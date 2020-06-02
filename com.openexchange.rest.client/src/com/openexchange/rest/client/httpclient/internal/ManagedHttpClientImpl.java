@@ -118,7 +118,17 @@ public class ManagedHttpClientImpl implements ManagedHttpClient {
         if (null == httpClient) {
             throw new IllegalStateException("HttpClient is null.");
         }
-        if (ccm.get().isShutdown() && false == b(reloadCallback.get())) {
+        if (ccm.get().isShutdown()) {
+            /*
+             * Connection manager is unusable. Client has to be re-created.
+             */
+            if (b(reloadCallback.get())) {
+                httpClient = httpClientReference.get();
+                if (null == httpClient) {
+                    throw new IllegalStateException("HttpClient is null.");
+                }
+                return httpClient;
+            }
             throw new IllegalStateException("HttpClient is not useable.");
         }
         return httpClient;

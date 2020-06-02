@@ -49,100 +49,80 @@
 
 package com.openexchange.rest.client.httpclient.internal;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Optional;
-import javax.annotation.concurrent.NotThreadSafe;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
-import com.openexchange.rest.client.httpclient.HttpClientProperty;
 
 /**
- * {@link HttpBasicConfigImpl} - Represents the basic configuration for a HTTP client.
- * <p>
- * Contains only values a administrator can modify.
+ * {@link UnmodifiableHttpBasicConfig} - Unmodifiable version of the {@link HttpBasicConfig}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.4
  */
-@NotThreadSafe
-public class HttpBasicConfigImpl implements HttpBasicConfig {
+public class UnmodifiableHttpBasicConfig implements HttpBasicConfig {
 
-    private int socketReadTimeout;
-    private int connectTimeout;
-    private int connectionRequestTimeout;
-    private int maxTotalConnections;
-    private int maxConnectionsPerRoute;
-    private int keepAliveDuration;
-    private int keepAliveMonitorInterval;
-    private int socketBufferSize;
+    private final int socketReadTimeout;
+    private final int connectTimeout;
+    private final int connectionRequestTimeout;
+    private final int maxTotalConnections;
+    private final int maxConnectionsPerRoute;
+    private final int keepAliveDuration;
+    private final int keepAliveMonitorInterval;
+    private final int socketBufferSize;
 
     /**
-     * Initializes a new {@link HttpBasicConfigImpl}.
-     *
-     * @param optionalLeanService The optional {@link LeanConfigurationService} to obtain the default configuration from
+     * Initializes a new {@link UnmodifiableHttpBasicConfig}.
+     * 
+     * @param config The configuration to clone
      */
-    public HttpBasicConfigImpl(Optional<LeanConfigurationService> optionalLeanService) {
+    public UnmodifiableHttpBasicConfig(HttpBasicConfig config) {
         super();
-        if (optionalLeanService.isPresent()) {
-            // Use passed service
-            for (HttpClientProperty property : HttpClientProperty.values()) {
-                // Read from default configuration
-                property.setInConfig(this, I(optionalLeanService.get().getIntProperty(property.getProperty())));
-            }
-        } else {
-            for (HttpClientProperty property : HttpClientProperty.values()) {
-                // Apply defaults
-                property.setInConfig(this, null);
-            }
-        }
+        this.socketReadTimeout = config.getSocketReadTimeout();
+        this.connectTimeout = config.getConnectTimeout();
+        this.connectionRequestTimeout = config.getConnectionRequestTimeout();
+        this.maxTotalConnections = config.getMaxTotalConnections();
+        this.maxConnectionsPerRoute = config.getMaxConnectionsPerRoute();
+        this.keepAliveDuration = config.getKeepAliveDuration();
+        this.keepAliveMonitorInterval = config.getKeepAliveMonitorInterval();
+        this.socketBufferSize = config.getSocketBufferSize();
     }
 
     @Override
     public HttpBasicConfig setSocketReadTimeout(int socketReadTimeout) {
-        this.socketReadTimeout = socketReadTimeout;
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public HttpBasicConfig setConnectTimeout(int connectTimeout) {
-        this.connectTimeout = connectTimeout;
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public HttpBasicConfig setConnectionRequestTimeout(int connectionRequestTimeout) {
-        this.connectionRequestTimeout = connectionRequestTimeout;
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public HttpBasicConfig setMaxTotalConnections(int maxTotalConnections) {
-        this.maxTotalConnections = maxTotalConnections;
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public HttpBasicConfig setMaxConnectionsPerRoute(int maxConnectionsPerRoute) {
-        this.maxConnectionsPerRoute = maxConnectionsPerRoute;
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public HttpBasicConfig setKeepAliveDuration(int keepAliveDuration) {
-        this.keepAliveDuration = keepAliveDuration;
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public HttpBasicConfig setKeepAliveMonitorInterval(int keepAliveMonitorInterval) {
-        this.keepAliveMonitorInterval = keepAliveMonitorInterval;
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public HttpBasicConfig setSocketBufferSize(int socketBufferSize) {
-        this.socketBufferSize = socketBufferSize;
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -239,7 +219,7 @@ public class HttpBasicConfigImpl implements HttpBasicConfig {
     @Override
     public String toString() {
         //@formatter:off
-        return "HttpBasicConfig [socketReadTimeout=" + socketReadTimeout + ", connectTimeout=" + connectTimeout + ", connectionRequestTimeout=" + connectionRequestTimeout
+        return "UnmodifiableHttpBasicConfig [socketReadTimeout=" + socketReadTimeout + ", connectTimeout=" + connectTimeout + ", connectionRequestTimeout=" + connectionRequestTimeout
             + ", maxTotalConnections=" + maxTotalConnections + ", maxConnectionsPerRoute=" + maxConnectionsPerRoute + ", keepAliveDuration=" + keepAliveDuration
             + ", keepAliveMonitorInterval=" + keepAliveMonitorInterval + ", socketBufferSize=" + socketBufferSize + "]";
         //@formatter:on
