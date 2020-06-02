@@ -85,6 +85,7 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
     private final AtomicBoolean shuttingDown;
     private final AtomicBoolean metricsInitialized;
     private final int defaultConnectTimeout;
+    private final int defaultConnectionRequestTimeout;
     private volatile IdleConnectionCloser idleConnectionCloser;
 
     /**
@@ -92,14 +93,16 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
      *
      * @param clientName A unique client name
      * @param defaultConnectTimeout The default connect timeout to apply or <code>0</code> (zero) to have no connect timeout
+     * @param defaultConnectionRequestTimeout
      * @param keepAliveMonitorInterval The amount of time to periodically run the {@link IdleConnectionCloser}
      * @param socketFactoryRegistry For super class
      */
-    public ClientConnectionManager(String clientName, int defaultConnectTimeout, int keepAliveMonitorInterval, Registry<ConnectionSocketFactory> socketFactoryRegistry) {
+    public ClientConnectionManager(String clientName, int defaultConnectTimeout, int defaultConnectionRequestTimeout, int keepAliveMonitorInterval, Registry<ConnectionSocketFactory> socketFactoryRegistry) {
         super(socketFactoryRegistry);
         this.clientName = clientName;
         this.keepAliveMonitorInterval = keepAliveMonitorInterval;
         this.defaultConnectTimeout = defaultConnectTimeout;
+        this.defaultConnectionRequestTimeout = defaultConnectionRequestTimeout;
         shuttingDown = new AtomicBoolean(false);
         metricsInitialized = new AtomicBoolean(false);
     }
@@ -153,6 +156,7 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
         }
 
         final ConnectionRequest connectionRequest = super.requestConnection(route, state);
+        final int defaultConnectionRequestTimeout = this.defaultConnectionRequestTimeout;
         return new ConnectionRequest() {
 
             @Override
@@ -163,7 +167,7 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
             @Override
             public HttpClientConnection get(long timeout, TimeUnit timeUnit) throws InterruptedException, ExecutionException, ConnectionPoolTimeoutException {
                 try {
-                    return connectionRequest.get(timeout, timeUnit);
+                    return connectionRequest.get(timeout > 0 ? timeout : defaultConnectionRequestTimeout, timeUnit);
                 } catch (ConnectionPoolTimeoutException e) {
                     getPoolTimeoutCounter(clientName).increment();
                     throw e;
