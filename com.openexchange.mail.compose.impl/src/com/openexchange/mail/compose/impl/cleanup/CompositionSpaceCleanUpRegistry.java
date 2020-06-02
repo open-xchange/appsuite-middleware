@@ -51,13 +51,11 @@ package com.openexchange.mail.compose.impl.cleanup;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
@@ -329,7 +327,9 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
 
     private static class CleanUpTask implements Runnable {
 
-        private final List<String> sessionIds;
+        private static final Object PRESENT = new Object();
+
+        private final ConcurrentMap<String, Object> sessionIds;
         private final int userId;
         private final int contextId;
         private final CompositionSpaceService compositionSpaceService;
@@ -349,8 +349,8 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
         CleanUpTask(Session initiatingSession, CompositionSpaceService compositionSpaceService, CompositionSpaceCleanUpRegistry cleanUpRegistry, ServiceLookup services) {
             super();
             this.cleanUpRegistry = cleanUpRegistry;
-            this.sessionIds = new CopyOnWriteArrayList<>();
-            this.sessionIds.add(initiatingSession.getSessionID());
+            this.sessionIds = new ConcurrentHashMap<>(10, 0.9F, 1);
+            this.sessionIds.put(initiatingSession.getSessionID(), PRESENT);
             userId = initiatingSession.getUserId();
             contextId = initiatingSession.getContextId();
             this.compositionSpaceService = compositionSpaceService;
@@ -399,7 +399,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
          * @param sessionId The session identifier to add
          */
         void addSessionId(String sessionId) {
-            this.sessionIds.add(sessionId);
+            this.sessionIds.put(sessionId, PRESENT);
         }
 
         @Override
@@ -407,8 +407,8 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
             try {
                 SessiondServiceExtended sessiondService = (SessiondServiceExtended) services.getServiceSafe(SessiondService.class);
                 Session session = null;
-                for (Iterator<String> it = sessionIds.iterator(); session == null && it.hasNext();) {
-                    session = sessiondService.peekSession(it.next(), false);
+                for (Iterator<Map.Entry<String, Object>> it = sessionIds.entrySet().iterator(); session == null && it.hasNext();) {
+                    session = sessiondService.peekSession(it.next().getKey(), false);
                     if (session == null) {
                         // No such session
                         it.remove();
