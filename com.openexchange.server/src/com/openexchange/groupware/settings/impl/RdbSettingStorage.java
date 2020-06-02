@@ -246,7 +246,7 @@ public class RdbSettingStorage extends SettingStorage {
                         cur = performSelect(setting, con);
                     }
                     if (retry++ > retryCount) {
-                        throw SettingExceptionCodes.MAX_RETRY.create();
+                        throw SettingExceptionCodes.MAX_RETRY.create(setting.getName());
                     }
                 } while (!compareAndSet(setting, cur, con));
                 val = setting.getSingleValue().toString();
