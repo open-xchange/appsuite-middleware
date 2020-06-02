@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder.userinterceptor;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
@@ -66,7 +67,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -204,35 +204,34 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
     private void propagateDisplayNameModification(Context context, int userId, String displayName, Connection connection) throws OXException {
         long lastModified = System.currentTimeMillis();
         try {
-            try {
-                /*
-                 * Determine the users default folder identifier and name
-                 */
-                FolderObject defaultFolder = new OXFolderAccess(connection, context).getDefaultFolder(userId, FolderObject.INFOSTORE);
-                if(defaultFolder.getFolderName().equals(displayName)){
-                    //Nothing changed, nothing to do (MWB-329)
-                    return;
-                }
-
-                /*
-                 * Update folder name
-                 */
-                String folderName = OXFolderAdminHelper.determineUserstoreFolderName(context, displayName, connection);
-                OXFolderSQL.updateName(defaultFolder.getObjectID(), folderName, lastModified, context.getMailadmin(), connection, context);
-
-                /*
-                 * Clear caches
-                 */
-                updateLastModified(context, connection, lastModified);
-                clearFolderCache(context, defaultFolder.getObjectID());
+            /*
+             * Determine the users default folder identifier and name
+             */
+            int defaultInfostoreFolderId = OXFolderSQL.getUserDefaultFolder(userId, FolderObject.INFOSTORE, connection, context);
+            if (-1 == defaultInfostoreFolderId) {
+                LOGGER.debug("No default infostore folder available for user {}, skip propagation of changed display name.", I(userId));
+                return;
             }
-            catch(OXException e) {
-                if(e.similarTo(OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND)){
-                    LOGGER.debug("Unable to ensure folder name uniqueness", e);
-                    return;
-                }
-                throw e;
+            FolderObject folder = FolderObject.loadFolderObjectFromDB(defaultInfostoreFolderId, context, connection);
+            if (displayName.equals(folder.getFolderName())) {
+                //Nothing changed, nothing to do (MWB-329)
+                return;
             }
+            /*
+             * Update folder name
+             */
+            String folderName;
+            if (displayName.equalsIgnoreCase(folder.getFolderName())) {
+                folderName = displayName;
+            } else {
+                folderName = OXFolderAdminHelper.determineUserstoreFolderName(context, displayName, connection);
+            }
+            OXFolderSQL.updateName(defaultInfostoreFolderId, folderName, lastModified, context.getMailadmin(), connection, context);
+            /*
+             * Clear caches
+             */
+            updateLastModified(context, connection, lastModified);
+            clearFolderCache(context, defaultInfostoreFolderId);
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
