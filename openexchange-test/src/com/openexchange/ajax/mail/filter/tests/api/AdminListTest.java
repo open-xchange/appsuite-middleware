@@ -53,15 +53,11 @@ import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.rmi.Naming;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.json.JSONException;
 import org.junit.Assume;
 import org.junit.Test;
 import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -97,14 +93,6 @@ public class AdminListTest extends AbstractMailFilterTest {
         Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
         OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
         ctxInterface.change(ctx, credentials);
-
-        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(adminClient.getValues().getUserId());
-        Set<String> cap = new HashSet<String>(1);
-        cap.add("webmail");
-        Credentials userCreds = new Credentials(admin.getUser(), admin.getPassword());
-        OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        Set<String> emptySet = Collections.emptySet();
-        usrInterface.changeCapabilities(getContext(), user, cap, emptySet, emptySet, userCreds);
     }
 
     private Context getContext() throws OXException, IOException, JSONException {
@@ -125,13 +113,6 @@ public class AdminListTest extends AbstractMailFilterTest {
             OXContextInterface iface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
             iface.change(ctx, credentials);
 
-            com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(adminClient.getValues().getUserId());
-            Set<String> cap = new HashSet<String>(1);
-            cap.add("webmail");
-            Credentials userCreds = new Credentials(admin.getUser(), admin.getPassword());
-            OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-            Set<String> emptySet = Collections.emptySet();
-            usrInterface.changeCapabilities(getContext(adminClient), user, emptySet, cap, emptySet, userCreds);
             if (rid > 0) {
                 mailFilterAPI.deleteRule(rid);
             }
