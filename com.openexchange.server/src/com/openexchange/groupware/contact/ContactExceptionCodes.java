@@ -152,7 +152,7 @@ public enum ContactExceptionCodes implements DisplayableOXExceptionCode {
 
     /** Contact %1$d not found in context %2$d. */
     CONTACT_NOT_FOUND("Contact %1$d not found in context %2$d.", ContactExceptionMessages.CONTACT_NOT_FOUND_DISPLAY,
-        Category.CATEGORY_ERROR, 125),
+        Category.CATEGORY_USER_INPUT, 125),
 
     /** Unable to save contact image. The image appears to be broken. */
     IMAGE_BROKEN("Unable to save contact image. The image appears to be broken.", ContactExceptionMessages.IMAGE_BROKEN_DISPLAY,
