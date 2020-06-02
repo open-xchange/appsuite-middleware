@@ -446,8 +446,8 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
      * the set value in the configuration.
      *
      * @param clientId The identifier
-     * @param httpBasicConfig The config to adjust
-     * @return The adjusted config
+     * @param httpBasicConfig The configuration to adjust
+     * @return The adjusted configuration
      */
     HttpBasicConfig adjustConfig(String clientId, HttpBasicConfig httpBasicConfig) {
         ConfigurationService configService = serviceLookup.getOptionalService(ConfigurationService.class);
