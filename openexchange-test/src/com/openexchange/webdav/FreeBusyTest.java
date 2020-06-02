@@ -61,18 +61,26 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.HttpHeaders;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.java.Charsets;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
+import com.openexchange.testing.restclient.invoker.ApiClient;
 import com.openexchange.testing.restclient.modules.InternetFreeBusyApi;
 
 /**
@@ -105,10 +113,27 @@ public class FreeBusyTest extends AbstractChronosTest {
 
     private String testResourceName;
 
+    private TestUser restUser;
+
+    private Object hostname;
+
+    private String protocol;
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        api = new InternetFreeBusyApi();
+        /*
+         * Initialize internet free busy API with generated REST API client
+         */
+        ProvisioningSetup.init();
+        ApiClient restClient = new ApiClient();
+        restClient.setBasePath(getBasePath());
+        restUser = TestContextPool.getRestUser();
+        restClient.setUsername(restUser.getUser());
+        restClient.setPassword(restUser.getPassword());
+        String authorizationHeaderValue = "Basic " + Base64.encodeBase64String((restUser.getUser() + ":" + restUser.getPassword()).getBytes(Charsets.UTF_8));
+        restClient.addDefaultHeader(HttpHeaders.AUTHORIZATION, authorizationHeaderValue);
+        api = new InternetFreeBusyApi(restClient);
         /*
          * Prepare config
          */
@@ -120,9 +145,30 @@ public class FreeBusyTest extends AbstractChronosTest {
         server = testUser.getContext();
         contextid = getClient().getValues().getContextId();
         testResourceName = "test-resource-1";
-        this.busyDate = createEvent(TranspEnum.OPAQUE, FreeBusyTest.class.getName() + "_Busy", 0, 1);
-        this.freeDate = createEvent(TranspEnum.TRANSPARENT, FreeBusyTest.class.getName() + "_Free", 1, 2);
+        this.busyDate = createEvent(TranspEnum.OPAQUE, FreeBusyTest.class.getName() + "_Busy", 10, 11);
+        this.freeDate = createEvent(TranspEnum.TRANSPARENT, FreeBusyTest.class.getName() + "_Free", 11, 12);
     }
+
+    protected String getBasePath() {
+        if (hostname == null) {
+            this.hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        }
+
+        if (protocol == null) {
+            this.protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
+            if (this.protocol == null) {
+                this.protocol = "http";
+            }
+        }
+        return this.protocol + "://" + this.hostname + ":8009";
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        TestContextPool.backContext(testContext);
+        super.tearDown();
+    }
+
     // -------------------------------Positive tests--------------------------------------------------------------
 
     /**
