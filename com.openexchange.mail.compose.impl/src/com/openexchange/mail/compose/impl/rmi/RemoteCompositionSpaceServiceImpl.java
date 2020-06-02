@@ -61,18 +61,26 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.Semaphore;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
+import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.java.util.Pair;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.KnownAttachmentStorageType;
 import com.openexchange.mail.compose.rmi.RemoteCompositionSpaceService;
@@ -80,6 +88,9 @@ import com.openexchange.mail.compose.rmi.RemoteCompositionSpaceServiceException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.ObfuscatorService;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link RemoteCompositionSpaceServiceImpl}
@@ -103,192 +114,247 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
 
     @Override
     public void deleteOrphanedReferences(List<Integer> fileStorageIds) throws RemoteCompositionSpaceServiceException, RemoteException {
+        String exceptionId = UUIDs.getUnformattedStringFromRandom();
         try {
             DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
             ContextService contextService = services.getServiceSafe(ContextService.class);
+            ThreadPoolService threadPool = services.getServiceSafe(ThreadPoolService.class);
 
             List<Integer> distinctContextsPerSchema = contextService.getDistinctContextsPerSchema();
 
             for (Integer fileStorageId : fileStorageIds) {
-                deleteOrphanedReferences(fileStorageId.intValue(), distinctContextsPerSchema, databaseService);
+                deleteOrphanedReferences(fileStorageId.intValue(), distinctContextsPerSchema, databaseService, threadPool, exceptionId);
             }
         } catch (OXException e) {
-            throw convertException(e);
+            throw convertException(e, exceptionId);
         } catch (RuntimeException e) {
-            throw convertException(e);
+            throw convertException(e, exceptionId);
         }
     }
 
-    private RemoteCompositionSpaceServiceException convertException(Exception e) {
-        LOGGER.error("Error during {} invocation", RemoteCompositionSpaceService.class.getSimpleName(), e);
+    private RemoteCompositionSpaceServiceException convertException(Exception e, String exceptionId) {
+        LOGGER.error("Error while deleting orphaned composition space references; exceptionId={}", exceptionId, e);
         RemoteCompositionSpaceServiceException cme = new RemoteCompositionSpaceServiceException(e.getMessage());
         cme.setStackTrace(e.getStackTrace());
         return cme;
     }
 
-    private void deleteOrphanedReferences(int fileStorageId, List<Integer> distinctContextsPerSchema, DatabaseService databaseService) throws  OXException {
-        for (Integer representativeContextId : distinctContextsPerSchema) {
-            deleteOrphanedReferencesForSchema(fileStorageId, representativeContextId.intValue(), databaseService);
+    private void deleteOrphanedReferences(int fileStorageId, List<Integer> distinctContextsPerSchema, DatabaseService databaseService, ThreadPoolService threadPool, String exceptionId) throws  OXException {
+        try {
+            Semaphore semaphore = new Semaphore(10);
+            List<FutureAndContext> futures = new ArrayList<>(distinctContextsPerSchema.size());
+            for (Integer representativeContextId : distinctContextsPerSchema) {
+                semaphore.acquire();
+                try {
+                    Future<Void> future = threadPool.submit(new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            try {
+                                deleteOrphanedReferencesForSchema(fileStorageId, representativeContextId.intValue(), databaseService);
+                                return null;
+                            } finally {
+                                semaphore.release();
+                            }
+                        }
+                    }, CallerRunsBehavior.getInstance());
+                    futures.add(new FutureAndContext(future, representativeContextId));
+                } catch (RejectedExecutionException e) {
+                    semaphore.release();
+                    logError(e, exceptionId, representativeContextId, databaseService);
+                }
+            }
+
+            boolean anyErrors = false;
+            for (FutureAndContext futureAndContext : futures) {
+                try {
+                    futureAndContext.future.get();
+                } catch (ExecutionException e) {
+                    Throwable cause = e.getCause();
+                    logError(cause == null ? e : cause, exceptionId, futureAndContext.representativeContextId, databaseService);
+                    anyErrors = true;
+                }
+            }
+            if (anyErrors) {
+                throw OXException.general("Errors occurred while deleting orphaned composition space references. Please check log files for exception identifier: " + exceptionId);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw OXException.general("Deleting orphaned composition space references has been interrupted");
         }
     }
 
-    private void deleteOrphanedReferencesForSchema(int fileStorageId, int representativeContextId, DatabaseService databaseService) throws OXException {
-        Connection writeCon = null;
+    void deleteOrphanedReferencesForSchema(int fileStorageId, int representativeContextId, DatabaseService databaseService) throws OXException {
+        // Examine current schema
+        Optional<SchemaExaminationResult> optionalResult = examineSchema(fileStorageId, representativeContextId, databaseService);
+        if (!optionalResult.isPresent()) {
+            return;
+        }
+
+        // Get schema result
+        SchemaExaminationResult result = optionalResult.get();
+
+        // Create a collection to collect for a certain (dedicated) file storage all contexts that use that storage
+        Collection<FileStorageAndContexts> collecton = determineFileStorageUsingContexts(fileStorageId, result.consideredContextIds);
+
+        // Create difference sets to determine unreferenced and non-existing file storage resources
+        Map<Integer, Set<String>> attachmentIdentifiers = result.attachmentIdentifiers;
+        Map<Integer, Set<String>> keyIdentifiers = result.keyIdentifiers;
+        for (FileStorageAndContexts fileStorageAndContexts : collecton) {
+            FileStorage fileStorage = fileStorageAndContexts.fileStorage;
+
+            SortedSet<String> fileList = fileStorage.getFileList();
+
+            {
+                Set<String> nonReferenced = new HashSet<String>(fileList);
+                for (Integer contextId : fileStorageAndContexts.contextIds) {
+                    {
+                        Set<String> storageIdentifiers = attachmentIdentifiers.get(contextId);
+                        if (storageIdentifiers != null) {
+                            nonReferenced.removeAll(storageIdentifiers);
+                        }
+                    }
+                    {
+                        Set<String> storageIdentifiers = keyIdentifiers.get(contextId);
+                        if (storageIdentifiers != null) {
+                            nonReferenced.removeAll(storageIdentifiers);
+                        }
+                    }
+                }
+
+                if (!nonReferenced.isEmpty()) {
+                    fileStorage.deleteFiles(nonReferenced.toArray(new String[nonReferenced.size()]));
+                }
+            }
+
+            {
+                Set<String> nonExisting = new HashSet<String>();
+                for (Integer contextId : fileStorageAndContexts.contextIds) {
+                    {
+                        Set<String> storageIdentifiers = attachmentIdentifiers.get(contextId);
+                        if (storageIdentifiers != null) {
+                            nonExisting.addAll(storageIdentifiers);
+                        }
+                    }
+                    {
+                        Set<String> storageIdentifiers = keyIdentifiers.get(contextId);
+                        if (storageIdentifiers != null) {
+                            nonExisting.addAll(storageIdentifiers);
+                        }
+                    }
+                }
+                nonExisting.removeAll(fileList);
+
+                if (!nonExisting.isEmpty()) {
+                    deleteObsoleteDatabaseEntries(nonExisting, fileStorageId, representativeContextId, databaseService);
+                }
+            }
+        }
+    }
+
+    private void deleteObsoleteDatabaseEntries(Set<String> nonExisting, int fileStorageId, int representativeContextId, DatabaseService databaseService) throws OXException {
+        PreparedStatement stmt = null;
+        Connection writeCon = databaseService.getWritable(representativeContextId);
+        try {
+            for (String nonExistingStorageIdentifier : nonExisting) {
+                stmt = writeCon.prepareStatement("DELETE FROM compositionSpaceAttachmentMeta WHERE dedicatedFileStorageId=? AND refType=" + KnownAttachmentStorageType.DEDICATED_FILE_STORAGE.getType() + " AND refId=?");
+                stmt.setInt(1, fileStorageId);
+                stmt.setString(2, nonExistingStorageIdentifier);
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+
+                stmt = writeCon.prepareStatement("DELETE FROM compositionSpaceKeyStorage WHERE dedicatedFileStorageId=? AND refId=?");
+                stmt.setInt(1, fileStorageId);
+                stmt.setString(2, obfuscate(nonExistingStorageIdentifier));
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+            }
+        } catch (SQLException e) {
+            throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+            databaseService.backWritable(representativeContextId, writeCon);
+        }
+    }
+
+    private Collection<FileStorageAndContexts> determineFileStorageUsingContexts(int fileStorageId, Set<Integer> consideredContextIds) throws OXException {
+        Map<URI, FileStorageAndContexts> fileStorage2Contexts = new HashMap<>();
+        for (Integer contextId : consideredContextIds) {
+            Pair<FileStorage, URI> fileStorageAndUri = getDedicatedFileStorage(fileStorageId, contextId.intValue());
+            URI fileStorageUri = fileStorageAndUri.getSecond();
+
+            FileStorageAndContexts fileStorageAndContexts = fileStorage2Contexts.get(fileStorageUri);
+            if (fileStorageAndContexts == null) {
+                // No such file storage associated with determined URI, yet
+                FileStorage fileStorage = fileStorageAndUri.getFirst();
+                fileStorageAndContexts = new FileStorageAndContexts(fileStorage, contextId);
+                fileStorage2Contexts.put(fileStorageUri, fileStorageAndContexts);
+            } else {
+                // File storage already used by another context. So just add current context
+                fileStorageAndContexts.addContextId(contextId);
+            }
+        }
+        return fileStorage2Contexts.values();
+    }
+
+    private Optional<SchemaExaminationResult> examineSchema(int fileStorageId, int representativeContextId, DatabaseService databaseService) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
         Connection readCon = databaseService.getReadOnly(representativeContextId);
         try {
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                if (!columnExists(readCon, "compositionSpaceAttachmentMeta", "dedicatedFileStorageId") || !columnExists(readCon, "compositionSpaceKeyStorage", "dedicatedFileStorageId")) {
-                    return;
-                }
-
-                Set<Integer> consideredContextIds = new HashSet<Integer>();
-                Map<Integer, Set<String>> attachmentIdentifiers;
-                {
-                    stmt = readCon.prepareStatement("SELECT cid, refId FROM compositionSpaceAttachmentMeta WHERE dedicatedFileStorageId=? AND refType=" + KnownAttachmentStorageType.DEDICATED_FILE_STORAGE.getType());
-                    stmt.setInt(1, fileStorageId);
-                    rs = stmt.executeQuery();
-                    attachmentIdentifiers = new HashMap<>();
-                    while (rs.next()) {
-                        Integer contextId = I(rs.getInt(1));
-                        consideredContextIds.add(contextId);
-                        Set<String> storageIdentifiers = attachmentIdentifiers.get(contextId);
-                        if (storageIdentifiers == null) {
-                            storageIdentifiers = new HashSet<String>();
-                            attachmentIdentifiers.put(contextId, storageIdentifiers);
-                        }
-                        storageIdentifiers.add(rs.getString(2));
-                    }
-                    Databases.closeSQLStuff(rs, stmt);
-                    stmt = null;
-                    rs = null;
-                }
-
-                Map<Integer, Set<String>> keyIdentifiers;
-                {
-                    stmt = readCon.prepareStatement("SELECT cid, refId FROM compositionSpaceKeyStorage WHERE dedicatedFileStorageId=?");
-                    stmt.setInt(1, fileStorageId);
-                    rs = stmt.executeQuery();
-                    keyIdentifiers = new HashMap<>();
-                    while (rs.next()) {
-                        Integer contextId = I(rs.getInt(1));
-                        consideredContextIds.add(contextId);
-                        Set<String> storageIdentifiers = keyIdentifiers.get(contextId);
-                        if (storageIdentifiers == null) {
-                            storageIdentifiers = new HashSet<String>();
-                            keyIdentifiers.put(contextId, storageIdentifiers);
-                        }
-                        storageIdentifiers.add(unobfuscate(rs.getString(2)));
-                    }
-                    Databases.closeSQLStuff(rs, stmt);
-                    stmt = null;
-                    rs = null;
-                }
-
-                // Release read-only database connection since no more needed
-                databaseService.backReadOnly(representativeContextId, readCon);
-                readCon = null;
-
-                // Create a map to collect for a certain (dedicated) file storage all contexts that use that storage
-                Map<URI, FileStorageAndContexts> fileStorage2Contexts = new HashMap<>();
-                for (Integer contextId : consideredContextIds) {
-                    Pair<FileStorage, URI> fileStorageAndUri = getDedicatedFileStorage(fileStorageId, contextId.intValue());
-                    URI fileStorageUri = fileStorageAndUri.getSecond();
-
-                    FileStorageAndContexts fileStorageAndContexts = fileStorage2Contexts.get(fileStorageUri);
-                    if (fileStorageAndContexts == null) {
-                        // No such file storage associated with determined URI, yet
-                        FileStorage fileStorage = fileStorageAndUri.getFirst();
-                        fileStorageAndContexts = new FileStorageAndContexts(fileStorage, contextId);
-                        fileStorage2Contexts.put(fileStorageUri, fileStorageAndContexts);
-                    } else {
-                        // File storage already used by another context. So just add current context
-                        fileStorageAndContexts.addContextId(contextId);
-                    }
-                }
-
-                for (FileStorageAndContexts fileStorageAndContexts : fileStorage2Contexts.values()) {
-                    FileStorage fileStorage = fileStorageAndContexts.fileStorage;
-
-                    SortedSet<String> fileList = fileStorage.getFileList();
-
-                    {
-                        Set<String> nonReferenced = new HashSet<String>(fileList);
-                        for (Integer contextId : fileStorageAndContexts.contextIds) {
-                            {
-                                Set<String> storageIdentifiers = attachmentIdentifiers.get(contextId);
-                                if (storageIdentifiers != null) {
-                                    nonReferenced.removeAll(storageIdentifiers);
-                                }
-                            }
-                            {
-                                Set<String> storageIdentifiers = keyIdentifiers.get(contextId);
-                                if (storageIdentifiers != null) {
-                                    nonReferenced.removeAll(storageIdentifiers);
-                                }
-                            }
-                        }
-
-                        if (!nonReferenced.isEmpty()) {
-                            fileStorage.deleteFiles(nonReferenced.toArray(new String[nonReferenced.size()]));
-                        }
-                    }
-
-                    {
-                        Set<String> nonExisting = new HashSet<String>();
-                        for (Integer contextId : fileStorageAndContexts.contextIds) {
-                            {
-                                Set<String> storageIdentifiers = attachmentIdentifiers.get(contextId);
-                                if (storageIdentifiers != null) {
-                                    nonExisting.addAll(storageIdentifiers);
-                                }
-                            }
-                            {
-                                Set<String> storageIdentifiers = keyIdentifiers.get(contextId);
-                                if (storageIdentifiers != null) {
-                                    nonExisting.addAll(storageIdentifiers);
-                                }
-                            }
-                        }
-                        nonExisting.removeAll(fileList);
-
-                        if (!nonExisting.isEmpty()) {
-                            if (writeCon == null) {
-                                writeCon = databaseService.getWritable(representativeContextId);
-                            }
-
-                            for (String nonExistingStorageIdentifier : nonExisting) {
-                                stmt = writeCon.prepareStatement("DELETE FROM compositionSpaceAttachmentMeta WHERE dedicatedFileStorageId=? AND refType=" + KnownAttachmentStorageType.DEDICATED_FILE_STORAGE.getType() + " AND refId=?");
-                                stmt.setInt(1, fileStorageId);
-                                stmt.setString(2, nonExistingStorageIdentifier);
-                                stmt.executeUpdate();
-                                Databases.closeSQLStuff(stmt);
-                                stmt = null;
-
-                                stmt = writeCon.prepareStatement("DELETE FROM compositionSpaceKeyStorage WHERE dedicatedFileStorageId=? AND refId=?");
-                                stmt.setInt(1, fileStorageId);
-                                stmt.setString(2, obfuscate(nonExistingStorageIdentifier));
-                                stmt.executeUpdate();
-                                Databases.closeSQLStuff(stmt);
-                                stmt = null;
-                            }
-                        }
-                    }
-                }
-            } catch (SQLSyntaxErrorException e) {
-                // Assume that column 'dedicatedFileStorageId' does not exist in context-associated schema. Therefore ignore.
-            } catch (SQLException e) {
-                throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                Databases.closeSQLStuff(rs, stmt);
+            if (!columnExists(readCon, "compositionSpaceAttachmentMeta", "dedicatedFileStorageId") || !columnExists(readCon, "compositionSpaceKeyStorage", "dedicatedFileStorageId")) {
+                return Optional.empty();
             }
+
+            stmt = readCon.prepareStatement("SELECT cid, refId FROM compositionSpaceAttachmentMeta WHERE dedicatedFileStorageId=? AND refType=" + KnownAttachmentStorageType.DEDICATED_FILE_STORAGE.getType());
+            stmt.setInt(1, fileStorageId);
+            rs = stmt.executeQuery();
+            Set<Integer> consideredContextIds = new HashSet<Integer>();
+            Map<Integer, Set<String>> attachmentIdentifiers = new HashMap<>();
+            while (rs.next()) {
+                Integer contextId = I(rs.getInt(1));
+                consideredContextIds.add(contextId);
+                Set<String> storageIdentifiers = attachmentIdentifiers.get(contextId);
+                if (storageIdentifiers == null) {
+                    storageIdentifiers = new HashSet<String>();
+                    attachmentIdentifiers.put(contextId, storageIdentifiers);
+                }
+                storageIdentifiers.add(rs.getString(2));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            stmt = null;
+            rs = null;
+
+            stmt = readCon.prepareStatement("SELECT cid, refId FROM compositionSpaceKeyStorage WHERE dedicatedFileStorageId=?");
+            stmt.setInt(1, fileStorageId);
+            rs = stmt.executeQuery();
+            Map<Integer, Set<String>> keyIdentifiers = new HashMap<>();
+            while (rs.next()) {
+                Integer contextId = I(rs.getInt(1));
+                consideredContextIds.add(contextId);
+                Set<String> storageIdentifiers = keyIdentifiers.get(contextId);
+                if (storageIdentifiers == null) {
+                    storageIdentifiers = new HashSet<String>();
+                    keyIdentifiers.put(contextId, storageIdentifiers);
+                }
+                storageIdentifiers.add(unobfuscate(rs.getString(2)));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            stmt = null;
+            rs = null;
+
+            return Optional.of(new SchemaExaminationResult(consideredContextIds, attachmentIdentifiers, keyIdentifiers));
+        } catch (SQLSyntaxErrorException e) {
+            // Assume that column 'dedicatedFileStorageId' does not exist in context-associated schema. Therefore ignore.
+            return Optional.empty();
+        } catch (SQLException e) {
+            throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
+            Databases.closeSQLStuff(rs, stmt);
             if (readCon != null) {
                 databaseService.backReadOnly(representativeContextId, readCon);
-            }
-            if (writeCon != null) {
-                databaseService.backWritable(representativeContextId, writeCon);
             }
         }
     }
@@ -356,6 +422,39 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
         return retval;
     }
 
+    private void logError(Throwable e, String exceptionId, Integer representativeContextId, DatabaseService databaseService) {
+        SchemaInfo schemaInfo = getSchemaInfoSafe(databaseService, representativeContextId);
+        if (schemaInfo == null) {
+            LOGGER.error("Failed to delete orphaned composition space references; exceptionId={}", exceptionId, e);
+        } else {
+            LOGGER.error("Failed to delete orphaned composition space references for schema {} in database {}; exceptionId={}", schemaInfo.getSchema(), I(schemaInfo.getPoolId()), exceptionId, e);
+        }
+    }
+
+    private SchemaInfo getSchemaInfoSafe(DatabaseService databaseService, Integer representativeContextId) {
+        try {
+            return databaseService.getSchemaInfo(representativeContextId.intValue());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class SchemaExaminationResult {
+
+        final Set<Integer> consideredContextIds;
+        final Map<Integer, Set<String>> attachmentIdentifiers;
+        final Map<Integer, Set<String>> keyIdentifiers;
+
+        SchemaExaminationResult(Set<Integer> consideredContextIds, Map<Integer, Set<String>> attachmentIdentifiers, Map<Integer, Set<String>> keyIdentifiers) {
+            super();
+            this.consideredContextIds = consideredContextIds;
+            this.attachmentIdentifiers = attachmentIdentifiers;
+            this.keyIdentifiers = keyIdentifiers;
+        }
+    }
+
     private static class FileStorageAndContexts {
 
         final FileStorage fileStorage;
@@ -370,6 +469,18 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
 
         void addContextId(Integer contextId) {
             contextIds.add(contextId);
+        }
+    }
+
+    private static class FutureAndContext {
+
+        final Future<Void> future;
+        final Integer representativeContextId;
+
+        FutureAndContext(Future<Void> future, Integer representativeContextId) {
+            super();
+            this.future = future;
+            this.representativeContextId = representativeContextId;
         }
     }
 

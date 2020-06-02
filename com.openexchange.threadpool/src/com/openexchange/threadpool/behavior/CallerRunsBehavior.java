@@ -53,6 +53,7 @@ import java.util.concurrent.RejectedExecutionException;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link CallerRunsBehavior} - Implements "Caller-Runs" behavior.
@@ -92,7 +93,7 @@ public final class CallerRunsBehavior implements RefusedExecutionBehavior<Object
     @Override
     public Object refusedExecution(final Task<Object> task, final ThreadPoolService threadPool) throws Exception {
         if (!threadPool.isShutdown()) {
-            return task.call();
+            return ThreadPools.execute(task);
         }
         return DISCARDED;
     }

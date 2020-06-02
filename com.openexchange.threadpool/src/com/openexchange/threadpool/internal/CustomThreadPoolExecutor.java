@@ -95,6 +95,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.MDC;
 import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.startup.CloseableControlService;
 import com.openexchange.threadpool.AbstractTask;
@@ -517,7 +518,15 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (null == t) {
             return null;
         }
-        startThread(t);
+        try {
+            startThread(t);
+        } catch (OutOfMemoryError oome) {
+            if ("unable to create new native thread".equals(Strings.asciiLowerCase(oome.getMessage()))) {
+                // Treat "java.lang.OutOfMemoryError: unable to create new native thread" as rejected execution
+                return null;
+            }
+            throw oome;
+        }
         return next;
     }
 
