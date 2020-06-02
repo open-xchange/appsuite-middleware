@@ -52,7 +52,6 @@ package com.openexchange.mail.compose.impl.cleanup;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -423,7 +422,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
                 SessiondServiceExtended sessiondServiceExtended = (SessiondServiceExtended) sessiondService;
 
                 Thread currentThread = Thread.currentThread();
-                for (Iterator<Entry<UserAndContext, CleanUpTask>> it = tasks.entrySet().iterator(); !currentThread.isInterrupted() && it.hasNext();) {
+                for (Iterator<Map.Entry<UserAndContext, CleanUpTask>> it = tasks.entrySet().iterator(); !currentThread.isInterrupted() && it.hasNext();) {
                     boolean remove = checkEntry(it.next(), sessiondServiceExtended, services);
                     if (remove) {
                         it.remove();
