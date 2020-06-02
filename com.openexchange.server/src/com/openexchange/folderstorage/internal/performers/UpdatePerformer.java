@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.internal.performers;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -581,19 +582,16 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      * @param original The original folder
      */
     private void restorePermissionType(Folder updated, Folder original) {
-        for(Permission origPerm : original.getPermissions()) {
-            if (FolderPermissionType.LEGATOR.equals(origPerm.getType())) {
-                // Adjust type of existing permission
-                for(Permission updatedPerm: updated.getPermissions()) {
-                    if (updatedPerm.getEntity() == origPerm.getEntity() && updatedPerm.isGroup() == origPerm.isGroup() && updatedPerm.getSystem() == origPerm.getSystem()) {
-                        if (!FolderPermissionType.LEGATOR.equals(updatedPerm.getType())) {
-                            updatedPerm.setType(FolderPermissionType.LEGATOR);
-                        }
-                        break;
-                    }
-                }
-            }
-        }
+        // @formatter:off
+        Arrays.asList(original.getPermissions()).stream()
+                                                .filter((p) -> FolderPermissionType.LEGATOR.equals(p.getType()) || FolderPermissionType.INHERITED.equals(p.getType()))
+                                                .forEach((origPerm) -> {
+                                                    Arrays.asList(updated.getPermissions())
+                                                    .parallelStream()
+                                                    .filter((updatedPerm) -> updatedPerm.getEntity() == origPerm.getEntity() && updatedPerm.isGroup() == origPerm.isGroup() && updatedPerm.getSystem() == origPerm.getSystem())
+                                                    .forEach((updatedPerm) -> updatedPerm.setType(origPerm.getType()));
+                                                });
+       // @formatter:on
     }
 
     /**
