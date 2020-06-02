@@ -28,11 +28,11 @@ public enum HttpClientProperty implements Property {
      */
     CONNECTION_REQUEST_TIMEOUT_MILLIS("connectionRequestTimeout", I(30000), (config, in) -> config.setConnectionRequestTimeout(i(in))),
     /**
-     * The property for keep-alive duration.
+     * The property for keep-alive duration in seconds.
      */
     KEEP_ALIVE_DURATION_SECS("keepAlive.duration", I(20), (config, in) -> config.setKeepAliveDuration(i(in))),
     /**
-     * The property for keep-alive monitor interval.
+     * The property for keep-alive monitor interval in seconds.
      */
     KEEP_ALIVE_MONITOR_INTERVAL_SECS("keepAlive.monitorInterval", I(5), (config, in) -> config.setKeepAliveMonitorInterval(i(in))),
     /**
