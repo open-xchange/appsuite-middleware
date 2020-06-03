@@ -1226,13 +1226,18 @@ public class DefaultShareService implements ShareService {
             TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, recipient.getBits(), FolderPermissionType.LEGATOR.getTypeNumber(), null, 0);
 
             targetProxy.applyPermissions(Collections.singletonList(targetPermission));
+            Date oldSeq = targetProxy.getTimestamp();
             /*
              * run target update, commit transaction & return created share link info
              */
             targetUpdate.run();
             connectionHelper.commit();
             LOG.info("Share link to {} for {} in context {} added successfully.", target, recipient, I(session.getContextId()));
-            Date timestamp = moduleSupport.load(target, session).getTimestamp();
+            Date timestamp = targetProxy.getTimestamp();
+            if (oldSeq.getTime() == timestamp.getTime()) {
+                // Timestamp not updated. Try a reload
+                timestamp = moduleSupport.load(target, session).getTimestamp();
+            }
             return new DefaultShareLink(shareInfo, timestamp, true);
         } finally {
             connectionHelper.finish();
