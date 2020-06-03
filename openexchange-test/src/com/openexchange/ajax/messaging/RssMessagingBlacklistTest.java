@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,63 +47,54 @@
  *
  */
 
-package com.openexchange.messaging.json.actions.accounts;
+package com.openexchange.ajax.messaging;
 
-import java.util.Iterator;
-import java.util.Map.Entry;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.tools.session.ServerSession;
-
+import org.junit.Test;
+import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.messaging.MessagingExceptionCodes;
+import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.MessagingAccountData;
+import com.openexchange.testing.httpclient.models.MessagingAccountUpdateResponse;
+import com.openexchange.testing.httpclient.modules.MessagingApi;
 
 /**
- * Creates a new MessagingAccount. The body of the request must contain the JSON representation of the given account.
+ * {@link RssMessagingBlacklistTest} checks whether the rss blacklist is properly working for messaging accounts
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public class NewAction extends AbstractMessagingAccountAction {
+public class RssMessagingBlacklistTest extends AbstractAPIClientSession {
 
-    /**
-     * Initializes a new {@link NewAction}.
-     *
-     * @param registry The {@link MessagingServiceRegistry}
-     */
-    public NewAction(final MessagingServiceRegistry registry) {
-        super(registry);
-    }
+    private MessagingApi messagingApi;
 
     @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-        final MessagingAccount account = parser.parse((JSONObject) request.requireData(), session.getUserId(), session.getContextId());
-        saneConfiguration(account);
-
-        // Check integrity of messaging service and configuration
-        checkAccountConfiguration(account, session);
-
-        final int id = account.getMessagingService().getAccountManager().addAccount(account, session);
-        return new AJAXRequestResult(Integer.valueOf(id));
+    public void setUp() throws Exception {
+        super.setUp();
+        messagingApi = new MessagingApi(getApiClient());
     }
 
-    /**
-     * Checks whether the configuration contains any json null values and removes it
-     *
-     * @param account The {@link MessagingAccount} to check
-     */
-    private static void saneConfiguration(final MessagingAccount account) {
-        if (null == account) {
-            return;
-        }
-        for (final Iterator<Entry<String, Object>> it = account.getConfiguration().entrySet().iterator(); it.hasNext();) {
-            if (JSONObject.NULL.equals(it.next().getValue())) {
-                it.remove();
+    @Test
+    public void testLocalURI() throws JSONException, ApiException {
+        JSONObject config = new JSONObject();
+        config.put("url", "http://localhost:22/");
+        MessagingAccountData data = new MessagingAccountData();
+        data.setMessagingService("com.openexchange.messaging.rss");
+        data.setDisplayName(RssMessagingBlacklistTest.class.getSimpleName() + "_" + System.currentTimeMillis());
+
+        data.setConfiguration(config);
+        MessagingAccountUpdateResponse resp = messagingApi.createMessagingAccount(getSessionId(), data);
+        try {
+            assertNotNull(resp.getError());
+            assertEquals("Wrong exception: " + resp.getErrorDesc(), MessagingExceptionCodes.INVALID_ACCOUNT_CONFIGURATION.create().getErrorCode(), resp.getCode());
+        } catch (AssertionError e) {
+            if (resp.getData() != null) {
+                messagingApi.deleteMessagingAccount(getSessionId(), "com.openexchange.messaging.rss", resp.getData());
             }
+            throw e;
         }
     }
-
 }

@@ -47,63 +47,33 @@
  *
  */
 
-package com.openexchange.messaging.json.actions.accounts;
+package com.openexchange.rss.utils.osgi;
 
-import java.util.Iterator;
-import java.util.Map.Entry;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * Creates a new MessagingAccount. The body of the request must contain the JSON representation of the given account.
+ * {@link RssUtilsActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public class NewAction extends AbstractMessagingAccountAction {
+public class RssUtilsActivator extends HousekeepingActivator {
 
-    /**
-     * Initializes a new {@link NewAction}.
-     *
-     * @param registry The {@link MessagingServiceRegistry}
-     */
-    public NewAction(final MessagingServiceRegistry registry) {
-        super(registry);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
     }
 
     @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-        final MessagingAccount account = parser.parse((JSONObject) request.requireData(), session.getUserId(), session.getContextId());
-        saneConfiguration(account);
-
-        // Check integrity of messaging service and configuration
-        checkAccountConfiguration(account, session);
-
-        final int id = account.getMessagingService().getAccountManager().addAccount(account, session);
-        return new AJAXRequestResult(Integer.valueOf(id));
+    protected void startBundle() {
+        Services.setServiceLookup(this);
     }
 
-    /**
-     * Checks whether the configuration contains any json null values and removes it
-     *
-     * @param account The {@link MessagingAccount} to check
-     */
-    private static void saneConfiguration(final MessagingAccount account) {
-        if (null == account) {
-            return;
-        }
-        for (final Iterator<Entry<String, Object>> it = account.getConfiguration().entrySet().iterator(); it.hasNext();) {
-            if (JSONObject.NULL.equals(it.next().getValue())) {
-                it.remove();
-            }
-        }
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.setServiceLookup(null);
+        super.stopBundle();
     }
-
 }

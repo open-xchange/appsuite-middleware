@@ -75,6 +75,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.rss.osgi.Services;
+import com.openexchange.rss.utils.RssProperties;
 import com.openexchange.tools.stream.CountingInputStream;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.fetcher.FetcherEvent;

@@ -47,63 +47,71 @@
  *
  */
 
-package com.openexchange.messaging.json.actions.accounts;
+package com.openexchange.rss.utils.osgi;
 
-import java.util.Iterator;
-import java.util.Map.Entry;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.server.ServiceLookup;
 
 /**
- * Creates a new MessagingAccount. The body of the request must contain the JSON representation of the given account.
+ * {@link Services} - The static service lookup.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public class NewAction extends AbstractMessagingAccountAction {
+public final class Services {
 
     /**
-     * Initializes a new {@link NewAction}.
-     *
-     * @param registry The {@link MessagingServiceRegistry}
+     * Initializes a new {@link Services}.
      */
-    public NewAction(final MessagingServiceRegistry registry) {
-        super(registry);
+    private Services() {
+        super();
     }
 
-    @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-        final MessagingAccount account = parser.parse((JSONObject) request.requireData(), session.getUserId(), session.getContextId());
-        saneConfiguration(account);
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
-        // Check integrity of messaging service and configuration
-        checkAccountConfiguration(account, session);
-
-        final int id = account.getMessagingService().getAccountManager().addAccount(account, session);
-        return new AJAXRequestResult(Integer.valueOf(id));
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
     /**
-     * Checks whether the configuration contains any json null values and removes it
+     * Gets the service lookup.
      *
-     * @param account The {@link MessagingAccount} to check
+     * @return The service lookup or <code>null</code>
      */
-    private static void saneConfiguration(final MessagingAccount account) {
-        if (null == account) {
-            return;
-        }
-        for (final Iterator<Entry<String, Object>> it = account.getConfiguration().entrySet().iterator(); it.hasNext();) {
-            if (JSONObject.NULL.equals(it.next().getValue())) {
-                it.remove();
-            }
-        }
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws OXException
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) throws OXException {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.rss.util\" not started?");
+        }
+        return serviceLookup.getServiceSafe(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+    }
 }

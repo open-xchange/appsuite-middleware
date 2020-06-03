@@ -66,8 +66,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.rss.osgi.Services;
-import com.openexchange.rss.util.RssProperties;
 import com.openexchange.rss.util.TimeoutHttpURLFeedFetcher;
+import com.openexchange.rss.utils.RssProperties;
 import com.openexchange.test.mock.MockUtils;
 import com.sun.syndication.feed.synd.SyndFeed;
 
@@ -81,7 +81,7 @@ import com.sun.syndication.feed.synd.SyndFeed;
 @PrepareForTest({ Services.class, RssProperties.class, InetAddress.class })
 public class RssActionTestReconfiguredPorts {
 
-    private ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
+    private final ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
 
     List<URL> urls = new ArrayList<>();
 
