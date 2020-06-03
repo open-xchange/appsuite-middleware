@@ -15,20 +15,52 @@ import com.openexchange.config.lean.Property;
  */
 public enum HttpClientProperty implements Property {
 
+    /**
+     * The property for socket read timeout in milliseconds.
+     */
     SOCKET_READ_TIMEOUT_MILLIS("readTimeout", I(30000), (config, in) -> config.setSocketReadTimeout(i(in))),
+    /**
+     * The property for connect timeout in milliseconds.
+     */
     CONNECT_TIMEOUT_MILLIS("connectTimeout", I(30000), (config, in) -> config.setConnectTimeout(i(in))),
+    /**
+     * The property specifying the timeout in milliseconds when waiting for a connection from connection pool.
+     */
     CONNECTION_REQUEST_TIMEOUT_MILLIS("connectionRequestTimeout", I(30000), (config, in) -> config.setConnectionRequestTimeout(i(in))),
+    /**
+     * The property for keep-alive duration in seconds.
+     */
     KEEP_ALIVE_DURATION_SECS("keepAlive.duration", I(20), (config, in) -> config.setKeepAliveDuration(i(in))),
+    /**
+     * The property for keep-alive monitor interval in seconds.
+     */
     KEEP_ALIVE_MONITOR_INTERVAL_SECS("keepAlive.monitorInterval", I(5), (config, in) -> config.setKeepAliveMonitorInterval(i(in))),
+    /**
+     * The property for maximum number of connections managed in connection pool.
+     * <p>
+     * If there is more than one host, this setting should be configured so that:<br>
+     * <pre>
+     *   connectionsPerRoute < totalConnections <= n * connectionsPerRoute.
+     * </pre>
+     */
     MAX_TOTAL_CONNECTIONS("totalConnections", I(20), (config, in) -> config.setMaxTotalConnections(i(in))),
+    /**
+     * The property for maximum number of connections per route/host.
+     * <p>
+     * If there is more than one host, this setting should be configured so that:<br>
+     * <pre>
+     *   connectionsPerRoute < totalConnections <= n * connectionsPerRoute.
+     * </pre>
+     */
     MAX_CONNECTIONS_PER_ROUTE("connectionsPerRoute", I(10), (config, in) -> config.setMaxConnectionsPerRoute(i(in))),
-    DEFAULT_SOCKET_BUFFER_SIZE("socketBufferSize", I(8192), (config, in) -> config.setSocketBufferSize(i(in)));
+    /**
+     * The property for socket buffer size in bytes.
+     */
+    DEFAULT_SOCKET_BUFFER_SIZE("socketBufferSize", I(8192), (config, in) -> config.setSocketBufferSize(i(in))),
+    ;
 
     /** The wild-card name for the properties */
     public final static String SERVICE_IDENTIFIER = "serviceIdentifier";
-
-    /** The property name prefix */
-    public final static String PREFIX = "com.openenexchange.httpclient.";
 
     private final String fqn;
     private final String defaultName;
@@ -39,9 +71,9 @@ public enum HttpClientProperty implements Property {
      * Initializes a new {@link HttpClientProperty}.
      */
     private HttpClientProperty(String propNameAppendix, Integer value, BiConsumer<HttpBasicConfig, Integer> setter) {
-        StringBuilder sb = new StringBuilder(PREFIX);
+        StringBuilder sb = new StringBuilder("com.openenexchange.httpclient.");
         int reslen = sb.length();
-        this.fqn = sb.append('[').append(SERVICE_IDENTIFIER).append(']').append('.').append(propNameAppendix).toString();
+        this.fqn = sb.append('[').append(SERVICE_IDENTIFIER).append("].").append(propNameAppendix).toString();
         sb.setLength(reslen);
         this.defaultName = sb.append(propNameAppendix).toString();
         this.value = value;
@@ -69,9 +101,9 @@ public enum HttpClientProperty implements Property {
     }
 
     /**
-     * Sets the given value to associated field in the given config
+     * Sets the given value to associated field in the given configuration.
      *
-     * @param config The config to set the value in
+     * @param config The configuration to set the value in
      * @param integer The value to set. If <code>null</code>, the default value is set.
      */
     public void setInConfig(HttpBasicConfig config, Integer integer) {

@@ -277,8 +277,8 @@ public class ImageURITest extends CardDAVTest {
          * get & verify contact on server
          */
         contact = getContact(uid);
-        assertNotNull(contact);
-        assertNull(contact.getImage1());
+        assertNotNull("Contact should not be null", contact);
+        assertNull("Contact image should be null", contact.getImage1());
         /*
          * get & verify photo in vCard
          */

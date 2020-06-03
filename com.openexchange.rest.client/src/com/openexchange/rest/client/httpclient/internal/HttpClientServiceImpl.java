@@ -361,7 +361,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             .build();
         //@formatter:on
 
-        ClientConnectionManager ccm = new ClientConnectionManager(clientId, config.getConnectTimeout(), config.getKeepAliveMonitorInterval(), socketFactoryRegistry);
+        ClientConnectionManager ccm = new ClientConnectionManager(clientId, config.getConnectTimeout(), config.getConnectionRequestTimeout(), config.getKeepAliveMonitorInterval(), socketFactoryRegistry);
         ccm.setDefaultMaxPerRoute(config.getMaxConnectionsPerRoute());
         ccm.setMaxTotal(config.getMaxTotalConnections());
         ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, config.getKeepAliveDuration()));
@@ -446,8 +446,8 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
      * the set value in the configuration.
      *
      * @param clientId The identifier
-     * @param httpBasicConfig The config to adjust
-     * @return The adjusted config
+     * @param httpBasicConfig The configuration to adjust
+     * @return The adjusted configuration
      */
     HttpBasicConfig adjustConfig(String clientId, HttpBasicConfig httpBasicConfig) {
         ConfigurationService configService = serviceLookup.getOptionalService(ConfigurationService.class);
@@ -581,7 +581,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             String clientId = entry.getKey();
             if (null != httpClients.getIfPresent(clientId)) {
                 SpecificHttpClientConfigProvider provider = entry.getValue();
-                HttpBasicConfig newClientConfig = provider.configureHttpBasicConfig(createNewDefaultConfig(configService));
+                HttpBasicConfig newClientConfig = adjustConfig(clientId, provider.configureHttpBasicConfig(createNewDefaultConfig(configService)));
                 reloadClient(clientId, newClientConfig, provider, true);
             }
         }
@@ -617,6 +617,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         }
         activeClientIds.stream().filter(id -> wildcardProvider.getRegularExpressionPattern().matcher(id).matches()).forEach(id -> {
             HttpBasicConfig newClientConfig = wildcardProvider.configureHttpBasicConfig(id, createNewDefaultConfig(configService));
+            newClientConfig = adjustConfig(id, newClientConfig);
             reloadClient(id, newClientConfig, wildcardProvider, true);
         });
     }
@@ -655,11 +656,12 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         CloseableHttpClient newHttpClient = null;
         ClientConnectionManager ccm = null;
         try {
-            ccm = initializeClientConnectionManager(clientId, config);
-            newHttpClient = initializeHttpClient(clientId, modifier, config, ccm);
+            final UnmodifiableHttpBasicConfig unmodifiableConfig = new UnmodifiableHttpBasicConfig(config);
+            ccm = initializeClientConnectionManager(clientId, unmodifiableConfig);
+            newHttpClient = initializeHttpClient(clientId, modifier, unmodifiableConfig, ccm);
             int configHash = managedHttpClient.getConfigHash();
-            closeWithDelay(clientId, configHash, managedHttpClient.reload(newHttpClient, ccm, config.hashCode()));
-            LOGGER.trace("Replaced HTTP client for ID {}. Original configuration had the hashCode {}. New configuration has the hash code {}", I(configHash), I(config.hashCode()));
+            closeWithDelay(clientId, configHash, managedHttpClient.reload(newHttpClient, ccm, unmodifiableConfig.hashCode()));
+            LOGGER.trace("Replaced HTTP client for ID {}. Original configuration had the hashCode {}. New configuration has the hash code {}", I(configHash), I(unmodifiableConfig.hashCode()));
             close = false;
             return true;
         } catch (OXException e) {
@@ -724,27 +726,35 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         public ManagedHttpClientImpl call() throws OXException {
             String httpClientId = this.httpClientId;
 
-            final HttpBasicConfig config;
+            /*
+             * Load configuration for the client
+             */
+            final Supplier<HttpBasicConfig> configSupplier;
             final HttpClientConfigProvider provider;
             {
                 SpecificHttpClientConfigProvider specificProvider = specificProviders.get(httpClientId);
                 if (specificProvider != null) {
                     provider = specificProvider;
-                    config = adjustConfig(httpClientId, specificProvider.configureHttpBasicConfig(createNewDefaultConfig()));
+                    configSupplier = () -> adjustConfig(httpClientId, specificProvider.configureHttpBasicConfig(createNewDefaultConfig()));
                 } else {
-                    WildcardHttpClientConfigProvider wildcardProvider = getWildcardProvider(httpClientId);
-                    if (wildcardProvider == null) {
-                        wildcardProvider = leftoverProvider;
+                    WildcardHttpClientConfigProvider tmp = getWildcardProvider(httpClientId);
+                    if (tmp == null) {
+                        tmp = leftoverProvider;
                     }
+                    final WildcardHttpClientConfigProvider wildcardProvider = tmp;
                     provider = wildcardProvider;
-                    config = adjustConfig(httpClientId, wildcardProvider.configureHttpBasicConfig(httpClientId, createNewDefaultConfig()));
+                    configSupplier = () -> adjustConfig(httpClientId, wildcardProvider.configureHttpBasicConfig(httpClientId, createNewDefaultConfig()));
                 }
             }
+            /*
+             * Ensure the configuration isn't changed unless the client is reloaded
+             */
+            final UnmodifiableHttpBasicConfig unmodifiableConfig = new UnmodifiableHttpBasicConfig(configSupplier.get());
 
-            ClientConnectionManager ccm = initializeClientConnectionManager(httpClientId, config);
-            CloseableHttpClient httpClient = initializeHttpClient(httpClientId, provider, config, ccm);
-            Supplier<Boolean> reloadCallback = () -> B(reloadClient(httpClientId, config, provider, false));
-            ManagedHttpClientImpl managedHttpClient = new ManagedHttpClientImpl(httpClientId, config.hashCode(), httpClient, ccm, reloadCallback);
+            ClientConnectionManager ccm = initializeClientConnectionManager(httpClientId, unmodifiableConfig);
+            CloseableHttpClient httpClient = initializeHttpClient(httpClientId, provider, unmodifiableConfig, ccm);
+            Supplier<Boolean> reloadCallback = () -> B(reloadClient(httpClientId, configSupplier.get(), provider, false));
+            ManagedHttpClientImpl managedHttpClient = new ManagedHttpClientImpl(httpClientId, unmodifiableConfig.hashCode(), httpClient, ccm, reloadCallback);
 
             LOGGER.trace("Initialized HTTP client for {} and put it into cache", httpClientId);
             return managedHttpClient;

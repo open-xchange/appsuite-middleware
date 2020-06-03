@@ -245,7 +245,7 @@ public class DAVServlet extends OXServlet {
         // @formatter:off
         Timer.builder("appsuite.webdav.requests")
              .description("Records the timing of webdav requests")
-             .sla(
+             .serviceLevelObjectives(
                  Duration.ofMillis(50),
                  Duration.ofMillis(100),
                  Duration.ofMillis(150),

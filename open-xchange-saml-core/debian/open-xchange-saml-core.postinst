@@ -33,6 +33,36 @@ postFix() {
 
     # SoftwareChange_Request-3548
     ox_add_property com.openexchange.saml.allowUnsolicitedResponses true /opt/open-xchange/etc/saml.properties
+
+    # SCR-678
+    VALUE=$(ox_read_property com.openexchange.saml.enabled /opt/open-xchange/etc/saml.properties)
+    if [ "false" = "${VALUE//[[:space:]]/}" ]; then
+        ox_remove_property com.openexchange.saml.enabled /opt/open-xchange/etc/saml.properties
+    fi
+    VALUE=$(ox_read_property com.openexchange.saml.enableMetadataService /opt/open-xchange/etc/saml.properties)
+    if [ "false" = "${VALUE//[[:space:]]/}" ]; then
+        ox_remove_property com.openexchange.saml.enableMetadataService /opt/open-xchange/etc/saml.properties
+    fi
+    VALUE=$(ox_read_property com.openexchange.saml.enableSingleLogout /opt/open-xchange/etc/saml.properties)
+    if [ "false" = "${VALUE//[[:space:]]/}" ]; then
+        ox_remove_property com.openexchange.saml.enableSingleLogout /opt/open-xchange/etc/saml.properties
+    fi
+    VALUE=$(ox_read_property com.openexchange.saml.logoutResponseBinding /opt/open-xchange/etc/saml.properties)
+    if [ "http-redirect" = "${VALUE//[[:space:]]/}" ]; then
+        ox_remove_property com.openexchange.saml.logoutResponseBinding /opt/open-xchange/etc/saml.properties
+    fi
+    VALUE=$(ox_read_property com.openexchange.saml.logoutResponseTemplate /opt/open-xchange/etc/saml.properties)
+    if [ "saml.logout.response.html.tmpl" = "${VALUE//[[:space:]]/}" ]; then
+        ox_remove_property com.openexchange.saml.logoutResponseTemplate /opt/open-xchange/etc/saml.properties
+    fi
+    VALUE=$(ox_read_property com.openexchange.saml.enableAutoLogin /opt/open-xchange/etc/saml.properties)
+    if [ "false" = "${VALUE//[[:space:]]/}" ]; then
+        ox_remove_property com.openexchange.saml.enableAutoLogin /opt/open-xchange/etc/saml.properties
+    fi
+    VALUE=$(ox_read_property com.openexchange.saml.allowUnsolicitedResponses /opt/open-xchange/etc/saml.properties)
+    if [ "true" = "${VALUE//[[:space:]]/}" ]; then
+        ox_remove_property com.openexchange.saml.allowUnsolicitedResponses /opt/open-xchange/etc/saml.properties
+    fi
 }
 
 case "$1" in

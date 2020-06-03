@@ -21,39 +21,120 @@ local templates = [
     query: 'label_values(up{job=~"$job",service=~"$' + serviceName + '"}, instance)',
     sort: 1,
   },
+  {
+    name: 'mem_pools_heap',
+    label: 'Memory Pools Heap',
+    query: 'label_values(jvm_memory_used_bytes{instance="$instance", area="heap"}, id)',
+    hide: 'variable',
+    includeAll: true,
+  },
+  {
+    name: 'mem_pools_nonheap',
+    label: 'Memory Pools Non-Heap',
+    query: 'label_values(jvm_memory_used_bytes{instance="$instance", area="nonheap"}, id)',
+    hide: 'variable',
+    includeAll: true,
+  },
 ];
 
-local memoryHeapUsage = graphPanel.new(
-  title='Heap',
-  description='Used bytes of a given JVM memory area.',
+local threadThreads = graphPanel.new(
+  title='Threads',
   datasource=grafana.default.datasource,
   nullPointMode='null as zero',
   legend_max=true,
   legend_current=true,
+  fill=2,
+  linewidth=2,
+  min='0',
+).addTargets(
+  [
+    prometheus.target(
+      'jvm_threads_live_threads{instance=~"$instance"}',
+      legendFormat='Live',
+    ),
+    prometheus.target(
+      'jvm_threads_daemon_threads{instance=~"$instance"}',
+      legendFormat='Daemon',
+    ),
+    prometheus.target(
+      'jvm_threads_peak_threads{instance=~"$instance"}',
+      legendFormat='Peak',
+    ),
+  ]
+).addSeriesOverride(
+  {
+    alias: 'Peak',
+    fill: 0,
+  },
+);
+
+local threadThreadStates = graphPanel.new(
+  title='Thread States',
+  datasource=grafana.default.datasource,
+  nullPointMode='null as zero',
+  legend_max=true,
+  legend_current=true,
+  fill=2,
+  linewidth=2,
+  min='0',
+).addTarget(
+  prometheus.target(
+    'jvm_threads_states_threads{instance=~"$instance"}',
+    legendFormat='{{state}}',
+  )
+).addSeriesOverride(
+  {
+    alias: 'Peak',
+    fill: 0,
+  },
+);
+
+local overviewHeapUsage = graphPanel.new(
+  title='Heap',
+  description='Used bytes of a given JVM memory area.',
+  datasource=grafana.default.datasource,
+  aliasColors={
+    Max: 'dark-red',
+  },
+  nullPointMode='null as zero',
+  legend_max=true,
+  legend_current=true,
+  fill=2,
+  linewidth=2,
   format='decbytes',
   min='0',
 ).addTargets(
   [
     prometheus.target(
-      'jvm_memory_bytes_used{instance=~"$instance", area="heap"}',
+      'sum(jvm_memory_used_bytes{instance=~"$instance", area="heap"})',
       legendFormat='Used',
     ),
     prometheus.target(
-      'jvm_memory_bytes_committed{instance=~"$instance", area="heap"}',
+      'sum(jvm_memory_committed_bytes{instance=~"$instance", area="heap"})',
       legendFormat='Committed',
     ),
     prometheus.target(
-      'jvm_memory_bytes_max{instance=~"$instance", area="heap"}',
+      'sum(jvm_memory_max_bytes{instance=~"$instance", area="heap"})',
       legendFormat='Max',
     ),
   ]
+).addSeriesOverride(
+  {
+    alias: 'Max',
+    fill: 0,
+  },
 );
 
-local memoryNonHeapUsage = graphPanel.new(
+local overviewNonHeapUsage = graphPanel.new(
   title='Non-Heap',
   description='Used bytes of a given JVM memory area.',
   datasource=grafana.default.datasource,
   nullPointMode='null as zero',
+  aliasColors={
+    Max: 'dark-red',
+  },
+  fill=2,
+  linewidth=2,
   legend_max=true,
   legend_current=true,
   format='decbytes',
@@ -61,55 +142,44 @@ local memoryNonHeapUsage = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      'jvm_memory_bytes_used{instance=~"$instance", area="nonheap"}',
+      'sum(jvm_memory_used_bytes{instance=~"$instance", area="nonheap"})',
       legendFormat='Used',
     ),
     prometheus.target(
-      'jvm_memory_bytes_committed{instance=~"$instance", area="nonheap"}',
+      'sum(jvm_memory_committed_bytes{instance=~"$instance", area="nonheap"})',
       legendFormat='Committed',
     ),
     prometheus.target(
-      'jvm_memory_bytes_max{instance=~"$instance", area="nonheap"}',
+      'sum(jvm_memory_max_bytes{instance=~"$instance", area="nonheap"})',
       legendFormat='Max',
     ),
   ]
+).addSeriesOverride(
+  {
+    alias: 'Max',
+    fill: 0,
+  },
 );
 
-local memoryPoolOldNewGen = graphPanel.new(
-  title='Old/New Gen usage',
-  description='Used bytes of a given JVM memory area.',
+local overviewUptime = singlestat.new(
+  title='Uptime',
   datasource=grafana.default.datasource,
-  nullPointMode='null as zero',
-  legend_max=true,
-  legend_current=true,
-  format='decbytes',
-  min='0',
-).addTargets(
-  [
-    prometheus.target(
-      'jvm_memory_pool_bytes_used{instance=~"$instance", pool="CMS Old Gen"}',
-      legendFormat='Old-Gen',
-    ),
-    prometheus.target(
-      'jvm_memory_pool_bytes_used{instance=~"$instance", pool="Par Eden Space"}',
-      legendFormat='New-Gen',
-    ),
-  ]
-);
-
-local memoryPools = graphPanel.new(
-  title='Pools',
-  description='Used bytes of a given JVM memory area.',
-  datasource=grafana.default.datasource,
-  nullPointMode='null as zero',
-  legend_max=true,
-  legend_current=true,
-  format='decbytes',
-  min='0',
+  valueName='current',
+  colorValue=true,
+  colors=[
+    'rgba(245, 54, 54, 0.9)',
+    'rgba(237, 129, 40, 0.89)',
+    'rgba(50, 172, 45, 0.97)',
+  ],
+  decimals=1,
+  format='s',
+  postfix='s',
+  prefixFontSize='80%',
+  postfixFontSize='80%',
+  thresholds='300,3600',
 ).addTarget(
   prometheus.target(
-    'jvm_memory_pool_bytes_used{instance=~"$instance"}',
-    legendFormat='{{pool}}',
+    'process_uptime_seconds{instance=~"$instance"}'
   )
 );
 
@@ -121,19 +191,29 @@ local overviewThreads = singlestat.new(
   sparklineShow=true,
 ).addTarget(
   prometheus.target(
-    'jvm_threads_current{instance=~"$instance"}'
+    'jvm_threads_live_threads{instance=~"$instance"}'
   )
 );
 
 local overviewClassesLoaded = singlestat.new(
-  title='Loaded classes',
-  description='The number of classes that are currently loaded in the JVM.',
+  title='Classes loaded',
   datasource=grafana.default.datasource,
   valueName='current',
   sparklineShow=true,
 ).addTarget(
   prometheus.target(
-    'jvm_classes_loaded{instance=~"$instance"}'
+    'jvm_classes_loaded_classes{instance=~"$instance"}'
+  )
+);
+
+local overviewClassesUnloaded = singlestat.new(
+  title='Classes unloaded',
+  datasource=grafana.default.datasource,
+  valueName='current',
+  sparklineShow=true,
+).addTarget(
+  prometheus.target(
+    'jvm_classes_unloaded_classes_total{instance=~"$instance"}'
   )
 );
 
@@ -142,6 +222,8 @@ local gcDuration = graphPanel.new(
   description='Used bytes of a given JVM memory area.',
   datasource=grafana.default.datasource,
   nullPointMode='null as zero',
+  fill=2,
+  linewidth=2,
   format='s',
 ).addTarget(
   prometheus.target(
@@ -155,6 +237,8 @@ local gcDurationCount = graphPanel.new(
   description='Used bytes of a given JVM memory area.',
   datasource=grafana.default.datasource,
   nullPointMode='null as zero',
+  fill=2,
+  linewidth=2,
   decimals=2,
   format='ops',
 ).addTarget(
@@ -162,6 +246,80 @@ local gcDurationCount = graphPanel.new(
     'rate(jvm_gc_collection_seconds_count{instance=~"$instance"}[$interval])',
     legendFormat='{{gc}}'
   )
+);
+
+local memoryPoolsHeap = graphPanel.new(
+  title='$mem_pools_heap',
+  datasource=grafana.default.datasource,
+  aliasColors={
+    Max: 'dark-red',
+  },
+  nullPointMode='null as zero',
+  legend_max=true,
+  legend_current=true,
+  fill=2,
+  linewidth=2,
+  format='decbytes',
+  min='0',
+  repeat='mem_pools_heap',
+  repeatDirection='h',
+).addTargets(
+  [
+    prometheus.target(
+      'sum(jvm_memory_used_bytes{instance=~"$instance", area="heap", id=~"$mem_pools_heap"})',
+      legendFormat='Used',
+    ),
+    prometheus.target(
+      'sum(jvm_memory_committed_bytes{instance=~"$instance", area="heap", id=~"$mem_pools_heap"})',
+      legendFormat='Committed',
+    ),
+    prometheus.target(
+      'sum(jvm_memory_max_bytes{instance=~"$instance", area="heap", id=~"$mem_pools_heap"})',
+      legendFormat='Max',
+    ),
+  ]
+).addSeriesOverride(
+  {
+    alias: 'Max',
+    fill: 0,
+  },
+);
+
+local memoryPoolsNonHeap = graphPanel.new(
+  title='$mem_pools_nonheap',
+  datasource=grafana.default.datasource,
+  aliasColors={
+    Max: 'dark-red',
+  },
+  nullPointMode='null as zero',
+  legend_max=true,
+  legend_current=true,
+  fill=2,
+  linewidth=2,
+  format='decbytes',
+  min='0',
+  repeat='mem_pools_nonheap',
+  repeatDirection='h',
+).addTargets(
+  [
+    prometheus.target(
+      'sum(jvm_memory_used_bytes{instance=~"$instance", area="nonheap", id=~"$mem_pools_nonheap"})',
+      legendFormat='Used',
+    ),
+    prometheus.target(
+      'sum(jvm_memory_committed_bytes{instance=~"$instance", area="nonheap", id=~"$mem_pools_nonheap"})',
+      legendFormat='Committed',
+    ),
+    prometheus.target(
+      'sum(jvm_memory_max_bytes{instance=~"$instance", area="nonheap", id=~"$mem_pools_nonheap"})',
+      legendFormat='Max',
+    ),
+  ]
+).addSeriesOverride(
+  {
+    alias: 'Max',
+    fill: 0,
+  },
 );
 
 grafana.newDashboard(
@@ -188,25 +346,33 @@ grafana.newDashboard(
     row.new(
       title='Overview'
     ) + { gridPos: { h: 1, w: 24, x: 0, y: 0 } },
-    overviewThreads { gridPos: { h: 6, w: 4, x: 0, y: 1 } },
-    overviewClassesLoaded { gridPos: { h: 6, w: 4, x: 4, y: 1 } },
+    overviewUptime { gridPos: { h: 4, w: 3, x: 0, y: 1 } },
+    overviewThreads { gridPos: { h: 4, w: 3, x: 3, y: 1 } },
+    overviewHeapUsage { gridPos: { h: 8, w: 9, x: 6, y: 1 } },
+    overviewNonHeapUsage { gridPos: { h: 8, w: 9, x: 15, y: 1 } },
+    overviewClassesLoaded { gridPos: { h: 4, w: 3, x: 0, y: 5 } },
+    overviewClassesUnloaded { gridPos: { h: 4, w: 3, x: 3, y: 5 } },
   ] + [
     row.new(
-      title='Memory'
+      title='Memory Pools (Heap)'
     ) + { gridPos: { h: 1, w: 24, x: 0, y: 7 } },
-    memoryHeapUsage { gridPos: { h: 8, w: 12, x: 0, y: 8 } },
-    memoryNonHeapUsage { gridPos: { h: 8, w: 12, x: 12, y: 8 } },
+    memoryPoolsHeap { gridPos: { h: 8, w: 8, x: 0, y: 8 } },
   ] + [
     row.new(
-      title='Memory Pool'
+      title='Memory Pools (Non-Heap)'
     ) + { gridPos: { h: 1, w: 24, x: 0, y: 16 } },
-    memoryPoolOldNewGen { gridPos: { h: 8, w: 12, x: 0, y: 17 } },
-    memoryPools { gridPos: { h: 8, w: 12, x: 12, y: 17 } },
+    memoryPoolsNonHeap { gridPos: { h: 8, w: 8, x: 0, y: 17 } },
   ] + [
     row.new(
       title='Garbage Collector'
     ) + { gridPos: { h: 1, w: 24, x: 0, y: 25 } },
     gcDuration { gridPos: { h: 8, w: 12, x: 0, y: 26 } },
     gcDurationCount { gridPos: { h: 8, w: 12, x: 12, y: 26 } },
+  ] + [
+    row.new(
+      title='Thread'
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 34 } },
+    threadThreads { gridPos: { h: 8, w: 12, x: 0, y: 35 } },
+    threadThreadStates { gridPos: { h: 8, w: 12, x: 12, y: 35 } },
   ]
 )

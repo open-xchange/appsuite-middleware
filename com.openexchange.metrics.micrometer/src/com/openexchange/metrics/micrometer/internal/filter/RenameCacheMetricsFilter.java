@@ -49,35 +49,26 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
-import java.util.ArrayList;
-import java.util.List;
 import io.micrometer.core.instrument.Meter.Id;
 import io.micrometer.core.instrument.config.MeterFilter;
 
+
 /**
- * {@link MeterNamePrefixFilter} - Renames a set of metrics by prefixing them with a given value
+ * {@link RenameCacheMetricsFilter} - Renames "cache.[...]" to "appsuite.cache.[...]"
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.10.4
  */
-public class MeterNamePrefixFilter implements MeterFilter {
-
-    private static final String APPSUITE = "appsuite.";
-    private static final List<String> PREFIX_WHITELIST = new ArrayList<String>(3);
-    static {
-        PREFIX_WHITELIST.add(APPSUITE);
-        PREFIX_WHITELIST.add("jvm.");
-        PREFIX_WHITELIST.add("process.");
-    }
+public class RenameCacheMetricsFilter implements MeterFilter {
 
     @Override
     public Id map(Id id) {
         final String name = id.getName();
-        boolean acceptAsIs = PREFIX_WHITELIST.stream().anyMatch(prefix -> name.startsWith(prefix));
-        if (acceptAsIs) {
-            return id;
+        if (name.startsWith("cache.")) {
+            return id.withName("appsuite." + name);
         }
 
-        return id.withName(APPSUITE + name);
+        return id;
     }
+
 }

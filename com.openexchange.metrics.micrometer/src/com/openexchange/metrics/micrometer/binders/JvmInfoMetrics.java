@@ -47,62 +47,32 @@
  *
  */
 
-package com.openexchange.metrics.micrometer.internal.filter;
+package com.openexchange.metrics.micrometer.binders;
 
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Strings;
-import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
-import com.openexchange.tools.strings.TimeSpanParser;
-import io.micrometer.core.instrument.Meter.Id;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
+import io.micrometer.core.instrument.binder.MeterBinder;
+import io.prometheus.client.hotspot.VersionInfoExports;
+
 
 /**
- * {@link DistributionSLAMicrometerFilterPerformer} - Applies metric filters for
- * properties <code>com.openexchange.metrics.micrometer.distribution.sla.*</code>
+ * This resembles {@link VersionInfoExports}.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.10.4
  */
-public class DistributionSLAMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer {
-
-    private static final Logger LOG = LoggerFactory.getLogger(DistributionSLAMicrometerFilterPerformer.class);
-
-    /**
-     * Initializes a new {@link DistributionSLAMicrometerFilterPerformer}.
-     */
-    public DistributionSLAMicrometerFilterPerformer() {
-        super(MicrometerFilterProperty.SLA);
-    }
+public class JvmInfoMetrics implements MeterBinder {
 
     @Override
-    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
-        applyFilterFor(configurationService, (entry) -> configure(meterRegistry, entry));
+    public void bindTo(MeterRegistry registry) {
+
+        Gauge.builder("jvm.info", () -> 1.0)
+            .description("JVM version info")
+            .tags(
+                "version", System.getProperty("java.runtime.version", "unknown"),
+                "vendor", System.getProperty("java.vm.vendor", "unknown"),
+                "runtime", System.getProperty("java.runtime.name", "unknown"))
+            .register(registry);
     }
 
-    @Override
-    DistributionStatisticConfig applyConfig(Id id, Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
-        if (!id.getName().startsWith(metricId)) {
-            return config;
-        }
-        if (Strings.isEmpty(entry.getValue())) {
-            return DistributionStatisticConfig.builder().sla(new long[0]).build().merge(config);
-        }
-        String[] p = Strings.splitByComma(entry.getValue());
-        long[] sla = new long[p.length];
-        int index = 0;
-        for (String s : p) {
-            try {
-                sla[index++] = TimeUnit.MILLISECONDS.toNanos(TimeSpanParser.parseTimespanToPrimitive(s));
-            } catch (IllegalArgumentException e) {
-                LOG.error("Cannot parse {} as long. Ignoring SLAs configuration for '{}'.", s, metricId, e);
-                return config;
-            }
-        }
-        return DistributionStatisticConfig.builder().sla(sla).build().merge(config);
-    }
 }

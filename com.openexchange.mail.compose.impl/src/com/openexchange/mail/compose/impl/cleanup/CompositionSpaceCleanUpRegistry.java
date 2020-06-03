@@ -51,13 +51,10 @@ package com.openexchange.mail.compose.impl.cleanup;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
@@ -157,57 +154,16 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
      */
     private CompositionSpaceCleanUpRegistry(CompositionSpaceService compositionSpaceService, ServiceLookup services) throws OXException {
         super();
-        this.compositionSpaceService = compositionSpaceService;
-        this.services = services;
-        ConcurrentMap<UserAndContext, CleanUpTask> tasks = new ConcurrentHashMap<>(256, 0.9F, 1);
-        this.tasks = tasks;
-
         TimerService timerService = services.getOptionalService(TimerService.class);
         if (timerService == null) {
             throw ServiceExceptionCode.absentService(TimerService.class);
         }
 
-        Runnable r = new Runnable() {
-
-            @Override
-            public void run() {
-                SessiondService sessiondService = services.getOptionalService(SessiondService.class);
-                if (sessiondService == null) {
-                    return;
-                }
-
-                if (sessiondService instanceof SessiondServiceExtended) {
-                    SessiondServiceExtended sessiondServiceExtended = (SessiondServiceExtended) sessiondService;
-
-                    Thread currentThread = Thread.currentThread();
-                    for (Iterator<Entry<UserAndContext, CleanUpTask>> it = tasks.entrySet().iterator(); !currentThread.isInterrupted() && it.hasNext();) {
-                        checkEntry(it.next(), it, sessiondServiceExtended, services);
-                    }
-                }
-            }
-
-            private void checkEntry(Map.Entry<UserAndContext, CleanUpTask> entry, Iterator<Entry<UserAndContext, CleanUpTask>> it, SessiondServiceExtended sessiondServiceExtended, ServiceLookup services) {
-                UserAndContext key = entry.getKey();
-                CleanUpTask cleanUpTask = entry.getValue();
-
-                if (sessiondServiceExtended.getActiveSessions(key.getUserId(), key.getContextId()).isEmpty()) {
-                    // Apparently no active user-associated session available
-                    it.remove();
-
-                    Optional<ScheduledTimerTask> optionalTimerTask = cleanUpTask.getAndDropTimerTask();
-                    if (optionalTimerTask.isPresent()) {
-                        optionalTimerTask.get().cancel();
-
-                        TimerService timerService = services.getOptionalService(TimerService.class);
-                        if (timerService != null) {
-                            timerService.purge();
-                        }
-                    }
-                }
-            }
-
-        };
-        checkerTask = timerService.scheduleWithFixedDelay(r, 1, 1, TimeUnit.DAYS);
+        this.compositionSpaceService = compositionSpaceService;
+        this.services = services;
+        ConcurrentMap<UserAndContext, CleanUpTask> tasks = new ConcurrentHashMap<>(256, 0.9F, 1);
+        this.tasks = tasks;
+        checkerTask = timerService.scheduleWithFixedDelay(new EntryValidityChecker(tasks, services), 1, 1, TimeUnit.DAYS);
     }
 
     /**
@@ -329,7 +285,9 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
 
     private static class CleanUpTask implements Runnable {
 
-        private final List<String> sessionIds;
+        private static final Object PRESENT = new Object();
+
+        private final ConcurrentMap<String, Object> sessionIds;
         private final int userId;
         private final int contextId;
         private final CompositionSpaceService compositionSpaceService;
@@ -349,8 +307,8 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
         CleanUpTask(Session initiatingSession, CompositionSpaceService compositionSpaceService, CompositionSpaceCleanUpRegistry cleanUpRegistry, ServiceLookup services) {
             super();
             this.cleanUpRegistry = cleanUpRegistry;
-            this.sessionIds = new CopyOnWriteArrayList<>();
-            this.sessionIds.add(initiatingSession.getSessionID());
+            this.sessionIds = new ConcurrentHashMap<>(10, 0.9F, 1);
+            this.sessionIds.put(initiatingSession.getSessionID(), PRESENT);
             userId = initiatingSession.getUserId();
             contextId = initiatingSession.getContextId();
             this.compositionSpaceService = compositionSpaceService;
@@ -399,7 +357,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
          * @param sessionId The session identifier to add
          */
         void addSessionId(String sessionId) {
-            this.sessionIds.add(sessionId);
+            this.sessionIds.put(sessionId, PRESENT);
         }
 
         @Override
@@ -407,8 +365,8 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
             try {
                 SessiondServiceExtended sessiondService = (SessiondServiceExtended) services.getServiceSafe(SessiondService.class);
                 Session session = null;
-                for (Iterator<String> it = sessionIds.iterator(); session == null && it.hasNext();) {
-                    session = sessiondService.peekSession(it.next(), false);
+                for (Iterator<Map.Entry<String, Object>> it = sessionIds.entrySet().iterator(); session == null && it.hasNext();) {
+                    session = sessiondService.peekSession(it.next().getKey(), false);
                     if (session == null) {
                         // No such session
                         it.remove();
@@ -442,5 +400,66 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
             return ConfigTools.parseTimespan(ConfigViews.getDefinedStringPropertyFrom("com.openexchange.mail.compose.maxIdleTimeMillis", defaultValue, view));
         }
     } // End of class CleanUpTask
+
+    private static class EntryValidityChecker implements Runnable {
+
+        private final ConcurrentMap<UserAndContext, CleanUpTask> tasks;
+        private final ServiceLookup services;
+
+        EntryValidityChecker(ConcurrentMap<UserAndContext, CleanUpTask> tasks, ServiceLookup services) {
+            this.tasks = tasks;
+            this.services = services;
+        }
+
+        @Override
+        public void run() {
+            SessiondService sessiondService = services.getOptionalService(SessiondService.class);
+            if (sessiondService == null) {
+                return;
+            }
+
+            if (sessiondService instanceof SessiondServiceExtended) {
+                SessiondServiceExtended sessiondServiceExtended = (SessiondServiceExtended) sessiondService;
+
+                Thread currentThread = Thread.currentThread();
+                for (Iterator<Map.Entry<UserAndContext, CleanUpTask>> it = tasks.entrySet().iterator(); !currentThread.isInterrupted() && it.hasNext();) {
+                    boolean remove = checkEntry(it.next(), sessiondServiceExtended, services);
+                    if (remove) {
+                        it.remove();
+                    }
+                }
+            }
+        }
+
+        /**
+         * Checks if there are any active sessions available for associated user of given entry.
+         *
+         * @param entry The entry to check
+         * @param sessiondServiceExtended The service to use
+         * @param services The service look-up to obtain further needed services
+         * @return <code>true</code> if checked entry is invalid and should be removed; otherwise <code>false</code> to keep the entry
+         */
+        private boolean checkEntry(Map.Entry<UserAndContext, CleanUpTask> entry, SessiondServiceExtended sessiondServiceExtended, ServiceLookup services) {
+            UserAndContext key = entry.getKey();
+            if (!sessiondServiceExtended.getActiveSessions(key.getUserId(), key.getContextId()).isEmpty()) {
+                // There are active session available for given user
+                return false;
+            }
+
+            // Apparently no active user-associated session available
+            CleanUpTask cleanUpTask = entry.getValue();
+            Optional<ScheduledTimerTask> optionalTimerTask = cleanUpTask.getAndDropTimerTask();
+            if (optionalTimerTask.isPresent()) {
+                optionalTimerTask.get().cancel();
+
+                TimerService timerService = services.getOptionalService(TimerService.class);
+                if (timerService != null) {
+                    timerService.purge();
+                }
+            }
+
+            return true;
+        }
+    } // End of class EntryValidityChecker
 
 }

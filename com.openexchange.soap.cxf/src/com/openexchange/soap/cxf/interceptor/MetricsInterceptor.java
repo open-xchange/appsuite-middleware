@@ -261,7 +261,7 @@ public class MetricsInterceptor extends AbstractPhaseInterceptor<Message> {
         // @formatter:off
         return Timer.builder("appsuite.soapapi.requests")
             .description("Records the timing of the soap calls.")
-            .sla(
+            .serviceLevelObjectives(
                 Duration.ofMillis(50),
                 Duration.ofMillis(100),
                 Duration.ofMillis(150),

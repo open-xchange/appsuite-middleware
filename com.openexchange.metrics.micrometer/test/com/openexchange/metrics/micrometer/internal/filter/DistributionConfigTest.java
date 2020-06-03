@@ -131,11 +131,11 @@ public class DistributionConfigTest {
 
     public void overrideHistogramSLAsByDefaultBucketsWithLimits() throws Exception {
         String config = "" +
-            "# Override SLA histogram with default latency buckets and limits\n" +
+            "# Override SLO histogram with default latency buckets and limits\n" +
             "com.openexchange.metrics.micrometer.distribution.histogram.appsuite.httpapi.requests = true\n" +
             "com.openexchange.metrics.micrometer.distribution.minimum.appsuite.httpapi.requests = 100\n" +
             "com.openexchange.metrics.micrometer.distribution.maximum.appsuite.httpapi.requests = 60000\n" +
-            "com.openexchange.metrics.micrometer.distribution.sla.appsuite.httpapi.requests =\n";
+            "com.openexchange.metrics.micrometer.distribution.slo.appsuite.httpapi.requests =\n";
 
         PrometheusMeterRegistry prometheusMeterRegistry = initializer.initialize(initConfigService(config));
 
@@ -155,8 +155,8 @@ public class DistributionConfigTest {
 
     public void overrideDefaultHistogramSLAs() throws Exception {
         String config = "" +
-            "# Override SLA latency buckets of existing histogram\n" +
-            "com.openexchange.metrics.micrometer.distribution.sla.appsuite.httpapi.requests = 11ms, 22ms, 60s";
+            "# Override SLO latency buckets of existing histogram\n" +
+            "com.openexchange.metrics.micrometer.distribution.slo.appsuite.httpapi.requests = 11ms, 22ms, 60s";
 
         PrometheusMeterRegistry prometheusMeterRegistry = initializer.initialize(initConfigService(config));
 
@@ -176,7 +176,7 @@ public class DistributionConfigTest {
             "com.openexchange.metrics.micrometer.distribution.histogram.appsuite.httpapi.requests = true\n" +
             "com.openexchange.metrics.micrometer.distribution.minimum.appsuite.httpapi.requests = 100\n" +
             "com.openexchange.metrics.micrometer.distribution.maximum.appsuite.httpapi.requests = 60000\n" +
-            "com.openexchange.metrics.micrometer.distribution.sla.appsuite.httpapi.requests = 111ms, 555ms, 20s\n";
+            "com.openexchange.metrics.micrometer.distribution.slo.appsuite.httpapi.requests = 111ms, 555ms, 20s\n";
 
         PrometheusMeterRegistry prometheusMeterRegistry = initializer.initialize(initConfigService(config));
 
@@ -195,7 +195,7 @@ public class DistributionConfigTest {
 
     public void disableHistogramForTimerWithDefaultSLAs() throws Exception {
         String config = "" +
-            "com.openexchange.metrics.micrometer.distribution.sla.appsuite.httpapi.requests =\n";
+            "com.openexchange.metrics.micrometer.distribution.slo.appsuite.httpapi.requests =\n";
 
         PrometheusMeterRegistry prometheusMeterRegistry = initializer.initialize(initConfigService(config));
 
@@ -214,7 +214,7 @@ public class DistributionConfigTest {
     public void turnHistogramForTimerWithDefaultSLAsIntoPercentileSummary() throws Exception {
         String config = "" +
             "com.openexchange.metrics.micrometer.distribution.histogram.appsuite.httpapi.requests = false\n" +
-            "com.openexchange.metrics.micrometer.distribution.sla.appsuite.httpapi.requests =\n" +
+            "com.openexchange.metrics.micrometer.distribution.slo.appsuite.httpapi.requests =\n" +
             "com.openexchange.metrics.micrometer.distribution.percentiles.appsuite.httpapi.requests = 0.5, 0.75, 0.95, 0.99, 0.999\n";
 
         PrometheusMeterRegistry prometheusMeterRegistry = initializer.initialize(initConfigService(config));
@@ -240,7 +240,7 @@ public class DistributionConfigTest {
     public void disableHistogramForAllButCertainTags() throws Exception {
         String config = "" +
             "com.openexchange.metrics.micrometer.distribution.histogram.appsuite.httpapi.requests = false\n" +
-            "com.openexchange.metrics.micrometer.distribution.sla.appsuite.httpapi.requests =\n" +
+            "com.openexchange.metrics.micrometer.distribution.slo.appsuite.httpapi.requests =\n" +
             "com.openexchange.metrics.micrometer.filter.httpapilogins = appsuite.httpapi.requests{module=\"mail\",action=\"get\"}\n" +
             "com.openexchange.metrics.micrometer.distribution.histogram.httpapilogins = true\n";
 
@@ -261,9 +261,9 @@ public class DistributionConfigTest {
     public void disableSLAsHistogramForAllButCertainTags() throws Exception {
         String config = "" +
             "com.openexchange.metrics.micrometer.distribution.histogram.appsuite.httpapi.requests = false\n" +
-            "com.openexchange.metrics.micrometer.distribution.sla.appsuite.httpapi.requests =\n" +
+            "com.openexchange.metrics.micrometer.distribution.slo.appsuite.httpapi.requests =\n" +
             "com.openexchange.metrics.micrometer.filter.httpapilogins = appsuite.httpapi.requests{module=\"mail\",action=\"get\"}\n" +
-            "com.openexchange.metrics.micrometer.distribution.sla.httpapilogins = 33ms, 66ms, 77s\n";
+            "com.openexchange.metrics.micrometer.distribution.slo.httpapilogins = 33ms, 66ms, 77s\n";
 
         PrometheusMeterRegistry prometheusMeterRegistry = initializer.initialize(initConfigService(config));
 
@@ -400,7 +400,7 @@ public class DistributionConfigTest {
                     Timer timer = Timer.builder("appsuite.httpapi.requests")
                         .tags("module", module, "action", action, "status", status)
                         .description("HTTP API request times")
-                        .sla(
+                        .serviceLevelObjectives(
                             Duration.ofMillis(50),
                             Duration.ofMillis(100),
                             Duration.ofMillis(150),
@@ -441,13 +441,13 @@ public class DistributionConfigTest {
         public DistributionStatisticConfig configure(Id id, DistributionStatisticConfig config) {
             Builder builder = DistributionStatisticConfig.builder();
             if (id.getTag("module").equals("mail")) {
-                builder.sla(Duration.ofMillis(50).toNanos(),
+                builder.serviceLevelObjectives(Duration.ofMillis(50).toNanos(),
                             Duration.ofMillis(100).toNanos(),
                             Duration.ofMillis(150).toNanos());
                        //.percentilesHistogram(Boolean.FALSE)
                        //.percentiles(/*0.5, 0.75, 0.95, 0.99, 0.999*/ new double[0]);
             } else {
-                builder.sla(new long[0])
+                builder.serviceLevelObjectives(new double[0])
                        .percentilesHistogram(Boolean.FALSE)
                        .percentiles(/*0.5, 0.75, 0.95, 0.99, 0.999*/ new double[0]);
             }

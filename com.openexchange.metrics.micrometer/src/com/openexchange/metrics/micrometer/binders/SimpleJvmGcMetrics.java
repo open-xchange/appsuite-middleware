@@ -47,52 +47,50 @@
  *
  */
 
-package com.openexchange.metrics.micrometer.internal.filter;
+package com.openexchange.metrics.micrometer.binders;
 
-import java.util.Map.Entry;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Strings;
-import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
-import com.openexchange.tools.strings.TimeSpanParser;
-import io.micrometer.core.instrument.Meter.Id;
+import io.micrometer.core.instrument.FunctionTimer;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
+import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.binder.MeterBinder;
+import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
+import io.prometheus.client.hotspot.GarbageCollectorExports;
+
 
 /**
- * {@link DistributionMinimumMicrometerFilterPerformer} - Applies metric filters for
- * properties <code>com.openexchange.metrics.micrometer.distribution.minimum.*</code>
+ * This resembles the  exported metrics of {@link GarbageCollectorExports} to provide
+ * a more light-weight and reliable result than {@link JvmGcMetrics}.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.10.4
  */
-public class DistributionMinimumMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer {
+public class SimpleJvmGcMetrics implements MeterBinder {
 
-    /**
-     * Initializes a new {@link DistributionMinimumMicrometerFilterPerformer}.
-     */
-    public DistributionMinimumMicrometerFilterPerformer() {
-        super(MicrometerFilterProperty.MINIMUM);
+    private final List<GarbageCollectorMXBean> garbageCollectors;
+
+    public SimpleJvmGcMetrics() {
+        this(ManagementFactory.getGarbageCollectorMXBeans());
+    }
+
+    SimpleJvmGcMetrics(List<GarbageCollectorMXBean> garbageCollectors) {
+        this.garbageCollectors = garbageCollectors;
     }
 
     @Override
-    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
-        applyFilterFor(configurationService, (entry) -> configure(meterRegistry, entry));
-    }
-
-    @Override
-    DistributionStatisticConfig applyConfig(Id id, Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
-        if (!id.getName().startsWith(metricId)) {
-            return config;
+    public void bindTo(MeterRegistry registry) {
+        for (final GarbageCollectorMXBean gaCollectorMXBean : garbageCollectors) {
+            Tags tags = Tags.of("gc", gaCollectorMXBean.getName());
+            FunctionTimer.builder("jvm.gc.collection",
+                gaCollectorMXBean,
+                    (gc) -> gc.getCollectionCount(),
+                    (gc) -> gc.getCollectionTime(), TimeUnit.MILLISECONDS)
+                .description("Time spent in a given JVM garbage collector in seconds.")
+                .tags(tags)
+                .register(registry);
         }
-
-        String value = entry.getValue();
-        if (Strings.isEmpty(value)) {
-            return config;
-        }
-
-        long nanos = TimeUnit.MILLISECONDS.toNanos(TimeSpanParser.parseTimespanToPrimitive(value));
-        return DistributionStatisticConfig.builder().minimumExpectedValue(Double.valueOf(nanos)).build().merge(config);
-
     }
 }

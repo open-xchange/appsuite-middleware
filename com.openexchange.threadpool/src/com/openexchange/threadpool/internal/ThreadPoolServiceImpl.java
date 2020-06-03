@@ -216,7 +216,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             threadPoolExecutor.setRejectedExecutionHandler(reh);
             threadPoolExecutor.setBlocking(blocking);
         }
-        new ExecutorServiceMetrics(threadPoolExecutor, "main", IterableUtils.emptyIterable()).bindTo(Metrics.globalRegistry);
+        new ExecutorServiceMetrics(threadPoolExecutor, "main", "appsuite.", IterableUtils.emptyIterable()).bindTo(Metrics.globalRegistry);
     }
 
     private static int getCorePoolSize(CorePoolSize corePoolSize) {

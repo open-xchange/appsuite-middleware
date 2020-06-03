@@ -55,21 +55,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.metrics.micrometer.binders.JvmInfoMetrics;
+import com.openexchange.metrics.micrometer.binders.SimpleJvmGcMetrics;
 import com.openexchange.metrics.micrometer.internal.filter.ActivateMetricMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionHistogramMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionMaximumMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionMinimumMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionPercentilesMicrometerFilterPerformer;
-import com.openexchange.metrics.micrometer.internal.filter.DistributionSLAMicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.filter.DistributionSLOMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.FilterMetricMicrometerFilterPerformer;
-import com.openexchange.metrics.micrometer.internal.filter.MeterNamePrefixFilter;
 import com.openexchange.metrics.micrometer.internal.filter.MicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.filter.RenameCacheMetricsFilter;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
+import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
+import io.micrometer.core.instrument.binder.system.FileDescriptorMetrics;
+import io.micrometer.core.instrument.binder.system.UptimeMetrics;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.micrometer.core.instrument.config.MeterFilter;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.prometheus.client.hotspot.DefaultExports;
 
 /**
  * {@link RegistryInitializer}
@@ -115,12 +121,24 @@ public class RegistryInitializer {
         initFilterPerformers();
 
         PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        DefaultExports.register(prometheusRegistry.getPrometheusRegistry());
+
+        // rename built-in io.micrometer.core.instrument.binder.cache metrics  to carry the "appsuite." prefix
+        prometheusRegistry.config().meterFilter(new RenameCacheMetricsFilter());
+
+        // set configuration-based filters
         filterPerformers.stream().forEach(p -> p.applyFilter(prometheusRegistry, configService));
-        enableAll(configService, prometheusRegistry);
-        // rename built-in metrics to contain the "appsuite." prefix
-        prometheusRegistry.config().meterFilter(new MeterNamePrefixFilter());
+        addEnableAllFilter(configService, prometheusRegistry);
+
         parentRegistry.add(prometheusRegistry);
+
+        // add JVM stats
+        new JvmMemoryMetrics().bindTo(prometheusRegistry);
+        new JvmThreadMetrics().bindTo(prometheusRegistry);
+        new ClassLoaderMetrics().bindTo(prometheusRegistry);
+        new UptimeMetrics().bindTo(prometheusRegistry);
+        new FileDescriptorMetrics().bindTo(prometheusRegistry);
+        new SimpleJvmGcMetrics().bindTo(prometheusRegistry);
+        new JvmInfoMetrics().bindTo(prometheusRegistry);
 
         this.prometheusRegistry = prometheusRegistry;
         return prometheusRegistry;
@@ -152,7 +170,7 @@ public class RegistryInitializer {
         filterPerformers.add(new DistributionMinimumMicrometerFilterPerformer());
         filterPerformers.add(new DistributionMaximumMicrometerFilterPerformer());
         filterPerformers.add(new DistributionPercentilesMicrometerFilterPerformer());
-        filterPerformers.add(new DistributionSLAMicrometerFilterPerformer());
+        filterPerformers.add(new DistributionSLOMicrometerFilterPerformer());
     }
 
     /**
@@ -163,7 +181,7 @@ public class RegistryInitializer {
     /*
      * Visible for testing
      */
-    synchronized void enableAll(ConfigurationService configService, PrometheusMeterRegistry prometheusRegistry) {
+    synchronized void addEnableAllFilter(ConfigurationService configService, PrometheusMeterRegistry prometheusRegistry) {
         boolean enableAll = Boolean.parseBoolean(configService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() + ".all", Boolean.TRUE.toString()));
         if (enableAll) {
             return;

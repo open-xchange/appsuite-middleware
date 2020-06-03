@@ -155,7 +155,7 @@ public class MetricsListener implements ApplicationEventListener  {
             return Timer.builder(NAME)
                         .tags("path", path, "method", method, "status", String.valueOf(status))
                         .description("Records the duration of rest calls.")
-                        .sla(
+                        .serviceLevelObjectives(
                             Duration.ofMillis(50),
                             Duration.ofMillis(100),
                             Duration.ofMillis(150),

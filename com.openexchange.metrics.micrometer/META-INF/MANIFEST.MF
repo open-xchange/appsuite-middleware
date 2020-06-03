@@ -29,17 +29,17 @@ Import-Package: com.google.common.cache,
 Export-Package: 
  com.openexchange.metrics.micrometer,
  com.openexchange.metrics.micrometer.binders,
- io.micrometer.core.instrument;version="1.3.3",
- io.micrometer.core.instrument.binder.cache;version="1.3.3",
- io.micrometer.core.instrument.binder.jvm;version="1.3.3",
- io.micrometer.core.instrument.composite;version="1.3.3",
- io.micrometer.core.instrument.config;version="1.3.3"
+ io.micrometer.core.instrument,
+ io.micrometer.core.instrument.binder.cache,
+ io.micrometer.core.instrument.binder.jvm,
+ io.micrometer.core.instrument.composite,
+ io.micrometer.core.instrument.config
 Bundle-ClassPath: .,
  lib/HdrHistogram-2.1.11.jar,
  lib/LatencyUtils-2.0.3.jar,
- lib/micrometer-core-1.3.3.jar,
- lib/micrometer-registry-prometheus-1.3.3.jar,
  lib/simpleclient_common-0.8.1.jar,
  lib/simpleclient_hotspot-0.8.1.jar,
  lib/simpleclient_servlet-0.8.1.jar,
- lib/simpleclient-0.8.1.jar
+ lib/simpleclient-0.8.1.jar,
+ lib/micrometer-core-1.5.1.jar,
+ lib/micrometer-registry-prometheus-1.5.1.jar
