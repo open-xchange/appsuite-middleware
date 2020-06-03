@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage.rdb.legacy;
 
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
@@ -75,17 +76,19 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.Appointment2Event;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.AttendeeMapper;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 
 /**
  * {@link CalendarStorage}
@@ -112,12 +115,36 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     @Override
     public void insertAttendees(String objectID, List<Attendee> attendees) throws OXException {
-        throw CalendarExceptionCodes.STORAGE_NOT_AVAILABLE.create("'Legacy' storage is operating in read-only mode.");
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += insertOrReplaceAttendees(connection, false, false, context.getContextId(), asInt(objectID), attendees);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
     }
 
     @Override
     public void insertAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
-        throw CalendarExceptionCodes.STORAGE_NOT_AVAILABLE.create("'Legacy' storage is operating in read-only mode.");
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            for (Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
+                updated += insertOrReplaceAttendees(connection, false, false, context.getContextId(), asInt(entry.getKey()), entry.getValue());
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
     }
 
     @Override
@@ -127,7 +154,18 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     @Override
     public void updateAttendees(String objectID, List<Attendee> attendees) throws OXException {
-        throw CalendarExceptionCodes.STORAGE_NOT_AVAILABLE.create("'Legacy' storage is operating in read-only mode.");
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += updateAttendees(connection, context.getContextId(), asInt(objectID), attendees);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
     }
 
     @Override
@@ -137,12 +175,36 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     @Override
     public void insertAttendeeTombstones(String objectID, List<Attendee> attendees) throws OXException {
-        throw CalendarExceptionCodes.STORAGE_NOT_AVAILABLE.create("'Legacy' storage is operating in read-only mode.");
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += insertTombstoneAttendees(connection, context.getContextId(), asInt(objectID), attendees);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
     }
 
     @Override
     public void insertAttendeeTombstones(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
-        throw CalendarExceptionCodes.STORAGE_NOT_AVAILABLE.create("'Legacy' storage is operating in read-only mode.");
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            for (Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
+                updated += insertTombstoneAttendees(connection, context.getContextId(), asInt(entry.getKey()), entry.getValue());
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
     }
 
     @Override
@@ -188,7 +250,18 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     @Override
     public void deleteAttendees(String objectID, List<Attendee> attendees) throws OXException {
-        throw CalendarExceptionCodes.STORAGE_NOT_AVAILABLE.create("'Legacy' storage is operating in read-only mode.");
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteAttendees(connection, context.getContextId(), asInt(objectID), attendees);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
     }
 
     @Override
@@ -198,12 +271,23 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     @Override
     public void deleteAttendees(List<String> objectIDs) throws OXException {
-        throw CalendarExceptionCodes.STORAGE_NOT_AVAILABLE.create("'Legacy' storage is operating in read-only mode.");
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteAttendees(connection, context.getContextId(), objectIDs);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
     }
 
     @Override
     public boolean deleteAllAttendees() throws OXException {
-        throw CalendarExceptionCodes.STORAGE_NOT_AVAILABLE.create("'Legacy' storage is operating in read-only mode.");
+        throw new UnsupportedOperationException();
     }
 
     private Map<String, List<Attendee>> loadAttendees(String[] eventIds, Boolean internal, boolean tombstones) throws OXException {
@@ -424,6 +508,227 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
     }
 
+    private static int deleteAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws SQLException {
+        int updated = 0;
+        for (Attendee attendee : attendees) {
+            if (false == CalendarUtils.isInternal(attendee)) {
+                /*
+                 * delete records in dateExternal and prg_date_rights for external users
+                 */
+                try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM dateExternal WHERE cid=? AND objectId=? AND mailAddress=?;")) {
+                    stmt.setInt(1, contextID);
+                    stmt.setInt(2, objectID);
+                    stmt.setString(3, Strings.replaceSurrogatePairs(Event2Appointment.getEMailAddress(attendee.getUri()), '@'));
+                    updated += logExecuteUpdate(stmt);
+                }
+                try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_date_rights WHERE cid=? AND object_id=? AND ma=?;")) {
+                    stmt.setInt(1, contextID);
+                    stmt.setInt(2, objectID);
+                    stmt.setString(3, Event2Appointment.getEMailAddress(attendee.getUri()));
+                    updated += logExecuteUpdate(stmt);
+                }
+            } else {
+                /*
+                 * delete record in prg_dates_members for each internal user
+                 */
+                if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
+                    try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_dates_members WHERE cid=? AND object_id=? AND member_uid=?;")) {
+                        stmt.setInt(1, contextID);
+                        stmt.setInt(2, objectID);
+                        stmt.setInt(3, attendee.getEntity());
+                        updated += logExecuteUpdate(stmt);
+                    }
+                }
+                /*
+                 * delete record in prg_date_rights for each attendee, skipping group members
+                 */
+                if (null == attendee.getMember()) {
+                    try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_date_rights WHERE cid=? AND object_id=? AND id=?;")) {
+                        stmt.setInt(1, contextID);
+                        stmt.setInt(2, objectID);
+                        stmt.setInt(3, attendee.getEntity());
+                        updated += logExecuteUpdate(stmt);
+                    }
+                }
+            }
+        }
+        return updated;
+    }
+
+    private int updateAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws OXException {
+        int updated = 0;
+        for (Attendee attendee : attendees) {
+            if (false == CalendarUtils.isInternal(attendee)) {
+                /*
+                 * update records in dateExternal for external users
+                 */
+                ExternalAttendeeMapper mapper = ExternalAttendeeMapper.getInstance();
+                AttendeeField[] fields = mapper.getMappedFields(mapper.getAssignedFields(attendee));
+                String sql = new StringBuilder()
+                    .append("UPDATE dateExternal SET ").append(mapper.getAssignments(fields))
+                    .append(" WHERE cid=? AND objectId=? AND mailAddress=?;")
+                .toString();
+                try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                    int parameterIndex = 1;
+                    parameterIndex = mapper.setParameters(stmt, parameterIndex, attendee, fields);
+                    stmt.setInt(parameterIndex++, contextID);
+                    stmt.setInt(parameterIndex++, objectID);
+                    stmt.setString(parameterIndex++, Strings.replaceSurrogatePairs(Event2Appointment.getEMailAddress(attendee.getUri()), '@'));
+                    updated += logExecuteUpdate(stmt);
+                } catch (SQLException e) {
+                    throw asOXException(e, ExternalAttendeeMapper.getInstance(), attendee, connection, "dateExternal");
+                }
+            } else if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
+                /*
+                 * update record in prg_dates_members for internal users
+                 */
+                InternalAttendeeMapper mapper = InternalAttendeeMapper.getInstance();
+                AttendeeField[] fields = mapper.getMappedFields(mapper.getAssignedFields(attendee));
+                String sql = new StringBuilder()
+                    .append("UPDATE prg_dates_members SET ").append(mapper.getAssignments(fields))
+                    .append(" WHERE cid=? AND object_id=? AND member_uid=?;")
+                .toString();
+                try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                    int parameterIndex = 1;
+                    parameterIndex = mapper.setParameters(stmt, parameterIndex, attendee, fields);
+                    stmt.setInt(parameterIndex++, contextID);
+                    stmt.setInt(parameterIndex++, objectID);
+                    stmt.setInt(parameterIndex++, attendee.getEntity());
+                    updated += logExecuteUpdate(stmt);
+                } catch (SQLException e) {
+                    throw asOXException(e, InternalAttendeeMapper.getInstance(), attendee, connection, "prg_dates_members");
+                }
+            }
+        }
+        return updated;
+    }
+
+    private static int deleteAttendees(Connection connection, int contextID, List<String> objectIDs) throws SQLException {
+        String[] deleteStatements = new String[] {
+            "DELETE FROM dateExternal WHERE cid=? AND objectId",
+            "DELETE FROM prg_dates_members WHERE cid=? AND object_id",
+            "DELETE FROM prg_date_rights WHERE cid=? AND object_id"
+        };
+        int updated = 0;
+        for (String deleteStatement : deleteStatements) {
+            String sql = new StringBuilder().append(deleteStatement).append(Databases.getPlaceholders(objectIDs.size())).append(';').toString();
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                int parameterIndex = 1;
+                stmt.setInt(parameterIndex++, contextID);
+                for (String id : objectIDs) {
+                    stmt.setInt(parameterIndex++, asInt(id));
+                }
+                updated += logExecuteUpdate(stmt);
+            }
+        }
+        return updated;
+    }
+
+    private int insertOrReplaceDateExternal(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws OXException {
+        String sql = new StringBuilder()
+            .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName)
+            .append(" (cid,objectId,mailAddress,displayName,confirm,reason) VALUES (?,?,?,?,?,?);")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, objectID);
+            stmt.setString(parameterIndex++, Event2Appointment.getEMailAddress(attendee.getUri()));
+            stmt.setString(parameterIndex++, attendee.getCn());
+            stmt.setInt(parameterIndex++, Event2Appointment.getConfirm(attendee.getPartStat()));
+            stmt.setString(parameterIndex++, attendee.getComment());
+            return logExecuteUpdate(stmt);
+        } catch (SQLException e) {
+            throw asOXException(e, ExternalAttendeeMapper.getInstance(), attendee, connection, tableName);
+        }
+    }
+
+    private int insertOrReplaceDatesMembers(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws OXException {
+        InternalAttendeeMapper mapper = InternalAttendeeMapper.getInstance();
+        AttendeeField[] mappedFields = mapper.getMappedFields();
+        String sql = new StringBuilder()
+            .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(' ')
+            .append("(cid,object_id,reminder,").append(mapper.getColumns(mappedFields)).append(") ")
+            .append("VALUES (?,?,?,").append(mapper.getParameters(mappedFields)).append(");")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, objectID);
+            stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
+            mapper.setParameters(stmt, parameterIndex, attendee, mappedFields);
+            return logExecuteUpdate(stmt);
+        } catch (SQLException e) {
+            throw asOXException(e, mapper, attendee, connection, tableName);
+        }
+    }
+
+    private int insertOrReplaceDateRights(Connection connection, String tableName, boolean replace, int contextID, int objectID, int entity, Attendee attendee) throws OXException {
+        String sql = new StringBuilder()
+            .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName)
+            .append(" (object_id,cid,id,type,ma,dn) VALUES (?,?,?,?,?,?);")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, objectID);
+            stmt.setInt(parameterIndex++, contextID);
+            if (isInternal(attendee)) {
+                stmt.setInt(parameterIndex++, entity);
+                stmt.setInt(parameterIndex++, Event2Appointment.getParticipantType(attendee.getCuType(), true));
+                stmt.setNull(parameterIndex++, java.sql.Types.VARCHAR);
+                stmt.setNull(parameterIndex++, java.sql.Types.VARCHAR);
+            } else {
+                stmt.setInt(parameterIndex++, entity);
+                stmt.setInt(parameterIndex++, Event2Appointment.getParticipantType(attendee.getCuType(), false));
+                stmt.setString(parameterIndex++, Event2Appointment.getEMailAddress(attendee.getUri()));
+                stmt.setString(parameterIndex++, attendee.getCn());
+            }
+            return logExecuteUpdate(stmt);
+        } catch (SQLException e) {
+            throw asOXException(e, InternalAttendeeMapper.getInstance(), attendee, connection, tableName);
+        }
+    }
+
+    private int insertTombstoneAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws OXException {
+        return insertOrReplaceAttendees(connection, true, true, contextID, objectID, attendees);
+    }
+
+    private int insertOrReplaceAttendees(Connection connection, boolean deleted, boolean replace, int contextID, int objectID, List<Attendee> attendees) throws OXException {
+        if (null == attendees || attendees.isEmpty()) {
+            return 0;
+        }
+        int updated = 0;
+        Set<Integer> usedEntities = new HashSet<Integer>();
+        for (Attendee attendee : attendees) {
+            /*
+             * enforce a 'set' participation status due to NOT NULL constraint on column in legacy storage
+             */
+            if (false == attendee.containsPartStat()) {
+                attendee = com.openexchange.chronos.common.mapping.AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+                attendee.setPartStat(null);
+            }
+            if (0 > attendee.getEntity() || 0 == attendee.getEntity() && false == CalendarUserType.GROUP.equals(attendee.getCuType())) {
+                /*
+                 * insert additional record into dateExternal for external users
+                 */
+                updated += insertOrReplaceDateExternal(connection, deleted ? "delDateExternal" : "dateExternal", replace, contextID, objectID, attendee);
+            } else if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
+                /*
+                 * insert additional record into prg_dates_members for each internal user
+                 */
+                updated += insertOrReplaceDatesMembers(connection, deleted ? "del_dates_members" : "prg_dates_members", replace, contextID, objectID, attendee);
+            }
+            if (null == attendee.getMember()) {
+                /*
+                 * insert record into prg_date_rights for each attendee, skipping group members
+                 */
+                int entity = determineEntity(attendee, usedEntities);
+                updated += insertOrReplaceDateRights(connection, deleted ? "del_date_rights" : "prg_date_rights", replace, contextID, objectID, entity, attendee);
+            }
+        }
+        return updated;
+    }
+
     private static Map<String, List<Attendee>> selectInternalAttendeeData(Connection connection, int contextID, String objectIDs[], boolean tombstones) throws SQLException {
         if (null == objectIDs || 0 == objectIDs.length) {
             return java.util.Collections.emptyMap();
@@ -525,6 +830,29 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             }
         }
         return attendeesByObjectId;
+    }
+
+    /**
+     * Determines the next unique entity identifier to use when inserting an entry into the <code>prg_date_rights</code> table. For
+     * <i>internal</i> attendees, this is always the (already unique) entity identifier itself. For <i>external</i> attendees, the
+     * identifier is always negative and based on the hash code of the URI.
+     *
+     * @param attendee The attendee to determine the entity for
+     * @param usedEntities The so far used entities to avoid hash collisions
+     * @return The entity
+     */
+    private static int determineEntity(Attendee attendee, Set<Integer> usedEntities) {
+        if (isInternal(attendee)) {
+            usedEntities.add(I(attendee.getEntity()));
+            return attendee.getEntity();
+        } else {
+            String uri = attendee.getUri();
+            int entity = -1 * Math.abs(null != uri ? uri.hashCode() : 1);
+            while (false == usedEntities.add(I(entity))) {
+                entity--;
+            }
+            return entity;
+        }
     }
 
     /**

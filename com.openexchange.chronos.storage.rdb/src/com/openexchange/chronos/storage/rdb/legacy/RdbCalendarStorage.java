@@ -92,8 +92,9 @@ public class RdbCalendarStorage implements CalendarStorage {
      * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
+     * @throws OXException
      */
-    public RdbCalendarStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public RdbCalendarStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
         super();
         eventStorage = new RdbEventStorage(context, entityResolver, dbProvider, txPolicy);
         attendeeStorage = new RdbAttendeeStorage(context, entityResolver, dbProvider, txPolicy);
