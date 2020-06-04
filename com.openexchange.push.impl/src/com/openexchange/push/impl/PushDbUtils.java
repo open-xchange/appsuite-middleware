@@ -98,9 +98,13 @@ public class PushDbUtils {
          */
         DELETED_FOR_CLIENT,
         /**
-         * Deleted last and therefore all registrations.
+         * Deleted last and therefore all registrations for associated user.
          */
-        DELETED_COMPLETELY;
+        DELETED_COMPLETELY,
+        /**
+         * Deleted last registration in user-associated context.
+         */
+        DELETED_ALL_IN_CONTEXT;
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------
@@ -470,17 +474,9 @@ public class PushDbUtils {
             Databases.startTransaction(con);
             rollback = 1;
 
-            boolean[] unmark = new boolean[1];
-            unmark[0] = false;
-
-            boolean deleted = deletePushRegistration(userId, contextId, optClientId, unmark, con);
-
-            DeleteResult deleteResult;
-            if (unmark[0]) {
+            DeleteResult deleteResult = deletePushRegistration(userId, contextId, optClientId, con);
+            if (deleteResult == DeleteResult.DELETED_ALL_IN_CONTEXT) {
                 unmarkContextForPush(contextId, service);
-                deleteResult = DeleteResult.DELETED_COMPLETELY;
-            } else {
-                deleteResult = (deleted ? DeleteResult.DELETED_FOR_CLIENT : DeleteResult.NOT_DELETED);
             }
 
             con.commit();
@@ -502,7 +498,7 @@ public class PushDbUtils {
         }
     }
 
-    private static boolean deletePushRegistration(int userId, int contextId, String optClientId, boolean[] unmark, Connection con) throws OXException {
+    private static DeleteResult deletePushRegistration(int userId, int contextId, String optClientId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -510,27 +506,56 @@ public class PushDbUtils {
             stmt.setInt(1, contextId);
             rs = stmt.executeQuery();
             Databases.closeSQLStuff(rs, stmt);
+            stmt = null;
             rs = null;
 
-            stmt = con.prepareStatement(null == optClientId ? "DELETE FROM registeredPush WHERE cid=? AND user=?" : "DELETE FROM registeredPush WHERE cid=? AND user=? AND client=?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            if (null != optClientId) {
+            DeleteResult deleteResult;
+            if (null == optClientId) {
+                stmt = con.prepareStatement("DELETE FROM registeredPush WHERE cid=? AND user=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                boolean deleted = stmt.executeUpdate() > 0;
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+                deleteResult = deleted ? DeleteResult.DELETED_COMPLETELY : DeleteResult.NOT_DELETED;
+            } else {
+                stmt = con.prepareStatement("DELETE FROM registeredPush WHERE cid=? AND user=? AND client=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
                 stmt.setString(3, optClientId);
-            }
-            boolean deleted = stmt.executeUpdate() > 0;
-            Databases.closeSQLStuff(stmt);
+                boolean deleted = stmt.executeUpdate() > 0;
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+                deleteResult = deleted ? DeleteResult.DELETED_FOR_CLIENT : DeleteResult.NOT_DELETED;
 
-            if (deleted) {
-                stmt = con.prepareStatement("SELECT COUNT(user) FROM registeredPush WHERE cid=?");
+                // Check if all for user were deleted through dropping push registration
+                if (deleted) {
+                    stmt = con.prepareStatement("SELECT 1 FROM registeredPush WHERE cid=? AND user=?");
+                    stmt.setInt(1, contextId);
+                    rs = stmt.executeQuery();
+                    if (!rs.next()) {
+                        deleteResult = DeleteResult.DELETED_COMPLETELY;
+                    }
+                    Databases.closeSQLStuff(rs, stmt);
+                    stmt = null;
+                    rs = null;
+                }
+            }
+
+            // Check if all in context were deleted through dropping push registration
+            if (deleteResult != DeleteResult.NOT_DELETED) {
+                stmt = con.prepareStatement("SELECT 1 FROM registeredPush WHERE cid=?");
                 stmt.setInt(1, contextId);
                 rs = stmt.executeQuery();
-                rs.next();
-                int count = rs.getInt(1);
-                unmark[0] = count <= 0;
+                if (!rs.next()) {
+                    deleteResult = DeleteResult.DELETED_ALL_IN_CONTEXT;
+                }
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
+                rs = null;
             }
 
-            return deleted;
+            return deleteResult;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {

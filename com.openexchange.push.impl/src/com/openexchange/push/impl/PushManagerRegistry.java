@@ -695,7 +695,7 @@ public final class PushManagerRegistry implements PushListenerService {
 
         DeleteResult deleteResult = PushDbUtils.deletePushRegistration(userId, contextId, clientId);
 
-        if (DeleteResult.DELETED_COMPLETELY == deleteResult) {
+        if (DeleteResult.DELETED_COMPLETELY == deleteResult || DeleteResult.DELETED_ALL_IN_CONTEXT == deleteResult) {
             CredentialStorage credentialStorage = optCredentialStorage();
             if (null != credentialStorage) {
                 try {
@@ -735,7 +735,7 @@ public final class PushManagerRegistry implements PushListenerService {
      */
     public boolean unregisterAllPermanentListenersFor(int userId, int contextId) throws OXException {
         DeleteResult deleteResult = PushDbUtils.deleteAllPushRegistrations(userId, contextId);
-        if (DeleteResult.DELETED_COMPLETELY == deleteResult) {
+        if (DeleteResult.DELETED_COMPLETELY == deleteResult || DeleteResult.DELETED_ALL_IN_CONTEXT == deleteResult) {
             CredentialStorage credentialStorage = optCredentialStorage();
             if (null != credentialStorage) {
                 try {
