@@ -2457,7 +2457,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
                 final int trashFolderID = getTrashFolderID(session, folderAccess);
                 readConnection = getReadConnection(context);
-                boolean moveToTrash = false;
+                boolean updateOrigin = false;
                 List<DocumentMetadata> tombstoneDocuments = new ArrayList<>(numberOfDocuments);
                 List<DocumentMetadata> documentsToUpdate = new ArrayList<>(numberOfDocuments);
                 List<DocumentMetadata> versionsToUpdate = new ArrayList<>();
@@ -2480,13 +2480,21 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                      * check origin path
                      */
                     //@formatter:off
-                    InfostoreFolderPath originFolderPath = !isBelowTrashFolder((int) document.getFolderId(), trashFolderID, folderAccess) ?
-                        generateOriginPathIfTrashed((int) document.getFolderId(), trashFolderID, session, folderAccess) :
-                        null;
+                    InfostoreFolderPath originFolderPath;
+                    if (isBelowTrashFolder((int) document.getFolderId(), trashFolderID, folderAccess)) {
+                        // A move from a trash folder...
+                        if (!isBelowTrashFolder((int) destinationFolderID, trashFolderID, folderAccess)) {
+                            // ... to a non-trash folder. Drop origin path information
+                            updateOrigin = true;
+                        }
+                        originFolderPath = null;
+                    } else {
+                        originFolderPath = generateOriginPathIfTrashed((int) document.getFolderId(), trashFolderID, session, folderAccess);
+                    }
                     //@formatter:on
                     if (null != originFolderPath && !originFolderPath.isEmpty()) {
                         documentToUpdate.setOriginFolderPath(originFolderPath);
-                        moveToTrash = true;
+                        updateOrigin = true;
                     } else {
                         documentToUpdate.setOriginFolderPath(null);
                     }
@@ -2533,11 +2541,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 /*
                  * perform document move
                  */
-                Metadata[] modified = null;
-                if (!moveToTrash) {
-                    modified = new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL };
-                } else {
+                Metadata[] modified;
+                if (updateOrigin) {
                     modified = new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL, Metadata.ORIGIN_LITERAL };
+                } else {
+                    modified = new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL };
                 }
                 perform(new UpdateDocumentAction(this, QUERIES, session.getContext(), documentsToUpdate, sourceDocuments, modified, sequenceNumber, session), true);
                 /*
