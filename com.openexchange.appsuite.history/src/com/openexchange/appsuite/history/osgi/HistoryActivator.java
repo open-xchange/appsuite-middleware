@@ -178,11 +178,11 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
             return;
         }
         File currentVersionFile = new File(historyFolder, "/current/version.txt");
-        File installedVersionFile = new File(installedFolder, "version.txt");
+        File installedVersionFile = installedFolder == null ? null : new File(installedFolder, "version.txt");
         try {
             Optional<String> current = currentVersionFile.exists() ? Files.lines(currentVersionFile.toPath()).findFirst() : Optional.empty();
 
-            if (installedVersionFile.exists()) {
+            if (installedVersionFile != null && installedVersionFile.exists()) {
                 Optional<String> installedVersion = HistoryUtil.readVersion(installedVersionFile.toPath());
                 if (installedVersion.isPresent() == false) {
                     LOG.debug("Couldn't read version info from installation folder for history {}", history.name());
@@ -277,10 +277,10 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
      *
      * @param property The raw property value
      * @param history The history
-     * @return The content folder
+     * @return The content folder or <code>null</code>
      */
     private File getInstalledPath(String property, History history) {
-        String[] paths = property.split(":");
+        String[] paths = Strings.splitByColon(property);
         return paths.length > 0 ? getContentFolder(new File(paths[0]), history) : null;
     }
 
