@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.HttpHeaders;
 import org.apache.commons.codec.binary.Base64;
+import org.junit.runner.RunWith;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -86,6 +87,7 @@ import com.openexchange.testing.restclient.modules.AdminApi;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.1
  */
+@RunWith(org.junit.runners.BlockJUnit4ClassRunner.class)
 public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession {
 
     private static String EMPTY_PROVIDER_FILTER = "";
