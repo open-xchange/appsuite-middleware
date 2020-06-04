@@ -153,7 +153,8 @@ if [ ${1:-0} -eq 2 ]; then
     ox_remove_property CREATE_CONTEXT_USE_UNIT /opt/open-xchange/etc/plugin/hosting.properties
 
     SCR=SCR-322.admin
-    ox_scr_todo ${SCR} && {
+    if ox_scr_todo ${SCR}
+    then
       prop_file=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
       orig_line='# publication (Permission to publish content of folders)'
       new_line='# publication (Permission to publish content of folders, Deprecated with v7.10.2, will have no impact) [DEPRECATED]'
@@ -161,10 +162,11 @@ if [ ${1:-0} -eq 2 ]; then
         sed -i -e "s/${orig_line}/${new_line}/" ${prop_file}
       }
       ox_scr_done ${SCR}
-    }
+    fi
 
     SCR=SCR-338
-    ox_scr_todo ${SCR} && {
+    if ox_scr_todo ${SCR}
+    then
       pfile=/opt/open-xchange/etc/plugin/hosting.properties
       prop_key=CONTEXT_STORAGE
       old_default=com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage
@@ -175,10 +177,11 @@ if [ ${1:-0} -eq 2 ]; then
         ox_set_property ${prop_key} ${new_default} ${pfile}
       fi
       ox_scr_done ${SCR}
-    }
+    fi
 
     SCR=SCR-466
-    ox_scr_todo ${SCR} && {
+    if ox_scr_todo ${SCR}
+    then
       pfile=/opt/open-xchange/etc/AdminUser.properties
       p_key=DEFAULT_PASSWORD_MECHANISM
       old_default=SHA
@@ -189,7 +192,7 @@ if [ ${1:-0} -eq 2 ]; then
         ox_set_property ${p_key} ${new_default} ${pfile}
       fi
       ox_scr_done ${SCR}
-    }
+    fi
 
 fi
 ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
