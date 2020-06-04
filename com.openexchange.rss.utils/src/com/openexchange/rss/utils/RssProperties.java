@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.rss.util;
+package com.openexchange.rss.utils;
 
 import java.net.InetAddress;
 import java.net.URI;
@@ -58,17 +58,20 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
-import com.openexchange.rss.osgi.Services;
+import com.openexchange.rss.utils.osgi.Services;
 
 /**
  *
  * {@link RssProperties}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
+ *
  */
 public class RssProperties {
 
@@ -85,6 +88,11 @@ public class RssProperties {
 
     private static final AtomicReference<HostList> blacklistedHosts = new AtomicReference<HostList>(null);
 
+    /**
+     * Gets the blacklisted hosts
+     *
+     * @return The blacklisted {@link HostList}
+     */
     private static HostList blacklistedHosts() {
         HostList tmp = blacklistedHosts.get();
         if (null == tmp) {
@@ -93,7 +101,7 @@ public class RssProperties {
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(RssProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.messaging.rss.feed.blacklist'.");
+                        LoggerFactory.getLogger(RssProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.messaging.rss.feed.blacklist'.");
                         return HostList.valueOf(HOST_BLACKLIST_DEFAULT);
                     }
                     String prop = service.getProperty(HOST_BLACKLIST_KEY, HOST_BLACKLIST_DEFAULT);
@@ -129,6 +137,11 @@ public class RssProperties {
 
     private static volatile Set<Integer> allowedPorts;
 
+    /**
+     * Gets the allowed ports
+     *
+     * @return A {@link Set} of allowed ports
+     */
     private static Set<Integer> allowedPorts() {
         Set<Integer> tmp = allowedPorts;
         if (null == tmp) {
@@ -156,6 +169,12 @@ public class RssProperties {
         return tmp;
     }
 
+    /**
+     * Parses an comma separated list of integer to a {@link Set} of {@link Integer}
+     *
+     * @param prop The list
+     * @return The {@link Set} of {@link Integer}
+     */
     private static Set<Integer> toIntSet(String prop) {
         String[] tokens = Strings.splitByComma(prop);
         Set<Integer> tmp = new HashSet<Integer>(tokens.length);
@@ -190,6 +209,12 @@ public class RssProperties {
         }
     }
 
+    /**
+     * Checks whether the given {@link URI} is valid or not
+     *
+     * @param uri The {@link URI} to check
+     * @return <code>true</code> if the uri is valid, <code>false</code> otherwise
+     */
     private static boolean isValid(URI uri) {
         try {
             InetAddress inetAddress = InetAddress.getByName(uri.getHost());
@@ -231,6 +256,11 @@ public class RssProperties {
 
     private static volatile Set<String> schemes;
 
+    /**
+     * Gets the {@link Set} of supported schemes
+     *
+     * @return The {@link Set} of schemes
+     */
     private static Set<String> supportedSchemes() {
         Set<String> tmp = schemes;
         if (null == tmp) {
@@ -251,6 +281,12 @@ public class RssProperties {
         return tmp;
     }
 
+    /**
+     * Parses the given comma separated list of schemes into a {@link Set} of schemes
+     *
+     * @param concatenatedSchemes The comma separated list of schemes
+     * @return The {@link Set} of schemes
+     */
     private static Set<String> toSet(String concatenatedSchemes) {
         if (Strings.isEmpty(concatenatedSchemes)) {
             return Collections.emptySet();
@@ -262,6 +298,12 @@ public class RssProperties {
         return new HashSet<>(Arrays.asList(schemes));
     }
 
+    /**
+     * Checks whether the schemes is allowed
+     *
+     * @param scheme The scheme to check
+     * @return <code>true</code> if the scheme is allowed, <code>false</code> otherwise
+     */
     private static boolean isAllowedScheme(String scheme) {
         Set<String> supportedSchemes = supportedSchemes();
         return supportedSchemes.isEmpty() ? true : supportedSchemes.contains(scheme);

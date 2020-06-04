@@ -61,7 +61,6 @@ import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAction;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.messaging.MessagingService;
-import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
 import com.openexchange.session.Session;
 import com.sun.syndication.fetcher.FeedFetcher;
 import com.sun.syndication.fetcher.impl.HashMapFeedInfoCache;
@@ -84,7 +83,7 @@ public class RSSMessagingService implements MessagingService {
         FORM_DESCRIPTION = new ReadOnlyDynamicFormDescription(fd);
     }
 
-    private final MessagingAccountManager accountManager = new DefaultMessagingAccountManager(this);
+    private final MessagingAccountManager accountManager = new ConfigurationCheckingAccountManager(this);
 
     private final FeedFetcher fetcher = new HttpURLFeedFetcher(HashMapFeedInfoCache.getInstance());
 

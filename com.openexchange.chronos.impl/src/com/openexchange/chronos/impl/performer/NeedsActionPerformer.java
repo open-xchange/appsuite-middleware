@@ -57,10 +57,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -93,8 +96,8 @@ public class NeedsActionPerformer extends AbstractQueryPerformer {
     }
 
     // @formatter:off
-    private static final EventField[] QUERY_FIELDS = new EventField[] { EventField.UID, EventField.SUMMARY, EventField.FOLDER_ID, EventField.LOCATION, 
-        EventField.DESCRIPTION, EventField.ATTACHMENTS, EventField.GEO, EventField.ORGANIZER, EventField.START_DATE, EventField.END_DATE, 
+    private static final EventField[] QUERY_FIELDS = new EventField[] { EventField.UID, EventField.SUMMARY, EventField.FOLDER_ID, EventField.LOCATION,
+        EventField.DESCRIPTION, EventField.ATTACHMENTS, EventField.GEO, EventField.ORGANIZER, EventField.START_DATE, EventField.END_DATE,
         EventField.TRANSP, EventField.RECURRENCE_RULE
     };
     // @formatter:on
@@ -131,6 +134,9 @@ public class NeedsActionPerformer extends AbstractQueryPerformer {
 
     /**
      * Reduces the technically based list of events that need action to a minimum list that really needs action by a user.
+     * <p/>
+     * If multiple overridden instances of a recurring event series could be reduced into the series master event, this series master
+     * event's change exception dates are adjusted implicitly so that they no longer list those exception dates that were skipped.
      *
      * @param eventsByUID {@link Map} containing all events in a mapped way which means each event series including any change exceptions are grouped separately.
      * @return {@link List} of {@link Event}s that need user action
@@ -155,15 +161,26 @@ public class NeedsActionPerformer extends AbstractQueryPerformer {
                 filteredEvents.addAll(series);
                 continue;
             }
-            filteredEvents.add(master);
+
+            SortedSet<RecurrenceId> newChangeExceptionDates = new TreeSet<RecurrenceId>();
+            if (null != master.getChangeExceptionDates()) {
+                newChangeExceptionDates.addAll(master.getChangeExceptionDates());
+            }
             Date timestamp = new Date();
             for (int i = 1; i < sortedSeries.size(); i++) {
                 Event event = sortedSeries.get(i);
                 Event originalOccurrence = prepareException(master, event.getRecurrenceId(), event.getId(), timestamp);
+                /*
+                 * include re-scheduled change exceptions, otherwise skip & remove from master's change exception dates
+                 */
                 if (Utils.isReschedule(originalOccurrence, event)) {
                     filteredEvents.add(event);
+                } else {
+                    newChangeExceptionDates.removeIf(r -> r.matches(event.getRecurrenceId()));
                 }
             }
+            master.setChangeExceptionDates(newChangeExceptionDates);
+            filteredEvents.add(master);
         }
         return filteredEvents;
     }

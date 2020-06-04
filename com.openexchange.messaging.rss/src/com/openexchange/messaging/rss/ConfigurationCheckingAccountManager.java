@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,62 +47,55 @@
  *
  */
 
-package com.openexchange.messaging.json.actions.accounts;
+package com.openexchange.messaging.rss;
 
-import java.util.Iterator;
-import java.util.Map.Entry;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.messaging.MessagingExceptionCodes;
+import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
+import com.openexchange.rss.utils.RssProperties;
+import com.openexchange.session.Session;
 
 /**
- * Creates a new MessagingAccount. The body of the request must contain the JSON representation of the given account.
+ * {@link ConfigurationCheckingAccountManager} is a {@link DefaultMessagingAccountManager} implementation which checks that the rss account configuration is valid.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public class NewAction extends AbstractMessagingAccountAction {
+public class ConfigurationCheckingAccountManager extends DefaultMessagingAccountManager {
 
     /**
-     * Initializes a new {@link NewAction}.
+     * Initializes a new {@link ConfigurationCheckingAccountManager}.
      *
-     * @param registry The {@link MessagingServiceRegistry}
+     * @param service The {@link MessagingService}
      */
-    public NewAction(final MessagingServiceRegistry registry) {
-        super(registry);
+    public ConfigurationCheckingAccountManager(MessagingService service) {
+        super(service);
     }
 
     @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-        final MessagingAccount account = parser.parse((JSONObject) request.requireData(), session.getUserId(), session.getContextId());
-        saneConfiguration(account);
+    public void updateAccount(MessagingAccount account, Session session) throws OXException {
+        checkAccount(account);
+        super.updateAccount(account, session);
+    }
 
-        // Check integrity of messaging service and configuration
-        checkAccountConfiguration(account, session);
-
-        final int id = account.getMessagingService().getAccountManager().addAccount(account, session);
-        return new AJAXRequestResult(Integer.valueOf(id));
+    @Override
+    public int addAccount(MessagingAccount account, Session session) throws OXException {
+        checkAccount(account);
+        return super.addAccount(account, session);
     }
 
     /**
-     * Checks whether the configuration contains any json null values and removes it
+     * Checks whether the account has a valid account url or not.
      *
-     * @param account The {@link MessagingAccount} to check
+     * @param account The {@link MessagingAccount}
+     * @throws OXException in case the account is invalid
      */
-    private static void saneConfiguration(final MessagingAccount account) {
-        if (null == account) {
-            return;
-        }
-        for (final Iterator<Entry<String, Object>> it = account.getConfiguration().entrySet().iterator(); it.hasNext();) {
-            if (JSONObject.NULL.equals(it.next().getValue())) {
-                it.remove();
-            }
+    private void checkAccount(MessagingAccount account) throws OXException {
+        Object urlObj = account.getConfiguration().get(FormStrings.FORM_LABEL_URL);
+        if (urlObj == null || RssProperties.isDenied(urlObj.toString())) {
+            throw MessagingExceptionCodes.INVALID_ACCOUNT_CONFIGURATION.create("Invalid account url");
         }
     }
 
