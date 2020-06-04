@@ -64,13 +64,11 @@ import com.openexchange.net.HostList;
 import com.openexchange.rss.utils.osgi.Services;
 
 /**
- *
- * {@link RssProperties}
+ * {@link RssProperties} - Provides access to commonly used configuration properties for RSS communication.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.2
- *
+ * @since v7.10.4
  */
 public class RssProperties {
 
