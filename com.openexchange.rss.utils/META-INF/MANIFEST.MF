@@ -16,6 +16,7 @@ Import-Package: com.google.common.annotations,
  com.openexchange.java,
  com.openexchange.net,
  com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
  com.openexchange.server,
  org.osgi.framework,
  org.slf4j

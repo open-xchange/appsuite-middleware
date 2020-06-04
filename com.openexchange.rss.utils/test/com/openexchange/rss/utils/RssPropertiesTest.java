@@ -47,12 +47,13 @@
  *
  */
 
-package com.openexchange.rss.util;
+package com.openexchange.rss.utils;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import com.openexchange.rss.utils.RssProperties;
+import com.openexchange.rss.utils.internal.RssPropertiesImpl;
+import com.openexchange.server.SimpleServiceLookup;
 
 /**
  * {@link RssPropertiesTest}
@@ -65,7 +66,7 @@ public class RssPropertiesTest {
     @Test
     public void testIsDenied_everythingAllowed_returnFalse() {
         String url = "http://open-xchange.com:80";
-        boolean denied = RssProperties.isDenied(url);
+        boolean denied = new RssPropertiesImpl(new SimpleServiceLookup()).isDenied(url);
 
         assertFalse(denied);
     }
@@ -73,7 +74,7 @@ public class RssPropertiesTest {
     @Test
     public void testIsDenied_everythingAllowed2_returnFalse() {
         String url = "https://open-xchange.com:80";
-        boolean denied = RssProperties.isDenied(url);
+        boolean denied = new RssPropertiesImpl(new SimpleServiceLookup()).isDenied(url);
 
         assertFalse(denied);
     }
@@ -81,7 +82,7 @@ public class RssPropertiesTest {
     @Test
     public void testIsDenied_everythingAllowed3_returnFalse() {
         String url = "https://open-xchange.com";
-        boolean denied = RssProperties.isDenied(url);
+        boolean denied = new RssPropertiesImpl(new SimpleServiceLookup()).isDenied(url);
 
         assertFalse(denied);
     }
@@ -89,7 +90,7 @@ public class RssPropertiesTest {
     @Test
     public void testIsDenied_everythingAllowed4_returnFalse() {
         String url = "https://open-xchange.com:443";
-        boolean denied = RssProperties.isDenied(url);
+        boolean denied = new RssPropertiesImpl(new SimpleServiceLookup()).isDenied(url);
 
         assertFalse(denied);
     }
@@ -97,7 +98,7 @@ public class RssPropertiesTest {
     @Test
     public void testIsDenied_everythingAllowed5_returnFalse() {
         String url = "https://open-xchange.com:443/myDeeplink/test.xml";
-        boolean denied = RssProperties.isDenied(url);
+        boolean denied = new RssPropertiesImpl(new SimpleServiceLookup()).isDenied(url);
 
         assertFalse(denied);
     }
@@ -105,7 +106,7 @@ public class RssPropertiesTest {
     @Test
     public void testIsDenied_schemeDenied_returnTrue() {
         String url = "rss://open-xchange.com:80";
-        boolean denied = RssProperties.isDenied(url);
+        boolean denied = new RssPropertiesImpl(new SimpleServiceLookup()).isDenied(url);
 
         assertTrue(denied);
     }
@@ -113,7 +114,7 @@ public class RssPropertiesTest {
     @Test
     public void testIsDenied_hostDenied_returnTrue() {
         String url = "https://localhost:80";
-        boolean denied = RssProperties.isDenied(url);
+        boolean denied = new RssPropertiesImpl(new SimpleServiceLookup()).isDenied(url);
 
         assertTrue(denied);
     }
@@ -121,7 +122,7 @@ public class RssPropertiesTest {
     @Test
     public void testIsDenied_hostIpDenied_returnTrue() {
         String url = "https://127.127.127.127:80";
-        boolean denied = RssProperties.isDenied(url);
+        boolean denied = new RssPropertiesImpl(new SimpleServiceLookup()).isDenied(url);
 
         assertTrue(denied);
     }
@@ -129,7 +130,7 @@ public class RssPropertiesTest {
     @Test
     public void testIsDenied_hostIpDenied2_returnTrue() {
         String url = "https://127.0.0.1";
-        boolean denied = RssProperties.isDenied(url);
+        boolean denied = new RssPropertiesImpl(new SimpleServiceLookup()).isDenied(url);
 
         assertTrue(denied);
     }
@@ -137,7 +138,7 @@ public class RssPropertiesTest {
     @Test
     public void testIsDenied_hostIpDenied3_returnTrue() {
         String url = "https://127.0.0.11/myDeeplink/test.xml";
-        boolean denied = RssProperties.isDenied(url);
+        boolean denied = new RssPropertiesImpl(new SimpleServiceLookup()).isDenied(url);
 
         assertTrue(denied);
     }
@@ -145,7 +146,7 @@ public class RssPropertiesTest {
     @Test
     public void testIsDenied_portDenied_returnTrue() {
         String url = "https://open-xchange.com:993";
-        boolean denied = RssProperties.isDenied(url);
+        boolean denied = new RssPropertiesImpl(new SimpleServiceLookup()).isDenied(url);
 
         assertTrue(denied);
     }

@@ -52,6 +52,8 @@ package com.openexchange.rss.utils.osgi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rss.utils.RssProperties;
+import com.openexchange.rss.utils.internal.RssPropertiesImpl;
 
 /**
  * {@link RssUtilsActivator}
@@ -61,6 +63,13 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class RssUtilsActivator extends HousekeepingActivator {
 
+    /**
+     * Initializes a new {@link RssUtilsActivator}.
+     */
+    public RssUtilsActivator() {
+        super();
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
@@ -68,12 +77,7 @@ public class RssUtilsActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() {
-        Services.setServiceLookup(this);
+        registerService(RssProperties.class, new RssPropertiesImpl(this));
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
 }

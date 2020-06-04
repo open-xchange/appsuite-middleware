@@ -49,11 +49,13 @@
 
 package com.openexchange.messaging.rss.osgi;
 
+import org.slf4j.Logger;
 import com.openexchange.html.HtmlService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.rss.RSSMessagingService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.proxy.ProxyRegistry;
+import com.openexchange.rss.utils.RssProperties;
 
 /**
  * {@link Activator}
@@ -62,12 +64,19 @@ import com.openexchange.proxy.ProxyRegistry;
  */
 public class Activator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return null;
+        return new Class<?>[] { RssProperties.class };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override
@@ -76,9 +85,9 @@ public class Activator extends HousekeepingActivator {
             track(HtmlService.class, new HTMLRegistryCustomizer(context));
             track(ProxyRegistry.class, new ProxyRegistryCustomizer(context));
             openTrackers();
-            registerService(MessagingService.class, new RSSMessagingService(), null);
+            registerService(MessagingService.class, new RSSMessagingService(getService(RssProperties.class)), null);
         } catch (Exception x) {
-            LOG.error("", x);
+            LoggerHolder.LOG.error("", x);
             throw x;
         }
     }

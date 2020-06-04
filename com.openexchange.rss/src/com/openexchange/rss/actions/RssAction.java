@@ -84,6 +84,7 @@ import com.openexchange.rss.preprocessors.RssPreprocessor;
 import com.openexchange.rss.preprocessors.SanitizingPreprocessor;
 import com.openexchange.rss.util.TimeoutHttpURLFeedFetcher;
 import com.openexchange.rss.utils.RssProperties;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.syndication.feed.synd.SyndContent;
@@ -301,10 +302,15 @@ public class RssAction implements AJAXActionService {
      * @throws OXException
      */
     protected List<SyndFeed> getAcceptedFeeds(List<URL> urls, List<OXException> warnings) throws OXException {
+        RssProperties rssProperties = Services.getService(RssProperties.class);
+        if (rssProperties == null) {
+            throw ServiceExceptionCode.absentService(RssProperties.class);
+        }
+
         List<SyndFeed> feeds = new LinkedList<>();
 
         for (URL url : urls) {
-            if (RssProperties.isDenied(url.toString())) {
+            if (rssProperties.isDenied(url.toString())) {
                 final OXException oxe = RssExceptionCodes.RSS_CONNECTION_ERROR.create(url.toString());
                 warnings.add(oxe);
                 continue;

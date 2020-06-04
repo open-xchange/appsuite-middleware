@@ -97,6 +97,8 @@ public class RssActionTest {
     @Mock
     private TimeoutHttpURLFeedFetcher fetcher;
 
+    private RssProperties rssProperties;
+
     List<URL> urls = new ArrayList<>();
 
     List<OXException> warnings = new ArrayList<>();
@@ -113,6 +115,55 @@ public class RssActionTest {
         Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.DEFAULT_PORT_WHITELIST)).thenReturn(RssProperties.DEFAULT_PORT_WHITELIST);
         Mockito.when(configurationService.getProperty(RssProperties.PROP_SCHEMES_WHITELIST, RssProperties.DEFAULT_SCHEMES_WHITELIST)).thenReturn(RssProperties.DEFAULT_SCHEMES_WHITELIST);
         Mockito.when(fetcher.retrieveFeed(ArgumentMatchers.any())).thenReturn(Mockito.mock(SyndFeed.class));
+
+        rssProperties = new RssProperties() {
+
+            @Override
+            public boolean isDenied(String uriString) {
+                if (uriString.indexOf("localhost") >= 0) {
+                    return true;
+                }
+                if (uriString.indexOf("127.0.0.1") >= 0) {
+                    return true;
+                }
+                if (uriString.indexOf(":77") >= 0) {
+                    return true;
+                }
+                if (uriString.indexOf(":88") >= 0) {
+                    return true;
+                }
+                if (uriString.indexOf("netdoc://") >= 0) {
+                    return true;
+                }
+                if (uriString.indexOf("file://") >= 0) {
+                    return true;
+                }
+                if (uriString.indexOf("mailto://") >= 0) {
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public boolean isBlacklisted(String hostName) {
+                // TODO Auto-generated method stub
+                return false;
+            }
+
+            @Override
+            public boolean isAllowedScheme(String scheme) {
+                // TODO Auto-generated method stub
+                return false;
+            }
+
+            @Override
+            public boolean isAllowed(int port) {
+                // TODO Auto-generated method stub
+                return false;
+            }
+        };
+        Mockito.when(Services.optService(RssProperties.class)).thenReturn(rssProperties);
+        Mockito.when(Services.getService(RssProperties.class)).thenReturn(rssProperties);
 
         action = new RssAction();
         MockitoAnnotations.initMocks(this);
