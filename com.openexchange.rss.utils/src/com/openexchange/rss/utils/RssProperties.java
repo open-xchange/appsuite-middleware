@@ -49,16 +49,15 @@
 
 package com.openexchange.rss.utils;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
@@ -75,6 +74,11 @@ import com.openexchange.rss.utils.osgi.Services;
  */
 public class RssProperties {
 
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RssProperties.class);
+    }
+
     /**
      * Initializes a new {@link RssProperties}.
      */
@@ -82,34 +86,36 @@ public class RssProperties {
         super();
     }
 
-    private static final String HOST_BLACKLIST_KEY = "com.openexchange.messaging.rss.feed.blacklist";
+    // ----------------------------------- Black-listed hosts -------------------------------------------------------------------------------
 
-    public static final String HOST_BLACKLIST_DEFAULT = "127.0.0.1-127.255.255.255,localhost";
+    private static final String PROP_HOST_BLACKLIST = "com.openexchange.messaging.rss.feed.blacklist";
 
-    private static final AtomicReference<HostList> blacklistedHosts = new AtomicReference<HostList>(null);
+    public static final String DEFAULT_HOST_BLACKLIST = "127.0.0.1-127.255.255.255,localhost";
+
+    private static final AtomicReference<HostList> BLACKLISTED_HOSTS = new AtomicReference<HostList>(null);
 
     /**
-     * Gets the blacklisted hosts
+     * Gets the black-listed hosts.
      *
-     * @return The blacklisted {@link HostList}
+     * @return The black-listed hosts
      */
     private static HostList blacklistedHosts() {
-        HostList tmp = blacklistedHosts.get();
+        HostList tmp = BLACKLISTED_HOSTS.get();
         if (null == tmp) {
             synchronized (RssProperties.class) {
-                tmp = blacklistedHosts.get();
+                tmp = BLACKLISTED_HOSTS.get();
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
-                        LoggerFactory.getLogger(RssProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.messaging.rss.feed.blacklist'.");
-                        return HostList.valueOf(HOST_BLACKLIST_DEFAULT);
+                        LoggerHolder.LOG.info("ConfigurationService not yet available. Use default value for '{}'.", PROP_HOST_BLACKLIST);
+                        return HostList.valueOf(DEFAULT_HOST_BLACKLIST);
                     }
-                    String prop = service.getProperty(HOST_BLACKLIST_KEY, HOST_BLACKLIST_DEFAULT);
+                    String prop = service.getProperty(PROP_HOST_BLACKLIST, DEFAULT_HOST_BLACKLIST);
                     if (Strings.isNotEmpty(prop)) {
                         prop = prop.trim();
                     }
                     tmp = HostList.valueOf(prop);
-                    blacklistedHosts.set(tmp);
+                    BLACKLISTED_HOSTS.set(tmp);
                 }
             }
         }
@@ -125,17 +131,16 @@ public class RssProperties {
      * @return <code>true</code> if black-listed; otherwise <code>false</code>
      */
     public static boolean isBlacklisted(String hostName) {
-        if (Strings.isEmpty(hostName)) {
-            return false;
-        }
-        return blacklistedHosts().contains(hostName);
+        return Strings.isEmpty(hostName) ? false : blacklistedHosts().contains(hostName.trim());
     }
 
-    private static final String PORT_WHITELIST_KEY = "com.openexchange.messaging.rss.feed.whitelist.ports";
+    // ---------------------------------------- Allowed ports ------------------------------------------------------------------------------
 
-    public static final String PORT_WHITELIST_DEFAULT = "80,443";
+    private static final String PROP_PORT_WHITELIST = "com.openexchange.messaging.rss.feed.whitelist.ports";
 
-    private static volatile Set<Integer> allowedPorts;
+    public static final String DEFAULT_PORT_WHITELIST = "80,443";
+
+    private static final AtomicReference<Set<Integer>> ALLOWED_PORTS = new AtomicReference<Set<Integer>>(null);
 
     /**
      * Gets the allowed ports
@@ -143,17 +148,17 @@ public class RssProperties {
      * @return A {@link Set} of allowed ports
      */
     private static Set<Integer> allowedPorts() {
-        Set<Integer> tmp = allowedPorts;
+        Set<Integer> tmp = ALLOWED_PORTS.get();
         if (null == tmp) {
             synchronized (RssProperties.class) {
-                tmp = allowedPorts;
+                tmp = ALLOWED_PORTS.get();
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(RssProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.messaging.rss.feed.whitelist.ports'.");
-                        return toIntSet(PORT_WHITELIST_DEFAULT);
+                        LoggerHolder.LOG.info("ConfigurationService not yet available. Use default value for '{}'.", PROP_PORT_WHITELIST);
+                        return toIntSet(DEFAULT_PORT_WHITELIST);
                     }
-                    String prop = service.getProperty(PORT_WHITELIST_KEY, PORT_WHITELIST_DEFAULT);
+                    String prop = service.getProperty(PROP_PORT_WHITELIST, DEFAULT_PORT_WHITELIST);
                     if (Strings.isNotEmpty(prop)) {
                         prop = prop.trim();
                     }
@@ -162,7 +167,7 @@ public class RssProperties {
                     } else {
                         tmp = toIntSet(prop);
                     }
-                    allowedPorts = tmp;
+                    ALLOWED_PORTS.set(tmp);
                 }
             }
         }
@@ -170,63 +175,38 @@ public class RssProperties {
     }
 
     /**
-     * Parses an comma separated list of integer to a {@link Set} of {@link Integer}
+     * Parses an comma separated list of port numbers to a set.
      *
-     * @param prop The list
-     * @return The {@link Set} of {@link Integer}
+     * @param concatenatedPorts The comma-separated list of port numbers
+     * @return The set consisting of port numbers
      */
-    private static Set<Integer> toIntSet(String prop) {
-        String[] tokens = Strings.splitByComma(prop);
-        Set<Integer> tmp = new HashSet<Integer>(tokens.length);
+    private static Set<Integer> toIntSet(String concatenatedPorts) {
+        if (Strings.isEmpty(concatenatedPorts)) {
+            return Collections.emptySet();
+        }
+
+        String[] tokens = Strings.splitByComma(concatenatedPorts);
+        if (tokens == null || tokens.length == 0) {
+            return Collections.emptySet();
+        }
+
+        ImmutableSet.Builder<Integer> tmp = ImmutableSet.builderWithExpectedSize(tokens.length);
         for (String token : tokens) {
             if (Strings.isNotEmpty(token)) {
                 try {
-                    tmp.add(Integer.valueOf(token.trim()));
-                } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                    int port = Integer.parseInt(token.trim());
+                    if (port > 0 && port <= 65535) {
+                        LoggerHolder.LOG.debug("Given value for property '{}' appears to hold a port number, which is outside of possible port range (0, 65535): {}.", PROP_PORT_WHITELIST, token);
+                    } else {
+                        tmp.add(I(port));
+                    }
+                } catch (NumberFormatException e) {
                     // Ignore
+                    LoggerHolder.LOG.debug("Given value for property '{}' appears to hold an invalid port number: {}.", PROP_PORT_WHITELIST, token, e);
                 }
             }
         }
-        return tmp;
-    }
-
-    /**
-     * Checks if specified host name and port are denied to connect against.
-     * <p>
-     * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
-     *
-     * @param uriString The URI (as String) of the rss feed
-     * @return <code>true</code> if denied; otherwise <code>false</code>
-     */
-    public static boolean isDenied(String uriString) {
-        URI uri;
-        try {
-            uri = new URI(uriString);
-            return !isAllowed(uri.getPort()) || isBlacklisted(uri.getHost()) || !isAllowedScheme(uri.getScheme()) || !isValid(uri);
-        } catch (URISyntaxException e) {
-            org.slf4j.LoggerFactory.getLogger(RssProperties.class).debug("Given feed URL \"{}\" appears not to be valid.", uriString, e);
-            return true;
-        }
-    }
-
-    /**
-     * Checks whether the given {@link URI} is valid or not
-     *
-     * @param uri The {@link URI} to check
-     * @return <code>true</code> if the uri is valid, <code>false</code> otherwise
-     */
-    private static boolean isValid(URI uri) {
-        try {
-            InetAddress inetAddress = InetAddress.getByName(uri.getHost());
-            if (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
-                org.slf4j.LoggerFactory.getLogger(RssProperties.class).debug("Given feed URL \"{}\" with destination IP {} appears not to be valid.", uri.toString(), inetAddress.getHostAddress());
-                return false;
-            }
-        } catch (UnknownHostException e) {
-            org.slf4j.LoggerFactory.getLogger(RssProperties.class).debug("Given feed URL \"{}\" appears not to be valid.", uri.toString(), e);
-            return false;
-        }
-        return true;
+        return tmp.build();
     }
 
     /**
@@ -250,11 +230,13 @@ public class RssProperties {
         return lAllowedPorts.isEmpty() ? true : lAllowedPorts.contains(Integer.valueOf(port));
     }
 
-    public static final String SCHEMES_KEY = "com.openexchange.messaging.rss.feed.schemes";
+    // ------------------------------------------ Allowed schemes --------------------------------------------------------------------------
 
-    public static final String SCHEMES_DEFAULT = "http, https, ftp";
+    public static final String PROP_SCHEMES_WHITELIST = "com.openexchange.messaging.rss.feed.schemes";
 
-    private static volatile Set<String> schemes;
+    public static final String DEFAULT_SCHEMES_WHITELIST = "http, https, ftp";
+
+    private static final AtomicReference<Set<String>> ALLOWED_SCHEMES = new AtomicReference<Set<String>>(null);
 
     /**
      * Gets the {@link Set} of supported schemes
@@ -262,19 +244,19 @@ public class RssProperties {
      * @return The {@link Set} of schemes
      */
     private static Set<String> supportedSchemes() {
-        Set<String> tmp = schemes;
+        Set<String> tmp = ALLOWED_SCHEMES.get();
         if (null == tmp) {
             synchronized (RssProperties.class) {
-                tmp = schemes;
+                tmp = ALLOWED_SCHEMES.get();
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(RssProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.messaging.rss.feed.schemes'.");
-                        return toSet(SCHEMES_DEFAULT);
+                        LoggerHolder.LOG.info("ConfigurationService not yet available. Use default value for '{}'.", PROP_SCHEMES_WHITELIST);
+                        return toSet(DEFAULT_SCHEMES_WHITELIST);
                     }
-                    String prop = service.getProperty(SCHEMES_KEY, SCHEMES_DEFAULT);
+                    String prop = service.getProperty(PROP_SCHEMES_WHITELIST, DEFAULT_SCHEMES_WHITELIST);
                     tmp = toSet(prop);
-                    schemes = tmp;
+                    ALLOWED_SCHEMES.set(tmp);
                 }
             }
         }
@@ -282,20 +264,28 @@ public class RssProperties {
     }
 
     /**
-     * Parses the given comma separated list of schemes into a {@link Set} of schemes
+     * Parses the given comma separated list of schemes into a set.
      *
-     * @param concatenatedSchemes The comma separated list of schemes
-     * @return The {@link Set} of schemes
+     * @param concatenatedSchemes The comma-separated list of schemes
+     * @return The set of schemes
      */
     private static Set<String> toSet(String concatenatedSchemes) {
         if (Strings.isEmpty(concatenatedSchemes)) {
             return Collections.emptySet();
         }
+
         String[] schemes = Strings.splitByComma(concatenatedSchemes);
         if (schemes == null || schemes.length == 0) {
             return Collections.emptySet();
         }
-        return new HashSet<>(Arrays.asList(schemes));
+
+        ImmutableSet.Builder<String> tmp = ImmutableSet.builderWithExpectedSize(schemes.length);
+        for (String scheme : schemes) {
+            if (Strings.isNotEmpty(scheme)) {
+                tmp.add(scheme.trim());
+            }
+        }
+        return tmp.build();
     }
 
     /**
@@ -304,8 +294,49 @@ public class RssProperties {
      * @param scheme The scheme to check
      * @return <code>true</code> if the scheme is allowed, <code>false</code> otherwise
      */
-    private static boolean isAllowedScheme(String scheme) {
+    public static boolean isAllowedScheme(String scheme) {
         Set<String> supportedSchemes = supportedSchemes();
         return supportedSchemes.isEmpty() ? true : supportedSchemes.contains(scheme);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Checks if specified host name and port are denied to connect against.
+     * <p>
+     * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
+     *
+     * @param uriString The URI (as String) of the RSS feed
+     * @return <code>true</code> if denied; otherwise <code>false</code>
+     */
+    public static boolean isDenied(String uriString) {
+        URI uri;
+        try {
+            uri = new URI(uriString);
+            return !isAllowed(uri.getPort()) || isBlacklisted(uri.getHost()) || !isAllowedScheme(uri.getScheme()) || !isValid(uri);
+        } catch (URISyntaxException e) {
+            LoggerHolder.LOG.debug("Given feed URL \"{}\" appears not to be valid.", uriString, e);
+            return true;
+        }
+    }
+
+    /**
+     * Checks whether the given {@link URI} is valid or not
+     *
+     * @param uri The {@link URI} to check
+     * @return <code>true</code> if the URI is valid, <code>false</code> otherwise
+     */
+    private static boolean isValid(URI uri) {
+        try {
+            InetAddress inetAddress = InetAddress.getByName(uri.getHost());
+            if (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
+                LoggerHolder.LOG.debug("Given feed URL \"{}\" with destination IP {} appears not to be valid.", uri.toString(), inetAddress.getHostAddress());
+                return false;
+            }
+        } catch (UnknownHostException e) {
+            LoggerHolder.LOG.debug("Given feed URL \"{}\" appears not to be valid.", uri.toString(), e);
+            return false;
+        }
+        return true;
     }
 }
