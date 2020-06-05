@@ -16,6 +16,10 @@ tags:
     description: Servlet for requesting free busy data.
   - name: Metrics
     description: The metrics module
+  - name: Push
+    description: The push module
+  - name: Preliminary
+    description: This module contains preliminary endpoints which can change in the future.
 
 paths: 
    source: ./paths/ 
