@@ -88,8 +88,8 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
             LoggerHolder.LOG.error("authdata is null", e);
             throw new InvalidCredentialsException("authentication failed");
         }
-        if (Strings.isEmpty(creds.getLogin()) || Strings.isEmpty(creds.getPassword())) {
-            LoggerHolder.LOG.error("authdata has empty login/password");
+        if (Strings.isEmpty(creds.getLogin())) {
+            LoggerHolder.LOG.error("authdata has empty login");
             throw new InvalidCredentialsException("authentication failed");
         }
         try {
@@ -116,8 +116,8 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
             LoggerHolder.LOG.error("authdata is null", e);
             throw new InvalidCredentialsException("authentication failed");
         }
-        if (Strings.isEmpty(creds.getLogin()) || Strings.isEmpty(creds.getPassword())) {
-            LoggerHolder.LOG.error("authdata has empty login/password");
+        if (Strings.isEmpty(creds.getLogin())) {
+            LoggerHolder.LOG.error("authdata has empty login");
             throw new InvalidCredentialsException("authentication failed");
         }
         try {
