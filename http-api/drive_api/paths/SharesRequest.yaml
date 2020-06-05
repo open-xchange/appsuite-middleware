@@ -87,7 +87,8 @@
                       "entity": 16175,
                       "bits": 257,
                       "type": "anonymous",
-                      "share_url": "http://127.0.0.1/ajax/share/102b560404b3e96c9623be94b3d643829a46b117558d9ec9/31342f1f"
+                      "share_url": "http://127.0.0.1/ajax/share/102b560404b3e96c9623be94b3d643829a46b117558d9ec9/31342f1f",
+                      "includeSubfolders": true
                     }],
                     "jump": ["permissions"],
                     "shared": true,
