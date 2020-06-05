@@ -1,3 +1,9 @@
+open-xchange-websockets-grizzly (7.10.2-28) stable; urgency=medium
+
+  * Build for patch 2020-06-15 (5764)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 05 Jun 2020 13:12:58 +0000
+
 open-xchange-websockets-grizzly (7.10.2-27) stable; urgency=medium
 
   * Build for patch 2020-05-26 (5741)
