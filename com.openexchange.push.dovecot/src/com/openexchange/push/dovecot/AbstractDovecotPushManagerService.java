@@ -61,6 +61,8 @@ import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.Hazelcasts;
+import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.push.PushExceptionCodes;
@@ -305,7 +307,21 @@ public abstract class AbstractDovecotPushManagerService implements PushManagerEx
 
         // TODO: Ensuring OAuth tokens should be implemented as part of com.openexchange.push.PushListenerService.generateSessionFor(PushUser)
         try {
-            Session session = generateSessionFor(pushUser);
+            Session session = null;
+            {
+                String sessionId = LogProperties.get(LogProperties.Name.SESSION_SESSION_ID);
+                if (Strings.isNotEmpty(sessionId)) {
+                    session = services.getServiceSafe(SessiondService.class).getSession(sessionId);
+                    if (session != null && (session.getContextId() != pushUser.getContextId() || session.getUserId() != pushUser.getUserId())) {
+                        session = null;
+                    }
+                }
+            }
+
+            if (session == null) {
+                session = generateSessionFor(pushUser);
+            }
+
             if (AuthType.isOAuthType(MailConfig.getConfiguredAuthType(true, session)) && session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN) == null) {
                 LOGGER.debug("Falling back to DoveAdm push registration context due to missing OAuth token in session");
                 return RegistrationContext.createDoveAdmClientContext(pushUser.getUserId(), pushUser.getContextId(), new ServiceLookupDoveAdmClientProvider(services));
