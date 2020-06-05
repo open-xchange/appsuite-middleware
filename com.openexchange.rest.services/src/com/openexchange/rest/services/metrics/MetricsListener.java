@@ -50,6 +50,8 @@
 package com.openexchange.rest.services.metrics;
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
@@ -118,7 +120,7 @@ public class MetricsListener implements ApplicationEventListener  {
                 if (templates.isEmpty()) {
                     path = "/" + event.getUriInfo().getPath();
                 } else {
-                    path = templates.get(0).getTemplate();
+                    path = contructPath(templates);
                 }
                 StatusType status = Status.INTERNAL_SERVER_ERROR;
                 if(type.equals(Type.ON_EXCEPTION) || event.getException() != null) {
@@ -140,6 +142,20 @@ public class MetricsListener implements ApplicationEventListener  {
                 Duration duration = Duration.ofMillis(System.currentTimeMillis() - start);
                 getTimer(path, status.equals(Status.METHOD_NOT_ALLOWED) ? METHOD_NOT_ALLOWED : event.getContainerRequest().getMethod(), status.getStatusCode()).record(duration);
             }
+        }
+
+        /**
+         * Constructs the path from the list of {@link UriTemplate}s
+         *
+         * @param templates The list of templates
+         * @return The path
+         */
+        private String contructPath(List<UriTemplate> templates) {
+            StringBuilder result = new StringBuilder();
+            LinkedList<UriTemplate> linkedList = new LinkedList<>(templates);
+            Collections.reverse(linkedList);
+            linkedList.forEach((t) -> result.append(t.getTemplate()));
+            return result.toString().replaceAll("//", "/");
         }
 
         /**

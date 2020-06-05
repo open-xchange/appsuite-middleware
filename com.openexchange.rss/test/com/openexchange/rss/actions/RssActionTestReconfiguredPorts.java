@@ -83,6 +83,8 @@ public class RssActionTestReconfiguredPorts {
 
     private final ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
 
+    private RssProperties rssProperties;
+
     List<URL> urls = new ArrayList<>();
 
     List<OXException> warnings = new ArrayList<>();
@@ -97,12 +99,55 @@ public class RssActionTestReconfiguredPorts {
         InetAddress inetAddress = Mockito.mock(InetAddress.class);
         Mockito.when(InetAddress.getByName(ArgumentMatchers.anyString())).thenReturn(inetAddress);
 
+        rssProperties = new RssProperties() {
+
+            @Override
+            public boolean isDenied(String uriString) {
+                if (uriString.indexOf("localhost") >= 0) {
+                    return true;
+                }
+                if (uriString.indexOf("127.0.0.1") >= 0) {
+                    return true;
+                }
+                if (uriString.indexOf("netdoc://") >= 0) {
+                    return true;
+                }
+                if (uriString.indexOf("file://") >= 0) {
+                    return true;
+                }
+                if (uriString.indexOf("mailto://") >= 0) {
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public boolean isBlacklisted(String hostName) {
+                // TODO Auto-generated method stub
+                return false;
+            }
+
+            @Override
+            public boolean isAllowedScheme(String scheme) {
+                // TODO Auto-generated method stub
+                return false;
+            }
+
+            @Override
+            public boolean isAllowed(int port) {
+                // TODO Auto-generated method stub
+                return false;
+            }
+        };
+        Mockito.when(Services.optService(RssProperties.class)).thenReturn(rssProperties);
+        Mockito.when(Services.getService(RssProperties.class)).thenReturn(rssProperties);
+
         RssAction newAction = new RssAction();
         MockUtils.injectValueIntoPrivateField(newAction, "fetcher", Mockito.mock(TimeoutHttpURLFeedFetcher.class));
 
-        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST_DEFAULT)).thenReturn("");
-        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST_DEFAULT)).thenReturn(RssProperties.HOST_BLACKLIST_DEFAULT);
-        Mockito.when(configurationService.getProperty(RssProperties.SCHEMES_KEY, RssProperties.SCHEMES_DEFAULT)).thenReturn(RssProperties.SCHEMES_DEFAULT);
+        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.DEFAULT_PORT_WHITELIST)).thenReturn("");
+        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.DEFAULT_HOST_BLACKLIST)).thenReturn(RssProperties.DEFAULT_HOST_BLACKLIST);
+        Mockito.when(configurationService.getProperty(RssProperties.PROP_SCHEMES_WHITELIST, RssProperties.DEFAULT_SCHEMES_WHITELIST)).thenReturn(RssProperties.DEFAULT_SCHEMES_WHITELIST);
 
         urls.add(new URL("http://tollerLaden.de:80/this/is/not/nice"));
         urls.add(new URL("http://tollerLaden.de:88/this/is/not/nice"));

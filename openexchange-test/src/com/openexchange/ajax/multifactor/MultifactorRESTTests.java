@@ -53,8 +53,9 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.empty;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,9 +66,16 @@ import java.util.Random;
 import java.util.UUID;
 import javax.ws.rs.core.HttpHeaders;
 import org.apache.commons.codec.binary.Base64;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
+import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
+import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.exception.OXException;
 import com.openexchange.multifactor.MultifactorProperties;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -117,11 +125,6 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
         return "DemoAwareTokenCreationStrategy,MultifactorSMSProvider";
     }
 
-    @Override
-    protected String getScope() {
-        return "context";
-    }
-
     private Collection<MultifactorDevice> registerTestDevices(MultifactorApi api, int count) throws ApiException {
         ArrayList<MultifactorDevice> devicesCreated = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
@@ -131,12 +134,11 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
     }
 
     private AdminApi createAdminAPIWithoutCredentials() {
-        return createAdminAPIWithCredentials(null,null);
+        return createAdminAPIWithCredentials(null, null);
     }
 
     private AdminApi createAdminAPIWithCredentials(String username, String password) {
-        com.openexchange.testing.restclient.invoker.ApiClient adminRestClient =
-            new com.openexchange.testing.restclient.invoker.ApiClient();
+        com.openexchange.testing.restclient.invoker.ApiClient adminRestClient = new com.openexchange.testing.restclient.invoker.ApiClient();
         adminRestClient.setBasePath(getRestBasePath());
         if (username != null && password != null) {
             String authorizationHeaderValue = "Basic " + Base64.encodeBase64String((username + ":" + password).getBytes(StandardCharsets.UTF_8));
@@ -172,13 +174,55 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
 
         //Get the devices via the REST API
         List<MultifactorDeviceData> devices = getAdminApi().multifactorGetDevices(I(contextId), I(userId));
-        assertThat("There must be exactly one multifactor device registered" , I(devices.size()), is(I(1)));
+        assertThat("There must be exactly one multifactor device registered", I(devices.size()), is(I(1)));
         MultifactorDeviceData device = devices.get(0);
         assertThat(device.getProviderName(), is(testProviderName));
         assertThat(device.getName(), is(registeredDevice.getName()));
         assertThat(device.getId(), is(registeredDevice.getId()));
         assertThat(device.getEnabled(), is(B(true)));
         assertThat(device.getBackup(), is(B(false)));
+    }
+
+    /**
+     * Sets up a configuration for given client
+     *
+     * @param client The client
+     * @return The old/existing configuration before changed
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    private JSONObject setUpConfigForClient(AJAXClient client) throws OXException, IOException, JSONException {
+        Map<String, String> map = getNeededConfigurations();
+        ChangePropertiesRequest req = new ChangePropertiesRequest(map, getScope(), getReloadables());
+        ChangePropertiesResponse response = client.execute(req);
+        return ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
+    }
+
+    /**
+     * Restores a configuration for a given client
+     *
+     * @param client The client
+     * @param configToRestore The configuration to restore
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    private void restoreConfigForClient(AJAXClient client, JSONObject configToRestore) throws OXException, IOException, JSONException {
+        Map<String, Object> map = configToRestore.asMap();
+        Map<String, String> newMap = new HashMap<>();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            Object value = entry.getValue();
+            if (value == JSONObject.NULL) {
+                value = null;
+            }
+            newMap.put(entry.getKey(), (String) value);
+        }
+        if (map.isEmpty()) {
+            return;
+        }
+        ChangePropertiesRequest req = new ChangePropertiesRequest(newMap, getScope(), getReloadables());
+        client.execute(req);
     }
 
     /**
@@ -198,7 +242,11 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
         MultifactorApi api2 = new MultifactorApi(apiClient2);
         boolean createdForUser2 = false;
 
+        JSONObject oldClient2Config = null;
         try {
+            //The 2nd user needs the same configuration applied (SMS provider and DEMO mode)
+            oldClient2Config = setUpConfigForClient(getClient2());
+
             //Create a test device for another user
             registerTestDevice(api2);
             createdForUser2 = true;
@@ -219,6 +267,10 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
                 List<MultifactorDeviceData> devicesForUser2 = getAdminApi().multifactorGetDevices(I(getClient2().getValues().getContextId()), I(getClient2().getValues().getUserId()));
                 assertThat(devicesForUser2, is(empty()));
             }
+            //Restoring the configuration for the 2nd user
+            if (oldClient2Config != null) {
+                restoreConfigForClient(getClient2(), oldClient2Config);
+            }
         }
     }
 
@@ -231,7 +283,7 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
         final int numberOfDevices = 4;
         Collection<MultifactorDevice> devices = registerTestDevices(MultifactorApi(), numberOfDevices);
         assertThat(I(devices.size()), is(I(numberOfDevices)));
-        MultifactorDevice firstDevice  = devices.iterator().next();
+        MultifactorDevice firstDevice = devices.iterator().next();
 
         //Remove the first device
         getAdminApi().multifactorDeleteDevice(I(contextId), I(userId), testProviderName, firstDevice.getId());

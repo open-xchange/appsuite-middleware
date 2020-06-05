@@ -57,11 +57,10 @@ import com.openexchange.rss.actions.RssActionTestReconfiguredHosts;
 import com.openexchange.rss.actions.RssActionTestReconfiguredPorts;
 import com.openexchange.rss.actions.RssActionTestReconfiguredPortsAndHosts;
 import com.openexchange.rss.preprocessors.PreprocessorChainingTest;
-import com.openexchange.rss.util.RssPropertiesTest;
 
 /**
  * Unit tests for the bundle com.openexchange.rss
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -71,8 +70,7 @@ import com.openexchange.rss.util.RssPropertiesTest;
     RssActionTest.class,
     RssActionTestReconfiguredHosts.class,
     RssActionTestReconfiguredPorts.class,
-    RssActionTestReconfiguredPortsAndHosts.class,
-    RssPropertiesTest.class
+    RssActionTestReconfiguredPortsAndHosts.class
 })
 public class UnitTests {
 

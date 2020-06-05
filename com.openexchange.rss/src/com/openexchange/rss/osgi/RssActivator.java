@@ -64,6 +64,7 @@ import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.rss.RssJsonConverter;
 import com.openexchange.rss.actions.RssActionFactory;
+import com.openexchange.rss.utils.RssProperties;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -72,7 +73,7 @@ public class RssActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HtmlService.class, CapabilityService.class, ConfigViewFactory.class, ConfigurationService.class, SSLSocketFactoryProvider.class, UserAwareSSLConfigurationService.class };
+        return new Class<?>[] { HtmlService.class, CapabilityService.class, ConfigViewFactory.class, ConfigurationService.class, SSLSocketFactoryProvider.class, UserAwareSSLConfigurationService.class, RssProperties.class };
     }
 
     @Override

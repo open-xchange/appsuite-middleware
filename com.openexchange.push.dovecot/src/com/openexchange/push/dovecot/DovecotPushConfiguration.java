@@ -50,7 +50,6 @@
 package com.openexchange.push.dovecot;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link DovecotPushConfiguration}
@@ -62,6 +61,11 @@ public class DovecotPushConfiguration {
 
     private final ConfigurationService configService;
 
+    /**
+     * Initializes a new {@link DovecotPushConfiguration}.
+     *
+     * @param configService The configuration service to use
+     */
     public DovecotPushConfiguration(ConfigurationService configService) {
         super();
         this.configService = configService;
@@ -76,9 +80,8 @@ public class DovecotPushConfiguration {
      *
      * @param services The service look-up to obtain required services from
      * @return <code>true</code> for stateless implementation; otherwise <code>false</code>
-     * @throws OXException If property cannot be checked
      */
-    public boolean useStatelessImpl() throws OXException {
+    public boolean useStatelessImpl() {
         return configService.getBoolProperty("com.openexchange.push.dovecot.stateless", true);
     }
 

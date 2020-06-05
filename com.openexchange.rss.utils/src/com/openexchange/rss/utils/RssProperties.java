@@ -49,72 +49,23 @@
 
 package com.openexchange.rss.utils;
 
-import java.net.InetAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import org.slf4j.LoggerFactory;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Strings;
-import com.openexchange.net.HostList;
-import com.openexchange.rss.utils.osgi.Services;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- *
- * {@link RssProperties}
+ * {@link RssProperties} - Provides access to commonly used configuration properties for RSS communication.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.2
- *
+ * @since v7.10.4
  */
-public class RssProperties {
+@SingletonService
+public interface RssProperties {
 
-    /**
-     * Initializes a new {@link RssProperties}.
-     */
-    private RssProperties() {
-        super();
-    }
+    /** The name of the property to specify black-listed hosts */
+    public static final String PROP_HOST_BLACKLIST = "com.openexchange.messaging.rss.feed.blacklist";
 
-    private static final String HOST_BLACKLIST_KEY = "com.openexchange.messaging.rss.feed.blacklist";
-
-    public static final String HOST_BLACKLIST_DEFAULT = "127.0.0.1-127.255.255.255,localhost";
-
-    private static final AtomicReference<HostList> blacklistedHosts = new AtomicReference<HostList>(null);
-
-    /**
-     * Gets the blacklisted hosts
-     *
-     * @return The blacklisted {@link HostList}
-     */
-    private static HostList blacklistedHosts() {
-        HostList tmp = blacklistedHosts.get();
-        if (null == tmp) {
-            synchronized (RssProperties.class) {
-                tmp = blacklistedHosts.get();
-                if (null == tmp) {
-                    ConfigurationService service = Services.optService(ConfigurationService.class);
-                    if (null == service) {
-                        LoggerFactory.getLogger(RssProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.messaging.rss.feed.blacklist'.");
-                        return HostList.valueOf(HOST_BLACKLIST_DEFAULT);
-                    }
-                    String prop = service.getProperty(HOST_BLACKLIST_KEY, HOST_BLACKLIST_DEFAULT);
-                    if (Strings.isNotEmpty(prop)) {
-                        prop = prop.trim();
-                    }
-                    tmp = HostList.valueOf(prop);
-                    blacklistedHosts.set(tmp);
-                }
-            }
-        }
-        return tmp;
-    }
+    /** The default listing of black-listed hosts */
+    public static final String DEFAULT_HOST_BLACKLIST = "127.0.0.1-127.255.255.255,localhost";
 
     /**
      * Checks if specified host name is black-listed.
@@ -124,110 +75,15 @@ public class RssProperties {
      * @param hostName The host name; either a machine name or a textual representation of its IP address
      * @return <code>true</code> if black-listed; otherwise <code>false</code>
      */
-    public static boolean isBlacklisted(String hostName) {
-        if (Strings.isEmpty(hostName)) {
-            return false;
-        }
-        return blacklistedHosts().contains(hostName);
-    }
+    boolean isBlacklisted(String hostName);
 
-    private static final String PORT_WHITELIST_KEY = "com.openexchange.messaging.rss.feed.whitelist.ports";
+    // ---------------------------------------- Allowed ports ------------------------------------------------------------------------------
 
-    public static final String PORT_WHITELIST_DEFAULT = "80,443";
+    /** The name of the property to specify white-listed ports */
+    public static final String PROP_PORT_WHITELIST = "com.openexchange.messaging.rss.feed.whitelist.ports";
 
-    private static volatile Set<Integer> allowedPorts;
-
-    /**
-     * Gets the allowed ports
-     *
-     * @return A {@link Set} of allowed ports
-     */
-    private static Set<Integer> allowedPorts() {
-        Set<Integer> tmp = allowedPorts;
-        if (null == tmp) {
-            synchronized (RssProperties.class) {
-                tmp = allowedPorts;
-                if (null == tmp) {
-                    ConfigurationService service = Services.optService(ConfigurationService.class);
-                    if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(RssProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.messaging.rss.feed.whitelist.ports'.");
-                        return toIntSet(PORT_WHITELIST_DEFAULT);
-                    }
-                    String prop = service.getProperty(PORT_WHITELIST_KEY, PORT_WHITELIST_DEFAULT);
-                    if (Strings.isNotEmpty(prop)) {
-                        prop = prop.trim();
-                    }
-                    if (Strings.isEmpty(prop)) {
-                        tmp = Collections.<Integer> emptySet();
-                    } else {
-                        tmp = toIntSet(prop);
-                    }
-                    allowedPorts = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
-    /**
-     * Parses an comma separated list of integer to a {@link Set} of {@link Integer}
-     *
-     * @param prop The list
-     * @return The {@link Set} of {@link Integer}
-     */
-    private static Set<Integer> toIntSet(String prop) {
-        String[] tokens = Strings.splitByComma(prop);
-        Set<Integer> tmp = new HashSet<Integer>(tokens.length);
-        for (String token : tokens) {
-            if (Strings.isNotEmpty(token)) {
-                try {
-                    tmp.add(Integer.valueOf(token.trim()));
-                } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                    // Ignore
-                }
-            }
-        }
-        return tmp;
-    }
-
-    /**
-     * Checks if specified host name and port are denied to connect against.
-     * <p>
-     * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
-     *
-     * @param uriString The URI (as String) of the rss feed
-     * @return <code>true</code> if denied; otherwise <code>false</code>
-     */
-    public static boolean isDenied(String uriString) {
-        URI uri;
-        try {
-            uri = new URI(uriString);
-            return !isAllowed(uri.getPort()) || isBlacklisted(uri.getHost()) || !isAllowedScheme(uri.getScheme()) || !isValid(uri);
-        } catch (URISyntaxException e) {
-            org.slf4j.LoggerFactory.getLogger(RssProperties.class).debug("Given feed URL \"{}\" appears not to be valid.", uriString, e);
-            return true;
-        }
-    }
-
-    /**
-     * Checks whether the given {@link URI} is valid or not
-     *
-     * @param uri The {@link URI} to check
-     * @return <code>true</code> if the uri is valid, <code>false</code> otherwise
-     */
-    private static boolean isValid(URI uri) {
-        try {
-            InetAddress inetAddress = InetAddress.getByName(uri.getHost());
-            if (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
-                org.slf4j.LoggerFactory.getLogger(RssProperties.class).debug("Given feed URL \"{}\" with destination IP {} appears not to be valid.", uri.toString(), inetAddress.getHostAddress());
-                return false;
-            }
-        } catch (UnknownHostException e) {
-            org.slf4j.LoggerFactory.getLogger(RssProperties.class).debug("Given feed URL \"{}\" appears not to be valid.", uri.toString(), e);
-            return false;
-        }
-        return true;
-    }
+    /** The default listing of white-listed ports */
+    public static final String DEFAULT_PORT_WHITELIST = "80,443";
 
     /**
      * Checks if specified port is allowed.
@@ -235,68 +91,15 @@ public class RssProperties {
      * @param port The port to check
      * @return <code>true</code> if allowed; otherwise <code>false</code>
      */
-    public static boolean isAllowed(int port) {
-        if (port < 0) {
-            // Not set; always allow
-            return true;
-        }
+    boolean isAllowed(int port);
 
-        if (port > 65535) {
-            // Invalid port
-            return false;
-        }
+    // ------------------------------------------ Allowed schemes --------------------------------------------------------------------------
 
-        Set<Integer> lAllowedPorts = allowedPorts();
-        return lAllowedPorts.isEmpty() ? true : lAllowedPorts.contains(Integer.valueOf(port));
-    }
+    /** The name of the property to specify white-listed schemes */
+    public static final String PROP_SCHEMES_WHITELIST = "com.openexchange.messaging.rss.feed.schemes";
 
-    public static final String SCHEMES_KEY = "com.openexchange.messaging.rss.feed.schemes";
-
-    public static final String SCHEMES_DEFAULT = "http, https, ftp";
-
-    private static volatile Set<String> schemes;
-
-    /**
-     * Gets the {@link Set} of supported schemes
-     *
-     * @return The {@link Set} of schemes
-     */
-    private static Set<String> supportedSchemes() {
-        Set<String> tmp = schemes;
-        if (null == tmp) {
-            synchronized (RssProperties.class) {
-                tmp = schemes;
-                if (null == tmp) {
-                    ConfigurationService service = Services.optService(ConfigurationService.class);
-                    if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(RssProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.messaging.rss.feed.schemes'.");
-                        return toSet(SCHEMES_DEFAULT);
-                    }
-                    String prop = service.getProperty(SCHEMES_KEY, SCHEMES_DEFAULT);
-                    tmp = toSet(prop);
-                    schemes = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
-    /**
-     * Parses the given comma separated list of schemes into a {@link Set} of schemes
-     *
-     * @param concatenatedSchemes The comma separated list of schemes
-     * @return The {@link Set} of schemes
-     */
-    private static Set<String> toSet(String concatenatedSchemes) {
-        if (Strings.isEmpty(concatenatedSchemes)) {
-            return Collections.emptySet();
-        }
-        String[] schemes = Strings.splitByComma(concatenatedSchemes);
-        if (schemes == null || schemes.length == 0) {
-            return Collections.emptySet();
-        }
-        return new HashSet<>(Arrays.asList(schemes));
-    }
+    /** The default listing of white-listed schemes */
+    public static final String DEFAULT_SCHEMES_WHITELIST = "http, https, ftp";
 
     /**
      * Checks whether the schemes is allowed
@@ -304,8 +107,18 @@ public class RssProperties {
      * @param scheme The scheme to check
      * @return <code>true</code> if the scheme is allowed, <code>false</code> otherwise
      */
-    private static boolean isAllowedScheme(String scheme) {
-        Set<String> supportedSchemes = supportedSchemes();
-        return supportedSchemes.isEmpty() ? true : supportedSchemes.contains(scheme);
-    }
+    boolean isAllowedScheme(String scheme);
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Checks if specified host name and port are denied to connect against.
+     * <p>
+     * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
+     *
+     * @param uriString The URI (as String) of the RSS feed
+     * @return <code>true</code> if denied; otherwise <code>false</code>
+     */
+    boolean isDenied(String uriString);
+
 }

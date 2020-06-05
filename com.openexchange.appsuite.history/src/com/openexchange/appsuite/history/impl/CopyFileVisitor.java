@@ -67,18 +67,20 @@ import java.util.Objects;
  */
 public class CopyFileVisitor extends SimpleFileVisitor<Path> {
 
-    final Path source;
-    final Path target;
+    private final Path source;
+    private final Path target;
 
     /**
      * Initializes a new {@link CopyFileVisitor}.
      *
      * @param source The source folder
      * @param target The target folder
+     * @throw {@link NullPointerException} If either source or target is <code>null</code>
      */
     public CopyFileVisitor(@NonNull Path source, @NonNull Path target) {
-        Objects.nonNull(source);
-        Objects.nonNull(target);
+        super();
+        Objects.requireNonNull(source, "Source must not be null");
+        Objects.requireNonNull(target, "Target must not be null");
         this.source = source;
         this.target = target;
     }
