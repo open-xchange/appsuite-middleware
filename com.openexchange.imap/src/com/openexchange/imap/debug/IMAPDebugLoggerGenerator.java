@@ -99,13 +99,13 @@ public class IMAPDebugLoggerGenerator {
     }
 
     /**
-     * Establishes debug logging for given IMAP session.
+     * Establishes logging for given IMAP session.
      *
-     * @param imapSession The IMAP session to enabled debug logging for
+     * @param imapSession The IMAP session to enable logging for
      * @param server The IMAP server
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @throws IllegalStateException If debug logging cannot be established for given IMAP session
+     * @throws IllegalStateException If logging cannot be established for given IMAP session
      */
     public void establishLoggerFor(javax.mail.Session imapSession, String server, int userId, int contextId) {
         imapSession.setDebugOut(DevNullPrintStream.getInstance()); // Swallow superfluous JavaMail debug logging: "setDebug: JavaMail version x.y.z"
@@ -113,6 +113,16 @@ public class IMAPDebugLoggerGenerator {
         imapSession.setDebugOut(new LoggerCallingPrintStream(imapSession, server, userId, contextId));
     }
 
+    /**
+     * Generates an appropriate logger for a given IMAP session.
+     *
+     * @param imapSession The IMAP session to enable logging for
+     * @param server The IMAP server
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The logger
+     * @throws IllegalStateException If logging cannot be established for given IMAP session
+     */
     static org.slf4j.Logger generateLoggerFor(javax.mail.Session imapSession, String server, int userId, int contextId) {
         ConfigViewFactory configViewFactory = Services.optService(ConfigViewFactory.class);
         if (configViewFactory == null) {
