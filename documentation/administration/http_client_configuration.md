@@ -26,7 +26,7 @@ Following list covers all properties that can be set, with their default values:
 
 ```
 com.openenexchange.httpclient.readTimeout=30000
-com.openenexchange.httpclient.connectionTimeout=30000
+com.openenexchange.httpclient.connectTimeout=30000
 com.openenexchange.httpclient.requestTimeout=30000
 com.openenexchange.httpclient.keepAlive.duration=20
 com.openenexchange.httpclient.keepAlive.monitorInterval=5
@@ -101,7 +101,7 @@ To adjust configuration for all clients, expect with the draw backs from above, 
 
 ```
 com.openenexchange.httpclient.readTimeout=30000
-com.openenexchange.httpclient.connectionTimeout=30000
+com.openenexchange.httpclient.connectTimeout=30000
 com.openenexchange.httpclient.requestTimeout=30000
 com.openenexchange.httpclient.keepAlive.duration=20
 com.openenexchange.httpclient.keepAlive.monitorInterval=5
@@ -119,7 +119,7 @@ To adjust configuration for example the HTTP client for iCAL feeds on top of the
 
 ```
 com.openenexchange.httpclient.readTimeout=30000
-com.openenexchange.httpclient.connectionTimeout=30000
+com.openenexchange.httpclient.connectTimeout=30000
 com.openenexchange.httpclient.requestTimeout=30000
 com.openenexchange.httpclient.keepAlive.duration=20
 com.openenexchange.httpclient.keepAlive.monitorInterval=5
@@ -128,7 +128,7 @@ com.openenexchange.httpclient.connectionPerRoute=10
 com.openenexchange.httpclient.socketBufferSize=8192
 
 com.openenexchange.httpclient.icalfeed.readTimeout=30000
-com.openenexchange.httpclient.icalfeed.connectionTimeout=30000
+com.openenexchange.httpclient.icalfeed.connectTimeout=30000
 com.openenexchange.httpclient.icalfeed.requestTimeout=30000
 com.openenexchange.httpclient.icalfeed.keepAlive.duration=20
 com.openenexchange.httpclient.icalfeed.keepAlive.monitorInterval=5
@@ -147,7 +147,7 @@ In such a case the legacy properties will still be used, if not configured other
 # Legacy configuration in calendar.properties file
 com.openexchange.calendar.ical.maxConnections=10
 com.openexchange.calendar.ical.maxConnectionsPerRoute=5
-com.openexchange.calendar.ical.connectionTimeout=50000
+com.openexchange.calendar.ical.connectTimeout=50000
 com.openexchange.calendar.ical.socketReadTimeout=50000
 
 # New configuration for iCAL feeds
@@ -160,9 +160,9 @@ com.openenexchange.httpclient.icalfeed.socketBufferSize=8192
 
 ```
 
-As you may have already noticed, `com.openenexchange.httpclient.icalfeed.connectionTimeout` and 
+As you may have already noticed, `com.openenexchange.httpclient.icalfeed.connectTimeout` and 
 `com.openenexchange.httpclient.icalfeed.connectionPerRoute` have not been set. 
-Instead of falling back to the default values, the values from `com.openexchange.calendar.ical.connectionTimeout` and 
+Instead of falling back to the default values, the values from `com.openexchange.calendar.ical.connectTimeout` and 
 `com.openexchange.calendar.ical.maxConnectionsPerRoute` will be used for the client configuration. 
 Further the values for the legacy properties `com.openexchange.calendar.ical.maxConnections` and 
 `com.openexchange.calendar.ical.socketReadTimeout` will **be overwritten**  by the new properties 
@@ -172,7 +172,7 @@ Efficiently the configuration from above can be written like this
 
 ```
 com.openenexchange.httpclient.icalfeed.readTimeout=30000
-com.openenexchange.httpclient.icalfeed.connectionTimeout=50000
+com.openenexchange.httpclient.icalfeed.connectTimeout=50000
 com.openenexchange.httpclient.icalfeed.requestTimeout=30000
 com.openenexchange.httpclient.icalfeed.keepAlive.duration=20
 com.openenexchange.httpclient.icalfeed.keepAlive.monitorInterval=5
