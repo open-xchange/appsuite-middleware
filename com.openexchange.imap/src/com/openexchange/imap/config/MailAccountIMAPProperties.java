@@ -368,6 +368,23 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     }
 
     @Override
+    public boolean isDebugLogEnabled() {
+        String tmp = getAccountProperty("com.openexchange.imap.debugLog.enabled");
+        if (null != tmp) {
+            return Boolean.parseBoolean(tmp.trim());
+        }
+
+        if (mailAccountId == PRIMARY) {
+            tmp = lookUpProperty("com.openexchange.imap.primary.debugLog.enabled");
+            if (null != tmp) {
+                return Boolean.parseBoolean(tmp.trim());
+            }
+        }
+
+        return lookUpBoolProperty("com.openexchange.imap.debugLog.enabled", IMAPProperties.getInstance().isDebugLogEnabled());
+    }
+
+    @Override
     public boolean isOverwritePreLoginCapabilities() {
         String tmp = getAccountProperty("com.openexchange.imap.overwritePreLoginCapabilities");
         if (null != tmp) {
