@@ -20,7 +20,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 70
+%define        ox_release 71
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -69,6 +69,8 @@ ox_update_permissions /opt/open-xchange/etc/reportclient.properties root:open-xc
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Fri Jun 05 2020 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2020-06-15 (5763)
 * Mon May 04 2020 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2020-05-11 (5717)
 * Mon Apr 06 2020 Carsten Hoeger <choeger@open-xchange.com>
