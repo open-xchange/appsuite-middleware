@@ -98,6 +98,7 @@ public class MetricsListener implements ApplicationEventListener  {
     private static class RequestListener implements RequestEventListener {
 
         private static final String METHOD_NOT_ALLOWED = "METHOD_NOT_ALLOWED";
+        private static final String NOT_FOUND = "NOT_FOUND";
         private static final String INVALID = "INVALID";
         private final long start;
 
@@ -115,6 +116,10 @@ public class MetricsListener implements ApplicationEventListener  {
         public void onEvent(RequestEvent event) {
             Type type = event.getType();
             if (type.equals(Type.FINISHED) || type.equals(Type.ON_EXCEPTION)) {
+                if (type.equals(Type.FINISHED) && event.getException() != null) {
+                    //A finished event with an exception should have been handled before in an exception event
+                    return;
+                }
                 List<UriTemplate> templates = event.getContainerRequest().getUriInfo().getMatchedTemplates();
                 String path = null;
                 if (templates.isEmpty()) {
@@ -123,13 +128,13 @@ public class MetricsListener implements ApplicationEventListener  {
                     path = contructPath(templates);
                 }
                 StatusType status = Status.INTERNAL_SERVER_ERROR;
-                if(type.equals(Type.ON_EXCEPTION) || event.getException() != null) {
+                if (type.equals(Type.ON_EXCEPTION)) {
                     Throwable exception = event.getException();
                     if(exception instanceof WebApplicationException) {
                         WebApplicationException we = (WebApplicationException) exception;
                         if(we instanceof NotFoundException) {
                             Duration duration = Duration.ofMillis(System.currentTimeMillis() - start);
-                            getTimer(INVALID, METHOD_NOT_ALLOWED, 404).record(duration);
+                            getTimer(INVALID, NOT_FOUND, 404).record(duration);
                             return;
                         }
                         status = we.getResponse().getStatusInfo();

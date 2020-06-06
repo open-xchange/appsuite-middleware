@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.sun.mail.iap.ResponseCode.AUTHENTICATIONFAILED;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -88,6 +89,7 @@ import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.config.MailAccountIMAPProperties;
 import com.openexchange.imap.converters.IMAPFolderConverter;
+import com.openexchange.imap.debug.IMAPDebugLoggerGenerator;
 import com.openexchange.imap.entity2acl.Entity2ACLInit;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.Services;
@@ -134,6 +136,7 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.JavaIMAPStore;
 import com.sun.mail.imap.Rights;
+import com.sun.mail.util.PropUtil;
 
 /**
  * {@link IMAPAccess} - Establishes an IMAP access and provides access to storages.
@@ -577,6 +580,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             if (Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.err);
+            } else if (PropUtil.getBooleanProperty(imapSession.getProperties(), "mail.imap.debugLog.enabled", false)) {
+                /*
+                 * Debug logging is enabled for this IMAP session
+                 */
+                establishDebugLogger();
             }
             IMAPStore imapStore = null;
             try {
@@ -723,14 +731,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, forceSecure, session.getUserId(), session.getContextId());
             }
             /*
-             * Check if debug should be enabled
-             */
-            final boolean certainUser = false;
-            if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
-                imapSession.setDebug(true);
-                imapSession.setDebugOut(System.out);
-            }
-            /*
              * Check if client IP address should be propagated
              */
             String clientIp = null;
@@ -747,6 +747,19 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             this.port = config.getPort();
             this.login = isProxyAuth ? proxyUser : user;
             this.password = tmpPassword;
+            /*
+             * Check if debug should be enabled
+             */
+            final boolean certainUser = false;
+            if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
+                imapSession.setDebug(true);
+                imapSession.setDebugOut(System.out);
+            } else if (PropUtil.getBooleanProperty(imapSession.getProperties(), "mail.imap.debugLog.enabled", false)) {
+                /*
+                 * Debug logging is enabled for this IMAP session
+                 */
+                establishDebugLogger();
+            }
             /*
              * Check for already failed authentication
              */
@@ -865,6 +878,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, config, session);
+        }
+    }
+
+    private void establishDebugLogger() {
+        String serverAndPort = this.server + ':' + this.port;
+        try {
+            IMAPDebugLoggerGenerator.getInstance().establishLoggerFor(imapSession, serverAndPort, session.getUserId(), session.getContextId());
+        } catch (Exception e) {
+            LOG.warn("Failed to establish IMAP debug logging for server {} with user {} in context {}", serverAndPort, I(session.getUserId()), I(session.getContextId()), e);
         }
     }
 
@@ -1316,6 +1338,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         if (config.getIMAPProperties().isAuditLogEnabled()) {
             imapProps.put("mail.imap.auditLog.enabled", "true");
+        }
+        /*
+         * Enable/disable debug log
+         */
+        if (config.getIMAPProperties().isDebugLogEnabled()) {
+            imapProps.put("mail.imap.debugLog.enabled", "true");
         }
         /*
          * Greeting listener (for primary IMAP)

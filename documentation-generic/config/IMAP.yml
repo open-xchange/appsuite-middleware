@@ -947,3 +947,66 @@ properties:
       file: imap.properties
       packageName: open-xchange-imap
       tags: ["Mail","IMAP","Metrics"]
+    - key: com.openexchange.imap.debugLog.enabled
+      defaultValue: false
+      description: |
+        Enables IMAP trace logging. If enabled, the complete IMAP traffoc for a certain IMAP session will be logged.
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP", "Logging"]
+    - key: com.openexchange.imap.debugLog.file.path
+      defaultValue: "/var/log/open-xchange"
+      description: |
+        Specifies the file path where log files for IMAP trace logging are created. Requires that "com.openexchange.imap.debugLog.enabled" is
+        set to "true".
+
+        Note that for a better overview an intermediate directory is created for each user according to pattern
+        "imaptrace_" + <context-id> + "_" + <user-id> + "_" + <imap-server>
+
+        E.g. "imaptrace_1337_17_imap.myhost.com:143"
+      related: com.openexchange.imap.debugLog.enabled
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP", "Logging"]
+    - key: com.openexchange.imap.debugLog.file.size
+      defaultValue: 2097152
+      description: |
+        Specifies the max. size for a single log file. If that size is exceeded, log files are rotated. Requires that
+        "com.openexchange.imap.debugLog.enabled" is set to "true".
+      related: com.openexchange.imap.debugLog.enabled
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP", "Logging", "Limit"]
+    - key: com.openexchange.imap.debugLog.file.count
+      defaultValue: 99
+      description: |
+        Specifies the max. number of rotating log files. If that number is exceeded, log files are discarded. Requires that
+        "com.openexchange.imap.debugLog.enabled" is set to "true".
+      related: com.openexchange.imap.debugLog.enabled
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP", "Logging", "Limit"]
+    - key: com.openexchange.imap.debugLog.file.pattern
+      defaultValue: "%sanitisedMessage%n"
+      description: |
+        Specifies the pattern for a single log message posted into a log file. Requires that "com.openexchange.imap.debugLog.enabled" is set
+        to "true".
+      related: com.openexchange.imap.debugLog.enabled
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP", "Logging"]

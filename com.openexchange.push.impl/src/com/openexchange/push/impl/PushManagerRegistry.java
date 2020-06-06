@@ -840,11 +840,6 @@ public final class PushManagerRegistry implements PushListenerService {
 
     @Override
     public Session generateSessionFor(PushUser pushUser) throws OXException {
-        // Check push user
-        if (false == PushDbUtils.hasPushRegistration(pushUser)) {
-            throw PushExceptionCodes.NO_PUSH_REGISTRATION.create(I(pushUser.getUserId()), I(pushUser.getContextId()));
-        }
-
         int contextId = pushUser.getContextId();
         int userId = pushUser.getUserId();
 

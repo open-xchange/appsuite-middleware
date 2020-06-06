@@ -86,6 +86,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -270,14 +271,14 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             /*
              * Get mail interface
              */
-            int orderDir = OrderDirection.ASC.getOrder();
+            OrderDirection orderDirection = OrderDirection.ASC;
             if (order != null) {
                 if (order.equalsIgnoreCase("asc")) {
-                    orderDir = OrderDirection.ASC.getOrder();
+                    orderDirection = OrderDirection.ASC;
                 } else if (order.equalsIgnoreCase("desc")) {
-                    orderDir = OrderDirection.DESC.getOrder();
+                    orderDirection = OrderDirection.DESC;
                 } else {
-                    throw MailExceptionCode.INVALID_INT_VALUE.create(AJAXServlet.PARAMETER_ORDER);
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AJAXServlet.PARAMETER_ORDER, order);
                 }
             }
             /*
@@ -302,11 +303,9 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                         searchTerm = null != first && null != second ? new ANDTerm(first, second) : (null == first ? second : first);
 
                         // Check if mail categories are enabled
-                        CapabilityService capabilityService = MailJSONActivator.SERVICES.get().getService(CapabilityService.class);
-                        if (null != capabilityService && capabilityService.getCapabilities(req.getSession()).contains("mail_categories")) {
+                        if (category_filter != null && !category_filter.equals("none") && isMailCategoriesEnabled(req.getSession())) {
                             MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getOptionalService(MailCategoriesConfigService.class);
-                            if (categoriesService != null && category_filter != null && !category_filter.equals("none")) {
-
+                            if (categoriesService != null) {
                                 if (category_filter.equals("general")) {
                                     // Special case with unkeyword
                                     String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true, false);
@@ -355,7 +354,6 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
 
                     IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
                     MailSortField sortField = MailSortField.getField(sortCol);
-                    OrderDirection orderDirection = OrderDirection.getOrderDirection(orderDir);
 
                     MailMessage[] result;
                     MailField[] fields = MailField.getFields(columns);
@@ -374,7 +372,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
 
                 } else {
                     // Get iterator
-                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, headers, fromToIndices, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
+                    it = mailInterface.getAllMessages(folderId, sortCol, orderDirection.getOrder(), columns, headers, fromToIndices, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
                     for (int i = it.size(); i-- > 0;) {
                         mails.add(it.next());
                     }
@@ -394,6 +392,18 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
         } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Checks if given session-associated user holds <code>"mail_categories"</code> capability.
+     *
+     * @param session The session providing user information
+     * @return <code>true</code> if mail categories are enabled; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    private boolean isMailCategoriesEnabled(ServerSession session) throws OXException {
+        CapabilityService capabilityService = MailJSONActivator.SERVICES.get().getService(CapabilityService.class);
+        return null != capabilityService && capabilityService.getCapabilities(session).contains("mail_categories");
     }
 
     @Override

@@ -532,6 +532,7 @@ public class PushDbUtils {
                 if (deleted) {
                     stmt = con.prepareStatement("SELECT 1 FROM registeredPush WHERE cid=? AND user=?");
                     stmt.setInt(1, contextId);
+                    stmt.setInt(2, userId);
                     rs = stmt.executeQuery();
                     if (!rs.next()) {
                         deleteResult = DeleteResult.DELETED_COMPLETELY;

@@ -76,11 +76,18 @@ public interface IIMAPProperties extends IMailProperties {
     public boolean isEnableTls();
 
     /**
-     * Whether to audit log is enabled or not to trace issued IMAP commands.
+     * Whether audit log is enabled or not to trace issued IMAP commands.
      *
      * @return <code>true</code> if audit log is enabled; otherwise <code>false</code>
      */
     public boolean isAuditLogEnabled();
+
+    /**
+     * Whether debug (traffic) log is enabled or not to trace IMAP communication.
+     *
+     * @return <code>true</code> if debug log is enabled; otherwise <code>false</code>
+     */
+    public boolean isDebugLogEnabled();
 
     /**
      * Whether the pre-login capabilities are supposed to be overwritten (completely replaced with the ones advertised after login)

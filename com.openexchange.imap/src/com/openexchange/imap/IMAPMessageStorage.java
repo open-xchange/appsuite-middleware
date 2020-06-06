@@ -1692,7 +1692,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 mail.setMailId(Long.toString(msgUID));
                 if (numUnreadMessages >= 0) {
                     mail.setUnreadMessages(numUnreadMessages);
-                } else {                    
+                } else {
                     try {
                         mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
                     } catch (Exception e) {

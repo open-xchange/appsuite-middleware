@@ -1,5 +1,5 @@
 ---
-title: checkconsistency
+title: checkconfigconsistency
 icon: far fa-circle
 tags: Administration, Command Line tools
 package: open-xchange-core
@@ -7,11 +7,11 @@ package: open-xchange-core
 
 # NAME
 
-checkconsistency - checks for config mistakes
+checkconfigconsistency - checks for config mistakes
 
 # SYNOPSIS
 
-**checkconsistency** [-h]
+**checkconfigconsistency** [-h]
 
 # DESCRIPTION
 

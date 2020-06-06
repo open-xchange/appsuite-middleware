@@ -28,6 +28,12 @@
   }, {
     "name" : "Metrics",
     "description" : "The metrics module"
+  }, {
+    "name" : "Push",
+    "description" : "The push module"
+  }, {
+    "name" : "Preliminary",
+    "description" : "This module contains preliminary endpoints which can change in the future."
   } ],
   "paths" : {
     "/admin/v1/contexts/{context-id}/users/{user-id}/passwd-changes" : {
@@ -170,6 +176,92 @@
           },
           "401" : {
             "description" : "Not authorized"
+          }
+        }
+      }
+    },
+    "/preliminary/http-notify/v1/notify" : {
+      "put" : {
+        "operationId" : "notify",
+        "tags" : [ "Preliminary", "Push" ],
+        "summary" : "Used by the dovecot mail server to push messages to the server",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "title" : "PushMessage",
+                "properties" : {
+                  "event" : {
+                    "type" : "string",
+                    "description" : "The event type.",
+                    "enum" : [ "messageNew" ]
+                  },
+                  "user" : {
+                    "type" : "string",
+                    "description" : "The user identifier in the format <userId>@<contextId>. E.g. 3@1"
+                  },
+                  "folder" : {
+                    "type" : "string",
+                    "description" : "The folder id"
+                  },
+                  "imap-uid" : {
+                    "type" : "string",
+                    "description" : "The mail uid"
+                  },
+                  "from" : {
+                    "type" : "string",
+                    "description" : "The from header of the mail"
+                  },
+                  "subject" : {
+                    "type" : "string",
+                    "description" : "The subject of the mail"
+                  },
+                  "unseen" : {
+                    "type" : "integer",
+                    "format" : "int32",
+                    "description" : "The number of unseen mails"
+                  },
+                  "snippet" : {
+                    "type" : "string",
+                    "description" : "A mail teaser"
+                  }
+                }
+              }
+            }
+          },
+          "description" : "JSONObject containing the push message",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object with a success field set to 'true'.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "Object",
+                  "title" : "SuccessResponse",
+                  "properties" : {
+                    "success" : {
+                      "type" : "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "500" : {
+            "description" : "In case of internal server error that might have multiple reasons. Response contains error message.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
           }
         }
       }
@@ -739,6 +831,60 @@
         }
       }
     },
+    "/preliminary/capabilities/v1/all/{context}/{user}" : {
+      "get" : {
+        "operationId" : "getAllCapabilities",
+        "tags" : [ "Preliminary", "Admin" ],
+        "summary" : "Gets all capabilities of a single user",
+        "parameters" : [ {
+          "name" : "context",
+          "description" : "The context id",
+          "in" : "path",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "user",
+          "description" : "The user id",
+          "in" : "path",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON array containing the capabilities for the user\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Capabilities"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "500" : {
+            "description" : "In case of internal server error that might have multiple reasons. Response contains error message.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : [ {
+          "Example" : null,
+          "description" : "Get capabilities",
+          "example" : "GET http://localhost:8009/preliminary/capabilities/v1/all/1/3"
+        } ]
+      }
+    },
     "/advertisement/v1/config/reseller" : {
       "put" : {
         "operationId" : "putAdvertisementByReseller",
@@ -767,6 +913,52 @@
         "requestBody" : {
           "$ref" : "#/components/requestBodies/putAdvertisementByNameBody"
         }
+      }
+    },
+    "/preliminary/utilities/mailResolver/v1/resolve/{mail*}" : {
+      "get" : {
+        "operationId" : "resolveMailAddress",
+        "tags" : [ "Preliminary", "Admin" ],
+        "summary" : "Resolves the given mail addresses",
+        "parameters" : [ {
+          "name" : "mail*",
+          "description" : "The mail addresses as a semicolon separated list",
+          "in" : "path",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON array containing the capabilities for the user\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "description" : "A json object containg subobjects for every mail address which contains the user id, context id and addtional informations."
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "500" : {
+            "description" : "In case of internal server error that might have multiple reasons. Response contains error message.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : [ {
+          "Example" : null,
+          "description" : "Resolve addresses",
+          "example" : "GET http://localhost:8009//preliminary/utilities/mailResolver/v1/resolve/anton@context1.ox.test;berta@context1.ox.test"
+        } ]
       }
     },
     "/advertisement/v1/config/user" : {
@@ -840,31 +1032,6 @@
           },
           "401" : {
             "description" : "Not authorized"
-          }
-        }
-      }
-    },
-    "/metrics" : {
-      "get" : {
-        "operationId" : "getMetrics",
-        "tags" : [ "Metrics" ],
-        "summary" : "Gets appsuite metrics in the prometheus format",
-        "responses" : {
-          "200" : {
-            "description" : "The metrics in the prometheus format.\n",
-            "content" : {
-              "text/plain" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
-          "401" : {
-            "description" : "Not authorized"
-          },
-          "403" : {
-            "description" : "In case basic authentication is enabled and an external client tries to access this resouce without using ssl."
           }
         }
       }
@@ -961,6 +1128,31 @@
           "contextAdminAuth" : [ ]
         } ],
         "summary" : "Deletes all multifactor authentication devices for a user."
+      }
+    },
+    "/metrics" : {
+      "get" : {
+        "operationId" : "getMetrics",
+        "tags" : [ "Metrics" ],
+        "summary" : "Gets appsuite metrics in the prometheus format",
+        "responses" : {
+          "200" : {
+            "description" : "The metrics in the prometheus format.\n",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "403" : {
+            "description" : "In case basic authentication is enabled and an external client tries to access this resouce without using ssl."
+          }
+        }
       }
     },
     "/admin/v1/close-sessions/by-user" : {
@@ -1236,6 +1428,68 @@
           "required" : true
         }
       }
+    },
+    "/preliminary/session/v1/get/{session}" : {
+      "get" : {
+        "operationId" : "getSession",
+        "tags" : [ "Preliminary", "Admin" ],
+        "summary" : "Resolves the given session id",
+        "parameters" : [ {
+          "name" : "session",
+          "description" : "The session id",
+          "in" : "path",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing informations about the session.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "description" : "A json object containing informations about the session.",
+                  "properties" : {
+                    "context" : {
+                      "type" : "integer",
+                      "format" : "int64",
+                      "description" : "The context id."
+                    },
+                    "user" : {
+                      "type" : "integer",
+                      "format" : "int64",
+                      "description" : "The user id."
+                    },
+                    "guest" : {
+                      "type" : "boolean",
+                      "description" : "Whether the session belongs to a guest user or not."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "500" : {
+            "description" : "In case of internal server error that might have multiple reasons. Response contains error message.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : [ {
+          "Example" : null,
+          "description" : "Resolve session",
+          "example" : "GET http://localhost:8009/preliminary/session/v1/get/1234567890"
+        } ]
+      }
     }
   },
   "components" : {
@@ -1383,6 +1637,25 @@
           "backup" : {
             "type" : "boolean",
             "description" : "true, if the device is a backup device, false otherwise"
+          }
+        }
+      },
+      "Capabilities" : {
+        "type" : "array",
+        "description" : "An array of capabilities",
+        "items" : {
+          "type" : "object",
+          "description" : "A capability",
+          "title" : "Capability",
+          "properties" : {
+            "id" : {
+              "type" : "string",
+              "description" : "The name of the capability"
+            },
+            "attributes" : {
+              "type" : "string",
+              "description" : "An json object containing the attributes of the capability"
+            }
           }
         }
       }

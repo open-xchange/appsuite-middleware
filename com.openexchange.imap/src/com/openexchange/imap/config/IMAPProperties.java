@@ -424,6 +424,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean auditLogEnabled;
 
+    private boolean debugLogEnabled;
+
     private boolean overwritePreLoginCapabilities;
 
     private Set<String> propagateHostNames;
@@ -452,6 +454,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         sContainerType = "boundary-aware";
         enableTls = true;
         auditLogEnabled = false;
+        debugLogEnabled = false;
         overwritePreLoginCapabilities = false;
         maxNumConnection = -1;
         newACLExtMap = new NonBlockingHashMap<String, Boolean>();
@@ -539,6 +542,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             auditLogEnabled = Boolean.parseBoolean(tmp);
             logBuilder.append("    Audit Log Enabled: {}{}");
             args.add(Boolean.valueOf(auditLogEnabled));
+            args.add(lineSeparator);
+        }
+
+        {
+            String tmp = configuration.getProperty("com.openexchange.imap.debugLog.enabled", STR_FALSE).trim();
+            debugLogEnabled = Boolean.parseBoolean(tmp);
+            logBuilder.append("    Debug Log Enabled: {}{}");
+            args.add(Boolean.valueOf(debugLogEnabled));
             args.add(lineSeparator);
         }
 
@@ -1358,6 +1369,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         propagateClientIPAddress = false;
         enableTls = true;
         auditLogEnabled = false;
+        debugLogEnabled = false;
         overwritePreLoginCapabilities = false;
         propagateHostNames = Collections.emptySet();
         supportsACLs = null;
@@ -1686,6 +1698,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean isAuditLogEnabled() {
         return auditLogEnabled;
+    }
+
+    @Override
+    public boolean isDebugLogEnabled() {
+        return debugLogEnabled;
     }
 
     @Override

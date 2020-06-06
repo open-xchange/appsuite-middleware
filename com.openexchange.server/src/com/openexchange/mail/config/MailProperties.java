@@ -1239,7 +1239,7 @@ public final class MailProperties implements IMailProperties {
                 final File javaMailPropsFile = configuration.getFileByName(javaMailPropertiesStr);
                 try {
                     javaMailProperties = readPropertiesFromFile(new FileInputStream(javaMailPropsFile));
-                    if (javaMailProperties.size() == 0) {
+                    if (javaMailProperties.isEmpty()) {
                         javaMailProperties = null;
                     }
                 } catch (FileNotFoundException e) {
@@ -1316,9 +1316,9 @@ public final class MailProperties implements IMailProperties {
      * @return The appropriate instance of {@link Properties}
      * @throws OXException If reading property file fails
      */
-    protected static Properties readPropertiesFromFile(final InputStream in) throws OXException {
-        final Properties properties = new Properties();
+    protected static Properties readPropertiesFromFile(InputStream in) throws OXException {
         try {
+            Properties properties = new Properties();
             properties.load(in);
             return properties;
         } catch (IOException e) {
