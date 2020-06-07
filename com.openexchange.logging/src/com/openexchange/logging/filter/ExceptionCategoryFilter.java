@@ -119,6 +119,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
      * Sets (and applies) given categories given as comma-separated string.
      *
      * @param categories The categories as comma-separated string
+     * @throws IllegalStateException If exception category filter has not yet been initialized
      */
     public static synchronized void setCategories(String categories) {
         ExceptionCategoryFilter previousInstance = CURRENT_INSTANCE.getAndSet(null);
@@ -142,6 +143,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
      * Gets the currently applicable categories as comma-separated string.
      *
      * @return The currently applicable categories
+     * @throws IllegalStateException If exception category filter has not yet been initialized
      */
     public static Set<Category.EnumType> getCategories() {
         ExceptionCategoryFilter currentInstance = CURRENT_INSTANCE.get();
@@ -156,6 +158,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
      * Gets the currently applicable categories as comma-separated string.
      *
      * @return The currently applicable categories
+     * @throws IllegalStateException If exception category filter has not yet been initialized
      */
     public static String getCategoriesAsString() {
         Iterator<Category.EnumType> it = getCategories().iterator();
