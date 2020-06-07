@@ -70,7 +70,6 @@ public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomiz
     private static final String PROP_SUPPRESSED_CATEGORIES = "com.openexchange.log.suppressedCategories";
 
     private final BundleContext context;
-    private ExceptionCategoryFilter exceptionCategoryFilter = null; // Guarded by synchronized
     private final RankingAwareTurboFilterList rankingAwareTurboFilterList;
     private final IncludeStackTraceService traceService;
 
@@ -81,7 +80,7 @@ public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomiz
      * @param rankingAwareTurboFilterList The list of logback turbo filters
      * @param traceService The "include stack trace" service
      */
-    public ExceptionCategoryFilterRegisterer(final BundleContext context, final RankingAwareTurboFilterList rankingAwareTurboFilterList, final IncludeStackTraceService traceService) {
+    public ExceptionCategoryFilterRegisterer(BundleContext context, RankingAwareTurboFilterList rankingAwareTurboFilterList, IncludeStackTraceService traceService) {
         super();
         this.context = context;
         this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
@@ -92,15 +91,7 @@ public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomiz
     public synchronized ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
         ConfigurationService service = context.getService(reference);
         String suppressedCategories = service.getProperty(PROP_SUPPRESSED_CATEGORIES, "USER_INPUT");
-        ExceptionCategoryFilter.setCategories(suppressedCategories);
-
-        ExceptionCategoryFilter exceptionCategoryFilter = this.exceptionCategoryFilter;
-        if (exceptionCategoryFilter == null) {
-            exceptionCategoryFilter = new ExceptionCategoryFilter(traceService);
-            rankingAwareTurboFilterList.addTurboFilter(exceptionCategoryFilter);
-            this.exceptionCategoryFilter = exceptionCategoryFilter;
-        }
-
+        ExceptionCategoryFilter.createInstance(suppressedCategories, traceService, rankingAwareTurboFilterList);
         return service;
     }
 
@@ -111,11 +102,7 @@ public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomiz
 
     @Override
     public synchronized void removedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
-        ExceptionCategoryFilter exceptionCategoryFilter = this.exceptionCategoryFilter;
-        if (exceptionCategoryFilter != null) {
-            rankingAwareTurboFilterList.removeTurboFilter(exceptionCategoryFilter);
-            this.exceptionCategoryFilter = null;
-        }
+        ExceptionCategoryFilter.dropInstance(rankingAwareTurboFilterList);
     }
 
     // ------------------------------------------------ Reloadable stuff -------------------------------------------------------------------
