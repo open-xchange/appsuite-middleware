@@ -109,7 +109,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
          *
          * @param databaseService The database service to use
          * @return The result
-         * @throws SQLException If an SQL error orccurs
+         * @throws SQLException If an SQL error occurs
          * @throws OXException If operation fails
          */
         protected abstract T doPerform(DatabaseService databaseService) throws SQLException, OXException;
