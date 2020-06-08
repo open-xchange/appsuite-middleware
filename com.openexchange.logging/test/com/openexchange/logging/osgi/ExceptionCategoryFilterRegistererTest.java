@@ -87,12 +87,12 @@ public class ExceptionCategoryFilterRegistererTest {
         Mockito.doReturn("ERROR").when(configMock).getProperty(Mockito.matches("com.openexchange.log.suppressedCategories"), Mockito.matches("USER_INPUT"));
         ecfr.addingService(refMock);
         Assert.assertEquals(1, turboFilterList.size());
-        Assert.assertEquals(ExceptionCategoryFilter.getCategories(), "ERROR");
+        Assert.assertEquals(ExceptionCategoryFilter.getCategoriesAsString(), "ERROR");
 
         Mockito.doReturn("TRY_AGAIN").when(configMock).getProperty(Mockito.matches("com.openexchange.log.suppressedCategories"), Mockito.matches("USER_INPUT"));
         ecfr.addingService(refMock);
         Assert.assertEquals(1, turboFilterList.size());
-        Assert.assertEquals(ExceptionCategoryFilter.getCategories(), "TRY_AGAIN");
+        Assert.assertEquals(ExceptionCategoryFilter.getCategoriesAsString(), "TRY_AGAIN");
     }
 
 }
