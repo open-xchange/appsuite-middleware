@@ -221,6 +221,10 @@ public final class IMAPException extends OXException {
          */
         IO_ERROR(IMAPCode.IO_ERROR),
         /**
+         * The IP address could not be determined: %1$s
+         */
+        UNKNOWN_HOST_ERROR(IMAPCode.UNKNOWN_HOST_ERROR),
+        /**
          * Flag %1$s could not be changed due to reason "%2$s"
          */
         FLAG_FAILED(IMAPCode.FLAG_FAILED),
@@ -835,6 +839,10 @@ public final class IMAPException extends OXException {
          * An I/O error occurred: %1$s
          */
         IO_ERROR(MailExceptionCode.IO_ERROR, null),
+        /**
+         * The IP address could not be determined: %1$s
+         */
+        UNKNOWN_HOST_ERROR("The IP address could not be determined: %1$s", MailExceptionCode.IO_ERROR.getCategory(), MailExceptionCode.IO_ERROR.getNumber(), null),
         /**
          * Flag %1$s could not be changed due to reason "%2$s"
          */
