@@ -1,41 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Copyright (c) 1997, 2020 Oracle and/or its affiliates. All rights reserved.
  *
- * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0, which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
  *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common Development
- * and Distribution License("CDDL") (collectively, the "License").  You
- * may not use this file except in compliance with the License.  You can
- * obtain a copy of the License at
- * https://oss.oracle.com/licenses/CDDL+GPL-1.1
- * or LICENSE.txt.  See the License for the specific
- * language governing permissions and limitations under the License.
+ * This Source Code may also be made available under the following Secondary
+ * Licenses when the conditions for such availability set forth in the
+ * Eclipse Public License v. 2.0 are satisfied: GNU General Public License,
+ * version 2 with the GNU Classpath Exception, which is available at
+ * https://www.gnu.org/software/classpath/license.html.
  *
- * When distributing the software, include this License Header Notice in each
- * file and include the License file at LICENSE.txt.
- *
- * GPL Classpath Exception:
- * Oracle designates this particular file as subject to the "Classpath"
- * exception as provided by Oracle in the GPL Version 2 section of the License
- * file that accompanied this code.
- *
- * Modifications:
- * If applicable, add the following below the License Header, with the fields
- * enclosed by brackets [] replaced by your own identifying information:
- * "Portions Copyright [year] [name of copyright owner]"
- *
- * Contributor(s):
- * If you wish your version of this file to be governed by only the CDDL or
- * only the GPL Version 2, indicate your decision by adding "[Contributor]
- * elects to include this software in this distribution under the [CDDL or GPL
- * Version 2] license."  If you don't indicate a single choice of license, a
- * recipient has the option to distribute your version of this file under
- * either the CDDL, the GPL Version 2 or to extend the choice of license to
- * its licensees as provided above.  However, if you add GPL Version 2 code
- * and therefore, elected the GPL Version 2 license, then the option applies
- * only if the new code is made subject to such option by the copyright
- * holder.
+ * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
 
 package com.sun.mail.pop3;
@@ -45,7 +21,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
@@ -303,10 +281,14 @@ public class POP3Store extends Store {
 
 	supportsUidl = capabilities == null || capabilities.containsKey("UIDL");
 
-	String msg = null;
-	if ((msg = p.login(user, passwd)) != null) {
-	    throw cleanupAndThrow(p, new EOFException(msg));
-	}
+	try {
+        if (!authenticate(p, user, passwd))
+        throw cleanupAndThrow(p, new EOFException("login failed"));
+    } catch (EOFException ex) {
+        throw cleanupAndThrow(p, ex);
+    } catch (Exception ex) {
+        throw cleanupAndThrow(p, new EOFException(ex.getMessage()));
+    }
 
 	/*
 	 * If a Folder closes the port, and then a Folder
@@ -343,6 +325,117 @@ public class POP3Store extends Store {
 	    }
 	}
 	return ife;
+    }
+
+    /**
+     * Authenticate to the server.
+     *
+     * XXX - This extensible authentication mechanism scheme was adapted
+     *       from the SMTPTransport class.  The work was done at the last
+     *       minute for the 1.6.5 release and so is not as clean as it
+     *       could be.  There's great confusion over boolean success/failure
+     *       return codes vs exceptions.  This should all be cleaned up at
+     *       some point, and more testing should be done, but I'm leaving
+     *       it in this "I believe it works" state for now.  I've tested
+     *       it with LOGIN, PLAIN, and XOAUTH2 mechanisms, the latter being
+     *       the primary motivation for the work right now.
+     *
+     * @param   p   the Protocol object to use
+     * @param   user    the user to authenticate as
+     * @param   passwd  the password for the user
+     * @return      true if authentication succeeds
+     * @exception   MessagingException  if authentication fails
+     * @since   Jakarta Mail 1.6.5
+     */
+    private boolean authenticate(Protocol p, String user, String passwd)
+                throws MessagingException {
+    // setting mail.pop3.auth.mechanisms controls which mechanisms will
+    // be used, and in what order they'll be considered.  only the first
+    // match is used.
+    String mechs = session.getProperty("mail." + name + ".auth.mechanisms");
+    boolean usingDefaultMechs = false;
+    if (mechs == null) {
+        mechs = p.getDefaultMechanisms();
+        usingDefaultMechs = true;
+    }
+
+    String authzid =
+        session.getProperty("mail." + name + ".sasl.authorizationid");
+    if (authzid == null)
+        authzid = user;
+    /*
+     * XXX - maybe someday
+     *
+    if (enableSASL) {
+        logger.fine("Authenticate with SASL");
+        try {
+        if (sasllogin(getSASLMechanisms(), getSASLRealm(), authzid,
+                user, passwd)) {
+            return true;    // success
+        } else {
+            logger.fine("SASL authentication failed");
+            return false;
+        }
+        } catch (UnsupportedOperationException ex) {
+        logger.log(Level.FINE, "SASL support failed", ex);
+        // if the SASL support fails, fall back to non-SASL
+        }
+    }
+     */
+
+    if (logger.isLoggable(Level.FINE))
+        logger.fine("Attempt to authenticate using mechanisms: " + mechs);
+
+    /*
+     * Loop through the list of mechanisms supplied by the user
+     * (or defaulted) and try each in turn.  If the server supports
+     * the mechanism and we have an authenticator for the mechanism,
+     * and it hasn't been disabled, use it.
+     */
+    StringTokenizer st = new StringTokenizer(mechs);
+    while (st.hasMoreTokens()) {
+        String m = st.nextToken();
+        m = m.toUpperCase(Locale.ENGLISH);
+        if (!p.supportsMechanism(m)) {
+        logger.log(Level.FINE, "no authenticator for mechanism {0}", m);
+        continue;
+        }
+
+        if (!p.supportsAuthentication(m)) {
+        logger.log(Level.FINE, "mechanism {0} not supported by server",
+                    m);
+        continue;
+        }
+
+        /*
+         * If using the default mechanisms, check if this one is disabled.
+         */
+        if (usingDefaultMechs) {
+        String dprop = "mail." + name + ".auth." +
+                    m.toLowerCase(Locale.ENGLISH) + ".disable";
+        boolean disabled = PropUtil.getBooleanProperty(
+                        session.getProperties(),
+                        dprop, !p.isMechanismEnabled(m));
+        if (disabled) {
+            if (logger.isLoggable(Level.FINE))
+            logger.fine("mechanism " + m +
+                    " disabled by property: " + dprop);
+            continue;
+        }
+        }
+
+        // only the first supported and enabled mechanism is used
+        logger.log(Level.FINE, "Using mechanism {0}", m);
+        String msg =
+        p.authenticate(m, host, authzid, user, passwd);
+        if (msg != null)
+        throw new AuthenticationFailedException(msg);
+        return true;
+    }
+
+    // if no authentication mechanism found, fail
+    throw new AuthenticationFailedException(
+        "No authentication mechanisms supported by both server and client");
     }
 
     private static boolean isRecoverable(Throwable t) {
