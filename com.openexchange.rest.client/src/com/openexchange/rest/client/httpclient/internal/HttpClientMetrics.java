@@ -52,12 +52,17 @@ package com.openexchange.rest.client.httpclient.internal;
 import static com.openexchange.java.Autoboxing.I;
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
+import java.util.function.Supplier;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Meter;
+import io.micrometer.core.instrument.Meter.Id;
+import io.micrometer.core.instrument.Meter.Type;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.Timer;
 
 /**
@@ -143,34 +148,61 @@ class HttpClientMetrics {
      */
     public static void initPoolMetrics(String clientName, PoolingHttpClientConnectionManager pool) {
         // @formatter:off
-        Gauge.builder(PREFIX + CONNECTIONS + "max", () -> I(pool.getTotalStats().getMax()) )
-            .tag(CLIENT_KEY, clientName)
-            .description("The configured maximum number of allowed persistent connections for all routes.")
-            .register(Metrics.globalRegistry);
+        register(PREFIX + CONNECTIONS + "max",
+            () -> I(pool.getTotalStats().getMax()),
+            clientName,
+            "The configured maximum number of allowed persistent connections for all routes.");
 
-        Gauge.builder(PREFIX + CONNECTIONS + "route.max", () -> I(pool.getDefaultMaxPerRoute()))
-            .tag(CLIENT_KEY, clientName)
-            .description("The configured maximum number of allowed persistent connections per route.")
-            .register(Metrics.globalRegistry);
+        register(PREFIX + CONNECTIONS + "route.max",
+            () -> I(pool.getDefaultMaxPerRoute()),
+            clientName,
+            "The configured maximum number of allowed persistent connections per route.");
 
-        Gauge.builder(PREFIX + CONNECTIONS + "available", () -> I(pool.getTotalStats().getAvailable()))
-            .tag(CLIENT_KEY, clientName)
-            .description("The number of available persistent connections for all routes.")
-            .register(Metrics.globalRegistry);
+        register(PREFIX + CONNECTIONS + "available",
+            () -> I(pool.getTotalStats().getAvailable()),
+            clientName,
+            "The number of available persistent connections for all routes.");
 
-        Gauge.builder(PREFIX + CONNECTIONS + "leased", () -> I(pool.getTotalStats().getLeased()))
-            .tag(CLIENT_KEY, clientName)
-            .description("The number of leased persistent connections for all routes.")
-            .register(Metrics.globalRegistry);
+        register(PREFIX + CONNECTIONS + "leased",
+            () -> I(pool.getTotalStats().getLeased()),
+            clientName,
+            "The number of leased persistent connections for all routes.");
 
-        Gauge.builder(PREFIX + CONNECTIONS + "pending", () -> I(pool.getTotalStats().getPending()))
-            .tag(CLIENT_KEY, clientName)
-            .description("The number of pending threads waiting for a connection.")
-            .register(Metrics.globalRegistry);
+        register(PREFIX + CONNECTIONS + "pending",
+            () -> I(pool.getTotalStats().getPending()),
+            clientName,
+            "The number of pending threads waiting for a connection.");
 
-        Gauge.builder(PREFIX + CONNECTIONS + "total", () -> I(pool.getTotalStats().getLeased() + pool.getTotalStats().getAvailable()))
-            .tag(CLIENT_KEY, clientName)
-            .description("The total number of pooled connections for all routes.")
+        register(PREFIX + CONNECTIONS + "total",
+            () -> I(pool.getTotalStats().getLeased() + pool.getTotalStats().getAvailable()),
+            clientName,
+            "The total number of pooled connections for all routes.");
+        // @formatter:on
+    }
+
+    /**
+     * Ensures the registration of a specific {@link Gauge}. This includes the removal of an already created gauge.
+     *
+     * @param gaugeName The name of the {@link Gauge}
+     * @param f The function to supply the value for the gauge
+     * @param clientName The name of the client
+     * @param description The description for the gauge
+     */
+    private static void register(String gaugeName, Supplier<Number> f, String clientName, String description) {
+        /*
+         * Remove data that may reference to an old client
+         */
+        Tags tags = Tags.of(CLIENT_KEY, clientName);
+        Id id = new Meter.Id(gaugeName, tags, null, description, Type.GAUGE);
+        Metrics.globalRegistry.remove(id);
+
+        /*
+         * Register new gauge
+         */
+        // @formatter:off
+        Gauge.builder(gaugeName, f)
+            .tags(tags)
+            .description(description)
             .register(Metrics.globalRegistry);
         // @formatter:on
     }
