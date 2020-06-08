@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.server.ServiceExceptionCode;
@@ -108,7 +109,12 @@ public class UnsubscribeAction extends AbstractPushJsonAction {
             .userId(session.getUserId());
         DefaultPushSubscription subscription = builder.build();
 
-        subscriptionRegistry.unregisterSubscription(subscription);
+        LogProperties.put(LogProperties.Name.PNS_NO_RECONNECT, "true");
+        try {
+            subscriptionRegistry.unregisterSubscription(subscription);
+        } finally {
+            LogProperties.remove(LogProperties.Name.PNS_NO_RECONNECT);
+        }
 
         return new AJAXRequestResult(new JSONObject(2).put("success", true), "json");
     }
