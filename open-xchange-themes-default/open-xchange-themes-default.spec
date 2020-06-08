@@ -6,7 +6,7 @@ BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define        ox_release 51
+%define        ox_release 52
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -51,6 +51,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Mon May 18 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-05-22 (5739)
 * Thu Apr 02 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-04-07 (5685)
 * Tue Mar 03 2020 Marcus Klein <marcus.klein@open-xchange.com>

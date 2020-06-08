@@ -505,7 +505,7 @@ public class SearchSequence {
     Argument result = new Argument();
     
     result.writeAtom("X-MAILBOX");
-    result.writeString(term.getPattern(), charset);
+    result.writeString(com.sun.mail.imap.protocol.BASE64MailboxEncoder.encode(term.getPattern()), charset);
     return result;
     }
 }

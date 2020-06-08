@@ -110,7 +110,7 @@ public final class XMailboxTerm extends SearchTerm<String> {
             }
 
             String xMailbox = (String) ((IMAPMessage) msg).getItem("X-MAILBOX");
-            return null != xMailbox && xMailbox.regionMatches(true, 0, this.xMailboxValue, 0, this.xMailboxValue.length());
+            return null != xMailbox && xMailbox.equalsIgnoreCase(this.xMailboxValue);
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(XMailboxTerm.class).warn("Error during search.", e);
             return false;

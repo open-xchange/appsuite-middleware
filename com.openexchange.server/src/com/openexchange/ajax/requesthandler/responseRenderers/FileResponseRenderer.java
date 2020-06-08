@@ -892,6 +892,18 @@ public class FileResponseRenderer implements ResponseRenderer {
                 if (null != contentTypeByFileName) {
                     fileContentType = contentTypeByFileName;
                 }
+            } else {
+                String subtype = fileContentType.substring(6).trim();
+                int idx = subtype.indexOf(';');
+                if (0 < idx) {
+                    subtype = subtype.substring(0, idx);
+                }
+                if (Strings.isEmpty(subtype) || subtype.length() <= 2) {
+                    String contentTypeByFileName = getContentTypeByFileName(file.getName());
+                    if (null != contentTypeByFileName) {
+                        fileContentType = contentTypeByFileName;
+                    }
+                }
             }
             final byte[] transformed;
             try {

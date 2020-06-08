@@ -63,6 +63,7 @@ import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.images.transformations.RotateTransformation;
 
 
@@ -142,7 +143,7 @@ public class ImageTransformationUtility {
             LOG.debug("Assuming 'bmp' for image format {}", val);
             return "bmp";
         }
-        return val;
+        return Strings.isEmpty(val) || val.length() <= 2 ? "jpeg" : val;
     }
 
     /**

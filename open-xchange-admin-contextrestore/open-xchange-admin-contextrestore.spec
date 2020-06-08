@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 51
+%define        ox_release 52
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -63,6 +63,8 @@ ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plug
 %doc com.openexchange.admin.contextrestore/ChangeLog
 
 %changelog
+* Mon May 18 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2020-05-22 (5739)
 * Thu Apr 02 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2020-04-07 (5685)
 * Tue Mar 03 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
