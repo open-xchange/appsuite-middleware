@@ -8,13 +8,15 @@
     parameters:
       - name: context
         description: The context id
-        in: path 
+        in: path
+        required: true
         schema: 
           type: integer
           format: int64
       - name: user
         description: The user id
-        in: path 
+        in: path
+        required: true
         schema: 
           type: integer
           format: int64

@@ -8,7 +8,8 @@
     parameters:
       - name: mail*
         description: The mail addresses as a semicolon separated list
-        in: path 
+        in: path
+        required: true
         schema: 
           type: string
     responses:
