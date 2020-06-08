@@ -502,6 +502,16 @@ public final class Session {
      * @return Array of configured providers
      */
     public synchronized Provider[] getProviders() {
+    if (!loadedProviders) {
+        Class<?> cl;
+        if (authenticator != null)
+            cl = authenticator.getClass();
+        else
+            cl = this.getClass();
+        // load the resources
+        loadProviders(cl);
+    }
+
     Provider[] _providers = new Provider[providers.size()];
     providers.toArray(_providers);
     return _providers;
