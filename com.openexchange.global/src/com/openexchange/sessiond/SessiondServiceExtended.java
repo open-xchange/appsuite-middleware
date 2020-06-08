@@ -85,52 +85,6 @@ public interface SessiondServiceExtended extends SessiondService {
     List<String> getActiveSessionIDs();
 
     /**
-     * Get the session object related to the given session identifier.
-     *
-     * @param sessionId The session identifier
-     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
-     *            <code>false</code>
-     * @return Returns the session or <code>null</code> if no session exists for the given identifier or if the session is expired
-     */
-    Session getSession(String sessionId, boolean considerSessionStorage);
-
-    /**
-     * Get the session object related to the given session identifier.
-     * <p>
-     * If session has been fetched from session storage, that session will not be added to local SessionD. Moreover, session will not be
-     * moved to first session container.
-     *
-     * @param sessionId The session identifier
-     * @return Returns the session or <code>null</code> if no session exists for the given identifier or if the session is expired
-     * @see SessiondServiceExtended#getSession(String, boolean)
-     */
-    Session peekSession(String sessionId);
-
-    /**
-     * Get the session object related to the given session identifier.
-     * <p>
-     * If session has been fetched from session storage, that session will not be added to local SessionD.. Moreover, session will not be
-     * moved to first session container.
-     *
-     * @param sessionId The session identifier
-     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
-     *            <code>false</code>
-     * @return Returns the session or <code>null</code> if no session exists for the given identifier or if the session is expired
-     * @see SessiondServiceExtended#getSession(String, boolean)
-     */
-    Session peekSession(String sessionId, boolean considerSessionStorage);
-
-    /**
-     * Gets the sessions associated with specified user in given context.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param considerSessionStorage <code>true</code> to also consider session storage; otherwise <code>false</code>
-     * @return The <b>local-only</b> sessions associated with specified user in given context
-     */
-    Collection<Session> getSessions(int userId, int contextId, boolean considerSessionStorage);
-
-    /**
      * Checks if specified session is applicable for session storage.
      *
      * @param session The session to check
