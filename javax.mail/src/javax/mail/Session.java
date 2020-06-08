@@ -235,6 +235,7 @@ public final class Session {
     private PrintStream out;			// debug output stream
     private MailLogger logger;
     private final List<Provider> providers = new ArrayList<>();
+    private boolean loadedProviders;
     private final Map<String, Provider> providersByProtocol = new HashMap<>();
     private final Map<String, Provider> providersByClassName = new HashMap<>();
     private final Properties addressMap = new Properties();
@@ -288,7 +289,8 @@ public final class Session {
 	else
 	    cl = this.getClass();
 	// load the resources
-    loadProviders(cl);
+    // loadProviders(cl);
+	loadedProviders = false;
 	loadAddressMap(cl);
 	q = new EventQueue((Executor)props.get("mail.event.executor"));
     }
@@ -536,14 +538,14 @@ public final class Session {
 				   ".class property exists and points to " + 
 				   _className);
 	    }
-	    _provider = providersByClassName.get(_className);
+	    _provider = getProviderByClassName(_className);
 	} 
 
 	if (_provider != null) {
         return _provider;
     } else {
         // returning currently default protocol in providersByProtocol
-        _provider = providersByProtocol.get(protocol);
+        _provider = getProviderByProtocol(protocol);
     }
 
 	if (_provider == null) {
@@ -554,6 +556,65 @@ public final class Session {
 	    }
 	    return _provider;
 	}
+    }
+    
+    /**
+     * Get the Provider that uses the specified class name.
+     *
+     * @param   className   the class name
+     * @return      the Provider
+     */
+    private Provider getProviderByClassName(String className) {
+    // first, try our local list of providers
+    Provider p = providersByClassName.get(className);
+    if (p != null)
+        return p;
+
+    // finally, if we haven't loaded our config, load it and try again
+    if (!loadedProviders) {
+        Class<?> cl;
+        if (authenticator != null)
+            cl = authenticator.getClass();
+        else
+            cl = this.getClass();
+        // load the resources
+        loadProviders(cl);
+        p = providersByClassName.get(className);
+    }
+    return p;
+    }
+
+    /**
+     * Get the Provider for the specified protocol.
+     *
+     * @param   protocol    the protocol
+     * @return      the Provider
+     */
+    private Provider getProviderByProtocol(String protocol) {
+    // first, try our local list of providers
+    Provider p = providersByProtocol.get(protocol);
+    if (p != null)
+        return p;
+
+    // now, try services
+    ServiceLoader<Provider> loader = ServiceLoader.load(Provider.class);
+    for (Provider pp : loader) {
+        if (protocol.equals(pp.getProtocol()))
+        return pp;
+    }
+
+    // finally, if we haven't loaded our config, load it and try again
+    if (!loadedProviders) {
+        Class<?> cl;
+        if (authenticator != null)
+            cl = authenticator.getClass();
+        else
+            cl = this.getClass();
+        // load the resources
+        loadProviders(cl);
+        p = providersByProtocol.get(protocol);
+    }
+    return p;
     }
 
     /**
@@ -1050,6 +1111,7 @@ public final class Session {
 	    logger.config("Providers Listed By Protocol: " + 
 	       providersByProtocol.toString());
 	}
+    loadedProviders = true;
     }
 
     private void loadProvidersFromStream(InputStream is) 
