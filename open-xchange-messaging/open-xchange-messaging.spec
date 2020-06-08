@@ -10,7 +10,7 @@ BuildRequires:  open-xchange-oauth
 BuildRequires:  open-xchange-xerces
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define        ox_release 52
+%define        ox_release 53
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -101,6 +101,8 @@ fi
 %dir /opt/open-xchange/etc/
 
 %changelog
+* Mon Jun 08 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-06-12 (5762)
 * Mon May 18 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-05-22 (5739)
 * Thu Apr 02 2020 Marcus Klein <marcus.klein@open-xchange.com>
