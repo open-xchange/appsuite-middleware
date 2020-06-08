@@ -606,13 +606,6 @@ public final class Session {
     if (p != null)
         return p;
 
-    // now, try services
-    ServiceLoader<Provider> loader = ServiceLoader.load(Provider.class);
-    for (Provider pp : loader) {
-        if (protocol.equals(pp.getProtocol()))
-        return pp;
-    }
-
     // finally, if we haven't loaded our config, load it and try again
     if (!loadedProviders) {
         Class<?> cl;
