@@ -50,6 +50,7 @@
 package com.openexchange.push.dovecot;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
@@ -57,6 +58,7 @@ import com.openexchange.push.PushListener;
 import com.openexchange.push.dovecot.registration.RegistrationContext;
 import com.openexchange.push.dovecot.registration.RegistrationPerformer;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 
@@ -184,10 +186,11 @@ public abstract class AbstractDovecotPushListener implements PushListener {
      * Unregisters this listeners.
      *
      * @param tryToReconnect Whether to try to reconnect this listener; otherwise <code>false</code>
+     * @param optionalOldSession The optional old session
      * @return An optional clean-up task or <code>null</code>
      * @throws OXException If unregistration fails
      */
-    public abstract Runnable unregister(boolean tryToReconnect) throws OXException;
+    public abstract Runnable unregister(boolean tryToReconnect, Optional<Session> optionalOldSession) throws OXException;
 
     // -------------------------------------------------------------------------------------------------------------------------------
 

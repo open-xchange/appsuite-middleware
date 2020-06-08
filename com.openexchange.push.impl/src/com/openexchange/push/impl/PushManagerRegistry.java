@@ -680,11 +680,13 @@ public final class PushManagerRegistry implements PushListenerService {
 
     @Override
     public boolean unregisterPermanentListenerFor(Session session, String clientId) throws OXException {
-        return unregisterPermanentListenerFor(session.getUserId(), session.getContextId(), clientId);
+        return unregisterPermanentListenerFor(new PushUser(session.getUserId(), session.getContextId(), Optional.of(session.getSessionID())), clientId);
     }
 
     @Override
-    public boolean unregisterPermanentListenerFor(int userId, int contextId, String clientId) throws OXException {
+    public boolean unregisterPermanentListenerFor(PushUser pushUser, String clientId) throws OXException {
+        int userId = pushUser.getUserId();
+        int contextId = pushUser.getContextId();
         if (!PushUtility.allowedClient(clientId, null, false)) {
             /*
              * No permanent push listener for the client.
@@ -706,7 +708,6 @@ public final class PushManagerRegistry implements PushListenerService {
                 }
             }
 
-            PushUser pushUser = new PushUser(userId, contextId);
             for (PushManagerExtendedService extendedService : getExtendedPushManagers()) {
                 try {
                     // Stop listener for session

@@ -52,6 +52,7 @@ package com.openexchange.push.dovecot.stateless;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
@@ -62,6 +63,8 @@ import com.openexchange.push.dovecot.DovecotPushConfiguration;
 import com.openexchange.push.dovecot.registration.RegistrationContext;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 
 
 /**
@@ -156,7 +159,7 @@ public class StatelessDovecotPushManagerService extends AbstractDovecotPushManag
 
         RegistrationContext registrationContext = getRegistrationContext(session);
         StatelessDovecotPushListener listener = new StatelessDovecotPushListener(registrationContext, false, services);
-        listener.unregister(false);
+        listener.unregister(false, Optional.empty());
         return true;
     }
 
@@ -215,7 +218,7 @@ public class StatelessDovecotPushManagerService extends AbstractDovecotPushManag
         StatelessDovecotPushListener listener = new StatelessDovecotPushListener(registrationContext, false, services);
 
         if (!tryToReconnect) {
-            listener.unregister(false);
+            listener.unregister(false, Optional.empty());
             return true;
         }
 
@@ -224,13 +227,18 @@ public class StatelessDovecotPushManagerService extends AbstractDovecotPushManag
             return false;
         }
 
-        Session anotherSession = lookUpSessionFor(userId, contextId, null);
+        Session oldSession = null;
+        if (pushUser.getIdOfIssuingSession().isPresent()) {
+            oldSession = ((SessiondServiceExtended) services.getServiceSafe(SessiondService.class)).peekSession(pushUser.getIdOfIssuingSession().get(), false);
+        }
+
+        Session anotherSession = lookUpSessionFor(userId, contextId, oldSession);
         if (anotherSession != null) {
             // User has another push-capable session in cluster
             return false;
         }
 
-        listener.unregister(false);
+        listener.unregister(false, Optional.empty());
         return true;
     }
 
@@ -238,7 +246,7 @@ public class StatelessDovecotPushManagerService extends AbstractDovecotPushManag
     public void unregisterForDeletedUser(PushUser pushUser) throws OXException {
         RegistrationContext registrationContext = getRegistrationContext(pushUser);
         StatelessDovecotPushListener listener = new StatelessDovecotPushListener(registrationContext, false, services);
-        listener.unregister(false);
+        listener.unregister(false, Optional.empty());
     }
 
     @Override

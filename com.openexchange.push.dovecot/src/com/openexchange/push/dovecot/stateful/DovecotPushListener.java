@@ -51,6 +51,7 @@
 package com.openexchange.push.dovecot.stateful;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Optional;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushExceptionCodes;
@@ -105,7 +106,7 @@ public class DovecotPushListener extends AbstractDovecotPushListener implements 
     public void run() {
         try {
             if (!isUserValid()) {
-                unregister(false);
+                unregister(false, Optional.empty());
                 return;
             }
 
@@ -166,7 +167,7 @@ public class DovecotPushListener extends AbstractDovecotPushListener implements 
     }
 
     @Override
-    public synchronized Runnable unregister(boolean tryToReconnect) throws OXException {
+    public synchronized Runnable unregister(boolean tryToReconnect, Optional<Session> optionalOldSession) throws OXException {
         // Avoid subsequent initialization attempt
         initialized = true;
 
@@ -179,7 +180,7 @@ public class DovecotPushListener extends AbstractDovecotPushListener implements 
                 }
 
                 // Check if there is still a valid push-capable session available
-                Session session = pushManager.lookUpSessionFor(registrationContext.getUserId(), registrationContext.getContextId(), null);
+                Session session = pushManager.lookUpSessionFor(registrationContext.getUserId(), registrationContext.getContextId(), optionalOldSession.orElse(null));
                 if (null != session) {
                     // Keep as-is
                     return null;
@@ -224,7 +225,7 @@ public class DovecotPushListener extends AbstractDovecotPushListener implements 
             }
         }
 
-        Runnable cleanUpTask = null;
+        Runnable cleanUpTask;
         DovecotPushListener anotherListener = tryToReconnect ? pushManager.injectAnotherListenerFor(registrationContext.getSession()) : null;
         if (null == anotherListener) {
             // No other listener available
