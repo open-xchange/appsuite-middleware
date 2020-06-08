@@ -51,7 +51,6 @@ package com.openexchange.rest.client.httpclient.internal;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -174,7 +173,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             .expireAfterAccess(2, TimeUnit.DAYS)
             .removalListener((RemovalListener<String, ManagedHttpClientImpl>) notification -> {
                 if (notification.wasEvicted()) {
-                    close(notification.getKey(), notification.getValue());
+                    close(notification.getKey(), notification.getValue(), false);
                 }})
             .build();
         //@formatter:on
@@ -219,7 +218,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         ManagedHttpClientImpl client = httpClients.getIfPresent(httpClientId);
         if (client != null) {
             LOGGER.debug("Explicit closing HTTP client for id {} via internal API.", httpClientId);
-            close(httpClientId, client);
+            close(httpClientId, client, true);
         }
     }
 
@@ -282,7 +281,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             SpecificHttpClientConfigProvider provider = (SpecificHttpClientConfigProvider) service;
             String clientId = provider.getClientId();
             if (specificProviders.remove(clientId) != null) {
-                close(clientId, httpClients.getIfPresent(clientId));
+                close(clientId, httpClients.getIfPresent(clientId), true);
                 LOGGER.trace("Removed provider for {}", clientId);
             }
         } else if (service instanceof WildcardHttpClientConfigProvider) {
@@ -299,7 +298,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
                 Pattern pattern = removed.getRegularExpressionPattern();
                 for (Map.Entry<String, ManagedHttpClientImpl> entry : httpClients.asMap().entrySet()) {
                     if (false == specificProviders.containsKey(entry.getKey()) && pattern.matcher(entry.getKey()).matches()) {
-                        close(entry.getKey(), entry.getValue());
+                        close(entry.getKey(), entry.getValue(), true);
                     }
                 }
             }
@@ -317,7 +316,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     public synchronized void shutdown() {
         if (isShutdown.compareAndSet(false, true)) {
             for (Map.Entry<String, ManagedHttpClientImpl> entry : httpClients.asMap().entrySet()) {
-                close(entry.getKey(), entry.getValue());
+                close(entry.getKey(), entry.getValue(), true);
             }
         }
     }
@@ -384,7 +383,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
          * Prepare client builder
          */
         //@formatter:off
-        HttpClientBuilder builder = new ExtendedBuilder(clientId)
+        HttpClientBuilder builder = HttpClientBuilder.create()
             .setConnectionManager(ccm)
             .setDefaultRequestConfig(RequestConfig.custom()
                 .setConnectTimeout(config.getConnectTimeout())
@@ -474,19 +473,22 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
     /**
      * Closes a HTTP client.
-     * <p>
-     * The HTTP client will be auto removed from the cache. See {@link CloseableListener}
      *
      * @param clientId The client identifier
      * @param managedClient The client to close
+     * @param removeFromCache <code>true</code> to remove the client from cache,
+     *            <code>false</code> otherwise
      */
-    void close(String clientId, ManagedHttpClientImpl managedClient) {
+    void close(String clientId, ManagedHttpClientImpl managedClient, boolean removeFromCache) {
         /*
          * The ClientConnectionManager will be closed implicit by the
          * HTTP client itself.
          */
         if (null != managedClient) {
             LOGGER.debug("Closing HTTP client for service {}", clientId);
+            if (removeFromCache) {
+                httpClients.invalidate(clientId);
+            }
             closeWithDelay(clientId, managedClient.getConfigHash(), managedClient.unset());
         }
     }
@@ -529,34 +531,6 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     private void checkShutdownStatus() {
         if (isShutdown.get()) {
             throw new IllegalStateException("Service is shutting down.");
-        }
-    }
-
-    private class CloseableListener implements Closeable {
-
-        private final String clientId;
-
-        public CloseableListener(String clientId) {
-            super();
-            this.clientId = clientId;
-        }
-
-        @Override
-        public void close() throws IOException {
-            LOGGER.debug("Client has been closed. Remove client for {} from cache.", clientId);
-            httpClients.invalidate(clientId);
-        }
-    }
-
-    private class ExtendedBuilder extends HttpClientBuilder {
-
-        @SuppressWarnings("resource")
-        public ExtendedBuilder(String clientId) {
-            super();
-            /*
-             * Add the listener to remove the client when it is closed outside this service
-             */
-            addCloseable(new CloseableListener(clientId));
         }
     }
 
