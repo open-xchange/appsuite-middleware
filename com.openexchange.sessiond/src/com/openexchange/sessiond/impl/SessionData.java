@@ -751,27 +751,42 @@ final class SessionData {
 
     List<SessionControl> getShortTermSessions() {
         // A read-only access
-        final List<SessionControl> retval = new LinkedList<SessionControl>();
-        for (final SessionContainer container : sessionList) {
-            retval.addAll(container.getSessionControls());
+        Iterator<SessionContainer> it = sessionList.iterator();
+        if (!it.hasNext()) {
+            return Collections.emptyList();
+        }
+
+        List<SessionControl> retval = new ArrayList<SessionControl>(it.next().getSessionControls());
+        while (it.hasNext()) {
+            retval.addAll(it.next().getSessionControls());
         }
         return retval;
     }
 
     List<String> getShortTermSessionIDs() {
         // A read-only access
-        List<String> retval = new LinkedList<String>();
-        for (SessionContainer container : sessionList) {
-            retval.addAll(container.getSessionIDs());
+        Iterator<SessionContainer> it = sessionList.iterator();
+        if (!it.hasNext()) {
+            return Collections.emptyList();
+        }
+
+        List<String> retval = new ArrayList<String>(it.next().getSessionIDs());
+        while (it.hasNext()) {
+            retval.addAll(it.next().getSessionIDs());
         }
         return retval;
     }
 
     List<SessionControl> getLongTermSessions() {
         // A read-only access
-        List<SessionControl> retval = new LinkedList<SessionControl>();
-        for (final SessionMap longTermMap : longTermList) {
-            retval.addAll(longTermMap.values());
+        Iterator<SessionMap> it = longTermList.iterator();
+        if (!it.hasNext()) {
+            return Collections.emptyList();
+        }
+
+        List<SessionControl> retval = new ArrayList<SessionControl>(it.next().values());
+        while (it.hasNext()) {
+            retval.addAll(it.next().values());
         }
         return retval;
     }
