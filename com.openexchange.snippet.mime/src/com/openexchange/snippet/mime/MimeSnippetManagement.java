@@ -591,8 +591,16 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
             }
 
-            final Object misc = snippet.getMisc();
-            final String contentSubType = determineContentSubtype(misc);
+            // Sanitize content to be an empty string if null is passed
+            String content = snippet.getContent();
+            if (content == null) {
+                // Set to empty string
+                content = "";
+            }
+
+            // Some variables
+            Object misc = snippet.getMisc();
+            String contentSubType = determineContentSubtype(misc);
 
             // Set other stuff
             final List<Attachment> attachments = snippet.getAttachments();
@@ -601,7 +609,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Content part
                 {
                     final MimeBodyPart textPart = new MimeBodyPart();
-                    final String content = snippet.getContent();
                     MessageUtility.setText(sanitizeContent(content), "UTF-8", null == misc ? "plain" : contentSubType, textPart);
                     // textPart.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
                     multipart.addBodyPart(textPart);
@@ -630,7 +637,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 MessageUtility.setContent(multipart, mimeMessage);
             } else {
                 // The variable "misc" can only be null at this location
-                MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain", mimeMessage);
+                MessageUtility.setText(sanitizeContent(content), "UTF-8", "plain", mimeMessage);
             }
             // Save
             mimeMessage.saveChanges();

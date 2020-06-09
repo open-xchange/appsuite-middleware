@@ -115,6 +115,10 @@ public final class NewAction extends SnippetAction {
         if (isEmpty(snippet.getModule())) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(Property.MODULE.getPropName());
         }
+        if (snippet.getContent() == null) {
+            // Set to empty string
+            snippet.setContent("");
+        }
         List<Attachment> attachments = snippet.getAttachments();
         if (null != attachments) {
             for (final Attachment attachment : attachments) {
