@@ -235,6 +235,7 @@ public final class Session {
     private PrintStream out;			// debug output stream
     private MailLogger logger;
     private final List<Provider> providers = new ArrayList<>();
+    private boolean loadedProviders;
     private final Map<String, Provider> providersByProtocol = new HashMap<>();
     private final Map<String, Provider> providersByClassName = new HashMap<>();
     private final Properties addressMap = new Properties();
@@ -288,7 +289,8 @@ public final class Session {
 	else
 	    cl = this.getClass();
 	// load the resources
-    loadProviders(cl);
+    // loadProviders(cl);
+	loadedProviders = false;
 	loadAddressMap(cl);
 	q = new EventQueue((Executor)props.get("mail.event.executor"));
     }
@@ -500,6 +502,16 @@ public final class Session {
      * @return Array of configured providers
      */
     public synchronized Provider[] getProviders() {
+    if (!loadedProviders) {
+        Class<?> cl;
+        if (authenticator != null)
+            cl = authenticator.getClass();
+        else
+            cl = this.getClass();
+        // load the resources
+        loadProviders(cl);
+    }
+
     Provider[] _providers = new Provider[providers.size()];
     providers.toArray(_providers);
     return _providers;
@@ -536,14 +548,14 @@ public final class Session {
 				   ".class property exists and points to " + 
 				   _className);
 	    }
-	    _provider = providersByClassName.get(_className);
+	    _provider = getProviderByClassName(_className);
 	} 
 
 	if (_provider != null) {
         return _provider;
     } else {
         // returning currently default protocol in providersByProtocol
-        _provider = providersByProtocol.get(protocol);
+        _provider = getProviderByProtocol(protocol);
     }
 
 	if (_provider == null) {
@@ -554,6 +566,58 @@ public final class Session {
 	    }
 	    return _provider;
 	}
+    }
+    
+    /**
+     * Get the Provider that uses the specified class name.
+     *
+     * @param   className   the class name
+     * @return      the Provider
+     */
+    private Provider getProviderByClassName(String className) {
+    // first, try our local list of providers
+    Provider p = providersByClassName.get(className);
+    if (p != null)
+        return p;
+
+    // finally, if we haven't loaded our config, load it and try again
+    if (!loadedProviders) {
+        Class<?> cl;
+        if (authenticator != null)
+            cl = authenticator.getClass();
+        else
+            cl = this.getClass();
+        // load the resources
+        loadProviders(cl);
+        p = providersByClassName.get(className);
+    }
+    return p;
+    }
+
+    /**
+     * Get the Provider for the specified protocol.
+     *
+     * @param   protocol    the protocol
+     * @return      the Provider
+     */
+    private Provider getProviderByProtocol(String protocol) {
+    // first, try our local list of providers
+    Provider p = providersByProtocol.get(protocol);
+    if (p != null)
+        return p;
+
+    // finally, if we haven't loaded our config, load it and try again
+    if (!loadedProviders) {
+        Class<?> cl;
+        if (authenticator != null)
+            cl = authenticator.getClass();
+        else
+            cl = this.getClass();
+        // load the resources
+        loadProviders(cl);
+        p = providersByProtocol.get(protocol);
+    }
+    return p;
     }
 
     /**
@@ -1024,22 +1088,22 @@ public final class Session {
         // failed to load any providers, initialize with our defaults
         addProvider(new Provider(Provider.Type.STORE,
             "imap", "com.sun.mail.imap.IMAPStore",
-            "Oracle", "1.6.4"));
+            "Oracle", "1.6.5"));
         addProvider(new Provider(Provider.Type.STORE,
             "imaps", "com.sun.mail.imap.IMAPSSLStore",
-            "Oracle", "1.6.4"));
+            "Oracle", "1.6.5"));
         addProvider(new Provider(Provider.Type.STORE,
             "pop3", "com.sun.mail.pop3.POP3Store",
-            "Oracle", "1.6.4"));
+            "Oracle", "1.6.5"));
         addProvider(new Provider(Provider.Type.STORE,
             "pop3s", "com.sun.mail.pop3.POP3SSLStore",
-            "Oracle", "1.6.4"));
+            "Oracle", "1.6.5"));
         addProvider(new Provider(Provider.Type.TRANSPORT,
             "smtp", "com.sun.mail.smtp.SMTPTransport",
-            "Oracle", "1.6.4"));
+            "Oracle", "1.6.5"));
         addProvider(new Provider(Provider.Type.TRANSPORT,
             "smtps", "com.sun.mail.smtp.SMTPSSLTransport",
-            "Oracle", "1.6.4"));
+            "Oracle", "1.6.5"));
     }
 
 	if (logger.isLoggable(Level.CONFIG)) {
@@ -1050,6 +1114,7 @@ public final class Session {
 	    logger.config("Providers Listed By Protocol: " + 
 	       providersByProtocol.toString());
 	}
+    loadedProviders = true;
     }
 
     private void loadProvidersFromStream(InputStream is) 

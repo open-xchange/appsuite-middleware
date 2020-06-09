@@ -239,7 +239,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "Object",
+                  "type" : "object",
                   "title" : "SuccessResponse",
                   "properties" : {
                     "success" : {
@@ -840,6 +840,7 @@
           "name" : "context",
           "description" : "The context id",
           "in" : "path",
+          "required" : true,
           "schema" : {
             "type" : "integer",
             "format" : "int64"
@@ -848,6 +849,7 @@
           "name" : "user",
           "description" : "The user id",
           "in" : "path",
+          "required" : true,
           "schema" : {
             "type" : "integer",
             "format" : "int64"
@@ -924,6 +926,7 @@
           "name" : "mail*",
           "description" : "The mail addresses as a semicolon separated list",
           "in" : "path",
+          "required" : true,
           "schema" : {
             "type" : "string"
           }
@@ -1438,6 +1441,7 @@
           "name" : "session",
           "description" : "The session id",
           "in" : "path",
+          "required" : true,
           "schema" : {
             "type" : "string"
           }

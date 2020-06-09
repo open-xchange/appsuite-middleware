@@ -999,7 +999,7 @@ properties:
       packageName: open-xchange-imap
       tags: ["Mail","IMAP", "Logging", "Limit"]
     - key: com.openexchange.imap.debugLog.file.pattern
-      defaultValue: "%sanitisedMessage%n"
+      defaultValue: "%message%n"
       description: |
         Specifies the pattern for a single log message posted into a log file. Requires that "com.openexchange.imap.debugLog.enabled" is set
         to "true".

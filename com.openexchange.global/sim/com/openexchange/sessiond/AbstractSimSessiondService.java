@@ -100,6 +100,21 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
+    public Session getSession(String sessionId, boolean considerSessionStorage) {
+        return null;
+    }
+
+    @Override
+    public Session peekSession(String sessionId) {
+        return null;
+    }
+
+    @Override
+    public Session peekSession(String sessionId, boolean considerSessionStorage) {
+        return null;
+    }
+
+    @Override
     public Session getSessionByAlternativeId(final String altId) {
         return getSessionByAlternativeId(altId, false);
     }
@@ -146,6 +161,11 @@ public class AbstractSimSessiondService implements SessiondService {
 
     @Override
     public Collection<Session> getSessions(final int userId, final int contextId) {
+        return null;
+    }
+
+    @Override
+    public Collection<Session> getSessions(int userId, int contextId, boolean considerSessionStorage) {
         return null;
     }
 

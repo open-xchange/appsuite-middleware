@@ -149,7 +149,7 @@ public class IMAPDebugLoggerGenerator {
 
             int fileSize = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.debugLog.file.size", 2097152, view);
             int fileCount = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.debugLog.file.count", 99, view);
-            String layoutPattern = Strings.unquote(ConfigViews.getDefinedStringPropertyFrom("com.openexchange.imap.debugLog.file.pattern", "%sanitisedMessage%n", view).trim());
+            String layoutPattern = Strings.unquote(ConfigViews.getDefinedStringPropertyFrom("com.openexchange.imap.debugLog.file.pattern", "%message%n", view).trim());
 
             org.slf4j.Logger slf4jLogger = org.slf4j.LoggerFactory.getLogger(IMAPAccess.class);
 

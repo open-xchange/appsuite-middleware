@@ -49,6 +49,7 @@
 
 package com.openexchange.push.dovecot.stateless;
 
+import java.util.Optional;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.dovecot.AbstractDovecotPushListener;
@@ -57,6 +58,7 @@ import com.openexchange.push.dovecot.registration.RegistrationPerformer;
 import com.openexchange.push.dovecot.registration.RegistrationResult;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -126,7 +128,7 @@ public class StatelessDovecotPushListener extends AbstractDovecotPushListener {
     }
 
     @Override
-    public synchronized Runnable unregister(boolean tryToReconnect) throws OXException {
+    public synchronized Runnable unregister(boolean tryToReconnect, Optional<Session> optionalOldSession) throws OXException {
         RegistrationPerformer registrationPerformer = REGISTRATION_PERFORMER_REFERENCE.get();
         registrationPerformer.unregister(registrationContext);
         return null;

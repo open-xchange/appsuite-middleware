@@ -577,6 +577,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Check if debug should be enabled
              */
+            String server = IDNA.toASCII(config.getServer());
+            int port = config.getPort();
             if (Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.err);
@@ -584,7 +586,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Debug logging is enabled for this IMAP session
                  */
-                establishDebugLogger();
+                establishDebugLogger(imapSession, server, port);
             }
             IMAPStore imapStore = null;
             try {
@@ -593,7 +595,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Get connected store
                  */
-                imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), login, tmpPass, -1, preAuthStartTlsCap, true);
+                imapStore = newConnectedImapStore(imapSession, server, port, login, tmpPass, -1, preAuthStartTlsCap, true);
                 /*
                  * Add warning if non-secure
                  */
@@ -758,7 +760,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Debug logging is enabled for this IMAP session
                  */
-                establishDebugLogger();
+                establishDebugLogger(imapSession, server, port);
             }
             /*
              * Check for already failed authentication
@@ -881,8 +883,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private void establishDebugLogger() {
-        String serverAndPort = this.server + ':' + this.port;
+    private void establishDebugLogger(javax.mail.Session imapSession, String server, int port) {
+        String serverAndPort = server + ':' + port;
         try {
             IMAPDebugLoggerGenerator.getInstance().establishLoggerFor(imapSession, serverAndPort, session.getUserId(), session.getContextId());
         } catch (Exception e) {

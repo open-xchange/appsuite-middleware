@@ -204,6 +204,12 @@ public class SimSessiondService implements SessiondService {
     }
 
     @Override
+    public Collection<Session> getSessions(int userId, int contextId, boolean considerSessionStorage) {
+        SessionFilter filter = SessionFilter.create("(&(" + SessionFilter.USER_ID + "=" + userId + ")(" + SessionFilter.CONTEXT_ID + "=" + contextId + "))");
+        return filterSessions(filter, false);
+    }
+
+    @Override
     public Session findFirstMatchingSessionForUser(int userId, int contextId, SessionMatcher matcher) {
         SessionFilter filter = SessionFilter.create("(&(" + SessionFilter.USER_ID + "=" + userId + ")(" + SessionFilter.CONTEXT_ID + "=" + contextId + "))");
         List<Session> userSessions = filterSessions(filter, false);
@@ -218,6 +224,21 @@ public class SimSessiondService implements SessiondService {
 
     @Override
     public Session getSession(String sessionId) {
+        return sessionsById.get(sessionId);
+    }
+
+    @Override
+    public Session getSession(String sessionId, boolean considerSessionStorage) {
+        return sessionsById.get(sessionId);
+    }
+
+    @Override
+    public Session peekSession(String sessionId) {
+        return sessionsById.get(sessionId);
+    }
+
+    @Override
+    public Session peekSession(String sessionId, boolean considerSessionStorage) {
         return sessionsById.get(sessionId);
     }
 

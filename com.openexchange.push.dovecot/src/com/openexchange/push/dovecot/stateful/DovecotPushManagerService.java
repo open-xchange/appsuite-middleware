@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClient;
@@ -71,6 +72,8 @@ import com.openexchange.push.dovecot.locking.SessionInfo;
 import com.openexchange.push.dovecot.registration.RegistrationContext;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 
 
 /**
@@ -190,7 +193,7 @@ public class DovecotPushManagerService extends AbstractDovecotPushManagerService
     private void stopAll() {
         for (Map.Entry<SimpleKey, DovecotPushListener> entry : listeners.entrySet()) {
             try {
-                entry.getValue().unregister(false);
+                entry.getValue().unregister(false, Optional.empty());
             } catch (Exception e) {
                 SimpleKey key = entry.getKey();
                 LOGGER.warn("Failed to stop listener for user {} in context {}", I(key.userId), I(key.contextId));
@@ -204,12 +207,14 @@ public class DovecotPushManagerService extends AbstractDovecotPushManagerService
      *
      * @param tryToReconnect <code>true</code> to signal that a reconnect using another sessions should be performed; otherwise <code>false</code>
      * @param stopIfPermanent <code>true</code> to signal that current listener is supposed to be stopped even though it might be associated with a permanent push registration; otherwise <code>false</code>
-     * @param userId The user identifier
-     * @param contextId The corresponding context identifier
+     * @param pushUser The push user providing user information
      * @return The stop result
      * @throws OXException If unregistration attempt fails
      */
-    public StopResult stopListener(boolean tryToReconnect, boolean stopIfPermanent, int userId, int contextId) throws OXException {
+    public StopResult stopListener(boolean tryToReconnect, boolean stopIfPermanent, PushUser pushUser) throws OXException {
+        int contextId = pushUser.getContextId();
+        int userId = pushUser.getUserId();
+
         AccessControl lock = getlockFor(userId, contextId);
         Runnable cleanUpTask = null;
         try {
@@ -225,7 +230,15 @@ public class DovecotPushManagerService extends AbstractDovecotPushManagerService
                 listeners.remove(key);
 
                 boolean tryRecon = tryToReconnect || (!listener.isPermanent() && hasPermanentPush(userId, contextId));
-                cleanUpTask = listener.unregister(tryRecon);
+                if (tryRecon) {
+                    Session oldSession = null;
+                    if (pushUser.getIdOfIssuingSession().isPresent()) {
+                        oldSession = ((SessiondServiceExtended) services.getServiceSafe(SessiondService.class)).peekSession(pushUser.getIdOfIssuingSession().get(), false);
+                    }
+                    cleanUpTask = listener.unregister(tryRecon, Optional.ofNullable(oldSession));
+                } else {
+                    cleanUpTask = listener.unregister(false, Optional.empty());
+                }
                 if (null != cleanUpTask) {
                     return StopResult.STOPPED;
                 }
@@ -358,7 +371,7 @@ public class DovecotPushManagerService extends AbstractDovecotPushManagerService
             return false;
         }
 
-        StopResult stopResult = stopListener(true, false, session.getUserId(), session.getContextId());
+        StopResult stopResult = stopListener(true, false, new PushUser(session.getUserId(), session.getContextId(), Optional.of(session.getSessionID())));
         switch (stopResult) {
         case RECONNECTED:
             if (LOGGER.isDebugEnabled()) {
@@ -440,7 +453,7 @@ public class DovecotPushManagerService extends AbstractDovecotPushManagerService
                         LOGGER.info("Could not register permanent Dovecot listener for user {} in context {}. Reason: {}", I(userId), I(contextId), reason);
                     } else if (!current.isPermanent()) {
                         // Cancel current & replace
-                        current.unregister(false);
+                        current.unregister(false, Optional.empty());
                         DovecotPushListener listener = new DovecotPushListener(registrationContext, true, this, services);
                         listeners.put(key, listener);
                         removeListener = true;
@@ -502,7 +515,7 @@ public class DovecotPushManagerService extends AbstractDovecotPushManagerService
             return false;
         }
 
-        StopResult stopResult = stopListener(tryToReconnect, true, pushUser.getUserId(), pushUser.getContextId());
+        StopResult stopResult = stopListener(tryToReconnect, true, pushUser);
         switch (stopResult) {
         case RECONNECTED:
             if (LOGGER.isDebugEnabled()) {
@@ -537,7 +550,7 @@ public class DovecotPushManagerService extends AbstractDovecotPushManagerService
 
     @Override
     public void unregisterForDeletedUser(PushUser pushUser) throws OXException {
-        stopListener(false, true, pushUser.getUserId(), pushUser.getContextId());
+        stopListener(false, true, pushUser);
     }
 
     public void stop() {
