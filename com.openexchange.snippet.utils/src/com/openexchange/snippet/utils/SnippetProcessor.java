@@ -77,9 +77,15 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.Data;
+import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.image.ImageDataSource;
+import com.openexchange.image.ImageLocation;
+import com.openexchange.image.ImageUtility;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.InetAddresses;
 import com.openexchange.java.Streams;
@@ -163,8 +169,7 @@ public class SnippetProcessor {
     /**
      * Initializes a new {@link SnippetProcessor}.
      *
-     * @param session
-     * @param ctx
+     * @param session The session
      */
     public SnippetProcessor(Session session) {
         super();
@@ -442,6 +447,8 @@ public class SnippetProcessor {
         return processImages0(snippet, attachments, false);
     }
 
+    private static final Pattern PATTERN_SRC = MimeMessageUtility.PATTERN_SRC;
+
     private List<String> processImages0(DefaultSnippet snippet, List<Attachment> attachments, boolean addAttachments) throws OXException {
         String content = snippet.getContent();
         if (isEmpty(content)) {
@@ -465,21 +472,27 @@ public class SnippetProcessor {
             do {
                 String imageTag = m.group();
                 if (MimeMessageUtility.isValidImageTag(imageTag)) {
-                    String id = m.getManagedFileId();
-                    if (null == id || !mfm.contains(id)) {
-                        // Leave it
-                        continue;
-                    }
-
                     ManagedFile mf;
                     try {
-                        mf = mfm.getByID(id);
+                        String id = m.getManagedFileId();
+                        if (null != id) {
+                            if (mfm.contains(id)) {
+                                mf = mfm.getByID(id);
+                            } else {
+                                m.appendLiteralReplacement(sb, MimeMessageUtility.blankSrc(imageTag));
+                                continue;
+                            }
+                        } else {
+                            mf = toManagedFile(imageTag, mfm);
+                        }
                     } catch (OXException e) {
-                        LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", id, e);
+                        LOG.warn("Image with could not be loaded. Referenced image is skipped.", e);
                         // Anyway, replace image tag
                         m.appendLiteralReplacement(sb, MimeMessageUtility.blankSrc(imageTag));
                         continue;
                     }
+
+                    String id = mf.getID();
                     managedFiles.add(id);
 
                     if (++count > maxImageLimit) {
@@ -516,6 +529,59 @@ public class SnippetProcessor {
         }
 
         return managedFiles;
+    }
+
+    private final ManagedFile toManagedFile(String imageTag, ManagedFileManagement mfm) throws OXException {
+        ConversionService conversionService = Services.optService(ConversionService.class);
+        if (conversionService == null) {
+            // No such service
+            return null;
+        }
+
+        ImageLocation imageLocation = null;
+        Matcher srcMatcher = PATTERN_SRC.matcher(imageTag);
+        if (srcMatcher.find()) {
+            String imageUri = Strings.replaceSequenceWith(srcMatcher.group(1), "&amp;", '&');
+            if (MimeMessageUtility.isValidImageSource(imageUri)) {
+                try {
+                    imageLocation = ImageUtility.parseImageLocationFrom(imageUri);
+                } catch (IllegalArgumentException e) {
+                    // Nothing
+                }
+            }
+        }
+
+        if (null == imageLocation) {
+            // Could not yield image location
+            return null;
+        }
+
+        ImageDataSource dataSource = (ImageDataSource) conversionService.getDataSource(imageLocation.getRegistrationName());
+        if (null == dataSource) {
+            // No such data source
+            return null;
+        }
+
+        InputStream in = null;
+        try {
+            Data<InputStream> data = dataSource.getData(InputStream.class, dataSource.generateDataArgumentsFrom(imageLocation), session);
+            in = data.getData();
+
+            DataProperties dataProperties = data.getDataProperties();
+            String fileName = dataProperties == null ? null : dataProperties.get(DataProperties.PROPERTY_NAME);
+            String contentType = dataProperties == null ? null : dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+
+            ManagedFile managedFile = mfm.createManagedFile(in, false);
+            if (Strings.isNotEmpty(fileName)) {
+                managedFile.setFileName(fileName);
+            }
+            if (Strings.isNotEmpty(contentType)) {
+                managedFile.setContentType(contentType);
+            }
+            return managedFile;
+        } finally {
+            Streams.close(in);
+        }
     }
 
     /**
