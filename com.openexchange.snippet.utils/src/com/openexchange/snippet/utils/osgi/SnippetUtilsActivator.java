@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.html.HtmlService;
@@ -88,6 +89,7 @@ public final class SnippetUtilsActivator extends HousekeepingActivator {
 
         RankingAwareNearRegistryServiceTracker<SnippetService> snippetServiceRegistry = new RankingAwareNearRegistryServiceTracker<SnippetService>(context, SnippetService.class);
         rememberTracker(snippetServiceRegistry);
+        trackService(ConversionService.class);
         openTrackers();
 
         {

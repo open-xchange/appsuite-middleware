@@ -127,10 +127,16 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
     private static String getRegistrationNameFor(final String url, final String prefix) {
         String s = url;
         {
-            final String path = prefix + ALIAS_APPENDIX;
-            final int pos = s.indexOf(path);
+            String path = prefix + ALIAS_APPENDIX;
+            int pos = s.indexOf(path);
             if (pos >= 0) {
                 s = s.substring(pos + path.length());
+            } else {
+                path = "/appsuite/api/" + ALIAS_APPENDIX;
+                pos = s.indexOf(path);
+                if (pos >= 0) {
+                    s = s.substring(pos + path.length());
+                }
             }
         }
         for (final Entry<String, String> entry : alias2regName.entrySet()) {
