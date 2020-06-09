@@ -363,7 +363,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
         @Override
         public void run() {
             try {
-                SessiondServiceExtended sessiondService = (SessiondServiceExtended) services.getServiceSafe(SessiondService.class);
+                SessiondService sessiondService = services.getServiceSafe(SessiondService.class);
                 Session session = null;
                 for (Iterator<Map.Entry<String, Object>> it = sessionIds.entrySet().iterator(); session == null && it.hasNext();) {
                     session = sessiondService.peekSession(it.next().getKey(), false);

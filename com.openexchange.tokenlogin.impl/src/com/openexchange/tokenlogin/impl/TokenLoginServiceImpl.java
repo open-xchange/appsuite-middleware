@@ -82,7 +82,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.DefaultAddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.tokenlogin.DefaultTokenLoginSecret;
 import com.openexchange.tokenlogin.TokenLoginExceptionCodes;
 import com.openexchange.tokenlogin.TokenLoginSecret;
@@ -382,12 +381,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             lock.unlock();
         }
         // Create duplicate session
-        Session session;
-        if (sessiondService instanceof SessiondServiceExtended) {
-            session = ((SessiondServiceExtended) sessiondService).peekSession(sessionId);
-        } else {
-            session = sessiondService.getSession(sessionId);
-        }
+        Session session = sessiondService.peekSession(sessionId);
         if (null == session) {
             throw TokenLoginExceptionCodes.NO_SUCH_SESSION_FOR_TOKEN.create(token);
         }
