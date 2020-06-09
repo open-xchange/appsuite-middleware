@@ -59,9 +59,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -96,9 +96,9 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.notification.impl.mail.MailNotifications;
 import com.openexchange.share.notification.impl.mail.MailNotifications.ShareCreatedBuilder;
-import com.openexchange.threadpool.BoundedCompletionService;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
@@ -447,19 +447,20 @@ public class DefaultNotificationService implements ShareNotificationService {
          */
         ThreadPoolService threadPoolService = serviceLookup.getServiceSafe(ThreadPoolService.class);
         int numOfNotificationThreads = getIntValue("com.openexchange.share.notification.numOfNotificationThreads", 10, session);
-        CompletionService<Void> completionService = new BoundedCompletionService<Void>(threadPoolService, numOfNotificationThreads).setTrackable(true);
-        int numTasks = 0;
-        for (Entry<Integer, UserDetail> entry : internalUsersById.entrySet()) {
-            completionService.submit(new NotificationTask(entry.getKey(), entry.getValue(), moduleSupport, srcTarget, message, session, hostData));
-            numTasks++;
-        }
-        try {
-            for (int i = numTasks; i-- > 0;) {
-                completionService.take();
+        if (numOfNotificationThreads < 1) {
+            // Notify using this thread
+            for (Map.Entry<Integer, UserDetail> entry : internalUsersById.entrySet()) {
+                try {
+                    ThreadPools.execute(new NotificationTask(entry.getKey(), entry.getValue(), moduleSupport, srcTarget, message, session, hostData));
+                } catch (Exception e) {
+                    LOG.warn("Unable to send notification mail to internal user {} in context {}", entry.getKey(), I(session.getContextId()), e);
+                }
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOG.error("Interrupte while sending notifications to internl users", e);
+        } else {
+            ExecutorService executorService = threadPoolService.getFixedExecutor(numOfNotificationThreads);
+            for (Map.Entry<Integer, UserDetail> entry : internalUsersById.entrySet()) {
+                executorService.submit(new NotificationTask(entry.getKey(), entry.getValue(), moduleSupport, srcTarget, message, session, hostData));
+            }
         }
     }
 
