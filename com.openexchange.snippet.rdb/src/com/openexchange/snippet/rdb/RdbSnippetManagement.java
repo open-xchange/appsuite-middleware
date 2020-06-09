@@ -531,7 +531,10 @@ public final class RdbSnippetManagement implements SnippetManagement {
             // Store content
             {
                 String content = snippet.getContent();
-                if (contentSubType.indexOf("htm") >= 0) {
+                if (content == null) {
+                    // Set to empty string
+                    content = "";
+                } else if (contentSubType.indexOf("htm") >= 0) {
                     content = sanitizeHtmlContent(content);
                 }
                 if (null != content) {
