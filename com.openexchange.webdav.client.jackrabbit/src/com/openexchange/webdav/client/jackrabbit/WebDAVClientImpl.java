@@ -63,6 +63,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Transformer;
@@ -176,10 +177,11 @@ public class WebDAVClientImpl implements WebDAVClient {
      * @param login The user name to use for authentication
      * @param password The password to use for authentication
      * @param services The service look-up providing OSGi services
+     * @param optClientId The optional http client id to use
      * @throws OXException If initialization fails
      */
-    public WebDAVClientImpl(URI baseUrl, String login, String password, ServiceLookup services) throws IllegalStateException, OXException {
-        this(initDefaultClient(services), initDefaultContext(baseUrl, login, password), baseUrl);
+    public WebDAVClientImpl(URI baseUrl, String login, String password, ServiceLookup services, Optional<String> optClientId) throws IllegalStateException, OXException {
+        this(initDefaultClient(services, optClientId), initDefaultContext(baseUrl, login, password), baseUrl);
     }
 
     private HttpResponse execute(HttpUriRequest request) throws IOException, ClientProtocolException {
@@ -526,11 +528,12 @@ public class WebDAVClientImpl implements WebDAVClient {
      * Initializes the default client
      *
      * @param services The {@link ServiceLookup}
+     * @param optClientId The optional http client id to use
      * @return The {@link ManagedHttpClient}
      * @throws OXException in case of errors
      */
-    private static ManagedHttpClient initDefaultClient(ServiceLookup services) throws OXException {
-        return services.getServiceSafe(HttpClientService.class).getHttpClient(HTTP_CLIENT_ID);
+    private static ManagedHttpClient initDefaultClient(ServiceLookup services, Optional<String> optClientId) throws OXException {
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(optClientId.orElse(HTTP_CLIENT_ID));
     }
 
     /**

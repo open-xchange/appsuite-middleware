@@ -154,7 +154,7 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
                 uriBuilder.setPort(uri.getPort());
             }
             URI baseUrl = uriBuilder.build();
-            return service.getClientFactory().create(baseUrl, login, password);
+            return service.getClientFactory().create(baseUrl, login, password, optHttpClientId());
         } catch (URISyntaxException e) {
             throw FileStorageExceptionCodes.INVALID_URL.create(configUrl, e.getMessage());
         }
@@ -329,5 +329,15 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
     @Override
     public FileStorageService getService() {
         return service;
+    }
+
+    /**
+     * Gets the optional client identifier for the http client.
+     * If none is provided, then the default "webdav" is used instead.
+     *
+     * @return The optional http client identifier
+     */
+    protected Optional<String> optHttpClientId() {
+        return Optional.empty();
     }
 }
