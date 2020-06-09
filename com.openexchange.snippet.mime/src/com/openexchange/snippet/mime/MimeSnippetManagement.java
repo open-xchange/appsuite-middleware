@@ -578,7 +578,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
-        final Connection con = databaseService.getWritable(contextId);
+        Connection con = null;
         PreparedStatement stmt = null;
         boolean backAfterRead=false;
         try {
@@ -666,6 +666,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
             }
             // Store in DB, too
+            con = databaseService.getWritable(contextId);
             String newId = null;
             boolean error = true;
             try {
@@ -714,10 +715,12 @@ public final class MimeSnippetManagement implements SnippetManagement {
             throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            if (backAfterRead){
-                databaseService.backWritableAfterReading(contextId, con);
-            }else {
-                databaseService.backWritable(contextId, con);
+            if (con != null) {
+                if (backAfterRead){
+                    databaseService.backWritableAfterReading(contextId, con);
+                }else {
+                    databaseService.backWritable(contextId, con);
+                }
             }
         }
     }
