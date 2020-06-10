@@ -50,6 +50,7 @@
 package com.openexchange.share.notification.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -319,13 +320,14 @@ public class DefaultNotificationService implements ShareNotificationService {
 
         // Gather users and groups to notify
         Map<Integer, UserDetail> usersById = new HashMap<>(entities.size());
-        for (int userId : entities.getUsers()) {
-            try {
-                User user = userService.getUser(userId, context);
-                usersById.put(I(userId), new UserDetail(user));
-            } catch (OXException e) {
-                collectWarning(warnings, e, null);
+        try {
+            User[] users = userService.getUser(context, I2i(entities.getUsers()));
+            for (int i = 0; i < users.length; i++) {
+                User user = users[i];
+                usersById.put(I(user.getId()), new UserDetail(user));
             }
+        } catch (OXException e) {
+            collectWarning(warnings, e, null);
         }
 
         for (int groupId : entities.getGroups()) {
