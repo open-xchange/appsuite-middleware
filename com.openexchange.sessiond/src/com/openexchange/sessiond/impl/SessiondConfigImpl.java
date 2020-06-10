@@ -75,6 +75,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     private final long longLifeTime;
     private final boolean asyncPutToSessionStorage;
     private final String obfuscationKey;
+    private final boolean removeFromSessionStorageOnTimeout;
 
     /**
      * Initializes a new {@link SessiondConfigImpl}.
@@ -114,6 +115,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         asyncPutToSessionStorage = Boolean.parseBoolean(tmp.trim());
 
         obfuscationKey = conf.getProperty("com.openexchange.sessiond.encryptionKey", "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn");
+        removeFromSessionStorageOnTimeout = conf.getBoolProperty("com.openexchange.sessiond.removeFromSessionStorageOnTimeout", true);
     }
 
     @Override
@@ -171,4 +173,10 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     public String getObfuscationKey() {
         return obfuscationKey;
     }
+
+    @Override
+    public boolean isRemoveFromSessionStorageOnTimeout() {
+        return removeFromSessionStorageOnTimeout;
+    }
+
 }
