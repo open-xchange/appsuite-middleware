@@ -61,11 +61,29 @@ import com.openexchange.metrics.MetricType;
  */
 public class MonitoringId {
 
+    private static final MonitoringId NOOP = new MonitoringId("noop", 1);
+
+    /**
+     * Gets the special no-op instance.
+     *
+     * @return The no-op instance
+     */
+    public static MonitoringId getNoop() {
+        return NOOP;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private final String clientName;
 
     private final int instanceId;
 
-
+    /**
+     * Initializes a new {@link MonitoringId}.
+     *
+     * @param clientName The client name
+     * @param instanceId The instance identifier
+     */
     public MonitoringId(String clientName, int instanceId) {
         super();
         this.clientName = clientName;
@@ -102,20 +120,26 @@ public class MonitoringId {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         MonitoringId other = (MonitoringId) obj;
         if (clientName == null) {
-            if (other.clientName != null)
+            if (other.clientName != null) {
                 return false;
-        } else if (!clientName.equals(other.clientName))
+            }
+        } else if (!clientName.equals(other.clientName)) {
             return false;
-        if (instanceId != other.instanceId)
+        }
+        if (instanceId != other.instanceId) {
             return false;
+        }
         return true;
     }
 
