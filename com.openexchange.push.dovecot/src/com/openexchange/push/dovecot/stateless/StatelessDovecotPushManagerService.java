@@ -64,7 +64,6 @@ import com.openexchange.push.dovecot.registration.RegistrationContext;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
 
 
 /**
@@ -229,7 +228,7 @@ public class StatelessDovecotPushManagerService extends AbstractDovecotPushManag
 
         Session oldSession = null;
         if (pushUser.getIdOfIssuingSession().isPresent()) {
-            oldSession = ((SessiondServiceExtended) services.getServiceSafe(SessiondService.class)).peekSession(pushUser.getIdOfIssuingSession().get(), false);
+            oldSession = services.getServiceSafe(SessiondService.class).peekSession(pushUser.getIdOfIssuingSession().get(), false);
         }
 
         Session anotherSession = lookUpSessionFor(userId, contextId, oldSession);

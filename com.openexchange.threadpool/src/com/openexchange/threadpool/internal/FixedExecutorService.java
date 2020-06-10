@@ -49,14 +49,12 @@
 
 package com.openexchange.threadpool.internal;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.AbstractExecutorService;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -68,41 +66,45 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class FixedExecutorService extends AbstractExecutorService {
 
-    private final class PollingFuture extends FutureTask<Object> {
+    private final class PollingRunnable implements Runnable {
 
-        public PollingFuture(final Runnable command) {
-            super(command, null);
+        private final Runnable initialTask;
+
+        PollingRunnable(Runnable initialTask) {
+            super();
+            this.initialTask = initialTask;
         }
 
         @Override
-        protected void done() {
-            /*
-             * Poll next available command from queue
-             */
-            pollFromQueue();
-        }
+        public void run() {
+            initialTask.run();
 
+            for (Runnable nextTask; (nextTask = pollFromQueue()) != null;) {
+                nextTask.run();
+            }
+        }
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private final ExecutorService executorService;
-
-    private final Lock lock;
-
-    private final BlockingQueue<Runnable> queue;
-
     private final int size;
-
-    private final AtomicInteger count;
+    private final Lock lock;
+    private final Queue<Runnable> queue;
+    private int count;
 
     /**
      * Initializes a new {@link FixedExecutorService}.
+     *
+     * @param size The number of threads that are allowed being used concurrently
+     * @param executorService The executor to delegate to
      */
     public FixedExecutorService(final int size, final ExecutorService executorService) {
         super();
         lock = new ReentrantLock();
         this.size = size;
-        queue = new LinkedBlockingQueue<Runnable>();
-        count = new AtomicInteger();
+        queue = new LinkedList<Runnable>();
+        count = 0;
         this.executorService = executorService;
     }
 
@@ -115,12 +117,12 @@ public final class FixedExecutorService extends AbstractExecutorService {
     public void execute(final Runnable command) {
         lock.lock();
         try {
-            if (queue.isEmpty() && count.get() < size) {
+            if (queue.isEmpty() && count < size) {
                 /*
                  * Pass to execute() and leave
                  */
-                count.incrementAndGet();
-                executorService.execute(new PollingFuture(command));
+                executorService.execute(new PollingRunnable(command));
+                count++;
             } else {
                 /*
                  * Too many in-progress commands or queue not empty. Enqueue and leave
@@ -136,9 +138,9 @@ public final class FixedExecutorService extends AbstractExecutorService {
      * Polls next available command from queue. If queue is not empty, command is immediately passed to {@link #execute(Runnable)} method;
      * otherwise counter is decremented to signal a free resource for further processing of passed {@link Runnable commands}.
      *
-     * @return <code>true</code> if queue was not empty and thus a command is scheduled for execution; otherwise <code>false</code>
+     * @return <code>Runnable</code> if queue was not empty ; otherwise <code>null</code>
      */
-    protected boolean pollFromQueue() {
+    protected Runnable pollFromQueue() {
         lock.lock();
         try {
             final Runnable command = queue.poll();
@@ -146,14 +148,13 @@ public final class FixedExecutorService extends AbstractExecutorService {
                 /*
                  * Continue executing next queued command
                  */
-                executorService.execute(new PollingFuture(command));
-                return true;
+                return command;
             }
             /*
              * No queued command available. Signal free thread for processing.
              */
-            count.decrementAndGet();
-            return false;
+            count--;
+            return null;
         } finally {
             lock.unlock();
         }

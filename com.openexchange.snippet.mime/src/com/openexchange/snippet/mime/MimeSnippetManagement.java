@@ -578,7 +578,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
-        final Connection con = databaseService.getWritable(contextId);
+        Connection con = null;
         PreparedStatement stmt = null;
         boolean backAfterRead=false;
         try {
@@ -592,8 +592,16 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
             }
 
-            final Object misc = snippet.getMisc();
-            final String contentSubType = determineContentSubtype(misc);
+            // Sanitize content to be an empty string if null is passed
+            String content = snippet.getContent();
+            if (content == null) {
+                // Set to empty string
+                content = "";
+            }
+
+            // Some variables
+            Object misc = snippet.getMisc();
+            String contentSubType = determineContentSubtype(misc);
 
             // Set other stuff
             final List<Attachment> attachments = snippet.getAttachments();
@@ -602,7 +610,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Content part
                 {
                     final MimeBodyPart textPart = new MimeBodyPart();
-                    String content = snippet.getContent();
                     MessageUtility.setText(sanitizeContent(content), "UTF-8", null == misc ? "plain" : contentSubType, textPart);
                     // textPart.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
                     multipart.addBodyPart(textPart);
@@ -631,7 +638,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 MessageUtility.setContent(multipart, mimeMessage);
             } else {
                 // The variable "misc" can only be null at this location
-                MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain", mimeMessage);
+                MessageUtility.setText(sanitizeContent(content), "UTF-8", "plain", mimeMessage);
             }
             // Save
             mimeMessage.saveChanges();
@@ -659,6 +666,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
             }
             // Store in DB, too
+            con = databaseService.getWritable(contextId);
             String newId = null;
             boolean error = true;
             try {
@@ -707,10 +715,12 @@ public final class MimeSnippetManagement implements SnippetManagement {
             throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            if (backAfterRead){
-                databaseService.backWritableAfterReading(contextId, con);
-            }else {
-                databaseService.backWritable(contextId, con);
+            if (con != null) {
+                if (backAfterRead){
+                    databaseService.backWritableAfterReading(contextId, con);
+                }else {
+                    databaseService.backWritable(contextId, con);
+                }
             }
         }
     }

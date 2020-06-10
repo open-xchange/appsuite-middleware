@@ -64,7 +64,6 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.tools.encoding.Base64;
 
 /**
@@ -160,17 +159,14 @@ public class WebDAVSessionStore {
 
     /**
      * Optionally looks up a session by its identifier from the session service.
-     * 
+     *
      * @param sessionId The identifier of the session to get
      * @return The session, or <code>null</code> if not found
      */
     private static Session optSession(String sessionId) {
         SessiondService sessiondService = ServerServiceRegistry.getServize(SessiondService.class);
         if (null != sessiondService) {
-            if (SessiondServiceExtended.class.isInstance(sessiondService)) {
-                return ((SessiondServiceExtended) sessiondService).getSession(sessionId, false);
-            }
-            return sessiondService.getSession(sessionId);
+            return sessiondService.getSession(sessionId, false);
         }
         return null;
     }

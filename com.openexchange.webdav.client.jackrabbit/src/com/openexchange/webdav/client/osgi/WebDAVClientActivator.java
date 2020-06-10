@@ -50,6 +50,7 @@
 package com.openexchange.webdav.client.osgi;
 
 import java.net.URI;
+import java.util.Optional;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,8 +97,8 @@ public class WebDAVClientActivator extends HousekeepingActivator {
             registerService(WebDAVClientFactory.class, new WebDAVClientFactory() {
 
                 @Override
-                public WebDAVClient create(URI baseUrl, String login, String password) throws OXException {
-                    return new WebDAVClientImpl(baseUrl, login, password, services);
+                public WebDAVClient create(URI baseUrl, String login, String password, Optional<String> optClientId) throws OXException {
+                    return new WebDAVClientImpl(baseUrl, login, password, services, optClientId);
                 }
 
                 @Override

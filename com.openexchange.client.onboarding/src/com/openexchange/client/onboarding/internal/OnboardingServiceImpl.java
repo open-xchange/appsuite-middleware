@@ -90,7 +90,6 @@ import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
 
 /**
  * {@link OnboardingServiceImpl}
@@ -571,13 +570,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                 if (null != optSessionId) {
                     SessiondService service = services.getOptionalService(SessiondService.class);
                     if (null != service) {
-                        Session session;
-                        if (service instanceof SessiondServiceExtended) {
-                            session = ((SessiondServiceExtended) service).peekSession(optSessionId);
-                        } else {
-                            session = service.getSession(optSessionId);
-                        }
-
+                        Session session = service.peekSession(optSessionId);
                         if (null != session && session.getContextId() == contextId && session.getUserId() == userId) {
                             ImageLocation imageLocation = new ImageLocation.Builder(image.getName()).id(image.getType().getScheme()).optImageHost(HtmlProcessing.imageHost()).build();
                             OnboardingImageDataSource imgSource = OnboardingImageDataSource.getInstance();

@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.owncloud;
 
+import java.util.Optional;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -66,7 +67,7 @@ import com.openexchange.webdav.client.WebDAVClient;
  * @since v7.10.4
  */
 public class NextCloudAccountAccess extends OwnCloudAccountAccess {
-    
+
     public final static String HTTP_CLIENT_ID = "nextcloud";
 
     /**
@@ -84,9 +85,9 @@ public class NextCloudAccountAccess extends OwnCloudAccountAccess {
     protected AbstractWebDAVFileAccess initWebDAVFileAccess(WebDAVClient webdavClient) throws OXException {
         return new NextCloudFileAccess(webdavClient, this);
     }
-    
+
     @Override
-    protected String getHttpClientId() {
-        return HTTP_CLIENT_ID;
+    protected Optional<String> optHttpClientId() {
+        return Optional.of(HTTP_CLIENT_ID);
     }
 }

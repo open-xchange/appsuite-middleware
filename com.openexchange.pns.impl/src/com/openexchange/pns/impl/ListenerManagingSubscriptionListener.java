@@ -116,7 +116,7 @@ public class ListenerManagingSubscriptionListener implements PushSubscriptionLis
                 return;
             }
 
-            Session session = sessiond.getSession(sessionId);
+            Session session = sessiond.peekSession(sessionId);
             if (null == session) {
                 // No such session
                 return;
@@ -141,7 +141,7 @@ public class ListenerManagingSubscriptionListener implements PushSubscriptionLis
                 return;
             }
 
-            Session session = sessiond.getSession(sessionId);
+            Session session = sessiond.peekSession(sessionId);
             if (null == session) {
                 // No such session
                 return;
