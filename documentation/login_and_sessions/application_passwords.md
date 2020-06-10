@@ -1,6 +1,6 @@
 ---
 title: Application-specific Passwords
-icon: fa-sign-in
+icon: fa-key
 tags: Authentication, Session, Security
 ---
 
