@@ -1,6 +1,6 @@
 ---
 title: Internet Free Busy Servlet
-icon: fas fa-calendar-check-o
+icon: fa-calendar-check-o
 tags: API, Calendar, FreeBusy
 ---
 
@@ -26,7 +26,7 @@ To get free busy data for a user in a context, the property for publishing must 
 
     com.openexchange.calendar.publishInternetFreeBusy=true
 
-Furthermore it is possible to configure the maximum time range that can be requested. By default this time range is 12 weeks into the past and 26 weeks into the future. The time range is given in weeks.
+Furthermore it is possible to configure the maximum time range that is allowed to be requested. By default this maximum time range is 12 weeks into the past and 26 weeks into the future. The time range is given in weeks.
 
     com.openexchange.calendar.internetFreeBusyMaximumTimerangePast=13
     com.openexchange.calendar.internetFreeBusyMaximumTimerangeFuture=27
@@ -38,15 +38,22 @@ This section provides information about how to use the servlet.
 The request to the servlet has required and optional parameters. The context id, the user name and the server name are necessary for requesting free busy data. Optionally, the time range to be queried can be specified. Set parameter simple to true, if the resulting iCalendar data should not contain the free busy type and free information (necessary to get readable data for Microsoft Outlook).
 
 Required parameters:
-- contextId (Integer): The context id of the context in which the requested user is located.
-- userName (String): The name of the user. Typically the local part of the email address.
-- server (String): The name of the server. Typically the domain part of the email address.
+* **contextId** (Integer): The context id of the context in which the requested user is located.
+
+* **userName** (String): The name of the user. Typically the local part of the email address.
+
+* **server** (String): The name of the server. Typically the domain part of the email address.
+
 
 Optional parameters:
-- weeksIntoPast (Integer): The requested time range into the past in weeks.
+* **weeksIntoPast** (Integer): The requested time range into the past in weeks.
           Default value is 1 week into the past.
-- weeksIntoFuture (Integer): The requested time range into the future in weeks. Default value is 4 week into the future.
-- simple (Boolean): true, if the VFREEBUSY data should not contain free busy type and free information, false otherwise.
+          
+* **weeksIntoFuture** (Integer): The requested time range into the future in weeks.
+Default value is 4 week into the future.
+
+* **simple** (Boolean): true, if the VFREEBUSY data should not contain free busy type and free information, false otherwise.
+
 
 For further information see OX REST API documentation: <https://documentation.open-xchange.com/components/middleware/rest/7.10.3/index.html>.
 
