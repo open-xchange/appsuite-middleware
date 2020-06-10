@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,58 +47,48 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.sources;
+package com.openexchange.file.storage;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.mail.autoconfig.tools.Utils.OX_CONTEXT_ID;
-import static com.openexchange.mail.autoconfig.tools.Utils.OX_USER_ID;
-import static com.openexchange.rest.client.httpclient.util.HttpContextUtils.addCookieStore;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
-import com.openexchange.server.ServiceLookup;
+import java.net.CookieStore;
+import com.openexchange.exception.OXException;
+import com.openexchange.rest.client.httpclient.util.HttpContextUtils;
+import com.openexchange.session.Session;
 
 /**
- * Connects to the Mozilla ISPDB. For more information see <a
- * href="https://developer.mozilla.org/en/Thunderbird/Autoconfiguration">https://developer.mozilla.org/en/Thunderbird/Autoconfiguration</a>
+ * {@link HttpClientAwareAccountManager} is a {@link SecretAwareFileStorageAccountManager} which also removes the {@link CookieStore} in case the account is deleted or updated.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added google-common cache
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public abstract class AbstractProxyAwareConfigSource extends AbstractConfigSource {
-
-    /** The OSGi service look-up */
-    protected final ServiceLookup services;
+public class HttpClientAwareAccountManager extends SecretAwareFileStorageAccountManager {
 
     /**
-     * Initializes a new {@link AbstractProxyAwareConfigSource}.
+     * Gets a new {@code HttpClientAwareAccountManager} instance.
      *
-     * @param services The service look-up
+     * @param manager The backing account manager
+     * @return The http client aware account manager or <code>null</code>
      */
-    protected AbstractProxyAwareConfigSource(ServiceLookup services) {
-        super();
-        this.services = services;
+    public static HttpClientAwareAccountManager newInstanceFor(FileStorageAccountManager manager) {
+        return null == manager ? null : new HttpClientAwareAccountManager(manager);
     }
 
     /**
-     * Generated a {@link HttpContext} in which user and context identifiers
-     * are set.
-     *
-     * @param context The context to set with identifier {@link #OX_CONTEXT_ID}
-     * @param user The user to set with identifier {@link #OX_USER_ID}
-     * @return A {@link HttpContext}
+     * Initializes a new {@link HttpClientAwareAccountManager}.
      */
-    protected HttpContext httpContextFor(int context, int user) {
-        BasicHttpContext httpContext = new BasicHttpContext();
-        httpContext.setAttribute(OX_CONTEXT_ID, I(context));
-        httpContext.setAttribute(OX_USER_ID, I(user));
-        addCookieStore(httpContext, context, user, getAccountId());
-        return httpContext;
+    private HttpClientAwareAccountManager(FileStorageAccountManager manager) {
+        super(manager);
     }
 
-    /**
-     * Gets the account identifier used in the HTTP context
-     *
-     * @return The identifier
-     */
-    protected abstract String getAccountId();
+    @Override
+    public void deleteAccount(FileStorageAccount account, Session session) throws OXException {
+        super.deleteAccount(account, session);
+        HttpContextUtils.removeCookieStore(session, account.getId());
+    }
+
+    @Override
+    public void updateAccount(FileStorageAccount account, Session session) throws OXException {
+        super.updateAccount(account, session);
+        HttpContextUtils.removeCookieStore(session, account.getId());
+    }
+
 }

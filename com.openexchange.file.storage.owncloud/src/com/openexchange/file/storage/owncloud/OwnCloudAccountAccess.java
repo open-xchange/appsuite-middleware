@@ -81,6 +81,7 @@ import com.openexchange.file.storage.webdav.exception.WebdavExceptionCodes;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.ManagedHttpClient;
+import com.openexchange.rest.client.httpclient.util.HttpContextUtils;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.client.WebDAVClient;
 
@@ -184,7 +185,7 @@ public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
             HttpClientContext context = HttpClientContext.create();
             context.setCredentialsProvider(credsProvider);
             context.setAuthCache(authCache);
-
+            HttpContextUtils.addCookieStore(context, getSession(), getAccountId());
             ManagedHttpClient client = initDefaultClient();
             restClient = new OwnCloudRestClient(client, baseUri, context);
         } catch (URISyntaxException e) {

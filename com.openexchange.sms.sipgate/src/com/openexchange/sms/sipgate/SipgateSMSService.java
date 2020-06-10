@@ -51,6 +51,8 @@ package com.openexchange.sms.sipgate;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.rest.client.httpclient.util.HttpContextUtils.addCookieStore;
+import static com.openexchange.rest.client.httpclient.util.HttpContextUtils.addCredentialProvider;
 import java.io.IOException;
 import java.util.Locale;
 import org.apache.http.HttpEntity;
@@ -58,13 +60,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -140,7 +139,7 @@ public class SipgateSMSService implements SMSServiceSPI {
                 jsonObject.put("smsId", "s0");
                 jsonObject.put("recipient", checkAndFormatPhoneNumber(recipients[i], null));
                 jsonObject.put("message", message);
-                sendMessage(client, sipgateUsername, sipgatePassword, jsonObject);
+                sendMessage(client, contextId, userId, sipgateUsername, sipgatePassword, jsonObject);
             }
         } catch (JSONException e) {
             // will not happen
@@ -155,20 +154,17 @@ public class SipgateSMSService implements SMSServiceSPI {
         return sb.toString();
     }
 
-    private void sendMessage(HttpClient client, String username, String password, JSONObject message) throws OXException {
+    private void sendMessage(HttpClient client, int contextId, int userId, String username, String password, JSONObject message) throws OXException {
         HttpPost request = new HttpPost(URI);
         request.setEntity(new InputStreamEntity(new JSONInputStream(message, Charsets.UTF_8_NAME), -1L, ContentType.APPLICATION_JSON));
         HttpResponse response = null;
 
+        /*
+         * Configure HTTP context
+         */
         HttpContext context = new BasicHttpContext();
-        {
-            /*
-             * Configure HTTP context
-             */
-            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(AUTHSCOPE, new UsernamePasswordCredentials(username, password));
-            context.setAttribute(HttpClientContext.CREDS_PROVIDER, credentialsProvider);
-        }
+        addCredentialProvider(context, AUTHSCOPE, username, password);
+        addCookieStore(context, contextId, userId, username);
 
         try {
             response = client.execute(request, context);

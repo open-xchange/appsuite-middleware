@@ -154,7 +154,7 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
                 uriBuilder.setPort(uri.getPort());
             }
             URI baseUrl = uriBuilder.build();
-            return service.getClientFactory().create(baseUrl, login, password, optHttpClientId());
+            return service.getClientFactory().create(getSession(), getAccountId(), baseUrl, login, password, optHttpClientId());
         } catch (URISyntaxException e) {
             throw FileStorageExceptionCodes.INVALID_URL.create(configUrl, e.getMessage());
         }

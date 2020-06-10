@@ -54,6 +54,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 import org.apache.http.impl.client.CloseableHttpClient;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 import com.openexchange.webdav.client.jackrabbit.WebDAVClientImpl;
 
 /**
@@ -93,6 +94,8 @@ public interface WebDAVClientFactory {
     /**
      * Initializes a new {@link WebDAVClientImpl}.
      *
+     * @param session The users session
+     * @param accountId The account id
      * @param baseUrl The URL of the WebDAV host to connect to
      * @param login The username to use for authentication
      * @param password The password to use for authentication
@@ -100,20 +103,22 @@ public interface WebDAVClientFactory {
      * @return An initialized WebDAV client
      * @throws If WebDAV client cannot be created
      */
-    WebDAVClient create(URI baseUrl, String login, String password, Optional<String> optClientId) throws OXException;
+    WebDAVClient create(Session session, String accountId, URI baseUrl, String login, String password, Optional<String> optClientId) throws OXException;
 
     /**
      * Initializes a new {@link WebDAVClientImpl}.
      *
+     * @param session The users session
+     * @param accountId The account id
      * @param baseUrl The URL of the WebDAV host to connect to
      * @param login The username to use for authentication
      * @param password The password to use for authentication
      * @return An initialized WebDAV client
      * @throws If WebDAV client cannot be created
      */
-    default WebDAVClient create(String baseUrl, String login, String password) throws OXException {
+    default WebDAVClient create(Session session, String accountId, String baseUrl, String login, String password) throws OXException {
         try {
-            return create(new URI(baseUrl), login, password, Optional.empty());
+            return create(session, accountId, new URI(baseUrl), login, password, Optional.empty());
         } catch (URISyntaxException e) {
             throw WebDAVClientExceptionCodes.UNABLE_TO_PARSE_URI.create(baseUrl, e);
         }

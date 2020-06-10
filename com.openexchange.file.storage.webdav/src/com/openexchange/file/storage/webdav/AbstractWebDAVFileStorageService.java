@@ -49,7 +49,7 @@
 
 package com.openexchange.file.storage.webdav;
 
-import static com.openexchange.file.storage.SecretAwareFileStorageAccountManager.newInstanceFor;
+import static com.openexchange.file.storage.HttpClientAwareAccountManager.newInstanceFor;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;

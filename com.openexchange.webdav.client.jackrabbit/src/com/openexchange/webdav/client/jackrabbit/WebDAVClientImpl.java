@@ -122,7 +122,9 @@ import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.ManagedHttpClient;
+import com.openexchange.rest.client.httpclient.util.HttpContextUtils;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.webdav.client.WebDAVClient;
 import com.openexchange.webdav.client.WebDAVClientException;
 import com.openexchange.webdav.client.WebDAVClientExceptionCodes;
@@ -173,6 +175,8 @@ public class WebDAVClientImpl implements WebDAVClient {
     /**
      * Initializes a new {@link WebDAVClientImpl}.
      *
+     * @param session The users session
+     * @param accountId The account id
      * @param baseUrl The URL of the WebDAV host to connect to
      * @param login The user name to use for authentication
      * @param password The password to use for authentication
@@ -180,8 +184,8 @@ public class WebDAVClientImpl implements WebDAVClient {
      * @param optClientId The optional http client id to use
      * @throws OXException If initialization fails
      */
-    public WebDAVClientImpl(URI baseUrl, String login, String password, ServiceLookup services, Optional<String> optClientId) throws IllegalStateException, OXException {
-        this(initDefaultClient(services, optClientId), initDefaultContext(baseUrl, login, password), baseUrl);
+    public WebDAVClientImpl(Session session, String accountId, URI baseUrl, String login, String password, ServiceLookup services, Optional<String> optClientId) throws IllegalStateException, OXException {
+        this(initDefaultClient(services, optClientId), initDefaultContext(session, accountId, baseUrl, login, password), baseUrl);
     }
 
     private HttpResponse execute(HttpUriRequest request) throws IOException, ClientProtocolException {
@@ -539,12 +543,14 @@ public class WebDAVClientImpl implements WebDAVClient {
     /**
      * Initializes the default {@link HttpContext}
      *
+     * @param session The users session
+     * @param accountId The account id
      * @param baseUrl The base url
      * @param login The login name
      * @param password The login password
      * @return The {@link HttpContext}
      */
-    private static HttpContext initDefaultContext(URI baseUrl, String login, String password) {
+    private static HttpContext initDefaultContext(Session session, String accountId, URI baseUrl, String login, String password) {
         HttpHost targetHost = new HttpHost(baseUrl.getHost(), determinePort(baseUrl), baseUrl.getScheme());
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
@@ -556,6 +562,7 @@ public class WebDAVClientImpl implements WebDAVClient {
         HttpClientContext context = HttpClientContext.create();
         context.setCredentialsProvider(credsProvider);
         context.setAuthCache(authCache);
+        HttpContextUtils.addCookieStore(context, session, accountId);
         return context;
     }
 
