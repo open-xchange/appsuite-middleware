@@ -90,7 +90,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.amazonaws.services.s3.model.UploadPartResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.DestroyAwareFileStorage;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.utils.TempFileHelper;
 import com.openexchange.java.Streams;
@@ -102,7 +102,7 @@ import com.openexchange.java.util.UUIDs;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class S3FileStorage implements FileStorage {
+public class S3FileStorage implements DestroyAwareFileStorage {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(S3FileStorage.class);
 
@@ -144,6 +144,11 @@ public class S3FileStorage implements FileStorage {
         this.prefix = prefix;
         this.chunkSize = chunkSize;
         LOG.debug("S3 file storage initialized for \"{}/{}{}\"", bucketName, prefix, DELIMITER);
+    }
+
+    @Override
+    public void onDestroyed() {
+        amazonS3.shutdown();
     }
 
     @Override

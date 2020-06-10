@@ -64,6 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.sproxyd.SproxydExceptionCode;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.rest.client.httpclient.HttpClients;
 
 /**
  * {@link SproxydClient}
@@ -90,6 +91,13 @@ public class SproxydClient {
         this.endpoints = sproxydConfig.getEndpointPool();
         this.httpClient = sproxydConfig.getHttpClient();
         this.prefix = prefix;
+    }
+
+    /**
+     * Shuts-down this Sproxyd client.
+     */
+    public void shutdown() {
+        HttpClients.shutDown(httpClient);
     }
 
     /**
