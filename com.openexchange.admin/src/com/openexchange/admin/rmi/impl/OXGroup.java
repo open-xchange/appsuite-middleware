@@ -117,7 +117,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     }
 
     private void logAndEnhanceException(Throwable t, final Credentials credentials, final Context ctx, final Group grp) {
-        logAndEnhanceException(t, credentials, null != ctx ? ctx.getIdAsString() : null, null != grp ? grp.getId().toString() : null);
+        logAndEnhanceException(t, credentials, null != ctx ? ctx.getIdAsString() : null, null != grp && null != grp.getId() ? grp.getId().toString() : null);
     }
 
     private void logAndEnhanceException(Throwable t, final Credentials credentials, final String contextId, final String groupId) {
