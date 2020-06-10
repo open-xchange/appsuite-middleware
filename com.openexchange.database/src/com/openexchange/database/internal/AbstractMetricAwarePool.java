@@ -103,7 +103,7 @@ public abstract class AbstractMetricAwarePool<T extends ConnectionTypeAware> ext
     /**
      * Initializes the metrics for this pool
      */
-    private void initMetrics() {
+    public void initMetrics() {
         Tags tags = Tags.of("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()));
         // @formatter:off
         Gauge.builder(GROUP + "active", () -> I(getNumActive()))
