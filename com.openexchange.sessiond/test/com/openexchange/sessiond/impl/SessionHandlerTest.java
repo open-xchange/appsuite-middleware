@@ -202,6 +202,11 @@ public class SessionHandlerTest {
             public long getLifeTime() {
                 return 0;
             }
+
+            @Override
+            public boolean isRemoveFromSessionStorageOnTimeout() {
+                return true;
+            }
         };
         SessionHandler.init(config, registry);
     }

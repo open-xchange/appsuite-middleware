@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,55 +47,48 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.file.storage;
+
+import java.net.CookieStore;
+import com.openexchange.exception.OXException;
+import com.openexchange.rest.client.httpclient.util.HttpContextUtils;
+import com.openexchange.session.Session;
 
 /**
+ * {@link HttpClientAwareAccountManager} is a {@link SecretAwareFileStorageAccountManager} which also removes the {@link CookieStore} in case the account is deleted or updated.
  *
- * {@link SessiondConfigInterface}
- *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public interface SessiondConfigInterface {
-
-    long getSessionContainerTimeout();
-
-    long getLongTermSessionContainerTimeout();
-
-    int getNumberOfSessionContainers();
-
-    int getMaxSessions();
-
-    int getMaxSessionsPerClient();
-
-    long getLifeTime();
-
-    long getLongLifeTime();
-
-    long getRandomTokenTimeout();
-
-    int getNumberOfLongTermSessionContainers();
+public class HttpClientAwareAccountManager extends SecretAwareFileStorageAccountManager {
 
     /**
-     * Whether to enforce putting sessions into session storage asynchronously.
+     * Gets a new {@code HttpClientAwareAccountManager} instance.
      *
-     * @return <code>true</code> for async put; otherwise <code>false</code>
+     * @param manager The backing account manager
+     * @return The http client aware account manager or <code>null</code>
      */
-    boolean isAsyncPutToSessionStorage();
+    public static HttpClientAwareAccountManager newInstanceFor(FileStorageAccountManager manager) {
+        return null == manager ? null : new HttpClientAwareAccountManager(manager);
+    }
 
     /**
-     * Gets a key to encrypt passwords when putting session into storage.
-     *
-     * @return The obfuscation key
+     * Initializes a new {@link HttpClientAwareAccountManager}.
      */
-    String getObfuscationKey();
+    private HttpClientAwareAccountManager(FileStorageAccountManager manager) {
+        super(manager);
+    }
 
-    /**
-     * Gets a value indicating whether sessions that were rotated out of the containers are implicitly also removed from the session
-     * storage or not. This may not be desired if a session is still in use by another node in the cluster.
-     *
-     * @return <code>true</code> if a session timeout should also remove the session from the distributed storage, <code>false</code>, otherwise
-     */
-    boolean isRemoveFromSessionStorageOnTimeout();
+    @Override
+    public void deleteAccount(FileStorageAccount account, Session session) throws OXException {
+        super.deleteAccount(account, session);
+        HttpContextUtils.removeCookieStore(session, account.getId());
+    }
+
+    @Override
+    public void updateAccount(FileStorageAccount account, Session session) throws OXException {
+        super.updateAccount(account, session);
+        HttpContextUtils.removeCookieStore(session, account.getId());
+    }
 
 }

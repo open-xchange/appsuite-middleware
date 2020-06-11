@@ -57,9 +57,6 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.conn.DefaultRoutePlanner;
 import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
@@ -69,6 +66,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.autoconfig.tools.ProxyInfo;
 import com.openexchange.mail.autoconfig.tools.Services;
+import com.openexchange.rest.client.httpclient.util.HttpContextUtils;
 
 /**
  * {@link UserAwareRoutePlanner}
@@ -122,9 +120,8 @@ public class UserAwareRoutePlanner extends DefaultRoutePlanner {
             /*
              * Set credential provider for authentication against the proxy
              */
-            BasicCredentialsProvider provider = new BasicCredentialsProvider();
-            provider.setCredentials(new AuthScope(httpHost.getHostName(), httpHost.getPort()), new UsernamePasswordCredentials(proxy.getProxyLogin(), proxy.getProxyPassword()));
-            context.setAttribute(HttpClientContext.CREDS_PROVIDER, provider);
+            AuthScope authScope = new AuthScope(httpHost.getHostName(), httpHost.getPort());
+            HttpContextUtils.addCredentialProvider(context, authScope, proxy.getProxyLogin(), proxy.getProxyPassword());
 
             return httpHost;
         } catch (OXException e) {

@@ -188,7 +188,7 @@ public final class Initialization {
             configDatabaseService.setCacheService(cacheService);
         }
         // Context pool life cycle.
-        ContextDatabaseLifeCycle contextLifeCycle = new ContextDatabaseLifeCycle(configuration, management, timer, reloader, configDatabaseService);
+        ContextDatabaseLifeCycle contextLifeCycle = new ContextDatabaseLifeCycle(configuration, management, timer, reloader, configDatabaseService, configurationService);
         pools.addLifeCycle(contextLifeCycle);
         Server.setConfigDatabaseService(configDatabaseService);
         Server.start(configurationService);

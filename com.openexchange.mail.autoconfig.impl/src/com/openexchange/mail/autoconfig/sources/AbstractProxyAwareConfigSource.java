@@ -52,6 +52,7 @@ package com.openexchange.mail.autoconfig.sources;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.autoconfig.tools.Utils.OX_CONTEXT_ID;
 import static com.openexchange.mail.autoconfig.tools.Utils.OX_USER_ID;
+import static com.openexchange.rest.client.httpclient.util.HttpContextUtils.addCookieStore;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import com.openexchange.server.ServiceLookup;
@@ -90,6 +91,14 @@ public abstract class AbstractProxyAwareConfigSource extends AbstractConfigSourc
         BasicHttpContext httpContext = new BasicHttpContext();
         httpContext.setAttribute(OX_CONTEXT_ID, I(context));
         httpContext.setAttribute(OX_USER_ID, I(user));
+        addCookieStore(httpContext, context, user, getAccountId());
         return httpContext;
     }
+
+    /**
+     * Gets the account identifier used in the HTTP context
+     *
+     * @return The identifier
+     */
+    protected abstract String getAccountId();
 }

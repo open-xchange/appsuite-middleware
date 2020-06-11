@@ -47,55 +47,21 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.filestore;
+
 
 /**
+ * {@link DestroyAwareFileStorage} - A file storage that supports a call-back if destroyed.
  *
- * {@link SessiondConfigInterface}
- *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public interface SessiondConfigInterface {
-
-    long getSessionContainerTimeout();
-
-    long getLongTermSessionContainerTimeout();
-
-    int getNumberOfSessionContainers();
-
-    int getMaxSessions();
-
-    int getMaxSessionsPerClient();
-
-    long getLifeTime();
-
-    long getLongLifeTime();
-
-    long getRandomTokenTimeout();
-
-    int getNumberOfLongTermSessionContainers();
+public interface DestroyAwareFileStorage extends FileStorage {
 
     /**
-     * Whether to enforce putting sessions into session storage asynchronously.
-     *
-     * @return <code>true</code> for async put; otherwise <code>false</code>
+     * Call-back if this file storage is destroyed.
+     * <p>
+     * Instance is cleared from cache and therefore freed for being garbage-collected.
      */
-    boolean isAsyncPutToSessionStorage();
-
-    /**
-     * Gets a key to encrypt passwords when putting session into storage.
-     *
-     * @return The obfuscation key
-     */
-    String getObfuscationKey();
-
-    /**
-     * Gets a value indicating whether sessions that were rotated out of the containers are implicitly also removed from the session
-     * storage or not. This may not be desired if a session is still in use by another node in the cluster.
-     *
-     * @return <code>true</code> if a session timeout should also remove the session from the distributed storage, <code>false</code>, otherwise
-     */
-    boolean isRemoveFromSessionStorageOnTimeout();
-
+    void onDestroyed();
 }

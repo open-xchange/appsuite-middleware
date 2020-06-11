@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -69,6 +68,7 @@ import java.util.regex.Pattern;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.ConnectionConfig;
@@ -115,6 +115,7 @@ import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.ManagedHttpClient;
 import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.internal.cookiestore.RejectAllCookieStore;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
 
@@ -126,6 +127,9 @@ import com.openexchange.timer.TimerService;
  * @since v7.10.4
  */
 public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerCustomizer<Object, Object>, ForcedReloadable {
+
+    private static final String DEFAULT_COOKIE_SPEC_NAME = "lenient";
+    private static final CookieStore REJECT_ALL_COOKIE_STORE = new RejectAllCookieStore();
 
     static final Logger LOGGER = LoggerFactory.getLogger(HttpClientServiceImpl.class);
 
@@ -201,7 +205,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
         LOGGER.trace("Getting client with ID {}", httpClientId);
         try {
-            return httpClients.get(httpClientId, new ManagedHttpClientImplLoader(httpClientId));
+            return httpClients.get(httpClientId, () -> create(httpClientId));
         } catch (ExecutionException e) {
             throw new IllegalStateException("Error getting or intitializing HTTP client for ID: " + httpClientId, e);
         }
@@ -389,7 +393,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
                 .setConnectTimeout(config.getConnectTimeout())
                 .setSocketTimeout(config.getSocketReadTimeout())
                 .setConnectionRequestTimeout(config.getConnectionRequestTimeout())
-                .setCookieSpec("lenient")
+                .setCookieSpec(DEFAULT_COOKIE_SPEC_NAME)
                 .build())
             .setRequestExecutor(new MeteredHttpRequestExecutor(clientId));
         //@formatter:on
@@ -404,10 +408,10 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         builder.setPublicSuffixMatcher(publicSuffixMatcher);
         {
             LenientCookieSpecProvider lenientCookieSpecProvider = new LenientCookieSpecProvider();
-            RegistryBuilder<CookieSpecProvider> regestryBuilder = CookieSpecRegistries.createDefaultBuilder(publicSuffixMatcher);
-            regestryBuilder.register(CookieSpecs.DEFAULT, lenientCookieSpecProvider);
-            regestryBuilder.register("lenient", lenientCookieSpecProvider);
-            builder.setDefaultCookieSpecRegistry(regestryBuilder.build());
+            RegistryBuilder<CookieSpecProvider> registryBuilder = CookieSpecRegistries.createDefaultBuilder(publicSuffixMatcher);
+            registryBuilder.register(CookieSpecs.DEFAULT, lenientCookieSpecProvider);
+            registryBuilder.register(DEFAULT_COOKIE_SPEC_NAME, lenientCookieSpecProvider);
+            builder.setDefaultCookieSpecRegistry(registryBuilder.build());
         }
 
         builder.addInterceptorLast(new HttpRequestInterceptor() {
@@ -419,6 +423,8 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
                 }
             }
         });
+
+        builder.setDefaultCookieStore(REJECT_ALL_COOKIE_STORE);
         builder.useSystemProperties();
 
         /*
@@ -687,53 +693,49 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         }
     }
 
-    private class ManagedHttpClientImplLoader implements Callable<ManagedHttpClientImpl> {
+    /**
+     * Creates a new {@link ManagedHttpClient} instance
+     *
+     * @param httpClientId The http client id
+     * @return The new {@link ManagedHttpClient}
+     * @throws OXException in case of errors
+     */
+    public ManagedHttpClientImpl create(String httpClientId) throws OXException {
 
-        private final String httpClientId;
-
-        ManagedHttpClientImplLoader(String httpClientId) {
-            super();
-            this.httpClientId = httpClientId;
-        }
-
-        @Override
-        public ManagedHttpClientImpl call() throws OXException {
-            String httpClientId = this.httpClientId;
-
-            /*
-             * Load configuration for the client
-             */
-            final Supplier<HttpBasicConfig> configSupplier;
-            final HttpClientConfigProvider provider;
-            {
-                SpecificHttpClientConfigProvider specificProvider = specificProviders.get(httpClientId);
-                if (specificProvider != null) {
-                    provider = specificProvider;
-                    configSupplier = () -> adjustConfig(httpClientId, specificProvider.configureHttpBasicConfig(createNewDefaultConfig()));
-                } else {
-                    WildcardHttpClientConfigProvider tmp = getWildcardProvider(httpClientId);
-                    if (tmp == null) {
-                        tmp = leftoverProvider;
-                    }
-                    final WildcardHttpClientConfigProvider wildcardProvider = tmp;
-                    provider = wildcardProvider;
-                    configSupplier = () -> adjustConfig(httpClientId, wildcardProvider.configureHttpBasicConfig(httpClientId, createNewDefaultConfig()));
+        /*
+         * Load configuration for the client
+         */
+        final Supplier<HttpBasicConfig> configSupplier;
+        final HttpClientConfigProvider provider;
+        {
+            SpecificHttpClientConfigProvider specificProvider = specificProviders.get(httpClientId);
+            if (specificProvider != null) {
+                provider = specificProvider;
+                configSupplier = () -> adjustConfig(httpClientId, specificProvider.configureHttpBasicConfig(createNewDefaultConfig()));
+            } else {
+                WildcardHttpClientConfigProvider tmp = getWildcardProvider(httpClientId);
+                if (tmp == null) {
+                    tmp = leftoverProvider;
                 }
+                final WildcardHttpClientConfigProvider wildcardProvider = tmp;
+                provider = wildcardProvider;
+                configSupplier = () -> adjustConfig(httpClientId, wildcardProvider.configureHttpBasicConfig(httpClientId, createNewDefaultConfig()));
             }
-            /*
-             * Ensure the configuration isn't changed unless the client is reloaded
-             */
-            final UnmodifiableHttpBasicConfig unmodifiableConfig = new UnmodifiableHttpBasicConfig(configSupplier.get());
-
-            ClientConnectionManager ccm = initializeClientConnectionManager(httpClientId, unmodifiableConfig);
-            CloseableHttpClient httpClient = initializeHttpClient(httpClientId, provider, unmodifiableConfig, ccm);
-            Supplier<Boolean> reloadCallback = () -> B(reloadClient(httpClientId, configSupplier.get(), provider, false));
-            ManagedHttpClientImpl managedHttpClient = new ManagedHttpClientImpl(httpClientId, unmodifiableConfig.hashCode(), httpClient, ccm, reloadCallback);
-
-            LOGGER.trace("Initialized HTTP client for {} and put it into cache", httpClientId);
-            return managedHttpClient;
         }
+        /*
+         * Ensure the configuration isn't changed unless the client is reloaded
+         */
+        final UnmodifiableHttpBasicConfig unmodifiableConfig = new UnmodifiableHttpBasicConfig(configSupplier.get());
+
+        ClientConnectionManager ccm = initializeClientConnectionManager(httpClientId, unmodifiableConfig);
+        CloseableHttpClient httpClient = initializeHttpClient(httpClientId, provider, unmodifiableConfig, ccm);
+        Supplier<Boolean> reloadCallback = () -> B(reloadClient(httpClientId, configSupplier.get(), provider, false));
+        ManagedHttpClientImpl managedHttpClient = new ManagedHttpClientImpl(httpClientId, unmodifiableConfig.hashCode(), httpClient, ccm, reloadCallback);
+
+        LOGGER.trace("Initialized HTTP client for {} and put it into cache", httpClientId);
+        return managedHttpClient;
     }
+
 
     WildcardHttpClientConfigProvider getWildcardProvider(String clientId) {
         WildcardHttpClientConfigProvider wildcardProvider = wildcardProvidersCache.getUnchecked(clientId);

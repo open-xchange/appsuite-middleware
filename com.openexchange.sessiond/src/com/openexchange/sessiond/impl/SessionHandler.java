@@ -1634,7 +1634,7 @@ public final class SessionHandler {
                 for (SessionControl sessionControl : removed) {
                     LOG.info("Session timed out. ID: {}", sessionControl.getSession().getSessionID());
                 }
-                postContainerRemoval(removed, true);
+                postContainerRemoval(removed, config.isRemoveFromSessionStorageOnTimeout());
             }
         }
     }
@@ -1650,7 +1650,7 @@ public final class SessionHandler {
             for (SessionControl control : controls) {
                 LOG.info("Session timed out. ID: {}", control.getSession().getSessionID());
             }
-            postContainerRemoval(controls, true);
+            postContainerRemoval(controls, config.isRemoveFromSessionStorageOnTimeout());
         }
     }
 

@@ -77,7 +77,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.message.BasicHeader;
 import com.dropbox.core.http.HttpRequestor;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClientService;
@@ -153,8 +152,6 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
             Response response = new Response(httpResponse.getStatusLine().getStatusCode(), body, responseHeaders);
             error = false;
             return response;
-        } catch (OXException e) {
-            throw new IOException(e);
         } finally {
             if (error) {
                 HttpClients.close(request, httpResponse);
@@ -270,12 +267,7 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
             {
                 Future<HttpResponse> execution = this.execution;
                 if (null == execution) {
-                    // Nothing written to output stream
-                    try {
-                        httpResponse = getHttpClient().execute(httpRequest);
-                    } catch (OXException e) {
-                        throw new IOException(e);
-                    }
+                    httpResponse = getHttpClient().execute(httpRequest);
                 } else {
                     try {
                         httpResponse = execution.get();
@@ -312,7 +304,7 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
         }
     }
 
-    static HttpClient getHttpClient() throws OXException {
+    static HttpClient getHttpClient() {
         return getService(HttpClientService.class).getHttpClient(HTTP_CLIENT_DROPBOX);
     }
 

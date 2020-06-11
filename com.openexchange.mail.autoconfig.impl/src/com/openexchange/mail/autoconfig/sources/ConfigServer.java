@@ -174,4 +174,8 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
         }
     }
 
+    @Override
+    protected String getAccountId() {
+        return "configServer";
+    }
 }

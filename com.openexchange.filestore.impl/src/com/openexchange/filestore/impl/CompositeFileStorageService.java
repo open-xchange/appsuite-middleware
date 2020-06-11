@@ -68,10 +68,13 @@ import org.slf4j.Logger;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.DestroyAwareFileStorage;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.FileStorageService;
@@ -112,6 +115,16 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
         this.storageCache = CacheBuilder.newBuilder()
             .maximumSize(50000)
             .expireAfterAccess(2, TimeUnit.HOURS)
+            .removalListener(new RemovalListener<URI, FileStorage>() {
+
+                @Override
+                public void onRemoval(RemovalNotification<URI, FileStorage> notification) {
+                    FileStorage fileStorage = notification.getValue();
+                    if (fileStorage instanceof DestroyAwareFileStorage) {
+                        ((DestroyAwareFileStorage) fileStorage).onDestroyed();
+                    }
+                }
+            })
             .build(new CacheLoader<URI, FileStorage>() {
 
                 @Override

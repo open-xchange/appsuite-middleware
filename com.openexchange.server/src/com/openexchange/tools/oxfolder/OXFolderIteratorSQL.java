@@ -1790,7 +1790,6 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If a folder error occurs
      */
     public static SearchIterator<FolderObject> getModifiedFoldersSince(final Date since, final int[] modules, final Context ctx, final Connection con) throws OXException {
-        // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
         final StringBuilder sb = new StringBuilder(256).append(STR_SELECT);
         sb.append(FolderObjectIterator.getFieldsForSQL(STR_OT)).append(" FROM oxfolder_tree AS ot");
         final long time = since.getTime();
@@ -1819,7 +1818,8 @@ public final class OXFolderIteratorSQL {
             }
             sb.append(")) ");
         }
-        sb.append(OXFolderProperties.isEnableDBGrouping() ? getGroupBy(STR_OT) : null).append(" ORDER by ot.fuid").toString();
+        sb.append(" ORDER by ot.fuid").toString();
+
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;

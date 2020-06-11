@@ -200,4 +200,9 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
         return retval;
     }
 
+    @Override
+    protected String getAccountId() {
+        return "ispdb";
+    }
+
 }

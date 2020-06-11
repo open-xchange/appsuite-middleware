@@ -13,10 +13,9 @@ CalDAV and CardDAV are standard protocols for the exchange of calendar data and 
 
 # Webserver Configuration
 
-In order to redirect DAV requests to the appropriate servlets, the webserver's configuration may need to be adjusted using one of the following alternatives. 
+In order to redirect DAV requests to the appropriate servlets, the webserver's configuration may need to be adjusted using one of the following alternatives. Please note that most clients will refuse to establish connections to non-SSL servers, so a proper SSL configuration is required. 
 
-> Note: Please be aware that for a working auto configuration setup in OS X Mavericks you need to have SSL enabled on the server. The non-SSL variant described below only works if you use the advanced CalDAV configuration in Mac OS X Mavericks and enter the path by hand. If you just want to enter the hostname, SSL is required. The same applies to iOS7 where SSL is always required.
-
+In contrast to other, browser-based clients, most CalDAV- and CardDAV-clients don't preserve cookies when making requests, so that there's no session-stickiness possible based on the commonly used <code>JSESSIONID</code>-cookie. Therefore, it's recommended to route this traffic to a single middleware node in the cluster statically, so that consecutive requests will not encounter stale data in caches that is not yet invalidated.
 
 ## Via Virtual Hosts (recommended)
 
@@ -49,8 +48,6 @@ Please edit your site configuration file for OX so that the existing OX configur
       SSLCertificateKeyFile "conf/ssl.key/dav.MYSERVER.TLD.key"
  </VirtualHost>
 ```
-
-
 
 Please adjust the SSL configuration as needed and make sure that <code>dav.<MYSERVER.TLD></code> is reachable; your DNS configuration needs an entry for this name. Take care of the the <code>dav.*</code> logfiles, the example writes them without logrotation to <code>/tmp</code>.
 

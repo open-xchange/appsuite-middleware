@@ -57,8 +57,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.ConnectionType;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -91,7 +93,19 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private final Properties jdbcProperties;
 
-    public ContextDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, ConnectionReloaderImpl reloader, final ConfigDatabaseService configDatabaseService) {
+    final ConfigurationService configurationService;
+
+    /**
+     * Initializes a new {@link ContextDatabaseLifeCycle}.
+     *
+     * @param configuration
+     * @param management
+     * @param timer
+     * @param reloader
+     * @param configDatabaseService
+     * @param configurationService
+     */
+    public ContextDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, ConnectionReloaderImpl reloader, final ConfigDatabaseService configDatabaseService, final ConfigurationService configurationService) {
         super();
         this.management = management;
         this.timer = timer;
@@ -99,6 +113,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         this.configDatabaseService = configDatabaseService;
         this.defaultPoolConfig = configuration.getPoolConfig();
         this.jdbcProperties = configuration.getJdbcProps();
+        this.configurationService = configurationService;
     }
 
     @Override
@@ -202,6 +217,8 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private class ContextPoolAdapter extends AbstractMetricAwarePool<ConnectionData> {
 
+        private Set<Integer> globalDBPoolIds = null;
+
         ContextPoolAdapter(int poolId, ConnectionData data, Function<ConnectionData, String> toURL, Function<ConnectionData, Properties> toConnectionArguments, Function<ConnectionData, PoolConfig> toConfig) {
             super(poolId, data, toURL, toConnectionArguments, toConfig);
         }
@@ -213,6 +230,8 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
                 data = loadPoolData(getPoolId(), configuration.getJdbcProps());
                 Class.forName(data.driverClass);
                 update(data);
+                globalDBPoolIds = GlobalDbInit.getGlobalDBPoolIds(configurationService);
+                initMetrics();
             } catch (OXException oxe) {
                 LOG.error("Unable to load pool data.", oxe);
             } catch (ClassNotFoundException e) {
@@ -223,7 +242,15 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
         @Override
         protected String getPoolClass() {
-            return "userdb";
+            if (globalDBPoolIds == null) {
+                synchronized (this) {
+                    if (globalDBPoolIds == null) {
+                        globalDBPoolIds = GlobalDbInit.getGlobalDBPoolIds(configurationService);
+                    }
+                }
+            }
+            return globalDBPoolIds != null && globalDBPoolIds.contains(I(getPoolId())) ? "globaldb" : "userdb";
         }
     }
+
 }

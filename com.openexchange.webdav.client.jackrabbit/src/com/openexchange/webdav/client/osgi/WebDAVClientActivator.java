@@ -60,6 +60,7 @@ import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.webdav.client.WebDAVClient;
 import com.openexchange.webdav.client.WebDAVClientFactory;
 import com.openexchange.webdav.client.jackrabbit.WebDAVClientImpl;
@@ -97,8 +98,8 @@ public class WebDAVClientActivator extends HousekeepingActivator {
             registerService(WebDAVClientFactory.class, new WebDAVClientFactory() {
 
                 @Override
-                public WebDAVClient create(URI baseUrl, String login, String password, Optional<String> optClientId) throws OXException {
-                    return new WebDAVClientImpl(baseUrl, login, password, services, optClientId);
+                public WebDAVClient create(Session session, String accountId, URI baseUrl, String login, String password, Optional<String> optClientId) throws OXException {
+                    return new WebDAVClientImpl(session, accountId, baseUrl, login, password, services, optClientId);
                 }
 
                 @Override

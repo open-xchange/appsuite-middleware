@@ -75,6 +75,9 @@ public class OCCapabilities extends AbstractOCJSONResponse {
     public static OCCapabilities parse(JSONObject json) throws OXException {
         OCCapabilities result = new OCCapabilities(json);
         try {
+            if (result.getData() instanceof JSONObject == false) {
+                throw FileStorageExceptionCodes.JSON_ERROR.create("Unexpected response.");
+            }
             result.capabilities = ((JSONObject) result.getData()).getJSONObject("capabilities");
             return result;
         } catch (JSONException e) {
