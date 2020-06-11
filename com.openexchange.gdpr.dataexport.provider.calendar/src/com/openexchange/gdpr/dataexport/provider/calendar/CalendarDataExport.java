@@ -176,10 +176,10 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
             Options options;
             {
                 Module calendarModule = getModule();
-                boolean subscribedOnly = getBoolOption(CalendarDataExportPropertyNames.PROP_INCLUDE_UNSUBSCRIBED, false, calendarModule);
+                boolean includeUnsubscribed = getBoolOption(CalendarDataExportPropertyNames.PROP_INCLUDE_UNSUBSCRIBED, false, calendarModule);
                 boolean includePublicFolders = getBoolOption(CalendarDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, false, calendarModule);
                 boolean includeSharedFolders = getBoolOption(CalendarDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, false, calendarModule);
-                options = new Options(subscribedOnly, includePublicFolders, includeSharedFolders);
+                options = new Options(includeUnsubscribed, includePublicFolders, includeSharedFolders);
             }
 
             User user = userService.getUser(task.getUserId(), task.getContextId());
@@ -285,7 +285,7 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
             List<Folder> children;
             try {
                 FolderService folderService = neededServices.folderService;
-                UserizedFolder[] visibleFolders = folderService.getVisibleFolders(folder.getFolderId(), FolderStorage.REAL_TREE_ID, decoratorProvider.contentType, type, !options.subscribedOnly, session, decoratorProvider.createDecorator()).getResponse();
+                UserizedFolder[] visibleFolders = folderService.getVisibleFolders(folder.getFolderId(), FolderStorage.REAL_TREE_ID, decoratorProvider.contentType, type, options.includeUnsubscribed, session, decoratorProvider.createDecorator()).getResponse();
                 if (null == visibleFolders || visibleFolders.length <= 0) {
                     children = Collections.emptyList();
                 } else {
@@ -518,13 +518,13 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
 
     private static class Options {
 
-        final boolean subscribedOnly;
+        final boolean includeUnsubscribed;
         final boolean includePublicFolders;
         final boolean includeSharedFolders;
 
-        Options(boolean subscribedOnly, boolean includePublicFolders, boolean includeSharedFolders) {
+        Options(boolean includeUnsubscribed, boolean includePublicFolders, boolean includeSharedFolders) {
             super();
-            this.subscribedOnly = subscribedOnly;
+            this.includeUnsubscribed = includeUnsubscribed;
             this.includePublicFolders = includePublicFolders;
             this.includeSharedFolders = includeSharedFolders;
         }
