@@ -24,6 +24,9 @@ spec:
     command:
     - cat
     tty: true
+    resources:
+      requests:
+        cpu: 4
   - name: java-gettext
     image: gitlab.open-xchange.com:4567/jenkins/slave-gettext:latest
     command:
