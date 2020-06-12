@@ -476,17 +476,21 @@ public class SnippetProcessor {
                     try {
                         String id = m.getManagedFileId();
                         if (null != id) {
-                            if (mfm.contains(id)) {
-                                mf = mfm.getByID(id);
-                            } else {
+                            if (false == mfm.contains(id)) {
                                 m.appendLiteralReplacement(sb, MimeMessageUtility.blankSrc(imageTag));
                                 continue;
                             }
+                            mf = mfm.getByID(id);
                         } else {
-                            mf = toManagedFile(imageTag, mfm);
+                            Optional<ManagedFile> optionalFile = toManagedFile(imageTag, mfm);
+                            if (false == optionalFile.isPresent()) {
+                                m.appendLiteralReplacement(sb, MimeMessageUtility.blankSrc(imageTag));
+                                continue;
+                            }
+                            mf = optionalFile.get();
                         }
                     } catch (OXException e) {
-                        LOG.warn("Image with could not be loaded. Referenced image is skipped.", e);
+                        LOG.warn("Image could not be loaded. Referenced image is skipped.", e);
                         // Anyway, replace image tag
                         m.appendLiteralReplacement(sb, MimeMessageUtility.blankSrc(imageTag));
                         continue;
@@ -531,11 +535,11 @@ public class SnippetProcessor {
         return managedFiles;
     }
 
-    private final ManagedFile toManagedFile(String imageTag, ManagedFileManagement mfm) throws OXException {
+    private final Optional<ManagedFile> toManagedFile(String imageTag, ManagedFileManagement mfm) throws OXException {
         ConversionService conversionService = Services.optService(ConversionService.class);
         if (conversionService == null) {
             // No such service
-            return null;
+            return Optional.empty();
         }
 
         ImageLocation imageLocation = null;
@@ -553,13 +557,13 @@ public class SnippetProcessor {
 
         if (null == imageLocation) {
             // Could not yield image location
-            return null;
+            return Optional.empty();
         }
 
         ImageDataSource dataSource = (ImageDataSource) conversionService.getDataSource(imageLocation.getRegistrationName());
         if (null == dataSource) {
             // No such data source
-            return null;
+            return Optional.empty();
         }
 
         InputStream in = null;
@@ -578,7 +582,7 @@ public class SnippetProcessor {
             if (Strings.isNotEmpty(contentType)) {
                 managedFile.setContentType(contentType);
             }
-            return managedFile;
+            return Optional.of(managedFile);
         } finally {
             Streams.close(in);
         }
