@@ -58,6 +58,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.webdav.utils.WebDAVEndpointConfig;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -114,7 +115,8 @@ public abstract class AbstractWebDAVAccess {
      * @throws OXException If the path cannot be extracted
      */
     protected WebDAVPath getRootPath(FileStorageAccount account) throws OXException {
-        String endpoint = (String) account.getConfiguration().get(WebDAVFileStorageConstants.WEBDAV_URL);
+        String endpoint = new WebDAVEndpointConfig.Builder(this.session, this.accountAccess.getWebDAVFileStorageService(), (String) account.getConfiguration().get(WebDAVFileStorageConstants.WEBDAV_URL)).build().getUrl();
+
         if (Strings.isEmpty(endpoint)) {
             throw FileStorageExceptionCodes.MISSING_CONFIG.create(WebDAVFileStorageConstants.WEBDAV_URL, account.getId());
         }

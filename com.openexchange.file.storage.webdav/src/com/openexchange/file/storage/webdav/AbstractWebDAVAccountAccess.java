@@ -49,13 +49,10 @@
 
 package com.openexchange.file.storage.webdav;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -64,7 +61,7 @@ import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.webdav.exception.WebdavExceptionCodes;
+import com.openexchange.file.storage.webdav.utils.WebDAVEndpointConfig;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.client.WebDAVClient;
@@ -78,7 +75,7 @@ import com.openexchange.webdav.client.WebDAVClient;
 public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
 
     protected final FileStorageAccount account;
-    private final Session session;
+    protected final Session session;
     private final AbstractWebDAVFileStorageService service;
 
     private volatile WebDAVClient webdavClient;
@@ -129,9 +126,9 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
      */
     private WebDAVClient connectViaBasicAuth() throws OXException {
         Map<String, Object> configuration = account.getConfiguration();
-        String configUrl = (String) configuration.get("url");
+        String configUrl = (String) configuration.get(WebDAVFileStorageConstants.WEBDAV_URL);
         if (Strings.isEmpty(configUrl)) {
-            throw FileStorageExceptionCodes.INVALID_URL.create(configUrl, "empty");
+            throw FileStorageExceptionCodes.INVALID_URL.create("not provided", "empty");
         }
         String login = (String) configuration.get("login");
         if (Strings.isEmpty(login)) {
@@ -141,105 +138,12 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
         if (Strings.isEmpty(login)) {
             throw FileStorageExceptionCodes.MISSING_CONFIG.create("password", account.getId());
         }
+        WebDAVEndpointConfig config = new WebDAVEndpointConfig.Builder(session, getWebDAVFileStorageService(), configUrl).build();
         try {
-            URI uri = verifyURL(new URI(configUrl));
-            URIBuilder uriBuilder = new URIBuilder();
-            if (null != uri.getScheme()) {
-                uriBuilder.setScheme(uri.getScheme());
-            }
-            if (null != uri.getHost()) {
-                uriBuilder.setHost(uri.getHost());
-            }
-            if (0 < uri.getPort()) {
-                uriBuilder.setPort(uri.getPort());
-            }
-            URI baseUrl = uriBuilder.build();
-            return service.getClientFactory().create(getSession(), getAccountId(), baseUrl, login, password, optHttpClientId());
+            return getWebDAVFileStorageService().getClientFactory().create(getSession(), getAccountId(), new URI(config.getUrl()), login, password, optHttpClientId());
         } catch (URISyntaxException e) {
             throw FileStorageExceptionCodes.INVALID_URL.create(configUrl, e.getMessage());
         }
-    }
-
-    /**
-     * Verifies that the given URI is allowed to be used by the session
-     *
-     * @param uri The URI to verify
-     * @return The given URI if allowed to be used
-     * @throws OXException if the given URI is not allowed to be used
-     */
-    protected URI verifyURL(URI uri) throws OXException {
-        if (isBlacklisted(session, uri)) {
-            throw WebdavExceptionCodes.PING_FAILED.create();
-        }
-
-        if (!verifyPort(session, uri)) {
-            throw WebdavExceptionCodes.PING_FAILED.create();
-        }
-        return uri;
-    }
-
-    /**
-     * Checks if the host specified in given URL is blacklisted for a session
-     *
-     * @param session The session to check
-     * @param uri The URI to check
-     * @return <code>true</code>, if the uri's host is blacklisted, <code>false</code> otherwise
-     * @throws OXException
-     */
-    protected boolean isBlacklisted(Session session, URI uri) throws OXException {
-        if (uri != null) {
-            return isBlacklisted(session, uri.getHost());
-        }
-        return false;
-    }
-
-    /**
-     * Checks if the given host is blacklisted
-     *
-     * @param session The session to get the black listed hosts for
-     * @param host The host to check
-     * @return <code>true</code> , if the given host is blacklisted, <code>false</code> otherwise
-     * @throws OXException
-     */
-    protected boolean isBlacklisted(Session session, String host) throws OXException {
-        return service.getBlackListedHosts(session).contains(host);
-    }
-
-    /**
-     * Verifies that the port of the given URI is allowed
-     *
-     * @param session The session
-     * @param uri The URI to verify
-     * @return <code>true</code> if the URI's port is allowed <code>false</code> otherwise
-     * @throws OXException
-     */
-    protected boolean verifyPort(Session session, URI uri) throws OXException {
-        if (uri != null) {
-            return isAllowed(session, uri.getPort());
-        }
-        return false;
-    }
-
-    /**
-     * Checks if the given port is allowed
-     *
-     * @param session The session to check
-     * @param port The port to check
-     * @return <code>true</code> if the given port is allowed <code>false</code> otherwise
-     * @throws OXException
-     */
-    protected boolean isAllowed(Session session, int port) throws OXException {
-        if (port < 0) {
-            // port not set; always allow
-            return true;
-        }
-
-        if (port > 65535) {
-            // invalid port
-            return false;
-        }
-        Optional<Set<Integer>> optAllowedPorts = service.getAllowedPorts(session);
-        return optAllowedPorts.isPresent() ? optAllowedPorts.get().contains(I(port)) : true;
     }
 
     /**
@@ -270,8 +174,7 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
             WebDAVFolder rootFolder = getFolderAccess().getRootFolder();
             getFolderAccess().getFolder(rootFolder.getId());
             return true;
-        }
-        finally {
+        } finally {
             close();
         }
     }
@@ -328,7 +231,7 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
 
     @Override
     public FileStorageService getService() {
-        return service;
+        return getWebDAVFileStorageService();
     }
 
     /**
@@ -339,5 +242,14 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
      */
     protected Optional<String> optHttpClientId() {
         return Optional.empty();
+    }
+
+    /**
+     * Gets the service
+     *
+     * @return The service
+     */
+    public AbstractWebDAVFileStorageService getWebDAVFileStorageService() {
+        return service;
     }
 }

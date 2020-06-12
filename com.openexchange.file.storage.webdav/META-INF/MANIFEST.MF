@@ -35,7 +35,8 @@ Import-Package: com.google.common.base,
  com.openexchange.tx,
  com.openexchange.webdav.client,
  javax.xml.namespace,
- org.apache.http;version="4.4.11",
+ org.apache.commons.lang3,
+ org.apache.http,
  org.apache.http.client,
  org.apache.http.client.utils,
  org.osgi.framework,
@@ -46,6 +47,7 @@ Import-Package: com.google.common.base,
  org.w3c.dom
 Bundle-ClassPath: .
 Export-Package: com.openexchange.file.storage.webdav,
- com.openexchange.file.storage.webdav.exception
+ com.openexchange.file.storage.webdav.exception,
+ com.openexchange.file.storage.webdav.utils
 Bundle-Activator: com.openexchange.file.storage.webdav.osgi.WebDAVFileStorageActivator
 
