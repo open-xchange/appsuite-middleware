@@ -156,7 +156,8 @@ public class IMAPDebugLoggerGenerator {
             ch.qos.logback.classic.Logger templateLogger = (ch.qos.logback.classic.Logger) slf4jLogger;
             LoggerContext context = templateLogger.getLoggerContext();
 
-            StringBuilder filePatternBase = new StringBuilder(filePath).append("imaptrace_").append(ISO8601Utils.format(new Date(), false)).append('_').append(Math.abs(imapSession.hashCode())).append(".log");
+            String sHashCode = toPositiveString(imapSession.hashCode());
+            StringBuilder filePatternBase = new StringBuilder(filePath).append("imaptrace_").append(ISO8601Utils.format(new Date(), false)).append('_').append(sHashCode).append(".log");
             int reslen = filePatternBase.length();
             String filePattern = filePatternBase.append(".0").toString();
             filePatternBase.setLength(reslen);
@@ -181,7 +182,7 @@ public class IMAPDebugLoggerGenerator {
             rollingFileAppender.setContext(context);
             rollingFileAppender.setEncoder(encoder);
             rollingFileAppender.setFile(filePattern);
-            rollingFileAppender.setName("IMAPDebugLogAppender_" + contextId + "_" + userId + "_" + server + "_" + Math.abs(imapSession.hashCode()));
+            rollingFileAppender.setName(new StringBuilder("IMAPDebugLogAppender_").append(contextId).append('_').append(userId).append('_').append(server).append('_').append(sHashCode).toString());
             rollingFileAppender.setPrudent(false);
             rollingFileAppender.setRollingPolicy(rollingPolicy);
             rollingFileAppender.setTriggeringPolicy(triggeringPolicy);
@@ -220,7 +221,7 @@ public class IMAPDebugLoggerGenerator {
                 }
             }
 
-            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("IMAPDebugLogger_" + contextId + "_" + userId + "_" + server + "_" + Math.abs(imapSession.hashCode()));
+            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(new StringBuilder("IMAPDebugLogger_").append(contextId).append('_').append(userId).append('_').append(server).append('_').append(sHashCode).toString());
             logbackLogger.setLevel(ch.qos.logback.classic.Level.INFO);
             logbackLogger.setAdditive(false);
             logbackLogger.addAppender(rollingFileAppender);
@@ -233,6 +234,11 @@ public class IMAPDebugLoggerGenerator {
 
     private static IllegalStateException createException(String server, int userId, int contextId, Throwable throwable) {
         return new IllegalStateException("Failed to generate IMAP debug logger for server '" + server + "' of user " + userId + " in context " + contextId, throwable);
+    }
+
+    private static String toPositiveString(int i) {
+        String str = Integer.toString(i);
+        return str.charAt(0)  == '-' ? str.substring(1) : str;
     }
 
 }

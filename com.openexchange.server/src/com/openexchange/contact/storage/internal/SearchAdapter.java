@@ -129,52 +129,54 @@ public class SearchAdapter {
          */
         boolean emailAutoComplete = contactSearch.isEmailAutoComplete();
         boolean orSearch = emailAutoComplete || contactSearch.isOrSearch();
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(orSearch ? CompositeOperation.OR : CompositeOperation.AND);
+        CompositeSearchTerm searchCriteriaTerm = new CompositeSearchTerm(orSearch ? CompositeOperation.OR : CompositeOperation.AND);
         /*
          * add search criteria
          */
         if (null != contactSearch.getSurname()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.SUR_NAME, contactSearch.getSurname(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.SUR_NAME, contactSearch.getSurname(), false == orSearch, true));
         }
         if (null != contactSearch.getGivenName()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.GIVEN_NAME, contactSearch.getGivenName(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.GIVEN_NAME, contactSearch.getGivenName(), false == orSearch, true));
         }
         if (null != contactSearch.getDisplayName()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.DISPLAY_NAME, contactSearch.getDisplayName(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.DISPLAY_NAME, contactSearch.getDisplayName(), false == orSearch, true));
         }
         if (null != contactSearch.getEmail1()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.EMAIL1, contactSearch.getEmail1(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.EMAIL1, contactSearch.getEmail1(), false == orSearch, true));
         }
         if (null != contactSearch.getEmail2()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.EMAIL2, contactSearch.getEmail2(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.EMAIL2, contactSearch.getEmail2(), false == orSearch, true));
         }
         if (null != contactSearch.getEmail3()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.EMAIL3, contactSearch.getEmail3(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.EMAIL3, contactSearch.getEmail3(), false == orSearch, true));
         }
         if (null != contactSearch.getCompany()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.COMPANY, contactSearch.getCompany(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.COMPANY, contactSearch.getCompany(), false == orSearch, true));
         }
         if (null != contactSearch.getStreetBusiness()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.STREET_BUSINESS, contactSearch.getStreetBusiness(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.STREET_BUSINESS, contactSearch.getStreetBusiness(), false == orSearch, true));
         }
         if (null != contactSearch.getCityBusiness()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.CITY_BUSINESS, contactSearch.getCityBusiness(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.CITY_BUSINESS, contactSearch.getCityBusiness(), false == orSearch, true));
         }
         if (null != contactSearch.getDepartment()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.DEPARTMENT, contactSearch.getDepartment(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.DEPARTMENT, contactSearch.getDepartment(), false == orSearch, true));
         }
         if (null != contactSearch.getCatgories()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.CATEGORIES, contactSearch.getCatgories(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.CATEGORIES, contactSearch.getCatgories(), false == orSearch, true));
         }
         if (null != contactSearch.getYomiLastName()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.YOMI_LAST_NAME, contactSearch.getYomiLastName(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.YOMI_LAST_NAME, contactSearch.getYomiLastName(), false == orSearch, true));
         }
         if (null != contactSearch.getYomiFirstName()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.YOMI_FIRST_NAME, contactSearch.getYomiFirstName(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.YOMI_FIRST_NAME, contactSearch.getYomiFirstName(), false == orSearch, true));
         }
         if (null != contactSearch.getYomiCompany()) {
-            searchTerm.addSearchTerm(getSearchTerm(ContactField.YOMI_COMPANY, contactSearch.getYomiCompany(), false == orSearch, true));
+            searchCriteriaTerm.addSearchTerm(getSearchTerm(ContactField.YOMI_COMPANY, contactSearch.getYomiCompany(), false == orSearch, true));
         }
+
+        SearchTerm<?> searchTerm = searchCriteriaTerm;
 
         if (contactSearch.hasImage()) {
             searchTerm = getCompositeTerm(searchTerm, HAS_IMG_TERM);
@@ -205,7 +207,13 @@ public class SearchAdapter {
      * @param term2 the second term
      * @return the composite search term
      */
-    private static CompositeSearchTerm getCompositeTerm(SearchTerm<?> term1, SearchTerm<?> term2) {
+    private static SearchTerm<?> getCompositeTerm(SearchTerm<?> term1, SearchTerm<?> term2) {
+        if (null == term1 || null == term1.getOperands() || 0 == term1.getOperands().length) {
+            return term2;
+        }
+        if (null == term2 || null == term2.getOperands() || 0 == term2.getOperands().length) {
+            return term1;
+        }
         CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
         andTerm.addSearchTerm(term1);
         andTerm.addSearchTerm(term2);
