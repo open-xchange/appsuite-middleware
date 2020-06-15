@@ -50,11 +50,15 @@
 package com.openexchange.rest.client.httpclient.util;
 
 import static com.openexchange.java.Autoboxing.I;
+import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.protocol.HttpContext;
 import com.openexchange.rest.client.httpclient.internal.cookiestore.AccountAwareCookieStore;
@@ -118,14 +122,40 @@ public class HttpContextUtils {
      * {@link HttpContext}
      *
      * @param context The {@link HttpContext}
-     * @param authScope The {@link AuthScope} of the credentials
      * @param username The user name to use
      * @param password The password to use
+     * @param targetHost The target host to send the request to
      */
-    public static void addCredentialProvider(HttpContext context, AuthScope authScope, String username, String password) {
+    public static void addCredentialProvider(HttpContext context, String username, String password, HttpHost targetHost) {
+        addCredentialProvider(context, username, password, new AuthScope(targetHost.getHostName(), targetHost.getPort()));
+    }
+
+    /**
+     * Adds a {@link CredentialsProvider} for the given user, password combination to the given
+     * {@link HttpContext}
+     *
+     * @param context The {@link HttpContext}
+     * @param username The user name to use
+     * @param password The password to use
+     * @param authScope The {@link AuthScope} of the credentials
+     */
+    public static void addCredentialProvider(HttpContext context, String username, String password, AuthScope authScope) {
         BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(authScope, new UsernamePasswordCredentials(username, password));
         context.setAttribute(HttpClientContext.CREDS_PROVIDER, credentialsProvider);
+    }
+
+    /**
+     * Adds a {@link CredentialsProvider} for the given user, password combination to the given
+     * {@link HttpContext}
+     *
+     * @param context The {@link HttpContext}
+     * @param targetHost The target host to send the request to
+     */
+    public static void addAuthCache(HttpContext context, HttpHost targetHost) {
+        AuthCache authCache = new BasicAuthCache();
+        authCache.put(targetHost, new BasicScheme());
+        context.setAttribute(HttpClientContext.AUTH_CACHE, authCache);
     }
 
 }
