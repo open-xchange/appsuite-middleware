@@ -50,12 +50,11 @@
 package com.openexchange.file.storage.webdav.utils;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.net.InetAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.commons.validator.routines.UrlValidator;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.webdav.AbstractWebDAVFileStorageService;
@@ -71,34 +70,35 @@ import com.openexchange.session.Session;
  */
 public class WebDAVEndpointUtils {
 
+    private static final String[] ALLOWED_PROTOCOLS = new String[] { "http", "https" };
+
     /**
-     * Verifies provided url by doing multiple checks (configuration, scheme, loopback, ...)
+     * Verifies provided url by doing multiple checks (configuration, protocol, ...)
      *
      * @param session The session used for configuration retrieval
      * @param service The service used for configuration retrieval
-     * @param url The URL to check
+     * @param urlString The URL to check
      * @throws OXException
      */
-    public static void verifyURI(Session session, AbstractWebDAVFileStorageService service, String url) throws OXException {
-        if (Strings.isEmpty(url)) {
+    public static void verifyURL(Session session, AbstractWebDAVFileStorageService service, String urlString) throws OXException {
+        if (Strings.isEmpty(urlString)) {
             throw FileStorageExceptionCodes.INVALID_URL.create("not provided", "empty");
         }
         try {
-            URI uri = new URI(url);
-            check(uri);
-            boolean denied = isDenied(session, service, uri);
-
-            if (denied || !isValid(uri)) {
-                throw WebdavExceptionCodes.URL_NOT_ALLOWED.create(url);
+            check(urlString);
+            URL url = new URL(urlString);
+            if (isDenied(session, service, url)) {
+                throw WebdavExceptionCodes.URL_NOT_ALLOWED.create(urlString);
             }
-        } catch (URISyntaxException e) {
-            throw WebdavExceptionCodes.BAD_URL.create(e, url);
+        } catch (MalformedURLException e) {
+            throw WebdavExceptionCodes.BAD_URL.create(e, urlString);
         }
     }
 
-    private static void check(URI uri) throws OXException {
-        if (Strings.containsSurrogatePairs(uri.toString())) {
-            throw WebdavExceptionCodes.BAD_URL.create(uri.toString());
+    private static void check(String url) throws OXException {
+        UrlValidator validator = new UrlValidator(ALLOWED_PROTOCOLS, UrlValidator.ALLOW_LOCAL_URLS);
+        if (!validator.isValid(url) || Strings.containsSurrogatePairs(url)) {
+            throw WebdavExceptionCodes.BAD_URL.create(url);
         }
     }
 
@@ -106,10 +106,10 @@ public class WebDAVEndpointUtils {
      * Verifies that the given URL is allowed to be used by the session
      *
      * @param url The URL to verify
-     * @throws OXException if the given URI is not allowed to be used
+     * @throws OXException if the given URL is not allowed to be used
      */
-    private static boolean isDenied(Session session, AbstractWebDAVFileStorageService service, URI url) throws OXException {
-        if (isBlacklisted(session, service, url) || !verifyPort(session, service, url) || !verifyScheme(url)) {
+    private static boolean isDenied(Session session, AbstractWebDAVFileStorageService service, URL url) throws OXException {
+        if (isBlacklisted(session, service, url) || !verifyPort(session, service, url)) {
             return true;
         }
         return false;
@@ -120,10 +120,10 @@ public class WebDAVEndpointUtils {
      *
      * @param session The session to check
      * @param url The URL to check
-     * @return <code>true</code>, if the uri's host is blacklisted, <code>false</code> otherwise
+     * @return <code>true</code>, if the url's host is blacklisted, <code>false</code> otherwise
      * @throws OXException
      */
-    private static boolean isBlacklisted(Session session, AbstractWebDAVFileStorageService service, URI url) throws OXException {
+    private static boolean isBlacklisted(Session session, AbstractWebDAVFileStorageService service, URL url) throws OXException {
         if (url != null) {
             return isBlacklisted(session, service, url.getHost());
         }
@@ -146,36 +146,14 @@ public class WebDAVEndpointUtils {
     }
 
     /**
-     * Verifies that the scheme (if set) is http or https
-     *
-     * @param url The URL to verify
-     * @return <code>true</code> if the scheme is allowed or <code>null</code>, <code>false</code> otherwise
-     * @throws OXException
-     */
-    private static boolean verifyScheme(URI url) {
-        if (url != null) {
-            String protocol = url.getScheme();
-            if (Strings.isNotEmpty(protocol)) {
-                if (protocol.equalsIgnoreCase("http") || protocol.equalsIgnoreCase("https")) {
-                    return true;
-                }
-            } else {
-                // no scheme provided. Will be set to 'https' later on.
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Verifies that the port of the given URI is allowed
+     * Verifies that the port of the given URL is allowed
      *
      * @param session The session
      * @param url The URL to verify
-     * @return <code>true</code> if the URI's port is allowed <code>false</code> otherwise
+     * @return <code>true</code> if the URL's port is allowed <code>false</code> otherwise
      * @throws OXException
      */
-    private static boolean verifyPort(Session session, AbstractWebDAVFileStorageService service, URI url) throws OXException {
+    private static boolean verifyPort(Session session, AbstractWebDAVFileStorageService service, URL url) throws OXException {
         if (url != null) {
             return isAllowed(session, service, url.getPort());
         }
@@ -203,20 +181,6 @@ public class WebDAVEndpointUtils {
         if (service != null) {
             Optional<Set<Integer>> optAllowedPorts = service.getAllowedPorts(session);
             return optAllowedPorts.isPresent() ? optAllowedPorts.get().contains(I(port)) : true;
-        }
-        return true;
-    }
-
-    private static boolean isValid(URI uri) {
-        try {
-            InetAddress inetAddress = InetAddress.getByName(uri.getHost());
-            if (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
-                org.slf4j.LoggerFactory.getLogger(WebDAVEndpointUtils.class).debug("Given URL \"{}\" with destination IP {} appears not to be valid.", uri.toString(), inetAddress.getHostAddress());
-                return false;
-            }
-        } catch (UnknownHostException e) {
-            org.slf4j.LoggerFactory.getLogger(WebDAVEndpointUtils.class).debug("Given URL \"{}\" appears not to be valid.", uri.toString(), e);
-            return false;
         }
         return true;
     }

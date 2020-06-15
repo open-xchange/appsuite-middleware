@@ -88,8 +88,8 @@ public class WebDAVEndpointConfig {
             Validate.notNull(url, "URL might not be null!");
             this.url = url;
 
-            WebDAVEndpointUtils.verifyURI(session, service, this.url);
             optAdaptScheme();
+            WebDAVEndpointUtils.verifyURL(session, service, this.url);
         }
 
         private void optAdaptScheme() {
@@ -105,7 +105,5 @@ public class WebDAVEndpointConfig {
         public WebDAVEndpointConfig build() {
             return new WebDAVEndpointConfig(url);
         }
-
     }
-
 }
