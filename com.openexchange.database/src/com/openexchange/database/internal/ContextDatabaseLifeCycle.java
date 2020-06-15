@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.ConfigDatabaseService;
@@ -217,10 +218,11 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private class ContextPoolAdapter extends AbstractMetricAwarePool<ConnectionData> {
 
-        private Set<Integer> globalDBPoolIds = null;
+        private final AtomicReference<Set<Integer>> globalDBPoolIdsReference;
 
         ContextPoolAdapter(int poolId, ConnectionData data, Function<ConnectionData, String> toURL, Function<ConnectionData, Properties> toConnectionArguments, Function<ConnectionData, PoolConfig> toConfig) {
             super(poolId, data, toURL, toConnectionArguments, toConfig);
+            globalDBPoolIdsReference = new AtomicReference<Set<Integer>>(null);
         }
 
         @Override
@@ -230,7 +232,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
                 data = loadPoolData(getPoolId(), configuration.getJdbcProps());
                 Class.forName(data.driverClass);
                 update(data);
-                globalDBPoolIds = GlobalDbInit.getGlobalDBPoolIds(configurationService);
+                globalDBPoolIdsReference.set(GlobalDbInit.getGlobalDBPoolIds(configurationService));
                 initMetrics();
             } catch (OXException oxe) {
                 LOG.error("Unable to load pool data.", oxe);
@@ -242,10 +244,13 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
         @Override
         protected String getPoolClass() {
+            Set<Integer> globalDBPoolIds = globalDBPoolIdsReference.get();
             if (globalDBPoolIds == null) {
                 synchronized (this) {
+                    globalDBPoolIds = globalDBPoolIdsReference.get();
                     if (globalDBPoolIds == null) {
                         globalDBPoolIds = GlobalDbInit.getGlobalDBPoolIds(configurationService);
+                        globalDBPoolIdsReference.set(globalDBPoolIds);
                     }
                 }
             }
