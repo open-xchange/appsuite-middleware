@@ -1089,8 +1089,12 @@ public class ParticipantNotify implements TaskEventInterface2 {
     }
 
     private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final String organizer, final State state) {
-        sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
-        sortOldExternalParticipantsAndResources(oldParticipants, participantSet, resourceSet, isUpdate, receivers, all, session, newParticipants, organizer, state);
+        if (state.getType().equals(Type.DELETED)) {
+            sortOldExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, isUpdate, receivers, all, session, new Participant[0], organizer, state);
+        } else {
+            sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
+            sortOldExternalParticipantsAndResources(oldParticipants, participantSet, resourceSet, isUpdate, receivers, all, session, newParticipants, organizer, state);
+        }
     }
 
     private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants, final String organizer, final State state) {
