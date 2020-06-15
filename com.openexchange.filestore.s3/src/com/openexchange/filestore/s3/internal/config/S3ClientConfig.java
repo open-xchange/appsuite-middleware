@@ -49,6 +49,8 @@
 
 package com.openexchange.filestore.s3.internal.config;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -283,8 +285,8 @@ public class S3ClientConfig {
         }
 
         List<Object> contributors = new LinkedList<>();
-        contributors.add(configService.getBooleanProperty(S3Property.METRIC_COLLECTION));
-        contributors.add(configService.getIntProperty(S3Property.MAX_NUMBER_OF_MONITORED_CLIENTS));
+        contributors.add(B(configService.getBooleanProperty(S3Property.METRIC_COLLECTION)));
+        contributors.add(I(configService.getIntProperty(S3Property.MAX_NUMBER_OF_MONITORED_CLIENTS)));
         for (S3ClientProperty property : S3ClientProperty.values()) {
             if (scope == S3ClientScope.SHARED) {
                 contributors.add(configService.getProperty(property, qualifierMap));
