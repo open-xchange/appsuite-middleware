@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -424,6 +426,7 @@ public class MailTestManager implements TestManager {
      * This method sets the lastResponse field to the result of the ForwardRequest.
      */
     public TestMail forwardButDoNotSend(TestMail forwardMe) throws OXException, IOException, JSONException {
+        assertNotNull(forwardMe);
         ForwardRequest request = new ForwardRequest(forwardMe.getFolderAndId());
         ReplyResponse response = client.execute(request);
         TestMail forwarded = new TestMail((JSONObject) response.getData());
@@ -437,6 +440,9 @@ public class MailTestManager implements TestManager {
      */
     public TestMail forwardAndSendBefore(TestMail forwardMe) throws OXException, JSONException, IOException {
         TestMail forwarded = send(forwardMe);
+        if (forwarded == null) {
+            fail("Error while sending message:" + lastResponse.getErrorMessage());
+        }
         TestMail mailFormattedForForwarding = forwardButDoNotSend(forwarded);
 
         cleaningSteps.add(new MailCleaner(forwarded, client));
