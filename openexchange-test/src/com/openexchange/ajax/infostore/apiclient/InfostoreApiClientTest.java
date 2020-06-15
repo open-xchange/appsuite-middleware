@@ -329,7 +329,8 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
         body.file(file);
         InfoItemUpdateResponse resp = infostoreApi.updateInfoItem(getSessionId(), id, timestamp, body, null);
         if(errorCode.isPresent()) {
-            assertEquals(errorCode.get(), resp.getCode());
+            assertNotNull("Expected an error but the response didn't contain one.", resp.getError());
+            assertEquals("Request returned with an unexpected error: " + resp.getErrorDesc(), errorCode.get(), resp.getCode());
             return;
         }
         assertNull(resp.getError());
