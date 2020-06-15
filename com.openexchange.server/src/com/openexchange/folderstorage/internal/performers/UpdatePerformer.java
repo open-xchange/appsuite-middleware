@@ -582,6 +582,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      * @param original The original folder
      */
     private void restorePermissionType(Folder updated, Folder original) {
+        if (null == updated.getPermissions()) {
+            return;
+        }
         // @formatter:off
         Arrays.asList(original.getPermissions()).stream()
                                                 .filter((p) -> FolderPermissionType.LEGATOR.equals(p.getType()) || FolderPermissionType.INHERITED.equals(p.getType()))
