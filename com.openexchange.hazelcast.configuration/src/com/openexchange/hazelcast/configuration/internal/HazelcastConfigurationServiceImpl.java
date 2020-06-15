@@ -91,6 +91,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.configuration.KnownNetworkJoin;
 import com.openexchange.hazelcast.configuration.osgi.Services;
+import com.openexchange.hazelcast.configuration.ssl.HazelcastSSLFactory;
 import com.openexchange.hazelcast.dns.HazelcastDnsResolver;
 import com.openexchange.hazelcast.dns.HazelcastDnsResolverConfig;
 import com.openexchange.hazelcast.dns.HazelcastDnsService;
@@ -433,9 +434,8 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
          */
         // Only one encryption method can be use. so start with strongest
         if (configService.getBoolProperty("com.openexchange.hazelcast.network.ssl", false)) {
-            HazelcastSSLFactory hazelcastSSLFactory = new HazelcastSSLFactory();
             config.getNetworkConfig().setSSLConfig(new SSLConfig().setEnabled(true)
-                .setFactoryImplementation(hazelcastSSLFactory)
+                .setFactoryImplementation(new HazelcastSSLFactory())
                 .setFactoryClassName(HazelcastSSLFactory.class.getName())
                 .setProperties(HazelcastSSLFactory.getPropertiesFromService(configService)));
         } else if (configService.getBoolProperty("com.openexchange.hazelcast.network.symmetricEncryption", false)) {
