@@ -89,7 +89,7 @@ public class HttpContextUtils {
      * @param accountId The account id
      */
     public static void addCookieStore(HttpContext context, int contextId, int userId, String accountId) {
-        context.setAttribute(HttpClientContext.COOKIE_STORE, new AccountAwareCookieStore(I(contextId), I(userId), accountId));
+        context.setAttribute(HttpClientContext.COOKIE_STORE, new AccountAwareCookieStore(accountId, I(contextId), I(userId)));
     }
 
     /**
@@ -110,7 +110,7 @@ public class HttpContextUtils {
      * @param accountId The account id
      */
     public static void removeCookieStore(int contextId, int userId, String accountId) {
-        MultiUserCookieStore.getInstance().clear(new AccountAwareCookieStore(I(contextId), I(userId), accountId));
+        MultiUserCookieStore.getInstance().clear(new AccountAwareCookieStore(accountId, I(contextId), I(userId)));
     }
 
     /**
