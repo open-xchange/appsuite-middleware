@@ -531,11 +531,14 @@ properties:
     - key: com.openexchange.filestore.s3client.[clientID].connectTimeout
       description: |
         Defines the connect timeout in milliseconds when connecting to S3 end-point.
+        
+        Note:
+        Please note that the configured connection timeout is reset for each retry attempt. If a retry policy with three retries is used then the request fails after 3 * timeout + X ms where X is the time used up by the exponential back-off. 
       defaultValue: 10000
       version: 7.10.4
       reloadable: true
       configcascadeAware: false
-      related: 
+      related: com.openexchange.filestore.s3client.[clientID].maxRetries
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
       tags: ["Filestore","S3"]
@@ -575,6 +578,18 @@ properties:
         "iam" refers to using the integrated AWS Identity and Access Management (IAM); see also
         https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html
       defaultValue: static
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]
+      
+    - key: com.openexchange.filestore.s3client.[clientID].maxRetries
+      description: |
+        Per default the s3 client uses a retry policy with an exponential back-off strategy. This property configures the maximum amount of retries.
+      defaultValue: 3
       version: 7.10.4
       reloadable: true
       configcascadeAware: false

@@ -120,6 +120,10 @@ public enum S3ClientProperty implements Property {
      * "com.openexchange.filestore.s3client.[clientID].buckets"
      */
     BUCKETS("buckets", ""),
+    /**
+     * "com.openexchange.filestore.s3client.[clientID].maxRetries"
+     */
+    MAX_RETRIES("maxRetries", "3"),
     ;
 
     public static final String PREFIX = "com.openexchange.filestore.s3client.";
