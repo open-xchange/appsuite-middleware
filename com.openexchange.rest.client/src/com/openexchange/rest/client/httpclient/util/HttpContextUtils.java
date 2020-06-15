@@ -146,11 +146,10 @@ public class HttpContextUtils {
     }
 
     /**
-     * Adds a {@link CredentialsProvider} for the given user, password combination to the given
-     * {@link HttpContext}
+     * Adds a {@link AuthCache} for the given {@link HttpContext}
      *
-     * @param context The {@link HttpContext}
      * @param targetHost The target host to send the request to
+     * @param context The {@link HttpContext}
      */
     public static void addAuthCache(HttpContext context, HttpHost targetHost) {
         AuthCache authCache = new BasicAuthCache();
