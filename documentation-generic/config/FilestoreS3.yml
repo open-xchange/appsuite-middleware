@@ -533,7 +533,7 @@ properties:
         Defines the connect timeout in milliseconds when connecting to S3 end-point.
         
         Note:
-        Please note that the configured connection timeout is reset for each retry attempt. If a retry policy with three retries is used then the request fails after 3 * timeout + X ms where X is the time used up by the exponential back-off. 
+        Please note that the configured connect timeout is reset for each retry attempt. If a retry policy with three retries is used then the request fails after 3 * timeout + X ms where X is the time used up by the exponential back-off. 
       defaultValue: 10000
       version: 7.10.4
       reloadable: true
