@@ -372,26 +372,26 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     @Override
     public boolean existsDisplayName(final Context ctx, final User user, final int userId) throws StorageException {
-        final int ctxId = i(ctx.getId());
-        final Connection con;
-        try {
-            con = cache.getConnectionForContext(ctxId);
-        } catch (PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
-        }
+        int ctxId = i(ctx.getId());
+        Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        boolean foundOther = false;
         try {
+            con = cache.getConnectionForContext(ctxId);
             stmt = con.prepareStatement("SELECT field01,userid FROM prg_contacts WHERE cid=? AND field01=? AND fid=?");
             stmt.setInt(1, ctxId);
             stmt.setString(2, user.getDisplay_name());
             stmt.setInt(3, FolderObject.SYSTEM_LDAP_FOLDER_ID);
             rs = stmt.executeQuery();
+
+            boolean foundOther = false;
             while (!foundOther && rs.next()) {
                 foundOther = user.getDisplay_name().equals(rs.getString(1)) && (userId == 0 || userId != rs.getInt(2));
             }
+            return foundOther;
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
         } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);
@@ -406,7 +406,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 }
             }
         }
-        return foundOther;
     }
 
     @Override
