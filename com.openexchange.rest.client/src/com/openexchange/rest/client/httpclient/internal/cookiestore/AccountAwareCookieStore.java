@@ -65,9 +65,10 @@ import org.apache.http.cookie.Cookie;
  */
 public class AccountAwareCookieStore implements CookieStore {
 
-    private final Integer userId;
-    private final Integer contextId;
+    private final int userId;
+    private final int contextId;
     private final String accountId;
+    private final int hash;
 
     /**
      * Initializes a new {@link AccountAwareCookieStore}.
@@ -76,14 +77,18 @@ public class AccountAwareCookieStore implements CookieStore {
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public AccountAwareCookieStore(String accountId, Integer userId, Integer contextId) {
+    public AccountAwareCookieStore(String accountId, int userId, int contextId) {
         super();
-        Objects.requireNonNull(userId, "User identifier must not be null");
-        Objects.requireNonNull(contextId, "Context identifier must not be null");
-        Objects.requireNonNull(accountId, "Acciunt identifier must not be null");
+        Objects.requireNonNull(accountId, "Account identifier must not be null");
         this.userId = userId;
         this.contextId = contextId;
         this.accountId = accountId;
+
+        int prime = 31;
+        int h = prime * 1 + contextId;
+        h = prime * h + userId;
+        h = prime * h + accountId.hashCode();
+        hash = h;
     }
 
     @Override
@@ -108,29 +113,32 @@ public class AccountAwareCookieStore implements CookieStore {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + accountId.hashCode();
-        hash = 31 * hash + userId.hashCode();
-        hash = 31 * hash + contextId.hashCode();
         return hash;
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (other == null) {
+        if (!(obj instanceof AccountAwareCookieStore)) {
             return false;
         }
-        if (this.getClass() != other.getClass()) {
+        AccountAwareCookieStore other = (AccountAwareCookieStore) obj;
+        if (contextId != other.contextId) {
             return false;
         }
-        AccountAwareCookieStore otherStore = (AccountAwareCookieStore) other;
-
-        return userId.equals(otherStore.userId)
-            && contextId.equals(otherStore.contextId)
-            && accountId.equals(otherStore.accountId);
+        if (userId != other.userId) {
+            return false;
+        }
+        if (accountId == null) {
+            if (other.accountId != null) {
+                return false;
+            }
+        } else if (!accountId.equals(other.accountId)) {
+            return false;
+        }
+        return true;
     }
 
 }
