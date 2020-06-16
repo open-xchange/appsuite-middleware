@@ -320,37 +320,36 @@ public class Executor {
          * construct query string
          */
     	SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
-        StringBuilder StringBuilder = new StringBuilder(1024);
-        StringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields, table.getName() + ".")).append(",object_use_count.value").append(" FROM ").append(table)
+        StringBuilder stmtBuilder = new StringBuilder(1024);
+        stmtBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields, table.getName() + ".")).append(",object_use_count.value").append(" FROM ").append(table)
             .append(" LEFT JOIN ").append(Table.OBJECT_USE_COUNT).append(" ON ").append(table.getName()).append(".cid=").append(Table.OBJECT_USE_COUNT)
             .append(".cid AND ").append(forUser).append("=").append(Table.OBJECT_USE_COUNT).append(".user AND ")
             .append(table.getName()).append(".fid=").append(Table.OBJECT_USE_COUNT).append(".folder AND ")
             .append(table).append(".intfield01=").append(Table.OBJECT_USE_COUNT).append(".object ")
             .append(" WHERE ").append(table.getName()).append(".").append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
-        	StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
+        	stmtBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
         }
         if (null != objectIDs && 0 < objectIDs.length) {
-        	StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
+        	stmtBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
         	if (1 == objectIDs.length) {
-        		StringBuilder.append('=').append(objectIDs[0]);
+        		stmtBuilder.append('=').append(objectIDs[0]);
         	} else {
-	        	StringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
+	        	stmtBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
         	}
         }
         if (Long.MIN_VALUE != minLastModified) {
-            StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append(">?");
+            stmtBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append(">?");
         }
         if (null != adapter) {
-        	StringBuilder.append(" AND ").append(adapter.getClause());
+        	stmtBuilder.append(" AND ").append(adapter.getClause());
         }
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
-        	StringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
+        	stmtBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
         	if (0 < sortOptions.getLimit()) {
-            	StringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
+            	stmtBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
         	}
         }
-        StringBuilder.append(';');
         /*
          * prepare statement
          */
@@ -358,7 +357,8 @@ public class Executor {
         int parameterIndex = 1;
         ResultSet resultSet = null;
         try {
-            stmt = connection.prepareStatement(StringBuilder.toString());
+            stmt = connection.prepareStatement(stmtBuilder.toString());
+            stmtBuilder = null; // Free for GC
             stmt.setInt(parameterIndex++, contextID);
             if (Integer.MIN_VALUE != folderID) {
             	stmt.setInt(parameterIndex++, folderID);
