@@ -81,7 +81,7 @@ public final class Reference<V> {
         super();
         this.value = value;
     }
-    
+
     /**
      * Checks for a <code>null</code> value
      *
@@ -90,7 +90,7 @@ public final class Reference<V> {
     public boolean hasNoValue() {
         return value == null;
     }
-    
+
     /**
      * Checks for a non-<code>null</code> value
      *

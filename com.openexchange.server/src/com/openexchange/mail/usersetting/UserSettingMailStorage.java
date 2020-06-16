@@ -50,6 +50,10 @@
 package com.openexchange.mail.usersetting;
 
 import java.sql.Connection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -76,7 +80,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     }
 
     /**
-     * Gets the singleton instance of {@link UserSettingMailStorage}
+     * Gets the singleton instance of {@link UserSettingMailStorage}.
      *
      * @return The singleton instance of {@link UserSettingMailStorage}
      */
@@ -94,7 +98,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     }
 
     /**
-     * Releases this storage instance
+     * Releases this storage instance.
      */
     public static final void releaseInstance() {
         if (null != singleton) {
@@ -166,7 +170,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     }
 
     /**
-     * Saves given user's mail settings bits to database
+     * Saves given user's mail settings bits to database.
      *
      * @param usm the user's mail settings to save
      * @param user the user ID
@@ -178,7 +182,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     }
 
     /**
-     * Saves given user's mail settings bits to database
+     * Saves given user's mail settings bits to database.
      *
      * @param usm the user's mail settings to save
      * @param user the user ID
@@ -189,7 +193,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     public abstract void saveUserSettingMailBits(final UserSettingMail usm, final int user, final Context ctx, final Connection writeConArg) throws OXException;
 
     /**
-     * Saves given user's mail settings to database
+     * Saves given user's mail settings to database.
      *
      * @param usm the user's mail settings to save
      * @param user the user ID
@@ -201,7 +205,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     }
 
     /**
-     * Saves given user's mail settings to database
+     * Saves given user's mail settings to database.
      *
      * @param usm the user's mail settings to save
      * @param user the user ID
@@ -212,7 +216,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     public abstract void saveUserSettingMail(final UserSettingMail usm, final int user, final Context ctx, final Connection writeConArg) throws OXException;
 
     /**
-     * Deletes the user's mail settings from database
+     * Deletes the user's mail settings from database.
      *
      * @param user the user ID
      * @param ctx the context
@@ -223,7 +227,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     }
 
     /**
-     * Deletes the user's mail settings from database
+     * Deletes the user's mail settings from database.
      *
      * @param user the user ID
      * @param ctx the context
@@ -233,7 +237,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     public abstract void deleteUserSettingMail(final int user, final Context ctx, final Connection writeConArg) throws OXException;
 
     /**
-     * Loads user's mail settings from database
+     * Loads user's mail settings from database.
      *
      * @param user the user
      * @param ctx the context
@@ -245,7 +249,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     }
 
     /**
-     * Loads user's mail settings from database
+     * Loads user's mail settings from database.
      *
      * @param user the user
      * @param ctx the context
@@ -256,7 +260,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     public abstract UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg) throws OXException;
 
     /**
-     * Removes the user's mail settings from cache if any used
+     * Removes the user's mail settings from cache if any used.
      *
      * @param user the user
      * @param ctx the context
@@ -265,7 +269,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     public abstract void removeUserSettingMail(final int user, final Context ctx) throws OXException;
 
     /**
-     * Clears this storage's cache if any used
+     * Clears this storage's cache if any used.
      *
      * @throws OXException if cache clearing fails
      */
@@ -275,4 +279,31 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
      * Triggers necessary action to shutdown the storage
      */
     public abstract void shutdownStorage();
+
+    /**
+     * Gets the sender address of the given user.
+     *
+     * @param userId The identifier of the user to retrieve the sender address for
+     * @param context The context
+     * @param connection An optional connection to use
+     * @return The optional user's sender address
+     * @throws OXException If sender address cannot be returned
+     */
+    public Optional<String> getSenderAddress(int userId, Context context, Connection connection) throws OXException {
+        Integer iUserId = Integer.valueOf(userId);
+        Map<Integer, String> addresses = getSenderAddresses(Collections.singleton(iUserId), context, connection);
+        return Optional.ofNullable(addresses.get(iUserId));
+    }
+
+    /**
+     * Gets the sender addresses of the given users.
+     *
+     * @param userIds The identifiers of the users to retrieve the sender address for
+     * @param context The context
+     * @param connection An optional connection to use
+     * @return A map associating the user identifier with user's sender address
+     * @throws OXException If sender addresses cannot be returned
+     */
+    public abstract Map<Integer, String> getSenderAddresses(Set<Integer> userIds, Context context, Connection connection) throws OXException;
+
 }
