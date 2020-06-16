@@ -75,7 +75,7 @@ import com.openexchange.rest.client.httpclient.util.HttpContextUtils;
  * @since v7.10.4
  */
 public class UserAwareRoutePlanner extends DefaultRoutePlanner {
-    
+
     public final static UserAwareRoutePlanner USER_PLANNER_INSTANCE = new UserAwareRoutePlanner();
 
     private final static Logger LOGGER = LoggerFactory.getLogger(UserAwareRoutePlanner.class);
@@ -121,7 +121,7 @@ public class UserAwareRoutePlanner extends DefaultRoutePlanner {
              * Set credential provider for authentication against the proxy
              */
             AuthScope authScope = new AuthScope(httpHost.getHostName(), httpHost.getPort());
-            HttpContextUtils.addCredentialProvider(context, authScope, proxy.getProxyLogin(), proxy.getProxyPassword());
+            HttpContextUtils.addCredentialProvider(context, proxy.getProxyLogin(), proxy.getProxyPassword(), authScope);
 
             return httpHost;
         } catch (OXException e) {

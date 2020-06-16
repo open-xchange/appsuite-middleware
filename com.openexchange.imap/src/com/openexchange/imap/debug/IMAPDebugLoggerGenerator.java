@@ -139,7 +139,11 @@ public class IMAPDebugLoggerGenerator {
             filePath = new StringBuilder(filePath).append("imaptrace_").append(contextId).append('_').append(userId).append('_').append(server).toString();
             {
                 File f = new File(filePath);
-                if (!f.isDirectory() || !f.exists()) {
+                if (f.exists()) {
+                    if (!f.isDirectory()) {
+                        throw new IllegalStateException("Failed to create directory: " + filePath + ". There is already a file with such a pathname.");
+                    }
+                } else {
                     if (!f.mkdir()) {
                         throw new IllegalStateException("Failed to create directory: " + filePath);
                     }

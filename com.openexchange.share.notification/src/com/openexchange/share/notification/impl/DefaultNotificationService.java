@@ -330,6 +330,7 @@ public class DefaultNotificationService implements ShareNotificationService {
             collectWarning(warnings, e, null);
         }
 
+        // Gather users per group, that aren't already loaded
         for (int groupId : entities.getGroups()) {
             Group group;
             try {
@@ -338,17 +339,30 @@ public class DefaultNotificationService implements ShareNotificationService {
                 collectWarning(warnings, e);
                 continue;
             }
-            for (int userId : group.getMember()) {
-                if (!usersById.containsKey(I(userId))) {
-                    try {
-                        User user = userService.getUser(userId, context);
-                        UserDetail userDetail = new UserDetail(user);
-                        userDetail.setGroup(group);
-                        usersById.put(I(userId), userDetail);
-                    } catch (OXException e) {
-                        collectWarning(warnings, e, null);
+            if (null == group.getMember() || 0 == group.getMember().length) {
+                continue;
+            }
+
+            int[] unkownUsers = new int[group.getMember().length];
+            {
+                int i = 0;
+                for (int userId : group.getMember()) {
+                    if (false == usersById.containsKey(I(userId))) {
+                        unkownUsers[i++] = userId;
                     }
                 }
+            }
+            if (0 == unkownUsers.length) {
+                continue;
+            }
+
+            try {
+                User[] users = userService.getUser(context, unkownUsers);
+                for (User user : users) {
+                    usersById.put(I(user.getId()), new UserDetail(user));
+                }
+            } catch (OXException e) {
+                collectWarning(warnings, e, null);
             }
         }
 

@@ -512,7 +512,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void remove(Event object) {
-                object.removeDescription();
+                object.removeCategories();
             }
 
             @Override

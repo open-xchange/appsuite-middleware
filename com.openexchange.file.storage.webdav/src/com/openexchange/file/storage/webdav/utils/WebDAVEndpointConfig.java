@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,63 @@
  *
  */
 
-package com.openexchange.file.storage.webdav.exception;
+package com.openexchange.file.storage.webdav.utils;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.net.MalformedURLException;
+import java.net.URL;
+import org.apache.commons.lang3.Validate;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.webdav.AbstractWebDAVFileStorageService;
+import com.openexchange.session.Session;
 
 /**
- * {@link WebdavExceptionMessages}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * {@link WebDAVEndpointConfig}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.4
  */
-public class WebdavExceptionMessages implements LocalizableStrings {
+public class WebDAVEndpointConfig {
 
-    // Missing capability for file storage %1$s
-    public static final String MISSING_CAP_MSG = "Missing capability for file storage %1$s";
+    private final String url;
 
-    // Invalid config: %1$s
-    public static final String INVALID_CONFIG_MSG = "Invalid config: %1$s";
+    private WebDAVEndpointConfig(String url) {
+        super();
+        this.url = url;
+    }
 
-    // The document could not be updated because it was modified. Please try again.
-    public static final String MODIFIED_CONCURRENTLY_MSG_DISPLAY = "The document could not be updated because it was modified. Please try again.";
+    public String getUrl() {
+        return url;
+    }
 
-    // The connection check failed
-    public static final String PING_FAILED = "The connection check failed.";
+    public static class Builder {
 
-    // Cannot connect to URI: %1$s. Please change and try again.
-    public static final String URL_NOT_ALLOWED_MSG = "Cannot connect to URI: %1$s. Please change and try again.";
+        private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebDAVEndpointConfig.Builder.class);
 
-    // The given URL is invalid. Please change it and try again.
-    public static final String BAD_URL_MSG = "The given URL is invalid. Please change it and try again.";
+        protected String url;
 
+        public Builder(Session session, AbstractWebDAVFileStorageService service, String url) throws OXException {
+            Validate.notNull(session, "Session might not be null!");
+            Validate.notNull(service, "AbstractWebDAVFileStorageService might not be null!");
+            Validate.notNull(url, "URL might not be null!");
+            this.url = url;
+
+            optAdaptScheme();
+            WebDAVEndpointUtils.verifyURL(session, service, this.url);
+        }
+
+        private void optAdaptScheme() {
+            try {
+                if (!this.url.startsWith("http")) { // includes 'https'
+                    this.url = new URL("https://" + this.url).toString();
+                }
+            } catch (MalformedURLException e) {
+                LOG.error("Unable to verify and adapt scheme for endpoint {}.", this.url, e);
+            }
+        }
+
+        public WebDAVEndpointConfig build() {
+            return new WebDAVEndpointConfig(url);
+        }
+    }
 }

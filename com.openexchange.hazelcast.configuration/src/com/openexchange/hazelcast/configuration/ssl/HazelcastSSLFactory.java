@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.hazelcast.configuration.internal;
+package com.openexchange.hazelcast.configuration.ssl;
 
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -66,7 +66,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.collect.ImmutableList;
 import com.hazelcast.nio.ssl.SSLContextFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.ConfigAwareKeyStore;
@@ -211,7 +210,7 @@ public class HazelcastSSLFactory implements SSLContextFactory {
         return retval;
     }
 
-    private static final List<String> SSL_PROPERTY_NAMES = ImmutableList.of(
+    private static final List<String> SSL_PROPERTY_NAMES = Arrays.asList(
         PROP_SSL_PROTOCOLS,
         PROP_TRUST_STORE,
         PROP_TRUST_PASSWORD,

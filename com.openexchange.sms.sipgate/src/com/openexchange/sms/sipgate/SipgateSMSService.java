@@ -51,11 +51,12 @@ package com.openexchange.sms.sipgate;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.rest.client.httpclient.util.HttpContextUtils.addCookieStore;
+import static com.openexchange.rest.client.httpclient.util.HttpContextUtils.addAuthCache;
 import static com.openexchange.rest.client.httpclient.util.HttpContextUtils.addCredentialProvider;
 import java.io.IOException;
 import java.util.Locale;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
@@ -93,7 +94,7 @@ import com.openexchange.sms.SMSServiceSPI;
  */
 public class SipgateSMSService implements SMSServiceSPI {
 
-    private static final AuthScope AUTHSCOPE = new AuthScope("api.sipgate.com", -1, null, "https");
+    private static final String HOST_ADDRESS = "api.sipgate.com";
     private static final String USERNAME = "com.openexchange.sms.sipgate.username";
     private static final String PASSWORD = "com.openexchange.sms.sipgate.password";
 
@@ -104,8 +105,8 @@ public class SipgateSMSService implements SMSServiceSPI {
 
     /**
      * Initializes a new {@link SipgateSMSService}.
-     *
-     * @throws OXException
+     * 
+     * @param services The {@link ServiceLookup}
      */
     public SipgateSMSService(ServiceLookup services) {
         this.services = services;
@@ -139,7 +140,7 @@ public class SipgateSMSService implements SMSServiceSPI {
                 jsonObject.put("smsId", "s0");
                 jsonObject.put("recipient", checkAndFormatPhoneNumber(recipients[i], null));
                 jsonObject.put("message", message);
-                sendMessage(client, contextId, userId, sipgateUsername, sipgatePassword, jsonObject);
+                sendMessage(client, sipgateUsername, sipgatePassword, jsonObject);
             }
         } catch (JSONException e) {
             // will not happen
@@ -154,7 +155,7 @@ public class SipgateSMSService implements SMSServiceSPI {
         return sb.toString();
     }
 
-    private void sendMessage(HttpClient client, int contextId, int userId, String username, String password, JSONObject message) throws OXException {
+    private void sendMessage(HttpClient client, String username, String password, JSONObject message) throws OXException {
         HttpPost request = new HttpPost(URI);
         request.setEntity(new InputStreamEntity(new JSONInputStream(message, Charsets.UTF_8_NAME), -1L, ContentType.APPLICATION_JSON));
         HttpResponse response = null;
@@ -162,9 +163,10 @@ public class SipgateSMSService implements SMSServiceSPI {
         /*
          * Configure HTTP context
          */
+        HttpHost targetHost = new HttpHost(HOST_ADDRESS, AuthScope.ANY_PORT, "https");
         HttpContext context = new BasicHttpContext();
-        addCredentialProvider(context, AUTHSCOPE, username, password);
-        addCookieStore(context, contextId, userId, username);
+        addCredentialProvider(context, username, password, targetHost);
+        addAuthCache(context, targetHost);
 
         try {
             response = client.execute(request, context);

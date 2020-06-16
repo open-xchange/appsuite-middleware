@@ -77,7 +77,9 @@ import com.openexchange.file.storage.owncloud.rest.OwnCloudRestClient;
 import com.openexchange.file.storage.webdav.AbstractWebDAVAccountAccess;
 import com.openexchange.file.storage.webdav.AbstractWebDAVFileAccess;
 import com.openexchange.file.storage.webdav.AbstractWebDAVFolderAccess;
+import com.openexchange.file.storage.webdav.WebDAVFileStorageConstants;
 import com.openexchange.file.storage.webdav.exception.WebdavExceptionCodes;
+import com.openexchange.file.storage.webdav.utils.WebDAVEndpointConfig;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.ManagedHttpClient;
@@ -164,12 +166,14 @@ public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
         Map<String, Object> configuration = account.getConfiguration();
         String login = (String) configuration.get("login");
         String password = (String) configuration.get("password");
-        String host = (String) configuration.get("url");
+        WebDAVEndpointConfig config = new WebDAVEndpointConfig.Builder(this.session, this.getWebDAVFileStorageService(), (String) configuration.get(WebDAVFileStorageConstants.WEBDAV_URL)).build();
+        String host = config.getUrl();
+
         if (Strings.isEmpty(login) || Strings.isEmpty(password) || Strings.isEmpty(host)) {
             throw FileStorageExceptionCodes.MISSING_CONFIG.create(getService().getId(), getAccountId());
         }
         if (host.contains(REMOTE_PHP) == false) {
-            throw WebdavExceptionCodes.INVALID_CONFIG.create("Host url is invalid");
+            throw WebdavExceptionCodes.INVALID_CONFIG.create("Host url is invalid. Must contain '/remote.php'.");
         }
         String baseUri = host.substring(0, host.indexOf(REMOTE_PHP));
         try {

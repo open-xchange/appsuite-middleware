@@ -72,15 +72,15 @@ public class AccountAwareCookieStore implements CookieStore {
     /**
      * Initializes a new {@link AccountAwareCookieStore}.
      *
-     * @param userId The user id
-     * @param contextId The context id
-     * @param accountId The account id
+     * @param accountId The account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public AccountAwareCookieStore(Integer userId, Integer contextId, String accountId) {
+    public AccountAwareCookieStore(String accountId, Integer userId, Integer contextId) {
         super();
-        Objects.nonNull(userId);
-        Objects.nonNull(contextId);
-        Objects.nonNull(accountId);
+        Objects.requireNonNull(userId, "User identifier must not be null");
+        Objects.requireNonNull(contextId, "Context identifier must not be null");
+        Objects.requireNonNull(accountId, "Acciunt identifier must not be null");
         this.userId = userId;
         this.contextId = contextId;
         this.accountId = accountId;
@@ -109,9 +109,9 @@ public class AccountAwareCookieStore implements CookieStore {
     @Override
     public int hashCode() {
         int hash = 7;
+        hash = 31 * hash + accountId.hashCode();
         hash = 31 * hash + userId.hashCode();
         hash = 31 * hash + contextId.hashCode();
-        hash = 31 * hash + accountId.hashCode();
         return hash;
     }
 

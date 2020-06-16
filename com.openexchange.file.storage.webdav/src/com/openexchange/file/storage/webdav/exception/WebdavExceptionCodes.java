@@ -62,6 +62,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * @since v7.10.4
  */
 public enum WebdavExceptionCodes implements DisplayableOXExceptionCode {
+
     /**
      * Missing capability for file storage %1$s
      */
@@ -81,6 +82,16 @@ public enum WebdavExceptionCodes implements DisplayableOXExceptionCode {
      * The connection check failed
      */
     PING_FAILED("The connection check failed.", CATEGORY_CONNECTIVITY, 4, WebdavExceptionMessages.PING_FAILED),
+
+    /**
+     * Cannot connect to URL: %1$s. Please change and try again.
+     */
+    URL_NOT_ALLOWED("The feed URL %1$s is not allowed due to configuration.", CATEGORY_USER_INPUT, 5, WebdavExceptionMessages.URL_NOT_ALLOWED_MSG),
+
+    /**
+     * The requested URI %1$s does not match the standard.
+     */
+    BAD_URL("The requested URL %1$s does not match the standard.", Category.CATEGORY_USER_INPUT, 6, WebdavExceptionMessages.BAD_URL_MSG),
 
     ;
 

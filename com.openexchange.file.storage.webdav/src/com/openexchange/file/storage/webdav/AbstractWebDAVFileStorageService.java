@@ -131,7 +131,7 @@ public abstract class AbstractWebDAVFileStorageService implements AccountAware, 
         tmpDescription.add(login);
         FormElement password = FormElement.custom("password", "password", FormStrings.PASSWORD_LABEL);
         tmpDescription.add(password);
-        FormElement url = FormElement.custom("url", "url", FormStrings.URL_LABEL);
+        FormElement url = FormElement.custom(WebDAVFileStorageConstants.WEBDAV_URL, WebDAVFileStorageConstants.WEBDAV_URL, FormStrings.URL_LABEL);
         tmpDescription.add(url);
 
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);

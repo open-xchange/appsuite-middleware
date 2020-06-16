@@ -58,7 +58,7 @@ import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadables;
 import com.openexchange.hazelcast.configuration.internal.HazelcastConfigurationServiceImpl;
-import com.openexchange.hazelcast.configuration.internal.HazelcastSSLFactory;
+import com.openexchange.hazelcast.configuration.ssl.HazelcastSSLFactory;
 
 /**
  * {@link HazelcastSSLReloadable}

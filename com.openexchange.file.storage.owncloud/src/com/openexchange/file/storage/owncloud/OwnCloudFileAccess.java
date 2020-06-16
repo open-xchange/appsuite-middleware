@@ -92,6 +92,7 @@ import com.openexchange.file.storage.webdav.WebDAVFile;
 import com.openexchange.file.storage.webdav.WebDAVFileStorageConstants;
 import com.openexchange.file.storage.webdav.WebDAVPath;
 import com.openexchange.file.storage.webdav.WebDAVUtils;
+import com.openexchange.file.storage.webdav.utils.WebDAVEndpointConfig;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -136,7 +137,7 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
     public OwnCloudFileAccess(WebDAVClient webdavClient, OwnCloudAccountAccess accountAccess) throws OXException {
         super(webdavClient, accountAccess);
         if (account.getConfiguration().containsKey(WebDAVFileStorageConstants.WEBDAV_URL)) {
-            rootUrl = (String) account.getConfiguration().get(WebDAVFileStorageConstants.WEBDAV_URL);
+            rootUrl = new WebDAVEndpointConfig.Builder(this.session, accountAccess.getWebDAVFileStorageService(), (String) account.getConfiguration().get(WebDAVFileStorageConstants.WEBDAV_URL)).build().getUrl();
         } else {
             throw FileStorageExceptionCodes.MISSING_CONFIG.create(WebDAVFileStorageConstants.ID, WebDAVFileStorageConstants.WEBDAV_URL);
         }

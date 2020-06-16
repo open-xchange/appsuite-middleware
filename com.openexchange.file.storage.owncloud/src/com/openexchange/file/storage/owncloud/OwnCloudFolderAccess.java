@@ -57,6 +57,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.file.storage.webdav.AbstractWebDAVFolderAccess;
 import com.openexchange.file.storage.webdav.WebDAVFileStorageConstants;
+import com.openexchange.file.storage.webdav.utils.WebDAVEndpointConfig;
 import com.openexchange.webdav.client.WebDAVClient;
 
 /**
@@ -75,7 +76,7 @@ public class OwnCloudFolderAccess extends AbstractWebDAVFolderAccess implements 
     protected OwnCloudFolderAccess(@NonNull WebDAVClient webdavClient, @NonNull OwnCloudAccountAccess accountAccess) throws OXException {
         super(webdavClient, accountAccess);
         if (account.getConfiguration().containsKey(WebDAVFileStorageConstants.WEBDAV_URL)) {
-            rootUrl = (String) account.getConfiguration().get(WebDAVFileStorageConstants.WEBDAV_URL);
+            rootUrl = new WebDAVEndpointConfig.Builder(this.session, accountAccess.getWebDAVFileStorageService(), (String) account.getConfiguration().get(WebDAVFileStorageConstants.WEBDAV_URL)).build().getUrl();
         } else {
             throw FileStorageExceptionCodes.MISSING_CONFIG.create(WebDAVFileStorageConstants.ID, WebDAVFileStorageConstants.WEBDAV_URL);
         }

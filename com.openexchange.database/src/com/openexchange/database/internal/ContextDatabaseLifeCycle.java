@@ -217,7 +217,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private class ContextPoolAdapter extends AbstractMetricAwarePool<ConnectionData> {
 
-        private Set<Integer> globalDBPoolIds = null;
+        private volatile Set<Integer> globalDBPoolIds;
 
         ContextPoolAdapter(int poolId, ConnectionData data, Function<ConnectionData, String> toURL, Function<ConnectionData, Properties> toConnectionArguments, Function<ConnectionData, PoolConfig> toConfig) {
             super(poolId, data, toURL, toConnectionArguments, toConfig);
@@ -242,10 +242,13 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
         @Override
         protected String getPoolClass() {
+            Set<Integer> globalDBPoolIds = this.globalDBPoolIds;
             if (globalDBPoolIds == null) {
                 synchronized (this) {
+                    globalDBPoolIds = this.globalDBPoolIds;
                     if (globalDBPoolIds == null) {
                         globalDBPoolIds = GlobalDbInit.getGlobalDBPoolIds(configurationService);
+                        this.globalDBPoolIds = globalDBPoolIds;
                     }
                 }
             }
