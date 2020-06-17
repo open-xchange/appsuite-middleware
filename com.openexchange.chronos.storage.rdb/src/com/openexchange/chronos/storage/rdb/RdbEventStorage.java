@@ -571,9 +571,25 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setInt(3, asInt(seriesId));
             stmt.setString(4, String.valueOf(recurrenceId));
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                return resultSet.next() ? readEvent(resultSet, mappedFields, null) : null;
+                if (resultSet.next()) {
+                    return readEvent(resultSet, mappedFields, null);
+                }
             }
         }
+        /*
+         * lookup matching recurrence manually as last resort
+         */
+        List<Event> changeExceptions = selectExceptions(connection, seriesId, new EventField[] { EventField.ID, EventField.RECURRENCE_ID });
+        for (Event changeException : changeExceptions) {
+            if (recurrenceId.equals(changeException.getRecurrenceId())) {
+                List<Event> events = selectEvents(connection, Collections.singletonList(changeException.getId()), fields);
+                return 0 < events.size() ? events.get(0) : null;
+            }
+        }
+        /*
+         * not found, otherwise
+         */
+        return null;
     }
 
     private List<Event> selectExceptions(Connection connection, String seriesId, EventField[] fields) throws SQLException, OXException {
