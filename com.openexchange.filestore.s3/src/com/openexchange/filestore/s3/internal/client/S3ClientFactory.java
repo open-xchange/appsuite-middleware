@@ -303,6 +303,18 @@ public class S3ClientFactory {
         }
 
         {
+            ConfigProperty retries = clientConfig.getProperty(S3ClientProperty.MAX_RETRIES);
+            if (Strings.isNotEmpty(retries.getValue())) {
+                try {
+                    clientConfiguration.setMaxErrorRetry(Integer.parseInt(retries.getValue().trim()));
+                } catch (NumberFormatException e) {
+                    // Invalid max retries
+                    LOG.warn("Invalid integer value specified for {}", retries.getKey(), e);
+                }
+            }
+        }
+
+        {
             ConfigProperty readTimeout = clientConfig.getProperty(S3ClientProperty.READ_TIMEOUT);
             if (Strings.isNotEmpty(readTimeout.getValue())) {
                 try {

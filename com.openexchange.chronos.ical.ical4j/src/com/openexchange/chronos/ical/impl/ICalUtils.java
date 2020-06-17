@@ -122,6 +122,7 @@ import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.parameter.XParameter;
 import net.fortuna.ical4j.model.property.XProperty;
+import net.fortuna.ical4j.util.CompatibilityHints;
 
 /**
  * {@link ICalUtils}
@@ -130,6 +131,17 @@ import net.fortuna.ical4j.model.property.XProperty;
  * @since v7.10.0
  */
 public class ICalUtils {
+
+    /*
+     * ensure to enable compatibility hints globally before any import takes place
+     */
+    static {
+        CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_UNFOLDING, true);
+        CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_OUTLOOK_COMPATIBILITY, true);
+        CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_NOTES_COMPATIBILITY, true);
+        CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING, true);
+        CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_VALIDATION, true);
+    }
 
     static final PropertyFactoryRegistry PROPERTY_FACTORY = initPropertyFactory();
     static final ParameterFactoryRegistry PARAMETER_FACTORY = initParameterFactory();
@@ -390,7 +402,7 @@ public class ICalUtils {
         }
         return matchingProperties;
     }
-    
+
     /**
      * Builds a key for a specific parameter to be removed
      *
@@ -444,7 +456,7 @@ public class ICalUtils {
             }
         }
     }
-    
+
     public static CalendarBuilder getCalendarBuilder(ICalParameters parameters) {
         ICalParameters iCalParameters = getParametersOrDefault(parameters);
         CalendarParser calendarParser = CalendarParserFactory.getInstance().createParser();

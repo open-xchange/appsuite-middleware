@@ -49,7 +49,6 @@
 
 package com.openexchange.rest.client.httpclient.util;
 
-import static com.openexchange.java.Autoboxing.I;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -66,7 +65,7 @@ import com.openexchange.rest.client.httpclient.internal.cookiestore.MultiUserCoo
 import com.openexchange.session.Session;
 
 /**
- * {@link HttpContextUtils} is a utility class which helps setup and invalidate a {@link CookieStore} for given {@link HttpContext}s
+ * {@link HttpContextUtils} is a utility class which helps setup and invalidate a cookie store for a given HTTP context.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.4
@@ -74,33 +73,33 @@ import com.openexchange.session.Session;
 public class HttpContextUtils {
 
     /**
-     * Adds a {@link CookieStore} to the given {@link HttpContext}
+     * Adds a {@link CookieStore} to the given HTTP context.
      *
-     * @param context The {@link HttpContext}
-     * @param session The users {@link Session}
-     * @param accountId The account id
+     * @param context The HTTP context that represents the execution state of an HTTP process
+     * @param session The session providing user information
+     * @param accountId The account identifier
      */
     public static void addCookieStore(HttpContext context, Session session, String accountId) {
         addCookieStore(context, session.getContextId(), session.getUserId(), accountId);
     }
 
     /**
-     * Adds a {@link CookieStore} to the given {@link HttpContext}
+     * Adds a {@link CookieStore} to the given HTTP context.
      *
-     * @param context The {@link HttpContext}
+     * @param context The HTTP context that represents the execution state of an HTTP process
      * @param contextId The context identifier
      * @param userId The user identifier
-     * @param accountId The account id
+     * @param accountId The account identifier
      */
     public static void addCookieStore(HttpContext context, int contextId, int userId, String accountId) {
-        context.setAttribute(HttpClientContext.COOKIE_STORE, new AccountAwareCookieStore(accountId, I(contextId), I(userId)));
+        context.setAttribute(HttpClientContext.COOKIE_STORE, new AccountAwareCookieStore(accountId, contextId, userId));
     }
 
     /**
      * Removes the {@link CookieStore} for the given session and account
      *
-     * @param session The users {@link Session}
-     * @param accountId The account id
+     * @param session The session providing user information
+     * @param accountId The account identifier
      */
     public static void removeCookieStore(Session session, String accountId) {
         removeCookieStore(session.getContextId(), session.getUserId(), accountId);
@@ -111,17 +110,16 @@ public class HttpContextUtils {
      *
      * @param contextId The context identifier
      * @param userId The user identifier
-     * @param accountId The account id
+     * @param accountId The account identifier
      */
     public static void removeCookieStore(int contextId, int userId, String accountId) {
-        MultiUserCookieStore.getInstance().clear(new AccountAwareCookieStore(accountId, I(contextId), I(userId)));
+        MultiUserCookieStore.getInstance().clear(new AccountAwareCookieStore(accountId, contextId, userId));
     }
 
     /**
-     * Adds a {@link CredentialsProvider} for the given user, password combination to the given
-     * {@link HttpContext}
+     * Adds a {@link CredentialsProvider} for the given user, password combination to the given HTTP context.
      *
-     * @param context The {@link HttpContext}
+     * @param context The HTTP context that represents the execution state of an HTTP process
      * @param username The user name to use
      * @param password The password to use
      * @param targetHost The target host to send the request to
@@ -131,10 +129,9 @@ public class HttpContextUtils {
     }
 
     /**
-     * Adds a {@link CredentialsProvider} for the given user, password combination to the given
-     * {@link HttpContext}
+     * Adds a {@link CredentialsProvider} for the given user, password combination to the given HTTP context.
      *
-     * @param context The {@link HttpContext}
+     * @param context The HTTP context that represents the execution state of an HTTP process
      * @param username The user name to use
      * @param password The password to use
      * @param authScope The {@link AuthScope} of the credentials
@@ -146,10 +143,10 @@ public class HttpContextUtils {
     }
 
     /**
-     * Adds a {@link AuthCache} for the given {@link HttpContext}
+     * Adds an {@link AuthCache} for the given HTTP context.
      *
      * @param targetHost The target host to send the request to
-     * @param context The {@link HttpContext}
+     * @param context The HTTP context that represents the execution state of an HTTP process
      */
     public static void addAuthCache(HttpContext context, HttpHost targetHost) {
         AuthCache authCache = new BasicAuthCache();

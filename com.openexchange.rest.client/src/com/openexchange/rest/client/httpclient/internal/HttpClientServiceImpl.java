@@ -68,7 +68,6 @@ import java.util.regex.Pattern;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.ConnectionConfig;
@@ -128,10 +127,10 @@ import com.openexchange.timer.TimerService;
  */
 public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerCustomizer<Object, Object>, ForcedReloadable {
 
-    private static final String DEFAULT_COOKIE_SPEC_NAME = "lenient";
-    private static final CookieStore REJECT_ALL_COOKIE_STORE = new RejectAllCookieStore();
-
+    /** The logger constant */
     static final Logger LOGGER = LoggerFactory.getLogger(HttpClientServiceImpl.class);
+
+    private static final String DEFAULT_COOKIE_SPEC_NAME = "lenient";
 
     /** Dummy wild-card provider to signal absent provider */
     static final WildcardHttpClientConfigProvider ABSENT = new WildcardHttpClientConfigProvider() {
@@ -146,6 +145,8 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             return "noop";
         }
     };
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     /** A boolean value that indicates whether the service is shutting down or not */
     private final AtomicBoolean isShutdown;
@@ -424,7 +425,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             }
         });
 
-        builder.setDefaultCookieStore(REJECT_ALL_COOKIE_STORE);
+        builder.setDefaultCookieStore(RejectAllCookieStore.getInstance());
         builder.useSystemProperties();
 
         /*

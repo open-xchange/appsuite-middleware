@@ -53,14 +53,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import jersey.repackaged.com.google.common.cache.Cache;
-import jersey.repackaged.com.google.common.cache.CacheBuilder;
 import org.apache.http.client.CookieStore;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 /**
- * {@link MultiUserCookieStore} is a {@link CookieStore} which caches a {@link CookieStore} per user account. It uses the {@link AccountAwareCookieStore} as a cache key.
+ * {@link MultiUserCookieStore} caches a {@link CookieStore} per user account. It uses the {@link AccountAwareCookieStore} as a cache key.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.4
@@ -68,38 +69,50 @@ import org.apache.http.impl.client.BasicCookieStore;
 public class MultiUserCookieStore {
 
     private static final MultiUserCookieStore INSTANCE = new MultiUserCookieStore();
-    private final Cache<AccountAwareCookieStore, CookieStore> cache;
 
     /**
      * Gets the {@link MultiUserCookieStore} instance
+     *
+     * @return The instance
      */
     public static MultiUserCookieStore getInstance() {
         return INSTANCE;
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final LoadingCache<AccountAwareCookieStore, CookieStore> cache;
+
     /**
      * Initializes a new {@link MultiUserCookieStore}.
      */
     private MultiUserCookieStore() {
-        cache = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.MINUTES).build();
+        cache = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.MINUTES).build(new CacheLoader<AccountAwareCookieStore, CookieStore>() {
+
+            @Override
+            public CookieStore load(AccountAwareCookieStore key) throws Exception {
+                return new BasicCookieStore();
+            }
+        });
     }
 
     /**
-     * Gets the cookie store from cache
+     * Gets the cookie store from cache.
      *
-     * @param key The {@link AccountAwareCookieStore} to get the store for
-     * @return The {@link CookieStore}
+     * @param key The {key to get the store for
+     * @return The cookie store
+     * @throws IllegalStateException If a cookie store cannot be returned for given key
      */
     private CookieStore getCookieStore(AccountAwareCookieStore key) {
         try {
-            return cache.get(key, () -> new BasicCookieStore());
+            return cache.get(key);
         } catch (ExecutionException e) {
             throw new IllegalStateException("Error getting or intitializing cookie store for: " + key.toString(), e);
         }
     }
 
     /**
-     * Adds a cookie to the given store
+     * Adds a cookie to the given store.
      *
      * @param key The store key
      * @param cookie The cookie to add
@@ -109,7 +122,7 @@ public class MultiUserCookieStore {
     }
 
     /**
-     * Get all cookies from the given store
+     * Get all cookies from the given store.
      *
      * @param key The store key
      * @return The cookies
@@ -119,11 +132,11 @@ public class MultiUserCookieStore {
     }
 
     /**
-     * Removes all of Cookies from the given store that have expired by the specified {@link Date}.
+     * Removes all of Cookies from the given store that have expired by the specified date.
      *
      * @param key The store key
-     * @param date The date to expire
-     * @return <code>true</code> if any cookie has been removed
+     * @param date The expiration date
+     * @return <code>true</code> if any cookie has been removed; otherwise <code>false</code>
      */
     public boolean clearExpired(AccountAwareCookieStore key, Date date) {
         return getCookieStore(key).clearExpired(date);

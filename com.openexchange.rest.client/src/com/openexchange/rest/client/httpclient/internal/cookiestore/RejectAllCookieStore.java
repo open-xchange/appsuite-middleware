@@ -56,12 +56,29 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.cookie.Cookie;
 
 /**
- * {@link RejectAllCookieStore} is a {@link CookieStore} which rejects all cookies
+ * {@link RejectAllCookieStore} is a {@link CookieStore} which rejects all cookies.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.4
  */
 public class RejectAllCookieStore implements CookieStore {
+
+    private static final RejectAllCookieStore INSTANCE = new RejectAllCookieStore();
+
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static RejectAllCookieStore getInstance() {
+        return INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private RejectAllCookieStore() {
+        super();
+    }
 
     @Override
     public void addCookie(Cookie cookie) {
