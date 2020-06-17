@@ -77,7 +77,6 @@ import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
-import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.restclient.invoker.ApiClient;
@@ -99,6 +98,8 @@ public class FreeBusyTest extends AbstractChronosTest {
 
     private static final int DEFAULT_WEEKS_PAST = 1;
 
+    private Date testDate;
+
     private EventData busyDate;
 
     private EventData freeDate;
@@ -115,7 +116,7 @@ public class FreeBusyTest extends AbstractChronosTest {
 
     private TestUser restUser;
 
-    private Object hostname;
+    private String hostname;
 
     private String protocol;
 
@@ -145,6 +146,7 @@ public class FreeBusyTest extends AbstractChronosTest {
         server = testUser.getContext();
         contextid = getClient().getValues().getContextId();
         testResourceName = "test-resource-1";
+        this.testDate = new Date();
         this.busyDate = createEvent(TranspEnum.OPAQUE, FreeBusyTest.class.getName() + "_Busy", 10, 11);
         this.freeDate = createEvent(TranspEnum.TRANSPARENT, FreeBusyTest.class.getName() + "_Free", 11, 12);
     }
@@ -245,6 +247,110 @@ public class FreeBusyTest extends AbstractChronosTest {
         validateICal(icalResponse, userName, server, DEFAULT_WEEKS_PAST, DEFAULT_WEEKS_FUTURE, true);
     }
 
+    /**
+     * 
+     * Tests whether valid iCalendar data is returned, if the requested time range into future is greater than the configured maximum.
+     * In this case the time range up to the configured time range is expected.
+     *
+     * @throws Exception if changing the configuration fails
+     * @throws ApiException if an error occurred by getting the free busy data
+     */
+    @Test
+    public void testGetFreeBusy_PropertyWeeksFuture_Status200() throws Exception {
+        int maxTimerangeFuture = 1;
+        CONFIG.put(FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_FUTURE.getFQPropertyName(), I(maxTimerangeFuture).toString());
+        super.setUpConfiguration();
+        int weeksFuture = 2;
+        String icalResponse = api.getFreeBusy(I(contextid), userName, server, null, I(weeksFuture), null);
+        validateICal(icalResponse, userName, server, DEFAULT_WEEKS_PAST, maxTimerangeFuture, false);
+    }
+
+    /**
+     * 
+     * Tests whether valid iCalendar data is returned, if the requested time range into past is greater than the configured maximum.
+     * In this case the time range down to the configured time range is expected.
+     *
+     * @throws Exception if changing the configuration fails
+     * @throws ApiException if an error occurred by getting the free busy data
+     */
+    @Test
+    public void testGetFreeBusy_PropertyWeeksPast_Status200() throws Exception {
+        int maxTimerangePast = 1;
+        CONFIG.put(FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_PAST.getFQPropertyName(), I(maxTimerangePast).toString());
+        super.setUpConfiguration();
+        int weeksPast = 2;
+        String icalResponse = api.getFreeBusy(I(contextid), userName, server, I(weeksPast), null, null);
+        validateICal(icalResponse, userName, server, maxTimerangePast, DEFAULT_WEEKS_FUTURE, false);
+    }
+
+    /**
+     * 
+     * Tests the edge case where the maximum time range into the past property is set to 0.
+     * In this case no past free busy times should be returned.
+     *
+     * @throws Exception if changing the configuration fails
+     * @throws ApiException if an error occurred by getting the free busy data
+     */
+    @Test
+    public void testGetFreeBusy_PropertyWeeksPast0_Status200() throws Exception {
+        int maxTimerangePast = 0;
+        CONFIG.put(FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_PAST.getFQPropertyName(), I(maxTimerangePast).toString());
+        super.setUpConfiguration();
+        int weeksPast = 2;
+        String icalResponse = api.getFreeBusy(I(contextid), userName, server, I(weeksPast), null, null);
+        validateICal(icalResponse, userName, server, maxTimerangePast, DEFAULT_WEEKS_FUTURE, false);
+    }
+
+    /**
+     * 
+     * Tests the edge case where the time range into the past parameter is set to 0.
+     * In this case no past free busy times should be returned.
+     *
+     * @throws Exception if changing the configuration fails
+     * @throws ApiException if an error occurred by getting the free busy data
+     */
+    @Test
+    public void testGetFreeBusy_WeeksPast0_Status200() throws Exception {
+        super.setUpConfiguration();
+        int weeksPast = 0;
+        String icalResponse = api.getFreeBusy(I(contextid), userName, server, I(weeksPast), null, null);
+        validateICal(icalResponse, userName, server, weeksPast, DEFAULT_WEEKS_FUTURE, false);
+    }
+
+    /**
+     * 
+     * Tests the edge case where the maximum time range into the future property is set to 0.
+     * In this case no future free busy times should be returned.
+     *
+     * @throws Exception if changing the configuration fails
+     * @throws ApiException if an error occurred by getting the free busy data
+     */
+    @Test
+    public void testGetFreeBusy_PropertyWeeksFuture0_Status200() throws Exception {
+        int maxTimerangeFuture = 0;
+        CONFIG.put(FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_FUTURE.getFQPropertyName(), I(maxTimerangeFuture).toString());
+        super.setUpConfiguration();
+        int weeksFuture = 2;
+        String icalResponse = api.getFreeBusy(I(contextid), userName, server, null, I(weeksFuture), null);
+        validateICal(icalResponse, userName, server, DEFAULT_WEEKS_PAST, maxTimerangeFuture, false);
+    }
+
+    /**
+     * 
+     * Tests the edge case where the time range into the future parameter is set to 0.
+     * In this case no future free busy times should be returned.
+     *
+     * @throws Exception if changing the configuration fails
+     * @throws ApiException if an error occurred by getting the free busy data
+     */
+    @Test
+    public void testGetFreeBusy_WeeksFuture0_Status200() throws Exception {
+        super.setUpConfiguration();
+        int weeksFuture = 0;
+        String icalResponse = api.getFreeBusy(I(contextid), userName, server, null, I(weeksFuture), null);
+        validateICal(icalResponse, userName, server, DEFAULT_WEEKS_PAST, weeksFuture, false);
+    }
+
     // -------------------------------Depend on property tests--------------------------------------------------------------
 
     /**
@@ -260,47 +366,9 @@ public class FreeBusyTest extends AbstractChronosTest {
         super.setUpConfiguration();
         try {
             api.getFreeBusy(I(contextid), userName, server, null, null, null);
-            fail();
+            fail("Expected error code 404");
         } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
             assertEquals(404, e.getCode());
-        }
-    }
-
-    /**
-     * 
-     * Tests whether getting free busy data failed with code 400,
-     * if the requested value for time range into past is bigger than the configured maximum.
-     * 
-     * @throws Exception if changing the configuration fails
-     */
-    @Test
-    public void testGetFreeBusy_PropertyWeeksPast_Status400() throws Exception {
-        CONFIG.put(FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_PAST.getFQPropertyName(), "1");
-        super.setUpConfiguration();
-        int weeksPast = 2;
-        try {
-            api.getFreeBusy(I(contextid), userName, server, I(weeksPast), null, null);
-        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
-            assertEquals(400, e.getCode());
-        }
-    }
-
-    /**
-     * 
-     * Tests whether getting free busy data failed with code 400,
-     * if the requested value for time range into future is bigger than the configured maximum.
-     * 
-     * @throws Exception if changing the configuration fails
-     */
-    @Test
-    public void testGetFreeBusy_PropertyWeeksFuture_Status400() throws Exception {
-        CONFIG.put(FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_FUTURE.getFQPropertyName(), "1");
-        super.setUpConfiguration();
-        int weeksFuture = 2;
-        try {
-            api.getFreeBusy(I(contextid), userName, server, null, I(weeksFuture), null);
-        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
-            assertEquals(400, e.getCode());
         }
     }
 
@@ -318,7 +386,7 @@ public class FreeBusyTest extends AbstractChronosTest {
         super.setUpConfiguration();
         try {
             api.getFreeBusy(null, userName, server, null, null, null);
-            fail();
+            fail("Expected error code 400");
         } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
             assertEquals(400, e.getCode());
         }
@@ -336,7 +404,7 @@ public class FreeBusyTest extends AbstractChronosTest {
         super.setUpConfiguration();
         try {
             api.getFreeBusy(I(-1), userName, server, null, null, null);
-            fail();
+            fail("Expected error code 404");
         } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
             assertEquals(404, e.getCode());
         }
@@ -354,7 +422,7 @@ public class FreeBusyTest extends AbstractChronosTest {
         super.setUpConfiguration();
         try {
             api.getFreeBusy(I(contextid), null, server, null, null, null);
-            fail();
+            fail("Expected error code 400");
         } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
             assertEquals(400, e.getCode());
         }
@@ -372,7 +440,7 @@ public class FreeBusyTest extends AbstractChronosTest {
         super.setUpConfiguration();
         try {
             api.getFreeBusy(I(contextid), userName, null, null, null, null);
-            fail();
+            fail("Expected error code 400");
         } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
             assertEquals(400, e.getCode());
         }
@@ -390,7 +458,7 @@ public class FreeBusyTest extends AbstractChronosTest {
         super.setUpConfiguration();
         try {
             api.getFreeBusy(I(contextid + 1), userName, server, null, null, null);
-            fail();
+            fail("Expected error code 404");
         } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
             assertEquals(404, e.getCode());
         }
@@ -408,7 +476,7 @@ public class FreeBusyTest extends AbstractChronosTest {
         super.setUpConfiguration();
         try {
             api.getFreeBusy(I(contextid), userName + "Test", server, null, null, null);
-            fail();
+            fail("Expected error code 404");
         } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
             assertEquals(404, e.getCode());
         }
@@ -426,7 +494,7 @@ public class FreeBusyTest extends AbstractChronosTest {
         super.setUpConfiguration();
         try {
             api.getFreeBusy(I(contextid), userName, server + ".test", null, null, null);
-            fail();
+            fail("Expected error code 404");
         } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
             assertEquals(404, e.getCode());
         }
@@ -444,7 +512,7 @@ public class FreeBusyTest extends AbstractChronosTest {
         super.setUpConfiguration();
         try {
             api.getFreeBusy(I(contextid), userName, server, I(-1), null, null);
-            fail();
+            fail("Expected error code 400");
         } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
             assertEquals(400, e.getCode());
         }
@@ -462,11 +530,13 @@ public class FreeBusyTest extends AbstractChronosTest {
         super.setUpConfiguration();
         try {
             api.getFreeBusy(I(contextid), userName, server, null, I(-1), null);
-            fail();
+            fail("Expected error code 400");
         } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
             assertEquals(400, e.getCode());
         }
     }
+
+
 
     // -------------------------------Helper methods--------------------------------------------------------------
 
@@ -498,24 +568,33 @@ public class FreeBusyTest extends AbstractChronosTest {
         assertTrue("Contains no VFreeBusy", content.contains("BEGIN:VFREEBUSY") && content.contains("END:VFREEBUSY"));
         String startDate = this.busyDate.getStartDate().getValue();
         String endDate = this.busyDate.getEndDate().getValue();
-        if (simple) {
-            assertTrue("Contains no simple free busy data.", content.contains("FREEBUSY:"));
+        if (weeksFuture > 0) {
+            if (simple) {
+                assertTrue("Contains no simple free busy data.", content.contains("FREEBUSY:"));
 
-            assertTrue("Does not contain the busy data", content.contains(startDate) && content.contains(endDate));
-        } else {
-            assertTrue("Contains no extended free busy data.", content.contains("FREEBUSY;FBTYPE=BUSY:"));
-            assertTrue("Does not contain the busy data", content.contains(startDate) && content.contains(endDate));
-            assertTrue("Contains no extended free busy data.", content.contains("FREEBUSY;FBTYPE=FREE:"));
-            startDate = this.freeDate.getStartDate().getValue();
-            endDate = this.freeDate.getEndDate().getValue();
-            assertTrue("Does not contain the free data", content.contains(startDate) && content.contains(endDate));
+                assertTrue("Does not contain the busy data", content.contains(startDate) && content.contains(endDate));
+            } else {
+                assertTrue("Contains no extended free busy data.", content.contains("FREEBUSY;FBTYPE=BUSY:"));
+                assertTrue("Does not contain the busy data", content.contains(startDate) && content.contains(endDate));
+                assertTrue("Contains no extended free busy data.", content.contains("FREEBUSY;FBTYPE=FREE:"));
+                startDate = this.freeDate.getStartDate().getValue();
+                endDate = this.freeDate.getEndDate().getValue();
+                assertTrue("Does not contain the free data", content.contains(startDate) && content.contains(endDate));
+            }
         }
-        Date date = DateTimeUtil.parseDateTime(this.busyDate.getStartDate());
 
-        DateTimeData start = DateTimeUtil.getDateTime("utc", CalendarUtils.add(date, Calendar.WEEK_OF_YEAR, -weeksPast).getTime());
-        DateTimeData end = DateTimeUtil.getDateTime("utc", CalendarUtils.add(date, Calendar.WEEK_OF_YEAR, weeksFuture).getTime());
-        assertTrue("Contains wrong start time", content.contains("DTSTART:" + start.getValue().substring(0, 6)));
-        assertTrue("Contains wrong end time", content.contains("DTEND:" + end.getValue().substring(0, 6)));
+        Date expectedStart = CalendarUtils.add(this.testDate, Calendar.WEEK_OF_YEAR, -weeksPast);
+        int startIndex = content.indexOf("DTSTART") + 8;
+        String dtStart = content.substring(startIndex, startIndex + 17);
+        Date actualStart = DateTimeUtil.parseZuluDateTime(dtStart);
+        assertTrue("Contains wrong start time", Math.abs(expectedStart.getTime() - actualStart.getTime()) < 5000);
+
+        Date expectedEnd = CalendarUtils.add(this.testDate, Calendar.WEEK_OF_YEAR, weeksFuture);
+        int endIndex = content.indexOf("DTEND") + 6;
+        String dtEnd = content.substring(endIndex, endIndex + 17);
+        Date actualEnd = DateTimeUtil.parseZuluDateTime(dtEnd);
+        assertTrue("Contains wrong end time", Math.abs(expectedEnd.getTime() - actualEnd.getTime()) < 5000);
+
         assertTrue("Does not contain the user name", content.contains(userName));
         assertTrue("Does not contain the server name", content.contains(serverName));
     }
