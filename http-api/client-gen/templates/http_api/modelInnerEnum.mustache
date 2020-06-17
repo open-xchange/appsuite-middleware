@@ -33,10 +33,16 @@
 {{#jackson}}
 
     @JsonCreator
-    public static {{#datatypeWithEnum}}{{{.}}}{{/datatypeWithEnum}}{{^datatypeWithEnum}}{{{classname}}}{{/datatypeWithEnum}} fromValue(String text) {
+    public static {{#datatypeWithEnum}}{{{.}}}{{/datatypeWithEnum}}{{^datatypeWithEnum}}{{{classname}}}{{/datatypeWithEnum}} fromValue(Object input) {
       for ({{#datatypeWithEnum}}{{{.}}}{{/datatypeWithEnum}}{{^datatypeWithEnum}}{{{classname}}}{{/datatypeWithEnum}} b : {{#datatypeWithEnum}}{{{.}}}{{/datatypeWithEnum}}{{^datatypeWithEnum}}{{{classname}}}{{/datatypeWithEnum}}.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
+        if (input instanceof String) {
+            if (String.valueOf(b.value).equals(input)) {
+                return b;
+            }
+        } else if (input instanceof Integer) {
+            if (b.value.equals(input)) {
+                return b;
+            }
         }
       }
       return null;
