@@ -13,6 +13,7 @@ local dbPoolName = 'dbpool';
 local davInterfaceName = 'davinterface';
 local httpClient = 'httpclient';
 local serviceName = 'service';
+local circuitBreakerName = 'circuitbreaker_name';
 
 local templates = [
   {
@@ -30,8 +31,8 @@ local templates = [
   {
     name: dbPoolName,
     label: 'DB Pool',
-    hide: 'variable',
     includeAll: true,
+    customAllValue: '.*',
     query: 'label_values(appsuite_mysql_connections_total,pool)',
     regex: '([0-9]+)',
     sort: 3,
@@ -48,6 +49,12 @@ local templates = [
     name: httpClient,
     label: 'HTTP Client',
     query: 'label_values(appsuite_httpclient_requests_seconds_count,client)',
+    sort: 1,
+  },
+  {
+    name: circuitBreakerName,
+    label: 'CircuitBreaker Name',
+    query: 'label_values(appsuite_circuitbreaker_state, name)',
     sort: 1,
   },
 ];
@@ -95,12 +102,12 @@ local cacheRatio = [
   {
     title: 'Hit Ratio',
     expr: 'sum(rate(appsuite_jcs_cache_hits_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_jcs_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_jcs_cache_misses_total{instance=~"$instance"}[$interval])))',
-    gridPos: { h: 4, w: 3, x: 0, y: 17 },
+    gridPos: { h: 4, w: 3, x: 0, y: 25 },
   },
   {
     title: 'Miss Ratio',
     expr: 'sum(rate(appsuite_jcs_cache_misses_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_jcs_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_jcs_cache_misses_total{instance=~"$instance"}[$interval])))',
-    gridPos: { h: 4, w: 3, x: 0, y: 21 },
+    gridPos: { h: 4, w: 3, x: 0, y: 25 },
   },
 ];
 
@@ -354,30 +361,34 @@ local restApiResponsePercentiles = graphPanel.new(
   },
 );
 
-local circuitBreakerDenials = graphPanel.new(
-  title='Average Denials Rate (per-second)',
+local imapFailureRatio = singlestat.new(
+  title='Failure Ratio',
   datasource=grafana.default.datasource,
-  fill=2,
-  linewidth=2,
-  min='0',
-  labelY1='denials/s',
-).addTargets(
-  [
-    prometheus.target(
-      'rate(appsuite_circuitbreaker_denials_total{instance=~"$instance", name!="mailfilter"}[$interval])',
-      legendFormat='{{name}}',
-    ),
-    prometheus.target(
-      'rate(appsuite_circuitbreaker_denials_total{instance=~"$instance", name="mailfilter"}[$interval])',
-      legendFormat='{{name}}',
-    ),
-  ]
+  decimals=1,
+  format='percentunit',
+  colorValue=true,
+  gaugeShow=true,
+  gaugeThresholdLabels=true,
+  thresholds='25,50',
+  valueName='current',
+  valueMaps=[
+    {
+      op: '=',
+      text: '0',
+      value: 'null',
+    },
+  ],
+  timeFrom='1m',
+).addTarget(
+  prometheus.target(
+    expr='sum without (instance, status, host) (rate(appsuite_imap_commands_seconds_count{status!~"OK"}[1m])) / sum without (instance, status, host) (rate(appsuite_imap_commands_seconds_count[1m]))',
+  )
 );
 
 local imapRequestRate = graphPanel.new(
   title='Requests (per-second)',
   datasource=grafana.default.datasource,
-  decimals=0,
+  decimals=1,
   fill=2,
   linewidth=2,
   aliasColors={
@@ -385,9 +396,13 @@ local imapRequestRate = graphPanel.new(
     OK: 'dark-green',
     Total: 'dark-yellow',
   },
+  legend_values=true,
+  legend_rightSide=true,
+  legend_alignAsTable=true,
+  legend_current=true,
   min='0',
-  format='cps',
-  labelY1='Commands/s',
+  format='reqps',
+  labelY1='Requests/s',
 ).addTargets(
   [
     prometheus.target(
@@ -405,8 +420,40 @@ local imapRequestRate = graphPanel.new(
   ]
 );
 
-local circuitBreakerIMAPStatus = table.new(
-  title='IMAP Status',
+local circuitBreakerDenialRate = graphPanel.new(
+  title='Denial Rate: $' + circuitBreakerName,
+  datasource=grafana.default.datasource,
+  description='The number of times an execution was denied because the circuit was open.',
+  fill=2,
+  linewidth=2,
+  legend_show=false,
+  min='0',
+  decimals=0,
+).addTarget(
+  prometheus.target(
+    expr='rate(appsuite_circuitbreaker_denials_total{instance=~"$instance", name=~"$' + circuitBreakerName + '"}[$interval])',
+    legendFormat='{{name}}',
+  )
+);
+
+local circuitBreakerOpenRate = graphPanel.new(
+  title='Open Rate: $' + circuitBreakerName,
+  datasource=grafana.default.datasource,
+  description='The number of times the circuit was opened.',
+  fill=2,
+  linewidth=2,
+  legend_show=false,
+  min='0',
+  decimals=0,
+).addTarget(
+  prometheus.target(
+    expr='rate(appsuite_circuitbreaker_opens_total{instance=~"$instance", name=~"$' + circuitBreakerName + '"}[$interval])',
+    legendFormat='{{name}}',
+  )
+);
+
+local circuitBreakerStates = table.new(
+  title='States',
   styles=[
     {
       dateFormat: 'YYYY-MM-DD HH:mm:ss',
@@ -421,9 +468,48 @@ local circuitBreakerIMAPStatus = table.new(
   ]
 ).addTarget(
   prometheus.target(
-    'count(appsuite_circuitbreaker_state{instance=~"$instance",name!="mailfilter"}>0) by (host,state)',
+    expr='count(appsuite_circuitbreaker_state{instance=~"$instance"} > 0) by (host, name, state)',
     format='table',
     instant=true,
+  )
+);
+
+local circuitBreakerClosed = singlestat.new(
+  title='CLOSED',
+  description='Number of closed CircuitBreaker',
+  datasource=grafana.default.datasource,
+  decimals=0,
+  valueName='current',
+  sparklineShow=true,
+).addTarget(
+  prometheus.target(
+    expr='sum(appsuite_circuitbreaker_state{state="CLOSED"})',
+  )
+);
+
+local circuitBreakerOpen = singlestat.new(
+  title='OPEN',
+  description='Number of open CircuitBreaker',
+  datasource=grafana.default.datasource,
+  decimals=0,
+  valueName='current',
+  sparklineShow=true,
+).addTarget(
+  prometheus.target(
+    expr='sum(appsuite_circuitbreaker_state{state="OPEN"})',
+  )
+);
+
+local circuitBreakerHalfOpen = singlestat.new(
+  title='HALF_OPEN',
+  description='Number of half-open CircuitBreaker',
+  datasource=grafana.default.datasource,
+  decimals=0,
+  valueName='current',
+  sparklineShow=true,
+).addTarget(
+  prometheus.target(
+    expr='sum(appsuite_circuitbreaker_state{state="HALF_OPEN"})',
   )
 );
 
@@ -521,12 +607,36 @@ local webdavApiRequestsPerSecond = graphPanel.new(
   ]
 );
 
-local dbTimeoutRate = singlestat.new(
-  title='Timeout Error Rate',
+local dbTimeoutRatio = singlestat.new(
+  title='Timeout Error Ratio',
   datasource=grafana.default.datasource,
+  decimals=1,
+  format='percentunit',
+  colorValue=true,
+  gaugeShow=true,
+  gaugeThresholdLabels=true,
+  thresholds='25,50',
+  valueName='current',
+  valueMaps=[
+    {
+      op: '=',
+      text: '0',
+      value: 'null',
+    },
+  ],
+  timeFrom='1m',
+).addTarget(
+  prometheus.target(
+    expr='sum without (instance, type, class, pool, service) (rate(appsuite_mysql_connections_timeout_total[1m])) / sum without (instance, type, class, pool, service) (rate(appsuite_mysql_connections_total[1m]))',
+  )
+);
+
+local configdbActive = singlestat.new(
+  title='Active ConfigDB',
+  datasource=grafana.default.datasource,
+  description='**Active ConfigDB Connections**',
   decimals=0,
-  timeFrom='1h',
-  valueName='avg',
+  valueName='current',
   valueMaps=[
     {
       op: '=',
@@ -537,9 +647,54 @@ local dbTimeoutRate = singlestat.new(
   sparklineShow=true,
 ).addTarget(
   prometheus.target(
-    expr='sum(rate(appsuite_mysql_connections_timeout_total{instance=~"$instance"}[1h])) by (instance)',
+    expr='sum(appsuite_mysql_connections_active{class=~"configdb"})',
   )
 );
+
+local userdbActive = singlestat.new(
+  title='Active UserDB',
+  datasource=grafana.default.datasource,
+  description='**Active UserDB Connections**',
+  decimals=0,
+  valueName='current',
+  valueMaps=[
+    {
+      op: '=',
+      text: '0',
+      value: 'null',
+    },
+  ],
+  sparklineShow=true,
+).addTarget(
+  prometheus.target(
+    expr='sum(appsuite_mysql_connections_active{class=~"userdb"})',
+  )
+);
+
+local dbPoolTable = table.new(
+  title='DB Pools',
+  sort={
+    col: 2,
+    desc: true,
+  },
+  styles=[
+    {
+      pattern: '/Value.*/',
+      type: 'hidden',
+    },
+    {
+      pattern: 'Time',
+      type: 'hidden',
+    },
+  ]
+).addTarget(
+  prometheus.target(
+    expr='count(appsuite_mysql_connections_total{pool=~".*[0-9]+"}) by (pool, class, type)',
+    format='table',
+    instant=true,
+  )
+);
+
 
 local configDBConnections = graphPanel.new(
   title='ConfigDB Connections',
@@ -601,7 +756,6 @@ local configDBReadConnections = graphPanel.new(
 local configDBWriteConnections = graphPanel.new(
   title='ConfigDB Write Connections',
   datasource=grafana.default.datasource,
-  description='The total number of pooled and active connections of this db pool.',
   aliasColors={
     Max: 'dark-red',
   },
@@ -630,120 +784,82 @@ local configDBWriteConnections = graphPanel.new(
   ]
 ).addSeriesOverride({ alias: 'Max', fill: 0 },);
 
-local configDBTimes = graphPanel.new(
-  title='ConfigDB Times',
+local userdbConnections = graphPanel.new(
+  title='UserDB $' + dbPoolName + ' Connections',
   datasource=grafana.default.datasource,
+  decimals=0,
   fill=2,
   linewidth=2,
-  decimals=0,
+  legend_alignAsTable=true,
+  legend_rightSide=true,
+  legend_values=true,
+  legend_avg=true,
+  legend_current=true,
   min='0',
-  format='s',
 ).addTargets(
   [
     prometheus.target(
-      'rate(appsuite_mysql_connections_acquire_seconds_sum{class="configdb",instance=~"$instance"}[$interval])/rate(appsuite_mysql_connections_acquire_seconds_count{class="configdb",instance=~"$instance"}[$interval])',
-      legendFormat='acquire {{type}}',
+      'appsuite_mysql_connections_total{class=~"userdb",instance=~"$instance",pool=~"$' + dbPoolName + '"}',
+      legendFormat='Pooled (Type: {{type}}, Pool: {{pool}})',
     ),
     prometheus.target(
-      'rate(appsuite_mysql_connections_usage_seconds_sum{class="configdb",instance=~"$instance"}[$interval])/rate(appsuite_mysql_connections_usage_seconds_count{class="configdb",instance=~"$instance"}[$interval])',
-      legendFormat='usage {{type}}',
+      'appsuite_mysql_connections_active{class=~"userdb",instance=~"$instance",pool=~"$' + dbPoolName + '"}',
+      legendFormat='Active (Type: {{type}}, Pool: {{pool}})',
     ),
     prometheus.target(
-      'rate(appsuite_mysql_connections_create_seconds_sum{class="configdb",instance=~"$instance"}[$interval])/rate(appsuite_mysql_connections_create_seconds_count{class="configdb",instance=~"$instance"}[$interval])',
-      legendFormat='create {{type}}',
+      'appsuite_mysql_connections_idle{class=~"userdb",instance=~"$instance",pool=~"$' + dbPoolName + '"}',
+      legendFormat='Idle (Type: {{type}}, Pool: {{pool}})',
+    ),
+    prometheus.target(
+      'appsuite_mysql_connections_max{class=~"userdb",instance=~"$instance",pool=~"$' + dbPoolName + '"}',
+      legendFormat='Max (Type: {{type}}, Pool: {{pool}})',
     ),
   ]
+).addSeriesOverride({ alias: '/Max.*/', fill: 0, color: '#C4162A' },);
+
+local sessionStorageBytes = graphPanel.new(
+  title='Consumed memory',
+  datasource=grafana.default.datasource,
+  description='Consumed memory of stored sessions held by this node in.',
+  fill=2,
+  linewidth=2,
+  decimals=0,
+  format='decbytes',
+  min='0',
+).addTarget(
+  prometheus.target(
+    'appsuite_sessionstorage_memory_bytes{instance=~"$instance"}',
+    legendFormat='{{type}}',
+  )
 );
 
-local userDBWriteConnections = graphPanel.new(
-  title='UserDB Write Connections',
+local sessionStorageTotal = graphPanel.new(
+  title='Stored sessions',
   datasource=grafana.default.datasource,
-  description='The total number of pooled and active connections of this db pool.',
+  description='Number of stored sessions held by this node.',
   aliasColors={
-    Max: 'dark-red',
+    global: 'dark-red',
   },
-  decimals=0,
   fill=2,
   linewidth=2,
+  decimals=0,
   min='0',
 ).addTargets(
   [
     prometheus.target(
-      'sum(appsuite_mysql_connections_total{class="userdb",instance=~"$instance",type="write"})',
-      legendFormat='Pooled',
+      'appsuite_sessionstorage_sessions_total{instance=~"$instance"}',
+      legendFormat='{{type}}',
     ),
     prometheus.target(
-      'sum(appsuite_mysql_connections_active{class="userdb",instance=~"$instance",type="write"})',
-      legendFormat='Active',
-    ),
-    prometheus.target(
-      'sum(appsuite_mysql_connections_idle{class="userdb",instance=~"$instance",type="write"})',
-      legendFormat='Idle',
-    ),
-    prometheus.target(
-      'sum(appsuite_mysql_connections_max{class="userdb",instance=~"$instance",type="write"}) by (pool)',
-      legendFormat='Max (Pool {{pool}})',
+      'sum(appsuite_sessionstorage_sessions_total{type="owned"})',
+      legendFormat='global',
     ),
   ]
-).addSeriesOverride({ alias: '/Max.*/', fill: 0 },);
-
-local userDBReadConnections = graphPanel.new(
-  title='UserDB Read Connections',
-  datasource=grafana.default.datasource,
-  description='The total number of pooled and active connections of this db pool.',
-  aliasColors={
-    Max: 'dark-red',
+).addSeriesOverride(
+  {
+    alias: 'global',
+    fill: 0,
   },
-  decimals=0,
-  fill=2,
-  linewidth=2,
-  min='0',
-).addTargets(
-  [
-    prometheus.target(
-      'sum(appsuite_mysql_connections_total{class="userdb",instance=~"$instance",type="read"})',
-      legendFormat='Pooled',
-    ),
-    prometheus.target(
-      'sum(appsuite_mysql_connections_active{class="userdb",instance=~"$instance",type="read"})',
-      legendFormat='Active',
-    ),
-    prometheus.target(
-      'sum(appsuite_mysql_connections_idle{class="userdb",instance=~"$instance",type="read"})',
-      legendFormat='Idle',
-    ),
-    prometheus.target(
-      'sum(appsuite_mysql_connections_max{class="userdb",instance=~"$instance",type="read"}) by (pool)',
-      legendFormat='Max (Pool {{pool}})',
-    ),
-  ]
-).addSeriesOverride({ alias: '/Max.*/', fill: 0 },);
-
-local userDBTimes = graphPanel.new(
-  title='UserDB Pool $dbpool Times',
-  datasource=grafana.default.datasource,
-  decimals=0,
-  fill=2,
-  linewidth=2,
-  min='0',
-  format='s',
-  repeat=dbPoolName,
-  repeatDirection='h',
-).addTargets(
-  [
-    prometheus.target(
-      'rate(appsuite_mysql_connections_acquire_seconds_sum{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}[$interval])/rate(appsuite_mysql_connections_acquire_seconds_count{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}[$interval])',
-      legendFormat='Acquire {{type}}',
-    ),
-    prometheus.target(
-      'rate(appsuite_mysql_connections_usage_seconds_sum{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}[$interval])/rate(appsuite_mysql_connections_usage_seconds_count{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}[$interval])',
-      legendFormat='Usage {{type}}',
-    ),
-    prometheus.target(
-      'rate(appsuite_mysql_connections_create_seconds_sum{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}[$interval])/rate(appsuite_mysql_connections_create_seconds_count{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}[$interval])',
-      legendFormat='Create {{type}}',
-    ),
-  ]
 );
 
 grafana.newDashboard(
@@ -767,6 +883,7 @@ grafana.newDashboard(
       datasource=grafana.default.datasource,
       hide=if std.objectHas(obj, 'hide') then obj.hide else '',
       includeAll=if std.objectHas(obj, 'includeAll') then obj.includeAll else false,
+      allValues=if std.objectHas(obj, 'customAllValue') then obj.customAllValue else null,
       sort=if std.objectHas(obj, 'sort') then obj.sort else 0,
       regex=if std.objectHas(obj, 'regex') then obj.regex else '',
       refresh='load',
@@ -830,17 +947,23 @@ grafana.newDashboard(
       },
     ) { gridPos: { h: 8, w: 12, x: 6, y: 1 } },
   ] + [
+    row.new(
+      title='SessionStorage',
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 7 } },
+    sessionStorageBytes { gridPos: { h: 8, w: 12, x: 0, y: 8 } },
+    sessionStorageTotal { gridPos: { h: 8, w: 12, x: 12, y: 8 } },
+  ] + [
     //------------------------------------------------------------------------------
     row.new(
       title='ThreadPool'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 7 } },
-    threadPool { gridPos: { h: 8, w: 12, x: 0, y: 8 } },
-    threadPoolTasks { gridPos: { h: 8, w: 12, x: 12, y: 8 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 16 } },
+    threadPool { gridPos: { h: 8, w: 12, x: 0, y: 17 } },
+    threadPoolTasks { gridPos: { h: 8, w: 12, x: 12, y: 17 } },
   ] + [
     //------------------------------------------------------------------------------
     row.new(
       title='Cache'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 16 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 25 } },
   ] + [
     singlestat.new(
       title=obj.title,
@@ -879,7 +1002,7 @@ grafana.newDashboard(
           legendFormat='Miss Ratio',
         ),
       ]
-    ) { gridPos: { h: 8, w: 9, x: 3, y: 17 } },
+    ) { gridPos: { h: 8, w: 9, x: 3, y: 26 } },
     graphPanel.new(
       title='Cache Operations',
       datasource=grafana.default.datasource,
@@ -897,7 +1020,7 @@ grafana.newDashboard(
           legendFormat='Removals',
         ),
       ]
-    ) { gridPos: { h: 8, w: 12, x: 12, y: 17 } },
+    ) { gridPos: { h: 8, w: 12, x: 12, y: 26 } },
     graphPanel.new(
       title='Top 5 Cache Regions',
       datasource=grafana.default.datasource,
@@ -918,17 +1041,19 @@ grafana.newDashboard(
         expr='topk(5,avg_over_time(appsuite_jcs_cache_elements_total{instance=~"$instance"}[${__range_s}s]))',
         legendFormat='{{region}}',
       )
-    ) { gridPos: { h: 8, w: 24, x: 0, y: 25 } },
+    ) { gridPos: { h: 8, w: 24, x: 0, y: 33 } },
   ] + [
     //------------------------------------------------------------------------------
     row.new(
       title='DB Pool'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 33 } },
-    dbTimeoutRate { gridPos: { h: 8, w: 6, x: 0, y: 34 } },
-    configDBReadConnections { gridPos: { h: 8, w: 9, x: 6, y: 34 } },
-    configDBWriteConnections { gridPos: { h: 8, w: 9, x: 15, y: 34 } },
-    userDBReadConnections { gridPos: { h: 8, w: 12, x: 0, y: 50 } },
-    userDBWriteConnections { gridPos: { h: 8, w: 12, x: 12, y: 50 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 41 } },
+    dbTimeoutRatio { gridPos: { h: 8, w: 6, x: 0, y: 42 } },
+    configdbActive { gridPos: { h: 4, w: 3, x: 6, y: 42 } },
+    userdbActive { gridPos: { h: 4, w: 3, x: 6, y: 45 } },
+    dbPoolTable { gridPos: { h: 8, w: 15, x: 9, y: 42 } },
+    configDBReadConnections { gridPos: { h: 8, w: 12, x: 0, y: 50 } },
+    configDBWriteConnections { gridPos: { h: 8, w: 12, x: 12, y: 50 } },
+    userdbConnections { gridPos: { h: 8, w: 24, x: 0, y: 58 } },
   ] + [
     //------------------------------------------------------------------------------
     row.new(
@@ -969,10 +1094,20 @@ grafana.newDashboard(
   ] + [
     //------------------------------------------------------------------------------
     row.new(
-      title='Circuit Breaker'
+      title='IMAP'
     ) + { gridPos: { h: 1, w: 24, x: 0, y: 127 } },
-    circuitBreakerDenials { gridPos: { h: 8, w: 12, x: 0, y: 128 } },
-    imapRequestRate { gridPos: { h: 8, w: 12, x: 12, y: 128 } },
-    circuitBreakerIMAPStatus { gridPos: { h: 8, w: 24, x: 0, y: 136 } },
+    imapFailureRatio { gridPos: { h: 8, w: 6, x: 0, y: 128 } },
+    imapRequestRate { gridPos: { h: 8, w: 18, x: 6, y: 128 } },
+  ] + [
+    //------------------------------------------------------------------------------
+    row.new(
+      title='CircuitBreaker'
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 136 } },
+    circuitBreakerClosed { gridPos: { h: 4, w: 3, x: 0, y: 137 } },
+    circuitBreakerHalfOpen { gridPos: { h: 4, w: 3, x: 3, y: 137 } },
+    circuitBreakerOpen { gridPos: { h: 4, w: 3, x: 0, y: 141 } },
+    circuitBreakerDenialRate { gridPos: { h: 8, w: 9, x: 6, y: 137 } },
+    circuitBreakerOpenRate { gridPos: { h: 8, w: 9, x: 15, y: 137 } },
+    circuitBreakerStates { gridPos: { h: 8, w: 24, x: 0, y: 153 } },
   ]
 )
