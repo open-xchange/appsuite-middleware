@@ -23,7 +23,7 @@ local annotation = grafana.annotation;
         query='auto,1m,5m,1h,6h,1d',
         auto_count=200,
         auto_min='1s',
-        current='5m',
+        current='5m', 
       ),
       template.new(
         name='job',
