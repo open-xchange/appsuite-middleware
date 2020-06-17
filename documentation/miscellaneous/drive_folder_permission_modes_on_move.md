@@ -34,7 +34,7 @@ Shared files
     - Shared folder 1
 ```
 
-where User1 has administrative permission for folders `Folder 1` and `Folder 2`, Author permission for `Public folder 1` and `Public folder 2` and Reviewer permission for `Shared folder 1`.  
+where User1 has administrative permission for folders `Folder 1` and `Folder 2` and Author permission for `Public folder 1`, `Public folder 2` and `Shared folder 1`.  
 User2 has administrative permission for folder `Shared folder 1`, Reviewer permission for `Folder 1`, Viewer permission for `Folder 2` and Author permission for `Public folder 1`.  
 And all users have viewer permission for public folders.
 
@@ -70,7 +70,7 @@ When moving `Folder 1` into `Public folder 2` and `com.openexchange.folderstorag
  * Viewer permission for group 'AllUsers' is unchanged
 
 ### `com.openexchange.folderstorage.permissions.moveToPublic=keep`
-When moving `Folder 1` into `Public folder 2` and `com.openexchange.folderstorage.permissions.moveToPublic` set to `inherit`, `Folder 1` has following permissions after the move operation:
+When moving `Folder 1` into `Public folder 2` and `com.openexchange.folderstorage.permissions.moveToPublic` set to `keep`, `Folder 1` has following permissions after the move operation:
  * User1 keeps administrative permission for `Folder 1`
  * User2 keeps Reviewer permission for `Folder 1`
  * Viewer permission for group 'AllUsers' is unchanged
