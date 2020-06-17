@@ -54,7 +54,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageProvider;
@@ -116,7 +115,7 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
 
     @Override
     public Interests getInterests() {
-        return Reloadables.interestsForProperties("com.openexchange.filestore.s3.*");
+        return clientRegistry.getInterests();
     }
 
     @Override
