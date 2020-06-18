@@ -124,7 +124,7 @@ public final class ConversionEngineRegistry {
      * @return The data source associated with specified identifier or <code>null</code>
      */
     public DataSource getDataSource(final String identifier) {
-        return sources.get(identifier);
+        return identifier == null ? null : sources.get(identifier);
     }
 
     /**

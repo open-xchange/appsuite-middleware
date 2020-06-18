@@ -77,6 +77,7 @@ import com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanup
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link GlobalRealtimeCleanupImpl}
@@ -106,11 +107,17 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, Managem
         // Do the local cleanup via a simple service call
         LocalRealtimeCleanup localRealtimeCleanup;
         try {
-            localRealtimeCleanup = Services.optService(LocalRealtimeCleanup.class);
-            if (localRealtimeCleanup == null) {
-                LOG.error("Unable to start local cleanup.", RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class));
+            ServiceLookup services = Services.getServiceLookup();
+            if (services == null || Services.getStoppedFlag().get()) {
+                // Shutting down...
+                LOG.debug("Unable to start local cleanup due to shut-down.");
             } else {
-                localRealtimeCleanup.cleanForId(id);
+                localRealtimeCleanup = services.getOptionalService(LocalRealtimeCleanup.class);
+                if (localRealtimeCleanup == null) {
+                    LOG.error("Unable to start local cleanup.", RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class));
+                } else {
+                    localRealtimeCleanup.cleanForId(id);
+                }
             }
         } catch (ShutDownRuntimeException shutDown) {
             // Shutting down

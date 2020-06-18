@@ -621,22 +621,42 @@ public final class MimeMessageUtility {
     private static final String FILE_ALIAS_APPENDIX = "file";
 
     /**
-     * Checks if specified &lt;image&gt; tag's <code>src</code> attribute seems to point to OX image Servlet.
+     * Checks if specified &lt;image&gt; tag's <code>src</code> attribute seems to point to an Open-Xchange image end-point.
      *
      * @param imageTag The &lt;image&gt; tag
-     * @return <code>true</code> if image Servlet is addressed; otherwise <code>false</code>
+     * @return <code>true</code> if an image end-point is addressed; otherwise <code>false</code>
      */
-    public static boolean isValidImageUri(final String imageTag) {
+    public static boolean isValidImageTag(String imageTag) {
         if (isEmpty(imageTag)) {
             return false;
         }
-        final String tmp = asciiLowerCase(imageTag);
-        final String srcStart = "src=\"";
-        final int pos = tmp.indexOf(srcStart);
+
+        String tmp = asciiLowerCase(imageTag);
+        String srcStart = "src=\"";
+        int pos = tmp.indexOf(srcStart);
         int fromIndex = pos + srcStart.length();
         if (fromIndex < 0) {
             fromIndex = 0;
         }
+        return isValidImageSource(tmp, fromIndex);
+    }
+
+    /**
+     * Checks if specified image URI attribute seems to point to an Open-Xchange image end-point.
+     *
+     * @param imageUri The image URI to examine
+     * @return <code>true</code> if an image end-point is addressed; otherwise <code>false</code>
+     */
+    public static boolean isValidImageSource(String imageUri) {
+        return isValidImageSource(imageUri, 0);
+    }
+
+    private static boolean isValidImageSource(String imageUri, int fromIndex) {
+        if (isEmpty(imageUri)) {
+            return false;
+        }
+
+        String tmp = asciiLowerCase(imageUri);
         // String prefix = ServerServiceRegistry.getServize(DispatcherPrefixService.class).getPrefix();
         if (tmp.indexOf('/' + IMAGE_ALIAS_APPENDIX, fromIndex) >= 0 || tmp.indexOf('/' + FILE_ALIAS_APPENDIX, fromIndex) >= 0) {
             return true;

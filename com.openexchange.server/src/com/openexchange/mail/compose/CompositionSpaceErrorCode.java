@@ -143,7 +143,11 @@ public enum CompositionSpaceErrorCode implements DisplayableOXExceptionCode {
     /**
      * The entered "Bcc" addresses are too long. Please use a shorter one.
      */
-    BCC_TOO_LONG("The entered \"Bcc\" addresses are too long.", CompositionSpaceExceptionMessages.BCC_TOO_LONG_MSG, CATEGORY_USER_INPUT, 20)
+    BCC_TOO_LONG("The entered \"Bcc\" addresses are too long.", CompositionSpaceExceptionMessages.BCC_TOO_LONG_MSG, CATEGORY_USER_INPUT, 20),
+    /**
+     * The entered "Reply-To" address is too long. Please use a shorter one.
+     */
+    REPLY_TO_TOO_LONG("The entered \"Reply-To\" address is too long.", CompositionSpaceExceptionMessages.REPLY_TO_TOO_LONG_MSG, CATEGORY_USER_INPUT, 21),
 
     ;
 

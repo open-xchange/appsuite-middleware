@@ -90,7 +90,7 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
      * @param login The login
      * @param pw The password
      * @param imapSession The IMAP session
-     * @param session The Groupware session
+     * @param session The Open-Xchange session
      * @return The newly created & connected {@link IMAPStore} instance
      * @throws MessagingException If operation fails
      */
@@ -118,21 +118,6 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
         } finally {
             if (error) {
                 Streams.close(imapStore);
-            }
-        }
-    }
-
-    /**
-     * Safely closes specified IMAP store.
-     *
-     * @param imapStore The IMAP store
-     */
-    protected static void closeSafe(IMAPStore imapStore) {
-        if (null != imapStore) {
-            try {
-                imapStore.close();
-            } catch (@SuppressWarnings("unused") Exception e) {
-                // Ignore
             }
         }
     }

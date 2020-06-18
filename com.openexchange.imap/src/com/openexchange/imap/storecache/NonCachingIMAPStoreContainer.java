@@ -49,8 +49,8 @@
 
 package com.openexchange.imap.storecache;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.MessagingException;
+import com.openexchange.imap.IMAPAccess;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
@@ -63,7 +63,6 @@ public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     protected final String server;
     protected final int port;
-    private final AtomicInteger inUseCount;
 
     /**
      * Initializes a new {@link NonCachingIMAPStoreContainer}.
@@ -72,32 +71,24 @@ public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
         super(accountId, session, propagateClientIp);
         this.port = port;
         this.server = server;
-        inUseCount = new AtomicInteger();
-    }
-
-    @Override
-    public int getInUseCount() {
-        return inUseCount.get();
     }
 
     @Override
     public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException {
-        inUseCount.incrementAndGet();
         return newStore(server, port, login, pw, imapSession, session);
     }
 
     @Override
     public void backStore(final IMAPStore imapStore) {
         backStoreNoValidityCheck(imapStore);
-        inUseCount.decrementAndGet();
     }
 
     protected void backStoreNoValidityCheck(final IMAPStore imapStore) {
-        closeSafe(imapStore);
+        IMAPAccess.closeSafely(imapStore);
     }
 
     @Override
-    public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
+    public void closeElapsed(final long stamp) {
         // Nothing to do
     }
 
@@ -113,4 +104,5 @@ public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
     public boolean hasElapsed(long millis) {
         return false;
     }
+
 }

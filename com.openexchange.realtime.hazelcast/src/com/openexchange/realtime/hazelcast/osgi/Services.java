@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.hazelcast.osgi;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
 
@@ -65,6 +66,17 @@ public final class Services {
      */
     private Services() {
         super();
+    }
+
+    private static final AtomicBoolean STOPPED = new AtomicBoolean(true);
+
+    /**
+     * Gets the stopped flag
+     *
+     * @return The stopped flag
+     */
+    public static AtomicBoolean getStoppedFlag() {
+        return STOPPED;
     }
 
     private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
