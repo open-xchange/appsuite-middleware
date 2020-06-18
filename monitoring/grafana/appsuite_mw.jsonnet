@@ -138,7 +138,7 @@ local httpClientRequestsPerSecond = graphPanel.new(
   },
   fill=2,
   linewidth=2,
-  min='0',
+  min=0,
   format='cps',
   labelY1='Counts/s',
 ).addTargets(
@@ -167,7 +167,7 @@ local httpClientConnections = graphPanel.new(
   },
   fill=2,
   linewidth=2,
-  min='0',
+  min=0,
 ).addTargets(
   [
     prometheus.target(
@@ -201,7 +201,7 @@ local threadPoolTasks = graphPanel.new(
   linewidth=2,
   decimals=0,
   labelY1='Tasks/s',
-  min='0',
+  min=0,
 ).addTargets(
   [
     prometheus.target(
@@ -226,7 +226,7 @@ local threadPool = graphPanel.new(
   fill=2,
   linewidth=2,
   labelY1='Threads',
-  min='0',
+  min=0,
 ).addTargets(
   [
     prometheus.target(
@@ -250,7 +250,7 @@ local httpApiResponsePercentiles = graphPanel.new(
   fill=2,
   linewidth=2,
   labelY1='Response Time',
-  min='0',
+  min=0,
   format='s',
 ).addTargets(
   genPercentileTargets('httpapi_requests')
@@ -267,7 +267,7 @@ local httpApiRequestsPercentilesByRequest = graphPanel.new(
   fill=2,
   linewidth=2,
   legend_hideZero=true,
-  min='0',
+  min=0,
   format='s',
   sort='decreasing',
   labelY1='Response Time',
@@ -289,7 +289,7 @@ local httpApiRequestsPerSecond = graphPanel.new(
   },
   fill=2,
   linewidth=2,
-  min='0',
+  min=0,
   format='cps',
   labelY1='Counts/s',
 ).addTargets(
@@ -320,7 +320,7 @@ local restApiRequestsPerSecond = graphPanel.new(
   },
   fill=2,
   linewidth=2,
-  min='0',
+  min=0,
   format='cps',
   labelY1='Counts/s',
 ).addTargets(
@@ -350,7 +350,7 @@ local restApiResponsePercentiles = graphPanel.new(
   fill=2,
   linewidth=2,
   labelY1='Response Time',
-  min='0',
+  min=0,
   format='s',
 ).addTargets(
   genPercentileTargets('restapi_requests')
@@ -371,13 +371,6 @@ local imapFailureRatio = singlestat.new(
   gaugeThresholdLabels=true,
   thresholds='25,50',
   valueName='current',
-  valueMaps=[
-    {
-      op: '=',
-      text: '0',
-      value: 'null',
-    },
-  ],
   timeFrom='1m',
 ).addTarget(
   prometheus.target(
@@ -400,7 +393,7 @@ local imapRequestRate = graphPanel.new(
   legend_rightSide=true,
   legend_alignAsTable=true,
   legend_current=true,
-  min='0',
+  min=0,
   format='reqps',
   labelY1='Requests/s',
 ).addTargets(
@@ -427,7 +420,7 @@ local circuitBreakerDenialRate = graphPanel.new(
   fill=2,
   linewidth=2,
   legend_show=false,
-  min='0',
+  min=0,
   decimals=0,
 ).addTarget(
   prometheus.target(
@@ -443,7 +436,7 @@ local circuitBreakerOpenRate = graphPanel.new(
   fill=2,
   linewidth=2,
   legend_show=false,
-  min='0',
+  min=0,
   decimals=0,
 ).addTarget(
   prometheus.target(
@@ -521,7 +514,7 @@ local soapApiResponsePercentiles = graphPanel.new(
   },
   fill=2,
   linewidth=2,
-  min='0',
+  min=0,
   format='s',
   labelY1='Response Time',
 ).addTargets(
@@ -539,7 +532,7 @@ local soapApiRequestsPerSecond = graphPanel.new(
   },
   fill=2,
   linewidth=2,
-  min='0',
+  min=0,
   format='cps',
   labelY1='Counts/s',
 ).addTargets(
@@ -567,7 +560,7 @@ local webdavApiResponsePercentiles = graphPanel.new(
   },
   fill=2,
   linewidth=2,
-  min='0',
+  min=0,
   format='s',
   labelY1='Response Time',
   repeat=davInterfaceName,
@@ -587,7 +580,7 @@ local webdavApiRequestsPerSecond = graphPanel.new(
   },
   fill=2,
   linewidth=2,
-  min='0',
+  min=0,
   format='cps',
   labelY1='Counts/s',
 ).addTargets(
@@ -617,13 +610,6 @@ local dbTimeoutRatio = singlestat.new(
   gaugeThresholdLabels=true,
   thresholds='25,50',
   valueName='current',
-  valueMaps=[
-    {
-      op: '=',
-      text: '0',
-      value: 'null',
-    },
-  ],
   timeFrom='1m',
 ).addTarget(
   prometheus.target(
@@ -703,7 +689,7 @@ local configDBConnections = graphPanel.new(
   fill=2,
   linewidth=2,
   decimals=0,
-  min='0',
+  min=0,
 ).addTargets(
   [
     prometheus.target(
@@ -731,7 +717,7 @@ local configDBReadConnections = graphPanel.new(
   fill=2,
   linewidth=2,
   decimals=0,
-  min='0',
+  min=0,
 ).addTargets(
   [
     prometheus.target(
@@ -762,7 +748,7 @@ local configDBWriteConnections = graphPanel.new(
   fill=2,
   linewidth=2,
   decimals=0,
-  min='0',
+  min=0,
 ).addTargets(
   [
     prometheus.target(
@@ -795,7 +781,7 @@ local userdbConnections = graphPanel.new(
   legend_values=true,
   legend_avg=true,
   legend_current=true,
-  min='0',
+  min=0,
 ).addTargets(
   [
     prometheus.target(
@@ -825,7 +811,7 @@ local sessionStorageBytes = graphPanel.new(
   linewidth=2,
   decimals=0,
   format='decbytes',
-  min='0',
+  min=0,
 ).addTarget(
   prometheus.target(
     'appsuite_sessionstorage_memory_bytes{instance=~"$instance"}',
@@ -843,7 +829,7 @@ local sessionStorageTotal = graphPanel.new(
   fill=2,
   linewidth=2,
   decimals=0,
-  min='0',
+  min=0,
 ).addTargets(
   [
     prometheus.target(
@@ -926,7 +912,7 @@ grafana.newDashboard(
       fill=2,
       linewidth=2,
       labelY1='Sessions',
-      min='0',
+      min=0,
     ).addTargets(
       [
         prometheus.target(
@@ -970,13 +956,6 @@ grafana.newDashboard(
       datasource=grafana.default.datasource,
       decimals=1,
       format='percentunit',
-      valueMaps=[
-        {
-          op: '=',
-          text: '0',
-          value: 'null',
-        },
-      ],
       sparklineShow=true,
     ).addTarget(
       prometheus.target(expr=obj.expr,)
@@ -990,7 +969,8 @@ grafana.newDashboard(
       decimals=2,
       fill=2,
       linewidth=2,
-      max='1',
+      min=0,
+      max=1,
     ).addTargets(
       [
         prometheus.target(
@@ -1008,7 +988,7 @@ grafana.newDashboard(
       datasource=grafana.default.datasource,
       fill=2,
       linewidth=2,
-      min='0',
+      min=0,
     ).addTargets(
       [
         prometheus.target(
@@ -1027,7 +1007,7 @@ grafana.newDashboard(
       fill=2,
       linewidth=2,
       sort='decreasing',
-      min='0',
+      min=0,
       legend_alignAsTable=true,
       legend_rightSide=true,
       legend_sort='avg',
@@ -1082,7 +1062,7 @@ grafana.newDashboard(
     row.new(
       title='WebDAV API'
     ) + { gridPos: { h: 1, w: 24, x: 0, y: 101 } },
-    webdavApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 102 } },
+    webdavApiRequestsPerSecond { gridPos: { h: 8, w: 24, x: 0, y: 102 } },
     webdavApiResponsePercentiles { gridPos: { h: 8, w: 6, x: 0, y: 110 } },
   ] + [
     //------------------------------------------------------------------------------
