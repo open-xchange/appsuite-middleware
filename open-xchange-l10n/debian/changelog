@@ -1,3 +1,9 @@
+open-xchange-l10n (7.8.4-71) stable; urgency=medium
+
+  * Build for patch 2020-06-15 (5763)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 05 Jun 2020 13:06:38 +0000
+
 open-xchange-l10n (7.8.4-70) stable; urgency=medium
 
   * Build for patch 2020-05-11 (5717)

@@ -52,7 +52,6 @@ package com.openexchange.imap.storecache;
 import static com.openexchange.imap.IMAPAccess.doIMAPConnect;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPClientParameters;
-import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
@@ -89,7 +88,7 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
      * @param login The login
      * @param pw The password
      * @param imapSession The IMAP session
-     * @param session The Groupware session
+     * @param session The Open-Xchange session
      * @return The newly created & connected {@link IMAPStore} instance
      * @throws MessagingException If operation fails
      */

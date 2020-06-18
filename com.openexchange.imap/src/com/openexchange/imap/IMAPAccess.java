@@ -95,7 +95,6 @@ import com.openexchange.imap.entity2acl.Entity2ACLInit;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
-import com.openexchange.imap.storecache.IMAPStoreContainer;
 import com.openexchange.imap.util.HostAndPort;
 import com.openexchange.imap.util.HostAndPortAndCredentials;
 import com.openexchange.imap.util.StampAndOXException;
@@ -108,14 +107,11 @@ import com.openexchange.log.audit.DefaultAttribute.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AuthType;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.IMailStoreAware;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
-import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeMailException;
@@ -927,25 +923,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return connectIMAPStore(maxCount, imapSession, server, port, login, password, clientIp);
     }
 
-    /**
-     * Clears cached IMAP connections.
-     */
-    protected void clearCachedConnections() {
-        final IMAPStoreContainer container = IMAPStoreCache.getInstance().optContainer(accountId, server, port, login, session);
-        if (null != container) {
-            container.clear();
-        }
-        try {
-            final IMailAccessCache mailAccessCache = MailAccess.getMailAccessCache();
-            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> tmp;
-            while ((tmp = mailAccessCache.removeMailAccess(session, accountId)) != null) {
-                tmp.close(false);
-            }
-        } catch (final Exception e) {
-            // Ignore
-        }
-    }
-
     private static final String PROTOCOL = IMAPProvider.PROTOCOL_IMAP.getName();
 
     private IMAPStore connectIMAPStore(final int maxCount, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final String clientIp) throws MessagingException, OXException {
@@ -1075,13 +1052,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             String eventId = knownExternal ? "imap.external.login" : (MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login");
             auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("imap.login", login), DefaultAttribute.arbitraryFor("imap.server", server), DefaultAttribute.arbitraryFor("imap.port", Integer.toString(port)));
         }
-        
+
         String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
         if (null != sessionInformation) {
             LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
         }
         java.net.InetAddress remoteAddress = imapStore.getRemoteAddress();
-        if (null != remoteAddress) {            
+        if (null != remoteAddress) {
             LogProperties.put(LogProperties.Name.MAIL_HOST_REMOTE_ADDRESS, remoteAddress.getHostAddress());
         }
     }
@@ -1560,7 +1537,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private static void closeSafely(final IMAPStore imapStore) {
+    /**
+     * (Safely) closes given IMAP store instance
+     *
+     * @param imapStore The IMAP store to close
+     */
+    public static void closeSafely(final IMAPStore imapStore) {
         if (null != imapStore) {
             try {
                 imapStore.close();
