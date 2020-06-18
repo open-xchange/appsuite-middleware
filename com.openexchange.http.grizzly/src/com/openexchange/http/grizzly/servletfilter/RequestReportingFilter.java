@@ -130,15 +130,15 @@ public class RequestReportingFilter implements Filter {
         if (null == entry) {
             // Registration failed
             chain.doFilter(request, response);
-            return;
-        }
-
-        try {
-            // Proceed processing
-            chain.doFilter(request, response);
-        } finally {
-            // Remove request from watcher after processing finished
-            requestWatcher.unregisterRequest(entry);
+        } else {
+            // Registration succeeded
+            try {
+                // Proceed processing
+                chain.doFilter(request, response);
+            } finally {
+                // Remove request from watcher after processing finished
+                requestWatcher.unregisterRequest(entry);
+            }
         }
     }
 
