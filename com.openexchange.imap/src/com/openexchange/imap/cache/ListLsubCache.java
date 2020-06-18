@@ -49,20 +49,21 @@
 
 package com.openexchange.imap.cache;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.MessagingException;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.Logger;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
@@ -73,6 +74,7 @@ import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.session.Session;
+import com.openexchange.session.UserAndContext;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -90,98 +92,10 @@ public final class ListLsubCache {
 
     private static final ListLsubCache INSTANCE = new ListLsubCache();
 
-    private static final class Key {
-
-        private final int cid;
-        private final int user;
-        private final int hash;
-
-        protected Key(int user, int cid) {
-            super();
-            this.user = user;
-            this.cid = cid;
-            int prime = 31;
-            int result = 1;
-            result = prime * result + cid;
-            result = prime * result + user;
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            Key other = (Key) obj;
-            if (cid != other.cid) {
-                return false;
-            }
-            if (user != other.user) {
-                return false;
-            }
-            return true;
-        }
-
-    } // End of class Key
-
-    private static final class KeyedCache {
-
-        private final Key key;
-
-        KeyedCache(Key key) {
-            super();
-            this.key = key;
-        }
-
-        /**
-         * Gets the associated object from cache
-         *
-         * @return The object or <code>null</code>
-         */
-        ConcurrentMap<Integer, Future<ListLsubCollection>> get() {
-            return CACHE.get(key);
-        }
-
-        /**
-         * Safely puts given object into cache
-         *
-         * @param value The object to put
-         * @return The object previously in cache or <code>null</code>
-         * @throws OXException If there is already such an entry in cache
-         */
-        ConcurrentMap<Integer, Future<ListLsubCollection>> putIfAbsent(ConcurrentMap<Integer, Future<ListLsubCollection>> map) {
-            return CACHE.putIfAbsent(key, map);
-        }
-
-        /**
-         * Removes the object from cache
-         */
-        void remove() {
-            CACHE.remove(key);
-        }
-
-    } // End of class KeyedCache
-
     /**
      * The region name.
      */
     public static final String REGION = "ListLsubCache";
-
-    private static KeyedCache getCache(Session session) {
-        return getCache(session.getUserId(), session.getContextId());
-    }
-
-    private static KeyedCache getCache(int userId, int contextId) {
-        return new KeyedCache(new Key(userId, contextId));
-    }
 
     /** The default timeout for LIST/LSUB cache (6 minutes) */
     private static final long DEFAULT_TIMEOUT = 360000;
@@ -189,7 +103,13 @@ public final class ListLsubCache {
     private static final String INBOX = "INBOX";
 
     /** The cache */
-    static final ConcurrentMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>> CACHE = new NonBlockingHashMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>>();
+    static final LoadingCache<UserAndContext, Cache<Integer, ListLsubCollection>> CACHE = CacheBuilder.newBuilder().expireAfterAccess(java.time.Duration.ofDays(1)).build(new CacheLoader<UserAndContext, Cache<Integer, ListLsubCollection>>() {
+
+        @Override
+        public Cache<Integer, ListLsubCollection> load(UserAndContext key) throws Exception {
+            return CacheBuilder.newBuilder().expireAfterAccess(java.time.Duration.ofMillis(getTimeout() << 1)).build();
+        }
+    });
 
     /**
      * No instance
@@ -230,22 +150,25 @@ public final class ListLsubCache {
     public static void dropFor(int userId, int contextId, boolean notify, boolean enforceNewConnection) {
         if (enforceNewConnection) {
             // Get the associated map
-            ConcurrentMap<Integer, Future<ListLsubCollection>> map = getCache(userId, contextId).get();
-            if (null != map) {
-                for (Future<ListLsubCollection> f : map.values()) {
-                    try {
-                        ListLsubCollection collection = getFrom(f);
-                        synchronized (collection) {
-                            collection.clear(enforceNewConnection);
+            Cache<Integer, ListLsubCollection> cache = CACHE.getIfPresent(UserAndContext.newInstance(userId, contextId));
+            if (null != cache) {
+                // Iterate keys and perform explicit getIfPresent() to touch last-accessed time stamp
+                for (Integer accountId : cache.asMap().keySet()) {
+                    ListLsubCollection collection = cache.getIfPresent(accountId);
+                    if (collection != null) {
+                        try {
+                            synchronized (collection) {
+                                collection.clear(enforceNewConnection);
+                            }
+                        } catch (@SuppressWarnings("unused") Exception e) {
+                            // Ignore
                         }
-                    } catch (@SuppressWarnings("unused") Exception e) {
-                        // Ignore
                     }
                 }
 
             }
         } else {
-            getCache(userId, contextId).remove();
+            CACHE.invalidate(UserAndContext.newInstance(userId, contextId));
         }
 
         if (notify) {
@@ -263,11 +186,11 @@ public final class ListLsubCache {
      * @param session The session
      */
     public static void removeCachedEntry(String fullName, int accountId, Session session) {
-        ConcurrentMap<Integer, Future<ListLsubCollection>> map = getCache(session).get();
-        if (null == map) {
+        Cache<Integer, ListLsubCollection> cache = CACHE.getIfPresent(UserAndContext.newInstance(session));
+        if (null == cache) {
             return;
         }
-        ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
+        ListLsubCollection collection = cache.getIfPresent(Integer.valueOf(accountId));
         if (null != collection) {
             synchronized (collection) {
                 collection.remove(fullName);
@@ -314,11 +237,11 @@ public final class ListLsubCache {
      * @param contextId The context identifier
      */
     public static void clearCache(int accountId, int userId, int contextId) {
-        ConcurrentMap<Integer, Future<ListLsubCollection>> map = getCache(userId, contextId).get();
-        if (null == map) {
+        Cache<Integer, ListLsubCollection> cache = CACHE.getIfPresent(UserAndContext.newInstance(userId, contextId));
+        if (null == cache) {
             return;
         }
-        ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
+        ListLsubCollection collection = cache.getIfPresent(Integer.valueOf(accountId));
         if (null != collection) {
             synchronized (collection) {
                 collection.clear(false);
@@ -570,21 +493,18 @@ public final class ListLsubCache {
      */
     public static String prettyPrintCache(int accountId, int userId, int contextId) {
         try {
-            KeyedCache cache = getCache(userId, contextId);
-
             // Get the associated map
-            ConcurrentMap<Integer, Future<ListLsubCollection>> map = cache.get();
-            if (null == map) {
+            Cache<Integer, ListLsubCollection> cache = CACHE.getIfPresent(UserAndContext.newInstance(userId, contextId));
+            if (null == cache) {
                 return null;
             }
 
             // Submit task
-            Future<ListLsubCollection> f = map.get(Integer.valueOf(accountId));
-            if (null == f) {
+            ListLsubCollection collection = cache.getIfPresent(Integer.valueOf(accountId));
+            if (null == collection) {
                 return null;
             }
 
-            ListLsubCollection collection = getFrom(f);
             return collection.toString();
         } catch (@SuppressWarnings("unused") Exception e) {
             return null;
@@ -604,26 +524,18 @@ public final class ListLsubCache {
      * @throws MessagingException If a messaging error occurs
      */
     public static ListLsubEntry tryCachedLISTEntry(String fullName, int accountId, Session session) throws OXException, MessagingException {
-        KeyedCache cache = getCache(session);
-
         // Get the associated map
-        ConcurrentMap<Integer, Future<ListLsubCollection>> map = cache.get();
-        if (null == map) {
+        Cache<Integer, ListLsubCollection> cache = CACHE.getIfPresent(UserAndContext.newInstance(session));
+        if (null == cache) {
             return null;
         }
 
-        Future<ListLsubCollection> f = map.get(Integer.valueOf(accountId));
-        if (null == f) {
+        ListLsubCollection collection = cache.getIfPresent(Integer.valueOf(accountId));
+        if (null == collection) {
             return null;
         }
 
-        try {
-            ListLsubCollection collection = getFrom(f);
-            return collection.getListIgnoreDeprecated(fullName);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
-        }
+        return collection.getListIgnoreDeprecated(fullName);
     }
 
     /**
@@ -742,7 +654,7 @@ public final class ListLsubCache {
         return !collection.isDeprecated() && ((System.currentTimeMillis() - collection.getStamp()) <= getTimeout());
     }
 
-    private static long getTimeout() {
+    static long getTimeout() {
         return IMAPProperties.getInstance().allowFolderCaches() ? DEFAULT_TIMEOUT : 20000L;
     }
 
@@ -974,79 +886,90 @@ public final class ListLsubCache {
     }
 
     private static ListLsubCollection getCollection(final int accountId, final IMAPFolder imapFolder, final Session session, final boolean ignoreSubscriptions) throws OXException, MessagingException {
-        KeyedCache cache = getCache(session);
-
         // Get the associated map
-        ConcurrentMap<Integer, Future<ListLsubCollection>> map = cache.get();
-        if (null == map) {
-            ConcurrentHashMap<Integer, Future<ListLsubCollection>> newmap = new ConcurrentHashMap<Integer, Future<ListLsubCollection>>();
-            map = cache.putIfAbsent(newmap);
-            if (null == map) {
-                map = newmap;
-            }
+        Cache<Integer, ListLsubCollection> cache = CACHE.getUnchecked(UserAndContext.newInstance(session));
+
+        // Check if present
+        ListLsubCollection optCollection = cache.getIfPresent(I(accountId));
+        if (optCollection != null) {
+            return optCollection;
         }
 
-        // Submit task
-        Future<ListLsubCollection> f = map.get(Integer.valueOf(accountId));
-        boolean caller = false;
-        if (null == f) {
-            FutureTask<ListLsubCollection> ft = new FutureTask<ListLsubCollection>(new Callable<ListLsubCollection>() {
+        // Create loader
+        final AtomicBoolean caller = new AtomicBoolean(false);
+        Callable<ListLsubCollection> loader = new Callable<ListLsubCollection>() {
 
-                @Override
-                public ListLsubCollection call() throws OXException, MessagingException {
-                    String[] shared;
-                    String[] user;
+            @Override
+            public ListLsubCollection call() throws OXException, MessagingException {
+                // Determine shared and user namespaces
+                String[] shared;
+                String[] user;
+                try {
+                    IMAPStore imapStore = (IMAPStore) imapFolder.getStore();
                     try {
-                        IMAPStore imapStore = (IMAPStore) imapFolder.getStore();
-                        try {
-                            shared = check(NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId));
-                        } catch (MessagingException e) {
-                            if (imapStore.hasCapability("NAMESPACE")) {
-                                LOG.warn("Couldn't get shared namespaces.", e);
-                            } else {
-                                LOG.debug("Couldn't get shared namespaces.", e);
-                            }
-                            shared = new String[0];
-                        } catch (RuntimeException e) {
-                            LOG.warn("Couldn't get shared namespaces.", e);
-                            shared = new String[0];
-                        }
-                        try {
-                            user = check(NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId));
-                        } catch (MessagingException e) {
-                            if (imapStore.hasCapability("NAMESPACE")) {
-                                LOG.warn("Couldn't get user namespaces.", e);
-                            } else {
-                                LOG.debug("Couldn't get user namespaces.", e);
-                            }
-                            user = new String[0];
-                        } catch (RuntimeException e) {
-                            LOG.warn("Couldn't get user namespaces.", e);
-                            user = new String[0];
-                        }
+                        shared = check(NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId));
                     } catch (MessagingException e) {
-                        throw MimeMailException.handleMessagingException(e);
+                        if (imapStore.hasCapability("NAMESPACE")) {
+                            LOG.warn("Couldn't get shared namespaces.", e);
+                        } else {
+                            LOG.debug("Couldn't get shared namespaces.", e);
+                        }
+                        shared = new String[0];
+                    } catch (RuntimeException e) {
+                        LOG.warn("Couldn't get shared namespaces.", e);
+                        shared = new String[0];
                     }
-                    return new ListLsubCollection(imapFolder, shared, user, ignoreSubscriptions);
+                    try {
+                        user = check(NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId));
+                    } catch (MessagingException e) {
+                        if (imapStore.hasCapability("NAMESPACE")) {
+                            LOG.warn("Couldn't get user namespaces.", e);
+                        } else {
+                            LOG.debug("Couldn't get user namespaces.", e);
+                        }
+                        user = new String[0];
+                    } catch (RuntimeException e) {
+                        LOG.warn("Couldn't get user namespaces.", e);
+                        user = new String[0];
+                    }
+                } catch (MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e);
                 }
-            });
-            f = map.putIfAbsent(Integer.valueOf(accountId), ft);
-            if (null == f) {
-                f = ft;
-                ft.run();
-                caller = true;
+
+                // Create collection instance
+                ListLsubCollection collection = new ListLsubCollection(imapFolder, shared, user, ignoreSubscriptions);
+
+                // Mark running thread as caller & return collection
+                caller.set(true);
+                return collection;
             }
-        }
+        };
+
         try {
-            return getFrom(f);
+            return getFromCache(accountId, loader, cache);
         } catch (OXException e) {
-            if (caller) {
-                cache.remove();
+            if (caller.get()) {
+                CACHE.invalidate(UserAndContext.newInstance(session));
             }
             throw e;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static ListLsubCollection getFromCache(int accountId, Callable<ListLsubCollection> loader, Cache<Integer, ListLsubCollection> cache) throws OXException, MessagingException {
+        try {
+            return cache.get(I(accountId), loader);
+        } catch (ExecutionException e) {
+            Throwable t = e.getCause();
+            if (t instanceof OXException) {
+                throw (OXException) t;
+            }
+            if (t instanceof MessagingException) {
+                throw (MessagingException) t;
+            }
+            if (t instanceof Error) {
+                throw (Error) t;
+            }
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(t, t.getMessage());
         }
     }
 
@@ -1074,52 +997,6 @@ public final class ListLsubCache {
         synchronized (collection) {
             checkTimeStamp(imapFolder, collection, ignoreSubscriptions);
             return collection.hasAnySubscribedSubfolder(fullName);
-        }
-    }
-
-    private static ListLsubCollection getFrom(Future<ListLsubCollection> future) throws OXException, InterruptedException, MessagingException {
-        if (null == future) {
-            return null;
-        }
-        try {
-            return future.get();
-        } catch (ExecutionException e) {
-            Throwable t = e.getCause();
-            if (t instanceof OXException) {
-                throw (OXException) t;
-            }
-            if (t instanceof MessagingException) {
-                throw (MessagingException) t;
-            }
-            if (t instanceof RuntimeException) {
-                throw MailExceptionCode.UNEXPECTED_ERROR.create(t, t.getMessage());
-            }
-            if (t instanceof Error) {
-                throw (Error) t;
-            }
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(t, t.getMessage());
-        }
-    }
-
-    private static ListLsubCollection getSafeFrom(Future<ListLsubCollection> future) {
-        if (null == future) {
-            return null;
-        }
-        try {
-            return future.get();
-        } catch (InterruptedException e) {
-            // Cannot occur
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException(e);
-        } catch (ExecutionException e) {
-            Throwable t = e.getCause();
-            if (t instanceof RuntimeException) {
-                throw (RuntimeException) t;
-            } else if (t instanceof Error) {
-                throw (Error) t;
-            } else {
-                throw new IllegalStateException("Not unchecked", t);
-            }
         }
     }
 

@@ -105,6 +105,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
 
     // User tries to restore a folders from trash, but that functionality is not supported
     public static final String NO_RESTORE_SUPPORT_MSG = "Restore from trash is not supported";
+
+    // User selected one or more permissions that cannot be applied to target folder; e.g. selected guest permission for a mail folder.
+    public static final String INVALID_PERMISSIONS_MSG = "The chosen permission(s) cannot be set";
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

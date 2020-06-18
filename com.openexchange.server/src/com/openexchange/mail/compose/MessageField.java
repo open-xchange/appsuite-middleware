@@ -83,6 +83,10 @@ public enum MessageField {
      */
     BCC("bcc"),
     /**
+     * The  message's "Reply-To" header
+     */
+    REPLY_TO("reply_to"),
+    /**
      * The  message's "Subject" header
      */
     SUBJECT("subject"),

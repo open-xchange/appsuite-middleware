@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.apache.commons.lang.StringUtils;
 
-
 /**
  * {@link ISO8601DateParser}
  *
@@ -127,23 +126,24 @@ public class ISO8601DateParser {
         DateFormat df = mThreadLocalSimpleDateFormat.get();
 
         // this is zero time so we need to add that TZ indicator for
-        if (input.endsWith("Z")) {
-            input = input.substring(0, input.length() - 1) + "GMT-00:00";
+        String i = input;
+        if (i.endsWith("Z")) {
+            i = input.substring(0, input.length() - 1) + "GMT-00:00";
         }
 
-        return df.parse(input);
+        return df.parse(i);
 
     }
 
     /**
      * Same as parse method but does not throws. In case input date string cannot be parsed, null is returned.
      */
+    @SuppressWarnings("unused")
     public static Date parseSilently(String input) {
         try {
             Date date = StringUtils.isEmpty(input) ? null : parse(input);
             return date;
-        }
-        catch (ParseException e) {
+        } catch (ParseException e) {
             return null;
         }
     }

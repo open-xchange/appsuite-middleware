@@ -23,6 +23,6 @@
             schema:
               type: string
     x-ox-examples:
-      Example:
+      - Example:
         description: Get health status
         example: 'GET http://localhost:8009/health'

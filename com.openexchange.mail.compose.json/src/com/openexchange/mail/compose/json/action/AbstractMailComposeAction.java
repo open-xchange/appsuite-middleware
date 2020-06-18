@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -142,7 +143,10 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
             JSONArray jFrom = jMessage.optJSONArray("from");
             if (null != jFrom) {
                 JSONArray jAddress = jFrom.optJSONArray(0);
-                md.setFrom(toAddress(null == jAddress ? jFrom : jAddress));
+                Optional<Address> optionalAddress = toAddress(null == jAddress ? jFrom : jAddress);
+                if (optionalAddress.isPresent()) {
+                    md.setFrom(optionalAddress.get());
+                }
             }
         }
 
@@ -164,6 +168,17 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
             JSONArray jBcc = jMessage.optJSONArray("bcc");
             if (null != jBcc) {
                 md.setBcc(toAddresses(jBcc));
+            }
+        }
+
+        {
+            JSONArray jReplyTo = jMessage.optJSONArray("reply_to");
+            if (null != jReplyTo) {
+                JSONArray jAddress = jReplyTo.optJSONArray(0);
+                Optional<Address> optionalAddress = toAddress(null == jAddress ? jReplyTo : jAddress);
+                if (optionalAddress.isPresent()) {
+                    md.setReplyTo(optionalAddress.get());
+                }
             }
         }
 
@@ -246,26 +261,40 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
             Object jAddress = jAddresses.get(0);
             Address address;
             if (jAddress instanceof JSONArray) {
-                address = toAddress((JSONArray) jAddress);
+                address = toAddress((JSONArray) jAddress).orElse(null);
             } else {
-                address = new Address(null, jAddress.toString());
+                address = JSONObject.NULL.equals(jAddress) ? null : new Address(null, jAddress.toString());
             }
-            return Collections.singletonList(address);
+            return address == null ? Collections.emptyList() : Collections.singletonList(address);
         }
 
         List<Address> addresses = new ArrayList<Address>(length);
         for (Object jAddress : jAddresses) {
             if (jAddress instanceof JSONArray) {
-                addresses.add(toAddress((JSONArray) jAddress));
+                Optional<Address> optionalAddress = toAddress((JSONArray) jAddress);
+                if (optionalAddress.isPresent()) {
+                    addresses.add(optionalAddress.get());
+                }
             } else {
-                addresses.add(new Address(null, jAddress.toString()));
+                if (false == JSONObject.NULL.equals(jAddress)) {
+                    addresses.add(new Address(null, jAddress.toString()));
+                }
             }
         }
         return addresses;
     }
 
-    private static Address toAddress(JSONArray jAddress) throws JSONException {
-        return new Address(jAddress.optString(0, null), jAddress.getString(1));
+    private static Optional<Address> toAddress(JSONArray jAddress) throws JSONException {
+        if (jAddress == null) {
+            return Optional.empty();
+        }
+
+        int length = jAddress.length();
+        if (length <= 0) {
+            return Optional.empty();
+        }
+
+        return Optional.of(length == 1 ? new Address(null, jAddress.getString(0)) : new Address(jAddress.optString(0, null), jAddress.getString(1)));
     }
 
     private static List<Attachment> toAttachments(JSONArray jAttachments, UUID compositionSpaceId) throws JSONException, OXException {

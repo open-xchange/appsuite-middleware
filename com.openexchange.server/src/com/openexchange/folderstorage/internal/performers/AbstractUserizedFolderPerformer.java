@@ -92,6 +92,7 @@ import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
+import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
@@ -706,6 +707,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID.intValue());
                 Permission guestPermission = comparedPermissions.getAddedGuestPermission(guestID);
                 checkGuestPermission(session, folder, guestPermission, guestInfo);
+                if (MailContentType.getInstance().toString().equals(folder.getContentType().toString())) {
+                    throw invalidPermissions(folder, guestPermission);
+                }
                 if (isAnonymous(guestInfo) && false == isInherited(guestPermission)) {
                     /*
                      * allow only one anonymous permission that's not inherited
@@ -735,6 +739,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID.intValue());
                 Permission guestPermission = comparedPermissions.getModifiedGuestPermission(guestID);
                 checkGuestPermission(session, folder, guestPermission, guestInfo);
+                if (MailContentType.getInstance().toString().equals(folder.getContentType().toString())) {
+                    throw invalidPermissions(folder, guestPermission);
+                }
             }
         }
         /*
@@ -743,6 +750,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         if (comparedPermissions.hasNewGuests()) {
             GuestPermission newAnonymousPermission = null;
             for (GuestPermission guestPermission : comparedPermissions.getNewGuestPermissions()) {
+                if (MailContentType.getInstance().toString().equals(folder.getContentType().toString())) {
+                    throw invalidPermissions(folder, guestPermission);
+                }
                 if (guestPermission.getRecipient().getType() == RecipientType.ANONYMOUS) {
                     /*
                      * allow only one anonymous permission with "read-only" permission bits that's not inherited

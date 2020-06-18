@@ -226,7 +226,7 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
     /**
      * The set permissions (%1$d) are invalid for entity (%2$d) on object %3$s.
      */
-    INVALID_PERMISSIONS("The set permissions (%1$d) are invalid for entity (%2$d) on object %3$s.", Category.CATEGORY_PERMISSION_DENIED, 1039),
+    INVALID_PERMISSIONS("The set permissions (%1$d) are invalid for entity (%2$d) on object %3$s.", Category.CATEGORY_PERMISSION_DENIED, 1039, FolderExceptionMessages.INVALID_PERMISSIONS_MSG),
     /**
      * Folder name contains illegal characters: \"%1$s\"
      */

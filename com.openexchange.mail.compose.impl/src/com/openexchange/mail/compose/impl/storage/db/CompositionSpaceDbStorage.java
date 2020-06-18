@@ -606,6 +606,8 @@ public class CompositionSpaceDbStorage {
                     return CompositionSpaceErrorCode.FROM_TOO_LONG.create(truncation, new Object[0]);
                 case "senderAddr":
                     return CompositionSpaceErrorCode.SENDER_TOO_LONG.create(truncation, new Object[0]);
+                case "replyToAddr":
+                    return CompositionSpaceErrorCode.REPLY_TO_TOO_LONG.create(truncation, new Object[0]);
                 case "toAddr":
                     return CompositionSpaceErrorCode.TO_TOO_LONG.create(truncation, new Object[0]);
                 case "ccAddr":

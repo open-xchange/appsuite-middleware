@@ -98,6 +98,7 @@ public class MicrosoftContactsOAuthAccountAssociation extends AbstractSubscribeO
         return Collections.singletonList(MicrosoftGraphOAuthScope.contacts_ro);
     }
 
+    @SuppressWarnings("unused")
     @Override
     public Status getStatus(Session session) throws OXException {
         String accessToken = null;

@@ -559,29 +559,20 @@ public class MimeMessageFiller {
             /*
              * Reply-To
              */
-            final String hdrReplyTo = mail.getFirstHeader("Reply-To");
-            if (!isEmpty(hdrReplyTo) && !toLowerCase(hdrReplyTo).startsWith("null")) {
-                InternetAddress[] replyTo = null;
-                try {
-                    replyTo = QuotedInternetAddress.parse(hdrReplyTo, true);
-                } catch (AddressException e) {
-                    LOG.error("Specified Reply-To address cannot be parsed", e);
-                }
-
-                if (null != replyTo) {
-                    mimeMessage.setReplyTo(replyTo);
-                }
+            InternetAddress[] replyTo = mail.getReplyTo();
+            if (replyTo != null && replyTo.length > 0) {
+                mimeMessage.setReplyTo(replyTo);
             } else {
-                String replyTo = compositionParameters.getReplyToAddress();
-                if (!isEmpty(replyTo)) {
+                String replyToAddress = compositionParameters.getReplyToAddress();
+                if (!isEmpty(replyToAddress)) {
                     try {
-                        mimeMessage.setReplyTo(QuotedInternetAddress.parse(replyTo, true));
+                        mimeMessage.setReplyTo(QuotedInternetAddress.parse(replyToAddress, true));
                     } catch (AddressException e) {
                         LOG.error("Default Reply-To address cannot be parsed", e);
                         try {
                             mimeMessage.setHeader(
                                 MessageHeaders.HDR_REPLY_TO,
-                                MimeUtility.encodeWord(replyTo, MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
+                                MimeUtility.encodeWord(replyToAddress, MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
                         } catch (UnsupportedEncodingException e1) {
                             /*
                              * Cannot occur since default mime charset is supported by JVM
@@ -1820,7 +1811,7 @@ public class MimeMessageFiller {
             final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
             do {
                 final String imageTag = m.group();
-                if (MimeMessageUtility.isValidImageUri(imageTag)) {
+                if (MimeMessageUtility.isValidImageTag(imageTag)) {
                     final String id = m.getManagedFileId();
                     ImageProvider imageProvider;
                     if (null != id) {
@@ -1869,21 +1860,26 @@ public class MimeMessageFiller {
                         {
                             final Matcher srcMatcher = PATTERN_SRC.matcher(imageTag);
                             if (srcMatcher.find()) {
-                                ImageLocation il;
-                                try {
-                                    il = ImageUtility.parseImageLocationFrom(Strings.replaceSequenceWith(srcMatcher.group(1), "&amp;", '&'));
-                                    SecuritySettings securitySettings = mail.getSecuritySettings();
-                                    if (null != securitySettings) {
-                                        il.setAuth(securitySettings.getAuthentication());
+                                String imageUri = Strings.replaceSequenceWith(srcMatcher.group(1), "&amp;", '&');
+                                if (MimeMessageUtility.isValidImageSource(imageUri)) {
+                                    ImageLocation il;
+                                    try {
+                                        il = ImageUtility.parseImageLocationFrom(imageUri);
+                                        SecuritySettings securitySettings = mail.getSecuritySettings();
+                                        if (null != securitySettings) {
+                                            il.setAuth(securitySettings.getAuthentication());
+                                        }
+                                    } catch (IllegalArgumentException e) {
+                                        final StringBuffer bblankImageTag = new StringBuffer(imageTag.length());
+                                        srcMatcher.appendReplacement(bblankImageTag, "");
+                                        srcMatcher.appendTail(bblankImageTag);
+                                        blankImageTag = bblankImageTag.toString();
+                                        il = null;
                                     }
-                                } catch (IllegalArgumentException e) {
-                                    final StringBuffer bblankImageTag = new StringBuffer(imageTag.length());
-                                    srcMatcher.appendReplacement(bblankImageTag, "");
-                                    srcMatcher.appendTail(bblankImageTag);
-                                    blankImageTag = bblankImageTag.toString();
-                                    il = null;
+                                    imageLocation = il;
+                                } else {
+                                    imageLocation = null;
                                 }
-                                imageLocation = il;
                             } else {
                                 ImageLocation il;
                                 try {

@@ -172,11 +172,11 @@ public class MailDataExport extends AbstractDataExportProviderTask {
 
             Options options;
             {
-                boolean subscribedOnly = getBoolOption(MailDataExportPropertyNames.PROP_INCLUDE_UNSUBSCRIBED, false, mailModule);
+                boolean includeUnsubscribed = getBoolOption(MailDataExportPropertyNames.PROP_INCLUDE_UNSUBSCRIBED, false, mailModule);
                 boolean includePublicFolders = getBoolOption(MailDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, false, mailModule);
                 boolean includeSharedFolders = getBoolOption(MailDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, false, mailModule);
                 boolean includeTrashFolder = getBoolOption(MailDataExportPropertyNames.PROP_INCLUDE_TRASH_FOLDER, false, mailModule);
-                options = new Options(subscribedOnly, includePublicFolders, includeSharedFolders, includeTrashFolder);
+                options = new Options(includeUnsubscribed, includePublicFolders, includeSharedFolders, includeTrashFolder);
             }
 
             StartInfo startInfo;
@@ -295,7 +295,7 @@ public class MailDataExport extends AbstractDataExportProviderTask {
 
         List<Folder> children;
         try {
-            children = folder.getChildren(options.subscribedOnly);
+            children = folder.getChildren(false == options.includeUnsubscribed);
         } catch (Exception e) {
             if (isRetryableExceptionAndMayFail(e, sink)) {
                 if (info != null) {
@@ -515,14 +515,14 @@ public class MailDataExport extends AbstractDataExportProviderTask {
 
     private static class Options {
 
-        final boolean subscribedOnly;
+        final boolean includeUnsubscribed;
         final boolean includePublicFolders;
         final boolean includeSharedFolders;
         final boolean includeTrashFolder;
 
-        Options(boolean subscribedOnly, boolean includePublicFolders, boolean includeSharedFolders, boolean includeTrashFolder) {
+        Options(boolean includeUnsubscribed, boolean includePublicFolders, boolean includeSharedFolders, boolean includeTrashFolder) {
             super();
-            this.subscribedOnly = subscribedOnly;
+            this.includeUnsubscribed = includeUnsubscribed;
             this.includePublicFolders = includePublicFolders;
             this.includeSharedFolders = includeSharedFolders;
             this.includeTrashFolder = includeTrashFolder;

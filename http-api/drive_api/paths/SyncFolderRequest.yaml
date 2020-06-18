@@ -8,8 +8,8 @@
       This request performs the selective synchronization of a single folder, resulting in different actions that should be
       executed on the client afterwards.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
       - $ref: '#/components/parameters/gblQueryApiVersion'
       - in: query
         name: version
@@ -80,7 +80,7 @@
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/DriveSyncFoldersBody'
+            $ref: '#/components/schemas/DriveSyncFolderBody'
       description: |
           A JSON object containing the fields `clientVersion` and `originalVersion` of the targeted directory. Optionally, 
           the `fileExclusions` array may be defined.

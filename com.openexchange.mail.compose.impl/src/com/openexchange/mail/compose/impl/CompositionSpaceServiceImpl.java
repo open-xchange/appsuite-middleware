@@ -340,6 +340,14 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         // From
         sourceMessage.addFrom(fromAddresss);
 
+        // Reply-To
+        {
+            Address replyTo = m.getReplyTo();
+            if (null != replyTo) {
+                sourceMessage.addReplyTo(toMimeAddress(replyTo));
+            }
+        }
+
         // Recipients
         {
             boolean anyRecipientSet = false;
@@ -748,6 +756,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 Address sender = m.getSender();
                 if (null != sender) {
                     mimeMessage.setSender(toMimeAddress(sender));
+                }
+
+                Address replyTo = m.getReplyTo();
+                if (null != replyTo) {
+                    mimeMessage.setReplyTo(new javax.mail.Address[] { toMimeAddress(replyTo) });
                 }
             }
             {

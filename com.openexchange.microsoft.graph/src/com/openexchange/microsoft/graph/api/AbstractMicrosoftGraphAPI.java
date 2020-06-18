@@ -156,9 +156,9 @@ abstract class AbstractMicrosoftGraphAPI {
      * @return A {@link JSONObject} with the resource metadata
      * @throws OXException if an error is occurred
      */
-    JSONObject putResource(String accessToken, String path, String contentType, long contentLength, InputStream body) throws OXException {
-        MicrosoftGraphRequest request = createRequest(RESTMethod.POST, accessToken, path, contentType);
-        request.sethBodyEntity(new InputStreamEntity(body, contentLength, contentType));
+    JSONObject putResource(String accessToken, String path, String contentType, InputStream body) throws OXException {
+        MicrosoftGraphRequest request = createRequest(RESTMethod.PUT, accessToken, path, contentType);
+        request.sethBodyEntity(new InputStreamEntity(body, contentType));
         return executeRequest(request);
     }
 

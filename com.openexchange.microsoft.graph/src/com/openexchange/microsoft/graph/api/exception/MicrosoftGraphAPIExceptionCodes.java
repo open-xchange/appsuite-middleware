@@ -165,10 +165,12 @@ public enum MicrosoftGraphAPIExceptionCodes implements DisplayableOXExceptionCod
     }
 
     /**
+     * Parses the specified 'error' to a {@link MicrosoftGraphAPIExceptionCodes}
      * 
-     * @param error
-     * @return
+     * @param error The error string
+     * @return The {@link MicrosoftGraphAPIExceptionCodes} constant
      */
+    @SuppressWarnings("unused")
     public static MicrosoftGraphAPIExceptionCodes parse(String error) {
         if (Strings.isEmpty(error)) {
             return MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION;
