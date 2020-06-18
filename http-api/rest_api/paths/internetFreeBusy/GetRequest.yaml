@@ -29,6 +29,7 @@
         in: query
         description: >-
           The requested time range into the past in weeks.
+          If this value is greater than the configured maximum, the free busy times are only requested to configured maximum.
           Default value is 1 week into the past.
         required: false
         schema:
@@ -38,6 +39,7 @@
         in: query
         description: >-
           The requested time range into the future in weeks.
+          If this value is greater than the configured maximum, the free busy times are only requested to configured maximum.
           Default value is 4 week into the past.
         required: false
         schema:
@@ -61,7 +63,7 @@
               type: string
       '400':
         description: >-
-          In case one parameter has a wrong format or if the time range is bigger than the configured maximum.
+          In case one parameter is invalid.
       '404':
         description: >-
           In case the servlet is not enabled, if no existing user with the requested user name, server and context id is found

@@ -232,11 +232,9 @@ public class FreeBusy extends HttpServlet {
     private Date readEnd(HttpServletRequest request, int contextId) throws OXException {
         String futureParameter = request.getParameter(PARAMETER_WEEKS_INTO_FUTURE);
         if (null == futureParameter) {
-            // No such parameter
             return CalendarUtils.add(new Date(), Calendar.WEEK_OF_YEAR, DEFAULT_WEEKS_FUTURE);
         }
 
-        // Parse parameter
         int weeksFuture;
         try {
             weeksFuture = Integer.parseInt(futureParameter);
@@ -249,8 +247,12 @@ public class FreeBusy extends HttpServlet {
 
         LeanConfigurationService leanConfigService = serviceLookup.getServiceSafe(LeanConfigurationService.class);
         int maxTimeRangeFuture = leanConfigService.getIntProperty(-1, contextId, FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_FUTURE);
-        if (maxTimeRangeFuture > 0 && weeksFuture > maxTimeRangeFuture) {
-            throw FreeBusyExceptionCode.INVALID_PARAMETER.create(PARAMETER_WEEKS_INTO_FUTURE, String.format("Maximum value into future is %d weeks", I(maxTimeRangeFuture)));
+        if (maxTimeRangeFuture >= 0 && weeksFuture > maxTimeRangeFuture) {
+            /*
+             * In case the parameter is greater than the configured maximum,
+             * only the time range to configured maximum will be requested (MWB-384)
+             */
+            return CalendarUtils.add(new Date(), Calendar.WEEK_OF_YEAR, maxTimeRangeFuture);
         }
         return CalendarUtils.add(new Date(), Calendar.WEEK_OF_YEAR, weeksFuture);
     }
@@ -302,8 +304,12 @@ public class FreeBusy extends HttpServlet {
 
         LeanConfigurationService leanConfigService = serviceLookup.getServiceSafe(LeanConfigurationService.class);
         int maxTimeRangePast = leanConfigService.getIntProperty(-1, contextId, FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_PAST);
-        if (maxTimeRangePast > 0 && weeksPast > maxTimeRangePast) {
-            throw FreeBusyExceptionCode.INVALID_PARAMETER.create(PARAMETER_WEEKS_INTO_PAST, String.format("Maximum value back into past is %d weeks", I(maxTimeRangePast)));
+        if (maxTimeRangePast >= 0 && weeksPast > maxTimeRangePast) {
+            /*
+             * In case the parameter is greater than the configured maximum,
+             * only the time range to configured maximum will be requested (MWB-384)
+             */
+            return CalendarUtils.add(new Date(), Calendar.WEEK_OF_YEAR, -maxTimeRangePast);
         }
         return CalendarUtils.add(new Date(), Calendar.WEEK_OF_YEAR, -weeksPast);
     }

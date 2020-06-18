@@ -355,8 +355,10 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
 
             final ResellerAdmin dbadm = oxresell.getData(new ResellerAdmin[] { adm })[0];
-            ResellerAdmin parent = null;
-            if (!isMaster) {
+            final ResellerAdmin parent;
+            if (isMaster) {
+                parent = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(i(dbadm.getParentId())) })[0];
+            } else {
                 parent = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0];
                 if (!dbadm.getParentId().equals(parent.getId())) {
                     throw new OXResellerException(Code.SUBADMIN_DOES_NOT_BELONG_TO_SUBADMIN, dbadm.getName(), parent.getName());
@@ -367,7 +369,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 throw new OXResellerException(Code.UNABLE_TO_DELETE, dbadm.getId().toString());
             }
 
-            dbadm.setParentName(null != parent ? parent.getName() : null);
+            dbadm.setParentName(parent.getName());
 
             final ArrayList<OXResellerPluginInterface> interfacelist = new ArrayList<OXResellerPluginInterface>();
 

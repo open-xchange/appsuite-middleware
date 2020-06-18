@@ -48,26 +48,29 @@ Required parameters:
 
 Optional parameters:
 
-* **weeksIntoPast** (Integer): The requested time range into the past in weeks.
-          Default value is 1 week into the past.
+* **weeksIntoPast** (Integer): The requested time range into the past in weeks. 
+If this value is greater than the configured maximum (see property above), the free busy times are only requested to configured maximum.
+Default value is 1 week into the past.
           
 * **weeksIntoFuture** (Integer): The requested time range into the future in weeks.
+If this value is greater than the configured maximum (see property above), the free busy times are only requested to configured maximum.
 Default value is 4 week into the future.
 
 * **simple** (Boolean): true, if the VFREEBUSY data should not contain free busy type and free information, false otherwise.
+Default value is false.
 
 
-For further information see OX REST API documentation: <https://documentation.open-xchange.com/components/middleware/rest/7.10.3/index.html>.
+For further information see OX REST API documentation: <https://documentation.open-xchange.com/components/middleware/rest/latest/index.html>.
 
 ## URI
 The servlet can be reached via the following path:
 
-	https://[server]:[port]/servlet/webdav.freebusy?
+	http://[server]:[port]/servlet/webdav.freebusy?
 
 [server] and [port] are placeholder and must be replaced by the information in the App Suite installation. The parameters are concatenated with '&' and appended on the URI.
 
 ## Example for Microsoft Outlook
 After activating the servlet for a speicifc context as outlined above, the following URI can be configured in the free/busy options of Microsoft Outlook, the free busy data of users and resources of the specified context can be requested. [server], [port] and [cid] are placeholder and must be replaced by the information from App Suite installation and the context id. Outlook substitutes %NAME% and %SERVER% in the template with the email address, splitted at the '@' character.
 
-	https://[server]:[port]/servlet/webdav.freebusy?contextId=[cid]&userName=%NAME%&server=%SERVER%&simple=true
+	http://[server]:[port]/servlet/webdav.freebusy?contextId=[cid]&userName=%NAME%&server=%SERVER%&simple=true
 For further information about how to request free busy data in Microsoft Outlook see: <https://support.microsoft.com/en-us/help/291621/how-to-use-the-internet-free-busy-feature-in-outlook>.
