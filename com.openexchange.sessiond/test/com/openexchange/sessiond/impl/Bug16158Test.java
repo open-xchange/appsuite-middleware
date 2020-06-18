@@ -171,7 +171,7 @@ public class Bug16158Test {
         public void run() {
             try {
                 while (run && !notFound) {
-                    final SessionControl control = sessionData.getSession(session.getSessionID());
+                    final SessionControl control = sessionData.getSession(session.getSessionID(), true);
                     notFound = null == control;
                 }
             } catch (final NullPointerException e) {
