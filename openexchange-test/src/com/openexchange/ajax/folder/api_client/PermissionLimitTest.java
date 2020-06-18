@@ -55,6 +55,7 @@ import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.rmi.server.UID;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,6 +80,7 @@ import com.openexchange.testing.httpclient.models.UsersResponse;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.UserApi;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
+import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
 /**
  * {@link PermissionLimitTest}
@@ -107,6 +109,7 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
         assertNotNull(resp.getData());
         @SuppressWarnings("unchecked") ArrayList<ArrayList<Object>> allUsers = (ArrayList<ArrayList<Object>>) resp.getData();
         allEntities = allUsers.parallelStream().map((list) -> (Integer) list.get(0)).collect(Collectors.toList());
+        assertTrue("Not enough users to perform this test.", allEntities.size() > 3);
         validPerms = allEntities.stream().limit(2).toArray(Integer[]::new);
         invalidPerms = allEntities.stream().toArray(Integer[]::new);
         defaultFolder = getDefaultFolder(getSessionId());
@@ -198,6 +201,7 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
         body.folder(folder);
         FolderUpdateResponse resp = folderApi.updateFolder(getSessionId(), id, body, Boolean.FALSE, timestamp, null, null, B(cascade), null, null);
         if(errorCode.isPresent()) {
+            assertNotNull("Response didn't contain an exception.", resp.getError());
             assertEquals("Unexpected error: " + resp.getErrorDesc(), errorCode.get(), resp.getCode());
             return null;
         }
@@ -260,7 +264,7 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
     private static final Map<String, String> CONFIG = new HashMap<>();
 
     static {
-        CONFIG.put("com.openexchange.folderstorage.maxPermissionEntities", String.valueOf(3));
+        CONFIG.put(OXFolderManagerImpl.MAX_FOLDER_PERMISSIONS.getFQPropertyName(), String.valueOf(3));
     }
 
     @Override
