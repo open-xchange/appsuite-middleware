@@ -185,9 +185,14 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
     @Override
     public boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
+        if (false == isAuthResultRequested(fetchArguments)) {
+            // Not requested by client
+            return true;
+        }
+
         MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
-        if (null == handler || false == isAuthResultRequested(fetchArguments)) {
-            // Not enabled or not requested by client
+        if (null == handler) {
+            // Not enabled
             return true;
         }
 
@@ -213,10 +218,15 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
     @Override
     public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> state) throws OXException {
+        if (false == isAuthResultRequested(fetchArguments)) {
+            // Not requested by client
+            return MailAttributation.NOT_APPLICABLE;
+        }
+
         Session session = mailAccess.getSession();
         MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
-        if (null == handler || false == isAuthResultRequested(fetchArguments)) {
-            // Not enabled or not requested by client
+        if (null == handler) {
+            // Not enabled
             return MailAttributation.NOT_APPLICABLE;
         }
 
@@ -386,8 +396,8 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
      * @return The milliseconds
      */
     private long getTimeoutMillis(int num) {
-        long min = Math.max(5000l, num * 100l);
-        return Math.min(min, 30000l);
+        long min = Math.max(5000L, num * 100L);
+        return Math.min(min, 30000L);
     }
 
     // --------------------------------------------------------------------------------------------------------------

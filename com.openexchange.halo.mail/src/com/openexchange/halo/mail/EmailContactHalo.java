@@ -54,8 +54,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -65,12 +67,18 @@ import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailFetchListener;
+import com.openexchange.mail.MailAttributation;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailFetchArguments;
+import com.openexchange.mail.MailFetchListenerChain;
 import com.openexchange.mail.MailFetchListenerRegistry;
+import com.openexchange.mail.MailFetchListenerResult;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.MailFetchListenerResult.ListenerReply;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
@@ -147,34 +155,61 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 
     private RetrievalResult retrieveMessages(int limit, SearchTerm<?> senderTerm, SearchTerm<?> recipientTerm, MailField[] fields, String[] headers, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         String sentFullName = mailAccess.getFolderStorage().getSentFolder();
+
+        List<MailMessage> inboxMessages = retrieveMessagesFromFolder("INBOX", limit, senderTerm, fields, headers, mailAccess);
+        List<MailMessage> sentMessages = retrieveMessagesFromFolder(sentFullName, limit, recipientTerm, fields, headers, mailAccess);
+        return new RetrievalResult(inboxMessages, sentMessages);
+    }
+
+    private List<MailMessage> retrieveMessagesFromFolder(String fullName, int limit, SearchTerm<?> searchTerm, MailField[] fields, String[] headers, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         IndexRange indexRange = new IndexRange(0, limit);
 
-        if (null == headers || 0 >= headers.length) {
+        MailField[] mailFields = fields;
+        String[] headerNames = headers;
+
+        MailFetchArguments fetchArguments = MailFetchArguments.builder(new FullnameArgument(mailAccess.getAccountId(), fullName), mailFields, headerNames).setSearchTerm(searchTerm).setSortOptions(MailSortField.RECEIVED_DATE, OrderDirection.DESC).build();
+        Map<String, Object> fetchListenerState = new HashMap<>(4);
+        MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, mailAccess, fetchListenerState);
+        if (null != listenerChain) {
+            MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, mailAccess, fetchListenerState);
+            if (attributation.isApplicable()) {
+                mailFields = attributation.getFields();
+                headerNames = attributation.getHeaderNames();
+            }
+        }
+
+        MailMessage[] mails;
+        if (headerNames != null && headerNames.length > 0) {
+            // Check for extended message storage
+            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
+            if (null != ext) {
+                mails = ext.searchMessages(fullName, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, mailFields, headerNames);
+            } else {
+                // Headers are required to be fetched dedicatedly; therefore we need the mail identifier to be contained in requested fields
+                MailField[] cols = checkFields(mailFields);
+                mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, cols);
+                MessageUtility.enrichWithHeaders(fullName, mails, headerNames, messageStorage);
+            }
+        } else {
             // No headers requested
-            List<MailMessage> inboxMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages("INBOX", indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, senderTerm, fields));
-            List<MailMessage> sentMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages(sentFullName, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, recipientTerm, fields));
-            return new RetrievalResult(inboxMessages, sentMessages);
+            mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, mailFields);
         }
 
-        // Check for extended message storage
-        IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-        IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
-        if (null != ext) {
-            List<MailMessage> inboxMessages = Arrays.asList(ext.searchMessages("INBOX", indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, senderTerm, fields, headers));
-            List<MailMessage> sentMessages = Arrays.asList(ext.searchMessages(sentFullName, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, recipientTerm, fields, headers));
-            return new RetrievalResult(inboxMessages, sentMessages);
+        if (null != listenerChain) {
+            MailFetchListenerResult result = listenerChain.onAfterFetch(mails, false, mailAccess, fetchListenerState);
+            if (ListenerReply.DENY == result.getReply()) {
+                OXException e = result.getError();
+                if (null == e) {
+                    // Should not occur
+                    e = MailExceptionCode.UNEXPECTED_ERROR.create("Fetch listener processing failed");
+                }
+                throw e;
+            }
+            mails = result.getMails();
         }
 
-        // Headers are required to be fetched dedicatedly; therefore we need the mail identifier to be contained in requested fields
-        MailField[] cols = checkFields(fields);
-        MailMessage[] mails = mailAccess.getMessageStorage().searchMessages("INBOX", indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, senderTerm, cols);
-        MessageUtility.enrichWithHeaders("INBOX", mails, headers, messageStorage);
-        List<MailMessage> inboxMessages = Arrays.asList(mails);
-
-        mails = mailAccess.getMessageStorage().searchMessages(sentFullName, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, recipientTerm, cols);
-        MessageUtility.enrichWithHeaders(sentFullName, mails, headers, messageStorage);
-        List<MailMessage> sentMessages = Arrays.asList(mails);
-        return new RetrievalResult(inboxMessages, sentMessages);
+        return Arrays.asList(mails);
     }
 
     @Override
@@ -214,17 +249,14 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
         SearchTerm<?> senderTerm = generateSenderSearch(addresses);
         SearchTerm<?> recipientTerm = generateRecipientSearch(addresses);
         List<MailMessage> messages = new LinkedList<MailMessage>();
-        List<MailFetchListener> fetchListeners = MailFetchListenerRegistry.getFetchListeners();
         for (MailAccount mailAccount : userMailAccounts) {
-            List<MailMessage> aux = new LinkedList<MailMessage>();
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
                 mailAccess = mailService.getMailAccess(session, mailAccount.getId());
                 mailAccess.connect();
                 RetrievalResult retrievees = retrieveMessages(limit, senderTerm, recipientTerm, requestedFields, headers, mailAccess);
-                aux.addAll(retrievees.inboxMessages);
-                aux.addAll(retrievees.sentMessage);
-                checkForMailFetchListeners(messages, fetchListeners, aux, mailAccess, requestedFields);
+                messages.addAll(retrievees.inboxMessages);
+                messages.addAll(retrievees.sentMessage);
             } finally {
                 if (mailAccess != null) {
                     mailAccess.close(true);
@@ -247,30 +279,6 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 
         messages = messages.subList(0, Math.min(limit, messages.size()));
         return new AJAXRequestResult(messages, "mail");
-    }
-
-    /**
-     * Check for mail fetch listeners
-     *
-     * @param messages The messages
-     * @param fetchListeners The fetch listeners
-     * @param aux The auxiliary list with messages
-     * @param mailAccess The mail access
-     * @param requestedFields The requested fields
-     * @throws OXException if an error is occurred
-     */
-    private void checkForMailFetchListeners(List<MailMessage> messages, List<MailFetchListener> fetchListeners, List<MailMessage> aux, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailField[] requestedFields) throws OXException {
-        if (null == fetchListeners) {
-            return;
-        }
-        if (Arrays.binarySearch(requestedFields, MailField.AUTHENTICATION_MECHANISM_RESULTS) < 0 && (Arrays.binarySearch(requestedFields, MailField.AUTHENTICATION_OVERALL_RESULT) < 0)) {
-            return;
-        }
-        for (MailMessage m : aux) {
-            for (MailFetchListener listener : fetchListeners) {
-                messages.add(listener.onSingleMailFetch(m, mailAccess));
-            }
-        }
     }
 
     protected SearchTerm<?> generateSenderSearch(final List<String> addresses) {
