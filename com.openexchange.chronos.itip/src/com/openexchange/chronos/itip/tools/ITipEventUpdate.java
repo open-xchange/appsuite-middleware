@@ -58,6 +58,8 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
@@ -138,6 +140,11 @@ public class ITipEventUpdate implements EventUpdate {
     @Override
     public SimpleCollectionUpdate<Attachment> getAttachmentUpdates() {
         return delegate.getAttachmentUpdates();
+    }
+
+    @Override
+    public CollectionUpdate<Conference, ConferenceField> getConferenceUpdates() {
+        return delegate.getConferenceUpdates();
     }
 
     public boolean containsAllChangesOf(EventField[] fields) {
@@ -223,7 +230,7 @@ public class ITipEventUpdate implements EventUpdate {
 
     /**
      * Check if the event diff contains only changes besides attendee update
-     * 
+     *
      * @return <code>false</code> if an attendee status was changes,<code>true</code> otherwise
      */
     public boolean isAboutDetailChangesOnly() {

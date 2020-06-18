@@ -78,6 +78,7 @@ import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.ical.ImportedEvent;
 import com.openexchange.chronos.ical.ical4j.ICal4JParser;
 import com.openexchange.chronos.ical.ical4j.VCalendar;
+import com.openexchange.chronos.ical.ical4j.extensions.Conference;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
@@ -531,6 +532,7 @@ public class ICalUtils {
         factory.register(WrCalName.PROPERTY_NAME, WrCalName.FACTORY);
         factory.register(AllDayEvent.PROPERTY_NAME, AllDayEvent.FACTORY);
         factory.register(BusyStatus.PROPERTY_NAME, BusyStatus.FACTORY);
+        factory.register(Conference.PROPERTY_NAME, Conference.FACTORY);
         return factory;
     }
 

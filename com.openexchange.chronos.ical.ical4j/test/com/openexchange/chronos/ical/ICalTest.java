@@ -50,6 +50,8 @@
 package com.openexchange.chronos.ical;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -60,6 +62,7 @@ import com.openexchange.chronos.ical.impl.ICalServiceImpl;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.TimeZones;
+import net.fortuna.ical4j.data.UnfoldingReader;
 
 /**
  * {@link ICalTest}
@@ -117,6 +120,21 @@ public abstract class ICalTest {
             }
         }
         throw new ParseException(value, 0);
+    }
+
+    protected static String unfold(String iCal) throws IOException {
+        int bufferLength = 1024;
+        UnfoldingReader reader = new UnfoldingReader(new StringReader(iCal), bufferLength, true);
+        try {
+            StringBuilder stringBuilder = new StringBuilder();
+            char[] buffer = new char[bufferLength];
+            for (int read; (read = reader.read(buffer, 0, bufferLength)) > 0;) {
+                stringBuilder.append(buffer, 0, read);
+            }
+            return 0 == stringBuilder.length() ? null : stringBuilder.toString();
+        } finally {
+            Streams.close(reader);
+        }
     }
 
 }

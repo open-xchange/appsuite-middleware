@@ -64,6 +64,15 @@ import com.openexchange.database.AbstractCreateTableImpl;
 public class ChronosCreateTableService extends AbstractCreateTableImpl {
 
     /**
+     * Gets the <code>CREATE TABLE</code> statement for a specific <i>chronos</i> table.
+     *
+     * @return The <code>CREATE TABLE</code> statement, or <code>null</code> if table name unknown
+     */
+    static String getCreateTableStmt(String tableName) {
+        return getTablesByName().get(tableName);
+    }
+
+    /**
      * Gets the <code>CREATE TABLE</code> statements for the <i>chronos</i> tables, mapped by their table names.
      *
      * @return The <code>CREATE TABLE</code> statements mapped by their table name
@@ -93,6 +102,14 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
         );
         tablesByName.put("calendar_alarm_sequence",
             "CREATE TABLE calendar_alarm_sequence (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "id INT4 UNSIGNED NOT NULL," +
+                "PRIMARY KEY (cid,account)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+        );
+        tablesByName.put("calendar_conference_sequence",
+            "CREATE TABLE calendar_conference_sequence (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
@@ -291,6 +308,20 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY triggerDate (cid,account,user,triggerDate)," +
                 "KEY event (cid,account,user,eventId)," +
                 "KEY action (action, triggerDate)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+        );
+        tablesByName.put("calendar_conference",
+            "CREATE TABLE calendar_conference (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "id INT4 UNSIGNED NOT NULL," +
+                "event INT4 UNSIGNED NOT NULL," +
+                "uri VARCHAR(767) COLLATE utf8mb4_bin NOT NULL," +
+                "label VARCHAR(1024) DEFAULT NULL," +
+                "features VARCHAR(767) DEFAULT NULL," +
+                "extendedParameters BLOB DEFAULT NULL," +
+                "PRIMARY KEY (cid,account,id)," +
+                "KEY event (cid,account,event)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
 

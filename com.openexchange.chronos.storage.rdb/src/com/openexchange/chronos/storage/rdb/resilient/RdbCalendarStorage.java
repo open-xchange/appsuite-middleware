@@ -61,6 +61,7 @@ import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageUtilities;
+import com.openexchange.chronos.storage.ConferenceStorage;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -77,6 +78,7 @@ public class RdbCalendarStorage implements CalendarStorage {
     private final RdbEventStorage eventStorage;
     private final RdbAttendeeStorage attendeeStorage;
     private final RdbAlarmStorage alarmStorage;
+    private final RdbConferenceStorage conferenceStorage;
 
     /**
      * Initializes a new {@link RdbCalendarStorage}.
@@ -94,6 +96,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         this.eventStorage = new RdbEventStorage(services, delegate.getEventStorage(), handleTruncations, handleIncorrectStrings, unsupportedDataThreshold);
         this.attendeeStorage = new RdbAttendeeStorage(services, delegate.getAttendeeStorage(), handleTruncations, handleIncorrectStrings, unsupportedDataThreshold);
         this.alarmStorage = new RdbAlarmStorage(services, delegate.getAlarmStorage(), handleTruncations, handleIncorrectStrings, unsupportedDataThreshold);
+        this.conferenceStorage = new RdbConferenceStorage(services, delegate.getConferenceStorage(), handleTruncations, handleIncorrectStrings, unsupportedDataThreshold);
     }
 
     @Override
@@ -122,6 +125,11 @@ public class RdbCalendarStorage implements CalendarStorage {
     }
 
     @Override
+    public ConferenceStorage getConferenceStorage() {
+        return conferenceStorage;
+    }
+
+    @Override
     public CalendarAccountStorage getAccountStorage() {
         return delegate.getAccountStorage();
     }
@@ -137,6 +145,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         warnings.putAll(eventStorage.getWarnings());
         warnings.putAll(attendeeStorage.getWarnings());
         warnings.putAll(alarmStorage.getWarnings());
+        warnings.putAll(conferenceStorage.getWarnings());
         warnings.putAll(delegate.getWarnings());
         return warnings;
     }
@@ -147,6 +156,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         warnings.putAll(eventStorage.getAndFlushWarnings());
         warnings.putAll(attendeeStorage.getAndFlushWarnings());
         warnings.putAll(alarmStorage.getAndFlushWarnings());
+        warnings.putAll(conferenceStorage.getAndFlushWarnings());
         warnings.putAll(delegate.getAndFlushWarnings());
         return warnings;
     }

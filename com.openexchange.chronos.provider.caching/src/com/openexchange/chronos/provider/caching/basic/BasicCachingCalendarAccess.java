@@ -86,6 +86,8 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
@@ -104,6 +106,7 @@ import com.openexchange.chronos.common.DeleteResultImpl;
 import com.openexchange.chronos.common.DeltaEvent;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.common.mapping.ConferenceMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -152,6 +155,7 @@ import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.ConferenceStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.ConversionService;
@@ -562,6 +566,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         calendarStorage.getEventStorage().insertEventTombstone(calendarStorage.getUtilities().getTombstone(originalEvent, new Date(), getCalendarUser()));
         calendarStorage.getAttendeeStorage().insertAttendeeTombstones(id, calendarStorage.getUtilities().getTombstones(originalEvent.getAttendees()));
         calendarStorage.getAlarmStorage().deleteAlarms(id);
+        calendarStorage.getConferenceStorage().deleteConferences(id);
         calendarStorage.getAlarmTriggerStorage().deleteTriggers(id);
         calendarStorage.getEventStorage().deleteEvent(id);
         calendarStorage.getAttendeeStorage().deleteAttendees(id, originalEvent.getAttendees());
@@ -669,6 +674,8 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             updateAttendees(calendarStorage, deltaEvent.getId(), attendeeUpdates);
         }
 
+        updateConferences(calendarStorage.getConferenceStorage(), deltaEvent.getId(), eventUpdate.getConferenceUpdates());
+
         if (updateAlarms) {
             CollectionUpdate<Alarm, AlarmField> alarmUpdates = eventUpdate.getAlarmUpdates();
             if (!alarmUpdates.isEmpty()) {
@@ -744,6 +751,31 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                 }
                 calendarStorage.getAttendeeStorage().updateAttendees(eventId, updatedAttendees);
             }
+        }
+    }
+
+    private void updateConferences(ConferenceStorage conferenceStorage, String eventId, CollectionUpdate<Conference, ConferenceField> conferenceUpdates) throws OXException {
+        if (null == conferenceStorage || null == conferenceUpdates || conferenceUpdates.isEmpty()) {
+            return;
+        }
+        if (false == conferenceUpdates.getAddedItems().isEmpty()) {
+            for (Conference conference : conferenceUpdates.getAddedItems()) {
+                conference.setId(conferenceStorage.nextId());
+            }
+            conferenceStorage.insertConferences(eventId, conferenceUpdates.getAddedItems());
+        }
+        if (false == conferenceUpdates.getRemovedItems().isEmpty()) {
+            conferenceStorage.deleteConferences(eventId, CalendarUtils.getConferenceIds(conferenceUpdates.getRemovedItems()));
+        }
+        if (false == conferenceUpdates.getUpdatedItems().isEmpty()) {
+            List<Conference> updatedConferences = new ArrayList<Conference>(conferenceUpdates.getUpdatedItems().size());
+            for (ItemUpdate<Conference, ConferenceField> attendeeUpdate : conferenceUpdates.getUpdatedItems()) {
+                Conference updated = attendeeUpdate.getUpdate();
+                Conference original = attendeeUpdate.getOriginal();
+                Conference newUpdatedAttendee = ConferenceMapper.getInstance().copy(original, updated, ConferenceField.ID);
+                updatedConferences.add(newUpdatedAttendee);
+            }
+            conferenceStorage.updateConferences(eventId, updatedConferences);
         }
     }
 

@@ -256,6 +256,7 @@ public class CalendarDataMigration {
             updated |= destinationStorage.getAttendeeStorage().deleteAllAttendees();
             updated |= destinationStorage.getAlarmStorage().deleteAllAlarms();
             updated |= destinationStorage.getAlarmTriggerStorage().deleteAllTriggers();
+            updated |= destinationStorage.getConferenceStorage().deleteAllConferences();
             txPolicy.commit(connection);
             warnings.putAll(destinationStorage.getAndFlushWarnings());
         } finally {

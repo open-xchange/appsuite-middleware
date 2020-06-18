@@ -86,6 +86,9 @@ public class CalendarStrings implements LocalizableStrings {
     /** The displayed name for the {@link EventField#ALARMS} property of an event */
     public static final String FIELD_ALARMS = "Reminder";
 
+    /** The displayed name for the {@link EventField#CONFERENCES} property of an event */
+    public static final String FIELD_CONFERENCES = "Conference";
+
     /** The displayed name for the {@link EventField#CLASSIFICATION} property of an event */
     public static final String FIELD_CLASSIFICATION = "Visibility";
 

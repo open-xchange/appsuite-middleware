@@ -201,6 +201,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         storage.getAttendeeStorage().insertAttendeeTombstones(attendeeTombstonesByEventId);
         storage.getAlarmStorage().deleteAlarms(eventIds);
         storage.getAlarmTriggerStorage().deleteTriggers(eventIds);
+        storage.getConferenceStorage().deleteConferences(eventIds);
         storage.getAttendeeStorage().deleteAttendees(eventIds);
         storage.getEventStorage().deleteEvents(eventIds);
         if (0 < attachmentsByEventId.size()) {

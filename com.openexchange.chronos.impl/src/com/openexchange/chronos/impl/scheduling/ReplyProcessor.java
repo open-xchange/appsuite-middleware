@@ -126,7 +126,7 @@ public class ReplyProcessor extends AbstractUpdatePerformer {
      * <li> taking over the attendees new participant status</li>
      * or
      * <li>adding an unknown calendar user to the event. This will trigger new messages to inform all other attendees.</li>
-     * 
+     *
      * @param message The {@link IncomingSchedulingMessage}
      * @return An {@link InternalCalendarResult} containing the changes that has been performed
      * @throws OXException In case data is invalid, outdated or permissions are missing
@@ -306,6 +306,7 @@ public class ReplyProcessor extends AbstractUpdatePerformer {
         storage.getEventStorage().insertEvent(newExceptionEvent);
         storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
         storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
+        storage.getConferenceStorage().insertConferences(newExceptionEvent.getId(), prepareConferences(originalSeriesMaster.getConferences()));
         insertAlarms(newExceptionEvent, newExceptionAlarms, true);
         newExceptionEvent = loadEventData(newExceptionEvent.getId());
         resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
@@ -402,7 +403,7 @@ public class ReplyProcessor extends AbstractUpdatePerformer {
         //@formatter:off
         DefaultCalendarObjectResource updatedResource = new DefaultCalendarObjectResource(updatedEvent, updatedChangeExceptions);
         AbstractSimpleCollectionUpdate<Attendee> collectedAttendeeUpdates = getSimpleAttendeeUpdates(
-            collectAttendees(eventUpdate.getOriginalResource(), null, (CalendarUserType[]) null), 
+            collectAttendees(eventUpdate.getOriginalResource(), null, (CalendarUserType[]) null),
             collectAttendees(updatedResource, null, (CalendarUserType[]) null));
         schedulingHelper.trackUpdate(updatedResource, CalendarUtils.isSeriesEvent(original) ? loadEventData(original.getSeriesId() ): null, eventUpdate, collectedAttendeeUpdates.getRetainedItems());
         //@formatter:on

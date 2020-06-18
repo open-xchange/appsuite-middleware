@@ -97,6 +97,13 @@ public interface CalendarStorage {
     AlarmTriggerStorage getAlarmTriggerStorage();
 
     /**
+     * Gets the conference storage.
+     *
+     * @return The conference storage
+     */
+    ConferenceStorage getConferenceStorage();
+
+    /**
      * Gets the calendar account storage.
      *
      * @return The account storage

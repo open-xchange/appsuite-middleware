@@ -56,6 +56,8 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.AlarmUtils;
@@ -182,13 +184,14 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
 
     private final CollectionUpdate<Alarm, AlarmField> alarmUpdates;
     private final CollectionUpdate<Attendee, AttendeeField> attendeeUpdates;
+    private final CollectionUpdate<Conference, ConferenceField> conferenceUpdates;
     private final SimpleCollectionUpdate<Attachment> attachmentUpdates;
 
     /**
      * Initializes a new {@link DefaultEventUpdate} containing the event update providing the differences.
      * <p/>
      * <i>Unset</i> fields of the original are considered, and no fields are ignored.
-     * 
+     *
      * @param originalEvent The original event
      * @param updatedEvent The updated event
      */
@@ -232,7 +235,7 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      */
     protected DefaultEventUpdate(Event originalEvent, Event updatedEvent, EventField[] ignoredEventFields, AttendeeField[] ignoredAttendeeFields, boolean considerUnset, boolean ignoreDefaults) {
-        super(originalEvent, updatedEvent, getDifferentFields(EventMapper.getInstance(), originalEvent, updatedEvent, considerUnset, ignoreDefaults, 
+        super(originalEvent, updatedEvent, getDifferentFields(EventMapper.getInstance(), originalEvent, updatedEvent, considerUnset, ignoreDefaults,
             extendIgnoredFields(ignoredEventFields, EventField.ALARMS, EventField.ATTACHMENTS, EventField.ATTENDEES)));
         if (considerCollectionUpdate(EventField.ALARMS, ignoredEventFields)) {
             alarmUpdates = AlarmUtils.getAlarmUpdates(
@@ -252,8 +255,14 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
         } else {
             attachmentUpdates = AbstractCollectionUpdate.emptyUpdate();
         }
+        if (considerCollectionUpdate(EventField.CONFERENCES, ignoredEventFields)) {
+            conferenceUpdates = CalendarUtils.getConferenceUpdates(
+                null != originalEvent ? originalEvent.getConferences() : null, null != updatedEvent ? updatedEvent.getConferences() : null);
+        } else {
+            conferenceUpdates = AbstractCollectionUpdate.emptyUpdate();
+        }
     }
-    
+
     private static EventField[] extendIgnoredFields(EventField[] ignoredFields, EventField...additionals) {
         if (null == ignoredFields) {
             return additionals;
@@ -263,13 +272,13 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
         }
         return Arrays.add(ignoredFields, additionals);
     }
-    
+
     private static boolean considerCollectionUpdate(EventField field, EventField[] ignoredFields) {
         if (null == ignoredFields || false == Arrays.contains(ignoredFields, field)) {
             return true;
         }
         return false;
-    } 
+    }
 
     @Override
     public CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates() {
@@ -287,6 +296,11 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
     }
 
     @Override
+    public CollectionUpdate<Conference, ConferenceField> getConferenceUpdates() {
+        return conferenceUpdates;
+    }
+
+    @Override
     public Set<EventField> getUpdatedFields() {
         Set<EventField> updatedFields = new HashSet<EventField>(super.getUpdatedFields());
         if (false == attendeeUpdates.isEmpty()) {
@@ -297,6 +311,9 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
         }
         if (false == alarmUpdates.isEmpty()) {
             updatedFields.add(EventField.ALARMS);
+        }
+        if (false == conferenceUpdates.isEmpty()) {
+            updatedFields.add(EventField.CONFERENCES);
         }
         return updatedFields;
     }

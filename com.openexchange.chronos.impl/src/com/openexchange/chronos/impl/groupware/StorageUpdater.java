@@ -168,6 +168,7 @@ class StorageUpdater {
         storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
         storage.getAttachmentStorage().deleteAttachments(session, CalendarUtils.getFolderView(event, attendeeId), event.getId());
         storage.getAttendeeStorage().deleteAttendees(event.getId());
+        storage.getConferenceStorage().deleteConferences(event.getId());
         storage.getEventStorage().deleteEvent(event.getId());
         tracker.addDelete(event, date.getTime());
     }
@@ -189,6 +190,7 @@ class StorageUpdater {
         }
         storage.getAlarmTriggerStorage().deleteTriggers(eventIds);
         storage.getAlarmStorage().deleteAlarms(eventIds);
+        storage.getConferenceStorage().deleteConferences(eventIds);
         storage.getAttendeeStorage().deleteAttendees(eventIds);
         storage.getEventStorage().deleteEvents(eventIds);
         for (Event event : events) {
@@ -325,7 +327,7 @@ class StorageUpdater {
      * switch and that the new organizer is added to the attendees
      * <p>
      * {@link CalendarParameters#PARAMETER_DEFAULT_ATTENDEE} is <b>NOT</b> validated.
-     * 
+     *
      * @param event The original event
      * @param eventUpdate The event delta to set the update in
      * @param contextId The context ID

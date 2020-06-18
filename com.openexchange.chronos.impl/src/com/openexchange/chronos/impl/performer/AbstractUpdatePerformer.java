@@ -102,6 +102,8 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.DefaultAttendeePrivileges;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
@@ -119,6 +121,7 @@ import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.AttendeeEventUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.common.mapping.ConferenceMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
@@ -227,6 +230,31 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
+     * Prepares a list of conferences prior inserting it into the storage by assigning a new internal identifier, as well as checking the
+     * conference's URI for validity.
+     * <p/>
+     * As new internal identifiers are generated, this may both be used for client-supplied data, as well as when taking over data from
+     * the series master event for overridden instances.
+     *
+     * @param conferencesData The new conferences to prepare prior insert
+     * @return The prepared conferences
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
+     */
+    protected List<Conference> prepareConferences(List<Conference> conferencesData) throws OXException {
+        if (null == conferencesData || conferencesData.isEmpty()) {
+            return conferencesData;
+        }
+        List<Conference> conferences = new ArrayList<Conference>(conferencesData.size());
+        for (Conference conferenceData : conferencesData) {
+            Conference conference = ConferenceMapper.getInstance().copy(conferenceData, null, (ConferenceField[]) null);
+            conference.setId(storage.getConferenceStorage().nextId());
+            conference.setUri(Check.requireValidURI(conferenceData.getUri(), String.valueOf(EventField.CONFERENCES)));
+            conferences.add(conference);
+        }
+        return conferences;
+    }
+
+    /**
      * <i>Touches</i> an event in the storage by setting it's last modification timestamp and modified-by property to the current
      * timestamp and calendar user.
      *
@@ -241,7 +269,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
 
     /**
      * Loads the recurrence identifiers of all stored change exception events for a specific event series from the storage.
-     * 
+     *
      * @param seriesId The identifier of the series to load the exception dates for
      * @return The recurrence identifiers of the change exception events, or an empty set if there are none
      */
@@ -315,6 +343,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getEventStorage().insertEventTombstone(tombstone);
         storage.getAttendeeStorage().insertAttendeeTombstones(id, tombstone.getAttendees());
         storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getId(), id, originalEvent.getAttachments());
+        storage.getConferenceStorage().deleteConferences(id);
         storage.getAlarmTriggerStorage().deleteTriggers(id);
         storage.getAlarmStorage().deleteAlarms(id);
         storage.getAttendeeStorage().deleteAttendees(id);
@@ -441,6 +470,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         attendees.add(updatedAttendee);
         storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), attendees);
         storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
+        storage.getConferenceStorage().insertConferences(newExceptionEvent.getId(), prepareConferences(originalSeriesMaster.getConferences()));
         for (Entry<Integer, List<Alarm>> entry : newExceptionAlarms.entrySet()) {
             if (originalAttendee.getEntity() != i(entry.getKey())) {
                 insertAlarms(newExceptionEvent, i(entry.getKey()), entry.getValue(), true);
@@ -1012,8 +1042,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * if configured, deny setting the participation status to a value other than NEEDS-ACTION for other attendees: RFC 6638, section 3.2.1
          */
-        if (false == session.getConfig().isAllowOrganizerPartStatChanges() && false == matches(originalAttendee, calendarUserId) && 
-            false == assumeExternalOrganizerUpdate && attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT) && 
+        if (false == session.getConfig().isAllowOrganizerPartStatChanges() && false == matches(originalAttendee, calendarUserId) &&
+            false == assumeExternalOrganizerUpdate && attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT) &&
             false == ParticipationStatus.NEEDS_ACTION.matches(attendeeUpdate.getUpdate().getPartStat())) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.PARTSTAT);
         }
@@ -1064,7 +1094,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * </ul>
      * <p/>
      * Note: Even if attendees are allowed to modify the event, deletion is out of scope.
-     * 
+     *
      * @param originalEvent The original event to check
      * @return <code>true</code> if a deletion would lead to a removal of the event, <code>false</code>, otherwise
      */
@@ -1102,7 +1132,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected void logPerform(EventUpdate update) {
         LOG.trace("Original: >\n{}\nUpdated: >\n{}", new JSONPrintableEvent(session, update.getOriginal()), new JSONPrintableEvent(session, update.getUpdate()));
     }
-    
+
     /**
      * Deletes an existing change exception. Besides the removal of the change exception data via {@link #delete(Event)}, this also
      * includes adjusting the master event's change- and delete exception date arrays.
@@ -1123,7 +1153,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         addDeleteExceptionDate(originalSeriesMaster, recurrenceId);
         return deletedEvents;
     }
-    
+
     /**
      * Adds a specific recurrence identifier to the series master's delete exception array, i.e. creates a new delete exception. A
      * previously existing entry for the recurrence identifier in the master's change exception date array is removed implicitly. In case
@@ -1189,16 +1219,16 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          * update alarms
          */
         updateAlarmTrigger(originalMasterEvent, updatedMasterEvent);
-        
+
         /*
          * track update of master in result
          */
         resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
         return updatedMasterEvent;
     }
-    
+
     /**
-     * Deletes all future occurrences by updating the recurrence rule. Efficiently shortens the series. 
+     * Deletes all future occurrences by updating the recurrence rule. Efficiently shortens the series.
      *
      * @param originalMasterEvent The original series master event
      * @param recurrenceId The recurrence identifier of the occurrence to add, containing the {@link RecurrenceRange}
@@ -1246,17 +1276,17 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Event updatedEvent = loadEventData(originalMasterEvent.getId());
         updateAlarmTrigger(originalMasterEvent, updatedEvent);
         resultTracker.trackUpdate(originalMasterEvent, updatedEvent);
-        
+
         /*
          * send CANCEL mails for orphaned attendees
          */
         if (trackOrphanedAttendees && 0 < orphanedAttendees.size()) {
             schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedChangeExceptions), null, orphanedAttendees);
         }
-        
+
         return updatedEvent;
     }
-    
+
     private void updateAlarmTrigger(Event originalMasterEvent, Event updatedMasterEvent) throws OXException {
         Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
         storage.getAlarmTriggerStorage().deleteTriggers(originalMasterEvent.getId());

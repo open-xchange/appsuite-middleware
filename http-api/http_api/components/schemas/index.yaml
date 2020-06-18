@@ -182,6 +182,10 @@ DateTimeData:
   $ref: ./chronos/DateTimeData.yaml
 Attendee:
   $ref: ./chronos/Attendee.yaml
+Conference:
+  $ref: ./chronos/Conference.yaml
+ExtendedPropertyParameter:
+  $ref: ./chronos/ExtendedPropertyParameter.yaml
 Alarm:
   $ref: ./chronos/Alarm.yaml
 CalendarUser:

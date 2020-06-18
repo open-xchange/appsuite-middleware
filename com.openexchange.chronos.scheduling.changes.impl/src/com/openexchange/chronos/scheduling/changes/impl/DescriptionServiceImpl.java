@@ -58,6 +58,7 @@ import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.DescriptionService;
 import com.openexchange.chronos.scheduling.changes.impl.desc.AttachmentDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.desc.AttendeeDescriber;
+import com.openexchange.chronos.scheduling.changes.impl.desc.ConferenceDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.desc.DescriptionDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.desc.LocationDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.desc.OrganizerDescriber;
@@ -84,7 +85,8 @@ public class DescriptionServiceImpl implements DescriptionService {
         new OrganizerDescriber(),
         new SummaryDescriber(),
         new LocationDescriber(),
-        new DescriptionDescriber(), 
+        new ConferenceDescriber(),
+        new DescriptionDescriber(),
         new TransparencyDescriber(),
         new AttachmentDescriber(),
         new AttendeeDescriber()

@@ -14,6 +14,14 @@ ${mail.event.description!""}
 ====================================
 </#if>
 
+<#if mail.conferences?has_content>
+== ${labels.conferencesLabel} ==
+
+<#list mail.conferences as conference>
+${participantHelper.conferenceLine(conference)}
+</#list>
+</#if>
+
 == ${labels.participantsLabel} ==
 
 <#list mail.participants as participant>
