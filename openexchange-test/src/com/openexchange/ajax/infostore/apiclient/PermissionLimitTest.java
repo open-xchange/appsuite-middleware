@@ -61,6 +61,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.Test;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
+import com.openexchange.groupware.infostore.validation.PermissionSizeValidator;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.InfoItemPermission;
 import com.openexchange.testing.httpclient.models.InfoItemPermission.BitsEnum;
@@ -135,7 +136,7 @@ public class PermissionLimitTest extends InfostoreApiClientTest {
     private static final Map<String, String> CONFIG = new HashMap<>();
 
     static {
-        CONFIG.put("com.openexchange.infostore.maxPermissionEntities", String.valueOf(3));
+        CONFIG.put(PermissionSizeValidator.MAX_OBJECT_PERMISSIONS.getFQPropertyName(), String.valueOf(3));
     }
 
     @Override
