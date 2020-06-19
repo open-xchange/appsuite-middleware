@@ -50,6 +50,7 @@
 package com.openexchange.mail;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.ByteArrayOutputStream;
@@ -2949,8 +2950,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return (b != null) && b.booleanValue();
     }
 
-    private ComposedMailMessage checkGuardEmail(ComposedMailMessage composedMail) throws OXException {
+    private ComposedMailMessage checkGuardEmail(ComposedMailMessage composedMailMessage) throws OXException {
         // Check if Guard email
+        ComposedMailMessage composedMail = composedMailMessage;
         if (composedMail.getSecuritySettings() != null && composedMail.getSecuritySettings().anythingSet()) {
             EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
             if (encryptor != null) {
@@ -2961,11 +2963,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailPath saveDraft(ComposedMailMessage draftMail, boolean autosave, int accountId) throws OXException {
+    public MailPath saveDraft(ComposedMailMessage draftMailMessage, boolean autosave, int accountId) throws OXException {
         if (autosave) {
-            return autosaveDraft(draftMail, accountId);
+            return autosaveDraft(draftMailMessage, accountId);
         }
-        draftMail = checkGuardEmail(draftMail);
+        ComposedMailMessage draftMail = checkGuardEmail(draftMailMessage);
         initConnection(isTransportOnly(accountId) ? MailAccount.DEFAULT_ID : accountId);
         String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
         if (!draftMail.containsSentDate()) {
@@ -3381,7 +3383,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                     sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                                 } else if (!properties.getRateLimitPrimaryOnly(session.getUserId(), session.getContextId()) || MailAccount.DEFAULT_ID == accountId) {
                                     int rateLimit = properties.getRateLimit(session.getUserId(), session.getContextId());
-                                    LOG.debug("Checking rate limit {} for request with IP {} ({}) from user {} in context {}", rateLimit, remoteAddr, null == remoteAddress ? "from session" : "from request", session.getUserId(), session.getContextId());
+                                    LOG.debug("Checking rate limit {} for request with IP {} ({}) from user {} in context {}", I(rateLimit), remoteAddr, null == remoteAddress ? "from session" : "from request", I(session.getUserId()), I(session.getContextId()));
                                     rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc(session.getUserId(), session.getContextId()));
                                     sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                                     setRateLimitTime(rateLimit);
@@ -3640,7 +3642,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         MailPath retval = new MailPath(mailAccess.getAccountId(), sentFullname, (uidArr == null || uidArr.length == 0) ? null : uidArr[0]);
-        LOG.debug("Mail copy ({}) appended in {}msec", retval, System.currentTimeMillis() - start);
+        LOG.debug("Mail copy ({}) appended in {}msec", retval, L(System.currentTimeMillis() - start));
         return retval;
     }
 
@@ -4497,6 +4499,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         // Iterate map
         final Reference<OXException> exceptionRef = new Reference<>();
         final Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = this.mailAccess;
         boolean success = m.forEachEntry(new TIntObjectProcedure<Map<String, List<String>>>() {
 
             @Override
@@ -4743,10 +4746,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage[] searchMails(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException {
+    public MailMessage[] searchMails(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields, String[] headers) throws OXException {
         FullnameArgument argument = prepareMailFolderParam(folder);
         String fullName = argument.getFullname();
         initConnection(argument.getAccountId());
+
+        MailField[] mailFields = fields;
+        String[] headerNames = headers;
 
         MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, mailFields, headerNames).build();
         Map<String, Object> fetchListenerState = new HashMap<>(4);

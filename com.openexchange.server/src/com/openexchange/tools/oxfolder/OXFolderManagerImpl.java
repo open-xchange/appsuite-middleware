@@ -153,11 +153,11 @@ import gnu.trove.set.hash.TIntHashSet;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionConstants {
+public final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionConstants {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderManagerImpl.class);
 
-    private static final Property MAX_FOLDER_PERMISSIONS = DefaultProperty.valueOf("com.openexchange.folder.maxPermissionEntities", I(100));
+    public static final Property MAX_FOLDER_PERMISSIONS = DefaultProperty.valueOf("com.openexchange.folder.maxPermissionEntities", I(100));
 
     private static final int[] SYSTEM_PUBLIC_FOLDERS = { FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 

@@ -190,7 +190,6 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositionSpaceServiceImpl.class);
 
     private static final com.openexchange.mail.compose.Message.ContentType TEXT_PLAIN = com.openexchange.mail.compose.Message.ContentType.TEXT_PLAIN;
-    private static final com.openexchange.mail.compose.Message.ContentType TEXT_HTML = com.openexchange.mail.compose.Message.ContentType.TEXT_HTML;
 
     private static final com.openexchange.mail.compose.Attachment.ContentDisposition INLINE = com.openexchange.mail.compose.Attachment.ContentDisposition.INLINE;
 

@@ -78,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
 public class PermissionSizeValidator implements InfostoreValidator {
 
     private static final Logger LOG = LoggerFactory.getLogger(PermissionSizeValidator.class);
-    private static final Property MAX_OBJECT_PERMISSIONS = DefaultProperty.valueOf("com.openexchange.infostore.maxPermissionEntities", I(100));
+    public static final Property MAX_OBJECT_PERMISSIONS = DefaultProperty.valueOf("com.openexchange.infostore.maxPermissionEntities", I(100));
 
     @Override
     public DocumentMetadataValidation validate(ServerSession session, DocumentMetadata metadata, DocumentMetadata originalDocument, Set<Metadata> updatedColumns) {

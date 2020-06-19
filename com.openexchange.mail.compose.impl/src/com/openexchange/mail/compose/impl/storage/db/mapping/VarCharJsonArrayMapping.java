@@ -92,7 +92,7 @@ public abstract class VarCharJsonArrayMapping<O> extends AbstractVarCharJsonObje
             return null;
         }
 
-        return new Gson().fromJson(value, new TypeToken<List<String>>() {}.getType());
+        return new Gson().fromJson(value, new TypeToken<List<String>>() {/*empty*/}.getType());
     }
 
 }

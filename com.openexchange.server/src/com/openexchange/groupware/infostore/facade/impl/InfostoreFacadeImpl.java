@@ -50,11 +50,11 @@
 package com.openexchange.groupware.infostore.facade.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.tools.arrays.Arrays.contains;
-import static com.openexchange.java.util.Tools.getUnsignedLong;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.util.Tools.getUnsignedInteger;
+import static com.openexchange.java.util.Tools.getUnsignedLong;
+import static com.openexchange.tools.arrays.Arrays.contains;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -3497,32 +3497,33 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     }
                 });
             }
+            if (false == folderIds.isEmpty()) {
+                performQuery(context, QUERIES.getFolderSequenceNumbersQuery(folderIds, versionsOnly, true, contextId), new ResultProcessor<Void>() {
 
-            performQuery(context, QUERIES.getFolderSequenceNumbersQuery(folderIds, versionsOnly, true, contextId), new ResultProcessor<Void>() {
-
-                @Override
-                public Void process(ResultSet rs) throws SQLException {
-                    while (rs.next()) {
-                        sequenceNumbers.put(Long.valueOf(rs.getLong(1)), Long.valueOf(rs.getLong(2)));
-                    }
-                    return null;
-                }
-            });
-            performQuery(context, QUERIES.getFolderSequenceNumbersQuery(folderIds, versionsOnly, false, contextId), new ResultProcessor<Void>() {
-
-                @Override
-                public Void process(ResultSet rs) throws SQLException {
-                    while (rs.next()) {
-                        Long folderID = Long.valueOf(rs.getLong(1));
-                        long newSequence = rs.getLong(2);
-                        Long oldSequence = sequenceNumbers.get(folderID);
-                        if (oldSequence == null || oldSequence.longValue() < newSequence) {
-                            sequenceNumbers.put(folderID, Long.valueOf(newSequence));
+                    @Override
+                    public Void process(ResultSet rs) throws SQLException {
+                        while (rs.next()) {
+                            sequenceNumbers.put(Long.valueOf(rs.getLong(1)), Long.valueOf(rs.getLong(2)));
                         }
+                        return null;
                     }
-                    return null;
-                }
-            });
+                });
+                performQuery(context, QUERIES.getFolderSequenceNumbersQuery(folderIds, versionsOnly, false, contextId), new ResultProcessor<Void>() {
+
+                    @Override
+                    public Void process(ResultSet rs) throws SQLException {
+                        while (rs.next()) {
+                            Long folderID = Long.valueOf(rs.getLong(1));
+                            long newSequence = rs.getLong(2);
+                            Long oldSequence = sequenceNumbers.get(folderID);
+                            if (oldSequence == null || oldSequence.longValue() < newSequence) {
+                                sequenceNumbers.put(folderID, Long.valueOf(newSequence));
+                            }
+                        }
+                        return null;
+                    }
+                });
+            }
         } catch (SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }

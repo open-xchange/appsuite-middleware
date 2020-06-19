@@ -178,7 +178,7 @@ public final class ManagementActivator extends HousekeepingActivator {
                             String ls = Strings.getLineSeparator();
                             LOG.warn("{}{}\tJMX server still not started. MBeans will not yet be accessible on this node.{}", ls, ls, ls, e.getCause());
                             keepOn = true;
-                        };
+                        }
                     }
                     synchronized (monitor) {
                         ManagementActivator.this.jmxStartPoller = null;

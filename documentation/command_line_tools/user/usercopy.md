@@ -17,6 +17,21 @@ usercopy - copies a user to another context
 
 This command line tool copies a user from one context to another.
 
+The following informations will be copied:
+
+* Contacts
+* Calender entries
+* Folders
+* Infostore documents
+* Mail accounts
+* Messaging accounts
+* OAuth accounts
+* Reminder
+* Subscriptions
+* Tasks
+* UserCounts
+* UserSettings
+
 # OPTIONS
 
 **-h**, **--help**
