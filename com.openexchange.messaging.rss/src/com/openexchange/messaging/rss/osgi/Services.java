@@ -49,47 +49,69 @@
 
 package com.openexchange.messaging.rss.osgi;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.html.HtmlService;
-import com.openexchange.messaging.MessagingService;
-import com.openexchange.messaging.rss.RSSMessagingService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.proxy.ProxyRegistry;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Activator}
+ * {@link Services} - 
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Activator extends HousekeepingActivator {
+public final class Services {
 
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
+    /**
+     * Initialises a new {@link Services}.
+     */
+    private Services() {
+        super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.messaging.rss\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
         try {
-        	Services.setServiceLookup(this);
-            track(HtmlService.class, new HTMLRegistryCustomizer(context));
-            track(ProxyRegistry.class, new ProxyRegistryCustomizer(context));
-            openTrackers();
-            registerService(MessagingService.class, new RSSMessagingService(), null);
-        } catch (Exception x) {
-            LoggerHolder.LOG.error("", x);
-            throw x;
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
         }
     }
-
 }
