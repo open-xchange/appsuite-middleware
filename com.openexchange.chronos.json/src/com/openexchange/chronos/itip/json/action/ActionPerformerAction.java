@@ -121,7 +121,7 @@ public class ActionPerformerAction extends AbstractITipAction {
         // Parse for attachments
         attach(request, analysisToProcess);
 
-        List<Event> list = performer.perform(action, analysisToProcess, calendarSession, attributes);
+        List<Event> list = performer.perform(request, action, analysisToProcess, calendarSession, attributes);
         return Utils.convertToResult(session, tz, list);
     }
 

@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
@@ -84,20 +85,20 @@ public class MailPerformer extends AbstractActionPerformer {
     }
 
     @Override
-    public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
+    public List<Event> perform(AJAXRequestData request, ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         int owner = getOwner(session, analysis);
         for (ITipChange change : changes) {
             Event event = change.getNewEvent();
             // TODO: appointment.setNotification(true);
-            writeMail(action, null, event, session, owner);
+            writeMail(request, action, null, event, session, owner);
         }
 
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         for (ITipAnnotation annotation : annotations) {
             Event event = annotation.getEvent();
             // TODO: appointment.setNotification(true);
-            writeMail(action, null, event, session, owner);
+            writeMail(request, action, null, event, session, owner);
         }
         return Collections.emptyList();
     }

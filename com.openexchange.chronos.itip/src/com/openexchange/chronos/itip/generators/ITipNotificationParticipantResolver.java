@@ -96,19 +96,17 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
     private final static Logger LOG = LoggerFactory.getLogger(ITipNotificationParticipantResolver.class);
 
     protected final UserService userService;
-    protected final ConfigurationService config;
     protected final ResourceService resources;
     private final ITipIntegrationUtility util;
 
     public ITipNotificationParticipantResolver(ITipIntegrationUtility util) {
-        this(util, Services.getService(ConfigurationService.class), Services.getService(UserService.class), Services.getService(ResourceService.class));
+        this(util, Services.getService(UserService.class), Services.getService(ResourceService.class));
     }
 
-    public ITipNotificationParticipantResolver(ITipIntegrationUtility util, ConfigurationService configurationService, UserService userService, ResourceService resourceService) {
+    public ITipNotificationParticipantResolver(ITipIntegrationUtility util, UserService userService, ResourceService resourceService) {
         super();
         this.userService = userService;
         this.resources = resourceService;
-        this.config = configurationService;
         this.util = util;
     }
 
@@ -489,7 +487,12 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
         return resourceParticipants;
     }
 
-    protected NotificationConfiguration getDefaultConfiguration() {
+    /**
+     * Generates a default configuration
+     *
+     * @return A default {@link NotificationConfiguration}
+     */
+    public static NotificationConfiguration getDefaultConfiguration() {
         final NotificationConfiguration configuration = new NotificationConfiguration();
 
         configuration.setIncludeHTML(true); // TODO: pay attention to user
@@ -499,7 +502,12 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
         configuration.setInterestedInStateChanges(true);
         configuration.setSendITIP(true);
 
-        configuration.setForceCancelMails(config.getBoolProperty("notify_participants_on_delete", true));
+        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        if (null == configurationService) {
+            configuration.setForceCancelMails(true);
+        } else {
+            configuration.setForceCancelMails(configurationService.getBoolProperty("notify_participants_on_delete", true));
+        }
 
         return configuration;
     }

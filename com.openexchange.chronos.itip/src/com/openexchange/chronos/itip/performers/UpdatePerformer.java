@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
@@ -107,7 +108,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
     }
 
     @Override
-    public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
+    public List<Event> perform(AJAXRequestData request, ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
         session.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
         List<ITipChange> changes = analysis.getChanges();
         List<Event> result = new ArrayList<Event>(changes.size());
@@ -160,7 +161,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
                 processed.put(updatedEvent.getUid(), updatedEvent);
             }
 
-            writeMail(action, original, updatedEvent, session, owner);
+            writeMail(request, action, original, updatedEvent, session, owner);
             result.add(updatedEvent);
         }
 

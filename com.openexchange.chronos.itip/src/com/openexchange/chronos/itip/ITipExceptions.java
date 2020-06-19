@@ -63,7 +63,10 @@ import com.openexchange.exception.OXExceptionFactory;
 public enum ITipExceptions implements OXExceptionCode {
 
     /** The transmitted iCal file doesn't meet the expectations defined in RFC 5546. */
-    NOT_CONFORM(100, Category.CATEGORY_ERROR, "The transmitted iCal file doesn't meet the expectations defined in RFC 5546.")
+    NOT_CONFORM(100, Category.CATEGORY_ERROR, "The transmitted iCal file doesn't meet the expectations defined in RFC 5546."),
+
+    /** The transmitted iTIP method is unknown */
+    UNKNOWN_METHOD(1001, Category.CATEGORY_USER_INPUT, "The transmitted iTIP method %1$s is unknown")
 
     ;
 

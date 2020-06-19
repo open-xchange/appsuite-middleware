@@ -51,18 +51,26 @@ package com.openexchange.chronos.itip.performers;
 
 import java.util.List;
 import java.util.Map;
+import javax.mail.internet.InternetAddress;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipActionPerformer;
 import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.itip.ITipChange.Type;
+import com.openexchange.chronos.itip.ITipExceptions;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
+import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
+import com.openexchange.chronos.itip.generators.ITipNotificationParticipantResolver;
 import com.openexchange.chronos.itip.generators.NotificationMail;
 import com.openexchange.chronos.itip.generators.NotificationParticipant;
 import com.openexchange.chronos.itip.sender.MailSenderService;
@@ -70,6 +78,13 @@ import com.openexchange.chronos.itip.tools.ITipUtils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.session.Session;
+import com.openexchange.tools.functions.ErrorAwareFunction;
 
 /**
  * 
@@ -128,13 +143,14 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
 
     }
 
-    protected void writeMail(final ITipAction action, Event original, final Event update, final CalendarSession session, int owner) throws OXException {
+    protected void writeMail(final AJAXRequestData request, final ITipAction action, Event original, final Event update, final CalendarSession session, int owner) throws OXException {
         if (ITipAction.COUNTER.equals(action)) {
             return;
         }
 
         CalendarUser principal = ITipUtils.getPrincipal(session);
         final ITipMailGenerator generator = mailGenerators.create(constructOriginalForMail(action, original, update, session, owner), update, session, owner, principal);
+        ErrorAwareFunction<NotificationParticipant, NotificationMail> f = null;
         switch (action) {
             case CREATE:
                 if (!generator.userIsTheOrganizer()) {
@@ -161,40 +177,27 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
                 }
                 break;
             case DECLINECOUNTER:
-                recipients = generator.getRecipients();
-                for (final NotificationParticipant p : recipients) {
-                    final NotificationMail mail = generator.generateDeclineCounterMailFor(p);
-                    if (mail != null) {
-                        sender.sendMail(mail, session, principal, null);
-                    }
-                }
+                f = (p) -> generator.generateDeclineCounterMailFor(p);
                 break;
             case SEND_APPOINTMENT:
-                recipients = generator.getRecipients();
-                for (final NotificationParticipant p : recipients) {
-                    final NotificationMail mail = generator.generateCreateMailFor(p);
-                    if (mail != null) {
-                        sender.sendMail(mail, session, principal, null);
-                    }
-                }
+                f = (p) -> generator.generateCreateMailFor(p);
                 break;
             case REFRESH:
-                recipients = generator.getRecipients();
-                for (final NotificationParticipant p : recipients) {
-                    final NotificationMail mail = generator.generateRefreshMailFor(p);
-                    if (mail != null) {
-                        sender.sendMail(mail, session, principal, null);
-                    }
-                }
+                f = (p) -> generator.generateRefreshMailFor(p);
                 break;
             default:
-                recipients = generator.getRecipients();
-                for (final NotificationParticipant p : recipients) {
-                    final NotificationMail mail = generator.generateUpdateMailFor(p);
-                    if (mail != null) {
-                        sender.sendMail(mail, session, principal, null);
-                    }
-                }
+                throw ITipExceptions.UNKNOWN_METHOD.create(action.toString());
+        }
+        /*
+         * For certain operations only the originator needs to get a response
+         */
+        if (null != f) {
+            NotificationParticipant p = getOriginator(request, session.getSession(), update);
+            p.setConfiguration(ITipNotificationParticipantResolver.getDefaultConfiguration());
+            final NotificationMail mail = f.apply(p);
+            if (mail != null) {
+                sender.sendMail(mail, session, principal, null);
+            }
         }
     }
 
@@ -231,6 +234,75 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
             }
         }
         return copy;
+    }
+
+    /**
+     * Gets the originator of the mail.
+     *
+     * @param request The request
+     * @param session The session
+     * @param update The updated event
+     * @return The originator of the mail or <code>null</code>
+     * @throws OXException In case mail can't be found or mail access is unavailable
+     */
+    private NotificationParticipant getOriginator(AJAXRequestData request, Session session, Event update) throws OXException {
+        FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(getData(request, "com.openexchange.mail.conversion.fullname"));
+        if (null == argument) {
+            return null;
+        }
+        String mailId = getData(request, "com.openexchange.mail.conversion.mailid");
+
+        /*
+         * Load mail and get the FROM address.
+         */
+        MailAccess<?, ?> mailAccess = null;
+        try {
+            mailAccess = MailAccess.getInstance(session, argument.getAccountId());
+            mailAccess.connect();
+            MailMessage message = mailAccess.getMessageStorage().getMessage(argument.getFullname(), mailId, false);
+            if (null == message) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, argument.getFullname());
+            }
+            InternetAddress[] from = message.getFrom();
+            if (null == from || 1 != from.length) {
+                return null;
+            }
+
+            /*
+             * Only generate participant if the originator participates in the event.
+             */
+            InternetAddress address = from[0];
+            CalendarUser calendarUser = new CalendarUser();
+            calendarUser.setUri(CalendarUtils.getURI(address.getAddress()));
+            if (null == CalendarUtils.find(update.getAttendees(), calendarUser)) {
+                return null;
+            }
+            return new NotificationParticipant(ITipRole.ATTENDEE, true, address.getAddress());
+        } finally {
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
+        }
+    }
+
+    /**
+     * Gets a value from the request.
+     * 
+     * @param request The request
+     * @param key The key to get the value for
+     * @return The value or <code>null</code>
+     */
+    private String getData(AJAXRequestData request, String key) {
+        final Object data = request.getData();
+        if (data != null) {
+            final JSONObject body = (JSONObject) data;
+            try {
+                return body.getString(key);
+            } catch (JSONException ignoree) {
+                return null;
+            }
+        }
+        return request.getParameters().get(key);
     }
 
 }
