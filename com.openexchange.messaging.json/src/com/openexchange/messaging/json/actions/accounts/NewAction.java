@@ -69,6 +69,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class NewAction extends AbstractMessagingAccountAction {
 
+    /**
+     * Initializes a new {@link NewAction}.
+     *
+     * @param registry The {@link MessagingServiceRegistry}
+     */
     public NewAction(final MessagingServiceRegistry registry) {
         super(registry);
     }
@@ -85,6 +90,11 @@ public class NewAction extends AbstractMessagingAccountAction {
         return new AJAXRequestResult(Integer.valueOf(id));
     }
 
+    /**
+     * Checks whether the configuration contains any json null values and removes it
+     *
+     * @param account The {@link MessagingAccount} to check
+     */
     private static void saneConfiguration(final MessagingAccount account) {
         if (null == account) {
             return;
