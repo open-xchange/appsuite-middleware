@@ -172,6 +172,12 @@ public enum MessagingExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_OAUTH_ACCOUNT("Invalid OAuth account specified. OAuth account of type '%1$s' cannot be mapped to messaging service '%2$s'.", CATEGORY_ERROR, 26, MessagingExceptionMessages.INVALID_OAUTH_ACCOUNT_MSG),
 
+    /**
+     * The account configuration is invalid: '%1$s'.
+     */
+    INVALID_ACCOUNT_CONFIGURATION("The account configuration is invalid: %1$s.", CATEGORY_USER_INPUT, 27, MessagingExceptionMessages.INVALID_OAUTH_ACCOUNT_MSG),
+
+
     ;
 
 
