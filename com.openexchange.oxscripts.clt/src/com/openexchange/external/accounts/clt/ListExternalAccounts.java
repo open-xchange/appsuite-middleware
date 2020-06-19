@@ -123,7 +123,7 @@ public class ListExternalAccounts extends AbstractExternalAccountCLT {
         this.userId = parseInt('u', 0, cmd, options);
         boolean userSet = userId > 0;
 
-        this.comparator = getComparator(cmd.getOptionValue('s'));
+        this.comparator = getComparator(cmd.getOptionValue('o'));
 
         if (false == cmd.hasOption('m')) {
             if (providerSet) {
