@@ -99,6 +99,16 @@ public class ListExternalAccounts extends AbstractExternalAccountCLT {
     }
 
     @Override
+    boolean isModuleMandatory() {
+        return false;
+    }
+
+    @Override
+    boolean isUserMandatory() {
+        return false;
+    }
+
+    @Override
     protected void addOptions(Options options) {
         super.addOptions(options);
         options.addOption(createArgumentOption("r", "provider", "providerId", "The provider identifier", false));
