@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.compose.impl.open;
 
-import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -221,7 +220,7 @@ public class EditCopy extends AbstractOpener {
 
         // Check if original mail may contain attachments
         if (multipart) {
-            Optional<Boolean> optionalEncrypt = Optional.of(B(state.encrypt));
+            Optional<Boolean> optionalEncrypt = Optional.of(state.encrypt);
             // Add mail's non-inline parts
             {
                 NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
