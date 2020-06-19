@@ -149,9 +149,12 @@ public class ModuleSupportImpl implements ModuleSupport {
 
     @Override
     public boolean isVisible(int module, String folder, String item, int contextID, int guestID) throws OXException {
+        ModuleHandler moduleHandler = handlers.get(module);
         if (item != null) {
-            ModuleHandler moduleHandler = handlers.get(module);
-            return moduleHandler.isVisible(folder, item, contextID, guestID);
+            boolean visible = moduleHandler.isVisible(folder, item, contextID, guestID);
+            if (visible) {
+                return visible;
+            }
         }
 
         if (null == Module.getForFolderConstant(module)) {
@@ -163,18 +166,7 @@ public class ModuleSupportImpl implements ModuleSupport {
             return folderHandler.isVisible(folder, item, contextID, guestID);
         }
 
-        try {
-            UserService userService = requireService(UserService.class, services);
-            Context context = userService.getContext(contextID);
-            User user = userService.getUser(guestID, context);
-            requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, folder, user, context, null);
-            return true;
-        } catch (OXException e) {
-            if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
-                return false;
-            }
-            throw e;
-        }
+        return false;
     }
 
     @Override
