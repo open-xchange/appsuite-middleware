@@ -359,7 +359,7 @@ public enum MailField {
     /**
      * Creates an array of {@link MailField} corresponding to given <code>int</code> values.
      * <p>
-     * Guarantees not to return any null values.
+     * Guarantees not to return any <code>null</code> values.
      *
      * @see #getField(int)
      * @param fields The <code>int</code> values
@@ -440,7 +440,7 @@ public enum MailField {
             return mailFields;
         }
 
-        List<MailField> toAdd = new ArrayList<>(fieldsToAdd.length);
+        List<MailField> toAdd = null;
         int numOfFields = mailFields.length;
         for (MailField fieldToAdd : fieldsToAdd) {
             boolean add = true;
@@ -452,14 +452,18 @@ public enum MailField {
                 }
             }
             if (add) {
+                if (toAdd == null) {
+                    toAdd = new ArrayList<>(fieldsToAdd.length);
+                }
                 toAdd.add(fieldToAdd);
             }
         }
 
-        int numOfFieldsToAdd = toAdd.size();
-        if (numOfFieldsToAdd <= 0) {
+        if (toAdd == null) {
             return mailFields;
         }
+
+        int numOfFieldsToAdd = toAdd.size();
         MailField[] newFields = new MailField[numOfFields + numOfFieldsToAdd];
         System.arraycopy(mailFields, 0, newFields, 0, numOfFields);
         for (MailField addMe : toAdd) {
