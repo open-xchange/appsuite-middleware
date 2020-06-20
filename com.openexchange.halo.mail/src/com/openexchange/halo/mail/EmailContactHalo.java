@@ -170,7 +170,8 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
         MailFetchArguments fetchArguments = MailFetchArguments.builder(new FullnameArgument(mailAccess.getAccountId(), fullName), mailFields, headerNames).setSearchTerm(searchTerm).setSortOptions(MailSortField.RECEIVED_DATE, OrderDirection.DESC).build();
         Map<String, Object> fetchListenerState = new HashMap<>(4);
         MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, mailAccess, fetchListenerState);
-        if (null != listenerChain) {
+        boolean notEmptyChain = MailFetchListenerChain.isNotEmptyChain(listenerChain);
+        if (notEmptyChain) {
             MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, mailAccess, fetchListenerState);
             if (attributation.isApplicable()) {
                 mailFields = attributation.getFields();
@@ -196,7 +197,7 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
             mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, mailFields);
         }
 
-        if (null != listenerChain) {
+        if (notEmptyChain) {
             MailFetchListenerResult result = listenerChain.onAfterFetch(mails, false, mailAccess, fetchListenerState);
             if (ListenerReply.DENY == result.getReply()) {
                 OXException e = result.getError();
