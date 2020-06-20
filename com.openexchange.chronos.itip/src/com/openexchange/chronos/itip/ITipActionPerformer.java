@@ -51,6 +51,7 @@ package com.openexchange.chronos.itip;
 
 import java.util.Collection;
 import java.util.List;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
@@ -67,6 +68,7 @@ public interface ITipActionPerformer {
     /**
      * Performs the given action with the data provided by the analysis
      * 
+     * @param request The original request
      * @param action The {@link ITipAction} to perform
      * @param analysis The {@link ITipAnalysis} to perform the action on
      * @param session The {@link CalendarSession}
@@ -74,7 +76,7 @@ public interface ITipActionPerformer {
      * @return A {@link List} of created or updated events
      * @throws OXException If action could not be performed to missing access/permission, DB error, etc.
      */
-    List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException;
+    List<Event> perform(AJAXRequestData request, ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException;
 
     /**
      * Get a collection of the supported {@link ITipAction}s by this instance.

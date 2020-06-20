@@ -99,6 +99,16 @@ public class ListExternalAccounts extends AbstractExternalAccountCLT {
     }
 
     @Override
+    boolean isModuleMandatory() {
+        return false;
+    }
+
+    @Override
+    boolean isUserMandatory() {
+        return false;
+    }
+
+    @Override
     protected void addOptions(Options options) {
         super.addOptions(options);
         options.addOption(createArgumentOption("r", "provider", "providerId", "The provider identifier", false));
@@ -123,7 +133,7 @@ public class ListExternalAccounts extends AbstractExternalAccountCLT {
         this.userId = parseInt('u', 0, cmd, options);
         boolean userSet = userId > 0;
 
-        this.comparator = getComparator(cmd.getOptionValue('s'));
+        this.comparator = getComparator(cmd.getOptionValue('o'));
 
         if (false == cmd.hasOption('m')) {
             if (providerSet) {

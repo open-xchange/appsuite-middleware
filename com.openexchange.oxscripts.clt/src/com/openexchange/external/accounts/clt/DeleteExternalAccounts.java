@@ -89,9 +89,19 @@ public class DeleteExternalAccounts extends AbstractExternalAccountCLT {
     }
 
     @Override
+    boolean isModuleMandatory() {
+        return true;
+    }
+
+    @Override
+    boolean isUserMandatory() {
+        return true;
+    }
+
+    @Override
     protected void addOptions(Options options) {
         super.addOptions(options);
-        options.addOption(createArgumentOption("i", "accountId", "accountId", "The account identifier", true));
+        options.addOption(createArgumentOption("i", "accountId", "accountId", "Required. The account identifier", true));
     }
 
     @Override

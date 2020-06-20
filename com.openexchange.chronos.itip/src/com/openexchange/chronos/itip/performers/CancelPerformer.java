@@ -56,6 +56,7 @@ import java.util.EnumSet;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -92,7 +93,7 @@ public class CancelPerformer extends AbstractActionPerformer {
     }
 
     @Override
-    public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
+    public List<Event> perform(AJAXRequestData request, ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
         // Suppress iTip
         session.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
 

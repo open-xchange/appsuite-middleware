@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.compose.impl.open;
 
-import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -179,7 +178,7 @@ public class Forward extends AbstractOpener {
             }
         }
 
-        Optional<Boolean> optionalEncrypt = Optional.of(B(state.encrypt));
+        Optional<Boolean> optionalEncrypt = Optional.of(state.encrypt);
         if (usm.isForwardAsAttachment() || forwardsFor.size() > 1) {
             state.metaBuilder.withType(Meta.MetaType.FORWARD_ATTACHMENT);
             // Forward as attachment, add mail(s) as attachment(s)

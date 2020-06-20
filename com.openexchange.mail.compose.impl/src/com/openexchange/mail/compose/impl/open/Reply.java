@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.compose.impl.open;
 
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import java.util.ArrayList;
@@ -389,7 +388,7 @@ public class Reply extends AbstractOpener {
         }
 
         // Check whether to attach original message
-        Optional<Boolean> optionalEncrypt = Optional.of(B(state.encrypt));
+        Optional<Boolean> optionalEncrypt = Optional.of(state.encrypt);
         if (usm.getAttachOriginalMessage() > 0) {
             // Obtain attachment storage (can only be null here)
             state.attachmentStorage = getAttachmentStorage(session);

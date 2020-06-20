@@ -104,7 +104,7 @@ public class ActionPerformerAction extends AbstractITipAction {
         }
         ITipActionPerformer performer = factory.getPerformer(action);
 
-        List<Event> list = performer.perform(action, analysisToProcess, session, attributes);
+        List<Event> list = performer.perform(request, action, analysisToProcess, session, attributes);
 
         if (list != null) {
             EventConverter eventConverter = getEventConverter(session);

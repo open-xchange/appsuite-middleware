@@ -51,9 +51,9 @@ package com.openexchange.external.accounts.clt;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import com.openexchange.external.account.ExternalAccountModule;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
+import com.openexchange.external.account.ExternalAccountModule;
 import com.openexchange.java.Enums;
 
 /**
@@ -81,8 +81,8 @@ abstract class AbstractExternalAccountCLT extends AbstractRmiCLI<Void> {
     @Override
     protected void addOptions(Options options) {
         options.addOption(createArgumentOption("c", "context", "contextId", "Required. The context identifier", true));
-        options.addOption(createArgumentOption("u", "user", "userId", "The user identifier", false));
-        options.addOption(createArgumentOption("m", "module", "module", "The module identifier. Valid modules are: " + getAvailableModules(), false));
+        options.addOption(createArgumentOption("u", "user", "userId", (isUserMandatory() ? "Required. " : "") + "The user identifier", isUserMandatory()));
+        options.addOption(createArgumentOption("m", "module", "module", (isModuleMandatory() ? "Required. " : "") + "The module identifier. Valid modules are: " + getAvailableModules(), isModuleMandatory()));
     }
 
     @Override
@@ -115,7 +115,7 @@ abstract class AbstractExternalAccountCLT extends AbstractRmiCLI<Void> {
         String module = cmd.getOptionValue('m');
         try {
             return ExternalAccountModule.valueOf(module.toUpperCase());
-        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.err.println("Invalid value '" + module + "' for option 'm'. Available modules are: " + getAvailableModules());
             System.exit(1);
             return null;
@@ -130,4 +130,18 @@ abstract class AbstractExternalAccountCLT extends AbstractRmiCLI<Void> {
     String getAvailableModules() {
         return Enums.toCommaSeparatedList(ExternalAccountModule.values());
     }
+
+    /**
+     * Returns whether the user option is mandatory
+     *
+     * @return whether the user option is mandatory
+     */
+    abstract boolean isUserMandatory();
+
+    /**
+     * Returns whether the module option is mandatory
+     *
+     * @return whether the module option is mandatory
+     */
+    abstract boolean isModuleMandatory();
 }

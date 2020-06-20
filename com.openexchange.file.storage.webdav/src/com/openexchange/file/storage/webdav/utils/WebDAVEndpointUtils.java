@@ -154,10 +154,27 @@ public class WebDAVEndpointUtils {
      * @throws OXException
      */
     private static boolean verifyPort(Session session, AbstractWebDAVFileStorageService service, URL url) throws OXException {
-        if (url != null) {
-            return isAllowed(session, service, url.getPort());
+        if (url == null) {
+            return false;
         }
-        return false;
+        int port = url.getPort();
+        if (port < 0) {
+            String protocol = Strings.asciiLowerCase(url.getProtocol());
+            if (Strings.isEmpty(protocol)) {
+                // Assume HTTP as default
+                port = 80;
+            } else {
+                protocol = protocol.trim();
+                if ("http".equals(protocol)) {
+                    port = 80;
+                } else if ("https".equals(protocol)) {
+                    port = 443;
+                }  else {
+                    port = 80;
+                }
+            }
+        }
+        return isAllowed(session, service, port);
     }
 
     /**
@@ -184,4 +201,5 @@ public class WebDAVEndpointUtils {
         }
         return true;
     }
+
 }

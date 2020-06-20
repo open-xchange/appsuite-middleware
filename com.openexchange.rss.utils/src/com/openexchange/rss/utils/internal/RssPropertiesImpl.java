@@ -281,7 +281,24 @@ public class RssPropertiesImpl implements RssProperties {
         URI uri;
         try {
             uri = new URI(uriString);
-            return !isAllowed(uri.getPort()) || isBlacklisted(uri.getHost()) || !isAllowedScheme(uri.getScheme()) || !isValid(uri);
+            int port = uri.getPort();
+            if (port < 0) {
+                String scheme = Strings.asciiLowerCase(uri.getScheme());
+                if (Strings.isEmpty(scheme)) {
+                    // Assume HTTP as default
+                    port = 80;
+                } else {
+                    scheme = scheme.trim();
+                    if ("http".equals(scheme)) {
+                        port = 80;
+                    } else if ("https".equals(scheme)) {
+                        port = 443;
+                    }  else {
+                        port = 80;
+                    }
+                }
+            }
+            return !isAllowed(port) || isBlacklisted(uri.getHost()) || !isAllowedScheme(uri.getScheme()) || !isValid(uri);
         } catch (URISyntaxException e) {
             LoggerHolder.LOG.debug("Given feed URL \"{}\" appears not to be valid.", uriString, e);
             return true;

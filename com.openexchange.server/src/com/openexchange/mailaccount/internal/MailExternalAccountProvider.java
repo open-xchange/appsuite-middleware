@@ -52,7 +52,9 @@ package com.openexchange.mailaccount.internal;
 import java.sql.Connection;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.http.conn.util.InetAddressUtils;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.net.InternetDomainName;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.external.account.DefaultExternalAccount;
@@ -144,6 +146,17 @@ public class MailExternalAccountProvider implements ExternalAccountProvider {
      * Converts the specified mail account to an {@link ExternalAccount} and adds it to the list
      * 
      * @param mailAccount the {@link MailAccount} to convert and add
+     * @param list The list to add it to
+     * @throws OXException if an error is occurred
+     */
+    private void addMailAccount(int contextId, MailAccount mailAccount, List<ExternalAccount> list) throws OXException {
+        addMailAccount(contextId, null, mailAccount, list);
+    }
+
+    /**
+     * Converts the specified mail account to an {@link ExternalAccount} and adds it to the list
+     * 
+     * @param mailAccount the {@link MailAccount} to convert and add
      * @param providerId The provider identifier
      * @param list The list to add it to
      * @throws OXException if an error is occurred
@@ -154,34 +167,31 @@ public class MailExternalAccountProvider implements ExternalAccountProvider {
             // Skip primary account and unified inbox
             return;
         }
-        if (mailAccount.getMailOAuthId() > 0) {
-            OAuthAccount account = getOAuthAccountStorage().getAccount(contextId, mailAccount.getUserId(), mailAccount.getMailOAuthId());
-            if (false == account.getAPI().getServiceId().equals(providerId)) {
-                return;
-            }
+        String pid = extractProviderId(mailAccount, contextId);
+        if (false == pid.equals(providerId)) {
+            return;
         }
-        list.add(new DefaultExternalAccount(mailAccount.getId(), contextId, mailAccount.getUserId(), providerId, ExternalAccountModule.MAIL));
+        list.add(new DefaultExternalAccount(mailAccount.getId(), contextId, mailAccount.getUserId(), pid, ExternalAccountModule.MAIL));
     }
 
     /**
-     * Converts the specified mail account to an {@link ExternalAccount} and adds it to the list
+     * Extracts the provider identifier.
      * 
-     * @param mailAccount the {@link MailAccount} to convert and add
-     * @param list The list to add it to
-     * @throws OXException if an error is occurred
+     * @param mailAccount The mail account from which to extract the account identifier
+     * @return The account identifier which is the account's configured mail server, either
+     *         as an IP address or as the top domain.
+     * @throws OXException
      */
-    private void addMailAccount(int contextId, MailAccount mailAccount, List<ExternalAccount> list) throws OXException {
-        int unifiedId = getUnifiedInboxManagement().getUnifiedINBOXAccountID(mailAccount.getUserId(), contextId);
-        if (mailAccount.getId() == 0 || mailAccount.getId() == unifiedId) {
-            // Skip primary account and unified inbox
-            return;
-        }
-        String providerId = mailAccount.getMailServer();
+    private String extractProviderId(MailAccount mailAccount, int contextId) throws OXException {
         if (mailAccount.getMailOAuthId() > 0) {
             OAuthAccount account = getOAuthAccountStorage().getAccount(contextId, mailAccount.getUserId(), mailAccount.getMailOAuthId());
-            providerId = account.getAPI().getServiceId();
+            return account.getAPI().getServiceId();
         }
-        list.add(new DefaultExternalAccount(mailAccount.getId(), contextId, mailAccount.getUserId(), providerId, ExternalAccountModule.MAIL));
+        String address = mailAccount.getMailServer();
+        if (InetAddressUtils.isIPv4Address(address) || InetAddressUtils.isIPv6Address(address)) {
+            return address;
+        }
+        return InternetDomainName.from(address).topDomainUnderRegistrySuffix().toString();
     }
 
     /**
@@ -208,5 +218,4 @@ public class MailExternalAccountProvider implements ExternalAccountProvider {
         return ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
 
     }
-
 }
