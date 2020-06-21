@@ -117,7 +117,7 @@ public abstract class DateTimeMapping<O> extends DefaultJsonMapping<DateTime, O>
         }
         try {
             DateTime dateTime = DateTime.parse(timeZone, value);
-            new java.util.Date(dateTime.getTimestamp());
+            // new java.util.Date(dateTime.getTimestamp());
             return dateTime;
         } catch (Exception e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, getAjaxName(), value);

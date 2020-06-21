@@ -72,6 +72,26 @@ public class MailFetchListenerChain implements MailFetchListener {
     /** The empty listener chain */
     public static MailFetchListenerChain EMPTY_CHAIN = new MailFetchListenerChain(null, MailAttributation.NOT_APPLICABLE);
 
+    /**
+     * Checks if given listener chain is <b>not</b> empty.
+     *
+     * @param listenerChain The listener chain to check
+     * @return <code>true</code> if listener chain is not empty; otherwise <code>false</code>
+     */
+    public static boolean isNotEmptyChain(MailFetchListenerChain listenerChain) {
+        return isEmptyChain(listenerChain) == false;
+    }
+
+    /**
+     * Checks if given listener chain is empty.
+     *
+     * @param listenerChain The listener chain to check
+     * @return <code>true</code> if listener chain is empty; otherwise <code>false</code>
+     */
+    public static boolean isEmptyChain(MailFetchListenerChain listenerChain) {
+        return listenerChain == null || listenerChain == EMPTY_CHAIN ? true : listenerChain.listeners.isEmpty();
+    }
+
     // -------------------------------------------------------------------------------------------------------------------------------
 
     private final List<MailFetchListener> listeners;
