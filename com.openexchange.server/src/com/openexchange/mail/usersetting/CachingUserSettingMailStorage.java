@@ -415,7 +415,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             {
                 Reference<List<Integer>> toLoadReference = new Reference<>(null);
                 Cache cache = getCache();
-                userIds.forEach(user -> {
+                userIds.stream().filter((u) -> u != null).forEach(user -> {
                     UserSettingMail usm = null == cache ? null : (UserSettingMail) cache.get(cache.newCacheKey(ctx.getContextId(), i(user)));
                     if (usm == null) {
                         List<Integer> l = toLoadReference.getValue();
