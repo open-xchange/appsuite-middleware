@@ -53,6 +53,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileOwnerAttributeView;
+import java.nio.file.attribute.UserPrincipal;
 import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -66,6 +68,9 @@ import org.slf4j.LoggerFactory;
  */
 public class HistoryUtil {
 
+    private static final String CURRENT_FOLDER_NAME = "current";
+    protected static final String PREVIOUS_FOLDER_NAME = "previous";
+    protected static final String OX_USER_NAME = "open-xchange"; // Enter your own system user name here for testing purposes
     private static final Logger LOG = LoggerFactory.getLogger(HistoryUtil.class);
 
     /**
@@ -118,6 +123,7 @@ public class HistoryUtil {
             LOG.error("Unable to create current folder in folder {}", history.getAbsolutePath());
             throw new IOException("Unable to create current folder");
         }
+        adjustPathOwner(destFolder.toPath());
         destFolder.setWritable(true);
         LOG.debug("Starting to copy installed files to current (targte: {}).", destFolder.getAbsolutePath());
         @SuppressWarnings("null") CopyFileVisitor visitor = new CopyFileVisitor(installed.toPath(), destFolder.toPath());
@@ -133,8 +139,8 @@ public class HistoryUtil {
      * @throws IOException
      */
     private static void moveToPrevious(File history) throws IOException {
-        File from = new File(history, "current");
-        File to = new File(history, "previous");
+        File from = new File(history, CURRENT_FOLDER_NAME);
+        File to = new File(history, PREVIOUS_FOLDER_NAME);
         LOG.info("Rotating current files to previous. Moving current files to history folder ({})", to.getAbsolutePath());
         if (to.exists()) {
             LOG.info("Previous files already present. Starting to delete them before moving current files (target: {}).", to.getAbsolutePath());
@@ -142,12 +148,30 @@ public class HistoryUtil {
             LOG.info("Previous files deleted successfully (target: {}).", to.getAbsolutePath());
         }
         LOG.debug("Starting to move current files to previous (targte: {}).", to.getAbsolutePath());
+
+        to.mkdirs();
+        adjustPathOwner(to.toPath());
+
         @SuppressWarnings("null") CopyFileVisitor visitor = new CopyFileVisitor(from.toPath(), to.toPath());
         Files.walkFileTree(from.toPath(), visitor);
         if (!from.delete()) {
             LOG.error("Unable to delete current folder {}", from.getAbsolutePath());
         }
         LOG.info("Files moved successfully (target: {}).", to.getAbsolutePath());
+    }
+
+    /**
+     * Adjust the owner of the folder to the open-xchange user if necessary.
+     *
+     * @param path The folder path to adjust
+     * @throws IOException
+     */
+    private static void adjustPathOwner(Path path) throws IOException {
+        FileOwnerAttributeView view = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
+        if (view != null && view.getOwner().getName().toLowerCase().equals(HistoryUtil.OX_USER_NAME) == false) {
+            UserPrincipal oxUser = path.getFileSystem().getUserPrincipalLookupService().lookupPrincipalByName(HistoryUtil.OX_USER_NAME);
+            Files.setOwner(path, oxUser);
+        }
     }
 
 }
