@@ -61,6 +61,7 @@ import com.openexchange.external.account.DefaultExternalAccount;
 import com.openexchange.external.account.ExternalAccount;
 import com.openexchange.external.account.ExternalAccountModule;
 import com.openexchange.external.account.ExternalAccountProvider;
+import com.openexchange.java.Strings;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -168,7 +169,7 @@ public class MailExternalAccountProvider implements ExternalAccountProvider {
             return;
         }
         String pid = extractProviderId(mailAccount, contextId);
-        if (false == pid.equals(providerId)) {
+        if (Strings.isNotEmpty(providerId) && false == pid.equals(providerId)) {
             return;
         }
         list.add(new DefaultExternalAccount(mailAccount.getId(), contextId, mailAccount.getUserId(), pid, ExternalAccountModule.MAIL));

@@ -111,7 +111,7 @@ public class ListExternalAccounts extends AbstractExternalAccountCLT {
     @Override
     protected void addOptions(Options options) {
         super.addOptions(options);
-        options.addOption(createArgumentOption("r", "provider", "providerId", "The provider identifier", false));
+        options.addOption(createArgumentOption("r", "provider", "providerId", "The provider identifier (exact match). For OAUTH mail accounts, the provider identifier is determined by the OX internal OAUTH provider identifier, e.g. for a Google OAUTH mail account the provider identifier is 'com.openexchange.oauth.google'. For custom mail accounts the provider identifier is determined by the parent domain of the configured provider's mail server, e.g. for imap.ox.io, the provider identifier will be ox.io.", false));
         options.addOption(createArgumentOption("o", "sort-by", "sortById", "The sort identifier. It can be one of the following: [" + SortBy.getCommandLineIds() + "] where " + SortBy.getDisplayNames() + ". Defaults to 'u'.", false));
     }
 
