@@ -1878,19 +1878,13 @@ public final class SessionHandler {
             // Asynchronous remove from session storage
             final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
             if (sessionStorageService != null) {
-                final List<SessionControl> tSessionControls = new ArrayList<SessionControl>(sessionControls.size());
-                for (SessionControl sessionControl : sessionControls) {
-                    if (useSessionStorage(sessionControl.getSession())) {
-                        tSessionControls.add(sessionControl);
-                    }
-                }
                 ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
 
                     @Override
                     public Void call() {
                         try {
                             List<String> sessionsToRemove = new ArrayList<String>();
-                            for (final SessionControl sessionControl : tSessionControls) {
+                            for (final SessionControl sessionControl : sessionControls) {
                                 SessionImpl session = sessionControl.getSession();
                                 if (useSessionStorage(session)) {
                                     sessionsToRemove.add(session.getSessionID());
@@ -1912,7 +1906,7 @@ public final class SessionHandler {
         EventAdmin eventAdmin = Services.optService(EventAdmin.class);
         if (eventAdmin != null) {
             Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
-            Map<String, Session> eventMap = new HashMap<String, Session>();
+            Map<String, Session> eventMap = new HashMap<String, Session>(sessionControls.size());
             Set<UserKey> users = new HashSet<UserKey>(sessionControls.size());
             for (SessionControl sessionControl : sessionControls) {
                 Session session = sessionControl.getSession();
