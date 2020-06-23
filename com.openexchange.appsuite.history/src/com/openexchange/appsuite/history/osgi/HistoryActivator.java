@@ -90,6 +90,8 @@ import com.openexchange.security.manager.SecurityManagerPropertyProvider;
  */
 public class HistoryActivator extends HousekeepingActivator implements ForcedReloadable {
 
+    private static final String COLON = ":";
+    private static final String MANIFESTS = "/manifests";
     private static final Logger LOG = LoggerFactory.getLogger(HistoryActivator.class);
     private static final Property INSTALLED_APPSUITE_PROP = DefaultProperty.valueOf("com.openexchange.apps.path", null);
     private static final Property INSTALLED_MANIFEST_PROP = DefaultProperty.valueOf("com.openexchange.apps.manifestPath", null);
@@ -98,6 +100,8 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
 
     private HistoryFileCacheProvider appsuiteCacheProvider;
     private HistoryManifestProvider manifestProvider;
+
+    private final boolean isWindows = Optional.ofNullable(System.getProperty("os.name")).orElse("").toLowerCase().startsWith("windows");
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -160,6 +164,14 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
             case manifest:
                 path = configService.getProperty(MANIFEST_PROP);
                 installed = configService.getProperty(INSTALLED_MANIFEST_PROP);
+                if (installed == null) {
+                    String tmp = configService.getProperty(INSTALLED_APPSUITE_PROP);
+                    if (Strings.isEmpty(tmp)) {
+                        break;
+                    }
+                    String[] split = Strings.splitByColon(tmp);
+                    installed = isWindows && split.length >= 2 ? split[0] + COLON + split[1] + MANIFESTS : split[0] + MANIFESTS;
+                }
                 break;
             default:
                 LOG.debug("Unknown history type: {}", history.name());
@@ -281,7 +293,7 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
      */
     private File getInstalledPath(String property, History history) {
         String[] paths = Strings.splitByColon(property);
-        return paths.length > 0 ? getContentFolder(new File(paths[0]), history) : null;
+        return paths.length > 0 ? getContentFolder(new File(isWindows && paths.length >= 2 ? paths[0] + COLON + paths[1] : paths[0]), history) : null;
     }
 
     /**
