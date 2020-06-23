@@ -50,6 +50,7 @@
 package com.openexchange.group;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.io.Serializable;
 import java.util.Date;
 import com.openexchange.ajax.AJAXServlet;
 
@@ -58,7 +59,9 @@ import com.openexchange.ajax.AJAXServlet;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Group implements Cloneable {
+public class Group implements Cloneable, Serializable {
+
+    private static final long serialVersionUID = -2056806379007998512L;
 
     public enum Field {
         ID(1, AJAXServlet.PARAMETER_ID, "id"),
@@ -271,16 +274,20 @@ public class Group implements Cloneable {
      * {@inheritDoc}
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        final Group retval = (Group) super.clone();
-        if (null != lastModified) {
-            retval.lastModified = (Date) lastModified.clone();
+    public Object clone() {
+        try {
+            Group retval = (Group) super.clone();
+            if (null != lastModified) {
+                retval.lastModified = (Date) lastModified.clone();
+            }
+            if (null != member) {
+                retval.member = new int[member.length];
+                System.arraycopy(member, 0, retval.member, 0, member.length);
+            }
+            return retval;
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError("CloneNotSupportedException although Cloneable.");
         }
-        if (null != member) {
-            retval.member = new int[member.length];
-            System.arraycopy(member, 0, retval.member, 0, member.length);
-        }
-        return retval;
     }
 
     /**
