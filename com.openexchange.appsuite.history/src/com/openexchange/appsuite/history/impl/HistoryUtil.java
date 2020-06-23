@@ -53,7 +53,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.Optional;
 import org.apache.commons.io.FileUtils;
@@ -123,12 +122,12 @@ public class HistoryUtil {
             LOG.error("Unable to create current folder in folder {}", history.getAbsolutePath());
             throw new IOException("Unable to create current folder");
         }
-        adjustPathOwner(destFolder.toPath());
+
         destFolder.setWritable(true);
         LOG.debug("Starting to copy installed files to current (targte: {}).", destFolder.getAbsolutePath());
         @SuppressWarnings("null") CopyFileVisitor visitor = new CopyFileVisitor(installed.toPath(), destFolder.toPath());
         Files.walkFileTree(installed.toPath(), visitor);
-
+        adjustPathOwner(destFolder.toPath());
         LOG.info("Files copied successfully (target: {}).", destFolder.getAbsolutePath());
     }
 
@@ -150,13 +149,13 @@ public class HistoryUtil {
         LOG.debug("Starting to move current files to previous (targte: {}).", to.getAbsolutePath());
 
         to.mkdirs();
-        adjustPathOwner(to.toPath());
 
         @SuppressWarnings("null") CopyFileVisitor visitor = new CopyFileVisitor(from.toPath(), to.toPath());
         Files.walkFileTree(from.toPath(), visitor);
         if (!from.delete()) {
             LOG.error("Unable to delete current folder {}", from.getAbsolutePath());
         }
+        adjustPathOwner(to.toPath());
         LOG.info("Files moved successfully (target: {}).", to.getAbsolutePath());
     }
 
@@ -166,9 +165,9 @@ public class HistoryUtil {
      * @param path The folder path to adjust
      * @throws IOException
      */
-    private static void adjustPathOwner(Path path) throws IOException {
-        FileOwnerAttributeView view = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
-        if (view != null && view.getOwner().getName().toLowerCase().equals(HistoryUtil.OX_USER_NAME) == false) {
+    protected static void adjustPathOwner(Path path) throws IOException {
+        UserPrincipal owner = Files.getOwner(path);
+        if (owner.getName().toLowerCase().equals(HistoryUtil.OX_USER_NAME) == false) {
             UserPrincipal oxUser = path.getFileSystem().getUserPrincipalLookupService().lookupPrincipalByName(HistoryUtil.OX_USER_NAME);
             Files.setOwner(path, oxUser);
         }
