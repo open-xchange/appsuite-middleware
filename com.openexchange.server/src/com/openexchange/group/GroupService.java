@@ -65,6 +65,11 @@ import com.openexchange.user.User;
 public interface GroupService {
 
     /**
+     * The name for the cache region holding group information.
+     */
+    public static final String CACHE_REGION_NAME = GroupStorage.CACHE_REGION_NAME;
+
+    /**
      * Creates a group.
      *
      * @param context Context.
@@ -116,7 +121,7 @@ public interface GroupService {
      * @throws OXException If group cannot be returned
      */
     Group[] getGroups(Context ctx, boolean loadMembers) throws OXException;
-    
+
     /**
      * Returns the groups with the given ids
      *
@@ -140,7 +145,7 @@ public interface GroupService {
 
     /**
      * Lists all groups in the given context
-     * 
+     *
      * @param context The context
      * @param loadMembers Whether to load member or not
      * @return The groups in the given context
@@ -150,7 +155,7 @@ public interface GroupService {
 
     /**
      * Gets all groups within the context which has been modified since the given date
-     * 
+     *
      * @param context The context
      * @param modifiedSince The boundary date
      * @return An array of groups which has been modified since the given date
@@ -160,7 +165,7 @@ public interface GroupService {
 
     /**
      * Gets all groups within the context which has been deleted since the given date
-     * 
+     *
      * @param context The context
      * @param deletedSince The boundary date
      * @return An array of groups which has been deleted since the given date
@@ -179,7 +184,7 @@ public interface GroupService {
      * @throws OXException if some problem occurs.
      */
     void update(Context context, User user, Group group, Date lastRead, boolean checkI18nNames) throws OXException;
-    
+
     /**
      * Similar to {@link #search(Context, String, boolean)} but sorts the results according to the use count.
      *
