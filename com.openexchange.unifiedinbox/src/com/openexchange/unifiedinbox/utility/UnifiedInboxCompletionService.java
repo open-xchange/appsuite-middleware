@@ -55,6 +55,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.TaskWrapper;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.threadpool.Trackable;
@@ -106,7 +107,7 @@ public final class UnifiedInboxCompletionService<V> {
     /**
      * To enqueue upon completion
      */
-    private static class QueueingTask<V> implements Task<V> {
+    private static class QueueingTask<V> implements Task<V>, TaskWrapper {
 
         private final Task<V> task;
         private final BlockingQueue<Result<V>> queue;
@@ -145,6 +146,11 @@ public final class UnifiedInboxCompletionService<V> {
                 queue.add(new Result<V>(t));
                 throw t;
             }
+        }
+
+        @Override
+        public Object getWrapped() {
+            return task;
         }
     }
 

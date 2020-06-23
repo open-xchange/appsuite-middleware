@@ -2664,21 +2664,26 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (runnable instanceof ScheduledFutureTask) {
             return getTaskName((ScheduledFutureTask<?>) runnable);
         }
-        return runnable.getClass().getName();
+        return getTaskNameFromPossiblyWrapped(runnable);
     }
 
     static String getTaskName(CustomFutureTask<?> runnable) {
-        Task<?> tsk = runnable.getTask();
-        Object task = tsk instanceof TaskWrapper ? ((TaskWrapper) tsk).getWrapped() : tsk;
-        return task.getClass().getName();
+        Task<?> task = runnable.getTask();
+        return getTaskNameFromPossiblyWrapped(task);
     }
 
     static String getTaskName(MDCProvidingRunnable runnable) {
-        return runnable.getTask().getClass().getName();
+        Runnable task = runnable.getTask();
+        return getTaskNameFromPossiblyWrapped(task);
     }
 
     static String getTaskName(ScheduledFutureTask<?> runnable) {
-        return runnable.getWrapped().getClass().getName();
+        Object wrapped = runnable.getWrapped();
+        return getTaskNameFromPossiblyWrapped(wrapped);
+    }
+
+    static String getTaskNameFromPossiblyWrapped(Object task) {
+        return task instanceof TaskWrapper ? getTaskNameFromPossiblyWrapped(((TaskWrapper) task).getWrapped()) : task.getClass().getName();
     }
 
 }
