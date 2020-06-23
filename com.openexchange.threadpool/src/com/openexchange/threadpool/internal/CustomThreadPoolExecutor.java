@@ -1778,17 +1778,17 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             if (customFutureTask.isTrackable()) {
                 activeTaskWatcher.addTask(customFutureTask.getNumber(), thread, customFutureTask.getMdc());
             }
-        } else if (r instanceof ScheduledFutureTask<?>) {
-            ((ThreadRenamer) thread).renamePrefix("OXTimer");
-            taskName = getTaskName((ScheduledFutureTask<?>) r);
         } else if (r instanceof MdcProvider) {
             // MDC map for executing thread
             final Map<String, String> mdc = ((MdcProvider) r).getMdc();
             if (null != mdc) {
                 MDC.setContextMap(mdc);
             }
+        } else if (r instanceof ScheduledFutureTask<?>) {
+            ((ThreadRenamer) thread).renamePrefix("OXTimer");
+            taskName = getTaskName((ScheduledFutureTask<?>) r);
         }
-        LOG.debug("About to execute task {} on thread {}", taskName == null ? r.getClass().getName() : taskName, thread);
+        LOG.debug("About to execute task {} on thread {}", taskName == null ? taskName(r) : taskName, thread);
         super.beforeExecute(thread, r);
     }
 
@@ -2602,6 +2602,15 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             this.mdc = mdc;
         }
 
+        /**
+         * Gets the wrapped <code>Runnable</code> instance.
+         *
+         * @return The task
+         */
+        Runnable getTask() {
+            return delegate;
+        }
+
         @Override
         public Map<String, String> getMdc() {
             return mdc;
@@ -2649,6 +2658,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (runnable instanceof CustomFutureTask) {
             return getTaskName((CustomFutureTask<?>) runnable);
         }
+        if (runnable instanceof MDCProvidingRunnable) {
+            return getTaskName((MDCProvidingRunnable) runnable);
+        }
         if (runnable instanceof ScheduledFutureTask) {
             return getTaskName((ScheduledFutureTask<?>) runnable);
         }
@@ -2661,9 +2673,12 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         return task.getClass().getName();
     }
 
+    static String getTaskName(MDCProvidingRunnable runnable) {
+        return runnable.getTask().getClass().getName();
+    }
+
     static String getTaskName(ScheduledFutureTask<?> runnable) {
-        Object task = runnable.getWrapped();
-        return task.getClass().getName();
+        return runnable.getWrapped().getClass().getName();
     }
 
 }
