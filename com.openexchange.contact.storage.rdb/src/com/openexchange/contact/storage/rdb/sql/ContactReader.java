@@ -55,6 +55,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -177,7 +178,10 @@ public class ContactReader {
             // for contacts not in (virtual) guest contact folder (id 16)
             if (notGuestContactFolderRef.hasValue()) {
                 List<Contact> notGuestContactFolder = notGuestContactFolderRef.getValue();
-                Map<Integer, Contact> map = notGuestContactFolder.stream().collect(Collectors.toMap(c -> I(c.getInternalUserId()), c -> c));
+                Map<Integer, Contact> map = new HashMap<>(notGuestContactFolder.size());
+                for (Contact c : notGuestContactFolder) {
+                    map.put(I(c.getInternalUserId()), c);
+                }
                 Map<Integer, String> addresses = UserSettingMailStorage.getInstance().getSenderAddresses(map.keySet(), getContext(), connection);
                 addresses.entrySet().forEach((entry) -> {
                     String address = entry.getValue();
