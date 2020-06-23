@@ -24,6 +24,7 @@ Assuming User1 does move operations in the following Drive folder tree:
 My files
  - Folder 1
  - Folder 2
+ - Folder 3
 
 Public files
  - Public folder 1
@@ -34,9 +35,9 @@ Shared files
     - Shared folder 1
 ```
 
-where User1 has administrative permission for folders `Folder 1` and `Folder 2` and Author permission for `Public folder 1`, `Public folder 2` and `Shared folder 1`.  
-User2 has administrative permission for folder `Shared folder 1`, Reviewer permission for `Folder 1`, Viewer permission for `Folder 2` and Author permission for `Public folder 1`.  
-And all users have viewer permission for public folders.  
+where User1 has administrative permission for folders `Folder 1`, `Folder 2` and `Folder 3` and Author permission for `Public folder 1`, `Public folder 2` and `Shared folder 1`.  
+User2 has administrative permission for folder `Shared folder 1`, Reviewer permission for `Folder 1`, Viewer permission for `Folder 2` and `Folder 3` and Author permission for `Public folder 1`.  
+And all users have viewer permission for public folders and `Folder 3`.  
 _Note_: In this scenario the public folders have to be created by a third user who granted Author permission to User1 and User2 for those folders. Apart from that the third user is not required and won't be mentioned in this scenario for simplification.
 
 ## Private folders
@@ -79,18 +80,19 @@ When moving `Folder 1` into `Public folder 2` and `com.openexchange.folderstorag
 ## Shared folders
 
 ### `com.openexchange.folderstorage.permissions.moveToShared=merge`
-When moving `Folder 1` into `Shared folder 1` and `com.openexchange.folderstorage.permissions.moveToShared` set to `merge`, `Folder 1` has following permissions after the move operation:
- * User1 keeps administrative permission for `Folder 1`
- * User2 gains administrative permission for `Folder 1`
+When moving `Folder 3` into `Shared folder 1` and `com.openexchange.folderstorage.permissions.moveToShared` set to `merge`, `Folder 3` has following permissions after the move operation:
+ * User1 keeps administrative permission for `Folder 3`
+ * User2 gains administrative permission for `Folder 3`
+ * Viewer permission for group 'AllUsers' is unchanged
 
 ### `com.openexchange.folderstorage.permissions.moveToShared=inherit`
-When moving `Public folder 1` into `Shared folder 1` and `com.openexchange.folderstorage.permissions.moveToShared` set to `inherit`, `Folder 1` has following permissions after the move operation:
- * User1 keeps Author permission for `Public folder 1`
- * User2 gains administrative permission for `Public folder 1`
+When moving `Folder 3` into `Shared folder 1` and `com.openexchange.folderstorage.permissions.moveToShared` set to `inherit`, `Folder 3` has following permissions after the move operation:
+ * User1 keeps Author permission for `Folder 3`
+ * User2 gains administrative permission for `Folder 3`
  * Viewer permission for group 'AllUsers' is dropped
 
 ### `com.openexchange.folderstorage.permissions.moveToShared=keep`
-When moving `Public folder 1` into `Shared folder 1` and `com.openexchange.folderstorage.permissions.moveToShared` set to `keep`, `Folder 1` has following permissions after the move operation:
- * User1 keeps Author permission for `Public folder 1`
- * User2 gains administrative permission for `Public folder 1`
+When moving `Folder 3` into `Shared folder 1` and `com.openexchange.folderstorage.permissions.moveToShared` set to `keep`, `Folder 3` has following permissions after the move operation:
+ * User1 keeps Author permission for `Folder 3`
+ * User2 keeps Viewer permission for `Folder 3`
  * Viewer permission for group 'AllUsers' is unchanged
