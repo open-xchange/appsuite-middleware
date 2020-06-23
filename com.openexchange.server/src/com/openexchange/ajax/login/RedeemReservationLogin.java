@@ -184,6 +184,9 @@ public class RedeemReservationLogin implements LoginRequestHandler {
 
         // Store session
         SessionUtility.rememberSession(req, new ServerSessionAdapter(session));
+        if (Boolean.parseBoolean(conf.getHttpAuthAutoLogin())) {
+            LoginServlet.writeSessionCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
+        }
         LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
 
         // Send redirect

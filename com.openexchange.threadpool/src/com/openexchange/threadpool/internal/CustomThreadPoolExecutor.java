@@ -1760,8 +1760,10 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     protected void beforeExecute(final Thread thread, final Runnable r) {
         activeCount.incrementAndGet();
         thread.setUncaughtExceptionHandler(CustomUncaughtExceptionhandler.getInstance());
+        String taskName = null;
         if (r instanceof CustomFutureTask<?>) {
             final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
+            taskName = getTaskName(customFutureTask);
             final Task<?> task = customFutureTask.getTask();
             task.setThreadName((ThreadRenamer) thread);
             task.beforeExecute(thread);
@@ -1784,8 +1786,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             }
         } else if (r instanceof ScheduledFutureTask<?>) {
             ((ThreadRenamer) thread).renamePrefix("OXTimer");
+            taskName = getTaskName((ScheduledFutureTask<?>) r);
         }
-        LOG.debug("About to execute task {} on thread {}", taskName(r), thread);
+        LOG.debug("About to execute task {} on thread {}", taskName == null ? taskName(r) : taskName, thread);
         super.beforeExecute(thread, r);
     }
 
@@ -2599,6 +2602,15 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             this.mdc = mdc;
         }
 
+        /**
+         * Gets the wrapped <code>Runnable</code> instance.
+         *
+         * @return The task
+         */
+        Runnable getTask() {
+            return delegate;
+        }
+
         @Override
         public Map<String, String> getMdc() {
             return mdc;
@@ -2637,18 +2649,41 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
             @Override
             public String toString() {
-                Object task;
-                if (runnable instanceof CustomFutureTask) {
-                    final Task<?> tsk = ((CustomFutureTask<?>) runnable).getTask();
-                    task = tsk instanceof TaskWrapper ? ((TaskWrapper) tsk).getWrapped() : tsk;
-                } else if (runnable instanceof ScheduledFutureTask) {
-                    task = ((ScheduledFutureTask<?>) runnable).getWrapped();
-                } else {
-                    task = runnable;
-                }
-                return task.getClass().getName();
+                return getTaskName(runnable);
             }
         };
+    }
+
+    static String getTaskName(Runnable runnable) {
+        if (runnable instanceof CustomFutureTask) {
+            return getTaskName((CustomFutureTask<?>) runnable);
+        }
+        if (runnable instanceof MDCProvidingRunnable) {
+            return getTaskName((MDCProvidingRunnable) runnable);
+        }
+        if (runnable instanceof ScheduledFutureTask) {
+            return getTaskName((ScheduledFutureTask<?>) runnable);
+        }
+        return getTaskNameFromPossiblyWrapped(runnable);
+    }
+
+    static String getTaskName(CustomFutureTask<?> runnable) {
+        Task<?> task = runnable.getTask();
+        return getTaskNameFromPossiblyWrapped(task);
+    }
+
+    static String getTaskName(MDCProvidingRunnable runnable) {
+        Runnable task = runnable.getTask();
+        return getTaskNameFromPossiblyWrapped(task);
+    }
+
+    static String getTaskName(ScheduledFutureTask<?> runnable) {
+        Object wrapped = runnable.getWrapped();
+        return getTaskNameFromPossiblyWrapped(wrapped);
+    }
+
+    static String getTaskNameFromPossiblyWrapped(Object task) {
+        return task instanceof TaskWrapper ? getTaskNameFromPossiblyWrapped(((TaskWrapper) task).getWrapped()) : task.getClass().getName();
     }
 
 }

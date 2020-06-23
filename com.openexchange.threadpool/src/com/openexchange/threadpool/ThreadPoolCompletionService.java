@@ -72,26 +72,35 @@ public class ThreadPoolCompletionService<V> implements CancelableCompletionServi
     /**
      * FutureTask extension to enqueue upon completion
      */
-    private final class QueueingFuture extends FutureTask<V> {
+    private final class QueueingFuture extends FutureTask<V> implements TaskWrapper {
+
+        private final Object task;
 
         QueueingFuture(final Callable<V> c) {
             super(c);
+            this.task = c;
         }
 
         QueueingFuture(final Runnable t, final V r) {
             super(t, r);
+            this.task = r;
         }
 
         @Override
         protected void done() {
             taskDone(this);
         }
+
+        @Override
+        public Object getWrapped() {
+            return task;
+        }
     }
 
     /**
      * FutureTask extension to enqueue upon completion
      */
-    private final class QueueingTaskFuture extends FutureTask<V> {
+    private final class QueueingTaskFuture extends FutureTask<V> implements TaskWrapper {
 
         private final Task<V> t;
 
@@ -119,6 +128,11 @@ public class ThreadPoolCompletionService<V> implements CancelableCompletionServi
         }
 
         @Override
+        public Object getWrapped() {
+            return t;
+        }
+
+        @Override
         protected void done() {
             taskDone(this);
         }
@@ -138,15 +152,7 @@ public class ThreadPoolCompletionService<V> implements CancelableCompletionServi
      * @throws NullPointerException If threadPoolService is <tt>null</tt>
      */
     public ThreadPoolCompletionService(final ThreadPoolService threadPoolService) {
-        super();
-        if (threadPoolService == null) {
-            throw new NullPointerException();
-        }
-        this.threadPoolService = threadPoolService;
-        this.completionQueue = new LinkedBlockingQueue<Future<V>>();
-        numberOfSubmits = new AtomicInteger(0);
-        behavior = CallerRunsBehavior.getInstance();
-        submittedFutures = new LinkedList<Future<V>>();
+        this(threadPoolService, new LinkedBlockingQueue<Future<V>>(), CallerRunsBehavior.getInstance());
     }
 
     /**

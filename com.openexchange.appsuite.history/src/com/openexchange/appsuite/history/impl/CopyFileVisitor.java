@@ -108,11 +108,13 @@ public class CopyFileVisitor extends SimpleFileVisitor<Path> {
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         Path newFile = target.resolve(source.relativize(file));
         copy(file, newFile);
+        HistoryUtil.adjustPathOwner(newFile);
         return FileVisitResult.CONTINUE;
     }
 
     @Override
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+        HistoryUtil.adjustPathOwner(dir);
         return FileVisitResult.CONTINUE;
     }
 
