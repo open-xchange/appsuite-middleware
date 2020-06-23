@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
@@ -355,13 +356,17 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
 
             final ResellerAdmin dbadm = oxresell.getData(new ResellerAdmin[] { adm })[0];
-            final ResellerAdmin parent;
+            final Optional<ResellerAdmin> parent;
             if (isMaster) {
-                parent = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(i(dbadm.getParentId())) })[0];
+                if (dbadm.getParentId() != null && dbadm.getParentId().intValue() > 0) {
+                    parent = Optional.of(oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(i(dbadm.getParentId())) })[0]);
+                } else {
+                    parent = Optional.empty();
+                }
             } else {
-                parent = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0];
-                if (!dbadm.getParentId().equals(parent.getId())) {
-                    throw new OXResellerException(Code.SUBADMIN_DOES_NOT_BELONG_TO_SUBADMIN, dbadm.getName(), parent.getName());
+                parent = Optional.of(oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0]);
+                if (!dbadm.getParentId().equals(parent.get().getId())) {
+                    throw new OXResellerException(Code.SUBADMIN_DOES_NOT_BELONG_TO_SUBADMIN, dbadm.getName(), parent.get().getName());
                 }
             }
 
@@ -369,7 +374,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 throw new OXResellerException(Code.UNABLE_TO_DELETE, dbadm.getId().toString());
             }
 
-            dbadm.setParentName(parent.getName());
+            dbadm.setParentName(parent.isPresent() ? parent.get().getName() : null);
 
             final ArrayList<OXResellerPluginInterface> interfacelist = new ArrayList<OXResellerPluginInterface>();
 
