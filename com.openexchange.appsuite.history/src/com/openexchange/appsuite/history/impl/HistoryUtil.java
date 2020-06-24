@@ -152,9 +152,7 @@ public class HistoryUtil {
 
         @SuppressWarnings("null") CopyFileVisitor visitor = new CopyFileVisitor(from.toPath(), to.toPath());
         Files.walkFileTree(from.toPath(), visitor);
-        if (!from.delete()) {
-            LOG.error("Unable to delete current folder {}", from.getAbsolutePath());
-        }
+        FileUtils.deleteDirectory(from);
         adjustPathOwner(to.toPath());
         LOG.info("Files moved successfully (target: {}).", to.getAbsolutePath());
     }
