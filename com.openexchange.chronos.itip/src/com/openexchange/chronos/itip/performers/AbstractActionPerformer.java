@@ -185,7 +185,13 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
                 f = (p) -> generator.generateRefreshMailFor(p);
                 break;
             default:
-                f = (p) -> generator.generateUpdateMailFor(p);
+                recipients = generator.getRecipients();
+                for (final NotificationParticipant p : recipients) {
+                    final NotificationMail mail = generator.generateUpdateMailFor(p);
+                    if (mail != null) {
+                        sender.sendMail(mail, session, principal, null);
+                    }
+                }
         }
         /*
          * For certain operations only the originator needs to get a response
