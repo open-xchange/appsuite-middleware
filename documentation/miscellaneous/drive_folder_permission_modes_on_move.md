@@ -87,12 +87,12 @@ When moving `Folder 3` into `Shared folder 1` and `com.openexchange.folderstorag
 
 ### `com.openexchange.folderstorage.permissions.moveToShared=inherit`
 When moving `Folder 3` into `Shared folder 1` and `com.openexchange.folderstorage.permissions.moveToShared` set to `inherit`, `Folder 3` has following permissions after the move operation:
- * User1 keeps Author permission for `Folder 3`
+ * User1 keeps administrative permission for `Folder 3`
  * User2 gains administrative permission for `Folder 3`
  * Viewer permission for group 'AllUsers' is dropped
 
 ### `com.openexchange.folderstorage.permissions.moveToShared=keep`
 When moving `Folder 3` into `Shared folder 1` and `com.openexchange.folderstorage.permissions.moveToShared` set to `keep`, `Folder 3` has following permissions after the move operation:
- * User1 keeps Author permission for `Folder 3`
+ * User1 keeps administrative permission for `Folder 3`
  * User2 keeps Viewer permission for `Folder 3`
  * Viewer permission for group 'AllUsers' is unchanged
