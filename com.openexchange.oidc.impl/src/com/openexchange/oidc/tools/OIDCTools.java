@@ -140,7 +140,10 @@ public class OIDCTools {
 
     public static final String DEFAULT_BACKEND_PATH = "oidc";
 
-    public static final String PARAM_DEEP_LINK = "hash";
+    public static final String PARAM_DEEP_LINK = "uriFragment";
+
+    @Deprecated
+    public static final String PARAM_DEEP_LINK_ALT = "hash";
 
     public static final String PARAM_SHARD = "shard";
 
@@ -393,6 +396,21 @@ public class OIDCTools {
     public static String getRedirectPathPrefix() {
         DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
         return prefixService.getPrefix();
+    }
+
+    /**
+     * Gets a deep link (URI fragment hash to be appended to final UI redirect) from
+     * the client request.
+     *
+     * @param request The request
+     * @return The value to preserve or <code>null</code>
+     */
+    public static String getDeepLink(HttpServletRequest request) {
+        String value = request.getParameter(PARAM_DEEP_LINK);
+        if (value == null) {
+            value = request.getParameter(PARAM_DEEP_LINK_ALT);
+        }
+        return value;
     }
 
     /**
