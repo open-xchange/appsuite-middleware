@@ -128,9 +128,9 @@ public interface MailMessageHandler {
     /**
      * Handle message's disposition notification
      *
-     * @param seen TODO
+     * @param acknowledged TODO
      */
-    public boolean handleDispositionNotification(InternetAddress dispositionNotificationTo, boolean seen) throws OXException;
+    public boolean handleDispositionNotification(InternetAddress dispositionNotificationTo, boolean acknowledged) throws OXException;
 
     /**
      * Handle content id

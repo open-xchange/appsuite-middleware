@@ -292,7 +292,7 @@ public class DumperMessageHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws OXException {
+    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean acknowledged) throws OXException {
         if (bodyOnly) {
             return true;
         }
