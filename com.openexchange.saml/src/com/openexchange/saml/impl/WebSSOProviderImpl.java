@@ -220,7 +220,12 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         requestInfo.setDomainName(domainName);
         requestInfo.setLoginPath(httpRequest.getParameter("loginPath"));
         requestInfo.setClientID(httpRequest.getParameter("client"));
-        requestInfo.setUriFragment(httpRequest.getParameter("hash"));
+        String uriFragment = httpRequest.getParameter(SAMLLoginTools.PARAM_URI_FRAGMENT);
+        if (uriFragment == null) {
+            // fallback for deprecated parameter name
+            uriFragment = httpRequest.getParameter("hash");
+        }
+        requestInfo.setUriFragment(uriFragment);
 
         String relayState = stateManagement.addAuthnRequestInfo(requestInfo, AUTHN_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
         try {
