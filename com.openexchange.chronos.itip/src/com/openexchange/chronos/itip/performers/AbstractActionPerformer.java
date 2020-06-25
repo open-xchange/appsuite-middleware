@@ -65,7 +65,6 @@ import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipActionPerformer;
 import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.itip.ITipChange.Type;
-import com.openexchange.chronos.itip.ITipExceptions;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
@@ -186,7 +185,13 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
                 f = (p) -> generator.generateRefreshMailFor(p);
                 break;
             default:
-                throw ITipExceptions.UNKNOWN_METHOD.create(action.toString());
+                recipients = generator.getRecipients();
+                for (final NotificationParticipant p : recipients) {
+                    final NotificationMail mail = generator.generateUpdateMailFor(p);
+                    if (mail != null) {
+                        sender.sendMail(mail, session, principal, null);
+                    }
+                }
         }
         /*
          * For certain operations only the originator needs to get a response

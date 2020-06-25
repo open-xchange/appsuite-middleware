@@ -1665,9 +1665,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws OXException {
+    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean acknowledged) throws OXException {
         try {
-            if (!seen) {
+            if (!acknowledged) {
                 jsonObject.put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(), dispositionNotificationTo.toUnicodeString());
             }
             return true;

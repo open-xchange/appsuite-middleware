@@ -267,7 +267,7 @@ public final class ImageMessageHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws OXException {
+    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean acknowledged) throws OXException {
         return true;
     }
 
