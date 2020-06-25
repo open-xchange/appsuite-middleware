@@ -346,6 +346,8 @@ public abstract class FilestoreDataMover implements Callable<Void> {
         }
     }
 
+    private static final int LOG_THRESHOLD = 100;
+
     /**
      * Copies specified files from source storage to destination storage.
      *
@@ -363,7 +365,10 @@ public abstract class FilestoreDataMover implements Callable<Void> {
         }
 
         final String threadName = Thread.currentThread().getName();
+        final String moverName = getClass().getSimpleName();
         final Integer size = Integer.valueOf(files.size());
+
+        LOGGER.info("{} is going to copy {} files from source \"{}\" to destination \"{}\" (with thread \"{}\").", moverName, size, srcFullUri, dstFullUri, threadName);
 
         if ("file".equalsIgnoreCase(srcFullUri.getScheme()) && "file".equalsIgnoreCase(dstFullUri.getScheme())) {
             // File-wise move possible
@@ -374,19 +379,19 @@ public abstract class FilestoreDataMover implements Callable<Void> {
 
                 int i = 1;
                 for (String file : files) {
-                    File toCopy = new File(srcParent, file);
-                    long length = toCopy.length();
-                    FileUtils.moveFile(toCopy, new File(dstParent, file));
+                    File toMove = new File(srcParent, file);
+                    long length = toMove.length();
+                    FileUtils.moveFile(toMove, new File(dstParent, file));
 
-                    if ((i % 10) == 0) {
-                        LOGGER.info("{} copied {} files of {} in total", threadName, Integer.valueOf(i), size);
+                    if ((i % LOG_THRESHOLD) == 0) {
+                        LOGGER.info("{} moved {} files of {} in total (with thread \"{}\").", moverName, Integer.valueOf(i), size, threadName);
                     }
                     i++;
 
                     totalSize += length;
                 }
 
-                LOGGER.info("{} copied {} files.", threadName, size);
+                LOGGER.info("{} moved {} files (with thread \"{}\").", moverName, size, threadName);
 
                 Reverter reverter = new Reverter() {
 
@@ -400,16 +405,16 @@ public abstract class FilestoreDataMover implements Callable<Void> {
                                 FileUtils.moveFile(toRevert, new File(srcParent, file));
 
                                 if ((i % 10) == 0) {
-                                    LOGGER.info("{} reverted {} files of {} in total", threadName, Integer.valueOf(i), size);
+                                    LOGGER.info("{} reverted {} files of {} in total (with thread \"{}\")", moverName, Integer.valueOf(i), size, threadName);
                                 }
                                 i++;
                                 numReverted++;
                             } catch (IOException e) {
-                                LOGGER.error("{} failed to revert file {}", threadName, toRevert.getPath(), e);
+                                LOGGER.error("{} failed to revert file {} (with thread \"{}\")", moverName, toRevert.getPath(), threadName, e);
                             }
                         }
 
-                        LOGGER.info("{} reverted {} files.", threadName, Integer.valueOf(numReverted));
+                        LOGGER.info("{} reverted {} files (with thread \"{}\").", moverName, Integer.valueOf(numReverted), threadName);
                     }
                 };
 
@@ -432,8 +437,8 @@ public abstract class FilestoreDataMover implements Callable<Void> {
                     if (null != newFile) {
                         prevFileName2newFileName.put(file, newFile);
 
-                        if ((i % 10) == 0) {
-                            LOGGER.info("{} copied {} files of {} in total", threadName, Integer.valueOf(i), size);
+                        if ((i % LOG_THRESHOLD) == 0) {
+                            LOGGER.info("{} copied {} files of {} in total (with thread \"{}\")", moverName, Integer.valueOf(i), size, threadName);
                         }
                         i++;
                     }
@@ -442,7 +447,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
                 }
             }
 
-            LOGGER.info("{} copied {} files.", threadName, size);
+            LOGGER.info("{} copied {} files (with thread \"{}\").", moverName, size, threadName);
 
             Reverter reverter = new Reverter() {
 
@@ -457,7 +462,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
                             try {
                                 dstStorage.deleteFile(copiedFile);
                             } catch (OXException e) {
-                                LOGGER.error("{} failed to revert file {}", threadName, copiedFile, e.getCause() == null ? e : e.getCause());
+                                LOGGER.error("{} failed to revert file {} (with thread \"{}\")", moverName, copiedFile, threadName, e.getCause() == null ? e : e.getCause());
                             }
                         }
                     }
@@ -527,18 +532,22 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @throws SQLException If an SQL error occurs
      */
     protected Set<String> determineFileLocationsFor(int userId, int contextId) throws OXException, SQLException {
-        Set<String> srcFiles = new LinkedHashSet<String>();
+        Set<String> srcFiles = null;
         {
             Connection con = Database.getNoTimeout(contextId, true);
             try {
                 for (FileLocationHandler updater : FilestoreLocationUpdaterRegistry.getInstance().getServices()) {
-                    srcFiles.addAll(updater.determineFileLocationsFor(userId, contextId, con));
+                    if (srcFiles == null) {
+                        srcFiles = new LinkedHashSet<String>(updater.determineFileLocationsFor(userId, contextId, con));
+                    } else {
+                        srcFiles.addAll(updater.determineFileLocationsFor(userId, contextId, con));
+                    }
                 }
             } finally {
                 Database.backNoTimeout(contextId, false, con);
             }
         }
-        return srcFiles;
+        return srcFiles == null ? Collections.emptySet() : srcFiles;
     }
 
     /**

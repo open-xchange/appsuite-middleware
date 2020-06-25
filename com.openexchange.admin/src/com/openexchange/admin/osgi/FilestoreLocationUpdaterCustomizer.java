@@ -74,20 +74,21 @@ public class FilestoreLocationUpdaterCustomizer implements ServiceTrackerCustomi
     }
 
     @Override
-    public FileLocationHandler addingService(ServiceReference<FileLocationHandler> arg0) {
-        FileLocationHandler service = context.getService(arg0);
+    public FileLocationHandler addingService(ServiceReference<FileLocationHandler> serviceReference) {
+        FileLocationHandler service = context.getService(serviceReference);
         FilestoreLocationUpdaterRegistry.getInstance().addService(service);
         return service;
     }
 
     @Override
-    public void modifiedService(ServiceReference<FileLocationHandler> arg0, FileLocationHandler arg1) {
+    public void modifiedService(ServiceReference<FileLocationHandler> serviceReference, FileLocationHandler service) {
         // nothing to do
     }
 
     @Override
-    public void removedService(ServiceReference<FileLocationHandler> arg0, FileLocationHandler arg1) {
-        context.ungetService(arg0);
+    public void removedService(ServiceReference<FileLocationHandler> serviceReference, FileLocationHandler service) {
+        FilestoreLocationUpdaterRegistry.getInstance().removeService(service);
+        context.ungetService(serviceReference);
     }
 
 }
