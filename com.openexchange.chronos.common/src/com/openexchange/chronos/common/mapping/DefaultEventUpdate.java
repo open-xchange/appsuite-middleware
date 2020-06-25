@@ -63,7 +63,6 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
-import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
@@ -235,19 +234,19 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
     protected DefaultEventUpdate(Event originalEvent, Event updatedEvent, EventField[] ignoredEventFields, AttendeeField[] ignoredAttendeeFields, boolean considerUnset, boolean ignoreDefaults) {
         super(originalEvent, updatedEvent, getDifferentFields(EventMapper.getInstance(), originalEvent, updatedEvent, considerUnset, ignoreDefaults, 
             extendIgnoredFields(ignoredEventFields, EventField.ALARMS, EventField.ATTACHMENTS, EventField.ATTENDEES)));
-        if (considerCollectionUpdate(EventField.ALARMS, originalEvent, updatedEvent, ignoredEventFields, considerUnset)) {
+        if (considerCollectionUpdate(EventField.ALARMS, ignoredEventFields)) {
             alarmUpdates = AlarmUtils.getAlarmUpdates(
                 null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
         } else {
             alarmUpdates = AbstractCollectionUpdate.emptyUpdate();
         }
-        if (considerCollectionUpdate(EventField.ATTENDEES, originalEvent, updatedEvent, ignoredEventFields, considerUnset)) {
+        if (considerCollectionUpdate(EventField.ATTENDEES, ignoredEventFields)) {
             attendeeUpdates = CalendarUtils.getAttendeeUpdates(
                 null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null, considerUnset, ignoredAttendeeFields);
         } else {
             attendeeUpdates = AbstractCollectionUpdate.emptyUpdate();
         }
-        if (considerCollectionUpdate(EventField.ATTACHMENTS, originalEvent, updatedEvent, ignoredEventFields, considerUnset)) {
+        if (considerCollectionUpdate(EventField.ATTACHMENTS, ignoredEventFields)) {
             attachmentUpdates = CalendarUtils.getAttachmentUpdates(
                 null != originalEvent ? originalEvent.getAttachments() : null, null != updatedEvent ? updatedEvent.getAttachments() : null);
         } else {
@@ -265,16 +264,12 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
         return Arrays.add(ignoredFields, additionals);
     }
     
-    private static boolean considerCollectionUpdate(EventField field, Event original, Event update, EventField[] ignoredFields, boolean considerUnset) {
+    private static boolean considerCollectionUpdate(EventField field, EventField[] ignoredFields) {
         if (null == ignoredFields || false == Arrays.contains(ignoredFields, field)) {
-            Mapping<? extends Object, Event> mapping = EventMapper.getInstance().opt(field);
-            if (null != mapping && null != update && mapping.isSet(update) && 
-                (considerUnset || null != original && mapping.isSet(original))) {
-                return true;
-            }
+            return true;
         }
         return false;
-    }   
+    } 
 
     @Override
     public CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates() {
