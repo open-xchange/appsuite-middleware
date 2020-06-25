@@ -345,6 +345,10 @@ public final class LogProperties {
          */
         FILESTORE_SPOOL("com.openexchange.filestore.spool"),
         /**
+         * com.openexchange.filestore.uri
+         */
+        FILESTORE_URI("com.openexchange.filestore.uri"),
+        /**
          * com.openexchange.rt2.client.uid
          */
         RT2_CLIENT_UID("com.openexchange.rt2.client.uid"),
@@ -382,7 +386,6 @@ public final class LogProperties {
          * A special log property that controls whether regular untagged IMAP responses are supposed to be discarded
          */
         IMAP_DISCARD_RESPONSES("mail.imap.discardresponses"),
-
         /**
          * com.openexchange.provisioning.adminName
          */
