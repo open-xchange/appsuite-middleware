@@ -74,9 +74,9 @@ public class SelfProtectionFactory {
 
     static final org.slf4j.Logger LOG = LoggerFactory.getLogger(SelfProtectionFactory.class);
 
-    private static final String PROPERTY_EVENT_LIMIT = "com.openexchange.calendar.maxEventResults";
-    private static final String PROPERTY_ATTENDEE_LIMIT = "com.openexchange.calendar.maxAttendeesPerEvent";
-    private static final String PROPERTY_ALARM_LIMIT = "com.openexchange.calendar.maxAlarmsPerEvent";
+    public static final Property PROPERTY_EVENT_LIMIT = DefaultProperty.valueOf("com.openexchange.calendar.maxEventResults", I(1000));
+    public static final Property PROPERTY_ATTENDEE_LIMIT = DefaultProperty.valueOf("com.openexchange.calendar.maxAttendeesPerEvent", I(1000));
+    public static final Property PROPERTY_ALARM_LIMIT = DefaultProperty.valueOf("com.openexchange.calendar.maxAlarmsPerEvent", I(100));
 
     /**
      * Initializes a new {@link SelfProtectionFactory}.
@@ -110,14 +110,9 @@ public class SelfProtectionFactory {
                 return;
             }
 
-            Property prop = DefaultProperty.valueOf(PROPERTY_EVENT_LIMIT, I(1000));
-            eventLimit = leanConfigurationService.getIntProperty(prop);
-
-            prop = DefaultProperty.valueOf(PROPERTY_ATTENDEE_LIMIT, I(1000));
-            attendeeLimit = leanConfigurationService.getIntProperty(prop);
-
-            prop = DefaultProperty.valueOf(PROPERTY_ALARM_LIMIT, I(100));
-            alarmLimit = leanConfigurationService.getIntProperty(prop);
+            eventLimit = leanConfigurationService.getIntProperty(PROPERTY_EVENT_LIMIT);
+            attendeeLimit = leanConfigurationService.getIntProperty(PROPERTY_ATTENDEE_LIMIT);
+            alarmLimit = leanConfigurationService.getIntProperty(PROPERTY_ALARM_LIMIT);
         }
 
         /**
