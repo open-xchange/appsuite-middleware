@@ -58,6 +58,80 @@ While we tried to keep breaking changes as small as possible, the new approach a
 Basically the output of the `/metrics` endpoint at runtime is the reference of available metrics according to the actual workloads served by that node. However, there are some important and noteworthy metrics that should be considered to be monitored in any case. These are briefly listed below.
 
 
+## Health and Version Information
+
+Some useful parts of the `/health` output (see also [Health Checks](./01_health_checks.html)) are mirrored to the Prometheus output for convenience:
+
+```bash
+# HELP appsuite_health_status Application health status
+# TYPE appsuite_health_status gauge
+appsuite_health_status{status="DOWN",} 0.0
+appsuite_health_status{status="UP",} 1.0
+# HELP appsuite_version_info App Suite version
+# TYPE appsuite_version_info gauge
+appsuite_version_info{build_date="2020-06-15",server_version="7.10.4-Rev1",} 1.0
+```
+
+
+## Process and JVM Metrics
+
+Crucial process and Java Virtual Machine related metrics are exposed to monitor application uptime, memory (heap and non-heap), threads and garbage collection.
+
+
+### Uptime and JVM Info
+
+```bash
+# HELP process_uptime_seconds The uptime of the Java virtual machine
+# TYPE process_uptime_seconds gauge
+process_uptime_seconds 102.111
+# HELP process_start_time_seconds Start time of the process since unix epoch.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.593071293529E9
+# HELP jvm_info JVM version info
+# TYPE jvm_info gauge
+jvm_info{runtime="OpenJDK Runtime Environment",vendor="Oracle Corporation",version="1.8.0_192-b12",} 1.0
+```
+
+
+### Memory and Threads
+
+Memory metrics are distiguished by `committed`, `used` and `max` bytes, exposed per area (`heap` or `nonheap`) and memory region (e.g. `Metaspace`, `CMS Old Gen`, etc. Tag: `id`). Native memory buffers are also monitored and distinguished by `direct` and `mapped` buffers. For breviety the output example is shortened, grep for `jvm_memory` or `jvm_buffer` to get the full picture of a running JVM.
+
+```bash
+# HELP jvm_memory_committed_bytes The amount of memory in bytes that is committed for the Java virtual machine to use
+# TYPE jvm_memory_committed_bytes gauge
+jvm_memory_committed_bytes{area="heap",id="CMS Old Gen",} 2.01326592E8
+# HELP jvm_buffer_memory_used_bytes An estimate of the memory that the Java virtual machine is using for this buffer pool
+# TYPE jvm_buffer_memory_used_bytes gauge
+jvm_buffer_memory_used_bytes{id="direct",} 1639545.0
+jvm_buffer_memory_used_bytes{id="mapped",} 0.0
+```
+
+To monitor garbage collection activity, a summary per garbage collector is exposed:
+
+```bash
+# HELP jvm_gc_collection_seconds Time spent in a given JVM garbage collector in seconds.
+# TYPE jvm_gc_collection_seconds summary
+jvm_gc_collection_seconds_count{gc="ConcurrentMarkSweep",} 3.0
+jvm_gc_collection_seconds_sum{gc="ConcurrentMarkSweep",} 0.068
+```
+
+Threads can be counted by state (runnable, blocked, waiting, etc.) but also aggregated counts are available:
+
+```
+# HELP jvm_threads_states_threads The current number of threads having NEW state
+# TYPE jvm_threads_states_threads gauge
+jvm_threads_states_threads{state="runnable",} 23.0
+[...]
+# HELP jvm_threads_peak_threads The peak live thread count since the Java virtual machine started or peak was reset
+# TYPE jvm_threads_peak_threads gauge
+jvm_threads_peak_threads 117.0
+# HELP jvm_threads_live_threads The current number of live threads including both daemon and non-daemon threads
+# TYPE jvm_threads_live_threads gauge
+jvm_threads_live_threads 104.0
+```
+
+
 ## API Request Metrics
 
 All App Suite APIs (HTTP API, WebDAV, SOAP, REST APIs) have been equipped with RED (Rate / Errors / Duration) metrics, so you can monitor request rates, response latencies (average and quantiles) and success-to-failure rates. You can find more on that approach in [The RED Method](https://grafana.com/files/grafanacon_eu_2018/Tom_Wilkie_GrafanaCon_EU_2018.pdf).

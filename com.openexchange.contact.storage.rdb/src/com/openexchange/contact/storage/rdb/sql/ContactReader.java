@@ -217,7 +217,7 @@ public class ContactReader {
 
                 //TODO: Guests do not have mail settings
                 if (contact.getParentFolderID() != GUEST_CONTACT_FOLDER_ID && senderSource.equalsIgnoreCase("defaultSenderAddress")) {
-                    Optional<String> optionalAddress = UserSettingMailStorage.getInstance().getSenderAddress(contact.getInternalUserId(), context, connection);
+                    Optional<String> optionalAddress = UserSettingMailStorage.getInstance().getSenderAddress(contact.getInternalUserId(), getContext(), connection);
                     String defaultSendAddress = optionalAddress.orElse(null);
                     if (Strings.isNotEmpty(defaultSendAddress)) {
                         contact.setEmail1(defaultSendAddress);

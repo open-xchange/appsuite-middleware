@@ -98,7 +98,9 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
     @Override
     @After
     public void tearDown() throws Exception {
-        eventManager2.cleanUp();
+        if (null != eventManager2) {
+            eventManager2.cleanUp();
+        }
         super.tearDown();
     }
 

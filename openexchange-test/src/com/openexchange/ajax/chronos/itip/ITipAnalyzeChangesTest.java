@@ -57,6 +57,7 @@ import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.prepareJsonForFileUpload;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
 import static com.openexchange.java.Autoboxing.i;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -82,6 +83,7 @@ import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.ActionResponse;
 import com.openexchange.testing.httpclient.models.AnalysisChange;
 import com.openexchange.testing.httpclient.models.AnalysisChangeCurrentEvent;
 import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
@@ -302,7 +304,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
     }
 
     @Test
-    public void testAddAttachment() throws Exception {
+    public void testAddAndRemoveAttachment() throws Exception {
         /*
          * Prepare attachment and update it
          */
@@ -344,6 +346,33 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         assertEquals("image/jpeg", attachment.getFmtType());
         byte[] attachmentData = eventManagerC2.getAttachment(eventData.getId(), i(attachment.getManagedId()),  eventData.getFolder());
         assertNotNull(attachmentData);
+        
+        /*
+         * Remove attachment as organizer
+         */
+        EventData deltaEvent = prepareDeltaEvent(createdEvent);
+        deltaEvent.setAttachments(Collections.emptyList());
+        updateEventAsOrganizer(deltaEvent);
+        
+        /*
+         * Lookup that event has been removed
+         */
+        EventData updated = eventManager.getEvent(createdEvent.getFolder(), createdEvent.getId());
+        assertThat("Should not contain attachments", updated.getAttachments(), empty());
+        
+        /*
+         * Receive update as attendee and accept changes
+         */
+        MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
+        rememberMail(apiClientC2, iMip);
+        analyzeResponse = analyze(apiClientC2, iMip);
+        analyze(analyzeResponse, CustomConsumers.ALL);
+        change = assertSingleChange(analyzeResponse);
+        assertSingleDescription(change, "The attachment <i>"+ asset.getFilename() + "</i> was removed");
+        ActionResponse actionResponse = update(apiClientC2, constructBody(iMip));
+        updated = actionResponse.getData().get(0);
+        updated = eventManagerC2.getEvent(updated.getFolder(), updated.getId());
+        assertThat("Should not contain attachments", updated.getAttachments(), empty());
     }
 
     @Test

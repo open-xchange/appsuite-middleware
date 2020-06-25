@@ -73,6 +73,7 @@ import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.owncloud.osgi.Services;
+import com.openexchange.file.storage.owncloud.rest.OCCapabilities;
 import com.openexchange.file.storage.owncloud.rest.OwnCloudRestClient;
 import com.openexchange.file.storage.webdav.AbstractWebDAVAccountAccess;
 import com.openexchange.file.storage.webdav.AbstractWebDAVFileAccess;
@@ -129,7 +130,12 @@ public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
                     }
                 }
                 try {
-                    return B(restClient.getCapabilities().supportsVersioning());
+                    if (restClient == null) {
+                        LOG.error("Missing rest client");
+                        return Boolean.FALSE;
+                    }
+                    OCCapabilities capabilities = restClient.getCapabilities();
+                    return capabilities == null ? Boolean.FALSE : B(capabilities.supportsVersioning());
                 } catch (OXException e) {
                     LOG.error(e.getMessage(), e);
                     return Boolean.FALSE;

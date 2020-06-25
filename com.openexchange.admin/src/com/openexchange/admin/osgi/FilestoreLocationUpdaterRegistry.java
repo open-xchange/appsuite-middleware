@@ -97,6 +97,17 @@ public class FilestoreLocationUpdaterRegistry {
     }
 
     /**
+     * Removes specified location handler.
+     *
+     * @param locationhandler The location handler to remove
+     */
+    public void removeService(FileLocationHandler locationhandler) {
+        if (null != locationhandler) {
+            services.remove(locationhandler);
+        }
+    }
+
+    /**
      * Gets the currently available location handlers.
      *
      * @return The location handlers

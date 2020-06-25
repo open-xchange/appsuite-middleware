@@ -54,8 +54,8 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.recurrence.service.RecurrenceConfig;
 import com.openexchange.chronos.recurrence.service.RecurrenceServiceImpl;
 import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -71,13 +71,13 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { LeanConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.chronos.recurrence\"");
-        RecurrenceConfig recurrenceConfig = new RecurrenceConfig(getService(ConfigurationService.class));
+        RecurrenceConfig recurrenceConfig = new RecurrenceConfig(getServiceSafe(LeanConfigurationService.class));
         registerService(Reloadable.class, recurrenceConfig);
         registerService(RecurrenceService.class, new RecurrenceServiceImpl(recurrenceConfig));
     }

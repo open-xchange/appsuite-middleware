@@ -54,6 +54,7 @@ import static com.openexchange.caldav.Tools.getSignificantEvents;
 import static com.openexchange.dav.DAVProtocol.protocolException;
 import static com.openexchange.folderstorage.CalendarFolderConverter.optCalendarProvider;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -79,11 +80,13 @@ import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.UpdatesResult;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.mixins.CalendarDescription;
 import com.openexchange.dav.mixins.ScheduleCalendarTransp;
@@ -382,12 +385,11 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
     }
 
     int getMaxResults() {
-        int defaultValue = 500;
         try {
-            return Integer.parseInt(caldavFactory.getConfigValue("com.openexchange.calendar.maxEventResults", String.valueOf(defaultValue)));
-        } catch (NumberFormatException | OXException e) {
-            LOG.warn("Error reading value for \"com.openexchange.calendar.maxEventResults\", falling back to {}.", I(defaultValue), e);
-            return defaultValue;
+            return caldavFactory.requireService(LeanConfigurationService.class).getIntProperty(SelfProtectionFactory.PROPERTY_EVENT_LIMIT);
+        } catch (OXException e) {
+            LOG.warn("Missing LeanConfigurationService. Falling back to default value", e);
+            return i((Integer) SelfProtectionFactory.PROPERTY_EVENT_LIMIT.getDefaultValue());
         }
     }
 

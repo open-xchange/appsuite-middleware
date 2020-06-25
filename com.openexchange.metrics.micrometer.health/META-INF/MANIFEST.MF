@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Health Metrics
+Bundle-SymbolicName: com.openexchange.metrics.micrometer.health
+Bundle-Version: 7.10.4
+Bundle-Activator: com.openexchange.metrics.micrometer.health.osgi.HealthMetricsActivator
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: com.openexchange.metrics.micrometer.health
+Import-Package: com.openexchange.annotation,
+ com.openexchange.exception,
+ com.openexchange.health,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.version,
+ io.micrometer.core.instrument,
+ io.micrometer.core.instrument.composite,
+ org.osgi.framework
+Bundle-ActivationPolicy: lazy

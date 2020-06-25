@@ -231,9 +231,9 @@ public abstract class AbstractITipAction implements AJAXActionService {
         if (ITipActionFactory.ANALYZE.equals(requestData.getAction())) {
             return null;
         }
-        CalendarSession calendarSession = Utils.initCalendarSession(services, session);
-        ImportedCalendar calendar = getCalendar(requestData, calendarSession);
         if (false == isLegacyScheduling()) {
+            CalendarSession calendarSession = Utils.initCalendarSession(services, session);
+            ImportedCalendar calendar = getCalendar(requestData, calendarSession);
             for (IncomingSchedulingAction action : schedulingActions) {
                 if (action.canPerform(calendar)) {
                     return action.perform(requestData, calendar, calendarSession, Utils.getTimeZone(requestData, session));
