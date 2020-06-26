@@ -1,3 +1,9 @@
+open-xchange-cassandra (7.10.3-15) stable; urgency=medium
+
+  * skip to 7.10.3-15
+
+ -- Ioannis Chouklis <ioannis.chouklis@open-xchange.com>  Fri, 26 Jun 2020 17:32:35 +0200
+
 open-xchange-cassandra (7.10.3-7) stable; urgency=medium
 
   * Build for patch 2020-03-02 (5623)

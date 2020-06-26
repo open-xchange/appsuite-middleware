@@ -1,3 +1,9 @@
+open-xchange-mobile-config (7.10.3-15) stable; urgency=medium
+
+  * skip to 7.10.3-15
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 26 Jun 2020 17:32:53 +0200
+
 open-xchange-mobile-config (7.10.3-7) stable; urgency=medium
 
   * Build for patch 2020-03-02 (5623)

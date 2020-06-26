@@ -1,3 +1,9 @@
+open-xchange-mail-categories (7.10.3-15) stable; urgency=medium
+
+  * skip to 7.10.3-15
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Fri, 26 Jun 2020 17:32:51 +0200
+
 open-xchange-mail-categories (7.10.3-7) stable; urgency=medium
 
   * Build for patch 2020-03-02 (5623)

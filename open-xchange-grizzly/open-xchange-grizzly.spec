@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 15
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -97,6 +97,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/grizzly.properties
 
 %changelog
+* Fri Jun 26 2020 Marc Arens <marc.arens@open-xchange.com>
+skip to 7.10.3-15
 * Fri Feb 28 2020 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2020-03-02 (5623)
 * Wed Feb 12 2020 Marc Arens <marc.arens@open-xchange.com>
