@@ -17,7 +17,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:        @OXVERSION@
-%define         ox_release 15
+%define         ox_release 16
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -75,6 +75,8 @@ perl -pi -e 's;(^.*?)\s+(.*/(twitter)\.properties)$;$1 %%%attr(640,root,open-xch
 %dir /opt/open-xchange/etc/
 
 %changelog
+* Fri Jun 26 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-07-02 (5792)
 * Fri Jun 26 2020 Marcus Klein <marcus.klein@open-xchange.com>
 skip to 7.10.3-15
 * Fri Feb 28 2020 Marcus Klein <marcus.klein@open-xchange.com>

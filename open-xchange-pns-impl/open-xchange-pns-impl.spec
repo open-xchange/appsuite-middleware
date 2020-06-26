@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 15
+%define        ox_release 16
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -61,6 +61,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/etc/pns-wns-options-defaults.yml
 
 %changelog
+* Fri Jun 26 2020 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2020-07-02 (5792)
 * Fri Jun 26 2020 Thorben Betten <thorben.betten@open-xchange.com>
 skip to 7.10.3-15
 * Fri Feb 28 2020 Thorben Betten <thorben.betten@open-xchange.com>
