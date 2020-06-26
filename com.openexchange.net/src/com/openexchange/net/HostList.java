@@ -72,7 +72,23 @@ public class HostList {
     /**
      * The empty host list.
      */
-    public static final HostList EMPTY = new HostList(Collections.<IPRange> emptyList(), Collections.<String> emptySet(), Collections.<String> emptySet(), "");
+    public static final HostList EMPTY = new HostList(Collections.<IPRange> emptyList(), Collections.<String> emptySet(), Collections.<String> emptySet(), "") {
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public boolean contains(InetAddress hostAddress) {
+            return false;
+        }
+
+        @Override
+        public boolean contains(String hostName) {
+            return false;
+        }
+    };
 
     /**
      * Accepts a comma-separated list of IP addresses, IP address ranges, and host names.
@@ -134,7 +150,7 @@ public class HostList {
     /**
      * Initializes a new {@link HostList}.
      */
-    private HostList(List<IPRange> ipRanges, Set<String> matchingAppendixHostNames, Set<String> matchingHostNames, String hostList) {
+    HostList(List<IPRange> ipRanges, Set<String> matchingAppendixHostNames, Set<String> matchingHostNames, String hostList) {
         super();
         this.ipRanges = ipRanges;
         this.hostList = hostList;
