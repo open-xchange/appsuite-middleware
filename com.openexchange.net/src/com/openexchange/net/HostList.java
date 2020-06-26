@@ -129,15 +129,15 @@ public class HostList {
     private final List<IPRange> ipRanges;
     private final Set<String> matchingAppendixHostNames;
     private final Set<String> matchingHostNames;
-    private final String hostString;
+    private final String hostList;
 
     /**
      * Initializes a new {@link HostList}.
      */
-    private HostList(List<IPRange> ipRanges, Set<String> matchingAppendixHostNames, Set<String> matchingHostNames, String hostString) {
+    private HostList(List<IPRange> ipRanges, Set<String> matchingAppendixHostNames, Set<String> matchingHostNames, String hostList) {
         super();
         this.ipRanges = ipRanges;
-        this.hostString = hostString;
+        this.hostList = hostList;
         this.matchingAppendixHostNames = ImmutableSet.copyOf(matchingAppendixHostNames);
         this.matchingHostNames = ImmutableSet.copyOf(matchingHostNames);
     }
@@ -176,12 +176,12 @@ public class HostList {
     }
 
     /**
-     * Gets the host string from which this instance was parsed.
+     * Gets the string representing the host list from which this instance was parsed.
      *
      * @return The host string
      */
-    public String getHostString() {
-        return hostString;
+    public String getHostList() {
+        return hostList;
     }
 
     /**

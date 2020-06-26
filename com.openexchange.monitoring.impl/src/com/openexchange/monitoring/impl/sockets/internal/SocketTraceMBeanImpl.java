@@ -112,7 +112,7 @@ public class SocketTraceMBeanImpl extends AnnotatedStandardMBean implements Sock
         int numSamples = 0;
         for (SocketTrace trace : monitor.getSocketTraces()) {
             Socket socket = trace.getSocket();
-            if ((null == filterPorts || Arrays.binarySearch(filterPorts, socket.getPort()) >= 0) && (null == hostList || hostList.contains(socket.getInetAddress()))) {
+            if ((null == filterPorts || Arrays.binarySearch(filterPorts, socket.getPort()) >= 0) && (null == hostList || (!hostList.isEmpty() && hostList.contains(socket.getInetAddress())))) {
                 long averageDuration = trace.getSamples().getAverageDuration();
                 if (averageDuration > 0) {
                     BigInteger cur = BigInteger.valueOf(averageDuration);
@@ -146,7 +146,7 @@ public class SocketTraceMBeanImpl extends AnnotatedStandardMBean implements Sock
         int numSamples = 0;
         for (SocketTrace trace : monitor.getSocketTraces()) {
             Socket socket = trace.getSocket();
-            if ((null == filterPorts || Arrays.binarySearch(filterPorts, socket.getPort()) >= 0) && (null == hostList || hostList.contains(socket.getInetAddress()))) {
+            if ((null == filterPorts || Arrays.binarySearch(filterPorts, socket.getPort()) >= 0) && (null == hostList || (!hostList.isEmpty() && hostList.contains(socket.getInetAddress())))) {
                 long averageDuration = trace.getSamples().getAverageTimeout();
                 if (averageDuration > 0) {
                     BigInteger cur = BigInteger.valueOf(averageDuration);

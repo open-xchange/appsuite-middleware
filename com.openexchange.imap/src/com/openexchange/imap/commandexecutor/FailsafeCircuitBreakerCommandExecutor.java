@@ -112,7 +112,7 @@ public class FailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircu
 
     @Override
     protected Key getKey(ProtocolInfo protocolInfo) {
-        return Key.of(name, getHostList().get().getHostString(), false);
+        return Key.of(name, getHostList().get().getHostList(), false);
     }
 
 }

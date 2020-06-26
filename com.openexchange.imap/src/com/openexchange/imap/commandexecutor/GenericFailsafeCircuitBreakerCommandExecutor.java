@@ -110,7 +110,7 @@ public class GenericFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
         Optional<HostList> newHostList;
         do {
             current = optionalHostsToExclude.get();
-            String currentHostString = current.isPresent() ? current.get().getHostString() : "";
+            String currentHostString = current.isPresent() ? current.get().getHostList() : "";
             newHostList = Optional.of(HostList.valueOf(Strings.isEmpty(currentHostString) ? hosts : currentHostString + ", " + hosts));
         } while (!optionalHostsToExclude.compareAndSet(current, newHostList));
     }

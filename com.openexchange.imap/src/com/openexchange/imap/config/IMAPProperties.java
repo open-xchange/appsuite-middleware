@@ -940,7 +940,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 } else {
                     logBuilder.append("    Added \"{}\"  circuit breaker for hosts: {}{}");
                     args.add(name);
-                    args.add(circuitBreaker.getHostList().get().getHostString());
+                    args.add(circuitBreaker.getHostList().get().getHostList());
                     args.add(Strings.getLineSeparator());
                 }
             }
