@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.java.Strings;
 
@@ -137,7 +138,8 @@ public class HostList {
             }
         }
 
-        return new HostList(ipRanges, matchingAppendixHostNames, matchingHostNames, hostList);
+        return ipRanges.isEmpty() && matchingAppendixHostNames.isEmpty() && matchingHostNames.isEmpty() ?
+            EMPTY : new HostList(ipRanges, matchingAppendixHostNames, matchingHostNames, hostList);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -152,7 +154,7 @@ public class HostList {
      */
     HostList(List<IPRange> ipRanges, Set<String> matchingAppendixHostNames, Set<String> matchingHostNames, String hostList) {
         super();
-        this.ipRanges = ipRanges;
+        this.ipRanges = ImmutableList.copyOf(ipRanges);
         this.hostList = hostList;
         this.matchingAppendixHostNames = ImmutableSet.copyOf(matchingAppendixHostNames);
         this.matchingHostNames = ImmutableSet.copyOf(matchingHostNames);
