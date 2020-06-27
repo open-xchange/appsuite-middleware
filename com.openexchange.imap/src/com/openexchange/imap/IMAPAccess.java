@@ -571,7 +571,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             javax.mail.Session imapSession;
             {
-                boolean forceSecure = getIMAPConfig().isRequireTls();
+                boolean forceSecure = config.isRequireTls();
                 imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class, forceSecure, session.getUserId(), session.getContextId());
             }
             /*
@@ -717,7 +717,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Remove proxy settings for whitelisted hosts
              */
             HostList nonProxyHosts = MailProxyConfig.getInstance().getImapNonProxyHostList();
-            if (nonProxyHosts.contains(getIMAPConfig().getImapServerAddress())) {
+            if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(config.getImapServerAddress())) {
                 imapProps.remove("mail.imap.proxy.host");
                 imapProps.remove("mail.imap.proxy.port");
                 imapProps.remove("mail.imaps.proxy.host");
@@ -729,7 +729,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             {
                 final Class<? extends IMAPStore> clazz = useIMAPStoreCache() ? IMAPStoreCache.getInstance().getStoreClass() : JavaIMAPStore.class;
-                boolean forceSecure = accountId > 0 && getIMAPConfig().isRequireTls();
+                boolean forceSecure = accountId > 0 && config.isRequireTls();
                 imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, forceSecure, session.getUserId(), session.getContextId());
             }
             /*
@@ -767,7 +767,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             checkAuthFailed(this.login, this.password, imapConfProps);
             this.clientIp = clientIp;
-            int maxCount = getIMAPConfig().getIMAPProperties().getMaxNumConnection();
+            int maxCount = config.getIMAPProperties().getMaxNumConnection();
             try {
                 imapStore = connectIMAPStore(maxCount);
             } catch (AuthenticationFailedException e) {

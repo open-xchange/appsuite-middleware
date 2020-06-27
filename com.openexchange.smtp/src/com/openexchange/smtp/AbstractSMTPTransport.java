@@ -443,7 +443,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                      * Remove proxy settings for whitelisted hosts
                      */
                     HostList nonProxyHosts = MailProxyConfig.getInstance().getSmtpNonProxyHostList();
-                    if (nonProxyHosts.contains(smtpConfig.getSmtpServerAddress())) {
+                    if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(smtpConfig.getSmtpServerAddress())) {
                         smtpProps.remove("mail.smtp.proxy.host");
                         smtpProps.remove("mail.smtp.proxy.port");
                         smtpProps.remove("mail.smtps.proxy.host");

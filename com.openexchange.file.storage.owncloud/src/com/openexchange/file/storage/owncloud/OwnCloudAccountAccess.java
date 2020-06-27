@@ -131,7 +131,7 @@ public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
                 }
                 try {
                     if (restClient == null) {
-                        LOG.error("Missing rest client");
+                        LOG.error("Missing rest client", new Exception());
                         return Boolean.FALSE;
                     }
                     OCCapabilities capabilities = restClient.getCapabilities();
@@ -201,6 +201,11 @@ public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
         } catch (URISyntaxException e) {
             throw FileStorageExceptionCodes.INVALID_URL.create(host, e.getMessage(), e);
         }
+    }
+
+    @Override
+    public boolean isConnected() {
+        return super.isConnected() && restClient != null;
     }
 
     protected ManagedHttpClient initDefaultClient() throws OXException {

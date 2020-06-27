@@ -457,7 +457,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
         if (optionalHostList.isPresent()) {
-            sb.append("hosts=").append(optionalHostList.get().getHostString());
+            sb.append("hosts=").append(optionalHostList.get().getHostList());
         } else {
             sb.append("hosts=none");
         }
