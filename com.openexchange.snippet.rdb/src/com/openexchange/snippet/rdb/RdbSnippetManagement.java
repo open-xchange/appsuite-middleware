@@ -1150,6 +1150,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         private final PreparedStatement stmt;
         private final ResultSet rs;
         private final DatabaseService databaseService;
+        private boolean closed;
 
         /**
          * Initializes a new {@link RdbSnippetManagement.ClosingInputStream}.
@@ -1161,15 +1162,22 @@ public final class RdbSnippetManagement implements SnippetManagement {
             this.con = con;
             this.contextId = contextId;
             this.databaseService = databaseService;
+            closed = false;
         }
 
         @Override
-        public void close() throws IOException {
+        public synchronized void close() throws IOException {
+            if (closed) {
+                // Already closed
+                return;
+            }
+
             super.close();
             Databases.closeSQLStuff(rs, stmt);
             if (null != con) {
                 databaseService.backReadOnly(contextId, con);
             }
+            closed = true;
         }
     }
 
