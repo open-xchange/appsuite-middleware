@@ -132,11 +132,41 @@ public class CompositionSpaceCreateTableService extends AbstractCreateTableImpl 
         + "uuid BINARY(16) NOT NULL,"
         + "cid INT4 UNSIGNED NOT NULL,"
         + "user INT4 UNSIGNED NOT NULL,"
-        + "data LONGBLOB NOT NULL,"
         + "PRIMARY KEY (uuid),"
         + "INDEX `userIndex` (cid, user)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     // @formatter:on
+
+    private static final String ATTACHMENT_BINARY_CHUNK_TABLE = "compositionSpaceAttachmentBinaryChunk";
+
+    // @formatter:off
+    private static final String CREATE_ATTACHMENT_BINARY_CHUNK_TABLE = "CREATE TABLE " + ATTACHMENT_BINARY_CHUNK_TABLE + "("
+        + "uuid BINARY(16) NOT NULL,"
+        + "cid INT4 UNSIGNED NOT NULL,"
+        + "user INT4 UNSIGNED NOT NULL,"
+        + "chunk INT4 UNSIGNED NOT NULL,"
+        + "data LONGBLOB NOT NULL,"
+        + "PRIMARY KEY (uuid, chunk)"
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    // @formatter:on
+
+    /**
+     * Gets the table name for storing attachment binary chunks.
+     *
+     * @return The table name
+     */
+    public static String getAttachmentBinaryChunkTable() {
+        return ATTACHMENT_BINARY_CHUNK_TABLE;
+    }
+
+    /**
+     * Gets the <code>"CREATE TABLE..."</code> statement for the table name for storing attachment binary chunks.
+     *
+     * @return The <code>"CREATE TABLE..."</code> statement
+     */
+    public static String getCreateAttachmentBinaryChunkTable() {
+        return CREATE_ATTACHMENT_BINARY_CHUNK_TABLE;
+    }
 
     private static final String KEY_STORAGE_TABLE = "compositionSpaceKeyStorage";
 
@@ -159,12 +189,12 @@ public class CompositionSpaceCreateTableService extends AbstractCreateTableImpl 
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { COMPOSITION_SPACE_TABLE, ATTACHMENT_META_TABLE, ATTACHMENT_BINARY_TABLE, KEY_STORAGE_TABLE };
+        return new String[] { COMPOSITION_SPACE_TABLE, ATTACHMENT_META_TABLE, ATTACHMENT_BINARY_TABLE, ATTACHMENT_BINARY_CHUNK_TABLE, KEY_STORAGE_TABLE };
     }
 
     @Override
     public String[] getCreateStatements() {
-        return new String[] { CREATE_COMPOSITION_SPACE_TABLE, CREATE_ATTACHMENT_META_TABLE, CREATE_ATTACHMENT_BINARY_TABLE, CREATE_KEY_STORAGE_TABLE };
+        return new String[] { CREATE_COMPOSITION_SPACE_TABLE, CREATE_ATTACHMENT_META_TABLE, CREATE_ATTACHMENT_BINARY_TABLE, CREATE_ATTACHMENT_BINARY_CHUNK_TABLE, CREATE_KEY_STORAGE_TABLE };
     }
 
 }

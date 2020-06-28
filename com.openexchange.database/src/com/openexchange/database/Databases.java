@@ -860,4 +860,37 @@ public final class Databases {
         return extractSqlException((Exception) cause);
     }
 
+    /**
+     * Gets the value for 'max_allowed_packet' setting.
+     *
+     * @param con The connection to use
+     * @return The max. allowed packet size in bytes or <code>-1</code> if unknown
+     * @throws SQLException If an SQL error occurs
+     */
+    public static long getMaxAllowedPacketSize(Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SHOW variables LIKE 'max_allowed_packet'");
+            result = stmt.executeQuery();
+            if (result.next()) {
+                return result.getInt("Value");
+            }
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        return -1;
+    }
+
+    /**
+     * Checks if given SQL exception represents a "package too big" SQL error, which is thrown when a packet is created that is too big for
+     * the database server.
+     *
+     * @param e The SQL exception to examine
+     * @return <code>true</code> if SQL exception represents a "package too big" SQL error; otherwise <code>false</code>
+     */
+    public static boolean isPacketTooBigException(SQLException e) {
+        return e instanceof com.mysql.jdbc.PacketTooBigException;
+    }
+
 }
