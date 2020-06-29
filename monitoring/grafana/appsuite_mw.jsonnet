@@ -67,7 +67,7 @@ local sessions = [
       expr: 'appsuite_sessions_total{client="all", instance=~"$instance"}',
       legendFormat: 'Total',
     },
-    gridPos: { h: 4, w: 3, x: 0, y: 1 },
+    gridPos: { h: 4, w: 3, x: 0, y: 5 },
   },
   {
     title: 'Active',
@@ -76,7 +76,7 @@ local sessions = [
       expr: 'appsuite_sessions_active_total{client="all", instance=~"$instance"}',
       legendFormat: 'Active',
     },
-    gridPos: { h: 4, w: 3, x: 3, y: 1 },
+    gridPos: { h: 4, w: 3, x: 3, y: 5 },
   },
   {
     title: 'Short Term',
@@ -85,7 +85,7 @@ local sessions = [
       expr: 'appsuite_sessions_short_term_total{client="all", instance=~"$instance"}',
       legendFormat: 'Short Term',
     },
-    gridPos: { h: 4, w: 3, x: 0, y: 5 },
+    gridPos: { h: 4, w: 3, x: 0, y: 9 },
   },
   {
     title: 'Long Term',
@@ -94,7 +94,7 @@ local sessions = [
       expr: 'appsuite_sessions_long_term_total{client="all", instance=~"$instance"}',
       legendFormat: 'Long Term',
     },
-    gridPos: { h: 4, w: 3, x: 3, y: 5 },
+    gridPos: { h: 4, w: 3, x: 3, y: 9 },
   },
 ];
 
@@ -102,12 +102,12 @@ local cacheRatio = [
   {
     title: 'Hit Ratio',
     expr: 'sum(rate(appsuite_jcs_cache_hits_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_jcs_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_jcs_cache_misses_total{instance=~"$instance"}[$interval])))',
-    gridPos: { h: 4, w: 3, x: 0, y: 25 },
+    gridPos: { h: 4, w: 3, x: 0, y: 33 },
   },
   {
     title: 'Miss Ratio',
     expr: 'sum(rate(appsuite_jcs_cache_misses_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_jcs_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_jcs_cache_misses_total{instance=~"$instance"}[$interval])))',
-    gridPos: { h: 4, w: 3, x: 0, y: 25 },
+    gridPos: { h: 4, w: 3, x: 0, y: 33 },
   },
 ];
 
@@ -848,6 +848,65 @@ local sessionStorageTotal = graphPanel.new(
   },
 );
 
+local overviewAppSuiteVersion = singlestat.new(
+  title='Server Version',
+  valueName='name',
+).addTarget(
+  prometheus.target(
+    expr='appsuite_version_info{instance=~"$instance"}',
+    legendFormat='{{server_version}} ({{build_date}})',
+  )
+);
+
+local overviewUptime = singlestat.new(
+  title='Uptime',
+  valueName='current',
+  colorValue=true,
+  colors=[
+    'rgba(245, 54, 54, 0.9)',
+    'rgba(237, 129, 40, 0.89)',
+    'rgba(50, 172, 45, 0.97)',
+  ],
+  decimals=1,
+  format='s',
+  postfix='s',
+  prefixFontSize='80%',
+  postfixFontSize='80%',
+  thresholds='300,3600',
+).addTarget(
+  prometheus.target(
+    expr='process_uptime_seconds{instance=~"$instance"}',
+  )
+);
+
+local overviewHealthStatus = singlestat.new(
+  title='Health Status',
+  valueName='current',
+  valueMaps=[
+    {
+      op: '=',
+      text: 'Unhealthy',
+      value: '0',
+    },
+    {
+      op: '=',
+      text: 'Healthy',
+      value: '1',
+    },
+  ],
+  colorBackground=true,
+  colors=[
+    'rgba(245, 54, 54, 0.9)',
+    'rgba(237, 129, 40, 0.89)',
+    'rgba(50, 172, 45, 0.97)',
+  ],
+  thresholds='0.1,1',
+).addTarget(
+  prometheus.target(
+    expr='appsuite_health_status{instance=~"$instance"} > 0',
+  )
+);
+
 grafana.newDashboard(
   title='App Suite', tags=['Java', 'AppSuite'], metric='jvm_info',
 ).addLink(
@@ -879,7 +938,13 @@ grafana.newDashboard(
 ).addPanels(
   [
     //------------------------------------------------------------------------------
-    row.new(title='Sessions') + { gridPos: { h: 1, w: 24, x: 0, y: 0 } },
+    row.new(title='Overview') + { gridPos: { h: 1, w: 24, x: 0, y: 0 } },
+    overviewAppSuiteVersion { gridPos: { h: 4, w: 5, x: 0, y: 1 } },
+    overviewUptime { gridPos: { h: 4, w: 5, x: 5, y: 1 } },
+    overviewHealthStatus { gridPos: { h: 4, w: 5, x: 10, y: 1 } },
+  ] + [
+    //------------------------------------------------------------------------------
+    row.new(title='Sessions') + { gridPos: { h: 1, w: 24, x: 0, y: 5 } },
   ] + [
     singlestat.new(
       title=obj.title,
@@ -931,25 +996,25 @@ grafana.newDashboard(
         alias: 'Max',
         fill: 0,
       },
-    ) { gridPos: { h: 8, w: 12, x: 6, y: 1 } },
+    ) { gridPos: { h: 8, w: 12, x: 6, y: 6 } },
   ] + [
     row.new(
       title='SessionStorage',
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 7 } },
-    sessionStorageBytes { gridPos: { h: 8, w: 12, x: 0, y: 8 } },
-    sessionStorageTotal { gridPos: { h: 8, w: 12, x: 12, y: 8 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 14 } },
+    sessionStorageBytes { gridPos: { h: 8, w: 12, x: 0, y: 15 } },
+    sessionStorageTotal { gridPos: { h: 8, w: 12, x: 12, y: 15 } },
   ] + [
     //------------------------------------------------------------------------------
     row.new(
       title='ThreadPool'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 16 } },
-    threadPool { gridPos: { h: 8, w: 12, x: 0, y: 17 } },
-    threadPoolTasks { gridPos: { h: 8, w: 12, x: 12, y: 17 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 23 } },
+    threadPool { gridPos: { h: 8, w: 12, x: 0, y: 24 } },
+    threadPoolTasks { gridPos: { h: 8, w: 12, x: 12, y: 24 } },
   ] + [
     //------------------------------------------------------------------------------
     row.new(
       title='Cache'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 25 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 32 } },
   ] + [
     singlestat.new(
       title=obj.title,
@@ -982,7 +1047,7 @@ grafana.newDashboard(
           legendFormat='Miss Ratio',
         ),
       ]
-    ) { gridPos: { h: 8, w: 9, x: 3, y: 26 } },
+    ) { gridPos: { h: 8, w: 9, x: 3, y: 33 } },
     graphPanel.new(
       title='Cache Operations',
       datasource=grafana.default.datasource,
@@ -1000,7 +1065,7 @@ grafana.newDashboard(
           legendFormat='Removals',
         ),
       ]
-    ) { gridPos: { h: 8, w: 12, x: 12, y: 26 } },
+    ) { gridPos: { h: 8, w: 12, x: 12, y: 33 } },
     graphPanel.new(
       title='Top 5 Cache Regions',
       datasource=grafana.default.datasource,
@@ -1021,73 +1086,73 @@ grafana.newDashboard(
         expr='topk(5,avg_over_time(appsuite_jcs_cache_elements_total{instance=~"$instance"}[${__range_s}s]))',
         legendFormat='{{region}}',
       )
-    ) { gridPos: { h: 8, w: 24, x: 0, y: 33 } },
+    ) { gridPos: { h: 8, w: 24, x: 0, y: 41 } },
   ] + [
     //------------------------------------------------------------------------------
     row.new(
       title='DB Pool'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 41 } },
-    dbTimeoutRatio { gridPos: { h: 8, w: 6, x: 0, y: 42 } },
-    configdbActive { gridPos: { h: 4, w: 3, x: 6, y: 42 } },
-    userdbActive { gridPos: { h: 4, w: 3, x: 6, y: 45 } },
-    dbPoolTable { gridPos: { h: 8, w: 15, x: 9, y: 42 } },
-    configDBReadConnections { gridPos: { h: 8, w: 12, x: 0, y: 50 } },
-    configDBWriteConnections { gridPos: { h: 8, w: 12, x: 12, y: 50 } },
-    userdbConnections { gridPos: { h: 8, w: 24, x: 0, y: 58 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 49 } },
+    dbTimeoutRatio { gridPos: { h: 8, w: 6, x: 0, y: 50 } },
+    configdbActive { gridPos: { h: 4, w: 3, x: 6, y: 50 } },
+    userdbActive { gridPos: { h: 4, w: 3, x: 6, y: 54 } },
+    dbPoolTable { gridPos: { h: 8, w: 15, x: 9, y: 50 } },
+    configDBReadConnections { gridPos: { h: 8, w: 12, x: 0, y: 58 } },
+    configDBWriteConnections { gridPos: { h: 8, w: 12, x: 12, y: 58 } },
+    userdbConnections { gridPos: { h: 8, w: 24, x: 0, y: 66 } },
   ] + [
     //------------------------------------------------------------------------------
     row.new(
       title='HTTP Client "$' + httpClient + '"',
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 66 } },
-    httpClientRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 67 } },
-    httpClientConnections { gridPos: { h: 8, w: 12, x: 12, y: 67 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 74 } },
+    httpClientRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 75 } },
+    httpClientConnections { gridPos: { h: 8, w: 12, x: 12, y: 75 } },
   ] + [
     //------------------------------------------------------------------------------
     row.new(
       title='HTTP API'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 75 } },
-    httpApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 76 } },
-    httpApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 76 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 83 } },
+    httpApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 84 } },
+    httpApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 84 } },
     //
-    httpApiRequestsPercentilesByRequest { gridPos: { h: 8, w: 24, x: 0, y: 84 } },
+    httpApiRequestsPercentilesByRequest { gridPos: { h: 8, w: 24, x: 0, y: 92 } },
   ] + [
     //------------------------------------------------------------------------------
     row.new(
       title='REST API'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 92 } },
-    restApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 93 } },
-    restApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 93 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 100 } },
+    restApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 101 } },
+    restApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 101 } },
   ] + [
     //------------------------------------------------------------------------------
     row.new(
       title='WebDAV API'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 101 } },
-    webdavApiRequestsPerSecond { gridPos: { h: 8, w: 24, x: 0, y: 102 } },
-    webdavApiResponsePercentiles { gridPos: { h: 8, w: 6, x: 0, y: 110 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 109 } },
+    webdavApiRequestsPerSecond { gridPos: { h: 8, w: 24, x: 0, y: 110 } },
+    webdavApiResponsePercentiles { gridPos: { h: 8, w: 6, x: 0, y: 118 } },
   ] + [
     //------------------------------------------------------------------------------
     row.new(
       title='SOAP API'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 118 } },
-    soapApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 119 } },
-    soapApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 119 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 126 } },
+    soapApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 127 } },
+    soapApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 127 } },
   ] + [
     //------------------------------------------------------------------------------
     row.new(
       title='IMAP'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 127 } },
-    imapFailureRatio { gridPos: { h: 8, w: 6, x: 0, y: 128 } },
-    imapRequestRate { gridPos: { h: 8, w: 18, x: 6, y: 128 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 135 } },
+    imapFailureRatio { gridPos: { h: 8, w: 6, x: 0, y: 136 } },
+    imapRequestRate { gridPos: { h: 8, w: 18, x: 6, y: 136 } },
   ] + [
     //------------------------------------------------------------------------------
     row.new(
       title='CircuitBreaker'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 136 } },
-    circuitBreakerClosed { gridPos: { h: 4, w: 3, x: 0, y: 137 } },
-    circuitBreakerHalfOpen { gridPos: { h: 4, w: 3, x: 3, y: 137 } },
-    circuitBreakerOpen { gridPos: { h: 4, w: 3, x: 0, y: 141 } },
-    circuitBreakerDenialRate { gridPos: { h: 8, w: 9, x: 6, y: 137 } },
-    circuitBreakerOpenRate { gridPos: { h: 8, w: 9, x: 15, y: 137 } },
-    circuitBreakerStates { gridPos: { h: 8, w: 24, x: 0, y: 153 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 144 } },
+    circuitBreakerClosed { gridPos: { h: 4, w: 3, x: 0, y: 145 } },
+    circuitBreakerHalfOpen { gridPos: { h: 4, w: 3, x: 3, y: 145 } },
+    circuitBreakerOpen { gridPos: { h: 4, w: 3, x: 0, y: 149 } },
+    circuitBreakerDenialRate { gridPos: { h: 8, w: 9, x: 6, y: 145 } },
+    circuitBreakerOpenRate { gridPos: { h: 8, w: 9, x: 15, y: 145 } },
+    circuitBreakerStates { gridPos: { h: 8, w: 24, x: 0, y: 157 } },
   ]
 )
