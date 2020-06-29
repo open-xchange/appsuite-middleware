@@ -50,11 +50,8 @@
 package com.openexchange.microsoft.graph.onedrive.parser;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * {@link ISO8601DateParser}
@@ -65,13 +62,20 @@ import org.apache.commons.lang.StringUtils;
 public class ISO8601DateParser {
 
     // Use ThreadLocal because SimpleDateFormat is not thread safe. See http://www.javacodegeeks.com/2010/07/java-best-practices-dateformat-in.html.
-    private final static ThreadLocal<DateFormat> mThreadLocalSimpleDateFormat = new ThreadLocal<DateFormat>() {
+    private final static ThreadLocal<DateFormat> millisThreadLocalSimpleDateFormat = new ThreadLocal<DateFormat>() {
 
         @Override
         protected DateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sssz");
         }
+    };
 
+    private final static ThreadLocal<DateFormat> secondsThreadLocalSimpleDateFormat = new ThreadLocal<DateFormat>() {
+
+        @Override
+        protected DateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
+        }
     };
 
     // 2004-06-14T19:GMT20:30Z
@@ -123,7 +127,6 @@ public class ISO8601DateParser {
 
         // NOTE: SimpleDateFormat uses GMT[-+]hh:mm for the TZ which breaks
         // things a bit. Before we go on we have to repair this.
-        DateFormat df = mThreadLocalSimpleDateFormat.get();
 
         // this is zero time so we need to add that TZ indicator for
         String i = input;
@@ -131,29 +134,8 @@ public class ISO8601DateParser {
             i = input.substring(0, input.length() - 1) + "GMT-00:00";
         }
 
+        int indexOf = i.indexOf('.');
+        DateFormat df = indexOf > 0 ? millisThreadLocalSimpleDateFormat.get() : secondsThreadLocalSimpleDateFormat.get();
         return df.parse(i);
-
-    }
-
-    /**
-     * Same as parse method but does not throws. In case input date string cannot be parsed, null is returned.
-     */
-    @SuppressWarnings("unused")
-    public static Date parseSilently(String input) {
-        try {
-            Date date = StringUtils.isEmpty(input) ? null : parse(input);
-            return date;
-        } catch (ParseException e) {
-            return null;
-        }
-    }
-
-    public static String toString(Date date) {
-        DateFormat df = mThreadLocalSimpleDateFormat.get();
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        df.setTimeZone(tz);
-        String output = df.format(date);
-        String result = output.replaceAll("UTC", "+00:00");
-        return result;
     }
 }
