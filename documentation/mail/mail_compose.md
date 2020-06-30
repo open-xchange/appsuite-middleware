@@ -36,7 +36,7 @@ If the context-associated file storage is used, the ``checkconsistency`` command
 ### Dedicated storage
 To have a dedicated file storage that is supposed to be used for uploaded attachments to not use the context-associated one, there is the opportunity to specify following configuration option:
 
-* ``com.openexchange.mail.compose.fileStorageId`` Specifies the identifier for a dedicated file storage that is supposed to be used for mail compose attachments. By default that option empty, but config-cascade aware and reloadable.
+* ``com.openexchange.mail.compose.fileStorageId`` Specifies the numeric identifier (the one returned by the ``registerfilestore`` operation) for a dedicated file storage that is supposed to be used for mail compose attachments. By default that option empty, but config-cascade aware and reloadable.
 
 #### Register a dedicated file storage
 
