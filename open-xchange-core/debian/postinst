@@ -746,6 +746,31 @@ index d56a04f3e1f..1214fd369fe 100644
 EOF
     fi
     ox_add_property com.openexchange.hazelcast.network.join.dns.domainNames "" /opt/open-xchange/etc/hazelcast.properties
+
+    SCR=SCR-698
+    if ox_scr_todo ${SCR}
+    then
+        PFILE=/opt/open-xchange/etc/cache.ccf
+        if ! grep "jcs.region.Group=LTCP" > /dev/null $PFILE; then
+            echo -e "\n# Pre-defined cache region for Group data" >> $PFILE
+            echo "jcs.region.Group=LTCP" >> $PFILE
+            echo "jcs.region.Group.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes" >> $PFILE
+            echo "jcs.region.Group.cacheattributes.MaxObjects=4000000" >> $PFILE
+            echo "jcs.region.Group.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache" >> $PFILE
+            echo "jcs.region.Group.cacheattributes.UseMemoryShrinker=true" >> $PFILE
+            echo "jcs.region.Group.cacheattributes.MaxMemoryIdleTimeSeconds=360" >> $PFILE
+            echo "jcs.region.Group.cacheattributes.ShrinkerIntervalSeconds=60" >> $PFILE
+            echo "jcs.region.Group.cacheattributes.MaxSpoolPerRun=500" >> $PFILE
+            echo "jcs.region.Group.elementattributes=org.apache.jcs.engine.ElementAttributes" >> $PFILE
+            echo "jcs.region.Group.elementattributes.IsEternal=false" >> $PFILE
+            echo "jcs.region.Group.elementattributes.MaxLifeSeconds=-1" >> $PFILE
+            echo "jcs.region.Group.elementattributes.IdleTime=360" >> $PFILE
+            echo "jcs.region.Group.elementattributes.IsSpool=false" >> $PFILE
+            echo "jcs.region.Group.elementattributes.IsRemote=false" >> $PFILE
+            echo -e "jcs.region.Group.elementattributes.IsLateral=false\n" >> $PFILE
+        fi
+        ox_scr_done ${SCR}
+    fi
 }
 
 setConfigFilePermissions() {
