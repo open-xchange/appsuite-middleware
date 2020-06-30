@@ -171,6 +171,9 @@ public class OAuthProxyRequest {
 
             @Override
             protected boolean acceptHost(String host) {
+                if (host == null) {
+                    return false;
+                }
                 return "twitter.com".equals(host) || host.endsWith(".twitter.com");
             }
 
@@ -188,6 +191,9 @@ public class OAuthProxyRequest {
 
             @Override
             protected boolean acceptHost(String host) {
+                if (host == null) {
+                    return false;
+                }
                 return "yahoo.com".equals(host) || host.endsWith(".yahoo.com") || "yahooapis.com".equals(host) || host.endsWith(".yahooapis.com");
             }
 
@@ -205,6 +211,9 @@ public class OAuthProxyRequest {
 
             @Override
             protected boolean acceptHost(String host) {
+                if (host == null) {
+                    return false;
+                }
                 return host.endsWith(".tumblr.com");
             }
 
@@ -222,6 +231,9 @@ public class OAuthProxyRequest {
 
             @Override
             protected boolean acceptHost(String host) {
+                if (host == null) {
+                    return false;
+                }
                 return host.endsWith(".flickr.com");
             }
 
