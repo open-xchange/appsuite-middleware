@@ -72,6 +72,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.DestroyAwareFileStorage;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.swift.chunkstorage.Chunk;
@@ -89,7 +90,7 @@ import com.openexchange.java.util.UUIDs;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class SwiftFileStorage implements FileStorage {
+public class SwiftFileStorage implements DestroyAwareFileStorage {
 
     private final SwiftClient client;
     private final ChunkStorage chunkStorage;
@@ -110,6 +111,11 @@ public class SwiftFileStorage implements FileStorage {
         this.client = client;
         this.chunkStorage = chunkStorage;
         containerCreatedTask = new AtomicReference<Future<Void>>(null);
+    }
+
+    @Override
+    public void onDestroyed() {
+        client.shutdown();
     }
 
     private void checkOrCreateContainer() throws OXException {

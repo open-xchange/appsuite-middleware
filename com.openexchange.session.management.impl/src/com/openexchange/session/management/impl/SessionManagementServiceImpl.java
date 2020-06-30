@@ -85,6 +85,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -124,6 +125,11 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             return Collections.emptyList();
         }
 
+        String location = getDefaultLocation(session);
+        if(ServerSessionAdapter.valueOf(session).getUser().isAnonymousGuest()) {
+            return Collections.singleton(DefaultManagedSession.builder(session).setLocation(optLocationFor(session, location, new HashMap<>())).build());
+        }
+
         SessiondService sessiondService = services.getService(SessiondService.class);
         if (null == sessiondService) {
             throw ServiceExceptionCode.absentService(SessiondService.class);
@@ -133,7 +139,6 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         Collection<PortableSession> remoteSessions = getRemoteSessionsForUser(session);
 
         Set<String> blackListedClients = getBlacklistedClients();
-        String location = getDefaultLocation(session);
 
         int totalSize = localSessions.size() + remoteSessions.size();
         Map<String, String> ip2locationCache = new HashMap<>(totalSize);
@@ -157,6 +162,11 @@ public class SessionManagementServiceImpl implements SessionManagementService {
 
     @Override
     public void removeSession(Session session, String sessionIdToRemove) throws OXException {
+        if (ServerSessionAdapter.valueOf(session).getUser().isAnonymousGuest() && session.getSessionID().equals(sessionIdToRemove) == false) {
+            // Only allow to remove the own session for anonymous guests
+            throw SessionManagementExceptionCodes.SESSION_NOT_FOUND.create();
+        }
+
         SessiondService sessiondService = services.getService(SessiondService.class);
         StringBuilder sb = new StringBuilder("(&");
         sb.append("(").append(SessionFilter.SESSION_ID).append("=").append(sessionIdToRemove).append(")");

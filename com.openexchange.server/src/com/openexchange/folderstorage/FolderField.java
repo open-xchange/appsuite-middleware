@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage;
 
 import java.io.Serializable;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FolderField} - A pair of a field and its name.
@@ -121,9 +122,10 @@ public class FolderField implements Serializable {
      * Serializes a folder property.
      *
      * @param property The folder property to write
+     * @param session The underlying session, or <code>null</code> if not available
      * @return The serialized value
      */
-    public Object write(FolderProperty property) {
+    public Object write(FolderProperty property, ServerSession session) {
         return null == property ? defaultValue : property.getValue();
     }
 

@@ -212,11 +212,16 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public Session peekSession(String sessionId) {
+        return peekSession(sessionId, true);
+    }
+
+    @Override
+    public Session peekSession(String sessionId, boolean considerSessionStorage) {
         if (null == sessionId) {
             return null;
         }
 
-        SessionControl sessionControl = SessionHandler.getSession(sessionId, true, true, true);
+        SessionControl sessionControl = SessionHandler.getSession(sessionId, true, considerSessionStorage, true);
         return null == sessionControl ? null : sessionControl.getSession();
     }
 

@@ -53,8 +53,11 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.rest.client.osgi.RestClientServices;
 
 /**
  * {@link MonitoringRegistry}
@@ -66,20 +69,62 @@ public class MonitoringRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(MonitoringRegistry.class);
 
+    private static final String PROP_MONITORING_ENABLED = "com.openexchange.httpclient.monitoring.enabled";
+
     private static final MonitoringRegistry INSTANCE = new MonitoringRegistry();
 
-    private final ConcurrentMap<String, AtomicInteger> registeredClients;
-
-    private MonitoringRegistry() {
-        super();
-        registeredClients = new ConcurrentHashMap<>();
-    }
-
+    /**
+     * Gets the registry instance.
+     *
+     * @return The instance
+     */
     public static MonitoringRegistry getInstance() {
         return INSTANCE;
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final ConcurrentMap<String, AtomicInteger> registeredClients;
+    private final AtomicReference<Boolean> enabled;
+
+    /**
+     * Initializes a new {@link MonitoringRegistry}.
+     */
+    private MonitoringRegistry() {
+        super();
+        registeredClients = new ConcurrentHashMap<>();
+        enabled = new AtomicReference<>(null);
+    }
+
+    /**
+     * Checks if monitoring is enabled as per configuration.
+     *
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     */
+    public boolean isMonitoringEnabled() {
+        Boolean enabled = this.enabled.get();
+        if (enabled == null) {
+            synchronized (this) {
+                enabled = this.enabled.get();
+                if (enabled == null) {
+                    boolean defaultValue = false;
+                    ConfigurationService configService = RestClientServices.getOptionalService(ConfigurationService.class);
+                    if (configService == null) {
+                        return defaultValue;
+                    }
+                    enabled = Boolean.valueOf(configService.getBoolProperty(PROP_MONITORING_ENABLED, defaultValue));
+                    this.enabled.set(enabled);
+                }
+            }
+        }
+        return enabled.booleanValue();
+    }
+
     public MonitoringId registerInstance(String clientName) {
+        if (!isMonitoringEnabled()) {
+            return MonitoringId.getNoop();
+        }
+
         AtomicInteger existing = registeredClients.putIfAbsent(clientName, new AtomicInteger(1));
         if (existing == null) {
             log("HTTP client with name '{}' was instantiated for the first time.", clientName);
@@ -93,6 +138,10 @@ public class MonitoringRegistry {
     }
 
     public void unregisterInstance(MonitoringId id) {
+        if (id == MonitoringId.getNoop()) {
+            return;
+        }
+
         AtomicInteger existing = registeredClients.get(id.getClientName());
         if (existing == null) {
             LOG.warn("HTTP client name was not registered for duplicate check!");
@@ -103,6 +152,10 @@ public class MonitoringRegistry {
     }
 
     public boolean hasInstance(MonitoringId monitoringId) {
+        if (monitoringId == MonitoringId.getNoop()) {
+            return false;
+        }
+
         AtomicInteger existing = registeredClients.get(monitoringId.getClientName());
         if (existing == null) {
             return false;

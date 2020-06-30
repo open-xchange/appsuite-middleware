@@ -76,6 +76,11 @@ public class MeteredHttpRequestExecutor extends HttpRequestExecutor {
 
     private final MonitoringId monitoringId;
 
+    /**
+     * Initializes a new {@link MeteredHttpRequestExecutor}.
+     *
+     * @param monitoringId The monitoring identifier
+     */
     public MeteredHttpRequestExecutor(MonitoringId monitoringId) {
         super();
         this.monitoringId = monitoringId;
@@ -83,6 +88,10 @@ public class MeteredHttpRequestExecutor extends HttpRequestExecutor {
 
     @Override
     public HttpResponse execute(HttpRequest request, HttpClientConnection conn, HttpContext context) throws IOException, HttpException {
+        if (monitoringId == MonitoringId.getNoop()) {
+            return super.execute(request, conn, context);
+        }
+
         long start = System.nanoTime();
         String status = "UNKNOWN";
         try {
@@ -99,7 +108,7 @@ public class MeteredHttpRequestExecutor extends HttpRequestExecutor {
 
     private Timer getTimer(String method, String status) {
         MetricService metrics = RestClientServices.getOptionalService(MetricService.class);
-        if (metrics == null) {
+        if (metrics == null || monitoringId == MonitoringId.getNoop()) {
             return NoopTimer.getInstance();
         }
 

@@ -1,0 +1,15 @@
+feature_name: HTTP Client
+feature_description: |
+  Properties for HTTP clients established by Open-Xchange Middleware to communicate with remote/internal REST/HTTP end-points
+properties:
+    - key: com.openexchange.httpclient.monitoring.enabled
+      description: |
+        Specifies whether monitoring/metrics are enbabled for HTTP clients.
+      defaultValue: false
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: httpclient.properties
+      packageName: open-xchange-core
+      tags: ["HTTP-Client"]

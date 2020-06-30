@@ -85,6 +85,7 @@ import com.openexchange.filestore.swift.impl.token.TokenStorage;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.rest.client.httpclient.HttpClients;
 
 /**
  * {@link SwiftClient}
@@ -123,6 +124,13 @@ public class SwiftClient {
         this.httpClient = swiftConfig.getHttpClient();
         this.tokenStorage = tokenStorage;
         this.prefix = prefix;
+    }
+
+    /**
+     * Shuts-down this Swift client.
+     */
+    public void shutdown() {
+        HttpClients.shutDown(httpClient);
     }
 
     /**

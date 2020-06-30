@@ -156,13 +156,13 @@ public class DiagnosticServlet extends HttpServlet {
             servletParameter = ServletParameter.valueOf(parameter);
         } catch (IllegalArgumentException e) {
             // Unknown parameter value
-            writeBadRequest(resp, "Unknown parameter value: " + parameter, page);
+            writeBadRequest(resp, "Unknown or illegal parameter value", page);
             return;
         }
 
         BiConsumer<DiagnosticService, StringBuilder> injector = pageInjectors.get(servletParameter);
         if (injector == null) {
-            writeBadRequest(resp, "Unknown parameter value: " + servletParameter.name(), page);
+            writeBadRequest(resp, "Unknown or illegal parameter value", page);
             return;
         }
 

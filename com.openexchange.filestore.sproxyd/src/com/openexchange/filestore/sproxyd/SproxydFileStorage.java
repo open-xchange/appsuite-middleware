@@ -65,7 +65,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.DestroyAwareFileStorage;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.sproxyd.chunkstorage.Chunk;
 import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
@@ -81,7 +81,7 @@ import com.openexchange.java.util.UUIDs;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SproxydFileStorage implements FileStorage {
+public class SproxydFileStorage implements DestroyAwareFileStorage {
 
     private final SproxydClient client;
     private final ChunkStorage chunkStorage;
@@ -100,6 +100,11 @@ public class SproxydFileStorage implements FileStorage {
         this.uri = uri;
         this.client = client;
         this.chunkStorage = chunkStorage;
+    }
+
+    @Override
+    public void onDestroyed() {
+        client.shutdown();
     }
 
     @Override

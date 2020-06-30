@@ -51,6 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -436,13 +437,19 @@ final class SessionData {
      */
     List<SessionControl> getUserActiveSessions(int userId, int contextId) {
         // A read-only access to session list
-        List<SessionControl> retval = new LinkedList<SessionControl>();
+        List<SessionControl> retval = null;
 
         // Short term ones
         for (SessionContainer container : sessionList) {
-            retval.addAll(container.getSessionsByUser(userId, contextId));
+            List<SessionControl> sessionsByUser = container.getSessionsByUser(userId, contextId);
+            if (!sessionsByUser.isEmpty()) {
+                if (retval == null) {
+                    retval = new ArrayList<>();
+                }
+                retval.addAll(sessionsByUser);
+            }
         }
-        return retval;
+        return retval == null ? Collections.emptyList() : retval;
     }
 
     /**
@@ -627,13 +634,13 @@ final class SessionData {
         return control;
     }
 
-    SessionControl getSession(final String sessionId) {
+    SessionControl getSession(final String sessionId, boolean peek) {
         SessionControl control = null;
         boolean first = true;
         for (SessionContainer container : sessionList) {
             control = container.getSessionById(sessionId);
             if (control != null) {
-                if (false == first) {
+                if (!peek && false == first) {
                     // Schedule task to put session into first container and remove from latter one.
                     scheduleTask2MoveSession2FirstContainer(sessionId, false);
                 }
@@ -644,7 +651,7 @@ final class SessionData {
 
         for (Iterator<SessionMap> iterator = longTermList.iterator(); null == control && iterator.hasNext();) {
             control = iterator.next().getBySessionId(sessionId);
-            if (null != control) {
+            if (!peek && null != control) {
                 scheduleTask2MoveSession2FirstContainer(sessionId, true);
             }
         }
@@ -669,7 +676,7 @@ final class SessionData {
             return null;
         }
 
-        final SessionControl sessionControl = getSession(sessionId);
+        final SessionControl sessionControl = getSession(sessionId, false);
         if (null == sessionControl) {
             LOG.error("Unable to get session for sessionId: {}.", sessionId);
             SessionHandler.clearSession(sessionId, true);

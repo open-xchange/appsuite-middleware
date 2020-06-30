@@ -57,6 +57,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CalendarAccountField}
@@ -105,7 +106,7 @@ public class CalendarAccountField extends FolderField {
     }
 
     @Override
-    public Object write(FolderProperty property) {
+    public Object write(FolderProperty property, ServerSession session) {
         if (null != property) {
             try {
                 return writeAccount((CalendarAccount) property.getValue());

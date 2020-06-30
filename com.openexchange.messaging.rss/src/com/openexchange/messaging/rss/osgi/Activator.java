@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.rss.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.rss.RSSMessagingService;
@@ -62,23 +63,31 @@ import com.openexchange.proxy.ProxyRegistry;
  */
 public class Activator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return null;
+        return new Class<?>[] { ConfigurationService.class };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
+        	Services.setServiceLookup(this);
             track(HtmlService.class, new HTMLRegistryCustomizer(context));
             track(ProxyRegistry.class, new ProxyRegistryCustomizer(context));
             openTrackers();
             registerService(MessagingService.class, new RSSMessagingService(), null);
         } catch (Exception x) {
-            LOG.error("", x);
+            LoggerHolder.LOG.error("", x);
             throw x;
         }
     }

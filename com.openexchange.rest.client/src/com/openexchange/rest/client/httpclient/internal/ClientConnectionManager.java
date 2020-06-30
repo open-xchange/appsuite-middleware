@@ -76,7 +76,7 @@ import com.openexchange.metrics.types.Counter;
 import com.openexchange.rest.client.osgi.RestClientServices;
 
 /**
- * 
+ *
  * {@link ClientConnectionManager}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -90,6 +90,13 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
     private final AtomicBoolean metricsInitialized;
     private volatile IdleConnectionCloser idleConnectionCloser;
 
+    /**
+     * Initializes a new {@link ClientConnectionManager}.
+     *
+     * @param monitoringId The monitoring identifier
+     * @param socketFactoryRegistry The socket factory registry to use
+     * @param keepAliveMonitorInterval The keep-alive monitor interval in seconds
+     */
     public ClientConnectionManager(MonitoringId monitoringId, Registry<ConnectionSocketFactory> socketFactoryRegistry, int keepAliveMonitorInterval) {
         super(socketFactoryRegistry);
         this.monitoringId = monitoringId;
@@ -181,8 +188,8 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
         try {
             IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
             if (null != idleConnectionClose) {
-                idleConnectionClose.stop();
                 this.idleConnectionCloser = null;
+                idleConnectionClose.stop();
             }
             shuttingDown.set(true);
             super.shutdown();
@@ -192,6 +199,10 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
     }
 
     private void initPoolMetrics(MetricService metrics) {
+        if (monitoringId == MonitoringId.getNoop()) {
+            return;
+        }
+
         List<MetricDescriptor> descriptors = getPoolMetricDescriptors();
         if (MonitoringRegistry.getInstance().hasInstance(monitoringId)) {
             descriptors.forEach(d -> metrics.removeMetric(d));
@@ -239,7 +250,7 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
 
     Counter getErrorCounter(String reason) {
         MetricService metrics = RestClientServices.getOptionalService(MetricService.class);
-        if (metrics == null) {
+        if (metrics == null || monitoringId == MonitoringId.getNoop()) {
             return NoopCounter.getInstance();
         }
 

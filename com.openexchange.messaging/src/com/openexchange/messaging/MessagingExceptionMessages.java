@@ -99,6 +99,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // Invalid OAuth account specified.
     public static final String INVALID_OAUTH_ACCOUNT_MSG = "Invalid OAuth account specified.";
 
+    // The account configuration is invalid.
+    public static final String INVALID_ACCOUNT_CONFIG_MSG = "The account configuration is invalid.";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */

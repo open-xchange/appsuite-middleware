@@ -916,7 +916,7 @@ public final class FolderWriter {
         @Override
         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
             final FolderProperty property = folder.getProperties().get(field);
-            jsonPutter.put(jsonPutter.withKey() ? name : null, field.write(property));
+            jsonPutter.put(jsonPutter.withKey() ? name : null, field.write(property, session));
         }
 
     }
