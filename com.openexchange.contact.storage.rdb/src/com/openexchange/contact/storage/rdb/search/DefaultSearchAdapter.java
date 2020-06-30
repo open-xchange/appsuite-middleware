@@ -196,6 +196,14 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
         return columnlabel + " IN (" + Tools.toCSV(folderIDs) + ")";
     }
 
+    protected static String getUserIDsClause(int[] userIDs) throws OXException {
+        String columnlabel = Mappers.CONTACT.get(ContactField.INTERNAL_USERID).getColumnLabel();
+        if (1 == userIDs.length) {
+            return columnlabel + "=" + userIDs[0];
+        }
+        return columnlabel + " IN (" + Tools.toCSV(userIDs) + ")";
+    }
+
 	protected static String getEMailAutoCompleteClause() throws OXException {
 		return getEMailAutoCompleteClause(false);
 	}

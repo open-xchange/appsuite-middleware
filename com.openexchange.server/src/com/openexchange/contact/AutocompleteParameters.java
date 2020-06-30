@@ -88,6 +88,12 @@ public class AutocompleteParameters implements Map<String, Object> {
 
     public static final String USER_ID = "user_id";
 
+    /**
+     * May hold an <code>int</code>-Array of those user identifiers the search should be restricted to, i.e. only contacts whose internal
+     * user id matches one of them will be matched.
+     */
+    public static final String MATCH_USER_IDS = "match_user_ids";
+
 	private final Map<String, Object> parameters = new HashMap<String, Object>();
 	private List<OXException> warnings;
 
