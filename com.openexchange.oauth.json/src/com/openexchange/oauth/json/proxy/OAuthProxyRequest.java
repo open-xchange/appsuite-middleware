@@ -49,17 +49,21 @@
 
 package com.openexchange.oauth.json.proxy;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -68,6 +72,202 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 public class OAuthProxyRequest {
+
+    /** The scheme for HTTP protocol */
+    static final String SCHEME_HTTP = "http";
+
+    /** The scheme for HTTPS protocol */
+    static final String SCHEME_HTTPS = "https";
+
+    /** The scheme set for HTTP and HTTPS protocols */
+    static final Set<String> SCHEMES_HTTP_AND_HTTPS = ImmutableSet.<String> builder().add(SCHEME_HTTP).add(SCHEME_HTTPS).build();
+
+    /** A matcher for a certain service */
+    private static interface ServiceMatcher {
+
+        /**
+         * Checks if this matcher accepts given URL.
+         *
+         * @param url The URL to check
+         * @return <code>true</code> if URL s accepted; otherwise <code>false</code>
+         * @throws OXException If URL cannot be checked
+         */
+        boolean accept(String url) throws OXException;
+
+        /**
+         * Gets the API this matcher belongs to
+         *
+         * @return The API
+         */
+        API getAPI();
+
+    } // End of interface ServiceMatcher
+
+    private static abstract class HostAndSchemeServiceMatcher implements ServiceMatcher {
+
+        /**
+         * Initializes a new {@link UriServiceMatcher}.
+         */
+        protected HostAndSchemeServiceMatcher() {
+            super();
+        }
+
+        /**
+         * Checks if given host is accepted.
+         *
+         * @param host The host to check
+         * @return <code>true</code> if host is accepted; otherwise <code>false</code>
+         */
+        protected abstract boolean acceptHost(String host);
+
+        /**
+         * Checks if given scheme is accepted.
+         *
+         * @param scheme The scheme to check
+         * @return <code>true</code> if scheme is accepted; otherwise <code>false</code>
+         */
+        protected abstract boolean acceptScheme(String scheme);
+
+        @Override
+        public boolean accept(String url) throws OXException {
+            try {
+                URI uri = new URI(url);
+                return acceptScheme(Strings.asciiLowerCase(uri.getScheme())) && acceptHost(Strings.asciiLowerCase(uri.getHost()));
+            } catch (URISyntaxException e) {
+                throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(e, url, getAPI());
+            }
+        }
+
+    } // End of abstract class HostAndSchemeServiceMatcher
+
+    private static final Map<API, List<ServiceMatcher>> WHITELIST = ImmutableMap.<API, List<ServiceMatcher>> builder()
+        .put(API.LINKEDIN, Collections.<ServiceMatcher> singletonList(new HostAndSchemeServiceMatcher() {
+
+            @Override
+            protected boolean acceptScheme(String scheme) {
+                return SCHEME_HTTP.equals(scheme);
+            }
+
+            @Override
+            protected boolean acceptHost(String host) {
+                return "api.linkedin.com".equals(host);
+            }
+
+            @Override
+            public API getAPI() {
+                return API.LINKEDIN;
+            }
+        }))
+        .put(API.TWITTER, Collections.<ServiceMatcher> singletonList(new HostAndSchemeServiceMatcher() {
+
+            @Override
+            protected boolean acceptScheme(String scheme) {
+                return scheme != null && SCHEMES_HTTP_AND_HTTPS.contains(scheme);
+            }
+
+            @Override
+            protected boolean acceptHost(String host) {
+                return "twitter.com".equals(host) || host.endsWith(".twitter.com");
+            }
+
+            @Override
+            public API getAPI() {
+                return API.TWITTER;
+            }
+        }))
+        .put(API.YAHOO, Collections.<ServiceMatcher> singletonList(new HostAndSchemeServiceMatcher() {
+
+            @Override
+            protected boolean acceptScheme(String scheme) {
+                return scheme != null && SCHEMES_HTTP_AND_HTTPS.contains(scheme);
+            }
+
+            @Override
+            protected boolean acceptHost(String host) {
+                return "yahoo.com".equals(host) || host.endsWith(".yahoo.com") || "yahooapis.com".equals(host) || host.endsWith(".yahooapis.com");
+            }
+
+            @Override
+            public API getAPI() {
+                return API.YAHOO;
+            }
+        }))
+        .put(API.TUMBLR, Collections.<ServiceMatcher> singletonList(new HostAndSchemeServiceMatcher() {
+
+            @Override
+            protected boolean acceptScheme(String scheme) {
+                return scheme != null && SCHEMES_HTTP_AND_HTTPS.contains(scheme);
+            }
+
+            @Override
+            protected boolean acceptHost(String host) {
+                return host.endsWith(".tumblr.com");
+            }
+
+            @Override
+            public API getAPI() {
+                return API.TUMBLR;
+            }
+        }))
+        .put(API.FLICKR, Collections.<ServiceMatcher> singletonList(new HostAndSchemeServiceMatcher() {
+
+            @Override
+            protected boolean acceptScheme(String scheme) {
+                return scheme != null && SCHEMES_HTTP_AND_HTTPS.contains(scheme);
+            }
+
+            @Override
+            protected boolean acceptHost(String host) {
+                return host.endsWith(".flickr.com");
+            }
+
+            @Override
+            public API getAPI() {
+                return API.FLICKR;
+            }
+        }))
+        .put(API.XING, Collections.<ServiceMatcher> singletonList(new HostAndSchemeServiceMatcher() {
+
+            @Override
+            protected boolean acceptScheme(String scheme) {
+                return SCHEME_HTTPS.equals(scheme);
+            }
+
+            @Override
+            protected boolean acceptHost(String host) {
+                return host.equals("api.xing.com");
+            }
+
+            @Override
+            public API getAPI() {
+                return API.XING;
+            }
+        }))
+        .put(API.GOOGLE, Collections.<ServiceMatcher> singletonList(new HostAndSchemeServiceMatcher() {
+
+            @Override
+            protected boolean acceptScheme(String scheme) {
+                return SCHEME_HTTPS.equals(scheme);
+            }
+
+            @Override
+            protected boolean acceptHost(String host) {
+                return host.equals("www.googleapis.com");
+            }
+
+            @Override
+            public API getAPI() {
+                return API.GOOGLE;
+            }
+        }))
+        .build();
+
+    public static enum HTTPMethod {
+        GET, PUT, POST, DELETE
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
 	private final AJAXRequestData req;
 	private final OAuthService oauthService;
 	private boolean analyzed;
@@ -77,21 +277,6 @@ public class OAuthProxyRequest {
 	private String url;
 	private String body;
 	private final ServerSession session;
-
-	protected Map<API, List<Pattern>> whitelist = new HashMap<API,List<Pattern>>(){{
-		put(API.FACEBOOK, 	Arrays.asList(Pattern.compile("^https:\\/\\/graph\\.facebook\\.com")));
-		put(API.LINKEDIN, 	Arrays.asList(Pattern.compile("^http:\\/\\/api\\.linkedin\\.com")));
-		put(API.TWITTER,	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?twitter.com")));
-		put(API.YAHOO, 	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?yahoo(apis)?\\.com")));
-		put(API.TUMBLR, Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.tumblr\\.com")));
-		put(API.FLICKR, Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.flickr\\.com")));
-		put(API.XING, Arrays.asList(Pattern.compile("^https:\\/\\/api\\.xing\\.com")));
-		put(API.GOOGLE, Arrays.asList(Pattern.compile("^https:\\/\\/www\\.googleapis\\.com")));
-	}};
-
-	public static enum HTTPMethod {
-		GET, PUT, POST, DELETE
-	}
 
 	public OAuthProxyRequest(AJAXRequestData req, ServerSession session, OAuthService oauthService) {
 		this.req = req;
@@ -204,17 +389,19 @@ public class OAuthProxyRequest {
 		return url;
 	}
 
-	private void whitelist(String checkMe) throws OXException {
-		API proposedApi = getAccount().getAPI();
-		List<Pattern> patterns = whitelist.get(proposedApi);
-		if(patterns == null){
-			throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi); //TODO: debatable
-		}
-		for(Pattern p: patterns){
-			if(p.matcher(checkMe).find()){
-				return;
-			}
-		}
-		throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi);
-	}
+
+    private void whitelist(String checkMe) throws OXException {
+        API proposedApi = getAccount().getAPI();
+        List<ServiceMatcher> matchers = WHITELIST.get(proposedApi);
+        if (matchers == null) {
+            throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi.name()); //TODO: debatable
+        }
+        for (ServiceMatcher matcher : matchers) {
+            if (matcher.accept(checkMe)) {
+                return;
+            }
+        }
+        throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi.name());
+    }
+
 }
