@@ -59,6 +59,7 @@ import com.openexchange.conversion.SimpleData;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CalendarAccountErrorField}
@@ -108,11 +109,11 @@ public class CalendarAccountErrorField extends FolderField {
     }
 
     @Override
-    public Object write(FolderProperty property) {
+    public Object write(FolderProperty property, ServerSession session) {
         if (null != property) {
             try {
                 DataHandler dataHandler = ServerServiceRegistry.getServize(ConversionService.class).getDataHandler(DataHandlers.OXEXCEPTION2JSON);
-                ConversionResult result = dataHandler.processData(new SimpleData<Object>(property.getValue()), new DataArguments(), null);
+                ConversionResult result = dataHandler.processData(new SimpleData<Object>(property.getValue()), new DataArguments(), session);
                 Object data = result.getData();
                 if (null != data && JSONObject.class.isInstance(data)) {
                     ((JSONObject) data).remove("error_stack");

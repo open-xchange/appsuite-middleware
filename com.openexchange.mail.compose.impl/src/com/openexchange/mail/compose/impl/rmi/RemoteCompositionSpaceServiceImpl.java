@@ -52,6 +52,7 @@ package com.openexchange.mail.compose.impl.rmi;
 import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage.getDedicatedFileStorage;
+import java.net.URI;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -59,6 +60,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +72,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.java.util.Pair;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.KnownAttachmentStorageType;
 import com.openexchange.mail.compose.rmi.RemoteCompositionSpaceService;
@@ -125,123 +128,154 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
 
     private void deleteOrphanedReferences(int fileStorageId, List<Integer> distinctContextsPerSchema, DatabaseService databaseService) throws  OXException {
         for (Integer representativeContextId : distinctContextsPerSchema) {
-            deleteOrphanedReferences(fileStorageId, representativeContextId.intValue(), databaseService);
+            deleteOrphanedReferencesForSchema(fileStorageId, representativeContextId.intValue(), databaseService);
         }
     }
 
-    private void deleteOrphanedReferences(int fileStorageId, int representativeContextId, DatabaseService databaseService) throws OXException {
-        Connection con = databaseService.getReadOnly(representativeContextId);
-        boolean readOnly = true;
+    private void deleteOrphanedReferencesForSchema(int fileStorageId, int representativeContextId, DatabaseService databaseService) throws OXException {
+        Connection writeCon = null;
+        Connection readCon = databaseService.getReadOnly(representativeContextId);
         try {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                if (!columnExists(con, "compositionSpaceAttachmentMeta", "dedicatedFileStorageId") || !columnExists(con, "compositionSpaceKeyStorage", "dedicatedFileStorageId")) {
+                if (!columnExists(readCon, "compositionSpaceAttachmentMeta", "dedicatedFileStorageId") || !columnExists(readCon, "compositionSpaceKeyStorage", "dedicatedFileStorageId")) {
                     return;
                 }
 
-                stmt = con.prepareStatement("SELECT cid, refId FROM compositionSpaceAttachmentMeta WHERE dedicatedFileStorageId=? AND refType="+KnownAttachmentStorageType.DEDICATED_FILE_STORAGE.getType());
-                stmt.setInt(1, fileStorageId);
-                rs = stmt.executeQuery();
-                Set<Integer> contextIds = new HashSet<Integer>();
-                Map<Integer, Set<String>> attachmentIdentifiers = new HashMap<>();
-                while (rs.next()) {
-                    Integer contextId = I(rs.getInt(1));
-                    contextIds.add(contextId);
-                    Set<String> storageIdentifiers = attachmentIdentifiers.get(contextId);
-                    if (storageIdentifiers == null) {
-                        storageIdentifiers = new HashSet<String>();
-                        attachmentIdentifiers.put(contextId, storageIdentifiers);
+                Set<Integer> consideredContextIds = new HashSet<Integer>();
+                Map<Integer, Set<String>> attachmentIdentifiers;
+                {
+                    stmt = readCon.prepareStatement("SELECT cid, refId FROM compositionSpaceAttachmentMeta WHERE dedicatedFileStorageId=? AND refType=" + KnownAttachmentStorageType.DEDICATED_FILE_STORAGE.getType());
+                    stmt.setInt(1, fileStorageId);
+                    rs = stmt.executeQuery();
+                    attachmentIdentifiers = new HashMap<>();
+                    while (rs.next()) {
+                        Integer contextId = I(rs.getInt(1));
+                        consideredContextIds.add(contextId);
+                        Set<String> storageIdentifiers = attachmentIdentifiers.get(contextId);
+                        if (storageIdentifiers == null) {
+                            storageIdentifiers = new HashSet<String>();
+                            attachmentIdentifiers.put(contextId, storageIdentifiers);
+                        }
+                        storageIdentifiers.add(rs.getString(2));
                     }
-                    storageIdentifiers.add(rs.getString(2));
+                    Databases.closeSQLStuff(rs, stmt);
+                    stmt = null;
+                    rs = null;
                 }
-                Databases.closeSQLStuff(rs, stmt);
-                stmt = null;
-                rs = null;
 
-                stmt = con.prepareStatement("SELECT cid, refId FROM compositionSpaceKeyStorage WHERE dedicatedFileStorageId=?");
-                stmt.setInt(1, fileStorageId);
-                rs = stmt.executeQuery();
-                Map<Integer, Set<String>> keyIdentifiers = new HashMap<>();
-                while (rs.next()) {
-                    Integer contextId = I(rs.getInt(1));
-                    contextIds.add(contextId);
-                    Set<String> storageIdentifiers = keyIdentifiers.get(contextId);
-                    if (storageIdentifiers == null) {
-                        storageIdentifiers = new HashSet<String>();
-                        keyIdentifiers.put(contextId, storageIdentifiers);
+                Map<Integer, Set<String>> keyIdentifiers;
+                {
+                    stmt = readCon.prepareStatement("SELECT cid, refId FROM compositionSpaceKeyStorage WHERE dedicatedFileStorageId=?");
+                    stmt.setInt(1, fileStorageId);
+                    rs = stmt.executeQuery();
+                    keyIdentifiers = new HashMap<>();
+                    while (rs.next()) {
+                        Integer contextId = I(rs.getInt(1));
+                        consideredContextIds.add(contextId);
+                        Set<String> storageIdentifiers = keyIdentifiers.get(contextId);
+                        if (storageIdentifiers == null) {
+                            storageIdentifiers = new HashSet<String>();
+                            keyIdentifiers.put(contextId, storageIdentifiers);
+                        }
+                        storageIdentifiers.add(unobfuscate(rs.getString(2)));
                     }
-                    storageIdentifiers.add(unobfuscate(rs.getString(2)));
+                    Databases.closeSQLStuff(rs, stmt);
+                    stmt = null;
+                    rs = null;
                 }
-                Databases.closeSQLStuff(rs, stmt);
-                stmt = null;
-                rs = null;
 
-                for (Integer contextId : contextIds) {
-                    FileStorage fileStorage = getDedicatedFileStorage(fileStorageId, contextId.intValue()).getFirst();
+                // Release read-only database connection since no more needed
+                databaseService.backReadOnly(representativeContextId, readCon);
+                readCon = null;
+
+                // Create a map to collect for a certain (dedicated) file storage all contexts that use that storage
+                Map<URI, FileStorageAndContexts> fileStorage2Contexts = new HashMap<>();
+                for (Integer contextId : consideredContextIds) {
+                    Pair<FileStorage, URI> fileStorageAndUri = getDedicatedFileStorage(fileStorageId, contextId.intValue());
+                    URI fileStorageUri = fileStorageAndUri.getSecond();
+
+                    FileStorageAndContexts fileStorageAndContexts = fileStorage2Contexts.get(fileStorageUri);
+                    if (fileStorageAndContexts == null) {
+                        // No such file storage associated with determined URI, yet
+                        FileStorage fileStorage = fileStorageAndUri.getFirst();
+                        fileStorageAndContexts = new FileStorageAndContexts(fileStorage, contextId);
+                        fileStorage2Contexts.put(fileStorageUri, fileStorageAndContexts);
+                    } else {
+                        // File storage already used by another context. So just add current context
+                        fileStorageAndContexts.addContextId(contextId);
+                    }
+                }
+
+                for (FileStorageAndContexts fileStorageAndContexts : fileStorage2Contexts.values()) {
+                    FileStorage fileStorage = fileStorageAndContexts.fileStorage;
 
                     SortedSet<String> fileList = fileStorage.getFileList();
 
                     {
                         Set<String> nonReferenced = new HashSet<String>(fileList);
-                        {
-                            Set<String> storageIdentifiers = attachmentIdentifiers.get(contextId);
-                            if (storageIdentifiers != null) {
-                                nonReferenced.removeAll(storageIdentifiers);
+                        for (Integer contextId : fileStorageAndContexts.contextIds) {
+                            {
+                                Set<String> storageIdentifiers = attachmentIdentifiers.get(contextId);
+                                if (storageIdentifiers != null) {
+                                    nonReferenced.removeAll(storageIdentifiers);
+                                }
+                            }
+                            {
+                                Set<String> storageIdentifiers = keyIdentifiers.get(contextId);
+                                if (storageIdentifiers != null) {
+                                    nonReferenced.removeAll(storageIdentifiers);
+                                }
                             }
                         }
-                        {
-                            Set<String> storageIdentifiers = keyIdentifiers.get(contextId);
-                            if (storageIdentifiers != null) {
-                                nonReferenced.removeAll(storageIdentifiers);
-                            }
-                        }
+
                         if (!nonReferenced.isEmpty()) {
                             fileStorage.deleteFiles(nonReferenced.toArray(new String[nonReferenced.size()]));
                         }
                     }
 
                     {
-                        Set<String> nonExisting = new HashSet<String>(fileList);
-                        {
-                            Set<String> storageIdentifiers = attachmentIdentifiers.get(contextId);
-                            if (storageIdentifiers != null) {
-                                nonExisting.addAll(storageIdentifiers);
+                        Set<String> nonExisting = new HashSet<String>();
+                        for (Integer contextId : fileStorageAndContexts.contextIds) {
+                            {
+                                Set<String> storageIdentifiers = attachmentIdentifiers.get(contextId);
+                                if (storageIdentifiers != null) {
+                                    nonExisting.addAll(storageIdentifiers);
+                                }
                             }
-                        }
-                        {
-                            Set<String> storageIdentifiers = keyIdentifiers.get(contextId);
-                            if (storageIdentifiers != null) {
-                                nonExisting.addAll(storageIdentifiers);
+                            {
+                                Set<String> storageIdentifiers = keyIdentifiers.get(contextId);
+                                if (storageIdentifiers != null) {
+                                    nonExisting.addAll(storageIdentifiers);
+                                }
                             }
                         }
                         nonExisting.removeAll(fileList);
+
                         if (!nonExisting.isEmpty()) {
-                            databaseService.backReadOnly(representativeContextId, con);
-                            con = null;
-                            con = databaseService.getWritable(representativeContextId);
-                            readOnly = false;
+                            if (writeCon == null) {
+                                writeCon = databaseService.getWritable(representativeContextId);
+                            }
 
                             for (String nonExistingStorageIdentifier : nonExisting) {
-                                stmt = con.prepareStatement("DELETE FROM compositionSpaceAttachmentMeta WHERE cid=? AND dedicatedFileStorageId=? AND refType="+KnownAttachmentStorageType.DEDICATED_FILE_STORAGE.getType() + " AND refId=?");
-                                stmt.setInt(1, contextId.intValue());
-                                stmt.setInt(2, fileStorageId);
-                                stmt.setString(3, nonExistingStorageIdentifier);
+                                stmt = writeCon.prepareStatement("DELETE FROM compositionSpaceAttachmentMeta WHERE dedicatedFileStorageId=? AND refType=" + KnownAttachmentStorageType.DEDICATED_FILE_STORAGE.getType() + " AND refId=?");
+                                stmt.setInt(1, fileStorageId);
+                                stmt.setString(2, nonExistingStorageIdentifier);
                                 stmt.executeUpdate();
                                 Databases.closeSQLStuff(stmt);
                                 stmt = null;
 
-                                stmt = con.prepareStatement("DELETE FROM compositionSpaceKeyStorage WHERE cid=? AND dedicatedFileStorageId=? AND refId=?");
-                                stmt.setInt(1, contextId.intValue());
-                                stmt.setInt(2, fileStorageId);
-                                stmt.setString(3, obfuscate(nonExistingStorageIdentifier));
+                                stmt = writeCon.prepareStatement("DELETE FROM compositionSpaceKeyStorage WHERE dedicatedFileStorageId=? AND refId=?");
+                                stmt.setInt(1, fileStorageId);
+                                stmt.setString(2, obfuscate(nonExistingStorageIdentifier));
                                 stmt.executeUpdate();
                                 Databases.closeSQLStuff(stmt);
                                 stmt = null;
                             }
                         }
                     }
-                } // End of loop traversing context identifiers
+                }
             } catch (SQLSyntaxErrorException e) {
                 // Assume that column 'dedicatedFileStorageId' does not exist in context-associated schema. Therefore ignore.
             } catch (SQLException e) {
@@ -250,10 +284,11 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
                 Databases.closeSQLStuff(rs, stmt);
             }
         } finally {
-            if (readOnly) {
-                databaseService.backReadOnly(representativeContextId, con);
-            } else {
-                databaseService.backWritable(representativeContextId, con);
+            if (readCon != null) {
+                databaseService.backReadOnly(representativeContextId, readCon);
+            }
+            if (writeCon != null) {
+                databaseService.backWritable(representativeContextId, writeCon);
             }
         }
     }
@@ -319,6 +354,23 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
             closeSQLStuff(rs);
         }
         return retval;
+    }
+
+    private static class FileStorageAndContexts {
+
+        final FileStorage fileStorage;
+        final List<Integer> contextIds;
+
+        FileStorageAndContexts(FileStorage fileStorage, Integer initialContextId) {
+            super();
+            this.fileStorage = fileStorage;
+            this.contextIds = new ArrayList<>(2);
+            contextIds.add(initialContextId);
+        }
+
+        void addContextId(Integer contextId) {
+            contextIds.add(contextId);
+        }
     }
 
 }
