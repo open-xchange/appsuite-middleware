@@ -131,6 +131,8 @@ public class ContactSearchObject extends SearchObject {
 
     private boolean exactMatch = false;
 
+    private int[] userIds = null;
+
     public ContactSearchObject() {
         super();
     }
@@ -460,6 +462,14 @@ public class ContactSearchObject extends SearchObject {
      */
     public void setExactMatch(boolean exactMatch) {
         this.exactMatch = exactMatch;
+    }
+
+    public int[] getUserIds() {
+        return userIds;
+    }
+
+    public void setUserIds(int[] userIds) {
+        this.userIds = userIds;
     }
 
 }
