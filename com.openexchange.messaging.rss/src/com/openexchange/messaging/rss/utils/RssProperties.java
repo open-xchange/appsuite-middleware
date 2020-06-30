@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.rss.util;
+package com.openexchange.messaging.rss.utils;
 
 import java.net.InetAddress;
 import java.net.URI;
@@ -59,12 +59,12 @@ import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
+import com.openexchange.messaging.rss.osgi.Services;
 import com.openexchange.net.HostList;
-import com.openexchange.rss.osgi.Services;
 
 /**
- *
- * {@link RssProperties}
+ * 
+ * {@link RssProperties} - copy of the RssProperties from c.o.rss
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
@@ -182,24 +182,7 @@ public class RssProperties {
         URI uri;
         try {
             uri = new URI(uriString);
-            int port = uri.getPort();
-            if (port < 0) {
-                String scheme = Strings.asciiLowerCase(uri.getScheme());
-                if (Strings.isEmpty(scheme)) {
-                    // Assume HTTP as default
-                    port = 80;
-                } else {
-                    scheme = scheme.trim();
-                    if ("http".equals(scheme)) {
-                        port = 80;
-                    } else if ("https".equals(scheme)) {
-                        port = 443;
-                    }  else {
-                        port = 80;
-                    }
-                }
-            }
-            return !isAllowed(port) || isBlacklisted(uri.getHost()) || !isAllowedScheme(uri.getScheme()) || !isValid(uri);
+            return !isAllowed(uri.getPort()) || isBlacklisted(uri.getHost()) || !isAllowedScheme(uri.getScheme()) || !isValid(uri);
         } catch (URISyntaxException e) {
             org.slf4j.LoggerFactory.getLogger(RssProperties.class).debug("Given feed URL \"{}\" appears not to be valid.", uriString, e);
             return true;
