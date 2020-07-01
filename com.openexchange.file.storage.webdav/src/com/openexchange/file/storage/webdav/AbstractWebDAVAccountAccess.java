@@ -51,8 +51,24 @@ package com.openexchange.file.storage.webdav;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthSchemeProvider;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.protocol.HttpContext;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -64,6 +80,7 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.webdav.utils.WebDAVEndpointConfig;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+import com.openexchange.webdav.client.BearerSchemeFactory;
 import com.openexchange.webdav.client.WebDAVClient;
 
 /**
@@ -115,46 +132,97 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
 
     @Override
     public void connect() throws OXException {
-        webdavClient = connectInternal().orElse(connectViaBasicAuth());
-    }
-
-    /**
-     * Connects to the endpoint using basic auth
-     *
-     * @return The {@link WebDAVClient} or null
-     * @throws OXException in case the root url is invalid
-     */
-    private WebDAVClient connectViaBasicAuth() throws OXException {
         Map<String, Object> configuration = account.getConfiguration();
         String configUrl = (String) configuration.get(WebDAVFileStorageConstants.WEBDAV_URL);
         if (Strings.isEmpty(configUrl)) {
             throw FileStorageExceptionCodes.INVALID_URL.create("not provided", "empty");
         }
-        String login = (String) configuration.get("login");
-        if (Strings.isEmpty(login)) {
-            throw FileStorageExceptionCodes.MISSING_CONFIG.create("login", account.getId());
-        }
-        String password = (String) configuration.get("password");
-        if (Strings.isEmpty(login)) {
-            throw FileStorageExceptionCodes.MISSING_CONFIG.create("password", account.getId());
-        }
         WebDAVEndpointConfig config = new WebDAVEndpointConfig.Builder(session, getWebDAVFileStorageService(), configUrl).build();
+        HttpContext context = getContextByAuthScheme(configuration, config.getUrl());
+
         try {
-            return getWebDAVFileStorageService().getClientFactory().create(getSession(), getAccountId(), new URI(config.getUrl()), login, password, optHttpClientId());
+            webdavClient = getWebDAVFileStorageService().getClientFactory().create(getSession(), getAccountId(), new URI(config.getUrl()), optHttpClientId(), context);
         } catch (URISyntaxException e) {
             throw FileStorageExceptionCodes.INVALID_URL.create(configUrl, e.getMessage());
         }
     }
 
     /**
-     * Provides an {@link WebDAVClient}.
+     * Creates an {@link HttpClientContext} for bearer authentication
      *
-     * @return The {@link WebDAVClient} or {@link Optional#empty()} if not applicable
-     * @throws OXException In case of an error while connecting
+     * @param configuration The configuration
+     * @return The created {@link HttpClientContext}
      */
-    @SuppressWarnings("unused")
-    protected Optional<WebDAVClient> connectInternal() throws OXException {
-        return Optional.empty();
+    protected @NonNull HttpContext setupBearerContext(Map<String, Object> configuration) {
+        String oauth = (String) configuration.get("oauth");
+        HttpClientContext context = HttpClientContext.create();
+        CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        credsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(oauth, null));
+
+        context.setCredentialsProvider(credsProvider);
+        context.setAuthSchemeRegistry(RegistryBuilder.<AuthSchemeProvider> create()
+            .register("Bearer", new BearerSchemeFactory())
+            .build());
+        context.setRequestConfig(RequestConfig.custom()
+            .setTargetPreferredAuthSchemes(Collections.unmodifiableList(Arrays.asList(
+                "Bearer")))
+            .build());
+        return context;
+    }
+
+    /**
+     * Gets the {@link HttpContext} based on the configured auth scheme
+     *
+     * @param configuration The configuration
+     * @param host The host uri
+     * @return The {@link HttpContext}
+     * @throws OXException in case the host uri is invalid
+     */
+    protected HttpContext getContextByAuthScheme(Map<String, Object> configuration, String host) throws OXException {
+        // Check which authentication mechanism should be used
+        WebDAVAuthScheme authScheme = WebDAVAuthScheme.getByName(configuration.getOrDefault("authScheme", "Basic").toString());
+        switch (authScheme) {
+            case BEARER:
+                return setupBearerContext(configuration);
+            case BASIC:
+            default:
+                return setupBasicAuthContext(configuration, host);
+        }
+    }
+
+    /**
+     * Creates an {@link HttpClientContext} for basic auth authentication
+     *
+     * @param configuration The configuration
+     * @param host The host
+     * @return The created {@link HttpClientContext}
+     * @throws OXException in case the host uri is invalid
+     */
+    protected @NonNull HttpClientContext setupBasicAuthContext(Map<String, Object> configuration, String host) throws OXException {
+        String login = (String) configuration.get("login");
+        String password = (String) configuration.get("password");
+
+        if (Strings.isEmpty(login) || Strings.isEmpty(password)) {
+            throw FileStorageExceptionCodes.MISSING_CONFIG.create(getService().getId(), getAccountId());
+        }
+
+        try {
+            URI uri = new URI(host);
+            HttpHost targetHost = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
+            CredentialsProvider credsProvider = new BasicCredentialsProvider();
+            credsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+
+            AuthCache authCache = new BasicAuthCache();
+            authCache.put(targetHost, new BasicScheme());
+
+            // Add AuthCache to the execution context
+            HttpClientContext context = HttpClientContext.create();
+            context.setCredentialsProvider(credsProvider);
+            context.setAuthCache(authCache);
+            return context;
+        } catch (URISyntaxException e) {
+            throw FileStorageExceptionCodes.INVALID_URL.create(host, e.getMessage(), e);
+        }
     }
 
     @Override
