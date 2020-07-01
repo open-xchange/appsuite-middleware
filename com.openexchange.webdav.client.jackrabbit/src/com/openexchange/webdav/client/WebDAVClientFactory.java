@@ -52,7 +52,9 @@ package com.openexchange.webdav.client;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.protocol.HttpContext;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.client.jackrabbit.WebDAVClientImpl;
@@ -73,7 +75,7 @@ public interface WebDAVClientFactory {
      * @return An initialized WebDAV client
      * @throws If WebDAV client cannot be created
      */
-    WebDAVClient create(CloseableHttpClient client, URI baseUrl) throws OXException;
+    WebDAVClient create(HttpClient client, URI baseUrl) throws OXException;
 
     /**
      * Initializes a new {@link WebDAVClientImpl}.
@@ -83,9 +85,37 @@ public interface WebDAVClientFactory {
      * @return An initialized WebDAV client
      * @throws If WebDAV client cannot be created
      */
-    default WebDAVClient create(CloseableHttpClient client, String baseUrl) throws OXException {
+    default WebDAVClient create(HttpClient client, String baseUrl) throws OXException {
         try {
             return create(client, new URI(baseUrl));
+        } catch (URISyntaxException e) {
+            throw WebDAVClientExceptionCodes.UNABLE_TO_PARSE_URI.create(baseUrl, e);
+        }
+    }
+
+    /**
+     * Initializes a new {@link WebDAVClientImpl}.
+     *
+     * @param client The underlying HTTP client to use
+     * @param context The underlying HTTP context to use
+     * @param baseUrl The URL of the WebDAV host to connect to
+     * @return An initialized WebDAV client
+     * @throws If WebDAV client cannot be created
+     */
+    WebDAVClient create(HttpClient client, HttpContext context, URI baseUrl) throws OXException;
+
+    /**
+     * Initializes a new {@link WebDAVClientImpl}.
+     *
+     * @param client The underlying HTTP client to use
+     * @param context The underlying HTTP context to use
+     * @param baseUrl The URL of the WebDAV host to connect to
+     * @return An initialized WebDAV client
+     * @throws If WebDAV client cannot be created
+     */
+    default WebDAVClient create(HttpClient client, HttpContext context, String baseUrl) throws OXException {
+        try {
+            return create(client, context, new URI(baseUrl));
         } catch (URISyntaxException e) {
             throw WebDAVClientExceptionCodes.UNABLE_TO_PARSE_URI.create(baseUrl, e);
         }
@@ -97,13 +127,12 @@ public interface WebDAVClientFactory {
      * @param session The users session
      * @param accountId The account id
      * @param baseUrl The URL of the WebDAV host to connect to
-     * @param login The username to use for authentication
-     * @param password The password to use for authentication
      * @param optClientId The optional http client id to use
+     * @param context The {@link HttpClientContext} to use
      * @return An initialized WebDAV client
      * @throws If WebDAV client cannot be created
      */
-    WebDAVClient create(Session session, String accountId, URI baseUrl, String login, String password, Optional<String> optClientId) throws OXException;
+    WebDAVClient create(Session session, String accountId, URI baseUrl, Optional<String> optClientId, HttpContext context) throws OXException;
 
     /**
      * Initializes a new {@link WebDAVClientImpl}.
@@ -111,14 +140,13 @@ public interface WebDAVClientFactory {
      * @param session The users session
      * @param accountId The account id
      * @param baseUrl The URL of the WebDAV host to connect to
-     * @param login The username to use for authentication
-     * @param password The password to use for authentication
+     * @param context The {@link HttpClientContext} to use
      * @return An initialized WebDAV client
      * @throws If WebDAV client cannot be created
      */
-    default WebDAVClient create(Session session, String accountId, String baseUrl, String login, String password) throws OXException {
+    default WebDAVClient create(Session session, String accountId, String baseUrl, HttpContext context) throws OXException {
         try {
-            return create(session, accountId, new URI(baseUrl), login, password, Optional.empty());
+            return create(session, accountId, new URI(baseUrl), Optional.empty(), context);
         } catch (URISyntaxException e) {
             throw WebDAVClientExceptionCodes.UNABLE_TO_PARSE_URI.create(baseUrl, e);
         }

@@ -68,6 +68,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -109,7 +110,7 @@ public class OwnCloudRestClient {
 
     private final ManagedHttpClient client;
     private final String host;
-    private final HttpClientContext context;
+    private final HttpContext context;
     private final Callable<OCCapabilities> loader;
 
     /**
@@ -119,7 +120,7 @@ public class OwnCloudRestClient {
      * @param host The base path
      * @param context The {@link HttpClientContext} to use for every request or null to use the default one
      */
-    public OwnCloudRestClient(@NonNull ManagedHttpClient client, @NonNull String host, @NonNull HttpClientContext context) {
+    public OwnCloudRestClient(@NonNull ManagedHttpClient client, @NonNull String host, @NonNull HttpContext context) {
         super();
         this.client = client;
         this.host = host;
