@@ -117,15 +117,21 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
             this.parameters.add(StringCollection.prepareForSearch(contactSearch.getPattern(), false, true, true));
 		}
 		/*
-		 * append folders
-		 */
-		stringBuilder.append(" AND ").append(getFolderIDsClause(contactSearch.getFolders()));
+         * append folders & users
+         */
+        if (null != contactSearch.getFolders() && 0 < contactSearch.getFolders().length) {
+            stringBuilder.append(" AND ").append(getFolderIDsClause(contactSearch.getFolders()));
+        }
+        if (null != contactSearch.getUserIds() && 0 < contactSearch.getUserIds().length) {
+            stringBuilder.append(" AND ").append(getFolderIDsClause(contactSearch.getFolders()));
+        }
 	}
 
     private void appendSearchAlternative(ContactSearchObject contactSearch, int contextID, ContactField[] fields, int forUser) throws OXException {
 		Map<ContactField, Object> comparisons = extractComparisons(contactSearch);
 		String contextIDClause = getContextIDClause(contextID);
-		String folderIDsClause = getFolderIDsClause(contactSearch.getFolders());
+        String folderIDsClause = null != contactSearch.getFolders() && 0 < contactSearch.getFolders().length ? getFolderIDsClause(contactSearch.getFolders()) : null;
+        String userIDsClause = null != contactSearch.getUserIds() && 0 < contactSearch.getUserIds().length ? getUserIDsClause(contactSearch.getUserIds()) : null;
         String selectClause = getSelectClause(fields, forUser);
 
 		Iterator<Entry<ContactField, Object>> iterator = comparisons.entrySet().iterator();
@@ -137,19 +143,26 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	             * construct clause using UNION SELECTs
 	             */
                 Entry<ContactField, Object> entry = iterator.next();
-                appendComparison(contactSearch, contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(),
+                appendComparison(contactSearch, contextIDClause, folderIDsClause, userIDsClause, selectClause, entry.getKey(), entry.getValue(),
                     emailAutoComplete, exact);
 	            while (iterator.hasNext()) {
 	                stringBuilder.append(" UNION ");
 	                entry = iterator.next();
-                    appendComparison(contactSearch, contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(), emailAutoComplete, exact);
+                    appendComparison(contactSearch, contextIDClause, folderIDsClause, userIDsClause, selectClause, entry.getKey(), entry.getValue(), emailAutoComplete, exact);
 	            }
 	        } else {
 	            /*
 	             * construct clause using single SELECT
 	             */
-                stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ").append(folderIDsClause).append(" AND ");
+                stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause);
+                if (null != folderIDsClause) {
+                    stringBuilder.append(" AND ").append(folderIDsClause);
+                }
+                if (null != userIDsClause) {
+                    stringBuilder.append(" AND ").append(userIDsClause);
+                }
                 Entry<ContactField, Object> entry = iterator.next();
+                stringBuilder.append(" AND ");
                 appendComparison(entry.getKey(), entry.getValue(), exact);
                 while (iterator.hasNext()) {
                     entry = iterator.next();
@@ -162,9 +175,15 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	        }
 		} else {
 		    /*
-		     * no comparison, just use folders and context id
-		     */
-            stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ").append(folderIDsClause);
+             * no comparison, just use folders/users and context id
+             */
+            stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause);
+            if (null != folderIDsClause) {
+                stringBuilder.append(" AND ").append(folderIDsClause);
+            }
+            if (null != userIDsClause) {
+                stringBuilder.append(" AND ").append(userIDsClause);
+            }
             if (contactSearch.hasImage()) {
                 stringBuilder.append(" AND ").append(IMG_CLAUSE);
             }
@@ -219,11 +238,16 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		}
 	}
 
-    private void appendComparison(ContactSearchObject cso, String contextIDClause, String folderIDsClause, String selectClause, ContactField field, Object value, boolean needsEMail, boolean exact) throws OXException {
+    private void appendComparison(ContactSearchObject cso, String contextIDClause, String folderIDsClause, String userIDsClause, String selectClause, ContactField field, Object value, boolean needsEMail, boolean exact) throws OXException {
 		stringBuilder.append('(').append(selectClause);
 		stringBuilder.append(" WHERE ").append(contextIDClause).append(" AND ");
 		appendComparison(field, value, exact);
-		stringBuilder.append(" AND ").append(folderIDsClause);
+        if (null != folderIDsClause) {
+            stringBuilder.append(" AND ").append(folderIDsClause);
+        }
+        if (null != userIDsClause) {
+            stringBuilder.append(" AND ").append(userIDsClause);
+        }
 		if (needsEMail) {
 			stringBuilder.append(" AND (").append(getEMailAutoCompleteClause()).append(')');
 		}

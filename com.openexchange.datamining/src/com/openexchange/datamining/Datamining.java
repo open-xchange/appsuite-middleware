@@ -498,7 +498,7 @@ public class Datamining {
             defaults.put("user", user);
             defaults.put("password", password);
 
-            Connection conn = DriverManager.getConnection(url, defaults);
+            Connection conn = DriverManager.getConnection(urlToUse, defaults);
             return (MySQLConnection) conn;
         } catch (ClassNotFoundException e) {
             System.out.println("Error : JDBC driver not found");

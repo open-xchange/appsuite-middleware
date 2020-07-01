@@ -106,17 +106,17 @@ public final class VirtualGroupStorage implements GroupStorage {
         return getGroup(gid, true, context);
     }
 
-    public Group[] getGroup(int[] gid, boolean loadMembers, Context context) throws OXException {
-        final List<Group> retval = new ArrayList<>();
-        for (int i = 0; i < gid.length; i++) {
-            int j = gid[i];
-            Group found = null;
-            if (GroupStorage.GROUP_ZERO_IDENTIFIER == j) {
+    public Group[] getGroup(int[] groupIds, boolean loadMembers, Context context) throws OXException {
+        final List<Group> retval = new ArrayList<>(groupIds.length);
+        for (int i = 0; i < groupIds.length; i++) {
+            int groupId = groupIds[i];
+            Group found;
+            if (GroupStorage.GROUP_ZERO_IDENTIFIER == groupId) {
                 found = GroupTools.getGroupZero(context, loadMembers);
-            } else if (GroupStorage.GUEST_GROUP_IDENTIFIER == j) {
+            } else if (GroupStorage.GUEST_GROUP_IDENTIFIER == groupId) {
                 found = GroupTools.getGuestGroup(context, loadMembers);
             } else {
-                found = delegate.getGroup(j, loadMembers, context);
+                found = delegate.getGroup(groupId, loadMembers, context);
             }
             if (found != null) {
                 retval.add(found);

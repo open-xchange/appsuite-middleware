@@ -144,7 +144,8 @@ public class FulltextAutocompleteAdapter extends DefaultSearchAdapter {
             }
             patterns = patterns.subList(0, 5);
         }
-        appendAutocomplete(patterns, parameters, folderIDs, contextID, fields);
+        int[] userIDs = (int[]) parameters.get(AutocompleteParameters.MATCH_USER_IDS);
+        appendAutocomplete(patterns, parameters, folderIDs, userIDs, contextID, fields);
     }
 
     private static void addIgnoredPatternWarning(String ignoredPattern, AutocompleteParameters parameters) {
@@ -158,19 +159,31 @@ public class FulltextAutocompleteAdapter extends DefaultSearchAdapter {
 		return Strings.trim(stringBuilder);
 	}
 
-    private void appendAutocomplete(List<String> patterns, AutocompleteParameters parameters, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
+    private void appendAutocomplete(List<String> patterns, AutocompleteParameters parameters, int[] folderIDs, int[] userIDs, int contextID, ContactField[] fields) throws OXException {
         boolean requireEmail = parameters.getBoolean(AutocompleteParameters.REQUIRE_EMAIL, true);
         boolean ignoreDistributionLists = parameters.getBoolean(AutocompleteParameters.IGNORE_DISTRIBUTION_LISTS, false);
         int forUser = parameters.getInteger(AutocompleteParameters.USER_ID, -1);
         if (null == patterns || 0 == patterns.size()) {
-            stringBuilder.append(getSelectClause(fields, forUser)).append(" WHERE ").append(getContextIDClause(contextID)).append(" AND ").append(getFolderIDsClause(folderIDs));
+            stringBuilder.append(getSelectClause(fields, forUser)).append(" WHERE ").append(getContextIDClause(contextID));
+            if (null != folderIDs && 0 < folderIDs.length) {
+                stringBuilder.append(" AND ").append(getFolderIDsClause(folderIDs));
+            }
+            if (null != userIDs && 0 < userIDs.length) {
+                stringBuilder.append(" AND ").append(getUserIDsClause(userIDs));
+            }
             if (requireEmail) {
                 stringBuilder.append(" AND (").append(getEMailAutoCompleteClause(ignoreDistributionLists)).append(')');
             } else if (ignoreDistributionLists) {
                 stringBuilder.append(" AND (").append(getIgnoreDistributionListsClause()).append(')');
             }
         } else {
-            stringBuilder.append(getSelectClause(fields, forUser)).append(" WHERE ").append(getContextIDClause(contextID)).append(" AND ").append(getFolderIDsClause(folderIDs));
+            stringBuilder.append(getSelectClause(fields, forUser)).append(" WHERE ").append(getContextIDClause(contextID));
+            if (null != folderIDs && 0 < folderIDs.length) {
+                stringBuilder.append(" AND ").append(getFolderIDsClause(folderIDs));
+            }
+            if (null != userIDs && 0 < userIDs.length) {
+                stringBuilder.append(" AND ").append(getUserIDsClause(userIDs));
+            }
             if (requireEmail) {
                 stringBuilder.append(" AND (").append(getEMailAutoCompleteClause(ignoreDistributionLists)).append(')');
             } else if (ignoreDistributionLists) {
