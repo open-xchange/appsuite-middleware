@@ -58,6 +58,9 @@ specific field data of single or multiple objects.
 |share_url| String | The share link for "anonymous" entities.|
 |password| String | The optionally set password for "anonymous" entities.|
 |expiry_date| Date | The optionally set expiry date for "anonymous" entities.|
+|includeSubfolders| Boolean | The optionally set "include subfolders" option for "anonymous" entities. |
+|isInherited| boolean | A flag indicating whether the permissions is inherited from the parent folder or not. The client must not allow the user to delete or update inherited permissions. |
+
 
 </div>
 
