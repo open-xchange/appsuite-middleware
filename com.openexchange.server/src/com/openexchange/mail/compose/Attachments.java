@@ -47,64 +47,53 @@
  *
  */
 
-package com.openexchange.mail.compose.json.action;
+package com.openexchange.mail.compose;
 
-import static com.openexchange.mail.compose.Attachments.isNoImage;
-import java.util.UUID;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.compose.Attachment;
-import com.openexchange.mail.compose.CompositionSpaceService;
-import com.openexchange.mail.compose.json.AttachmentFileHolder;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 
 /**
- * {@link GetAttachmentMailComposeAction}
+ * {@link Attachments} - A utility class for attachments.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.2
+ * @since v7.10.4
  */
-@DispatcherNotes(defaultFormat = "file", allowPublicSession = true, publicSessionAuth = true)
-public class GetAttachmentMailComposeAction extends AbstractMailComposeAction {
+public class Attachments {
 
     /**
-     * Initializes a new {@link GetAttachmentMailComposeAction}.
-     * @param services
+     * Initializes a new {@link Attachments}.
      */
-    public GetAttachmentMailComposeAction(ServiceLookup services) {
-        super(services);
+    private Attachments() {
+        super();
     }
 
-    @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        // Require composition space identifier
-        String sId = requestData.requireParameter("id");
-        UUID uuid = parseCompositionSpaceId(sId);
+    /**
+     * Checks if given attachment is <b>not</b> an image.
+     *
+     * @param attachment The attachment to check
+     * @return <code>true</code> if attachment is <b>not</b> an image; otherwise <code>false</code>
+     */
+    public static boolean isNoImage(Attachment attachment) {
+        return false == isImage(attachment);
+    }
 
-        // Require attachment identifier
-        String sAttachmentId = requestData.requireParameter("attachmentId");
-        UUID attachmentUuid = parseAttachmentId(sAttachmentId);
+    /**
+     * Checks if given attachment is an image.
+     *
+     * @param attachment The attachment to check
+     * @return <code>true</code> if attachment is an image; otherwise <code>false</code>
+     */
+    public static boolean isImage(Attachment attachment) {
+        return (mimeTypeIndicatesImage(attachment.getMimeType()) || mimeTypeIndicatesImage(getMimeTypeByFileName(attachment.getName())));
+    }
 
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
-        Attachment attachment = compositionSpaceService.getAttachment(uuid, attachmentUuid, session);
+    private static boolean mimeTypeIndicatesImage(String mimeType) {
+        // Starts with "image/"
+        return (null != mimeType && Strings.asciiLowerCase(mimeType).startsWith("image/"));
+    }
 
-        if (isNoImage(attachment)) {
-            // Require session parameter for non-image contents
-            String sessionId = requestData.requireParameter(AJAXServlet.PARAMETER_SESSION);
-            if (!sessionId.equals(session.getSessionID())) {
-                throw SessionExceptionCodes.WRONG_SESSION.create();
-            }
-        }
-
-        AttachmentFileHolder fileHolder = new AttachmentFileHolder(attachment);
-        return new AJAXRequestResult(fileHolder, "file");
+    private static String getMimeTypeByFileName(String fileName) {
+        return MimeType2ExtMap.getContentType(fileName, null);
     }
 
 }
