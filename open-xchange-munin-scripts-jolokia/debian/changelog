@@ -1,3 +1,9 @@
+open-xchange-munin-scripts-jolokia (7.6.3-54) stable; urgency=medium
+
+  * Build for patch 2020-07-10 (5794)
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Wed, 01 Jul 2020 08:08:49 +0000
+
 open-xchange-munin-scripts-jolokia (7.6.3-53) stable; urgency=medium
 
   * Build for patch 2020-06-12 (5762)
