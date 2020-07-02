@@ -944,7 +944,7 @@ properties:
       description: |
         Specifies a dedicated file storage that is supposed to be used for mail compose attachments.
         It must be the numeric identifier returned by the `registerfilestore` operation.
-        Once a file storage associated has been configured, it should not be changed.
+        Once a file storage association has been configured, it should not be changed.
       defaultValue: 
       version: 7.10.3
       reloadable: true

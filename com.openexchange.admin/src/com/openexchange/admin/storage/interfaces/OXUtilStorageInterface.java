@@ -533,4 +533,23 @@ public abstract class OXUtilStorageInterface {
      * @throws StorageException
      */
     public abstract Database getNextDBHandleByWeight(Connection con, boolean forContext) throws SQLException, StorageException;
+
+    /**
+     * Checks the consistencies for the count tables
+     *
+     * @param configCon The connection to the ConfigDb
+     * @param checkDatabaseCounts Whether to check the counts related to context to database/schema associations
+     * @param checkFilestoreCounts Whether to check the counts related to context to filestore associations
+     * @throws StorageException If check fails
+     */
+    public abstract void checkCountsConsistency(Connection configCon, boolean checkDatabaseCounts, boolean checkFilestoreCounts) throws StorageException;
+
+    /**
+     * Checks the consistencies for the count tables
+     *
+     * @param checkDatabaseCounts Whether to check the counts related to context to database/schema associations
+     * @param checkFilestoreCounts Whether to check the counts related to context to filestore associations
+     * @throws StorageException If check fails
+     */
+    public abstract void checkCountsConsistency(boolean checkDatabaseCounts, boolean checkFilestoreCounts) throws StorageException;
 }

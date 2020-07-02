@@ -721,17 +721,4 @@ public interface OXContextInterface extends Remote {
      */
     @Deprecated
     public boolean checkExists(Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException;
-
-    /**
-     * Checks the consistencies for the count tables
-     *
-     * @param checkDatabaseCounts Whether to check the counts related to context to database/schema associations
-     * @param checkFilestoreCounts Whether to check the counts related to context to filestore associations
-     * @param auth Credentials for authenticating against server
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occurred
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid
-     * @throws RemoteException General RMI Exception
-     */
-    public void checkCountsConsistency(boolean checkDatabaseCounts, boolean checkFilestoreCounts, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException;
-
 }

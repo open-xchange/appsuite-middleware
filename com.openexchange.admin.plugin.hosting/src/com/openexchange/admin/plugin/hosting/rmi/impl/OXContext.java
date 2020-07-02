@@ -1688,20 +1688,4 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     public boolean checkExists(final Context ctx, final Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
         return exists(ctx, credentials);
     }
-
-    @Override
-    public void checkCountsConsistency(boolean checkDatabaseCounts, boolean checkFilestoreCounts, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException {
-        try {
-            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-            BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
-
-            log(LogLevel.DEBUG, LOGGER, credentials, null, "Checking consistency for counters");
-
-            OXContextStorageInterface.getInstance().checkCountsConsistency(checkDatabaseCounts, checkFilestoreCounts);
-        } catch (Throwable e) {
-            logAndEnhanceException(e, credentials);
-            throw e;
-        }
-    }
-
 }

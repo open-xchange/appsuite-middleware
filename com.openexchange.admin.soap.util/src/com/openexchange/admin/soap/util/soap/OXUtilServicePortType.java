@@ -240,4 +240,13 @@ public interface OXUtilServicePortType {
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com") com.openexchange.admin.soap.util.dataobjects.Credentials auth,
         @WebParam(name = "optDBId", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Integer optDBId
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
+    
+        @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+        @Action(input = "urn:checkCountsConsistency", output = "urn:checkCountsConsistencyResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:checkCountsConsistencyStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:checkCountsConsistencyInvalidCredentialsException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:checkCountsConsistencyRemoteException")})
+        @WebMethod(action = "urn:checkCountsConsistency")
+        public void checkCountsConsistency(
+            @WebParam(partName = "parameters", name = "checkCountsConsistency", targetNamespace = "http://soap.admin.openexchange.com")
+            CheckCountsConsistency parameters
+        ) throws StorageException_Exception, InvalidCredentialsException_Exception, RemoteException_Exception;
+
 }

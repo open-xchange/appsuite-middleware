@@ -1096,4 +1096,17 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
     }
 
+    @Override
+    public void checkCountsConsistency(boolean checkDatabaseCounts, boolean checkFilestoreCounts, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException {
+        try {
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
+
+            log(LogLevel.DEBUG, LOGGER, credentials, null, "Checking consistency for counters");
+
+            OXUtilStorageInterface.getInstance().checkCountsConsistency(checkDatabaseCounts, checkFilestoreCounts);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        }
+    }
 }
