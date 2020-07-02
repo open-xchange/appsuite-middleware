@@ -74,6 +74,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 
 /**
@@ -99,11 +100,11 @@ public class DefaultGuestService implements GuestService {
     /**
      * Initializes a new {@link DefaultGuestService}.
      *
-     * @param userService
-     * @param contextService
-     * @param contactUserStorage
-     * @param configViewFactory
-     * @param passwordMechFactory
+     * @param userService The user service
+     * @param contextService The context service
+     * @param contactUserStorage The contact storage
+     * @param configViewFactory The config view
+     * @param passwordMechFactory The password factory
      */
     public DefaultGuestService(UserService userService, ContextService contextService, ContactUserStorage contactUserStorage, ConfigViewFactory configViewFactory, PasswordMechRegistry passwordMechFactory) {
         this.userService = userService;
@@ -209,13 +210,21 @@ public class DefaultGuestService implements GuestService {
      */
     @Override
     public void removeGuest(int contextId, int userId) throws OXException {
+        User user = userService.getUser(userId, contextId);
+        if (null == user) {
+            LOG.warn("No user in context {} with user id {} found. Cannot remove guest.", I(contextId), I(userId));
+            return;
+        }
+        removeGuest(contextId, userId, user.getMail());
+    }
+
+    private void removeGuest(int contextId, int userId, String mailAddress) throws OXException {
         GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), true, contextId);
         try {
             connectionHelper.start();
 
             String groupId = configViewFactory.getView(userId, contextId).opt("com.openexchange.context.group", String.class, "default");
-            User user = userService.getUser(userId, contextId);
-            final long relatedGuestId = GuestStorage.getInstance().getGuestId(user.getMail(), groupId, connectionHelper.getConnection()); // this has to happen before guest assignment is removed!
+            final long relatedGuestId = GuestStorage.getInstance().getGuestId(mailAddress, groupId, connectionHelper.getConnection()); // this has to happen before guest assignment is removed!
 
             if (relatedGuestId == GuestStorage.NOT_FOUND) {
                 LOG.info("Guest with context {} and user id {} cannot be removed! No internal guest to remove found.", I(contextId), I(userId));
@@ -496,7 +505,17 @@ public class DefaultGuestService implements GuestService {
             return null;
         }
         GuestAssignment existingAssignment = existingAssignments.get(0);
-        User existingUser = userService.getUser(existingAssignment.getUserId(), existingAssignment.getContextId());
+        User existingUser = null;
+        try {
+            existingUser = userService.getUser(existingAssignment.getUserId(), existingAssignment.getContextId());
+        } catch (OXException e) {
+            if (false == UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                throw e;
+            }
+            LOG.info("Found assignment without guest user in storage. Therefore removing assignment for guest id {} in context {} for referenced user {}", L(existingAssignment.getGuestId()), I(existingAssignment.getContextId()), I(existingAssignment.getUserId()));
+            removeGuest(contextId, existingAssignment.getUserId(), mailAddress);
+            return null;
+        }
 
         if (existingUser != null) {
             UserImpl user = new UserImpl(existingUser);
