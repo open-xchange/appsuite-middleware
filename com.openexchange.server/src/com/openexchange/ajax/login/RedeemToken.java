@@ -143,6 +143,7 @@ public class RedeemToken implements LoginRequestHandler {
         }
         // Write cookie accordingly
         LoginServlet.writeSecretCookie(req, resp, session, hash, req.isSecure(), req.getServerName(), conf);
+        LoginServlet.writeSessionCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
 
         String redirectUrl = LoginTools.parseRedirectUrl(req);
         if (Strings.isEmpty(redirectUrl)) {
