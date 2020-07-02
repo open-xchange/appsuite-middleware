@@ -2543,9 +2543,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                  */
                 Metadata[] modified;
                 if (updateOrigin) {
-                    modified = new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL, Metadata.ORIGIN_LITERAL };
+                    modified = new Metadata[] { Metadata.SEQUENCE_NUMBER_LITERAL, Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL, Metadata.ORIGIN_LITERAL };
                 } else {
-                    modified = new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL };
+                    modified = new Metadata[] { Metadata.SEQUENCE_NUMBER_LITERAL, Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL };
                 }
                 perform(new UpdateDocumentAction(this, QUERIES, session.getContext(), documentsToUpdate, sourceDocuments, modified, sequenceNumber, session), true);
                 /*
@@ -3468,7 +3468,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             Context context = session.getContext();
             final Long userInfostoreId = new Long(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
             if (folderIds.remove(userInfostoreId)) {
-                performQuery(context, QUERIES.getSharedDocumentsSequenceNumbersQuery(versionsOnly, true, contextId, user.getId(), user.getGroups()), new ResultProcessor<Void>() {
+                performQuery(context, QUERIES.getSharedDocumentsSequenceNumbersQuery(versionsOnly, true, false, contextId, user.getId(), user.getGroups()), new ResultProcessor<Void>() {
 
                     @Override
                     public Void process(ResultSet rs) throws SQLException {
@@ -3482,7 +3482,21 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                         return null;
                     }
                 });
-                performQuery(context, QUERIES.getSharedDocumentsSequenceNumbersQuery(versionsOnly, false, contextId, user.getId(), user.getGroups()), new ResultProcessor<Void>() {
+                performQuery(context, QUERIES.getSharedDocumentsSequenceNumbersQuery(versionsOnly, true, true, contextId, user.getId(), user.getGroups()), new ResultProcessor<Void>() {
+
+                    @Override
+                    public Void process(ResultSet rs) throws SQLException {
+                        while (rs.next()) {
+                            long newSequence = rs.getLong(1);
+                            Long oldSequence = sequenceNumbers.get(userInfostoreId);
+                            if (oldSequence == null || oldSequence.longValue() < newSequence) {
+                                sequenceNumbers.put(userInfostoreId, Long.valueOf(newSequence));
+                            }
+                        }
+                        return null;
+                    }
+                });
+                performQuery(context, QUERIES.getSharedDocumentsSequenceNumbersQuery(versionsOnly, false, false, contextId, user.getId(), user.getGroups()), new ResultProcessor<Void>() {
 
                     @Override
                     public Void process(ResultSet rs) throws SQLException {

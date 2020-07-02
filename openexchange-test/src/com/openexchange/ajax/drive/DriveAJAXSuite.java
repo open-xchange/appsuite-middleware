@@ -55,6 +55,7 @@ import com.openexchange.ajax.drive.apiclient.test.TrashTests;
 import com.openexchange.ajax.drive.test.Bug67685Test;
 import com.openexchange.ajax.drive.test.DeleteLinkTest;
 import com.openexchange.ajax.drive.test.GetLinkTest;
+import com.openexchange.ajax.drive.test.MWB358Test;
 import com.openexchange.ajax.drive.test.QuotaForSyncTest;
 import com.openexchange.ajax.drive.test.ResumableChecksumTest;
 import com.openexchange.ajax.drive.test.UpdateLinkTest;
@@ -76,7 +77,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     QuotaForSyncTest.class,
     Bug67685Test.class,
     TrashTests.class,
-    ResumableChecksumTest.class
+    ResumableChecksumTest.class,
+    MWB358Test.class
 })
 public class DriveAJAXSuite  {
 
