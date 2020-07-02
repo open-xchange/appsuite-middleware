@@ -84,6 +84,8 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 /**
  * Implementation for the RMI interface of group
@@ -187,6 +189,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                     int contextId = ctx.getId().intValue();
                     for (User user : members) {
                         cache.remove(cacheService.newCacheKey(contextId, user.getId().intValue()));
+                        UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
                     }
 
                     Cache groupCache = cacheService.getCache(GroupService.CACHE_REGION_NAME);
@@ -278,12 +281,14 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         if (new_members != null) {
                             for (final User user : new_members) {
                                 cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
+                                UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
                             }
                         }
 
                         if (grp.getMembers() != null && grp.getMembers().length > 0) {
                             for (final Integer old_user_id : grp.getMembers()) {
                                 cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), old_user_id.intValue()));
+                                UserConfigurationStorage.getInstance().invalidateCache(old_user_id.intValue(), new ContextImpl(ctx.getId().intValue()));
                             }
                         }
 
@@ -450,6 +455,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         int contextId = ctx.getId().intValue();
                         for (final Integer member_id : mems) {
                             cache.remove(cacheService.newCacheKey(contextId, member_id.intValue()));
+                            UserConfigurationStorage.getInstance().invalidateCache(member_id, new ContextImpl(ctx.getId().intValue()));
                         }
 
                         Cache groupCache = cacheService.getCache(GroupService.CACHE_REGION_NAME);
@@ -593,6 +599,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         for (final User[] membaz : del_groups_members) {
                             for (final User user : membaz) {
                                 cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
+                                UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
                             }
                         }
 
@@ -949,6 +956,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                     int contextId = ctx.getId().intValue();
                     for (User user : members) {
                         cache.remove(cacheService.newCacheKey(contextId, user.getId().intValue()));
+                        UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
                     }
 
                     Cache groupCache = cacheService.getCache(GroupService.CACHE_REGION_NAME);
