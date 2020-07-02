@@ -408,3 +408,16 @@ properties:
       file: AdminDaemon.properties
       packageName: open-xchange-admin
       tags: ["Admin", "Authentication"]
+    - key: com.openexchange.admin.bypassAccessCombinationChecks
+      description: |
+        Allows to bypass particular access combination checks during provisioning. If set to <code>true</code>, the 
+        permissions <code>editpublicfolders</code>, <code>readcreatesharedfolders}}, <code>delegatetask</code> and 
+        <code>webdavxml</code> will be possible in combination with <code>globaladdressbookdisabled</code> being set.
+      defaultValue: false
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: AdminUser.properties
+      packageName: open-xchange-admin
+      tags: ["Admin", "User", "Permission", "Provisioning"]
