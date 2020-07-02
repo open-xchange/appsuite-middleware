@@ -57,6 +57,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
+import java.util.stream.Stream;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.cookie.Cookie;
 import org.json.JSONObject;
@@ -213,4 +214,43 @@ public class TokenLoginTest extends AbstractAJAXSession {
             myClient.logout();
         }
     }
+
+    @Test
+    public void testSessionCookieWithStaySignedIn() throws Exception {
+        final AJAXSession session = new AJAXSession();
+        session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+        final AJAXClient myClient = new AJAXClient(session, false);
+        try {
+            TokenLoginResponse response = myClient.execute(new TokenLoginRequest(testUser.getLogin(), testUser.getPassword(), true));
+            TokensResponse response2 = myClient.execute(new TokensRequest(response.getHttpSessionId(), response.getClientToken(), response.getServerToken()));
+
+            Stream<Cookie> cookies = session.getHttpClient().getCookieStore().getCookies().stream();
+            Cookie sessionCookie = cookies.filter(c -> c.getName().startsWith(LoginServlet.SESSION_PREFIX)).findFirst().orElse(null);
+            assertNotNull("Session cookie is missing in tokens response", sessionCookie);
+            assertNotNull("Session cookie has no expiry date set", sessionCookie.getExpiryDate());
+            session.setId(response2.getSessionId());
+        } finally {
+            myClient.logout();
+        }
+    }
+
+    @Test
+    public void testSessionCookieWithoutStaySignedIn() throws Exception {
+        final AJAXSession session = new AJAXSession();
+        session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+        final AJAXClient myClient = new AJAXClient(session, false);
+        try {
+            TokenLoginResponse response = myClient.execute(new TokenLoginRequest(testUser.getLogin(), testUser.getPassword()));
+            TokensResponse response2 = myClient.execute(new TokensRequest(response.getHttpSessionId(), response.getClientToken(), response.getServerToken()));
+
+            Stream<Cookie> cookies = session.getHttpClient().getCookieStore().getCookies().stream();
+            Cookie sessionCookie = cookies.filter(c -> c.getName().startsWith(LoginServlet.SESSION_PREFIX)).findFirst().orElse(null);
+            assertNotNull("Session cookie is missing in tokens response", sessionCookie);
+            assertNull("Session cookie has expiry date set but should not", sessionCookie.getExpiryDate());
+            session.setId(response2.getSessionId());
+        } finally {
+            myClient.logout();
+        }
+    }
+
 }
