@@ -380,9 +380,18 @@ public class RdbContextStorage extends ContextStorage {
         }
     }
 
+    /**
+     * Loads the context data from the result set and puts them into a context object 
+     *
+     * @param result The result set
+     * @param optContextId The context identifier. <code>-1</code> to indicate that the context ID was
+     * loaded by the query and is contained in the result set with the column label <code>cid</code>
+     * @return The loaded context
+     * @throws OXException Wrapped {@link SQLException} or {@link ContextExceptionCodes#LOCATED_IN_ANOTHER_SERVER}
+     */
     private ContextImpl loadContextDataFromResultSet(ResultSet result, int optContextId) throws OXException {
         try {
-            boolean byContextId = optContextId > 0;
+            boolean byContextId = optContextId > -1;
             int contextId = byContextId ? optContextId : result.getInt("cid");
 
             // Determine context-associated server
