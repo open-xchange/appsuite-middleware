@@ -1106,7 +1106,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
             OXUtilStorageInterface.getInstance().checkCountsConsistency(checkDatabaseCounts, checkFilestoreCounts);
         } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials);
         }
     }
 }

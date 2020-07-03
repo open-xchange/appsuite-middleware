@@ -60,6 +60,7 @@ import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageUtilities;
+import com.openexchange.chronos.storage.ConferenceStorage;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.exception.OXException;
 
@@ -105,6 +106,11 @@ public class RdbCalendarStorage implements CalendarStorage {
     @Override
     public AttendeeStorage getAttendeeStorage() {
         return new RdbAttendeeStorage(delegate.getAttendeeStorage(), legacyDelegate.getAttendeeStorage());
+    }
+
+    @Override
+    public ConferenceStorage getConferenceStorage() {
+        return delegate.getConferenceStorage();
     }
 
     @Override

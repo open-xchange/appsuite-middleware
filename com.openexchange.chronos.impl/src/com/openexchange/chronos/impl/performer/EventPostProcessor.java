@@ -117,6 +117,7 @@ public class EventPostProcessor {
     private final SelfProtection selfProtection;
 
     private Set<String> eventIdsWithAttachment;
+    private Set<String> eventIdsWithConference;
     private Set<String> alarmTriggersPerEventId;
     private Map<String, Integer> attendeeCountsPerEventId;
     private Map<String, Attendee> userAttendeePerEventId;
@@ -153,7 +154,18 @@ public class EventPostProcessor {
     }
 
     /**
-     * Sets a map holding additional hints to assign the {@link EventFlag#ALARMS} when processing the events.
+     * Sets additional hints to assign the {@link EventFlag#CONFERENCES} when processing the events.
+     *
+     * @param eventIdsWithAttachment A set holding the identifiers of those events where at least one conference stored
+     * @return A self reference
+     */
+    EventPostProcessor setConferencesFlagInfo(Set<String> eventIdsWithConference) {
+        this.eventIdsWithConference = eventIdsWithConference;
+        return this;
+    }
+
+    /**
+     * Sets additional hints to assign the {@link EventFlag#ALARMS} when processing the events.
      *
      * @param alarmTriggersPerEventId A set holding the identifiers of those events where at least one alarm trigger is stored for the user
      * @return A self reference
@@ -485,6 +497,9 @@ public class EventPostProcessor {
          */
         if (null != eventIdsWithAttachment && eventIdsWithAttachment.contains(event.getId())) {
             flags.add(EventFlag.ATTACHMENTS);
+        }
+        if (null != eventIdsWithConference && eventIdsWithConference.contains(event.getId())) {
+            flags.add(EventFlag.CONFERENCES);
         }
         if (null != alarmTriggersPerEventId && alarmTriggersPerEventId.contains(event.getId())) {
             flags.add(EventFlag.ALARMS);

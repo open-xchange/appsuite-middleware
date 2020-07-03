@@ -99,6 +99,7 @@ public interface CalendarStorageUtilities {
      * <ul>
      * <li>{@link EventField#ATTENDEES}</li>
      * <li>{@link EventField#ATTACHMENTS}</li>
+     * <li>{@link EventField#CONFERENCES}</li>
      * <li>{@link EventField#ALARMS}</li> (of the calendar user)
      * </ul>
      *
@@ -115,6 +116,7 @@ public interface CalendarStorageUtilities {
      * <ul>
      * <li>{@link EventField#ATTENDEES}</li>
      * <li>{@link EventField#ATTACHMENTS}</li>
+     * <li>{@link EventField#CONFERENCES}</li>
      * <li>{@link EventField#ALARMS}</li> (of the calendar user)
      * </ul>
      *
@@ -138,7 +140,7 @@ public interface CalendarStorageUtilities {
     List<Event> loadAdditionalEventTombstoneData(List<Event> events, EventField[] fields) throws OXException;
 
     /**
-     * Removes all persisted data (events, alarms, attendees, ...) associated with the given account
+     * Removes all persisted data (events, alarms, attendees, conferences...) associated with the given account
      *
      * @throws OXException In case of an error
      */

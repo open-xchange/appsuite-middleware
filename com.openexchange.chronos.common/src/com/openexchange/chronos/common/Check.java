@@ -52,6 +52,8 @@ package com.openexchange.chronos.common;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.SearchStrings.lengthWithoutWildcards;
 import static com.openexchange.tools.arrays.Arrays.contains;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -384,6 +386,26 @@ public class Check {
             throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, calendarUser.getUri(), I(calendarUser.getEntity()), "");
         }
         return calendarUser;
+    }
+
+    /**
+     * Checks that the supplied string represents a valid URI.
+     *
+     * @param uri The URI to check
+     * @param field The <i>field</i> the value originates in for the error message
+     * @return The URI string, after it has been checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
+     */
+    public static String requireValidURI(String uri, String field) throws OXException {
+        if (Strings.isEmpty(uri)) {
+            throw CalendarExceptionCodes.INVALID_DATA.create(field, uri);
+        }
+        try {
+            new URI(uri);
+        } catch (URISyntaxException e) {
+            throw CalendarExceptionCodes.INVALID_DATA.create(e, field, e.getMessage());
+        }
+        return uri;
     }
 
     /**

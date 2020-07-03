@@ -63,7 +63,6 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
@@ -86,7 +85,7 @@ import com.openexchange.quota.Quota;
  * @since v7.10.0
  */
 public abstract class AbstractQueryPerformer {
-    
+
     /** <i>Meta</i>-fields of events that are always skipped when applying updated event data */
     protected static final EventField[] SKIPPED_FIELDS = {
         EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.FLAGS
@@ -150,7 +149,7 @@ public abstract class AbstractQueryPerformer {
 
     /**
      * Initializes a new event post processor for this performed.
-     * 
+     *
      * @return The event post processor
      */
     protected EventPostProcessor postProcessor() {
@@ -162,7 +161,7 @@ public abstract class AbstractQueryPerformer {
      * <p/>
      * <b>Note:</b> Should only be used if different fields were used before when querying the event storage. In case all attendee data is
      * not explicitly requested, the post-processor is enriched with data for the calendar user attendee implicitly.
-     * 
+     *
      * @param eventIds The identifiers of the events being processed
      * @param calendarUserId The identifier of the underlying calendar user
      * @param requestedFields The fields as requested by the client
@@ -179,7 +178,7 @@ public abstract class AbstractQueryPerformer {
             Attendee attendee = new Attendee();
             attendee.setEntity(calendarUserId);
             AttendeeField[] fields = {
-                AttendeeField.ENTITY, AttendeeField.CU_TYPE, AttendeeField.FOLDER_ID, 
+                AttendeeField.ENTITY, AttendeeField.CU_TYPE, AttendeeField.FOLDER_ID,
                 AttendeeField.PARTSTAT, AttendeeField.HIDDEN, AttendeeField.TIMESTAMP
             };
             postProcessor.setUserAttendeeInfo(storage.getAttendeeStorage().loadAttendee(eventIds, attendee, fields));
@@ -188,10 +187,13 @@ public abstract class AbstractQueryPerformer {
          * supply info for event flag generation as needed
          */
         if (contains(requestedFields, EventField.FLAGS)) {
-            if (false == contains(queriedFields, EventFlag.ATTACHMENTS)) {
+            if (false == contains(queriedFields, EventField.ATTACHMENTS)) {
                 postProcessor.setAttachmentsFlagInfo(storage.getAttachmentStorage().hasAttachments(eventIds));
             }
-            if (false == contains(queriedFields, EventFlag.ALARMS)) {
+            if (false == contains(queriedFields, EventField.CONFERENCES)) {
+                postProcessor.setConferencesFlagInfo(storage.getConferenceStorage().hasConferences(eventIds));
+            }
+            if (false == contains(queriedFields, EventField.ALARMS)) {
                 postProcessor.setAlarmsFlagInfo(storage.getAlarmTriggerStorage().hasTriggers(calendarUserId, eventIds));
             }
             if (false == contains(queriedFields, EventField.ATTENDEES)) {
@@ -200,14 +202,14 @@ public abstract class AbstractQueryPerformer {
         }
         return postProcessor;
     }
-    
+
     /**
      * Gets the event fields to pass down to the storage in case a subsequent <i>post-processing</i> of the events
      * will take place, based on the supplied calendar parameters.
      * <p/>
      * <b>Note:</b> Only in case the resulting events are <i>post-processed</i>, and information for event flag generation will be
      * fetched separately, a different set of fields may be queried from the storage.
-     * 
+     *
      * @param requestedFields The event fields as requested from the client
      * @return The event fields to hand down to the storage when querying event data
      */

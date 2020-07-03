@@ -215,8 +215,8 @@ public class ITipAssertion {
     /**
      * Asserts that a single description is given
      *
-     * @param change
-     * @param descriptionToMatch
+     * @param change The change to check
+     * @param descriptionToMatch The string that must be part of the change description
      */
     public static void assertSingleDescription(AnalysisChange change, String descriptionToMatch) {
         assertTrue(change.getDiffDescription().size() == 1);

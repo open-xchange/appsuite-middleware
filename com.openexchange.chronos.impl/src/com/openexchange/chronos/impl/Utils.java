@@ -199,7 +199,7 @@ public class Utils {
      * This does not contain {@link EventField#ATTENDEES}, as some more sophisticated logic to determine re-schedulings is required here.
      */
     private static final EventField[] RESCHEDULE_FIELDS = new EventField[] {
-        EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.ATTACHMENTS, EventField.GEO,
+        EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.ATTACHMENTS, EventField.GEO, EventField.CONFERENCES,
         EventField.ORGANIZER, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_RULE
     };
 

@@ -56,6 +56,7 @@ import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent
 import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.prepareJsonForFileUpload;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
@@ -65,6 +66,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -73,6 +75,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.ajax.chronos.factory.ConferenceBuilder;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory.RecurringFrequency;
 import com.openexchange.ajax.chronos.factory.RRuleFactory;
@@ -91,6 +94,7 @@ import com.openexchange.testing.httpclient.models.AnalyzeResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.testing.httpclient.models.Conference;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventResponse;
@@ -124,6 +128,8 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          */
         EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, summary);
         replyingAttendee = prepareCommonAttendees(eventToCreate);
+        eventToCreate = prepareAttendeeConference(eventToCreate);
+        eventToCreate = prepareModeratorConference(eventToCreate);
         createdEvent = eventManager.createEvent(eventToCreate, true);
 
         /*
@@ -270,7 +276,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
     @Test
     public void testLocationChange() throws Exception {
         /*
-         * Shift start and end date by two hours as organizer
+         * Change location as organizer
          */
         EventData deltaEvent = prepareDeltaEvent(createdEvent);
         deltaEvent.setLocation("Olpe");
@@ -283,6 +289,24 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         AnalyzeResponse analyzeResponse = receiveUpdateAsAttendee(PartStat.ACCEPTED, CustomConsumers.ALL);
         AnalysisChange change = assertSingleChange(analyzeResponse);
         assertSingleDescription(change, "The appointment takes place in a new location");
+    }
+
+    @Test
+    public void testRemoveLocation() throws Exception {
+        /*
+         * Remove location as organizer
+         */
+        EventData deltaEvent = prepareDeltaEvent(createdEvent);
+        deltaEvent.setLocation("");
+
+        updateEventAsOrganizer(deltaEvent);
+
+        /*
+         * Check that location has been updated
+         */
+        AnalyzeResponse analyzeResponse = receiveUpdateAsAttendee(PartStat.ACCEPTED, CustomConsumers.ALL);
+        AnalysisChange change = assertSingleChange(analyzeResponse);
+        assertSingleDescription(change, "The location of the appointment has been removed");
     }
 
     @Test
@@ -477,6 +501,138 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
 
         AnalysisChange change = assertSingleChange(analyzeResponse);
         assertTrue(change.getIntroduction().contains("you have been removed as a participant"));
+    }
+
+    @Test
+    public void testAddConference() throws Exception {
+        /*
+         * Add additional conference as organizer
+         */
+        ConferenceBuilder builder = ConferenceBuilder.newBuilder() //@formatter:off
+            .setDefaultFeatures()
+            .setLable("Random lable")
+            .setVideoChatUri(); //@formatter:on
+        EventData deltaEvent = prepareDeltaEvent(createdEvent);
+        deltaEvent.setConferences(createdEvent.getConferences());
+        deltaEvent.addConferencesItem(builder.build());
+        updateEventAsOrganizer(deltaEvent);
+
+        EventData updatedEvent = eventManager.getEvent(defaultFolderId, createdEvent.getId());
+        assertThat("Should be three conferences!", I(updatedEvent.getConferences().size()), is(I(3)));
+
+        /*
+         * Check that the conference item has been added
+         */
+        AnalyzeResponse analyzeResponse = receiveUpdateAsAttendee(PartStat.ACCEPTED, CustomConsumers.ALL, 1);
+        AnalysisChange change = assertSingleChange(analyzeResponse);
+        assertSingleDescription(change, "access information was changed");
+    }
+
+    @Test
+    public void testUpdateConference() throws Exception {
+        /*
+         * Change conference item as organizer
+         */
+        EventData deltaEvent = prepareDeltaEvent(createdEvent);
+        ArrayList<Conference> conferences = new ArrayList<Conference>(2);
+        conferences.add(createdEvent.getConferences().get(1));
+        Conference update = ConferenceBuilder.copy(createdEvent.getConferences().get(0));
+        update.setLabel("New lable");
+        conferences.add(update);
+        deltaEvent.setConferences(conferences);
+        updateEventAsOrganizer(deltaEvent);
+
+        EventData updatedEvent = eventManager.getEvent(defaultFolderId, createdEvent.getId());
+        assertThat("Should be two conferences!", I(updatedEvent.getConferences().size()), is(I(2)));
+
+        /*
+         * Check that conference has been updated
+         */
+        AnalyzeResponse analyzeResponse = receiveUpdateAsAttendee(PartStat.ACCEPTED, CustomConsumers.ALL, 1);
+        AnalysisChange change = assertSingleChange(analyzeResponse);
+        assertSingleDescription(change, "access information was changed");
+    }
+
+    @Test
+    public void testUpdateCallWithoutUpdate() throws Exception {
+        /*
+         * Change conference item as organizer
+         */
+        EventData deltaEvent = prepareDeltaEvent(createdEvent);
+        updateEventAsOrganizer(deltaEvent);
+
+        /*
+         * Check that mails has been send (updates still needs to be propagated) without any description
+         */
+        AnalyzeResponse analyzeResponse = receiveUpdateAsAttendee(PartStat.ACCEPTED, CustomConsumers.EMPTY, 1);
+        AnalysisChange change = assertSingleChange(analyzeResponse);
+        assertThat("Should have been no change", change.getDiffDescription(), empty());
+    }
+
+    @Test
+    public void testUpdateExtendedPropertiesOfConference() throws Exception {
+        /*
+         * Change conference item as organizer
+         */
+        EventData deltaEvent = prepareDeltaEvent(createdEvent);
+        ArrayList<Conference> conferences = new ArrayList<Conference>(2);
+        for (Conference conference : createdEvent.getConferences()) {
+            Conference update = ConferenceBuilder.copy(conference);
+            update.setExtendedParameters(null);
+            conferences.add(update);
+        }
+        deltaEvent.setConferences(conferences);
+        updateEventAsOrganizer(deltaEvent);
+
+        EventData updatedEvent = eventManager.getEvent(defaultFolderId, createdEvent.getId());
+        assertThat("Should be two conferences!", I(updatedEvent.getConferences().size()), is(I(2)));
+
+        /*
+         * Check that mails has been send (updates still needs to be propagated) without any description
+         */
+        AnalyzeResponse analyzeResponse = receiveUpdateAsAttendee(PartStat.ACCEPTED, CustomConsumers.EMPTY, 1);
+        AnalysisChange change = assertSingleChange(analyzeResponse);
+        assertThat("Should have been no change", change.getDiffDescription(), empty());
+    }
+
+    @Test
+    public void testRemoveConference() throws Exception {
+        /*
+         * Remove conference item as organizer
+         */
+        EventData deltaEvent = prepareDeltaEvent(createdEvent);
+        deltaEvent.setConferences(Collections.emptyList());
+        updateEventAsOrganizer(deltaEvent);
+
+        EventData updatedEvent = eventManager.getEvent(defaultFolderId, createdEvent.getId());
+        assertThat("Should be no conferences!", updatedEvent.getConferences(), empty());
+
+        /*
+         * Check that mails has been send
+         */
+        AnalyzeResponse analyzeResponse = receiveUpdateAsAttendee(PartStat.ACCEPTED, CustomConsumers.ALL, 1);
+        AnalysisChange change = assertSingleChange(analyzeResponse);
+        assertSingleDescription(change, "access information was removed");
+    }
+
+    @Test
+    public void testRemoveOnlyOneConference() throws Exception {
+        /*
+         * Remove conference item as organizer
+         */
+        EventData deltaEvent = prepareDeltaEvent(createdEvent);
+        deltaEvent.setConferences(Collections.singletonList(createdEvent.getConferences().get(0)));
+        updateEventAsOrganizer(deltaEvent);
+
+        EventData updatedEvent = eventManager.getEvent(defaultFolderId, createdEvent.getId());
+        assertThat("Should be one conference!", I(updatedEvent.getConferences().size()), is(I(1)));
+
+        /*
+         * Check that mails has been send, but for changed conferences not removed all
+         */
+        AnalyzeResponse analyzeResponse = receiveUpdateAsAttendee(PartStat.ACCEPTED, CustomConsumers.ALL, 1);
+        AnalysisChange change = assertSingleChange(analyzeResponse);
+        assertSingleDescription(change, "access information was changed");
     }
 
     /*

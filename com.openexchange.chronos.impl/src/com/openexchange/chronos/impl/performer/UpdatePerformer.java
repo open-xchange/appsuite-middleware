@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.collectAttendees;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getConferenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.getSimpleAttendeeUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.getUpdatedResource;
@@ -87,6 +88,8 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -98,6 +101,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.common.mapping.ConferenceMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
@@ -317,6 +321,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getEventStorage().insertEvent(newExceptionEvent);
             storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
+            storage.getConferenceStorage().insertConferences(newExceptionEvent.getId(), prepareConferences(originalSeriesMaster.getConferences()));
             insertAlarms(newExceptionEvent, newExceptionAlarms, true);
             newExceptionEvent = loadEventData(newExceptionEvent.getId());
             resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
@@ -396,6 +401,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          */
         storeEventUpdate(originalEvent, eventUpdate.getDelta(), eventUpdate.getUpdatedFields(), assumeExternalOrganizerUpdate);
         storeAttendeeUpdates(originalEvent, eventUpdate.getAttendeeUpdates(), assumeExternalOrganizerUpdate);
+        storeConferenceUpdates(originalEvent, eventUpdate.getConferenceUpdates(), assumeExternalOrganizerUpdate);
         storeAttachmentUpdates(originalEvent, eventUpdate.getAttachmentUpdates(), assumeExternalOrganizerUpdate);
         /*
          * update passed alarms for calendar user, apply default alarms for newly added internal user attendees
@@ -600,7 +606,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * in order to do so.
      *
      * @param originalEvent The event the attendees are updated for
-     * @param attachmentUpdates The attendee updates to persist
+     * @param attendeeUpdates The attendee updates to persist
      * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
@@ -644,6 +650,48 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 attendee.setTimestamp(timestamp.getTime());
             }
             storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), addedAttendees);
+        }
+        return true;
+    }
+
+    /**
+     * Persists conference updates in the underlying calendar storage, verifying that the current user has appropriate write permissions
+     * in order to do so.
+     *
+     * @param originalEvent The event the conferences are updated for
+     * @param conferenceUpdates The conference updates to persist
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
+     * @return <code>true</code> if there were changes, <code>false</code>, otherwise
+     */
+    private boolean storeConferenceUpdates(Event originalEvent, CollectionUpdate<Conference, ConferenceField> conferenceUpdates, boolean assumeExternalOrganizerUpdate) throws OXException {
+        if (conferenceUpdates.isEmpty()) {
+            return false;
+        }
+        requireWritePermissions(originalEvent, assumeExternalOrganizerUpdate);
+        /*
+         * perform conference deletions
+         */
+        if (0 < conferenceUpdates.getRemovedItems().size()) {
+            storage.getConferenceStorage().deleteConferences(originalEvent.getId(), getConferenceIds(conferenceUpdates.getRemovedItems()));
+        }
+        /*
+         * perform conference updates
+         */
+        if (0 < conferenceUpdates.getUpdatedItems().size()) {
+            List<Conference> conferencesToUpdate = new ArrayList<Conference>(conferenceUpdates.getUpdatedItems().size());
+            for (ItemUpdate<Conference, ConferenceField> conferenceToUpdate : conferenceUpdates.getUpdatedItems()) {
+                Conference originalConference = conferenceToUpdate.getOriginal();
+                Conference newConference = ConferenceMapper.getInstance().copy(originalConference, null, (ConferenceField[]) null);
+                ConferenceMapper.getInstance().copy(conferenceToUpdate.getUpdate(), newConference, ConferenceField.URI, ConferenceField.LABEL, ConferenceField.FEATURES, ConferenceField.EXTENDED_PARAMETERS);
+                conferencesToUpdate.add(newConference);
+            }
+            storage.getConferenceStorage().updateConferences(originalEvent.getId(), conferencesToUpdate);
+        }
+        /*
+         * perform conference inserts
+         */
+        if (0 < conferenceUpdates.getAddedItems().size()) {
+            storage.getConferenceStorage().insertConferences(originalEvent.getId(), prepareConferences(conferenceUpdates.getAddedItems()));
         }
         return true;
     }

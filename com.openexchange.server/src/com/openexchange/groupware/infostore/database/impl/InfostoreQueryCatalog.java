@@ -843,14 +843,21 @@ public class InfostoreQueryCatalog {
         return stringBuilder.toString();
     }
 
-    public String getSharedDocumentsSequenceNumbersQuery(final boolean versionsOnly, final boolean deleted, final int contextId, final int userId, final int[] groups) {
+    public String getSharedDocumentsSequenceNumbersQuery(final boolean versionsOnly, final boolean permissionDeleted, final boolean fileDeletedFromTrash, final int contextId, final int userId, final int[] groups) {
         final StringBuilder builder = new StringBuilder(STR_SELECT);
-        if (deleted) {
-            builder.append("MAX(p.last_modified) FROM del_object_permission");
+        if (permissionDeleted) {
+            if (fileDeletedFromTrash) {
+                builder.append("MAX(i.last_modified) FROM del_object_permission AS p");
+                builder.append(" JOIN del_infostore AS i");
+            } else {
+                builder.append("MAX(i.last_modified) FROM del_object_permission AS p");
+                builder.append(" JOIN infostore AS i");
+            }
         } else {
-            builder.append("MAX(i.last_modified) FROM object_permission");
+            builder.append("MAX(i.last_modified) FROM object_permission AS p");
+            builder.append(" JOIN infostore AS i");
         }
-        builder.append(" AS p JOIN infostore AS i ON p.cid = i.cid AND p.module = 8 AND p.folder_id = i.folder_id AND p.object_id = i.id");
+        builder.append(" ON p.cid = i.cid AND p.module = 8 AND p.folder_id = i.folder_id AND p.object_id = i.id");
         builder.append(" WHERE p.cid = ").append(contextId).append(" AND");
         appendEntityConstraint(builder, "p", userId, groups);
         if (versionsOnly) {

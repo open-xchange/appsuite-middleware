@@ -148,6 +148,7 @@ flags:
     description: >
       Event Flags:
        * `attachments` - The event contains at least one attachment. 
+       * `conferences` - The event contains at least one conference. 
        * `alarms` - The calendar user has at least one alarm associated with the event.
        * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.
        * `organizer` - The calendar user is the <i>organizer<i> of the meeting. 
@@ -172,3 +173,8 @@ flags:
 relatedTo:
   type: string
   description: The relationship between this and other events.
+conferences:
+  type: array
+  description: The conferences of the event.
+  items: 
+    $ref: "#/components/schemas/Conference"

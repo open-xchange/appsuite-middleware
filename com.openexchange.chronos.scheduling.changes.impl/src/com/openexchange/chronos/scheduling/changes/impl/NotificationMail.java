@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Conference;
 import com.openexchange.chronos.Event;
 
 /**
@@ -66,12 +67,14 @@ public class NotificationMail {
     private final Event event;
     private final List<NotificationParticipant> participants;
     private final List<NotificationParticipant> resources;
+    private final List<NotificationConference> conferences;
 
-    public NotificationMail(Event event, List<Attendee> participants, List<Attendee> resources) {
+    public NotificationMail(Event event, List<Attendee> participants, List<Attendee> resources, List<Conference> conferences) {
         super();
         this.event = event;
         this.participants = getParticipants(participants);
         this.resources = getParticipants(resources);
+        this.conferences = getConferences(conferences);
     }
 
     public Event getEvent() {
@@ -86,6 +89,10 @@ public class NotificationMail {
         return resources;
     }
 
+    public List<NotificationConference> getConferences() {
+        return conferences;
+    }
+
     private static final List<NotificationParticipant> getParticipants(List<Attendee> attendees) {
         if (null == attendees) {
             return Collections.emptyList();
@@ -95,6 +102,17 @@ public class NotificationMail {
             participants.add(new NotificationParticipant(attendee));
         }
         return participants;
+    }
+
+    private static final List<NotificationConference> getConferences(List<Conference> conferences) {
+        if (null == conferences) {
+            return Collections.emptyList();
+        }
+        List<NotificationConference> notificationConferences = new ArrayList<NotificationConference>(conferences.size());
+        for (Conference conference : conferences) {
+            notificationConferences.add(new NotificationConference(conference));
+        }
+        return notificationConferences;
     }
 
 }

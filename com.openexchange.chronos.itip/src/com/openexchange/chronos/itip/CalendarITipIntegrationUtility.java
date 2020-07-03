@@ -146,6 +146,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
             event.setAttachments(attachments);
         }
         event.setFlags(CalendarUtils.getFlags(event, session.getUserId()));
+        event.setConferences(storage.getConferenceStorage().loadConferences(event.getId()));
     }
 
     @Override

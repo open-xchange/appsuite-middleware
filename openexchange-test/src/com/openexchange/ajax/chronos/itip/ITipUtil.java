@@ -257,7 +257,7 @@ public class ITipUtil {
             if (Strings.isEmpty(subject) || false == subject.contains(subjectToMatch)) {
                 continue;
             }
-            MailResponse mailResponse = mailApi.getMail(apiClient.getSession(), mail.get(1), mail.get(0), null, null, null, null, null, null, null, null, null, null, null, null);
+            MailResponse mailResponse = mailApi.getMail(apiClient.getSession(), mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
             assertNull(mailResponse.getError(), mailsResponse.getError());
             assertNotNull(mailResponse.getData());
             MailData mailData = mailResponse.getData();

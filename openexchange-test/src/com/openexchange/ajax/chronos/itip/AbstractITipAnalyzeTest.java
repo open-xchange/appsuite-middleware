@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.function.Consumer;
+import com.openexchange.ajax.chronos.factory.ConferenceBuilder;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.java.Strings;
 import com.openexchange.junit.Assert;
@@ -155,7 +156,29 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
         if (null != eventData.getAttendees()) {
             delta.setAttendees(eventData.getAttendees());
         }
+        if (null != eventData.getConferences()) {
+            delta.setConferences(eventData.getConferences());
+        }
         return delta;
+    }
+
+    protected EventData prepareAttendeeConference(EventData eventData) {
+        ConferenceBuilder builder = ConferenceBuilder.newBuilder() //@formatter:off
+            .setDefaultFeatures()
+            .setAttendeeLable()
+            .setVideoChatUri()
+            .setGroupId();
+        eventData.addConferencesItem(builder.build()); //@formatter:on
+        return eventData;
+    }
+
+    protected EventData prepareModeratorConference(EventData eventData) {
+        ConferenceBuilder builder = ConferenceBuilder.newBuilder() //@formatter:off
+            .setDefaultFeatures()
+            .setModeratorLable()
+            .setVideoChatUri(); 
+        eventData.addConferencesItem(builder.build()); //@formatter:on
+        return eventData;
     }
 
     /**

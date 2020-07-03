@@ -69,6 +69,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.Conference;
 import com.openexchange.chronos.DefaultAttendeePrivileges;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -992,6 +993,28 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                     return null;
                 }
                 return AlarmMapper.getInstance().deserialize(jsonObject, AlarmMapper.getInstance().getMappedFields(), timeZone);
+            }
+        });
+        mappings.put(EventField.CONFERENCES, new ConferencesMapping<Event>(ChronosJsonFields.CONFERENCES, null) {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsConferences();
+            }
+
+            @Override
+            public void set(Event object, List<Conference> value) throws OXException {
+                object.setConferences(value);
+            }
+
+            @Override
+            public List<Conference> get(Event object) {
+                return object.getConferences();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeConferences();
             }
         });
         mappings.put(EventField.EXTENDED_PROPERTIES, new ExtendedPropertiesMapping<Event>(ChronosJsonFields.EXTENDED_PROPERTIES, null) {

@@ -154,11 +154,13 @@ public class ShareUtils {
 
     /**
      * Prepares a guest user instance based on the supplied share recipient.
-     *
+     * 
+     * @param contextId The context identifier 
      * @param sharingUser The sharing user
      * @param recipient The recipient description
      * @param target The share target
      * @return The guest user
+     * @throws OXException In case of error
      */
     public UserImpl prepareGuestUser(int contextId, User sharingUser, ShareRecipient recipient, ShareTarget target) throws OXException {
         if (AnonymousRecipient.class.isInstance(recipient)) {

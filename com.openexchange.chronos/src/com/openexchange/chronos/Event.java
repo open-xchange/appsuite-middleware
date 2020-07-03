@@ -105,6 +105,7 @@ public class Event {
 
     private List<Attachment> attachments;
     private List<Alarm> alarms;
+    private List<Conference> conferences;
 
     private ExtendedProperties extendedProperties;
     private EnumSet<EventFlag> flags;
@@ -866,7 +867,7 @@ public class Event {
     public boolean containsGeo() {
         return setFields.contains(EventField.GEO);
     }
-    
+
     /**
      * Gets the privileges attendees have to modify the event.
      *
@@ -1405,6 +1406,42 @@ public class Event {
      */
     public boolean containsAlarms() {
         return setFields.contains(EventField.ALARMS);
+    }
+
+    /**
+     * Gets the conferences of the event.
+     *
+     * @return The conferences
+     */
+    public List<Conference> getConferences() {
+        return conferences;
+    }
+
+    /**
+     * Sets the conferences of the event.
+     *
+     * @param value The conferences to set
+     */
+    public void setConferences(List<Conference> value) {
+        conferences = value;
+        setFields.add(EventField.CONFERENCES);
+    }
+
+    /**
+     * Removes the conferences of the event.
+     */
+    public void removeConferences() {
+        conferences = null;
+        setFields.remove(EventField.CONFERENCES);
+    }
+
+    /**
+     * Gets a value indicating whether the conferences of the event have been set or not.
+     *
+     * @return <code>true</code> if the conferences are set, <code>false</code>, otherwise
+     */
+    public boolean containsConferences() {
+        return setFields.contains(EventField.CONFERENCES);
     }
 
     /**

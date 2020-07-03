@@ -143,6 +143,17 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar","Limit"]
+    - key: com.openexchange.calendar.maxConferencesPerEvent
+      description: |
+        Defines a maximum number of conferences per event. The intention of this limit is to prevent out of memory situations.
+      defaultValue: 100
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit"]
     - key: com.openexchange.calendar.provider.google.refreshInterval
       description: |
         Defines the refresh interval in minutes for the google calendar provider.

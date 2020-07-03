@@ -233,7 +233,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                     Event originalOccurrence = prepareException(originalEvent, changeException.getRecurrenceId(), changeException.getId());
                     if (false == Utils.isReschedule(originalOccurrence, changeException)) {
                         /*
-                         * propagate update to this change exception, too, including attendee comment if also unchanged from master 
+                         * propagate update to this change exception, too, including attendee comment if also unchanged from master
                          */
                         Attendee attendeeUpdate = AttendeeMapper.getInstance().copy(matchingAttendee, null, (AttendeeField[]) null);
                         attendeeUpdate.setPartStat(attendee.getPartStat());
@@ -267,7 +267,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
 
     /**
      * Prepares and stores an update of an attendee in a single event.
-     * 
+     *
      * @param originalEvent The original event being updated
      * @param originalAttendee The original attendee
      * @param attendeeData The updated attendee data as passed from the client
@@ -318,6 +318,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 storage.getEventStorage().insertEvent(newExceptionEvent);
                 storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
                 storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
+                storage.getConferenceStorage().insertConferences(newExceptionEvent.getId(), prepareConferences(originalSeriesMaster.getConferences()));
                 insertAlarms(newExceptionEvent, newExceptionAlarms, true);
                 newExceptionEvent = loadEventData(newExceptionEvent.getId());
                 resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
@@ -392,7 +393,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                     break;
                 case COMMENT:
                     /*
-                     * Ensure correct timestamp 
+                     * Ensure correct timestamp
                      */
                     attendeeUpdate.setTimestamp(timestamp.getTime());
                     break;

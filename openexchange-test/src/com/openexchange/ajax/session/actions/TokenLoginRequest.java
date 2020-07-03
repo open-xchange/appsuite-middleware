@@ -52,11 +52,11 @@ package com.openexchange.ajax.session.actions;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ACTION;
 import static com.openexchange.ajax.LoginServlet.ACTION_TOKENLOGIN;
 import static com.openexchange.ajax.fields.LoginFields.AUTHID_PARAM;
-import static com.openexchange.ajax.fields.LoginFields.AUTOLOGIN_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_TOKEN;
 import static com.openexchange.ajax.fields.LoginFields.LOGIN_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.PASSWORD_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.STAY_SIGNED_IN;
 import static com.openexchange.ajax.fields.LoginFields.VERSION_PARAM;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,35 +74,28 @@ public final class TokenLoginRequest extends AbstractRequest<TokenLoginResponse>
 
     private final String clientToken;
 
-    public TokenLoginRequest(String login, String password, String authId, String client, String version, boolean autologin, String clientToken) {
-        this(login, password, authId, client, version, autologin, clientToken, false);
+    public TokenLoginRequest(String login, String password) {
+        this(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, false, UUIDs.getUnformattedString(UUID.randomUUID()));
     }
 
-    public TokenLoginRequest(String login, String password, String authId, String client, String version, boolean autologin, String clientToken, boolean passwordInURL) {
-        super(createParameter(login, password, authId, client, version, autologin, clientToken, passwordInURL));
+    public TokenLoginRequest(String login, String password, boolean staySignedIn) {
+        this(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, staySignedIn, UUIDs.getUnformattedString(UUID.randomUUID()));
+    }
+
+    public TokenLoginRequest(String login, String password, String authId, String client, String version, boolean autologin, String clientToken) {
+        super(createParameter(login, password, authId, client, version, autologin, clientToken));
         this.clientToken = clientToken;
     }
 
-    public TokenLoginRequest(String login, String password) {
-        this(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, true, UUIDs.getUnformattedString(UUID.randomUUID()));
-    }
-
-    public TokenLoginRequest(String login, String password, boolean passwordInURL) {
-        this(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, true, UUIDs.getUnformattedString(UUID.randomUUID()), passwordInURL);
-    }
-
-    private static Parameter[] createParameter(String login, String password, String authId, String client, String version, boolean autologin, String clientToken, boolean passwordInURL) {
+    private static Parameter[] createParameter(String login, String password, String authId, String client, String version, boolean staySignedIn, String clientToken) {
         List<Parameter> retval = new ArrayList<Parameter>();
-        if (passwordInURL) {
-            retval.add(new URLParameter(PASSWORD_PARAM, password));
-        }
         retval.add(new URLParameter(PARAMETER_ACTION, ACTION_TOKENLOGIN));
         retval.add(new URLParameter(AUTHID_PARAM, authId));
         retval.add(new FieldParameter(LOGIN_PARAM, login));
         retval.add(new FieldParameter(PASSWORD_PARAM, password));
         retval.add(new FieldParameter(CLIENT_PARAM, client));
         retval.add(new FieldParameter(VERSION_PARAM, version));
-        retval.add(new FieldParameter(AUTOLOGIN_PARAM, Boolean.toString(autologin)));
+        retval.add(new FieldParameter(STAY_SIGNED_IN, Boolean.toString(staySignedIn)));
         retval.add(new FieldParameter(CLIENT_TOKEN, clientToken));
         return retval.toArray(new Parameter[retval.size()]);
     }

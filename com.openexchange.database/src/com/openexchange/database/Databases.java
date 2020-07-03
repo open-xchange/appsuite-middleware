@@ -49,6 +49,8 @@
 
 package com.openexchange.database;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.DatabaseMetaData;
@@ -71,6 +73,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.database.internal.JdbcPropertiesImpl;
 import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentList;
 import com.openexchange.java.Strings;
 
@@ -891,6 +894,248 @@ public final class Databases {
      */
     public static boolean isPacketTooBigException(SQLException e) {
         return e instanceof com.mysql.jdbc.PacketTooBigException;
+    }
+
+    /**
+     * Executes an SQL query
+     * 
+     * @param databaseService The {@link DatabaseService} to obtain the connection from
+     * @param statement The statement to execute
+     * @param rc The consumer of the result to use transform into a concrete java object
+     * @param consumers The consumers to fill the statement with variables
+     * @throws SQLException In case of an SQL error
+     * @throws OXException In all other error cases
+     */
+    public static void executeAndConsumeQuery(DatabaseService databaseService, String statement, ResultConsumer rc, PreparedStatementValueSetter... consumers) throws SQLException, OXException {
+        executeAndConsumeQuery(-1, databaseService, statement, rc, consumers);
+    }
+
+    /**
+     * Executes an SQL query.
+     * 
+     * @param contextId The context identifier to use when obtaining the connection. <code>-1</code> to fetch connection without context
+     * @param databaseService The {@link DatabaseService} to obtain the connection from
+     * @param statement The statement to execute
+     * @param rc The consumer of the result to use transform into a concrete java object
+     * @param valueSetter The consumers to fill the statement with variables
+     * @throws SQLException In case of an SQL error
+     * @throws OXException In all other error cases
+     */
+    public static void executeAndConsumeQuery(int contextId, DatabaseService databaseService, String statement, ResultConsumer rc, PreparedStatementValueSetter... valueSetter) throws SQLException, OXException {
+        Connection connection = null;
+        try {
+            connection = contextId <= 0 ? databaseService.getReadOnly() : databaseService.getReadOnly(contextId);
+            if (null != connection) {
+                connection.setAutoCommit(false);
+                executeAndConsumeQuery(connection, statement, rc, valueSetter);
+            }
+        } finally {
+            if (contextId <= 0) {
+                databaseService.backReadOnly(connection);
+            } else {
+                databaseService.backReadOnly(contextId, connection);
+            }
+        }
+    }
+
+    /**
+     * Executes an SQL update
+     * 
+     * @param databaseService The {@link DatabaseService} to obtain the connection from
+     * @param statement The statement to execute
+     * @param valueSetter The consumers to fill the statement with variables
+     * @return See {@link PreparedStatement#executeUpdate()} or <code>-1</code> if no connection could be obtained
+     * @throws SQLException In case of an SQL error
+     * @throws OXException If no connection can be obtained
+     */
+    public static int executeUpdate(DatabaseService databaseService, String statement, PreparedStatementValueSetter... valueSetter) throws SQLException, OXException {
+        return executeUpdate(-1, databaseService, statement, valueSetter);
+    }
+
+    /**
+     * Executes an SQL update
+     * 
+     * @param contextId The context identifier to use when obtaining the connection. <code>-1</code> to fetch connection without context
+     * @param databaseService The {@link DatabaseService} to obtain the connection from
+     * @param statement The statement to execute
+     * @param valueSetter The consumers to fill the statement with variables
+     * @return See {@link PreparedStatement#executeUpdate()} or <code>-1</code> if no connection could be obtained
+     * @throws SQLException In case of an SQL error
+     * @throws OXException If no connection can be obtained
+     */
+    public static int executeUpdate(int contextId, DatabaseService databaseService, String statement, PreparedStatementValueSetter... valueSetter) throws SQLException, OXException {
+        Connection connection = null;
+        int rollback = 0;
+        try {
+            connection = contextId <= 0 ? databaseService.getWritable() : databaseService.getWritable(contextId);
+            int result = -1;
+            if (null != connection) {
+                connection.setAutoCommit(false);
+                rollback = 1;
+                result = executeUpdate(connection, statement, valueSetter);
+                rollback = 2;
+            }
+            return result;
+        } finally {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(connection);
+                }
+                autocommit(connection);
+            }
+            if (contextId <= 0) {
+                databaseService.backReadOnly(connection);
+            } else {
+                databaseService.backReadOnly(contextId, connection);
+            }
+        }
+    }
+
+    /**
+     * Executes an SQL query
+     *
+     * @param connection The connection to use
+     * @param statement The statement to execute
+     * @param rc The consumer of the result to use transform into a concrete java object
+     * @param valueSetter The consumers to fill the statement with variables
+     * @throws SQLException In case of an SQL error
+     * @throws OXException In all other error cases
+     */
+    public static void executeAndConsumeQuery(Connection connection, String statement, ResultConsumer rc, PreparedStatementValueSetter... valueSetter) throws SQLException, OXException {
+        ResultSet rs = null;
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(statement);
+            rs = executeQuery(stmt, valueSetter);
+            while (rs.next()) {
+                rc.accept(rs);
+            }
+        } finally {
+            closeSQLStuff(stmt, rs);
+        }
+    }
+
+    /**
+     * Executes an SQL update
+     *
+     * @param connection The connection to use
+     * @param statement The statement to execute
+     * @param valueSetter The consumers to fill the statement with variables
+     * @return See {@link PreparedStatement#executeUpdate()}
+     * @throws SQLException In case of an SQL error
+     */
+    public static int executeUpdate(Connection connection, String statement, PreparedStatementValueSetter... valueSetter) throws SQLException {
+        ResultSet rs = null;
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(statement);
+            return executeUpdate(stmt, valueSetter);
+        } finally {
+            closeSQLStuff(stmt, rs);
+        }
+    }
+
+    /**
+     * Executes an SQL query
+     *
+     * @param stmt The statement to execute
+     * @param valueSetter The consumers to fill the statement with variables
+     * @return See {@link PreparedStatement#executeQuery()}
+     * @throws SQLException In case of error
+     */
+    public static ResultSet executeQuery(PreparedStatement stmt, PreparedStatementValueSetter... valueSetter) throws SQLException {
+        return execute(stmt, (s) -> s.executeQuery(), valueSetter);
+    }
+
+    /**
+     * Executes an SQL update
+     *
+     * @param stmt The statement to execute
+     * @param valueSetter The consumers to fill the statement with variables
+     * @return See {@link PreparedStatement#executeUpdate()}
+     * @throws SQLException In case of error
+     */
+    public static int executeUpdate(PreparedStatement stmt, PreparedStatementValueSetter... valueSetter) throws SQLException {
+        return i(execute(stmt, (s) -> I(s.executeUpdate()), valueSetter));
+    }
+
+    /**
+     * Executes the given statement with the given execute function
+     *
+     * @param <T> The result to return
+     * @param stmt The statement to execute
+     * @param executionFunction The executing function
+     * @param valueSetter The consumers to fill the statement with variables
+     * @return A dedicated value
+     * @throws SQLException In case of error
+     */
+    public static <T> T execute(PreparedStatement stmt, SQLExecutorFunction<T> executionFunction, PreparedStatementValueSetter... valueSetter) throws SQLException {
+        for (PreparedStatementValueSetter preparer : valueSetter) {
+            preparer.setValue(stmt);
+        }
+        return executionFunction.execute(stmt);
+    }
+
+    /**
+     * {@link SQLExecutorFunction}
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v7.10.4
+     * @param <T> The class of the result value
+     */
+    @FunctionalInterface
+    public interface SQLExecutorFunction<T> {
+
+        /**
+         * Executes the given statement and returns a specific value.
+         *
+         * @param stmt The statement to execute
+         * @return The value to return
+         * @throws SQLException In case of SQL error
+         */
+        T execute(PreparedStatement stmt) throws SQLException;
+    }
+
+    /**
+     * 
+     * {@link PreparedStatementValueSetter}
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v7.10.4
+     */
+    @FunctionalInterface
+    public interface PreparedStatementValueSetter {
+
+        /**
+         * Sets a value to the supplied {@link PreparedStatement}.
+         *
+         * @param stmt The {@link PreparedStatement} to fill with values.
+         * @throws SQLException
+         */
+        void setValue(PreparedStatement stmt) throws SQLException;
+    }
+
+    /**
+     * 
+     * {@link ResultConsumer}
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v7.10.4
+     */
+    @FunctionalInterface
+    public interface ResultConsumer {
+
+        /**
+         * Consumes a {@link ResultSet} that has already a moved cursor, frankly speaking the {@link ResultSet#next()} was already called.
+         * The method will be called until {@link ResultSet#next()} will return <code>false</code>.
+         * <p>
+         * It is possible that the method won't be called at all. This means that there has been no result to consume.
+         *
+         * @param rs The result set with moved cursor
+         * @throws SQLException In case of an SQL related error
+         * @throws OXException In case of other errors
+         */
+        void accept(ResultSet rs) throws SQLException, OXException;
     }
 
 }

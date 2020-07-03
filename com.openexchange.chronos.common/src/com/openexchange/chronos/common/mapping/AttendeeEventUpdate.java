@@ -59,6 +59,8 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -81,7 +83,7 @@ public class AttendeeEventUpdate implements EventUpdate {
 
     /**
      * Initializes a new {@link AttendeeEventUpdate}, indicating a single updated attendee as the only change within the passed event.
-     * 
+     *
      * @param event The event to construct the attendee event update for
      * @param originalAttendee The original attendee to indicate
      * @param updatedAttendee The updated attendee to indicate
@@ -140,6 +142,11 @@ public class AttendeeEventUpdate implements EventUpdate {
 
     @Override
     public SimpleCollectionUpdate<Attachment> getAttachmentUpdates() {
+        return AbstractCollectionUpdate.emptyUpdate();
+    }
+
+    @Override
+    public CollectionUpdate<Conference, ConferenceField> getConferenceUpdates() {
         return AbstractCollectionUpdate.emptyUpdate();
     }
 

@@ -198,6 +198,10 @@ public enum EventField {
      */
     ALARMS,
     /**
+     * The conferences of the event.
+     */
+    CONFERENCES,
+    /**
      * Extended properties of the event.
      */
     EXTENDED_PROPERTIES,

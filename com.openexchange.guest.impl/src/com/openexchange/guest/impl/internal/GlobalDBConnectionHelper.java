@@ -66,12 +66,26 @@ public class GlobalDBConnectionHelper extends AbstractConnectionHelper {
     private final int contextId;
     private final String groupId;
 
+    /**
+     * Initializes a new {@link GlobalDBConnectionHelper}.
+     * 
+     * @param services The service lookup
+     * @param needsWritable <code>true</code> if connections used by this helper needs to be writable, <code>false</code> for read only
+     * @param contextId The context identifier
+     */
     public GlobalDBConnectionHelper(ServiceLookup services, boolean needsWritable, int contextId) {
         super(services, needsWritable);
         this.contextId = contextId;
         this.groupId = null;
     }
 
+    /**
+     * Initializes a new {@link GlobalDBConnectionHelper}.
+     * 
+     * @param services The service lookup
+     * @param needsWritable <code>true</code> if connections used by this helper needs to be writable, <code>false</code> for read only
+     * @param groupId The group identifier
+     */
     public GlobalDBConnectionHelper(ServiceLookup services, boolean needsWritable, String groupId) {
         super(services, needsWritable);
         this.contextId = -1;
@@ -80,8 +94,6 @@ public class GlobalDBConnectionHelper extends AbstractConnectionHelper {
 
     /**
      * Backs the underlying connection in case the connection is owned by this instance, rolling back automatically if not yet committed.
-     *
-     * @throws OXException
      */
     @Override
     public void finish() {

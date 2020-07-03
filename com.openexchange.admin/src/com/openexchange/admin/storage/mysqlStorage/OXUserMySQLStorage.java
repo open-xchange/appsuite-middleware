@@ -2772,7 +2772,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     private void myChangeInsertModuleAccess(final Context ctx, final int userId, final UserModuleAccess access, final boolean insert, final Connection writeCon, final int[] groups) throws StorageException {
-        checkForIllegalCombination(access);
+        checkForIllegalCombination(ctx.getId().intValue(), userId, access);
         try {
             final UserPermissionBits user = RdbUserPermissionBitsStorage.adminLoadUserPermissionBits(userId, groups, ctx.getId().intValue(), writeCon);
             user.setCalendar(access.getCalendar());
@@ -2816,8 +2816,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void checkForIllegalCombination(final UserModuleAccess access) throws StorageException {
-        if (access.isGlobalAddressBookDisabled()) {
+    private void checkForIllegalCombination(int contextId, int userId, final UserModuleAccess access) throws StorageException {
+        if (access.isGlobalAddressBookDisabled() && false == b(getConfigViewValue(userId, contextId, "com.openexchange.admin.bypassAccessCombinationChecks", Boolean.FALSE))) {
+
             // At least Outlook does not work if global address book is not available. All other groupware functionality gets useless.
             if (access.getEditPublicFolders()) {
                 throw new StorageException("Global address book can not be disabled for non-PIM users.");

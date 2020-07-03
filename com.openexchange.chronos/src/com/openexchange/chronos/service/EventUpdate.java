@@ -54,6 +54,8 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 
@@ -71,6 +73,13 @@ public interface EventUpdate extends ItemUpdate<Event, EventField> {
      * @return The attendee updates, or an empty collection update if there were no attendee-related changes
      */
     CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates();
+
+    /**
+     * Gets the conference-related changes between original and updated event.
+     *
+     * @return The conference updates, or an empty collection update if there were no conference-related changes
+     */
+    CollectionUpdate<Conference, ConferenceField> getConferenceUpdates();
 
     /**
      * Gets the alarm-related changes between original and updated event. Only alarms of the actual calendar user are considered.

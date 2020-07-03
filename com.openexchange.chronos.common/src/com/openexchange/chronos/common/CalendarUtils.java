@@ -51,6 +51,7 @@ package com.openexchange.chronos.common;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -82,6 +83,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
 import org.dmfs.rfc5545.DateTime;
@@ -97,6 +99,8 @@ import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
@@ -112,6 +116,7 @@ import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AbstractEventUpdates;
 import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.common.mapping.ConferenceMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -393,6 +398,19 @@ public class CalendarUtils {
      * @return <code>true</code> if the collections <i>match</i>, i.e. their elememts are targeting the same calendar users, <code>false</code>, otherwise
      */
     public static <T extends CalendarUser> boolean matches(Collection<T> collection1, Collection<T> collection2) {
+        return matches(collection1, collection2, (item1, item2) -> matches(item1, item2));
+    }
+
+    /**
+     * Gets a value indicating whether a collection <i>matches</i> another one, i.e. both collections contain the same elements, based on
+     * the supplied match function.
+     *
+     * @param collection1 The first collection to check
+     * @param collection2 The second collection to check
+     * @param matchFunction The function to use to check if one item matches another one
+     * @return <code>true</code> if the collections <i>match</i>, i.e. both contain the same elements (ignoring order), <code>false</code>, otherwise
+     */
+    public static <T> boolean matches(Collection<T> collection1, Collection<T> collection2, BiFunction<T, T, Boolean> matchFunction) {
         if (null == collection1 || collection1.isEmpty()) {
             return null == collection2 || collection2.isEmpty();
         }
@@ -403,7 +421,7 @@ public class CalendarUtils {
 
             @Override
             protected boolean matches(T item1, T item2) {
-                return CalendarUtils.matches(item1, item2);
+                return b(matchFunction.apply(item1, item2));
             }
         }.isEmpty();
     }
@@ -472,6 +490,77 @@ public class CalendarUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Gets a value indicating whether one conference matches another, by comparing their internal identifiers or trying to match the
+     * conference's URI.
+     *
+     * @param conference1 The first conference to check
+     * @param conference2 The second conference to check
+     * @return <code>true</code> if the objects <i>match</i>, i.e. are targeting the same conference, <code>false</code>, otherwise
+     */
+    public static boolean matches(Conference conference1, Conference conference2) {
+        if (null == conference1) {
+            return null == conference2;
+        } else if (null != conference2) {
+            if (0 < conference1.getId() && conference1.getId() == conference2.getId()) {
+                return true;
+            }
+            if (null != conference1.getUri() && conference1.getUri().equalsIgnoreCase(conference2.getUri())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Looks up a specific conference in a collection of conferences, utilizing the {@link CalendarUtils#matches} routine.
+     *
+     * @param conferences The conferences to search
+     * @param conference The conference to lookup
+     * @return The matching conference, or <code>null</code> if not found
+     * @see CalendarUtils#matches
+     */
+    public static Conference find(Collection<Conference> conferences, Conference conference) {
+        if (null != conferences && 0 < conferences.size()) {
+            for (Conference candidateConference : conferences) {
+                if (matches(conference, candidateConference)) {
+                    return candidateConference;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets a value indicating whether a specific conference is present in a collection of conferences, utilizing the
+     * {@link CalendarUtils#matches} routine.
+     *
+     * @param conferences The conferences to search
+     * @param conference The conference to lookup
+     * @return <code>true</code> if the conference is contained in the collection of conferences, <code>false</code>, otherwise
+     * @see CalendarUtils#matches
+     */
+    public static boolean contains(Collection<Conference> conferences, Conference conference) {
+        return null != find(conferences, conference);
+    }
+
+    /**
+     * Gets an array of the internal identifiers of the passed conferences.
+     *
+     * @param conferences The conferences to get the identifiers from
+     * @return The identifiers
+     */
+    public static int[] getConferenceIds(List<Conference> conferences) {
+        if (null == conferences) {
+            return new int[0];
+        }
+        int[] ids = new int[conferences.size()];
+        for (int i = 0; i < ids.length; i++) {
+            ids[i] = conferences.get(i).getId();
+        }
+        return ids;
     }
 
     /**
@@ -2372,6 +2461,23 @@ public class CalendarUtils {
     }
 
     /**
+     * Initializes a new conference collection update based on the supplied original and updated conference lists.
+     *
+     * @param originalConferences The original conferences
+     * @param updatedConferences The updated conferences
+     * @return The collection update
+     */
+    public static AbstractCollectionUpdate<Conference, ConferenceField> getConferenceUpdates(List<Conference> originalConferences, List<Conference> updatedConferences) {
+        return new AbstractCollectionUpdate<Conference, ConferenceField>(ConferenceMapper.getInstance(), originalConferences, updatedConferences) {
+
+            @Override
+            protected boolean matches(Conference item1, Conference item2) {
+                return CalendarUtils.matches(item1, item2);
+            }
+        };
+    }
+
+    /**
      * Initializes a new event updates collection based on the supplied original and updated event lists.
      * <p/>
      * Event matching is performed on one or more event fields.
@@ -2739,6 +2845,9 @@ public class CalendarUtils {
         EnumSet<EventFlag> flags = EnumSet.noneOf(EventFlag.class);
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             flags.add(EventFlag.ATTACHMENTS);
+        }
+        if (null != event.getConferences() && 0 < event.getConferences().size()) {
+            flags.add(EventFlag.CONFERENCES);
         }
         if (null != event.getAlarms() && 0 < event.getAlarms().size()) {
             flags.add(EventFlag.ALARMS);

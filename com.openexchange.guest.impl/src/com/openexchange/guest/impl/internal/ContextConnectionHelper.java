@@ -71,7 +71,6 @@ public class ContextConnectionHelper extends AbstractConnectionHelper {
      * @param services The service lookup
      * @param needsWritable <code>true</code> if a writable connection is required, <code>false</code>, otherwise
      * @param contextId - id of the context to get connection helper for
-     * @throws OXException
      */
     public ContextConnectionHelper(ServiceLookup services, boolean needsWritable, int contextId) {
         super(services, needsWritable);
@@ -80,8 +79,6 @@ public class ContextConnectionHelper extends AbstractConnectionHelper {
 
     /**
      * Backs the underlying connection in case the connection is owned by this instance, rolling back automatically if not yet committed.
-     *
-     * @throws OXException
      */
     @Override
     public void finish() {

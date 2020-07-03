@@ -414,6 +414,7 @@ To avoid possible ambiguities, only certain changes considered, where the change
 - For all *simple* changed event fields, it is checked if the modified property is equal in the original series master event and in the change exception. Simple event fields are (preliminary): ``CLASSIFICATION``, ``TRANSP``, ``SUMMARY``, ``LOCATION``, ``DESCRIPTION``, ``CATEGORIES``, ``COLOR``, ``URL``, ``GEO``, ``TRANSP``, ``STATUS``. If not, leave the property in the change exception as-is (i.e. do not propagate this change). If yes, also apply the change in the change exception.
 - Newly added attendees are also added in existing change exception events, unless they're not already attending there.
 - Removed attendees are also removed from change exceptions, in case they previously attended there, too.
+- Changes within the series event's conferences are also reflected in overridden instances, unless they were modified compared to the master event  
 - For changes to an event's start- and/or enddate, the same change is only propagated if both properties are equal to the original value in the change exception, i.e. the change exception's timeslot is still matching the recurrence.
 
 ## Propagate Participation Status to Exceptions
@@ -624,6 +625,7 @@ Therefore, a new, virtual *read-only* property for events was introduced: event 
 Via this property, events will get decorated with different aspects that are relevant for the client, e.g. "has attachments", "is recurring", "has alarm(s)", "is organizer", and so on. In particular, the following event flags are supported:
  
 - ``attachment``: The event contains at least one attachment. 
+- ``conferences``: The event contains at least one conference. 
 - ``alarms``: The calendar user has at least one alarm associated with the event.
 - ``scheduled``: Event is a *group-scheduled* meeting with an organizer.
 - ``organizer``: The calendar user is the *organizer* of the meeting.

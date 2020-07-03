@@ -110,6 +110,7 @@ public class ConnectionHelper {
      * @param contextID The context ID
      * @param services The service lookup
      * @param needsWritable <code>true</code> if a writable connection is required, <code>false</code>, otherwise
+     * @throws OXException In case connection can't be obtained
      */
     public ConnectionHelper(int contextID, ServiceLookup services, boolean needsWritable) throws OXException {
         super();
@@ -137,6 +138,7 @@ public class ConnectionHelper {
      * @param session The session
      * @param services The service lookup
      * @param needsWritable <code>true</code> if a writable connection is required, <code>false</code>, otherwise
+     * @throws OXException In case connection can't be obtained
      */
     public ConnectionHelper(Session session, ServiceLookup services, boolean needsWritable) throws OXException {
         super();
@@ -200,6 +202,8 @@ public class ConnectionHelper {
 
     /**
      * Starts the transaction on the underlying connection in case the connection is owned by this instance.
+     * 
+     * @throws OXException In case of an SQL error
      */
     public void start() throws OXException {
         if (ConnectionOwnership.OWNED_WRITEABLE == ownership) {
@@ -213,6 +217,8 @@ public class ConnectionHelper {
 
     /**
      * Commits the transaction on the underlying connection in case the connection is owned by this instance.
+     * 
+     * @throws OXException In case of an SQL error
      */
     public void commit() throws OXException {
         if (ConnectionOwnership.OWNED_WRITEABLE == ownership) {
@@ -265,6 +271,15 @@ public class ConnectionHelper {
         if (sessionParameterSet && null != session) {
             session.setParameter(getConnectionSessionParameterName(), null);
         }
+    }
+
+    /**
+     * Gets a value indicating whether this connection has been committed or not
+     *
+     * @return <code>true</code> if the connection has been committed, <code>false</code> otherwise
+     */
+    public boolean isCommitted() {
+        return committed;
     }
 
 }

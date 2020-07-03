@@ -136,7 +136,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Check.quotaNotExceeded(storage, session);
         Check.noConflicts(storage, session, newEvent, newEvent.getAttendees());
         /*
-         * insert event, attendees & attachments
+         * insert event, attendees, attachments & conferences
          */
         storage.getEventStorage().insertEvent(newEvent);
         if (false == isNullOrEmpty(newEvent.getAttendees())) {
@@ -144,6 +144,9 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         }
         if (false == isNullOrEmpty(newEvent.getAttachments())) {
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newEvent.getId(), newEvent.getAttachments());
+        }
+        if (false == isNullOrEmpty(newEvent.getConferences())) {
+            storage.getConferenceStorage().insertConferences(newEvent.getId(), newEvent.getConferences());
         }
         /*
          * reload created event for further processing
@@ -198,10 +201,11 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Consistency.adjustAllDayDates(event);
         Consistency.adjustTimeZones(session, calendarUserId, event, null);
         /*
-         * attendees, attachments
+         * attendees, attachments, conferences
          */
         event.setAttendees(Check.maxAttendees(getSelfProtection(), InternalAttendeeUpdates.onNewEvent(session, folder, eventData, timestamp).getAddedItems()));
         event.setAttachments(Check.attachmentsAreVisible(session, storage, eventData.getAttachments()));
+        event.setConferences(prepareConferences(Check.maxConferences(getSelfProtection(), eventData.getConferences())));
         /*
          * classification, transparency, color, geo
          */

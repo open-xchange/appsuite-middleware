@@ -118,7 +118,7 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
         if (null != clientTimestamp) {
             requireUpToDateTimestamp(originalEvent, clientTimestamp.longValue());
         }
-        
+
         if (null != recurrenceId) {
             if (isSeriesMaster(originalEvent)) {
 				if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
@@ -137,6 +137,7 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
 		            storage.getEventStorage().insertEvent(newExceptionEvent);
 		            storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalEvent.getAttendees());
 		            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalEvent.getAttachments());
+                    storage.getConferenceStorage().insertConferences(newExceptionEvent.getId(), prepareConferences(originalEvent.getConferences()));
 		            insertAlarms(newExceptionEvent, newExceptionAlarms, true);
 		            newExceptionEvent = loadEventData(newExceptionEvent.getId());
 		            resultTracker.trackCreation(newExceptionEvent, originalEvent);
@@ -191,7 +192,7 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
                     updateAlarms(entry.getKey(), calendarUserId, entry.getKey().getAlarms(), entry.getValue());
                 }
             }
-            
+
             touch(originalEvent.getId());
             resultTracker.trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
         }
