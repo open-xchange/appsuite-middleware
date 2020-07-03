@@ -145,7 +145,6 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
-import com.openexchange.mail.json.actions.AbstractArchiveMailAction.ArchiveDataWrapper;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -4478,12 +4477,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public List<ArchiveDataWrapper> archiveMultipleMail(List<String[]> entries, final ServerSession session, final boolean useDefaultName, final boolean createIfAbsent) throws OXException {
+    public List<ArchiveDataWrapper> archiveMultipleMail(List<FolderAndId> entries, final ServerSession session, final boolean useDefaultName, final boolean createIfAbsent) throws OXException {
         // Expect array of objects: [{"folder":"INBOX/foo", "id":"1234"},{"folder":"INBOX/foo", "id":"1235"},...,{"folder":"INBOX/bar", "id":"1299"}]
         TIntObjectMap<Map<String, List<String>>> m = new TIntObjectHashMap<>(2);
-        for (String[] obj : entries) {
+        for (FolderAndId obj : entries) {
 
-            FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(obj[0]);
+            FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(obj.getFolderId());
             int folderAccountId = fa.getAccountId();
 
             Map<String, List<String>> map = m.get(folderAccountId);
@@ -4499,7 +4498,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 map.put(fullName, list);
             }
 
-            list.add(obj[1]);
+            list.add(obj.getMailId());
         }
 
         // Iterate map

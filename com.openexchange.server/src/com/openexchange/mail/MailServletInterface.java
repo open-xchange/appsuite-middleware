@@ -69,7 +69,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.json.actions.AbstractArchiveMailAction.ArchiveDataWrapper;
 import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.search.SearchTerm;
@@ -263,7 +262,7 @@ public abstract class MailServletInterface {
      * @return a list of archived mails
      * @throws OXException
      */
-    public abstract List<ArchiveDataWrapper> archiveMultipleMail(List<String[]> mails, ServerSession session, boolean useDefaultName, boolean createIfAbsent) throws OXException;
+    public abstract List<ArchiveDataWrapper> archiveMultipleMail(List<FolderAndId> mails, ServerSession session, boolean useDefaultName, boolean createIfAbsent) throws OXException;
 
     /**
      * Gets a mail's ID by specified "Message-Id" header.
@@ -395,7 +394,7 @@ public abstract class MailServletInterface {
     public abstract SearchIterator<MailMessage> getAllThreadedMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices) throws OXException;
 
     /**
-     * 
+     *
      * Returns a list of conversations within the given folder
      *
      * @param folder The folder to search mails in
