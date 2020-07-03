@@ -1379,7 +1379,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         if (viewFactory != null) {
             try {
                 ConfigView view = viewFactory.getView(userId, contextId);
-                return view.get(propertyName, Boolean.class);
+                Boolean value = view.get(propertyName, Boolean.class);
+                return null == value ? defaultValue : value;
             } catch (OXException e) {
                 if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
                     LOG.debug("Context {} is being created. Therefore can't load context sensitive properties. Try to load \"{}\" on global view.", I(contextId), propertyName, e);
