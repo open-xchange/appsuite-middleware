@@ -2587,6 +2587,47 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public void checkContextIdentifier(Context ctx) throws InvalidDataException, StorageException {
+        if (null == ctx || null == ctx.getId()) {
+            throw new InvalidDataException("There must be a context identifier!");
+        }
+        if (i(ctx.getId()) <= 0) {
+            throw new InvalidDataException("The context identifier " + ctx.getId() + " is not allowed!");
+        }
+
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+            int contextId = ctx.getId().intValue();
+            stmt = con.prepareStatement("SELECT 1 FROM context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                throw new InvalidDataException("Context " + ctx.getId() + " already exists!");
+            }
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(stmt);
+
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    @Override
     public boolean checkContextName(Context ctx) throws NoSuchContextException, InvalidDataException, StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;

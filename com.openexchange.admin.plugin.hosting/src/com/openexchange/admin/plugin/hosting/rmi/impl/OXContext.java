@@ -1214,14 +1214,14 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         if (viewFactory != null) {
             ConfigView view;
             try {
-                view = viewFactory.getView(admin_user.getId().intValue(), ctx.getId().intValue());
+                view = viewFactory.getView(admin_user.getId().intValue(), ret.getId().intValue());
                 Boolean check = view.opt("com.openexchange.imap.initWithSpecialUse", Boolean.class, Boolean.TRUE);
                 if (check != null && check.booleanValue()) {
                     ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
                     prop.set(Boolean.TRUE);
                 }
             } catch (OXException e) {
-                log(LogLevel.ERROR, LOGGER, auth, ctx.getIdAsString(), e, "Unable to set special use check property!");
+                log(LogLevel.ERROR, LOGGER, auth, ret.getIdAsString(), e, "Unable to set special use check property!");
             }
         }
 

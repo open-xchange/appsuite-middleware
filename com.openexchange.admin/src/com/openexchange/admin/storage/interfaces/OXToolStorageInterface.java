@@ -370,6 +370,20 @@ public abstract class OXToolStorageInterface {
     public abstract boolean existsContextNameInServer(Context ctx) throws StorageException;
 
     /**
+     * Checks that the context identifier of the context is valid and unique
+     * <p>
+     * Should be used in create method!
+     * <p>
+     * A valid context identifier begins at <code>1</code>. <code>0</code> is not allowed as this confuses many services that expect
+     * <code>0</code> to be a indicator for missing context.
+     *
+     * @param ctx The context
+     * @throws InvalidDataException If the context has a invalid identifier or a context with this identifier exists
+     * @throws StorageException If existence check fails
+     */
+    public abstract void checkContextIdentifier(Context ctx) throws InvalidDataException, StorageException;
+
+    /**
      * Checks context existence and if there is no other context with the same name
      * <p>
      * Should be used in change method!
