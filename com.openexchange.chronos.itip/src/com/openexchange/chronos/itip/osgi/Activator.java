@@ -109,11 +109,6 @@ public class Activator extends HousekeepingActivator {
         Services.set(this);
         ConfigurationService config = Services.getService(ConfigurationService.class);
 
-        int detailInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.detail", 120000);
-        int stateChangeInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.states", 600000);
-        int priorityInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.priority", 900000);
-        boolean poolEnabled = config.getBoolProperty("com.openexchange.calendar.notify.poolenabled", true);
-
         TimerService timers = Services.getService(TimerService.class);
         MailSenderService sender = new DefaultMailSenderService();
 
@@ -121,7 +116,11 @@ public class Activator extends HousekeepingActivator {
         ITipNotificationParticipantResolver resolver = new ITipNotificationParticipantResolver(util);
         ITipNotificationMailGeneratorFactory generatorFactory = new ITipNotificationMailGeneratorFactory(resolver, util, this);
 
-        if (poolEnabled) {
+        if (config.getBoolProperty("com.openexchange.calendar.notify.poolenabled", true)) {
+            int detailInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.detail", 120000);
+            int stateChangeInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.states", 600000);
+            int priorityInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.priority", 900000);
+            
             EventNotificationPool pool = new EventNotificationPool(timers, generatorFactory, sender, detailInterval, stateChangeInterval, priorityInterval);
             sender = new PoolingMailSenderService(pool, sender);
         }
