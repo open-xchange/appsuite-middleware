@@ -582,7 +582,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Differing accounts...
          */
-        MailAccess<?, ?> destAccess = initMailAccess(destAccountId);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> destAccess = initMailAccess(destAccountId);
         try {
             // Chunk wise copy
             int chunkSize;
@@ -798,7 +798,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
 
         // Differing accounts...
-        MailAccess<?, ?> destAccess = initMailAccess(destAccountId);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> destAccess = initMailAccess(destAccountId);
         try {
             String[] mailIds = null;
             MailMessage[] flagInfo = null;
@@ -1365,7 +1365,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailMessage[] originalMails = new MailMessage[folders.length];
         {
             for (int i = 0; i < length; i++) {
-                MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = initMailAccess(arguments[i].getAccountId());
                 try {
                     MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
                     if (null == origMail) {
@@ -2895,7 +2895,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
-    void initConnection(int accountId) throws OXException {
+    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> initConnection(int accountId) throws OXException {
         if (!init) {
             mailAccess = initMailAccess(accountId);
             mailConfig = mailAccess.getMailConfig();
@@ -2907,18 +2907,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             mailConfig = mailAccess.getMailConfig();
             this.accountId = accountId;
         }
+        return mailAccess;
     }
 
-    private MailAccess<?, ?> initMailAccess(int accountId) throws OXException {
+    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> initMailAccess(int accountId) throws OXException {
         return initMailAccess(accountId, null);
     }
 
     @SuppressWarnings("unchecked")
-    private MailAccess<?, ?> initMailAccess(int accountId, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access) throws OXException {
+    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> initMailAccess(int accountId, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access) throws OXException {
         /*
          * Fetch a mail access (either from cache or a new instance)
          */
-        MailAccess<?, ?> localMailAccess = null == access ? MailAccess.getInstance(session, accountId) : access;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> localMailAccess = null == access ? MailAccess.getInstance(session, accountId) : access;
 
         /**
          * Decorate the MailAccess with crypto functionality
@@ -3000,7 +3001,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             draftMail.setFlag(MailMessage.FLAG_DRAFT, true);
         }
         MailPath msgref = draftMail.getMsgref();
-        MailAccess<?, ?> otherAccess = null;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
         try {
             MailMessage origMail;
             if (null == msgref || !draftFullname.equals(msgref.getFolder())) {
@@ -3139,7 +3140,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                 } else {
                     // Move to another account
-                    MailAccess<?, ?> otherAccess = initMailAccess(parentAccountID);
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = initMailAccess(parentAccountID);
                     try {
                         String newParent = mailFolder.getParentFullname();
                         // Check if parent mail folder exists
@@ -3706,7 +3707,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 LOG.error("", e);
             }
         } else {
-            MailAccess<?, ?> otherAccess = null;
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
             try {
                 otherAccess = MailAccess.getInstance(session, pathAccount);
                 otherAccess.connect(true);
@@ -3750,7 +3751,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     LOG.error("", e);
                 }
             } else {
-                MailAccess<?, ?> otherAccess = null;
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
                 try {
                     otherAccess = MailAccess.getInstance(session, pathAccount);
                     otherAccess.connect(true);
@@ -3788,7 +3789,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (mailAccess.getAccountId() == pathAccount) {
             mailAccess.getMessageStorage().deleteMessages(fullName, uids, true);
         } else {
-            MailAccess<?, ?> otherAccess = null;
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
             try {
                 otherAccess = MailAccess.getInstance(session, pathAccount);
                 otherAccess.connect(true);
@@ -3836,7 +3837,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Mark as \Answered in foreign account
              */
-            MailAccess<?, ?> otherAccess = null;
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
             try {
                 otherAccess = MailAccess.getInstance(session, pathAccount);
                 otherAccess.connect(true);
@@ -4480,8 +4481,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     public List<ArchiveDataWrapper> archiveMultipleMail(List<String[]> entries, final ServerSession session, final boolean useDefaultName, final boolean createIfAbsent) throws OXException {
         // Expect array of objects: [{"folder":"INBOX/foo", "id":"1234"},{"folder":"INBOX/foo", "id":"1235"},...,{"folder":"INBOX/bar", "id":"1299"}]
         TIntObjectMap<Map<String, List<String>>> m = new TIntObjectHashMap<>(2);
-        final List<ArchiveDataWrapper> retval = new ArrayList<>();
-        // Parse JSON body
         for (String[] obj : entries) {
 
             FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(obj[0]);
@@ -4504,16 +4503,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
 
         // Iterate map
+        final List<ArchiveDataWrapper> retval = new ArrayList<>();
         final Reference<OXException> exceptionRef = new Reference<>();
         final Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = this.mailAccess;
         boolean success = m.forEachEntry(new TIntObjectProcedure<Map<String, List<String>>>() {
 
             @Override
             public boolean execute(int accountId, Map<String, List<String>> mapping) {
                 boolean proceed = false;
                 try {
-                    initConnection(accountId);
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = initConnection(accountId);
 
                     // Check archive full name
                     int[] separatorRef = new int[1];
