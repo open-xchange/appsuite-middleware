@@ -484,7 +484,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                         Future<String> future = entry.getValue();
                         // Check Future's return value
                         int retryCount = 3;
-                        while (retryCount-- > 0) {
+                        NextTry: while (retryCount-- > 0) {
                             try {
                                 JSONObject jNodeInfo = new JSONObject(future.get());
                                 retryCount = 0;
@@ -510,6 +510,13 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
                                 // Check for Hazelcast timeout
                                 if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                                    if (cause instanceof com.hazelcast.core.MemberLeftException) {
+                                        // Target member left cluster
+                                        retryCount = 0;
+                                        LOG.info("Member \"{}\" has left cluster, hence ignored for rescheduling computation.", member);
+                                        cancelFutureSafe(future);
+                                        continue NextTry;
+                                    }
                                     if (cause instanceof IOException) {
                                         throw ((IOException) cause);
                                     }
