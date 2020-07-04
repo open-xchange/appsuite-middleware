@@ -2045,11 +2045,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      */
     private void autoFindOrCreateSchema(Connection configCon, Database db) throws StorageException {
         // Freshly determine the next schema to use
-        String schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon);
-        if (schemaName != null) {
+        NextUnfilledSchemaResult result = getNextUnfilledSchemaFromDB(db.getId(), configCon);
+        if (NextUnfilledSchemaResult.Type.FOUND == result.getType()) {
             // Found a suitable schema on specified database host
-            db.setScheme(schemaName);
+            db.setScheme(result.getSchema());
             return;
+        }
+
+        // Check if absent result is caused by all suitable schemas currently locked (update running) or needing an update (update tasks pending)
+        if (NextUnfilledSchemaResult.Type.ALL_LOCKED_OR_NEED_UPDATE == result.getType()) {
+            String sbol = prop.getProp("ALLOW_CREATING_NEW_SCHEMA_IF_ALL_LOCKED_OR_NEED_UPDATE", "true").trim();
+            if ("false".equalsIgnoreCase(sbol)) {
+                // Auto-creation of a new schema is explicitly forbidden in this case
+                throw new StorageException("All suitable schemas are locked or need update and auto-creation of a new schema is not allowed in this case");
+            }
         }
 
         // Need to create a new schema
@@ -2059,7 +2068,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         }
-        schemaName = db.getName() + '_' + schemaUnique;
+        String schemaName = db.getName() + '_' + schemaUnique;
         db.setScheme(schemaName);
         OXUtilStorageInterface.getInstance().createDatabase(db, configCon);
     }
@@ -2109,10 +2118,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         });
     }
 
-    private String getNextUnfilledSchemaFromDB(final Integer poolId, final Connection con) throws StorageException {
+    private NextUnfilledSchemaResult getNextUnfilledSchemaFromDB(final Integer poolId, final Connection con) throws StorageException {
         if (null == poolId) {
             throw new StorageException("pool_id in getNextUnfilledSchemaFromDB must be != null");
         }
+
         OXAdminPoolInterface pool = cache.getPool();
         final String[] unfilledSchemas;
         try {
@@ -2122,18 +2132,25 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
         }
+
+        if (unfilledSchemas.length <= 0) {
+            LOG.debug("no unfilled schema available for next context");
+            return NextUnfilledSchemaResult.RESULT_NONE;
+        }
+
         final OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
-        String found = null;
-        for (String schema : unfilledSchemas) {
+        for (int j = 0; j < unfilledSchemas.length; j++) {
+            String schema = unfilledSchemas[j];
             if (oxt.schemaBeingLockedOrNeedsUpdate(i(poolId), schema)) {
                 LOG.debug("schema {} is locked or updated, trying next one", schema);
             } else {
-                found = schema;
-                break;
+                LOG.debug("using schema {} for next context", schema);
+                return new NextUnfilledSchemaResult(schema);
             }
         }
-        LOG.debug("using schema {} it for next context", found);
-        return found;
+
+        LOG.debug("found no suitable schema for next context");
+        return NextUnfilledSchemaResult.RESULT_ALL_LOCKED_OR_NEED_UPDATE;
     }
 
     private Set<String> fillTargetDatabase(List<TableObject> sorted_tables, Connection target_ox_db_con, Connection ox_db_connection, Object criteriaMatch, Set<String> knownTables) throws SQLException {
@@ -3310,6 +3327,56 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         @Override
         public void run() {
             threadPool.submit(task, CallerRunsBehavior.<V> getInstance());
+        }
+    }
+
+    private static class NextUnfilledSchemaResult {
+
+        /** The result type when trying to determine next unfilled schema */
+        static enum Type {
+            /** No unfilled schema available for next context */
+            NONE,
+            /** All suitable schemas are currently locked (update running) or need an update (update tasks pending) */
+            ALL_LOCKED_OR_NEED_UPDATE,
+            /** Found a suitable schema for next context */
+            FOUND;
+        }
+
+        /** Constant to signal no unfilled schema available */
+        static final NextUnfilledSchemaResult RESULT_NONE = new NextUnfilledSchemaResult(null, Type.NONE);
+
+        /** Constant to all suitable schemas are currently locked (update running) or need an update (update tasks pending) */
+        static final NextUnfilledSchemaResult RESULT_ALL_LOCKED_OR_NEED_UPDATE = new NextUnfilledSchemaResult(null, Type.ALL_LOCKED_OR_NEED_UPDATE);
+
+        private final String schema;
+        private final Type type;
+
+        NextUnfilledSchemaResult(String schema) {
+            this(schema, Type.FOUND);
+        }
+
+        private NextUnfilledSchemaResult(String schema, Type type) {
+            super();
+            this.schema = schema;
+            this.type = type;
+        }
+
+        /**
+         * Gets the result type.
+         *
+         * @return The result type
+         */
+        Type getType() {
+            return type;
+        }
+
+        /**
+         * Gets the name of the schema.
+         *
+         * @return The schema name
+         */
+        String getSchema() {
+            return schema;
         }
 
     }

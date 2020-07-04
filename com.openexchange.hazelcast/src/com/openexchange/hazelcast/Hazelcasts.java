@@ -149,7 +149,7 @@ public class Hazelcasts {
             Future<R> future = entry.getValue();
             // Check Future's return value
             int retryCount = 3;
-            while (retryCount-- > 0) {
+            NextTry: while (retryCount-- > 0) {
                 try {
                     R result = future.get();
                     retryCount = 0;
@@ -166,6 +166,12 @@ public class Hazelcasts {
 
                     // Check for Hazelcast timeout
                     if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                        if (cause instanceof com.hazelcast.core.MemberLeftException) {
+                            // No further retry
+                            retryCount = 0;
+                            cancelFutureSafe(future);
+                            continue NextTry;
+                        }
                         throw e;
                     }
 
@@ -237,7 +243,7 @@ public class Hazelcasts {
                 Future<R> future = entry.getValue();
                 // Check Future's return value
                 int retryCount = 3;
-                while (retryCount-- > 0) {
+                NextTry: while (retryCount-- > 0) {
                     try {
                         R result = future.get();
                         retryCount = 0;
@@ -258,6 +264,12 @@ public class Hazelcasts {
 
                         // Check for Hazelcast timeout
                         if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                            if (cause instanceof com.hazelcast.core.MemberLeftException) {
+                                // No further retry
+                                retryCount = 0;
+                                cancelFutureSafe(future);
+                                continue NextTry;
+                            }
                             throw e;
                         }
 
@@ -349,7 +361,7 @@ public class Hazelcasts {
             try {
                 int retryCount = 3;
                 Thread currentThread = Thread.currentThread();
-                while (retryCount-- > 0 && !currentThread.isInterrupted()) {
+                NextTry: while (retryCount-- > 0 && !currentThread.isInterrupted()) {
                     try {
                         R result = toTakeFrom.get();
                         retryCount = 0;
@@ -369,6 +381,12 @@ public class Hazelcasts {
 
                         // Check for Hazelcast timeout
                         if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                            if (cause instanceof com.hazelcast.core.MemberLeftException) {
+                                // Target member left cluster
+                                retryCount = 0;
+                                cancelFutureSafe(toTakeFrom);
+                                continue NextTry;
+                            }
                             resultReference.setNonNull(cause);
                             return null;
                         }

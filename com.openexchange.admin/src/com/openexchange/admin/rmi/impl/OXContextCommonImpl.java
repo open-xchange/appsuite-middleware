@@ -80,7 +80,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         super();
     }
 
-    protected void createchecks(final Context ctx, final User admin_user, @SuppressWarnings("unused") final OXToolStorageInterface tool) throws StorageException, InvalidDataException {
+    protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, InvalidDataException {
         try {
             Boolean ret = null;
 
@@ -104,6 +104,11 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         } catch (PluginException e) {
             throw StorageException.wrapForRMI(e);
         }
+
+        /*
+         * Check that a valid identifier was set
+         */
+        tool.checkContextIdentifier(ctx);
 
         try {
             if (!admin_user.mandatoryCreateMembersSet()) {

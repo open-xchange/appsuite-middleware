@@ -55,11 +55,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.CalculatePermission;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -586,15 +588,29 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             return;
         }
         // @formatter:off
-        Arrays.asList(original.getPermissions()).stream()
-                                                .filter((p) -> FolderPermissionType.LEGATOR.equals(p.getType()) || FolderPermissionType.INHERITED.equals(p.getType()))
-                                                .forEach((origPerm) -> {
-                                                    Arrays.asList(updated.getPermissions())
-                                                    .parallelStream()
-                                                    .filter((updatedPerm) -> updatedPerm.getEntity() == origPerm.getEntity() && updatedPerm.isGroup() == origPerm.isGroup() && updatedPerm.getSystem() == origPerm.getSystem())
-                                                    .forEach((updatedPerm) -> updatedPerm.setType(origPerm.getType()));
-                                                });
-       // @formatter:on
+        List<Permission> updatedPerms = Arrays.asList(updated.getPermissions());
+        // Create a mapping from the old to the new permissions
+        Map<Permission, Permission> updated2originalMap = updatedPerms.stream()
+                                                .filter((p) -> p != null)
+                                                .collect(HashMap::new,
+                                                    (m,p)-> m.put(p, Arrays.asList(original.getPermissions())
+                                                                    .parallelStream()
+                                                                    .filter((ori) -> ori != null && ori.getEntity() == p.getEntity() && ori.isGroup() == p.isGroup() && ori.getSystem() == p.getSystem())
+                                                                    .findAny().orElse(null)),
+                                                    HashMap::putAll);
+        // Replace all new permissions with a permission with the correct type
+        updatedPerms.replaceAll((updatedPerm) -> {
+            Permission orig = updated2originalMap.get(updatedPerm);
+            if(orig != null && (FolderPermissionType.LEGATOR.equals(orig.getType()) || FolderPermissionType.INHERITED.equals(orig.getType()))) {
+                BasicPermission result = new BasicPermission(updatedPerm);
+                result.setType(orig.getType());
+                return result;
+            }
+            return updatedPerm;
+        });
+        // @formatter:on
+
+        updated.setPermissions(updatedPerms.toArray(new Permission[updatedPerms.size()]));
     }
 
     /**

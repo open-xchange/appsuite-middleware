@@ -95,3 +95,15 @@ properties:
       file: hosting.properties
       packageName: open-xchange-admin
       tags: ["Hosting"]
+    - key: ALLOW_CREATING_NEW_SCHEMA_IF_ALL_LOCKED_OR_NEED_UPDATE
+      description: |
+        Allows to automatically create a new schema on context creation when all suitable schemas
+        are currently locked (update running) or need an update (update tasks pending).
+      defaultValue: true
+      version: 7.10.4
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: hosting.properties
+      packageName: open-xchange-admin
+      tags: ["Hosting"]

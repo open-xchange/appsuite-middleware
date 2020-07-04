@@ -58,6 +58,8 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.ArchiveDataWrapper;
+import com.openexchange.mail.FolderAndId;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.MailRequest;
@@ -85,7 +87,6 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
     @Override
     protected AJAXRequestResult performArchive(final MailRequest req) throws OXException {
         try {
-            final ServerSession session = req.getSession();
             /*
              * Read in parameters
              */
@@ -96,50 +97,16 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
             if (null == jArray) {
                 throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
             }
-            int length = jArray.length();
-
-            if (folderId == null) {
-
-                ArrayList<String[]> paraList = new ArrayList<String[]>(length);
-                for (int i = 0; i < length; i++) {
-                    JSONObject jObject = jArray.getJSONObject(i);
-                    String folder = jObject.getString(AJAXServlet.PARAMETER_FOLDERID);
-                    String id = jObject.getString(AJAXServlet.PARAMETER_ID);
-                    paraList.add(new String[] { folder, id });
-                }
-                /*
-                 * Get mail interface
-                 */
-                final MailServletInterface mailInterface = getMailInterface(req);
-
-                List<ArchiveDataWrapper> retval = mailInterface.archiveMultipleMail(paraList, session, useDefaultName, createIfAbsent);
-                if (retval == null) {
-                    return new AJAXRequestResult(Boolean.TRUE, "native");
-                }
-                JSONArray json = new JSONArray();
-                for (ArchiveDataWrapper obj : retval) {
-                    JSONObject tmp = new JSONObject();
-                    tmp.put("id", obj.getId());
-                    tmp.put("created", obj.isCreated());
-                    json.put(tmp);
-                }
-                return new AJAXRequestResult(json, "json");
-            }
-            ArrayList<String> ids = new ArrayList<String>(length);
-            for (int i = 0; i < length; i++) {
-                ids.add(jArray.getString(i));
-            }
             /*
-             * Get mail interface
+             * Archive mails
              */
-            final MailServletInterface mailInterface = getMailInterface(req);
-            List<ArchiveDataWrapper> retval = mailInterface.archiveMail(folderId, ids, session, useDefaultName, createIfAbsent);
+            List<ArchiveDataWrapper> retval = archive(jArray, folderId, useDefaultName, createIfAbsent, req);
             if (retval == null) {
                 return new AJAXRequestResult(Boolean.TRUE, "native");
             }
-            JSONArray json = new JSONArray();
+            JSONArray json = new JSONArray(retval.size());
             for (ArchiveDataWrapper obj : retval) {
-                JSONObject tmp = new JSONObject();
+                JSONObject tmp = new JSONObject(4);
                 tmp.put("id", obj.getId());
                 tmp.put("created", obj.isCreated());
                 json.put(tmp);
@@ -150,6 +117,35 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
         } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private List<ArchiveDataWrapper> archive(JSONArray jArray, final String folderId, boolean useDefaultName, boolean createIfAbsent, final MailRequest req) throws JSONException, OXException {
+        ServerSession session = req.getSession();
+        int length = jArray.length();
+        if (folderId == null) {
+            List<FolderAndId> paraList = new ArrayList<FolderAndId>(length);
+            for (int i = 0; i < length; i++) {
+                JSONObject jObject = jArray.getJSONObject(i);
+                String folder = jObject.getString(AJAXServlet.PARAMETER_FOLDERID);
+                String id = jObject.getString(AJAXServlet.PARAMETER_ID);
+                paraList.add(new FolderAndId(folder, id));
+            }
+            /*
+             * Do archive mails
+             */
+            final MailServletInterface mailInterface = getMailInterface(req);
+            return mailInterface.archiveMultipleMail(paraList, session, useDefaultName, createIfAbsent);
+        }
+
+        List<String> ids = new ArrayList<String>(length);
+        for (int i = 0; i < length; i++) {
+            ids.add(jArray.getString(i));
+        }
+        /*
+         * Do archive mails
+         */
+        final MailServletInterface mailInterface = getMailInterface(req);
+        return mailInterface.archiveMail(folderId, ids, session, useDefaultName, createIfAbsent);
     }
 
 }

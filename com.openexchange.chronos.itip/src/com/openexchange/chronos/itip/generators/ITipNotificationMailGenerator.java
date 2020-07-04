@@ -271,6 +271,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(determinateSender(recipient.isExternal()));
+        mail.setStateType(State.Type.DELETED);
         initMail(mail);
 
         final ITipMessage message = new ITipMessage();
@@ -462,15 +463,17 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         }
         if (confirmStatus.equals(ParticipationStatus.ACCEPTED)) {
             return State.Type.ACCEPTED;
-        } else if (confirmStatus.equals(ParticipationStatus.DECLINED)) {
-            return State.Type.DECLINED;
-        } else if (confirmStatus.equals(ParticipationStatus.TENTATIVE)) {
-            return State.Type.TENTATIVELY_ACCEPTED;
-        } else if (confirmStatus.equals(ParticipationStatus.NEEDS_ACTION)) {
-            return State.Type.NONE_ACCEPTED;
-        } else {
-            return State.Type.MODIFIED;
         }
+        if (confirmStatus.equals(ParticipationStatus.DECLINED)) {
+            return State.Type.DECLINED;
+        }
+        if (confirmStatus.equals(ParticipationStatus.TENTATIVE)) {
+            return State.Type.TENTATIVELY_ACCEPTED;
+        }
+        if (confirmStatus.equals(ParticipationStatus.NEEDS_ACTION)) {
+            return State.Type.NONE_ACCEPTED;
+        }
+        return State.Type.MODIFIED;
     }
 
     protected NotificationMail refresh(final NotificationParticipant recipient) throws OXException {

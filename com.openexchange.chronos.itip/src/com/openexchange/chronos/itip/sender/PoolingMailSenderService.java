@@ -133,6 +133,9 @@ public class PoolingMailSenderService implements MailSenderService {
     }
 
     private boolean isStateChange(NotificationMail mail) {
+        if (null == mail || null == mail.getStateType()) {
+            return false;
+        }
         switch (mail.getStateType()) {
             case ACCEPTED:
             case DECLINED:
