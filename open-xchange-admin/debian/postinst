@@ -140,6 +140,9 @@ postFix() {
       fi
       ox_scr_done ${SCR}
     }
+
+    # SCR-704
+    ox_add_property ALLOW_CREATING_NEW_SCHEMA_IF_ALL_LOCKED_OR_NEED_UPDATE true /opt/open-xchange/etc/plugin/hosting.properties
 }
 
 setConfigFilePermissions() {
