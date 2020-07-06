@@ -51,6 +51,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/etc/pns-apns_http2-options-defaults.yml
 /opt/open-xchange/etc/pns-gcm-options-defaults.yml
 /opt/open-xchange/etc/pns-wns-options-defaults.yml
+/opt/open-xchange/etc/security/pns.list
 
 %changelog
 * Tue Jun 30 2020 Thorben Betten <thorben.betten@open-xchange.com>
