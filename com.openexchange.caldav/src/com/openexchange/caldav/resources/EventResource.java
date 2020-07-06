@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.dmfs.rfc5545.DateTime;
+import com.google.common.xml.XmlEscapers;
 import com.openexchange.caldav.CalDAVImport;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.EventPatches;
@@ -330,7 +331,7 @@ public class EventResource extends DAVObjectResource<Event> {
             byte[] iCalFile = getICalFile();
             if (null != iCalFile) {
                 property.setXML(true);
-                property.setValue("<![CDATA[" + new String(iCalFile, Charsets.UTF_8) + "]]>");
+                property.setValue(XmlEscapers.xmlContentEscaper().escape(new String(iCalFile, Charsets.UTF_8)));
             }
             return property;
         }
@@ -363,7 +364,7 @@ public class EventResource extends DAVObjectResource<Event> {
                     stringBuilder.append("<CS:dtstamp>").append(Tools.formatAsUTC(timestamp)).append("</CS:dtstamp>");
                 }
                 property.setXML(true);
-                property.setValue(stringBuilder.toString());
+                property.setValue(XmlEscapers.xmlContentEscaper().escape(stringBuilder.toString()));
             }
             return property;
         }

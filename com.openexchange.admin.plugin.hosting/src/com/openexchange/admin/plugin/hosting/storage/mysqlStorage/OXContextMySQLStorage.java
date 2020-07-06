@@ -3345,7 +3345,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         /** Constant to signal no unfilled schema available */
         static final NextUnfilledSchemaResult RESULT_NONE = new NextUnfilledSchemaResult(null, Type.NONE);
 
-        /** Constant to all suitable schemas are currently locked (update running) or need an update (update tasks pending) */
+        /** Constant to signal that all suitable schemas are currently locked (update running) or need an update (update tasks pending) */
         static final NextUnfilledSchemaResult RESULT_ALL_LOCKED_OR_NEED_UPDATE = new NextUnfilledSchemaResult(null, Type.ALL_LOCKED_OR_NEED_UPDATE);
 
         private final String schema;
