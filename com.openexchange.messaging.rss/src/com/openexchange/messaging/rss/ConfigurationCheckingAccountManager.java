@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,56 @@
  *
  */
 
-package com.openexchange.messaging.rss.osgi;
+package com.openexchange.messaging.rss;
 
-import javax.net.ssl.HttpsURLConnection;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.html.HtmlService;
+import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccount;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingService;
-import com.openexchange.messaging.rss.RSSMessagingService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.proxy.ProxyRegistry;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
+import com.openexchange.messaging.rss.utils.RssProperties;
+import com.openexchange.session.Session;
 
 /**
- * {@link Activator}
+ * {@link ConfigurationCheckingAccountManager} is a {@link DefaultMessagingAccountManager} implementation which checks that the rss account configuration is valid.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public class Activator extends HousekeepingActivator {
+public class ConfigurationCheckingAccountManager extends DefaultMessagingAccountManager {
 
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
+    /**
+     * Initializes a new {@link ConfigurationCheckingAccountManager}.
+     *
+     * @param service The {@link MessagingService}
+     */
+    public ConfigurationCheckingAccountManager(MessagingService service) {
+        super(service);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    public void updateAccount(MessagingAccount account, Session session) throws OXException {
+        checkAccount(account);
+        super.updateAccount(account, session);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-        	Services.setServiceLookup(this);
-            track(HtmlService.class, new HTMLRegistryCustomizer(context));
-            track(ProxyRegistry.class, new ProxyRegistryCustomizer(context));
-            openTrackers();
-            registerService(MessagingService.class, new RSSMessagingService(), null);
-            HttpsURLConnection.setDefaultSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
-        } catch (Exception x) {
-            LoggerHolder.LOG.error("", x);
-            throw x;
+    public int addAccount(MessagingAccount account, Session session) throws OXException {
+        checkAccount(account);
+        return super.addAccount(account, session);
+    }
+
+    /**
+     * Checks whether the account has a valid account url or not.
+     *
+     * @param account The {@link MessagingAccount}
+     * @throws OXException in case the account is invalid
+     */
+    private void checkAccount(MessagingAccount account) throws OXException {
+        Object urlObj = account.getConfiguration().get(FormStrings.FORM_LABEL_URL);
+        if (urlObj == null || RssProperties.isDenied(urlObj.toString())) {
+            throw MessagingExceptionCodes.INVALID_ACCOUNT_CONFIGURATION.create("Invalid account url");
         }
-    }
-
-    @Override
-    protected void stopBundle() {
-        closeTrackers();
-        unregisterServices();
-        cleanUp();
     }
 
 }
