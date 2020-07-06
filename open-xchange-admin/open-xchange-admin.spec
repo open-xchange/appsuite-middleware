@@ -194,6 +194,8 @@ if [ ${1:-0} -eq 2 ]; then
       ox_scr_done ${SCR}
     fi
 
+    # SCR-704
+    ox_add_property ALLOW_CREATING_NEW_SCHEMA_IF_ALL_LOCKED_OR_NEED_UPDATE true /opt/open-xchange/etc/plugin/hosting.properties
 fi
 ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 

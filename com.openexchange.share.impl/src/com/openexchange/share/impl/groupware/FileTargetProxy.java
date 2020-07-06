@@ -58,6 +58,7 @@ import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.UserizedFile;
+import com.openexchange.file.storage.infostore.InfostoreFile;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.java.Strings;
@@ -87,7 +88,7 @@ public class FileTargetProxy extends AbstractTargetProxy {
      * @param file The file
      */
     public FileTargetProxy(File file) {
-        this(file, new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId()));
+        this(file, new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file instanceof InfostoreFile ? ((InfostoreFile) file).getOriginalFolderId() : null, file.getId()));
     }
 
     /**

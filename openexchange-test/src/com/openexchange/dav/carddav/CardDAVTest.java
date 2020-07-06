@@ -289,6 +289,10 @@ public abstract class CardDAVTest extends WebDAVTest {
         return super.syncCollection(syncToken, "/carddav/Contacts");
     }
 
+    protected SyncCollectionResponse syncCollection(String collection, SyncToken syncToken) throws Exception {
+        return super.syncCollection(syncToken, "/carddav/" + collection);
+    }
+
     /**
      * Gets all changed vCards by performing a sync-collection REPORT with the
      * supplied sync-token, followed by an addressbook-multiget REPORT for

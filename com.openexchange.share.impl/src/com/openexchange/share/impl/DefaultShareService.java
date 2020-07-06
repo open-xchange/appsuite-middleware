@@ -263,26 +263,12 @@ public class DefaultShareService implements ShareService {
         if ((guestUser.getCreatedBy() == userId) || ShareTool.isAnonymousGuest(guestUser)) {
             return true;
         }
-
-        List<TargetProxy> targets = requireService(ModuleSupport.class).listTargets(session.getContextId(), guestID);
-        GroupService groupService = null;
+        ModuleSupport moduleSupport = requireService(ModuleSupport.class);
+        List<TargetProxy> targets = moduleSupport.listTargets(session.getContextId(), guestID);
         for (TargetProxy target : targets) {
-            List<TargetPermission> permissions = target.getPermissions();
-            if (null != permissions && 0 < permissions.size()) {
-                for (TargetPermission permission : permissions) {
-                    if (userId == permission.getEntity()) {
-                        return true;
-                    }
-                    if (permission.isGroup()) {
-                        groupService = requireService(GroupService.class, groupService);
-                        Group group = groupService.getGroup(context, permission.getEntity());
-                        for (int memberId : group.getMember()) {
-                            if (userId == memberId) {
-                                return true;
-                            }
-                        }
-                    }
-                }
+            String realFolder = target.getTarget().getRealFolder();
+            if (moduleSupport.isVisible(target.getTarget().getModule(), realFolder == null ? target.getFolderID() : realFolder, target.getID(), context.getContextId(), session.getUserId())) {
+                return true;
             }
         }
 
@@ -340,7 +326,7 @@ public class DefaultShareService implements ShareService {
         ModuleSupport moduleSupport = requireService(ModuleSupport.class);
         TargetProxy proxy = moduleSupport.load(target, session);
         if (false == proxy.mayAdjust()) {
-            return null; // don't expose share link info if no admin access to target  
+            return null; // don't expose share link info if no admin access to target
         }
         DefaultShareInfo shareInfo = optLinkShare(session, context, proxy, null);
         return null != shareInfo ? new DefaultShareLink(shareInfo, proxy.getTimestamp(), false) : null;

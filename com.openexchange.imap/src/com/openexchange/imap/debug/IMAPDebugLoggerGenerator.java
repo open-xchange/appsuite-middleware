@@ -240,7 +240,7 @@ public class IMAPDebugLoggerGenerator {
         return new IllegalStateException("Failed to generate IMAP debug logger for server '" + server + "' of user " + userId + " in context " + contextId, throwable);
     }
 
-    private static String toPositiveString(int i) {
+    static String toPositiveString(int i) {
         String str = Integer.toString(i);
         return str.charAt(0)  == '-' ? str.substring(1) : str;
     }
