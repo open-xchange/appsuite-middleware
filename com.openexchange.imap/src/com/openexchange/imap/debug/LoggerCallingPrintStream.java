@@ -49,8 +49,10 @@
 
 package com.openexchange.imap.debug;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import org.slf4j.Logger;
 import com.openexchange.java.Strings;
 
 /**
@@ -60,6 +62,11 @@ import com.openexchange.java.Strings;
  * @since v7.10.4
  */
 public class LoggerCallingPrintStream extends PrintStream {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LoggerCallingPrintStream.class);
+    }
 
     private org.slf4j.Logger logger;
     private final StringBuffer buf;
@@ -93,12 +100,17 @@ public class LoggerCallingPrintStream extends PrintStream {
     @Override
     public synchronized void flush() {
         if (buf.length() > 0) {
-            org.slf4j.Logger logger = this.logger;
-            if (logger == null) {
-                logger = IMAPDebugLoggerGenerator.generateLoggerFor(imapSession, server, userId, contextId);
-                this.logger = logger;
+            try {
+                org.slf4j.Logger logger = this.logger;
+                if (logger == null) {
+                    logger = IMAPDebugLoggerGenerator.generateLoggerFor(imapSession, server, userId, contextId);
+                    this.logger = logger;
+                }
+                logger.info(buf.toString());
+            } catch (Exception e) {
+                // Failed to create logger
+                LoggerHolder.LOG.warn("Failed to create DEBUG logger for IMAP server {} for user {} in context {} with new IMAP session {}", server, I(userId), I(contextId), IMAPDebugLoggerGenerator.toPositiveString(imapSession.hashCode()), e);
             }
-            logger.info(buf.toString());
             buf.setLength(0);
         }
     }
