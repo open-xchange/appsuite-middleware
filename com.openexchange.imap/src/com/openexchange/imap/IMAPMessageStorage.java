@@ -1945,6 +1945,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     msgIds = applyIndexRange(msgIds, indexRange);
                 }
                 if (msgIds.length == 0) {
+                    if (messageCount > 0 && searchTerm == null) {
+                        return fetchSortAndSlice(null, sortField, order, fields, indexRange, headerNames);
+                    }
                     return EMPTY_RETVAL;
                 }
             }
