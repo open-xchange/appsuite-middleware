@@ -63,21 +63,23 @@ import com.openexchange.management.ManagementService;
 import ch.qos.logback.classic.LoggerContext;
 
 /**
- * {@link LogbackSocketAppenderMBeanRegisterer}
+ * {@link DeprecatedLogstashSocketAppenderMBeanRegisterer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @deprecated
  */
-public class LogbackSocketAppenderMBeanRegisterer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
+@Deprecated
+public class DeprecatedLogstashSocketAppenderMBeanRegisterer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(LogbackSocketAppenderMBeanRegisterer.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(DeprecatedLogstashSocketAppenderMBeanRegisterer.class);
 
     private final BundleContext context;
     private ObjectName logstashConfName; // guarded by synchronized
 
     /**
-     * Initialises a new {@link LogbackSocketAppenderMBeanRegisterer}.
+     * Initialises a new {@link DeprecatedLogstashSocketAppenderMBeanRegisterer}.
      */
-    public LogbackSocketAppenderMBeanRegisterer(BundleContext context) {
+    public DeprecatedLogstashSocketAppenderMBeanRegisterer(BundleContext context) {
         super();
         this.context = context;
     }
@@ -135,13 +137,13 @@ public class LogbackSocketAppenderMBeanRegisterer implements ServiceTrackerCusto
 
     private static final class LogbackExtensionsBundleListener implements BundleListener {
 
-        private final LogbackSocketAppenderMBeanRegisterer registerer;
+        private final DeprecatedLogstashSocketAppenderMBeanRegisterer registerer;
         private final ManagementService managementService;
 
         /**
          * Initializes a new {@link BundleListenerImplementation}.
          */
-        LogbackExtensionsBundleListener(LogbackSocketAppenderMBeanRegisterer registerer, ManagementService managementService) {
+        LogbackExtensionsBundleListener(DeprecatedLogstashSocketAppenderMBeanRegisterer registerer, ManagementService managementService) {
             super();
             this.registerer = registerer;
             this.managementService = managementService;
