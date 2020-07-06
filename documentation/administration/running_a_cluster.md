@@ -4,21 +4,21 @@ icon: fa-server
 tags: Administration, Configuration
 ---
 
-# Running a cluster
+Running a cluster
 
 This document describes how a cluster can be setup between App Suite Middleware nodes.
 
-## Concepts
+# Concepts
 
 For inter-OX-communication over the network, multiple Open-Xchange servers can form a cluster. This brings different advantages regarding distribution and caching of volatile data, load balancing, scalability, fail-safety and robustness. Additionally, it provides the infrastructure for upcoming features of the Open-Xchange server. The clustering capabilities of the Open-Xchange server are mainly built up on [Hazelcast](http://hazelcast.com/), an open source clustering and highly scalable data distribution platform for Java. The following article provides an overview about the current featureset and configuration options.
 
-## Requirements
+# Requirements
 
-### Synchronized system clock times
+## Synchronized system clock times
 
 It is crucial that all involved members in a cluster do have their system clock times in sync with each other; e.g. by using an NTP service.
 
-### HTTP routing
+## HTTP routing
 An OX cluster is always part of a larger picture. Usually there is front level loadbalancer as central HTTPS entry point to the platform. This loadbalancer optionally performs HTTPS termination and forwards HTTP(S) requests to webservers (the usual and only supported choice as of now is Apache). These webservers are performing HTTPS termination (if this is not happening on the loadbalancer) and serve static content, and (which is what is relevant for our discussion here) they forward dynamic requests to the OX backends.
 
 A central requirement for the interaction of these components (loadbalancer, webservers, OX nodes) is that we have session stability based on the JSESSIONID cookie / jsessionid path component suffix. This means that our application sets a cookie named JSESSIONID which has a value like <large decimal number>.<route identifier>, e.g. "5661584529655240315.OX1". The route identifier here ("OX1" in this example) is taken by the OX node from a configuration setting from a config file and is specific to one OX node. HTTP routing must happen such that HTTP requests with a cookie with such a suffix always end up the corresponding OX node. There are furthermore specific circumstances when passing this information via cookie is not possible. Then the JSESSIONID is transferred in a path component as "jsessionid=..." in the HTTP request. The routing mechanism needs to take that into account also.
@@ -35,17 +35,17 @@ There are several reasons why we require session stability in exactly this way. 
 
 Usual "routing based on cookie hash" is not sufficient here since it disregards the information which machine originally issued the cookie. It only ensures that the session will be sticky to any target, which statistically will not be the same machine that issued the cookie. OX will then set a new JSESSIONID cookie, assuming the session had been migrated. The loadbalancer will then route the session to a different target, as the hash of the cookie will differ. This procedure then happens iteratively until by chance the routing based on cookie hash will route the session to the correct target. By then, a lot of resources will have been wasted, by creating full (short-term) sessions on all OX nodes. Furthermore, processes like TokenLogin will not work this way.
 
-### Same packages
+## Same packages
 
-All middleware nodes participating in the Hazelcast cluster need to have the same open-xchange-* packages installed, so that all dynamically injected class definitions are available during (de-)erialization on all nodes. So for example, even if a node does not serve requests from the web client, it still requires the realtime packages for collaborative document editing or the packages for the distributed session storage being installed.
+All middleware nodes participating in the Hazelcast cluster need to have the same open-xchange-* packages installed, so that all dynamically injected class definitions are available during (de-)serialization on all nodes. So for example, even if a node does not serve requests from the web client, it still requires the realtime packages for collaborative document editing or the packages for the distributed session storage being installed.
 
-## Configuration
+# Configuration
 
 All settings regarding cluster setup are located in the configuration file hazelcast.properties. The former used additional files cluster.properties, mdns.properties and static-cluster-discovery.properties are no longer needed. The following gives an overview about the most important settings - please refer to the inline documentation of the configuration file for more advanced options.
 
-Note: The configuration guide targets v7.4.0 of the OX server (and above). For older versions, please consult the history of this page. A full list of Hazelcast-related properties is available [here](https://documentation.open-xchange.com/components/middleware/config/7.8.4/#mode=features&feature=Hazelcast).
+Note: The configuration guide targets v7.10.4 of the OX server (and above). For older versions, please consult the history of this page at [OXpedia](https://oxpedia.org/wiki/index.php?title=AppSuite:Running_a_cluster). A full list of Hazelcast-related properties is available [here](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/#mode=features&feature=Hazelcast).
 
-## General
+# General
 
 To restrict access to the cluster and to separate the cluster from others in the local network, a group name needs to be defined. Up to v7.10.2, an additional group password, configurable via com.openexchange.hazelcast.group.password was used. Only backend nodes having the same values for those properties are able to join and form a cluster.
 
@@ -56,7 +56,7 @@ To restrict access to the cluster and to separate the cluster from others in the
 com.openexchange.hazelcast.group.name=
 ```
 
-## Network
+# Network
 
 It's required to define the network interface that is used for cluster communication via com.openexchange.hazelcast.network.interfaces. By default, the interface is restricted to the local loopback address only. To allow the same configuration amongst all nodes in the cluster, it's recommended to define the value using a wildcard matching the IP addresses of all nodes participating in the cluster, e.g. 192.168.0.*
 
@@ -87,11 +87,11 @@ Generally, it's advised to use the same network join mechanism for all nodes in 
 
 Depending on the network join setting, further configuration may be necessary, as described in the following paragraphs.
 
-### empty
+## empty
 
 When using the default value empty, no other nodes are discovered in the cluster. This value is suitable for single-node installations. Note that other nodes that are configured to use other network join mechanisms may be still able to still to connect to this node, e.g. using a static network join, having the IP address of this host in the list of potential cluster members (see below).
 
-### static
+## static
 
 The most common setting for com.openexchange.hazelcast.network.join is static. A static cluster discovery uses a fixed list of IP addresses of the nodes in the cluster. During startup and after a specific interval, the underlying Hazelcast library probes for not yet joined nodes from this list and adds them to the cluster automatically. The address list is configured via com.openexchange.hazelcast.network.join.static.nodes:
 
@@ -107,7 +107,7 @@ com.openexchange.hazelcast.network.join.static.nodes=
 
 For a fixed set of backend nodes, it's recommended to simply include the IP addresses of all nodes in the list, and use the same configuration for each node. However, it's only required to add the address of at least one other node in the cluster to allow the node to join the cluster. Also, when adding a new node to the cluster and this list is extended accordingly, existing nodes don't need to be shut down to recognize the new node, as long as the new node's address list contains at least one of the already running nodes.
 
-### multicast
+## multicast
 
 For highly dynamic setups where nodes are added and removed from the cluster quite often and/or the host's IP addresses are not fixed, it's also possible to configure the network join via multicast. During startup and after a specific interval, the backend nodes initiate the multicast join process automatically, and discovered nodes form or join the cluster afterwards. The multicast group and port can be configured as follows:
 
@@ -124,7 +124,7 @@ com.openexchange.hazelcast.network.join.multicast.group=224.2.2.3
 com.openexchange.hazelcast.network.join.multicast.port=54327
 ```
 
-### dns
+## dns
 
 A very common approach for service discovery in cloud environments is to use plain old DNS. Any service, consisting of a varying number of elastic nodes, would get its own domain name. Against a certain DNS server, this name always resolves to the most recent set of IP addresses of all service nodes.
 
@@ -154,7 +154,7 @@ com.openexchange.hazelcast.network.join.dns.resolverPort=53
 com.openexchange.hazelcast.network.join.dns.refreshMillis=60000
 ```
 
-## Example
+# Example
 
 The following example shows how a simple cluster named MyCluster consisting of 4 backend nodes can be configured using static cluster discovery. The node's IP addresses are 10.0.0.15, 10.0.0.16, 10.0.0.17 and 10.0.0.18. Note that the same hazelcast.properties is used by all nodes.
 
@@ -165,9 +165,9 @@ com.openexchange.hazelcast.network.join.static.nodes=10.0.0.15,10.0.0.16,10.0.0.
 com.openexchange.hazelcast.network.interfaces=10.0.0.*
 ```
 
-## Advanced Configuration
+# Advanced Configuration
 
-### Lite Members (available since v7.8.4)
+## Lite Members
 
 Lite members in a Hazelcast cluster are members that do not hold any data partitions, i.e. all read- and write operations to distributed maps are delegated to non-lite ("full") members. Apart from not having data partitions, lite members participate in the same way as other members: they can register listeners for distributed topics (e.g. cache invalidation events) or can be addressed for task execution (e.g. during realtime communication).
 
@@ -187,89 +187,13 @@ com.openexchange.hazelcast.liteMember=true
 
 It's also recommended to use a "static" cluster discovery for the network join, and list all "full" member nodes here, so that join requests are handled by those nodes, too (and not the other nodes that are potentially prone to garbage collection delays.
 
-### Custom Partitioning
-
-Note: Starting with v7.8.4, "Lite Members" should be used in favor of applying a custom partitioning scheme.
-
-While originally being designed to separate the nodes holding distributed data into different risk groups for increased fail safety, a custom partitioning strategy may also be used to distinguish between nodes holding distributed data from those who should not.
-
-This approach of custom partitioning may be used in a OX cluster, where usually different backend nodes serve different purposes. A common scenario is that there are nodes handling requests from the web interfaces, and others being responsible for USM/EAS traffic. Due to their nature of processing large chunks of synchronization data in memory, the USM/EAS nodes may encounter small delays when the Java garbage collector kicks in and suspends the Java Virtual Machine. Since those delays may also have an influence on hazelcast-based communication in the cluster, the idea is to instruct hazelcast to not store distributed data on that nodes. This is where a custom partitioning scheme comes into play.
-
-To setup a custom partitioning scheme in the cluster, an additional `hazelcast.xml` configuration file is used, which should be placed into the hazelcast subdirectory of the OX configuration folder, usually at `/opt/openexchange/etc/hazelcast`. Please note that it's vital that each node in the cluster is configured equally here, so the same `hazelcast.xml` file should be copied to each server. The configuration read from there is used as basis for all further settings that are taken from the ordinary hazelcast.properties config file.
-
-To setup a custom partitioning scheme, the partition groups must be defined in the `hazelcast.xml` file. See the following file for an example configuration, where the three nodes `10.10.10.60`, `10.10.10.61` and `10.10.10.62` are defined to form an own partitioning group each. Doing so, all distributed data will be stored at one of those nodes physically, while the corresponding backup data (if configured) at one of the other two nodes. All other nodes in the cluster will not be used to store distributed data, but will still be "full" hazelcast members, which is necessary for other cluster-wide operations the OX backends use.
-
-Please note that the configured backup count in the map configurations should be smaller than the number of nodes here, otherwise, there may be problems if one of those data nodes is shut down temporarily for maintenance. So, the minimum number of nodes to define in the partition group sections is implicitly bound to the sum of a map's `backupCount` and `asyncBackupCount` properties, plus 1 for the original data partition.
-
-```
-<?xml version="1.0" encoding="UTF-8"?>
-
-<hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.1.xsd"
-           xmlns="http://www.hazelcast.com/schema/config"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <partition-group enabled="true" group-type="CUSTOM">
-        <member-group>
-            <interface>10.10.10.60</interface>
-        </member-group>
-        <member-group>
-            <interface>10.10.10.61</interface>
-        </member-group>
-        <member-group>
-            <interface>10.10.10.62</interface>
-        </member-group>
-    </partition-group>
-</hazelcast>
-```
-
-More general information regarding custom partioning is available [here](http://hazelcast.org/docs/latest/manual/html/partitiongroupconfig.html).
-
-It's also recommended to use a "static" cluster discovery for the network join, and list same the nodes that are also configured in the parition groups here, so that join requests are handled by those nodes, too (and not the other nodes that are potentially prone to garbage collection delays.
-
-After configuring a custom partitioning scheme, the data distribution may be verified, e.g. by inspecting the MBeans of the distributed maps via JMX.
-
-## Features
-
- to distinguish between nodes holding distributed data from those who should not.
-
-This approach of custom partitioning may be used in a OX cluster, where usually different backend nodes serve different purposes. A common scenario is that there are nodes handling requests from the web interfaces, and others being responsible for USM/EAS traffic. Due to their nature of processing large chunks of synchronization data in memory, the USM/EAS nodes may encounter small delays when the Java garbage collector kicks in and suspends the Java Virtual Machine. Since those delays may also have an influence on hazelcast-based communication in the cluster, the idea is to instruct hazelcast to not store distributed data on that nodes. This is where a custom partitioning scheme comes into play.
-
-To setup a custom partitioning scheme in the cluster, an additional hazelcast.xml configuration file is used, which should be placed into the hazelcast subdirectory of the OX configuration folder, usually at /opt/openexchange/etc/hazelcast. Please note that it's vital that each node in the cluster is configured equally here, so the same hazelcast.xml file should be copied to each server. The configuration read from there is used as basis for all further settings that are taken from the ordinary hazelcast.properties config file.
-
-To setup a custom partitioning scheme, the partition groups must be defined in the hazelcast.xml file. See the following file for an example configuration, where the three nodes 10.10.10.60, 10.10.10.61 and 10.10.10.62 are defined to form an own partitioning group each. Doing so, all distributed data will be stored at one of those nodes physically, while the corresponding backup data (if configured) at one of the other two nodes. All other nodes in the cluster will not be used to store distributed data, but will still be "full" hazelcast members, which is necessary for other cluster-wide operations the OX backends use.
-
-Please note that the configured backup count in the map configurations should be smaller than the number of nodes here, otherwise, there may be problems if one of those data nodes is shut down temporarily for maintenance. So, the minimum number of nodes to define in the partition group sections is implicitly bound to the sum of a map's backupCount and asyncBackupCount properties, plus 1 for the original data partition.
-
-
-<?xml version="1.0" encoding="UTF-8"?>
-
-<hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.1.xsd"
-           xmlns="http://www.hazelcast.com/schema/config"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <partition-group enabled="true" group-type="CUSTOM">
-        <member-group>
-            <interface>10.10.10.60</interface>
-        </member-group>
-        <member-group>
-            <interface>10.10.10.61</interface>
-        </member-group>
-        <member-group>
-            <interface>10.10.10.62</interface>
-        </member-group>
-    </partition-group>
-</hazelcast>
-More general information regarding custom partioning is available at http://hazelcast.org/docs/latest/manual/html/partitiongroupconfig.html .
-
-It's also recommended to use a "static" cluster discovery for the network join, and list same the nodes that are also configured in the parition groups here, so that join requests are handled by those nodes, too (and not the other nodes that are potentially prone to garbage collection delays.
-
-After configuring a custom partitioning scheme, the data distribution may be verified, e.g. by inspecting the MBeans of the distributed maps via JMX.
-
-## Features
+# Features
 
 The following list gives an overview about different features that were implemented using the new cluster capabilities.
 
-### Distributed Session Storage
+## Distributed Session Storage
 
-Previously, when an Open-Xchange server was shutdown for maintenance, all user sessions that were bound to that machine were lost, i.e. the users needed to login again. With the distributed session storage, all sessions are backed by a distributed map in the cluster, so that they are no longer bound to a specific node in the cluster. When a node is shut down, the session data is still available in the cluster and can be accessed from the remaining nodes. The load-balancing techniques of the webserver then seamlessly routes the user session to another node, with no session expired errors. The distributed session storage comes with the package open-xchange-sessionstorage-hazelcast. It's recommended to install this optional package in all clustered environments with multiple groupware server nodes.
+Previously, when an Open-Xchange server was shutdown for maintenance, all user sessions that were bound to that machine were lost, i.e. the users needed to login again. With the distributed session storage, all sessions are backed by a distributed map in the cluster, so that they are no longer bound to a specific node in the cluster. When a node is shut down, the session data is still available in the cluster and can be accessed from the remaining nodes. The load-balancing techniques of the webserver then seamlessly routes the user session to another node, with no session expired errors. The distributed session storage comes with the package ``open-xchange-sessionstorage-hazelcast``. It's recommended to install this optional package in all clustered environments with multiple groupware server nodes.
 
 **Notes**:
 
@@ -300,7 +224,7 @@ com.openexchange.hazelcast.configuration.map.maxIdleSeconds=640000
 
 To avoid unnecessary eviction, the value should be higher than the configured `com.openexchange.sessiond.sessionLongLifeTime` in `sessiond.properties`.
 
-### Remote Cache Invalidation
+## Remote Cache Invalidation
 
 For faster access, groupware data is held in different caches by the server. Formerly, the caches utilized the TCP Lateral Auxiliary Cache plug in (LTCP) for the underlying JCS caches to broadcast updates and removals to caches on other OX nodes in the cluster. This could potentially lead to problems when remote invalidation was not working reliably due to network discovery problems. As an alternative, remote cache invalidation can also be performed using reliable publish/subscribe events built up on Hazelcast topics. This can be configured in the cache.properties configuration file, where the 'eventInvalidation' property can either be set to 'false' for the legacy behavior or 'true' for the new mechanism:
 
@@ -314,9 +238,9 @@ Internally, if `com.openexchange.caching.jcs.eventInvalidation` is set to `true`
 
 Using Hazelcast-based cache invalidation also makes further configuration of the JCS auxiliaries obsolete in the `cache.ccf` configuration file. In that case, all `jcs.auxiliary.LTCP.*` configuration settings are virtually ignored. However, it's still required to mark caches that require cluster-wide invalidation via `jcs.region.<cache_name>=LTCP`, just as before. So basically, when using the new default setting com.openexchange.caching.jcs.eventInvalidation=true, it's recommended to just use the stock cache.ccf file, since no further LTCP configuration is required.
 
-## Adminstration / Troubleshooting
+# Adminstration / Troubleshooting
 
-### Hazelcast Configuration
+## Hazelcast Configuration
 
 The underlying Hazelcast library can be configured using the file hazelcast.properties.
 
@@ -327,40 +251,36 @@ The Hazelcast JMX MBean can be enabled or disabled with the property `com.openex
 
 The port ranges used by Hazelcast for incoming and outgoing connections can be controlled via the configuration parameters `com.openexchange.hazelcast.networkConfig.port`, `com.openexchange.hazelcast.networkConfig.portAutoIncrement` and `com.openexchange.hazelcast.networkConfig.outboundPortDefinitions`.
 
-### Commandline Tool
+## Commandline Tool
 
 To print out statistics about the cluster and the distributed data, the showruntimestats commandline tool can be executed with the clusterstats ('c') argument. This provides an overview about the runtime cluster configuration of the node, other members in the cluster and distributed data structures.
 
-### JMX
+## JMX
 
 In the Open-Xchange server Java process, the MBean com.hazelcast can be used to monitor and manage different aspects of the underlying Hazelcast cluster. The com.hazelcast MBean provides detailed information about the cluster configuration and distributed data structures.
 
-### Hazelcast Errors
+## Hazelcast Errors
 
 When experiencing hazelcast related errors in the logfiles, most likely different versions of the packages are installed, leading to different message formats that can't be understood by nodes using another version. Examples for such errors are exceptions in hazelcast components regarding (de)serialization or other message processing. This may happen when performing a consecutive update of all nodes in the cluster, where temporarily nodes with a heterogeneous setup try to communicate with each other. If the errors don't disappear after all nodes in the cluster have been update to the same package versions, it might be necessary to shutdown the cluster completely, so that all distributed data is cleared.
 
-### Cluster Discovery Errors
+## Cluster Discovery Errors
 
 * If the started OX nodes don't form a cluster, please double-check your configuration in `hazelcast.properties`
 * It's important to have the same cluster name defined in `hazelcast.properties` throughout all nodes in the cluster
 * Especially when using multicast cluster discovery, it might take some time until the cluster is formed
 * When using `static` cluster discovery, at least one other node in the cluster has to be configured in `com.openexchange.hazelcast.network.join.static.nodes` to allow joining, however, it's recommended to list all nodes in the cluster here
 
-### Disable Cluster Features
+## Disable Cluster Features
 The Hazelcast based clustering features can be disabled with the following property changes:
 
 * Disable cluster discovery by setting `com.openexchange.hazelcast.network.join` to empty in `hazelcast.properties`
 * Disable Hazelcast by setting `com.openexchange.hazelcast.enabled` to `false` in `hazelcast.properties`
 * Disable message based cache event invalidation by setting `com.openexchange.caching.jcs.eventInvalidation` to false in `cache.properties`
 
-### Update from 6.22.1 to version 6.22.2 and above
-
-As hazelcast will be used by default for the distribution of sessions starting 6.22.2 you have to adjust hazelcast according to our old cache configuration. First of all it's important that you install the open-xchange-sessionstorage-hazelcast package. This package will add the binding between hazelcast and the internal session management. Next you have to set a cluster name to the cluster.properties file (see section "Cluster Discovery Errors"). Furthermore you will have to add one of the two discovery modes mentioned in section "Cluster Discovery".
-
-## Updating a Cluster
+# Updating a Cluster
 Running a cluster means built-in failover on the one hand, but might require some attention when it comes to the point of upgrading the services on all nodes in the cluster. This chapter gives an overview about general concepts and hints for silent updates of the cluster.
 
-### The Big Picture
+## The Big Picture
 
 Updating an OX App Suite cluster is possible in several ways. The involved steps always include
 
@@ -369,7 +289,7 @@ Updating an OX App Suite cluster is possible in several ways. The involved steps
 
 There are some precautions required, though.
 
-### Update Tasks Management
+## Update Tasks Management
 
 It is a feature of the OX App Suite middleware to automatically start update tasks on a database schema when a user tries to login whose context lives on that schema. For installations beyond a certain size, if you just update the OX App Suite software without special handling of the update tasks, user logins will trigger an uncontrolled storm of update tasks on the databases, potentially leading to resource contention, unnecessary long update tasks runtimes, excessive load on the database server, maybe even service outages.
 
@@ -379,7 +299,7 @@ So one key element of every update strategy is to avoid user logins on nodes whi
 
 We describe the update strategy in more detail in the next section. Note that these are still high-level outlines of the actual procedure, which requires additional details with regards to Hazelcast, given further down below.
 
-#### Full downtime approach
+## Full downtime approach
 
 The full downtime approach is quite straightforward and involves
 
@@ -390,7 +310,7 @@ The full downtime approach is quite straightforward and involves
 
 This is the most general approach and always available, even if the rolling approach is not available due to Hazelcast constraints.
 
-#### Rolling strategy
+## Rolling strategy
 
 It is possible to execute the update tasks decoupled from the real update of the rest from the cluster, days or even weeks ahead of time, with the following approach:
 
@@ -413,12 +333,12 @@ Hazelcast will ensure that sessions from nodes which you restart are taken over 
 
 For the rolling strategy to work as described, it is required that the old and new version of OX App Suite use compatible versions of the Hazelcast library. This is the case for most upgrades. However some upgrades must handle the situation that the new version of OX App Suite ships with a new version of Hazelcast incompatible to the version of Hazelcast shipped with the old version of OX App Suite. It will be stated in the release notes if this is the case for a given release. If so, then some additional steps are required during a rolling update to ensure session handling / invalidating during update tasks works properly. See below.
 
-### HOWTO / step-by-step instructions
+## HOWTO / step-by-step instructions
 
 * Take backups of as much as possible (databases, OX config files, etc).
 * Announce the maintenance to the users. The communication depends on which approach you chose: the full downtime approach will come with a full downtime for all users, while the rolling upgrade approach will result in some users will have a short loss of service while their schema upgrades.
 
-#### Full downtime approach
+## Full downtime approach
 
 * Initiate maintenance: Block HTTP sessions to the service. Put a reasonable maintenance page in place, probably some HTTP error 503 with a reasonable Retry-After header.
 * Shutdown the service on all middleware nodes. Upgrade the software on all middleware and frontend nodes using the disto's package manager. See [UpdatingOXPackages](https://www.oxpedia.org/wiki/index.php?title=AppSuite:UpdatingOXPackages) for details on how to do that. Don't forget the touch-appsuite step if required ("If you update only UI plugins without simultaneously upgrading the core UI packages to a new version").
@@ -432,7 +352,7 @@ For the rolling strategy to work as described, it is required that the old and n
  * Some central functionality tests like sending mails, accessing drive, etc
 * Restore service: allow HTTP sessions, remove the maintenance page.
 
-#### Rolling Upgrade without breaking Hazelcast upgrade
+## Rolling Upgrade without breaking Hazelcast upgrade
 
 Remember: as stated above, this is viable only if the release notes for the new version do not state that there are breaking Hazelcast changes. For example, with v7.8.4 there were breaking Hazelcast changes and in the Release Notes it was stated as follows.
 
@@ -444,13 +364,13 @@ Remember: as stated above, this is viable only if the release notes for the new 
 
 If you find you are upgrading to a version with breaking Hazelcast changes, please consult the next section "Rolling Upgrade with breaking Hazelcast upgrade".
 
-#### Description of the upgrade process
+## Description of the upgrade process
 
 The procedure consists of a **pre-update** where one update node will be taken out of the HTTP traffic, to execute database update tasks from that node, and a **real update**, where all of the cluster nodes will get updated to the new version of the software.
 
 The pre-update will not make the new version of the software available to the users. It will run as kind of "background task", mostly invisible for the users (but see below for a description of the impact of the update tasks on user experience).
 
-##### Pre-update
+### Pre-update
 The following steps all refer to one special middleware node, the so-called upgrade node. The other cluster nodes are not affected by this step.
 
 * Take one middleware node (the upgrade node) out of the HTTP traffic by adjusting the apache mod\_proxy tables. We propose a combination of the balancer_manager to do this during runtime without restart, but also update the config files to prevent service restarts of apache to accidentally route sessions to the upgrade node.
@@ -461,7 +381,7 @@ The following steps all refer to one special middleware node, the so-called upgr
  * Note that executing update tasks on database schemas will result in users from the given database schema to be logged out and locked out during the update tasks.
  * You might want to keep the load low on the DBs, to affect production operations as low as possible, and because with this decoupled update tasks approach there is no immediate time pressure. If you want to follow the [limited parallel](https://www.oxpedia.org/wiki/index.php?title=UpdateTasks#How_to_see_all_schemas.3F) approach, use a small, mild parallelity factor (e.g. 2 or maybe 4 if you know this by far does not saturate your DB platform).
 
-##### Real Update
+### Real Update
 
 The following steps refer to all cluster nodes (but the upgrade node, which had been updated before).
 
@@ -477,7 +397,7 @@ The following steps refer to all cluster nodes (but the upgrade node, which had 
  * WebUI login is possible
  * Some central functionality tests like sending mails, accessing drive, etc
 
-#### Rolling Upgrade with breaking Hazelcast upgrade
+## Rolling Upgrade with breaking Hazelcast upgrade
 
 See section "Upgrades of the Hazelcast library" below.
 
@@ -508,15 +428,15 @@ After the DB update tasks you can remove the special upgrade package again from 
 
 The "Real Upgrade" procedure then looks like above.
 
-## Reference Documentation
+# Reference Documentation
 
-### Limitations
+## Limitations
 
 While in most cases a seamless, rolling upgrade of all nodes in the cluster is possible, there may be situations where nodes running a newer version of the Open-Xchange Server are not able to communicate with older nodes in the cluster, i.e. can't access distributed data or consume incompatible event notifications - especially, when the underlying Hazelcast library is part of the update, which does not support this scenario at the moment. In such cases, the release notes will contain corresponding information, so please have a look there before applying an update.
 
-Additionally, there may always be some kind of race conditions during an update, i.e. client requests that can't be completed successfully or internal events not being deliverd to all nodes in the cluster. That's why the following information should only serve as a best-practices guide to minimize the impact of upgrades to the user experience.
+Additionally, there may always be some kind of race conditions during an update, i.e. client requests that can't be completed successfully or internal events not being delivered to all nodes in the cluster. That's why the following information should only serve as a best-practices guide to minimize the impact of upgrades to the user experience.
 
-### Upgrading a single Node
+## Upgrading a single Node
 
 Upgrading all nodes in the cluster should usually be done sequentially, i.o.w. one node after the other. This means that during the upgrade of one node, the node is temporarily disconnected from the other nodes in the cluster, and will join the cluster again after the update is completed. From the backend perspective, this is as easy as stopping the open-xchange service. other nodes in the cluster will recognize the disconnected node and start to repartition the shared cluster data automatically. But wait a minute - doing so would potentially lead to the webserver not registering the node being stopped immediately, resulting in temporary errors for currently logged in users until they are routed to another machine in the cluster. That's why it's good practice to tell the webserver's load balancer that the node should no longer fulfill incoming requests. The Apache Balancer Manager is an excellent tool for this ([module mod_status](http://httpd.apache.org/docs/2.2/mod/mod_status.html)). Look at the screen shot. Every node can be put into a disabled mode. Further requests will the redirected to other nodes in the cluster:
 
@@ -552,7 +472,7 @@ As stated above, depending on the chosen cluster discovery mechanism, it might t
 
 After the node has joined, distributed data is re-partioned automatically, and the node is ready to server incoming requests again - so now the node can finally be enabled again in the load balancer configuration of the webserver. Afterwards, the next node in the cluster can be upgraded using the same procedure, until all nodes were processed.
 
-### Upgrades of the Hazelcast library
+## Upgrades of the Hazelcast library
 
 In case an upgrade includes a major update of the Hazelcast library, a newly upgraded node will usually not be able to connect to the nodes running the previous version. In this case, volatile cluster data is lost after all nodes in the cluster have been updated, including sessions held in the distributed session storage. As outlined above, the release notes will contain a corresponding warning in such cases. Starting with v7.10.3, separation of the clusters during rolling upgrades is enforced using by appending a version suffix to the cluster group name.
 
@@ -591,15 +511,15 @@ Same steps apply to upgrading from v7.8.4 to v7.10.0 using the package named ope
 This means, the upgraded node will not be visible in the members list of the legacy Hazelcast cluster (`showruntimestats -c`). Furthermore, the native client will created and destructed on single context events, with the effect that connections will only be visible in the very moment of such an event. This means effectively that verification of the invalidation mechanism is only possible by actually executing the runupdate CLT. This should produce log lines like
 
 ```
-Successfully initialized Hazelcast client: <client-id>
-Successfully got reference to cache event topic: cacheEvents-3
-Publishing legacy cache event: <cache-event>
-Successfully published legacy cache event, shutting down client after 546ms...
+Received auth from Connection[...], successfully authenticated, principal: ClientPrincipal{...}, owner connection: true, client version: ...
+Successfully invalidated schema ... from pool ...
+Successfully invalidated contexts for schema ...
+Destroying ClientEndpoint{connection=Connection[...], principal='ClientPrincipal{...}, ownerConnection=true, authenticated=true, clientVersion=...}
 ```
 
 Most importantly, you should be able to observe correct functionality (users of affected contexts being logged out). It may be handy to prepare a dedicated schema with just test contexts inside. (How to create this is out of scope here, but hint: use `createschema` and `createcontext --schema-name`.)
 
-### Other Considerations
+## Other Considerations
 
 * It's always recommended to only upgrade one node after the other, always ensuring that the cluster has formed correctly between each shutdown/startup of a node.
 * Do not stop a node while running the runUpdate script or the associated update task.
@@ -609,3 +529,4 @@ Most importantly, you should be able to observe correct functionality (users of 
 * If there are general incompatibilities between two revisions of the Open-Xchange Server that prevent an operation in a cluster (release notes), it's recommended to choose another name for the cluster in cluster.properties for the nodes with the new version. This will temporary lead to two separate clusters during the rolling upgrade, and finally the old cluster being shut down completely after the last node was updated to the new version. While distributed data can't be migrated from one server version to another in this scenario due to incompatibilities, the uptime of the system itself is not affected, since the nodes in the new cluster are able to serve new incoming requests directly.
 * When updating only UI plugins without also updating to a new version of the core UI, you also need to perform the additional step from Updating UI plugins.
 * When performing a rolling upgrade of the middleware nodes in the cluster to 7.10.2 from a previous version (7.10.1 and earlier), the upgraded nodes will not join the Hazelcast cluster and fail to startup properly due to a change in the join process of the underlying Hazelcast library. Therefore, a new configuration switch is introduced that takes care to dynamically append the Hazelcast version to the cluster name so that a new cluster group is created automatically for the upgraded nodes: `com.openexchange.hazelcast.group.name.appendVersion`. Please mind that this configuration property is only applicable for 7.10.2; later versions starting with 7.10.3 will always append the version identifier to the group name. The default value is false, so that there are no surprises when patching an existing 7.10.2 installation.
+* When performing a rolling upgrade of the middleware nodes in the cluster to 7.10.5 from a previous version (7.10.4 and earlier), the upgraded nodes will not join the Hazelcast cluster and fail to startup properly due to a change in the join process of the underlying Hazelcast library. Therefore, a default automatic port offset mechanism can be used and no manual changes are necessary. However, it is still possible to take full control over the used ports if needed, e.g. because firewalls have to be considered. See properties `com.openexchange.hazelcast.network.portOffset` and `com.openexchange.hazelcast.network.port`  for further details. 

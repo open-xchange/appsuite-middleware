@@ -61,6 +61,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -73,13 +74,12 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.hazelcast.core.Cluster;
+import com.hazelcast.cluster.Cluster;
+import com.hazelcast.cluster.Member;
+import com.hazelcast.cluster.MembershipEvent;
+import com.hazelcast.cluster.MembershipListener;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
-import com.hazelcast.core.Member;
-import com.hazelcast.core.MemberAttributeEvent;
-import com.hazelcast.core.MembershipEvent;
-import com.hazelcast.core.MembershipListener;
 import com.hazelcast.instance.EndpointQualifier;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.event.CommonEvent;
@@ -162,7 +162,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
     private final PushManagerRegistry pushManagerRegistry;
     private final BundleContext context;
-    private final AtomicReference<String> registrationIdRef;
+    private final AtomicReference<UUID> registrationIdRef;
     private final AtomicReference<HazelcastInstance> hzInstancerRef;
     private final BufferingQueue<ReschedulePlan> rescheduleQueue;
     private final ReschedulePolicy policy;
@@ -179,7 +179,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         super();
         this.rescheduleQueue = new BufferingQueue<ReschedulePlan>(delayDuration()); // 5sec default delay;
         this.hzInstancerRef = new AtomicReference<HazelcastInstance>();
-        registrationIdRef = new AtomicReference<String>();
+        registrationIdRef = new AtomicReference<UUID>();
         this.pushManagerRegistry = pushManagerRegistry;
         this.context = context;
         this.policy = ReschedulePolicy.MASTER;
@@ -226,11 +226,6 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         } catch (Exception e) {
             LOG.error("Failed to plan rescheduling", e);
         }
-    }
-
-    @Override
-    public void memberAttributeChanged(MemberAttributeEvent memberAttributeEvent) {
-        // Don't care
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------
@@ -393,7 +388,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         HazelcastInstance hzInstance = context.getService(reference);
         try {
             Cluster cluster = hzInstance.getCluster();
-            String registrationId = cluster.addMembershipListener(this);
+            UUID registrationId = cluster.addMembershipListener(this);
             registrationIdRef.set(registrationId);
 
             hzInstancerRef.set(hzInstance);
@@ -415,7 +410,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
     @Override
     public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance hzInstance) {
-        String registrationId = registrationIdRef.get();
+        UUID registrationId = registrationIdRef.get();
         if (null != registrationId) {
             try {
                 hzInstance.getCluster().removeMembershipListener(registrationId);

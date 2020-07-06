@@ -71,9 +71,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import com.hazelcast.query.Predicate;
-import com.hazelcast.query.SqlPredicate;
+import com.hazelcast.query.impl.predicates.SqlPredicate;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -270,7 +270,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             if (timeoutMillis <= 0) {
                 storedSession = sessions().get(sessionId);
             } else {
-                Future<PortableSession> f = sessions().getAsync(sessionId);
+                Future<PortableSession> f = sessions().getAsync(sessionId).toCompletableFuture();
                 storedSession = getFrom(f, timeoutMillis);
                 if (null == storedSession && f.isCancelled()) {
                     LOG.warn("Session {} could not be retrieved from session storage within {}msec.", sessionId, Long.valueOf(timeoutMillis));
@@ -436,7 +436,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
          */
         Map<String, Future<PortableSession>> futures = new HashMap<String, Future<PortableSession>>(size);
         for (String sessionID : sessionIds) {
-            futures.put(sessionID, sessions.removeAsync(sessionID));
+            futures.put(sessionID, sessions.removeAsync(sessionID).toCompletableFuture());
         }
         /*
          * collect removed sessions
@@ -861,7 +861,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      * @return The first found matching session, or <code>null</code> if not found
      * @throws OXException
      */
-    private PortableSession findSession(Predicate<?, ?> predicate) throws OXException, HazelcastException {
+    private PortableSession findSession(Predicate<String, PortableSession> predicate) throws OXException, HazelcastException {
         IMap<String, PortableSession> sessions = sessions();
         if (null == sessions) {
             return null;

@@ -51,8 +51,8 @@ package com.openexchange.push.impl;
 
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import com.hazelcast.cluster.Member;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Member;
 import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.push.PushUser;
 import com.openexchange.server.ServiceLookup;

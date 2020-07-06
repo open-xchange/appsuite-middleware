@@ -158,7 +158,20 @@ properties:
       version:
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: com.openexchange.hazelcast.network.portOffset 
+      file: hazelcast.properties
+      packageName: open-xchange-core
+      tags: ["Hazelcast", "Port"]
+    - key: com.openexchange.hazelcast.network.portOffset
+      description: |
+        The offset to be applied to the port, which is used to form a separate cluster in networks with mixed versions of the Hazelcast library.
+        If set to <code>auto</code>, a default offset is chosen by the application, based on the shipped Hazelcast version. Can also be set to <code>0</code> to
+        use the port from "com.openexchange.hazelcast.network.port" as-is.
+      defaultValue: auto
+      version: 7.10.5
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.network.port
       file: hazelcast.properties
       packageName: open-xchange-core
       tags: ["Hazelcast", "Port"]
@@ -527,3 +540,29 @@ properties:
       file: hazelcast.properties
       packageName: open-xchange-core
       tags: ["Hazelcast"]
+    - key: com.openexchange.hazelcast.network.client.nodes
+      description: |
+        Optionally configures a comma-separated list of IP addresses / hostnames of possible nodes in the cluster to connect the client to when 
+        propagating cache invalidation events into the 'legacy' cluster. This may be set if "com.openexchange.hazelcast.network.join" is not 
+        configured to <code>static</code>. Addresses defined through this property are used in combination with the addresses found in 
+        "com.openexchange.hazelcast.network.join.static.nodes" when the client is initialized.  
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.network.join, com.openexchange.hazelcast.network.join.static.nodes
+      file: hazelcast.properties
+      packageName: open-xchange-cluster-upgrade-from-*
+      tags: ["Hazelcast", "Host"]
+    - key: com.openexchange.hazelcast.network.client.port
+      description: |
+        Optionally specifies an explicit port the client will use to connect to the 'legacy' cluster. If set to <code>auto</code>, the port configured 
+        through "com.openexchange.hazelcast.network.port" is used, plus an optional offset suitable for the shipped Hazelcast version the client connects to.
+      defaultValue: auto
+      version: 7.10.5
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.network.port, com.openexchange.hazelcast.network.portOffset 
+      file: hazelcast.properties
+      packageName: open-xchange-cluster-upgrade-from-*
+      tags: ["Hazelcast", "Port"]

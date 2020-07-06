@@ -6,9 +6,11 @@ Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.collect,
+ com.hazelcast.cluster,
  com.hazelcast.config,
  com.hazelcast.core,
  com.hazelcast.instance,
+ com.hazelcast.map,
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,
  com.hazelcast.version,

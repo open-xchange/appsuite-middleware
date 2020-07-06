@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -69,14 +70,14 @@ import org.slf4j.Logger;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.SetMultimap;
-import com.hazelcast.core.Cluster;
+import com.hazelcast.cluster.Address;
+import com.hazelcast.cluster.Cluster;
+import com.hazelcast.cluster.Member;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IExecutorService;
-import com.hazelcast.core.Member;
-import com.hazelcast.core.MultiMap;
-import com.hazelcast.nio.Address;
+import com.hazelcast.multimap.MultiMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.Hazelcasts;
@@ -138,7 +139,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
     volatile HazelcastInstance hzInstance;
     volatile String mapName;
-    volatile String entryListenerRegistrationId;
+    volatile UUID entryListenerRegistrationId;
 
     private final ConcurrentMap<UserAndContext, ScheduledTimerTask> cleanerTasks;
 
@@ -263,7 +264,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             }
 
             WebSocketClosingEntryListener entryListener = new WebSocketClosingEntryListener(app);
-            String entryListenerRegistrationId = hzMap.addEntryListener(entryListener, true);
+            UUID entryListenerRegistrationId = hzMap.addEntryListener(entryListener, true);
             this.entryListenerRegistrationId = entryListenerRegistrationId;
             LOGGER.info("Successfully added entry listener with registration ID \"{}\"", entryListenerRegistrationId);
         } catch (Exception e) {
@@ -315,7 +316,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             }
         }
 
-        String entryListenerRegistrationId = this.entryListenerRegistrationId;
+        UUID entryListenerRegistrationId = this.entryListenerRegistrationId;
         if (null != entryListenerRegistrationId) {
             this.entryListenerRegistrationId = null;
             try {

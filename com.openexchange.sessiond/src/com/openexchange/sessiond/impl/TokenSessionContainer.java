@@ -60,7 +60,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.osgi.Services;

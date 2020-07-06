@@ -8,10 +8,11 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.hazelcast.config,
  com.hazelcast.core,
- com.hazelcast.monitor;version="3.12.6",
+ com.hazelcast.map,
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,
  com.hazelcast.query,
+ com.hazelcast.query.impl.predicates,
  com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.hazelcast.configuration,

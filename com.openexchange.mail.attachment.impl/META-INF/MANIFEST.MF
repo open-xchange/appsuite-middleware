@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.mail.attachment.impl
 Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.hazelcast.config,
+Import-Package: com.hazelcast.cluster,
+ com.hazelcast.config,
  com.hazelcast.core,
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,

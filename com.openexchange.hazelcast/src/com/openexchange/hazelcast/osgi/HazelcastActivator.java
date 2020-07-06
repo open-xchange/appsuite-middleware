@@ -68,7 +68,7 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.OutOfMemoryHandler;
-import com.hazelcast.instance.OutOfMemoryErrorDispatcher;
+import com.hazelcast.instance.impl.OutOfMemoryErrorDispatcher;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.hazelcast.HazelcastMBean;
 import com.openexchange.hazelcast.HazelcastMBeanImpl;

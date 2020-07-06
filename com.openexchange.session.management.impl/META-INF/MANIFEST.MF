@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.collect,
+ com.hazelcast.cluster,
  com.hazelcast.core,
  com.openexchange.config,
  com.openexchange.config.lean,
@@ -30,7 +31,7 @@ Import-Package: com.google.common.annotations,
  com.openexchange.threadpool,
  com.openexchange.tools.session,
  com.openexchange.user,
- javax.servlet.http;version="4.0.0",
+ javax.servlet.http,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.session.management.impl.osgi.SessionManagementActivator

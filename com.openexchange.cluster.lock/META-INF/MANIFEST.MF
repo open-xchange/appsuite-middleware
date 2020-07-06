@@ -6,6 +6,7 @@ Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.hazelcast.core,
+ com.hazelcast.map,
  com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.groupware.update,
@@ -18,7 +19,7 @@ Import-Package: com.hazelcast.core,
  com.openexchange.timer,
  com.openexchange.tools.sql,
  org.osgi.framework,
- org.osgi.util.tracker;version="1.5.1",
- org.slf4j;version="1.7.5"
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.cluster.lock
 Bundle-Activator: com.openexchange.cluster.lock.osgi.ClusterLockActivator

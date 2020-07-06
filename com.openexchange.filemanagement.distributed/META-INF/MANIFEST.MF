@@ -6,9 +6,11 @@ Bundle-Version: 7.10.4
 Bundle-Activator: com.openexchange.filemanagement.distributed.osgi.DistributedFileManagementActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.hazelcast.config,
+Import-Package: com.hazelcast.cluster,
+ com.hazelcast.config,
  com.hazelcast.core,
- com.hazelcast.instance;version="3.12.6",
+ com.hazelcast.instance,
+ com.hazelcast.map,
  com.openexchange.config,
  com.openexchange.dispatcher,
  com.openexchange.exception,

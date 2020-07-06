@@ -50,10 +50,12 @@
 package com.openexchange.push.impl.balancing.reschedulerpolicy.portable;
 
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.push.impl.PushManagerRegistry;
 
 
@@ -81,9 +83,9 @@ public class PortableDropAllPermanentListenerCallable extends AbstractCustomPort
      *
      * @param source The push user to drop
      */
-    public PortableDropAllPermanentListenerCallable(String caller) {
+    public PortableDropAllPermanentListenerCallable(UUID caller) {
         super();
-        this.caller = caller;
+        this.caller = UUIDs.getUnformattedString(caller);
     }
 
     @Override

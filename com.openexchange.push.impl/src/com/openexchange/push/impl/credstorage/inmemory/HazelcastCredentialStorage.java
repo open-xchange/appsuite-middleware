@@ -55,7 +55,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.exception.OXException;

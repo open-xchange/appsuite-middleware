@@ -52,7 +52,7 @@ package com.openexchange.saml.impl.hz;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.state.AuthnRequestInfo;

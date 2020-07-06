@@ -50,6 +50,7 @@
 package com.openexchange.push.impl.balancing.reschedulerpolicy.portable;
 
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import org.json.JSONObject;
 import com.hazelcast.nio.serialization.ClassDefinition;
@@ -57,6 +58,7 @@ import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.push.impl.PushManagerRegistry;
 
 
@@ -110,9 +112,9 @@ public class PortableCheckForExtendedServiceCallable extends AbstractCustomPorta
      * @param id The associated UUID
      * @param version The version identifier
      */
-    public PortableCheckForExtendedServiceCallable(String id, String version) {
+    public PortableCheckForExtendedServiceCallable(UUID id, String version) {
         super();
-        this.id = id;
+        this.id = UUIDs.getUnformattedString(id);
         this.version = version;
     }
 

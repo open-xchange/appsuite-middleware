@@ -50,10 +50,12 @@
 package com.openexchange.push.impl.balancing.reschedulerpolicy.portable;
 
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.push.impl.PushManagerRegistry;
 import com.openexchange.push.impl.balancing.reschedulerpolicy.PermanentListenerRescheduler;
 
@@ -82,9 +84,9 @@ public class PortablePlanRescheduleCallable extends AbstractCustomPortable imple
      *
      * @param source The push user to drop
      */
-    public PortablePlanRescheduleCallable(String id) {
+    public PortablePlanRescheduleCallable(UUID id) {
         super();
-        this.id = id;
+        this.id = UUIDs.getUnformattedString(id);
     }
 
     @Override

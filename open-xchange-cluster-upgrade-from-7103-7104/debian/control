@@ -1,0 +1,13 @@
+Source: open-xchange-cluster-upgrade-from-7103-7104
+Section: web
+Priority: optional
+Maintainer: Thorben Betten <thorben.betten@open-xchange.com>
+Build-Depends: debhelper (>= 7.0.1), ant-optional (>= 1.7.0), openjdk-8-jdk-headless | adoptopenjdk-8-hotspot, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.9.8
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-cluster-upgrade-from-7103-7104
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Description: Server module to invalidate cluster nodes running v7.10.3/v7.10.4 of the Open-Xchange server (Hazelcast v3.12.x) during upgrade

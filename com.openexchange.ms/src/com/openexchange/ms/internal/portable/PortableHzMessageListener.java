@@ -59,7 +59,7 @@ import com.openexchange.ms.MessageListener;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PortableHzMessageListener<P extends Portable> implements com.hazelcast.core.MessageListener<PortableMessage<P>> {
+public class PortableHzMessageListener<P extends Portable> implements com.hazelcast.topic.MessageListener<PortableMessage<P>> {
 
     private final MessageListener<P> listener;
     private final String senderID;
@@ -77,7 +77,7 @@ public class PortableHzMessageListener<P extends Portable> implements com.hazelc
     }
 
     @Override
-    public void onMessage(com.hazelcast.core.Message<PortableMessage<P>> message) {
+    public void onMessage(com.hazelcast.topic.Message<PortableMessage<P>> message) {
         PortableMessage<P> messageData = message.getMessageObject();
         if (null != messageData) {
             List<P> messagePayload = messageData.getMessagePayload();

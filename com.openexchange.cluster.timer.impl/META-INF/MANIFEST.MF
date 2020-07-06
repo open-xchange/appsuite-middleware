@@ -5,7 +5,9 @@ Bundle-SymbolicName: com.openexchange.cluster.timer.impl
 Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.hazelcast.core,
+Import-Package: com.hazelcast.cluster,
+ com.hazelcast.core,
+ com.hazelcast.cp,
  com.openexchange.cluster.timer,
  com.openexchange.exception,
  com.openexchange.hazelcast.configuration,

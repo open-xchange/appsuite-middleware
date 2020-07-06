@@ -74,7 +74,7 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
 
     private final String senderId;
     private final String name;
-    private final ConcurrentMap<MessageListener<E>, String> registeredListeners;
+    private final ConcurrentMap<MessageListener<E>, UUID> registeredListeners;
     private final BufferingQueue<E> publishQueue;
     private final ScheduledTimerTask timerTask;
 
@@ -88,7 +88,7 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
         super();
         this.name = name;
         senderId = UUIDs.getUnformattedString(UUID.randomUUID());
-        registeredListeners = new ConcurrentHashMap<MessageListener<E>, String>(8, 0.9f, 1);
+        registeredListeners = new ConcurrentHashMap<MessageListener<E>, UUID>(8, 0.9f, 1);
         publishQueue = new BufferingQueue<E>(HzDataUtility.DELAY_MSEC);
         // Timer task
         final TimerService timerService = Services.getService(TimerService.class);
@@ -128,7 +128,7 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
 
     @Override
     public void addMessageListener(MessageListener<E> listener) {
-        String registrationID = registerListener(listener, senderId);
+        UUID registrationID = registerListener(listener, senderId);
         if (null != registrationID) {
             registeredListeners.put(listener, registrationID);
         }
@@ -136,7 +136,7 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
 
     @Override
     public void removeMessageListener(MessageListener<E> listener) {
-        String registrationID = registeredListeners.remove(listener);
+        UUID registrationID = registeredListeners.remove(listener);
         if (null != registrationID) {
             try {
                 unregisterListener(registrationID);
@@ -227,7 +227,7 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
      * @param senderID The listener's sender ID
      * @return The listener registration ID, or <code>null</code> if not registerd
      */
-    protected abstract String registerListener(MessageListener<E> listener, String senderID);
+    protected abstract UUID registerListener(MessageListener<E> listener, String senderID);
 
     /**
      * Removes a previously registered message listener for the underlying topic.
@@ -235,7 +235,7 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
      * @param registrationID The listener's registration ID
      * @return <code>true</code> if the listener was unregistered successfully, <code>false</code>, otherwise
      */
-    protected abstract boolean unregisterListener(String registrationID);
+    protected abstract boolean unregisterListener(UUID registrationID);
 
     /**
      * Publishes a message to the underlying topic-

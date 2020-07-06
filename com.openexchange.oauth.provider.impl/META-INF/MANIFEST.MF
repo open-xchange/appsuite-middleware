@@ -6,7 +6,7 @@ Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.base,
- com.google.common.cache;version="18.0.0",
+ com.google.common.cache,
  com.google.common.collect,
  com.google.common.io,
  com.google.common.net,

@@ -53,7 +53,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.IAtomicLong;
+import com.hazelcast.cp.IAtomicLong;
 import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -122,7 +122,7 @@ public class ClusterTimerServiceImpl implements ClusterTimerService {
                 HazelcastInstance.class.getName(), id);
             return initialDelay;
         }
-        IAtomicLong clusterExecutionTime = hazelcastInstance.getAtomicLong(id);
+        IAtomicLong clusterExecutionTime = hazelcastInstance.getCPSubsystem().getAtomicLong(id);
         long lastExecuted = clusterExecutionTime.get();
         if (0 == lastExecuted) {
             // no last execution time known
@@ -145,7 +145,7 @@ public class ClusterTimerServiceImpl implements ClusterTimerService {
                 LOG.warn("No {} available, skipping execution of task {} on this node.", HazelcastInstance.class.getName(), id);
                 return;
             }
-            IAtomicLong clusterExecutionTime = hazelcastInstance.getAtomicLong(id);
+            IAtomicLong clusterExecutionTime = hazelcastInstance.getCPSubsystem().getAtomicLong(id);
             long lastExecuted = clusterExecutionTime.get();
             long now = hazelcastInstance.getCluster().getClusterTime();
             if (lastExecuted + interval > now) {

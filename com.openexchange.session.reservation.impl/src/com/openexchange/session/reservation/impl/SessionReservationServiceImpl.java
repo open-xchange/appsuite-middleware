@@ -57,7 +57,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.exception.OXException;

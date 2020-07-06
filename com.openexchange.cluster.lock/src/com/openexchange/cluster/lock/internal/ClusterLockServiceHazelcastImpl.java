@@ -51,7 +51,7 @@ package com.openexchange.cluster.lock.internal;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.exception.OXException;
 import com.openexchange.policy.retry.RetryPolicy;

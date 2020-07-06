@@ -101,9 +101,9 @@ public final class HzMsService extends AbstractHzResource implements MsService {
 
     @Override
     public Set<Member> getMembers() {
-        final Set<com.hazelcast.core.Member> hzMembers = hz.getCluster().getMembers();
+        final Set<com.hazelcast.cluster.Member> hzMembers = hz.getCluster().getMembers();
         final Set<Member> set = new HashSet<Member>(hzMembers.size());
-        for (final com.hazelcast.core.Member hzMember : hzMembers) {
+        for (final com.hazelcast.cluster.Member hzMember : hzMembers) {
             set.add(new HzMember(hzMember));
         }
         return set;
@@ -116,11 +116,11 @@ public final class HzMsService extends AbstractHzResource implements MsService {
 
     @Override
     public void directMessage(final Message<?> message, final Member member) {
-        com.hazelcast.core.Member hzMember = null;
+        com.hazelcast.cluster.Member hzMember = null;
         // Look-up by UUID
         {
             final String uuid = member.getUuid();
-            for (final com.hazelcast.core.Member cur : hz.getCluster().getMembers()) {
+            for (final com.hazelcast.cluster.Member cur : hz.getCluster().getMembers()) {
                 if (uuid.equals(cur.getUuid())) {
                     hzMember = cur;
                     break;
