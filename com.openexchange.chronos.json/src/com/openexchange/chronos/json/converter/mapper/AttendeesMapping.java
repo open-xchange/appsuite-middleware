@@ -61,6 +61,7 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.json.fields.ChronosJsonFields;
+import com.openexchange.groupware.tools.mappings.json.ListItemMapping;
 import com.openexchange.session.Session;
 
 /**

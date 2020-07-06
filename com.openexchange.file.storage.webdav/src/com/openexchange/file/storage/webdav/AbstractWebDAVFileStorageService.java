@@ -364,5 +364,4 @@ public abstract class AbstractWebDAVFileStorageService implements AccountAware, 
         FileStorageAccountManagerLookupService lookupService = services.getService(FileStorageAccountManagerLookupService.class);
         return lookupService.getAccountManagerFor(getId());
     }
-
 }

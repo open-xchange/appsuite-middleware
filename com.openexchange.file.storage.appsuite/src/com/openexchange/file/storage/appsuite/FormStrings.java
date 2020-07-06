@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,51 +47,20 @@
  *
  */
 
-package com.openexchange.chronos.json.converter.mapper;
+package com.openexchange.file.storage.appsuite;
 
-import java.util.TimeZone;
-import org.json.JSONException;
-import com.openexchange.groupware.tools.mappings.json.ListMapping;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ListItemMapping}
+ * {@link FormStrings}
  *
- * @param <O> The type of the object
- * @param <T> The type of the list elements
- * @param <I> The type of the the json list element
- *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.0
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v7.10.5
  */
-public abstract class ListItemMapping<T,O,I> extends ListMapping<T,O> {
+public class FormStrings implements LocalizableStrings {
 
-    /**
-     * Initializes a new {@link ListItemMapping}.
-     * @param ajaxName
-     * @param columnID
-     */
-    public ListItemMapping(String ajaxName, Integer columnID) {
-        super(ajaxName, columnID);
-    }
+    public static final String SHARE_LINK_LABEL = "OX AppSuite share link";
 
-    /**
-     * Deserializes a list item from a json list element.
-     *
-     * @param from The source
-     * @param timeZone The {@link TimeZone} to use
-     * @return The deserialized object
-     * @throws JSONException
-     */
-    public abstract T deserialize(I from, TimeZone timeZone) throws JSONException;
-
-    /**
-     * Serializes a list item to a json list element.
-     *
-     * @param from The source
-     * @param timeZone The {@link TimeZone} to use
-     * @return The serialized object
-     * @throws JSONException
-     */
-    public abstract I serialize(T from, TimeZone timeZone) throws JSONException;
+    public static final String PASSWORD = "OX AppSuite share link password";
 
 }

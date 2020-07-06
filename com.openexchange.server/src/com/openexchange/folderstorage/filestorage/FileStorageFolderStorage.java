@@ -67,10 +67,13 @@ import com.openexchange.file.storage.FileStorageAccounts;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -95,6 +98,7 @@ import com.openexchange.java.Reference;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.User;
@@ -466,6 +470,23 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         return FileStorageFolderType.getInstance();
     }
 
+    /**
+     * Checks if a given folder is related to a {@link SharingFileStorageService}
+     *
+     * @param session The session
+     * @param folderId The folder
+     * @return True, if the given folder is related to a {@link SharingFileStorageService}, false otherwise.
+     * @throws OXException
+     */
+    private boolean belongToSharingFileService(Session session, FolderID folderId) throws OXException {
+        FileStorageServiceRegistry registry = ServerServiceRegistry.getInstance().getService(FileStorageServiceRegistry.class);
+        FileStorageService fileStorageService = registry.getFileStorageService(folderId.getService());
+        if (fileStorageService != null) {
+            return fileStorageService instanceof SharingFileStorageService;
+        }
+        return false;
+    }
+
     @Override
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         final IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
@@ -500,6 +521,11 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
                 int index = 0;
                 for (int j = 0; j < size; j++) {
                     String id = rootFolders[j].getId();
+
+                    if(belongToSharingFileService(storageParameters.getSession(), new FolderID(id))) {
+                        continue;
+                    }
+
                     if ((id.length() != 0) && !INFOSTORE_ACCOUNT_ID.equals(new FolderID(id).getAccountId())) {
                         list.add(new FileStorageId(id, index++, null));
                     }
