@@ -354,6 +354,9 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
         checkVersioningSupport();
         WebDAVFile master = getMetadata(folderId, id, CURRENT_VERSION, null);
         String fileId = ((OwnCloudFile) master).getFileId();
+        if (fileId == null) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("Missing file id");
+        }
         Set<QName> props = getPropertiesToQuery(fields);
         List<WebDAVResource> resources = client.propFind(getVersionsPath(fileId), 1, props, null);
         List<File> ret = new ArrayList<>(resources.size());
@@ -363,6 +366,7 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
             }
         }
         master.setVersion(String.valueOf(-1));
+        master.setIsCurrentVersion(true);
         ret.add(master);
         sort(ret, sort, order);
         return new FileTimedResult(ret);
