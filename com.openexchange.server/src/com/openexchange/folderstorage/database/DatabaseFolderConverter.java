@@ -484,7 +484,6 @@ public final class DatabaseFolderConverter {
              * Set subfolders for folder.
              */
             if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
-                boolean setChildren = true;
                 if (!InfostoreFacades.isInfoStoreAvailable()) {
                     if (session == null) {
                         throw FolderExceptionErrorMessage.MISSING_SESSION.create();
@@ -495,27 +494,9 @@ public final class DatabaseFolderConverter {
                          * Enforce subfolders are retrieved from appropriate file storage
                          */
                         databaseFolder.setSubfolderIDs(null);
-                        setChildren = false;
                     }
                 }
-                if (setChildren) {
-                    /*
-                     * User-sensitive loading of user infostore folder
-                     */
-                    final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, user.getGroups(), userPerm.getAccessibleModules(), ctx, con);
-                    if (subfolders.isEmpty()) {
-                        databaseFolder.setSubfolderIDs(new String[0]);
-                        databaseFolder.setSubscribedSubfolders(false);
-                    } else {
-                        final int len = subfolders.size();
-                        final String[] arr = new String[len];
-                        for (int i = 0; i < len; i++) {
-                            arr[i] = Integer.toString(subfolders.get(i), 10);
-                        }
-                        databaseFolder.setSubfolderIDs(arr);
-                        databaseFolder.setSubscribedSubfolders(true);
-                    }
-                }
+                databaseFolder.setSubfolderIDs(null);
                 /*
                  * Mark for user-sensitive cache
                  */

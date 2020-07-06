@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tools.mappings.json;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
@@ -61,6 +62,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -204,6 +206,26 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
     }
 
     @Override
+    public List<O> deserialize(JSONArray jsonArray, E[] fields) throws OXException, JSONException {
+        return deserialize(jsonArray, fields, (TimeZone) null);
+    }
+
+    @Override
+    public List<O> deserialize(JSONArray jsonArray, E[] fields, String timeZoneID) throws OXException, JSONException {
+        return deserialize(jsonArray, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null);
+    }
+
+    @Override
+    public List<O> deserialize(JSONArray jsonArray, E[] fields, TimeZone timeZone) throws OXException, JSONException {
+        List<O> objects = new ArrayList<O>(jsonArray.length());
+        List<E> nonNullFields = Arrays.stream(fields).filter( f -> f != null).collect(Collectors.toList());
+        for (int i = 0; i < jsonArray.length(); i++) {
+            objects.add(deserialize(asJsonObject(jsonArray.getJSONArray(i), fields), nonNullFields.toArray(newArray(nonNullFields.size())), timeZone));
+        }
+        return objects;
+    }
+
+    @Override
     public JsonMapping<? extends Object, O> get(final E field) throws OXException {
         final JsonMapping<? extends Object, O> mapping = this.opt(field);
         if (null == mapping) {
@@ -226,6 +248,16 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
     }
 
     @Override
+    public E[] getMappedFields(int...columnIDs) {
+        ArrayList<E> ret = new ArrayList<E>();
+        for(int c : columnIDs) {
+           ret.add(getMappedField(c));
+        }
+        return ret.toArray(newArray(ret.size()));
+    }
+
+
+    @Override
     public E getMappedField(String ajaxName) {
         if (null != ajaxName) {
             for (Entry<E, ? extends JsonMapping<? extends Object, O>> entry: mappings.entrySet()) {
@@ -233,6 +265,21 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
                     return entry.getKey();
                 }
             }
+        }
+        return null;
+    }
+
+    @Override
+    public E[] getMappedFields(String... ajaxNames) {
+        if (null != ajaxNames && ajaxNames.length > 0) {
+            List<String> names = Arrays.asList(ajaxNames);
+            //@formatter:off
+            List<E> fields = mappings.entrySet().stream().
+                filter(entry -> names.contains(entry.getValue().getAjaxName())). // filter entries which have one of the supplied ajax names
+                map(entry -> entry.getKey()). //get the mapping from the entries
+                collect(Collectors.toList());
+            //@formatter:on
+            return fields.toArray(newArray(fields.size()));
         }
         return null;
     }
@@ -326,6 +373,21 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
             LOG.error("", e);
         }
         return TimeZone.getTimeZone(ID);
+    }
+
+    private JSONObject asJsonObject(JSONArray itemArray, E[] fields) throws OXException, JSONException {
+        if (fields.length != itemArray.length()) {
+            throw new IllegalArgumentException("unexpected array length, epexted: " + fields.length + ", was: " + itemArray.length());
+        }
+        JSONObject jsonObject = new JSONObject(fields.length);
+        for (int i = 0; i < fields.length; i++) {
+            E field = fields[i];
+            if(field != null) {
+                JsonMapping<? extends Object, O> mapping = get(field);
+                jsonObject.put(mapping.getAjaxName(), itemArray.get(i));
+            }
+        }
+        return jsonObject;
     }
 
 }

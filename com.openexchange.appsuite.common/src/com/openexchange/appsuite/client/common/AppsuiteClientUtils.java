@@ -84,6 +84,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.appsuite.client.AppsuiteClientExceptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAppender;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.share.core.tools.ShareToken;
@@ -319,7 +320,7 @@ public final class AppsuiteClientUtils {
      * E.g. the login link path looks like
      * <code>/appsuite/api/share/04b29644047397444b29645473974b7ba433980a88b9aacd/1/8/Mzk</code>
      * the prefix is <code>/appsuite/api</code>
-     * 
+     *
      *
      * @param loginLinkPath The login link to access
      * @return The prefix
@@ -454,6 +455,38 @@ public final class AppsuiteClientUtils {
     }
 
     /**
+     * Parses the "data" field as array from the given JSON response body
+     *
+     * @param response The response containing the JSON body
+     * @return The data field parsed from the given response
+     * @throws OXException
+     */
+    public static JSONArray parseDataArray(HttpResponse response) throws OXException {
+        try {
+            JSONObject json = parseJSONObject(response);
+            return json.getJSONArray("data");
+        } catch (JSONException e) {
+            throw AppsuiteClientExceptions.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Parses the "data" field as JSOObject from the given JSON response body
+     *
+     * @param response The response containing the JSON body
+     * @return The data field parsed from the given response
+     * @throws OXException
+     */
+    public static JSONObject parseDataObject(HttpResponse response) throws OXException {
+        try {
+            JSONObject json = parseJSONObject(response);
+            return json.getJSONObject("data");
+        } catch (JSONException e) {
+            throw AppsuiteClientExceptions.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
      * Parses the response to a {@link JSONArray}
      *
      * @param response The response
@@ -480,6 +513,34 @@ public final class AppsuiteClientUtils {
             return (JSONArray) jsonValue;
         }
         throw AppsuiteClientExceptions.JSON_ERROR.create("Response not parsable");
+    }
+
+    /**
+     * Internal method to create a comma separated string from the given list
+     *
+     * @param items The items to create a comma separated list from
+     * @return A comma separated list built from the given items
+     */
+    public static String toCommaString(String... items) {
+        StringAppender appender = new StringAppender(",");
+        for (String s : items) {
+            appender.append(s);
+        }
+        return appender.toString();
+    }
+
+    /**
+     * Internal method to create a comma separated string from the given list
+     *
+     * @param items The items to create a comma separated list from
+     * @return A comma separated list built from the given items
+     */
+    public static String toCommaString(int... items) {
+        StringAppender appender = new StringAppender(",");
+        for (int i : items) {
+            appender.append(i);
+        }
+        return appender.toString();
     }
 
     /**
