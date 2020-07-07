@@ -748,7 +748,7 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.CreateSubscribeTableTask());
 
         list.add(new com.openexchange.groupware.update.tasks.DropUWAWidgetsTask());
-        // list.add(new com.openexchange.groupware.update.tasks.DropSwiftFilestoreTask());
+        list.add(new com.openexchange.groupware.update.tasks.DropSwiftFilestoreTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
