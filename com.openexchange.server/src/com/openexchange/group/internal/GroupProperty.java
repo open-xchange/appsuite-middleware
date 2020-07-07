@@ -47,51 +47,61 @@
  *
  */
 
-package com.openexchange.group.internal.osgi;
+package com.openexchange.group.internal;
 
-import com.openexchange.config.admin.HideAdminService;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.group.GroupService;
-import com.openexchange.group.GroupStorage;
-import com.openexchange.group.internal.CachingGroupStorage;
-import com.openexchange.group.internal.FilteringGroupService;
-import com.openexchange.group.internal.GroupServiceImpl;
-import com.openexchange.group.internal.RdbGroupStorage;
-import com.openexchange.group.internal.VirtualGroupStorage;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.principalusecount.PrincipalUseCountService;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link GroupActivator}
+ * {@link GroupProperty}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.2
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.4
  */
-public class GroupActivator extends HousekeepingActivator {
+public enum GroupProperty implements Property {
 
     /**
-     * Initializes a new {@link GroupActivator}.
+     * Configures whether the group "All users" should be hidden to clients when listing all groups or searching for groups in a context.
+     * The virtual group "All users" always contains all existing users of a context but no guests.
      */
-    public GroupActivator() {
-        super();
+    HIDE_ALL_USERS("hideAllUsers", Boolean.FALSE),
+
+    /**
+     * Configures whether the group "Guests" should be hidden to clients when listing all groups or searching for groups in a context. The
+     * virtual group "Guests" always contains all existing guest users of a context but no users, and is mainly used as entity in
+     * permissions of system folders.
+     */
+    HIDE_ALL_GUESTS("hideAllGuests", Boolean.TRUE),
+
+    /**
+     * Configures whether the group "Standard group" should be hidden to clients when listing all groups or searching for groups in a
+     * context. Every created user will be added to this non-virtual group automatically, but can be removed again later on.
+     */
+    HIDE_STANDARD_GROUP("hideStandardGroup", Boolean.TRUE),
+
+    ;
+
+    private final Object defaultValue;
+    private final String fqn;
+
+    /**
+     * Initializes a new {@link GroupProperty}.
+     *
+     * @param suffix The property name suffix
+     * @param defaultValue The property's default value
+     */
+    private GroupProperty(String suffix, Object defaultValue) {
+        this.defaultValue = defaultValue;
+        this.fqn = "com.openexchange.group." + suffix;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public String getFQPropertyName() {
+        return fqn;
     }
 
     @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class[] { HideAdminService.class, PrincipalUseCountService.class, LeanConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        VirtualGroupStorage storage = new VirtualGroupStorage(new CachingGroupStorage(new RdbGroupStorage()));
-        final GroupService groupService = new FilteringGroupService(new GroupServiceImpl(storage, this), this);
-        registerService(GroupService.class, groupService);
-        registerService(GroupStorage.class, storage);
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
 }

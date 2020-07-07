@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
@@ -128,13 +129,13 @@ public final class GroupServiceImpl implements GroupService {
     @Override
     public Group[] searchGroups(Session session, String pattern, boolean loadMembers) throws OXException {
         Group[] groups = storage.searchGroups(pattern, loadMembers, ServerSessionAdapter.valueOf(session).getContext());
-        return sortGroupsByUseCount(session, groups);
+        return sortGroupsByUseCount(session, removeHiddenGroups(session, groups));
     }
 
     @Override
     public Group[] getGroups(Session session, boolean loadMembers) throws OXException {
         Group[] groups = storage.getGroups(loadMembers, ServerSessionAdapter.valueOf(session).getContext());
-        return sortGroupsByUseCount(session, groups);
+        return sortGroupsByUseCount(session, removeHiddenGroups(session, groups));
     }
 
     private Group[] sortGroupsByUseCount(Session session, Group[] groups) throws OXException {
@@ -217,4 +218,45 @@ public final class GroupServiceImpl implements GroupService {
     public Group[] listGroups(Context ctx, int[] ids) throws OXException {
         return storage.getGroup(ids, ctx);
     }
+
+    /**
+     * Filters all groups that are configured to be hidden from <i>all</i>- and <i>search</i>-responses.
+     *
+     * @param session The current user's session
+     * @param groups The groups to filter
+     * @return The (possibly filtered) groups
+     */
+    private Group[] removeHiddenGroups(Session session, Group[] groups) {
+        if (null == groups || 0 == groups.length) {
+            return groups;
+        }
+        LeanConfigurationService configService = services.getOptionalService(LeanConfigurationService.class);
+        if (null == configService) {
+            org.slf4j.LoggerFactory.getLogger(GroupServiceImpl.class).warn("Configuration not found, unable to filter hidden groups.");
+            return groups;
+        }
+        boolean filtered = false;
+        List<Group> filteredGroups = new ArrayList<Group>(groups.length);
+        for (Group group : groups) {
+            if (GroupStorage.GROUP_ZERO_IDENTIFIER == group.getIdentifier()) {
+                if (configService.getBooleanProperty(session.getUserId(), session.getContextId(), GroupProperty.HIDE_ALL_USERS)) {
+                    filtered = true;
+                    continue;
+                }
+            } else if (GroupStorage.GUEST_GROUP_IDENTIFIER == group.getIdentifier()) {
+                if (configService.getBooleanProperty(session.getUserId(), session.getContextId(), GroupProperty.HIDE_ALL_GUESTS)) {
+                    filtered = true;
+                    continue;
+                }
+            } else if (GroupStorage.GROUP_STANDARD_SIMPLE_NAME.equals(group.getSimpleName())) {
+                if (configService.getBooleanProperty(session.getUserId(), session.getContextId(), GroupProperty.HIDE_STANDARD_GROUP)) {
+                    filtered = true;
+                    continue;
+                }
+            }
+            filteredGroups.add(group);
+        }
+        return filtered ? filteredGroups.toArray(new Group[filteredGroups.size()]) : groups;
+    }
+
 }

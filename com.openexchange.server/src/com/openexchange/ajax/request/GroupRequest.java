@@ -210,9 +210,9 @@ public class GroupRequest {
         final GroupService groupService = ServerServiceRegistry.getServize(GroupService.class, true);
         Group[] groups = null;
         if ("*".equals(searchpattern)) {
-            groups = groupService.getGroups(session.getContext(), true);
+            groups = groupService.getGroups(session, true);
         } else {
-            groups = groupService.search(session.getContext(), searchpattern, true);
+            groups = groupService.searchGroups(session, searchpattern, true);
         }
         final GroupWriter groupWriter = new GroupWriter();
         for (int a = 0; a < groups.length; a++) {
@@ -245,7 +245,7 @@ public class GroupRequest {
         final JSONArray jsonResponseArray = new JSONArray();
         final GroupService groupService = ServerServiceRegistry.getServize(GroupService.class, true);
         Group[] groups = null;
-        groups = groupService.getGroups(session.getContext(), loadMembers);
+        groups = groupService.getGroups(session, loadMembers);
         final GroupWriter groupWriter = new GroupWriter();
         for (int a = 0; a < groups.length; a++) {
             final JSONArray row = new JSONArray();
