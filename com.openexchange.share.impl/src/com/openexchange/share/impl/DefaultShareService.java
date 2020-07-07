@@ -266,9 +266,8 @@ public class DefaultShareService implements ShareService {
         ModuleSupport moduleSupport = requireService(ModuleSupport.class);
         List<TargetProxy> targets = moduleSupport.listTargets(session.getContextId(), guestID);
         for (TargetProxy target : targets) {
-            String item = target.getTarget().getItem();
             String realFolder = target.getTarget().getRealFolder();
-            if (moduleSupport.isVisible(target.getTarget().getModule(), realFolder == null ? target.getFolderID() : realFolder, item, context.getContextId(), session.getUserId())) {
+            if (moduleSupport.isVisible(target.getTarget().getModule(), realFolder == null ? target.getFolderID() : realFolder, target.getID(), context.getContextId(), session.getUserId())) {
                 return true;
             }
         }
