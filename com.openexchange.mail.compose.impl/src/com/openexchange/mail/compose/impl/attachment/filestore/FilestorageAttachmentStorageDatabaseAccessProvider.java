@@ -47,99 +47,44 @@
  *
  */
 
-package com.openexchange.filestore.sproxyd;
+package com.openexchange.mail.compose.impl.attachment.filestore;
+
+import static com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage.extractContextIdFrom;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.DatabaseAccess;
+import com.openexchange.filestore.DatabaseAccessProvider;
+import com.openexchange.filestore.utils.DefaultDatabaseAccess;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ExtractionResult} - The result for extracting association/path information from Swift URI.
+ * {@link FilestorageAttachmentStorageDatabaseAccessProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.10.4
  */
-public class ExtractionResult {
+public class FilestorageAttachmentStorageDatabaseAccessProvider implements DatabaseAccessProvider {
 
-    private final int contextId;
-    private final int userId;
-    private final Association association;
-    private final String prefix;
-    private final String rawPrefix;
+    private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link ExtractionResult}.
+     * Initializes a new {@link FilestorageAttachmentStorageDatabaseAccessProvider}.
+     *
+     * @param services The service look-up
      */
-    public ExtractionResult(int userId, int contextId) {
+    public FilestorageAttachmentStorageDatabaseAccessProvider(ServiceLookup services) {
         super();
-        String prefix = contextId + "/" + userId;
-        this.prefix = prefix;
-        this.rawPrefix = prefix;
-        this.userId = userId;
-        this.contextId = contextId;
-        this.association = Association.CONTEXT_AND_USER;
+        this.services = services;
     }
 
-    /**
-     * Initializes a new {@link ExtractionResult}.
-     */
-    public ExtractionResult(String prefix, String rawPrefix) {
-        super();
-        this.prefix = prefix;
-        this.rawPrefix = rawPrefix;
-        contextId = -1;
-        userId = -1;
-        this.association = Association.CUSTOM;
-    }
+    @Override
+    public DatabaseAccess getAccessFor(int fileStorageId, String prefix) throws OXException {
+        int contextId = extractContextIdFrom(prefix);
+        if (contextId <= 0) {
+            return null;
+        }
 
-    /**
-     * Checks if this extraction result has a context/user association
-     *
-     * @return <code>true</code> for context/user association; otherwise <code>false</code>
-     */
-    public boolean hasContextUserAssociation() {
-        return Association.CONTEXT_AND_USER == association;
-    }
-
-    /**
-     * Gets the context identifier
-     *
-     * @return The context identifier or <code>-1</code> if not set
-     */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Gets the user identifier
-     *
-     * @return The user identifier or <code>-1</code> if not set
-     */
-    public int getUserId() {
-        return userId;
-    }
-
-    /**
-     * Gets the association
-     *
-     * @return The association
-     */
-    public Association getAssociation() {
-        return association;
-    }
-
-    /**
-     * Gets the prefix
-     *
-     * @return The prefix
-     */
-    public String getPrefix() {
-        return prefix;
-    }
-
-    /**
-     * Gets the raw prefix
-     *
-     * @return The raw prefix
-     */
-    public String getRawPrefix() {
-        return rawPrefix;
+        return new DefaultDatabaseAccess(0, contextId, services.getServiceSafe(DatabaseService.class));
     }
 
 }
