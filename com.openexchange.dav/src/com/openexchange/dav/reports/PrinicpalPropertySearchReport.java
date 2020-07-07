@@ -240,7 +240,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                          */
                         if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
                             try {
-                                Group[] foundGroups = factory.getServiceSafe(GroupService.class).searchGroups(factory.getSession(), pattern, false);
+                                Group[] foundGroups = factory.getServiceSafe(GroupService.class).search(factory.getContext(), pattern, false);
                                 if (null != foundGroups) {
                                     groups.addAll(Arrays.asList(foundGroups));
                                 }

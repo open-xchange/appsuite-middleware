@@ -105,7 +105,7 @@ public class AutocompleteHelper {
 
             @Override
             public Group[] call() throws Exception {
-                return DriveServiceLookup.getService(GroupService.class).searchGroups(session.getServerSession(), query, false);
+                return DriveServiceLookup.getService(GroupService.class).search(session.getServerSession().getContext(), query, false);
             }
         });
         /*
