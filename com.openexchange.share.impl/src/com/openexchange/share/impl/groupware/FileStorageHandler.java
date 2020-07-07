@@ -72,11 +72,6 @@ import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedAdministrativeFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
@@ -91,8 +86,6 @@ import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tx.ConnectionHolder;
-import com.openexchange.user.User;
-import com.openexchange.user.UserService;
 
 
 /**
@@ -181,55 +174,12 @@ public class FileStorageHandler implements ModuleHandler {
 
     @Override
     public boolean isVisible(String folder, String item, int contextID, int userID) throws OXException {
-        if (item != null) {
-            FileID fileID = new FileID(item);
-            if (null == fileID.getFolderId()) {
-                fileID.setFolderId(new FolderID(folder).getFolderId());
-            }
-            Context context = requireService(ContextService.class, services).getContext(contextID);
-            boolean isVisible = getAdministrativeFileAccess(context).canRead(fileID.toUniqueID(), userID);
-            if (isVisible) {
-                return isVisible;
-            }
-        }
-
-        try {
-            UserService userService = requireService(UserService.class, services);
-            Context context = userService.getContext(contextID);
-            User user = userService.getUser(userID, context);
-            UserizedFolder userizedFolder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, folder, user, context, null);
-            if (item != null) {
-                int ownPerm = userizedFolder.getOwnPermission().getReadPermission();
-                if (ownPerm >= Permission.READ_ALL_OBJECTS || ownPerm == Permission.READ_OWN_OBJECTS && getCreator(folder, item, contextID) == userID) {
-                    return true;
-                }
-                return false;
-            }
-            return true;
-        } catch (OXException e) {
-            if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
-                return false;
-            }
-            throw e;
-        }
-    }
-
-    /**
-     * Gets the creator of the item
-     *
-     * @param folder The folder id
-     * @param item The item id
-     * @param contextID The context id
-     * @return The creator id
-     * @throws OXException
-     */
-    private int getCreator(String folder, String item, int contextID) throws OXException {
         FileID fileID = new FileID(item);
         if (null == fileID.getFolderId()) {
             fileID.setFolderId(new FolderID(folder).getFolderId());
         }
         Context context = requireService(ContextService.class, services).getContext(contextID);
-        return getAdministrativeFileAccess(context).getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION).getCreatedBy();
+        return getAdministrativeFileAccess(context).canRead(fileID.toUniqueID(), userID);
     }
 
     @Override
