@@ -76,6 +76,7 @@ import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.PathKnowingFileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.webdav.client.PropertyName;
 import com.openexchange.webdav.client.WebDAVClient;
 import com.openexchange.webdav.client.WebDAVClientException;
@@ -87,7 +88,7 @@ import com.openexchange.webdav.client.WebDAVResource;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.10.4
  */
-public abstract class AbstractWebDAVFolderAccess extends AbstractWebDAVAccess implements FileStorageFolderAccess, PathKnowingFileStorageFolderAccess, FileStorageAutoRenameFoldersAccess {
+public abstract class AbstractWebDAVFolderAccess extends AbstractWebDAVAccess implements FileStorageFolderAccess, PathKnowingFileStorageFolderAccess, FileStorageAutoRenameFoldersAccess, UserCreatedFileStorageFolderAccess {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractWebDAVFolderAccess.class);
 

@@ -138,7 +138,7 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
         } else {
             contextId = 0;
             userId = 0;
-            databaseAccess = lookUpDatabaseAccess(uri, extractionResult.getPrefix());
+            databaseAccess = lookUpDatabaseAccess(uri, extractionResult.getRawPrefix());
         }
 
         // Ensure required tables do exist
@@ -224,7 +224,7 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
         }
 
         // Any path that serves as prefix; e.g. "photos"
-        return new ExtractionResult(sanitizePathForPrefix(path, uri));
+        return new ExtractionResult(sanitizePathForPrefix(path, uri), path);
     }
 
     private static String sanitizePathForPrefix(String path, URI uri) {

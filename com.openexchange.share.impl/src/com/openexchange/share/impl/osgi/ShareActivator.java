@@ -128,7 +128,7 @@ public class ShareActivator extends HousekeepingActivator {
             DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
             ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
             QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class,
-            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechRegistry.class, UserAliasStorage.class, SessiondService.class, FolderService.class };
+            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechRegistry.class, UserAliasStorage.class, SessiondService.class };
     }
 
     @Override

@@ -220,7 +220,7 @@ public class LocalReportService extends AbstractReportService {
         stoppedPendingReports.put(reportType, stoppedReport);
         failedReportCache.asMap().put(REPORTS_ERROR_KEY + reportType, stoppedPendingReports);
 
-        if (!EXECUTOR_SERVICE_REF.get().isShutdown()) {
+        if (EXECUTOR_SERVICE_REF.get() != null && !EXECUTOR_SERVICE_REF.get().isShutdown()) {
             EXECUTOR_SERVICE_REF.get().shutdownNow();
         }
 
@@ -265,6 +265,11 @@ public class LocalReportService extends AbstractReportService {
         report.setNumberOfTasks(allContextIds.size());
         pendingReports.put(uuid, report);
         reportCache.asMap().put(PENDING_REPORTS_PRE_KEY + reportConfig.getType(), pendingReports);
+
+        // Abort report, if no contexts given
+        if (allContextIds.isEmpty()) {
+            abortGeneration(uuid, reportConfig.getType(), "No contexts to process.");
+        }
 
         try {
             report.setOperatingSystemName(System.getProperty("os.name"));

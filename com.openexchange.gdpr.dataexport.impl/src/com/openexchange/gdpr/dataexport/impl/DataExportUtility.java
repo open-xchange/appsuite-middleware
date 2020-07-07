@@ -150,6 +150,56 @@ public class DataExportUtility {
     }
 
     /**
+     * Extracts the context identifier from given path prefix.
+     *
+     * @param prefix The path prefix; e.g. "4321_gdpr_dataexport"
+     * @return The extracted context identifier or <code>-1</code>
+     */
+    public static int extractContextIdFrom(String prefix) {
+        if (Strings.isEmpty(prefix)) {
+            return -1;
+        }
+
+        String toExtractFrom = prefix.trim();
+        if (!toExtractFrom.endsWith("_gdpr_dataexport")) {
+            return -1;
+        }
+
+        int length = toExtractFrom.length();
+        StringBuilder ctxChars = null;
+        int i = 0;
+        {
+            boolean keepOn = true;
+            while (keepOn && i < length) {
+                char ch = toExtractFrom.charAt(i);
+                int digit = Strings.digitForChar(ch);
+                if (digit >= 0) {
+                    if (ctxChars == null) {
+                        ctxChars = new StringBuilder();
+                    }
+                    ctxChars.append(ch);
+                    i++;
+                } else {
+                    keepOn = false;
+                }
+            }
+            if (ctxChars == null || keepOn) {
+                return -1;
+            }
+        }
+
+        if (toExtractFrom.charAt(i) != '_') {
+            return -1;
+        }
+
+        try {
+            return Integer.parseInt(ctxChars.toString(), 10);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    /**
      * Deletes specified location in given file storage ignoring any exceptions.
      *
      * @param fileStorageLocation The location to delete
