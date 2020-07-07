@@ -149,9 +149,12 @@ public class ModuleSupportImpl implements ModuleSupport {
 
     @Override
     public boolean isVisible(int module, String folder, String item, int contextID, int guestID) throws OXException {
+        ModuleHandler moduleHandler = handlers.get(module);
         if (item != null) {
-            ModuleHandler moduleHandler = handlers.get(module);
-            return moduleHandler.isVisible(folder, item, contextID, guestID);
+            boolean visible = moduleHandler.isVisible(folder, item, contextID, guestID);
+            if (visible) {
+                return visible;
+            }
         }
 
         if (null == Module.getForFolderConstant(module)) {
