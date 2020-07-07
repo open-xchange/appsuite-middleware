@@ -66,6 +66,7 @@ import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.filestore.DatabaseAccessProvider;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.gdpr.dataexport.DataExportConfig;
 import com.openexchange.gdpr.dataexport.DataExportConstants;
@@ -74,6 +75,7 @@ import com.openexchange.gdpr.dataexport.DataExportProviderRegistry;
 import com.openexchange.gdpr.dataexport.DataExportService;
 import com.openexchange.gdpr.dataexport.DataExportStatusChecker;
 import com.openexchange.gdpr.dataexport.DataExportStorageService;
+import com.openexchange.gdpr.dataexport.impl.DataExportDatabaseAccessProvider;
 import com.openexchange.gdpr.dataexport.impl.DataExportProviderRegistryImpl;
 import com.openexchange.gdpr.dataexport.impl.DataExportServiceImpl;
 import com.openexchange.gdpr.dataexport.impl.groupware.DataExportAddFailCountTask;
@@ -235,6 +237,7 @@ public class DataExportActivator extends HousekeepingActivator {
         registerService(DataExportService.class, service);
         registerService(DataExportProviderRegistry.class, providerRegistry);
         registerService(Remote.class, new DataExportRMIServiceImpl(service));
+        registerService(DatabaseAccessProvider.class, new DataExportDatabaseAccessProvider(this));
         addService(DataExportStorageService.class, storageService);
 
         // Signal start-up
