@@ -75,6 +75,7 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.DatabaseAccessProvider;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.filestore.FileLocationHandler;
@@ -95,6 +96,7 @@ import com.openexchange.mail.compose.impl.attachment.AttachmentStorageServiceImp
 import com.openexchange.mail.compose.impl.attachment.filestore.ContextAssociatedFileStorageAttachmentStorage;
 import com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage;
 import com.openexchange.mail.compose.impl.attachment.filestore.FileStrorageAttachmentFileLocationHandler;
+import com.openexchange.mail.compose.impl.attachment.filestore.FilestorageAttachmentStorageDatabaseAccessProvider;
 import com.openexchange.mail.compose.impl.attachment.rdb.RdbAttachmentStorage;
 import com.openexchange.mail.compose.impl.cleanup.CompositionSpaceCleanUpRegistry;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddContentEncryptedFlag;
@@ -240,6 +242,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         registerService(AttachmentStorage.class, new ContextAssociatedFileStorageAttachmentStorage(this), withRanking(1));
         registerService(FileLocationHandler.class, new FileStrorageAttachmentFileLocationHandler());
         registerService(AttachmentStorage.class, new RdbAttachmentStorage(this), withRanking(0));
+        registerService(DatabaseAccessProvider.class, new FilestorageAttachmentStorageDatabaseAccessProvider(this));
 
         {
             AttachmentImageDataSource attachmentImageDataSource = AttachmentImageDataSource.getInstance();
