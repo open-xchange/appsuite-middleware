@@ -166,18 +166,7 @@ public class ModuleSupportImpl implements ModuleSupport {
             return folderHandler.isVisible(folder, item, contextID, guestID);
         }
 
-        try {
-            UserService userService = requireService(UserService.class, services);
-            Context context = userService.getContext(contextID);
-            User user = userService.getUser(guestID, context);
-            requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, folder, user, context, null);
-            return true;
-        } catch (OXException e) {
-            if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
-                return false;
-            }
-            throw e;
-        }
+        return false;
     }
 
     @Override
