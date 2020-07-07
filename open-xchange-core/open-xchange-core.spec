@@ -855,6 +855,7 @@ exit 0
 %doc docs/
 %doc com.openexchange.server/doc/examples
 %doc com.openexchange.database/doc/examples
+%doc com.openexchange.authentication.application.impl/doc/examples
 
 %changelog
 * Tue Jun 30 2020 Marcus Klein <marcus.klein@open-xchange.com>
