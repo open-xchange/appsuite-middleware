@@ -87,7 +87,7 @@ public class MWB456Test extends CalDAVTest {
         Date end = TimeTools.D("next monday at 13:00");
         String altDesc =
             "<html><head><style id=\"css_styles\">/*<![CDATA[*/ blockquote.cite { margin-left: 5px } /*]]>*/</style></head>" +
-            "<body>Themen beim nächsten Mal:<br>Umsetzung als elektronische Version</body></html>"
+            "<body>Themen beim naechsten Mal:<br>Umsetzung als elektronische Version</body></html>"
         ;
         String iCal = // @formatter:off
             "BEGIN:VCALENDAR" + "\r\n" +
