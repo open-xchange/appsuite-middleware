@@ -89,7 +89,7 @@ public final class AllAction extends AbstractGroupAction {
                 }
             }
         }
-        Group[] groups = services.getServiceSafe(GroupService.class).listAllGroups(req.getSession().getContext(), loadMembers);
+        Group[] groups = services.getServiceSafe(GroupService.class).getGroups(req.getSession(), loadMembers);
 
         int length = groups.length;
         List<Group> groupList = new ArrayList<Group>(length);
