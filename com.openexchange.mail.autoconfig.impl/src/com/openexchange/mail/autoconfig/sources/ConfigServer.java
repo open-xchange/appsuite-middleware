@@ -108,6 +108,11 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
                 LOG.warn("Unable to parse URL: {}. Skipping config server source for mail auto-config", sUrl, e);
                 return null;
             }
+
+            if (isInvalid(url)) {
+                LOG.warn("Invalid URL: {}. Skipping config server source for mail auto-config", sUrl);
+                return null;
+            }
         }
 
         boolean isLocalAddress;
@@ -152,7 +157,12 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
                     try {
                         url = new URL(sUrl);
                     } catch (MalformedURLException e) {
-                        LOG.warn("Unable to parse URL: {}", sUrl, e);
+                        LOG.warn("Unable to parse URL: {}. Skipping config server source for mail auto-config", sUrl, e);
+                        return null;
+                    }
+
+                    if (isInvalid(url)) {
+                        LOG.warn("Invalid URL: {}. Skipping config server source for mail auto-config", sUrl);
                         return null;
                     }
                 }
@@ -167,7 +177,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
 
             Header contentType = rsp.getFirstHeader("Content-Type");
             if (!contentType.getValue().contains("text/xml")) {
-                LOG.warn("Could not retrieve config XML from autoconfig server. The response's content type is not of 'text/xml'.");
+                LOG.warn("Could not retrieve config XML from autoconfig server. The response's content type is not of type 'text/xml'.");
                 return null;
             }
 
@@ -209,6 +219,36 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
                 }
             }
         }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Checks whether the given URL is invalid or not
+     *
+     * @param url The URL to check
+     * @return <code>true</code> if the URL is invalid, <code>false</code> otherwise
+     */
+    private static boolean isInvalid(URL url) {
+        return isValid(url) == false;
+    }
+
+    /**
+     * Checks whether the given URL is valid or not
+     *
+     * @param url The URL to check
+     * @return <code>true</code> if the URL is valid, <code>false</code> otherwise
+     */
+    private static boolean isValid(URL url) {
+        try {
+            InetAddress inetAddress = InetAddress.getByName(url.getHost());
+            if (InetAddresses.isInternalAddress(inetAddress)) {
+                return false;
+            }
+        } catch (UnknownHostException e) {
+            return false;
+        }
+        return true;
     }
 
 }
