@@ -219,22 +219,13 @@ public class GroupwareCarddavFactory extends DAVFactory {
     }
 
     /**
-     * Sets the next sync token for the current user to <code>"0"</code>,
-     * enforcing the next sync status report to contain all changes
-     * independently of the sync token supplied by the client, thus emulating
-     * some kind of slow-sync this way.
-     */
-    public void overrideNextSyncToken() {
-        this.setOverrideNextSyncToken("0");
-    }
-
-    /**
-     * Sets the next sync token for the current user to the supplied value.
+     * Sets the next sync token for the current user in a certain collection to the supplied value.
      *
-     * @param value The overridden value
+     * @param folderId The identifier of the folder to override the sync-token in, or <code>null</code> to override it generally
+     * @param value The overridden value, or <code>null</code> to remove a previously overridden value
      */
-    public void setOverrideNextSyncToken(String value) {
-        String attributeName = getOverrideNextSyncTokenAttributeName();
+    public void setOverrideNextSyncToken(String folderId, String value) {
+        String attributeName = getOverrideNextSyncTokenAttributeName(folderId);
         try {
             getService(UserService.class).setAttribute(attributeName, value, getUser().getId(), getContext());
         } catch (OXException e) {
@@ -245,11 +236,12 @@ public class GroupwareCarddavFactory extends DAVFactory {
     /**
      * Gets a value indicating the overridden sync token for the current user if defined
      *
+     * @param folderId The identifier of the targeted folder, or <code>null</code> to check for a globally overridden token
      * @return The value of the overridden sync-token, or <code>null</code> if not set
      */
-    public String getOverrideNextSyncToken() {
+    public String getOverrideNextSyncToken(String folderId) {
         User user = getUser();
-        String attributeName = getOverrideNextSyncTokenAttributeName();
+        String attributeName = getOverrideNextSyncTokenAttributeName(folderId);
         Map<String, String> attributes = user.getAttributes();
         if (null != attributes) {
             /*
@@ -277,9 +269,16 @@ public class GroupwareCarddavFactory extends DAVFactory {
         return null;
     }
 
-    private String getOverrideNextSyncTokenAttributeName() {
+    private String getOverrideNextSyncTokenAttributeName(String folderId) {
         String userAgent = (String) getSession().getParameter("user-agent");
-        return null != userAgent ? OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY + userAgent.hashCode() : OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY;
+        StringBuilder stringBuilder = new StringBuilder(OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY);
+        if (null != userAgent) {
+            stringBuilder.append(userAgent);
+        }
+        if (null != folderId) {
+            stringBuilder.append('.').append(folderId);
+        }
+        return stringBuilder.toString();
     }
 
     public static final class State {

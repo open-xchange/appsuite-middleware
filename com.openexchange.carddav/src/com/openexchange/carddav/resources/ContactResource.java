@@ -70,6 +70,7 @@ import com.openexchange.carddav.photos.PhotoUtils;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.storage.ContactTombstoneStorage;
 import com.openexchange.contact.vcard.DistributionListMode;
 import com.openexchange.contact.vcard.VCardExport;
 import com.openexchange.contact.vcard.VCardImport;
@@ -315,11 +316,19 @@ public class ContactResource extends CommonResource<Contact> {
                     contact.setFilename(extractedUID);
                 }
             }
-            /*
-             * set initial parent folder to the default contacts folder in case of an iOS client
-             */
             contact.setContextId(session.getContextId());
-            String parentFolderID = DAVUserAgent.IOS.equals(getUserAgent()) ? factory.getState().getDefaultFolder().getID() : String.valueOf(getId(parent));
+            String parentFolderID = parent.getFolder().getID();
+            if (DAVUserAgent.IOS.equals(getUserAgent()) && false == parentFolderID.equals(factory.getState().getDefaultFolder().getID())) {
+                /*
+                 * for iOS, set initial parent to the default contacts folder & insert tombstone record for automatic cleanup during next sync
+                 */
+                ContactTombstoneStorage tombstoneStorage = factory.getOptionalService(ContactTombstoneStorage.class);
+                if (null != tombstoneStorage && tombstoneStorage.supports(session, parentFolderID)) {
+                    LOG.debug("{}: Re-routing contact creation to default folder for iOS client, inserting tombstone in targeted folder for client recovery.", getUrl());
+                    tombstoneStorage.insertTombstone(session, parentFolderID, contact);
+                }
+                parentFolderID = factory.getState().getDefaultFolder().getID();
+            }
             if (contact.getMarkAsDistribtuionlist() && false == parent.isSyncDistributionLists()) {
                 /*
                  * insert & delete not supported contact group (next sync cleans up the client)
@@ -455,7 +464,7 @@ public class ContactResource extends CommonResource<Contact> {
                     entry.setFolderID(dbContact.getParentFolderID());
                 }
             } else if (originalContact.isPresent()) {
-                // try to match dleo from original list 
+                // try to match dleo from original list
                 DistributionListEntryObject[] origDistList = originalContact.get().getDistributionList();
                 if (origDistList == null) {
                     continue;
@@ -610,7 +619,7 @@ public class ContactResource extends CommonResource<Contact> {
              */
             LOG.debug("{}: {}", this.getUrl(), e.getMessage());
             LOG.debug("{}: overriding next sync token for client recovery.", this.getUrl());
-            this.factory.overrideNextSyncToken();
+            factory.setOverrideNextSyncToken(parent.getFolder().getID(), "0");
         } else if (Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
             throw protocolException(getUrl(), e, HttpServletResponse.SC_CONFLICT);
         } else if (Category.CATEGORY_SERVICE_DOWN.equals(e.getCategory())) {
@@ -784,7 +793,7 @@ public class ContactResource extends CommonResource<Contact> {
 
     /**
      * Gets the distribution list mode to use for serialization to vCards, based on the client's user agent.
-     * 
+     *
      * @return The distribution list mode
      */
     private DistributionListMode getDistributionListMode() {

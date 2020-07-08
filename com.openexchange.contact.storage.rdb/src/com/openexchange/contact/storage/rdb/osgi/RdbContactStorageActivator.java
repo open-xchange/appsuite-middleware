@@ -56,6 +56,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactStorage;
+import com.openexchange.contact.storage.ContactTombstoneStorage;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contact.storage.rdb.groupware.AddFulltextIndexTask;
 import com.openexchange.contact.storage.rdb.internal.RdbContactQuotaProvider;
@@ -103,6 +104,7 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
             RdbContactStorage service = new RdbContactStorage();
             registerService(ContactStorage.class, service);
             registerService(ContactUserStorage.class, service);
+            registerService(ContactTombstoneStorage.class, service);
 
             if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.contact.fulltextAutocomplete", false)) {
                 registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFulltextIndexTask()));

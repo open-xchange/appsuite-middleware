@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.storage.ContactTombstoneStorage;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
@@ -106,7 +107,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbContactStorage extends DefaultContactStorage implements ContactUserStorage {
+public class RdbContactStorage extends DefaultContactStorage implements ContactUserStorage, ContactTombstoneStorage {
 
     private static boolean PREFETCH_ATTACHMENT_INFO = true;
 
@@ -386,6 +387,34 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (OXException e) {
             throw e;
+        } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
+            connectionHelper.backWritable();
+        }
+    }
+
+    @Override
+    public void insertTombstone(Session session, String folderId, Contact contact) throws OXException {
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getWritable();
+        boolean rollback = true;
+        try {
+            /*
+             * insert tombstone contact
+             */
+            if (0 >= contact.getObjectID()) {
+                contact.setObjectID(IDGenerator.getId(session.getContextId(), com.openexchange.groupware.Types.CONTACT, connection));
+            }
+            insertDeletedContact(session, connection, parse(folderId), contact);
+            /*
+             * commit
+             */
+            connectionHelper.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
                 Databases.rollback(connection);
@@ -912,6 +941,24 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             executor.delete(connection, Table.DISTLIST, contextID, Integer.MIN_VALUE, currentObjectIDs);
         }
         return deletedContacts;
+    }
+
+    private int insertDeletedContact(Session session, Connection connection, int folderID, Contact contact) throws SQLException, OXException {
+        /*
+         * prepare contact to represent updated metadata
+         */
+        Contact insertedContact = contact.clone();
+        insertedContact.setCreationDate(new Date());
+        insertedContact.setLastModified(new Date());
+        insertedContact.setParentFolderID(folderID);
+        insertedContact.setCreatedBy(session.getUserId());
+        insertedContact.setModifiedBy(session.getUserId());
+        insertedContact.setContextId(session.getContextId());
+        /*
+         * insert record to 'deleted' contact-table with updated metadata
+         */
+        ContactField[] fields = Fields.DEL_CONTACT_DATABASE.toArray(new ContactField[Fields.DEL_CONTACT_DATABASE.size()]);
+        return executor.replace(connection, Table.DELETED_CONTACTS, insertedContact, fields);
     }
 
     private List<Contact> mergeDistListData(final Connection connection, final Table table, final int contextID, final List<Contact> contacts) throws SQLException, OXException {

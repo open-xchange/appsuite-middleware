@@ -133,11 +133,11 @@ public class CardDAVCollection extends FolderCollection<Contact> {
         super(factory, url, folder);
         this.factory = factory;
         includeProperties(
-            new CurrentUserPrivilegeSet(folder.getOwnPermission()), 
-            new SupportedReportSet(), 
-            new MaxResourceSize(factory), 
-            new MaxImageSize(factory), 
-            new SupportedAddressData(), 
+            new CurrentUserPrivilegeSet(folder.getOwnPermission()),
+            new SupportedReportSet(),
+            new MaxResourceSize(factory),
+            new MaxImageSize(factory),
+            new SupportedAddressData(),
             new BulkRequests(factory)
         );
     }
@@ -279,14 +279,14 @@ public class CardDAVCollection extends FolderCollection<Contact> {
 
     /**
      * Gets a value indicating whether synchronization of distribution lists is enabled for the used client or not.
-     * 
+     *
      * @return <code>true</code> if distribution lists can be synchronized with the used client, <code>false</code>, otherwise
      */
     public boolean isSyncDistributionLists() {
         DAVUserAgent davUserAgent = getUserAgent();
-        return davUserAgent.equals(DAVUserAgent.EM_CLIENT) || 
+        return davUserAgent.equals(DAVUserAgent.EM_CLIENT) ||
             davUserAgent.equals(DAVUserAgent.EM_CLIENT_FOR_APPSUITE) ||
-            davUserAgent.equals(DAVUserAgent.OUTLOOK_CALDAV_SYNCHRONIZER) 
+            davUserAgent.equals(DAVUserAgent.OUTLOOK_CALDAV_SYNCHRONIZER)
             ;
     }
 
@@ -527,11 +527,11 @@ public class CardDAVCollection extends FolderCollection<Contact> {
             /*
              * check for overridden sync-token for this client
              */
-            String overrrideSyncToken = factory.getOverrideNextSyncToken();
+            String overrrideSyncToken = factory.getOverrideNextSyncToken(folder.getID());
             if (null != overrrideSyncToken && 0 < overrrideSyncToken.length()) {
-                factory.setOverrideNextSyncToken(null);
+                factory.setOverrideNextSyncToken(folder.getID(), null);
                 token = overrrideSyncToken;
-                LOG.debug("Overriding sync token to '{}' for user '{}'.", token, this.factory.getUser());
+                LOG.debug("Overriding sync token to '{}' for collection '{}'.", token, getUrl());
             }
         }
         return super.getSyncStatus(token, limit);
@@ -542,11 +542,11 @@ public class CardDAVCollection extends FolderCollection<Contact> {
         /*
          * check for overridden sync-token for this client
          */
-        String overrrideSyncToken = factory.getOverrideNextSyncToken();
+        String overrrideSyncToken = factory.getOverrideNextSyncToken(folder.getID());
         if (null != overrrideSyncToken && 0 < overrrideSyncToken.length()) {
-            factory.setOverrideNextSyncToken(null);
+            factory.setOverrideNextSyncToken(folder.getID(), null);
             String value = "http://www.open-xchange.com/ctags/" + folder.getID() + "-" + overrrideSyncToken;
-            LOG.debug("Overriding CTag property to '{}' for user '{}'.", value, factory.getUser());
+            LOG.debug("Overriding CTag property to '{}' for collection '{}'.", value, getUrl());
             return value;
         }
         return super.getCTag();
