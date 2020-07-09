@@ -1,0 +1,25 @@
+feature_name: Appsuite HTTP Client
+properties:
+    - key: com.openexchange.appsuite.client.blacklistedHosts
+      description: |
+        Defines hosts that are blacklisted which means that they are not allowed to be accessed.
+      defaultValue: 127.0.0.1-127.255.255.255,localhost
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: 
+      packageName: open-xchange-core
+      tags: ["HTTP client", "Appsuite Client", "Black list"]
+properties:
+    - key: com.openexchange.appsuite.client.allowedPorts
+      description: |
+        Defines ports that are allowed to access.
+      defaultValue:
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: 
+      packageName: open-xchange-core
+      tags: ["HTTP client", "Appsuite Client"]

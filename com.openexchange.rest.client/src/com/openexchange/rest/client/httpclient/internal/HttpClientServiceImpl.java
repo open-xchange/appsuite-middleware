@@ -205,7 +205,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     }
 
     @Override
-    public ManagedHttpClient getHttpClient(String httpClientId) {
+    public @NonNull ManagedHttpClient getHttpClient(String httpClientId) {
         if (Strings.isEmpty(httpClientId)) {
             throw new IllegalArgumentException("The argument must not be empty!");
         }
@@ -213,7 +213,11 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
         LOGGER.trace("Getting client with ID {}", httpClientId);
         try {
-            return httpClients.get(httpClientId, () -> create(httpClientId));
+            ManagedHttpClientImpl client = httpClients.get(httpClientId, () -> create(httpClientId));
+            if (null == client) {
+                throw new IllegalStateException("Error intitializing HTTP client for ID: " + httpClientId);
+            }
+            return client;
         } catch (ExecutionException e) {
             throw new IllegalStateException("Error getting or intitializing HTTP client for ID: " + httpClientId, e);
         }

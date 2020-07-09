@@ -58,6 +58,7 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.protocol.HttpContext;
 import com.openexchange.rest.client.httpclient.internal.cookiestore.AccountAwareCookieStore;
@@ -73,14 +74,24 @@ import com.openexchange.session.Session;
 public class HttpContextUtils {
 
     /**
+     * Creates a new, simple, non-cached cookie store
+     *
+     * @return A cookie store
+     */
+    public static CookieStore createCookieStore() {
+        return new BasicCookieStore();
+    }
+
+    /**
      * Adds a {@link CookieStore} to the given HTTP context.
      *
      * @param context The HTTP context that represents the execution state of an HTTP process
      * @param session The session providing user information
      * @param accountId The account identifier
+     * @return The newly created or cached cookie store for the combination of IDs
      */
-    public static void addCookieStore(HttpContext context, Session session, String accountId) {
-        addCookieStore(context, session.getContextId(), session.getUserId(), accountId);
+    public static CookieStore addCookieStore(HttpContext context, Session session, String accountId) {
+        return addCookieStore(context, session.getContextId(), session.getUserId(), accountId);
     }
 
     /**
@@ -90,9 +101,32 @@ public class HttpContextUtils {
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
+     * @return The newly created or cached cookie store for the combination of IDs
      */
-    public static void addCookieStore(HttpContext context, int contextId, int userId, String accountId) {
-        context.setAttribute(HttpClientContext.COOKIE_STORE, new AccountAwareCookieStore(accountId, contextId, userId));
+    public static CookieStore addCookieStore(HttpContext context, int contextId, int userId, String accountId) {
+        AccountAwareCookieStore cookieStore = new AccountAwareCookieStore(accountId, contextId, userId);
+        context.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
+        return cookieStore;
+    }
+
+    /**
+     * Adds the given {@link CookieStore} to the given HTTP context.
+     *
+     * @param context The HTTP context that represents the execution state of an HTTP process
+     * @param cookieStore The cookie store to add
+     */
+    public static void addCookieStore(HttpContext context, CookieStore cookieStore) {
+        context.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
+    }
+
+    /**
+     * Get the {@link CookieStore} from the given HTTP context.
+     *
+     * @param context The HTTP context that represents the execution state of an HTTP process
+     * @return The cookie store or <code>null</code> if not set
+     */
+    public static CookieStore getCookieStore(HttpContext context) {
+        return (CookieStore) context.getAttribute(HttpClientContext.COOKIE_STORE);
     }
 
     /**

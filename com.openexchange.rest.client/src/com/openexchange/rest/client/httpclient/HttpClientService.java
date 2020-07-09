@@ -50,6 +50,7 @@
 package com.openexchange.rest.client.httpclient;
 
 import org.apache.http.impl.client.CloseableHttpClient;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -97,7 +98,7 @@ public interface HttpClientService {
      * @throws IllegalStateException In case service is shutting down, an unexpected error occurred during acquisition of the HTTP client
      * @see {@link ManagedHttpClient#getHttpClient()}
      */
-    ManagedHttpClient getHttpClient(String httpClientId);
+    @NonNull ManagedHttpClient getHttpClient(String httpClientId);
 
     /**
      * Removes cached client instances and closes it. This method is supposed to be called, when
