@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 17
+%define        ox_release 16
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -59,8 +59,6 @@ GLOBIGNORE='*'
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
-* Mon Jul 06 2020 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2020-07-13 (5804)
 * Fri Jun 26 2020 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2020-07-02 (5792)
 * Wed Jun 24 2020 Thorben Betten <thorben.betten@open-xchange.com>
