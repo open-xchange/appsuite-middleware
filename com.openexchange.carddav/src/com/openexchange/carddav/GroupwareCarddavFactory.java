@@ -101,7 +101,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public class GroupwareCarddavFactory extends DAVFactory {
 
-    private static final String OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY = "com.openexchange.carddav.overridenextsynctoken";
+    private static final String OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY = "carddav:overridenextsynctoken";
     private static final String FOLDER_BLACKLIST_PROPERTY = "com.openexchange.carddav.ignoreFolders";
     private static final String FOLDER_TRRE_ID_PROPERTY = "com.openexchange.carddav.tree";
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupwareCarddavFactory.class);
@@ -270,10 +270,10 @@ public class GroupwareCarddavFactory extends DAVFactory {
     }
 
     private String getOverrideNextSyncTokenAttributeName(String folderId) {
-        String userAgent = (String) getSession().getParameter("user-agent");
         StringBuilder stringBuilder = new StringBuilder(OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY);
+        String userAgent = (String) getSession().getParameter("user-agent");
         if (null != userAgent) {
-            stringBuilder.append(userAgent);
+            stringBuilder.append('.').append(userAgent.hashCode());
         }
         if (null != folderId) {
             stringBuilder.append('.').append(folderId);
