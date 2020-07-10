@@ -520,7 +520,7 @@ public class Utils {
         /*
          * try and match a known timezone with the same rules (original timezone, calendar user timezone, session user timezone)
          */
-        if (null != originalTimeZone && timeZone.hasSameRules(originalTimeZone)) {
+        if (haveSameRules(timeZone, originalTimeZone)) {
             LOG.debug("No matching timezone found for '{}', falling back to original timezone '{}'.", timeZone.getID(), originalTimeZone);
             return originalTimeZone;
         }
@@ -528,13 +528,13 @@ public class Utils {
          * use calendar user's / session user's timezone if same rules are effective
          */
         TimeZone calendarUserTimeZone = session.getEntityResolver().getTimeZone(calendarUserId);
-        if (timeZone.hasSameRules(calendarUserTimeZone)) {
+        if (haveSameRules(timeZone, calendarUserTimeZone)) {
             LOG.debug("No matching timezone found for '{}', falling back to calendar user's timezone '{}'.", timeZone.getID(), calendarUserTimeZone);
             return calendarUserTimeZone;
         }
         if (session.getUserId() != calendarUserId) {
             TimeZone sessionUserTimeZone = session.getEntityResolver().getTimeZone(session.getUserId());
-            if (timeZone.hasSameRules(sessionUserTimeZone)) {
+            if (haveSameRules(timeZone, sessionUserTimeZone)) {
                 LOG.debug("No matching timezone found for '{}', falling back to session user's timezone '{}'.", timeZone.getID(), sessionUserTimeZone);
                 return sessionUserTimeZone;
             }
@@ -561,11 +561,26 @@ public class Utils {
         return fallbackTimeZone;
     }
 
+    /**
+     * Gets a value indicating whether two timezones have the same rule and offset, considering the {@link TimeZone#hasSameRules(TimeZone)}
+     * implementation of both objects with each other to be sure.
+     *
+     * @param timeZone1 The first timezone to check, or <code>null</code> to get a <code>false</code> result
+     * @param timeZone2 The second timezone to check, or <code>null</code> to get a <code>false</code> result
+     * @return <code>true</code> if the timezones have the same rule and offset, <code>false</code>, otherwise
+     */
+    private static boolean haveSameRules(TimeZone timeZone1, TimeZone timeZone2) {
+        if (null == timeZone1 || null == timeZone2) {
+            return false;
+        }
+        return timeZone1.hasSameRules(timeZone2) && timeZone2.hasSameRules(timeZone1);
+    }
+
     private static List<TimeZone> getWithSameRules(TimeZone timeZone) {
         List<TimeZone> timeZones = new ArrayList<TimeZone>();
         for (String timeZoneId : TimeZone.getAvailableIDs(timeZone.getRawOffset())) {
             TimeZone candidateTimeZone = optTimeZone(timeZoneId);
-            if (timeZone.hasSameRules(candidateTimeZone)) {
+            if (haveSameRules(timeZone, candidateTimeZone)) {
                 timeZones.add(candidateTimeZone);
             }
         }
