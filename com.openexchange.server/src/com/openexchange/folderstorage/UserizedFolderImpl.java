@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folderstorage.internal;
+package com.openexchange.folderstorage;
 
 import java.util.Collections;
 import java.util.Date;
@@ -55,18 +55,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.folderstorage.AltNameAwareFolder;
-import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderExtension;
-import com.openexchange.folderstorage.FolderField;
-import com.openexchange.folderstorage.FolderPath;
-import com.openexchange.folderstorage.FolderProperty;
-import com.openexchange.folderstorage.ParameterizedFolder;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Type;
-import com.openexchange.folderstorage.UsedForSync;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.i18n.LocaleTools;

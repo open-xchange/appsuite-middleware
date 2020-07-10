@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,48 +47,34 @@
  *
  */
 
-package com.openexchange.config.admin.internal;
+package com.openexchange.folderstorage;
 
-import java.util.Arrays;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.UserizedFolderImpl;
+import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link PermissionFilterUserizedFolderImpl} overrides {@link UserizedFolderImpl} to filter out administrators permission
+ * {@link SearchableFolderNameFolderStorage}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.2
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.5
  */
-public class PermissionFilterUserizedFolderImpl extends UserizedFolderImpl implements UserizedFolder {
-
-    private static final long serialVersionUID = 3941871306938103932L;
-    private final int adminUserId;
+public interface SearchableFolderNameFolderStorage extends FolderStorage {
 
     /**
-     * Initializes a new {@link PermissionFilterUserizedFolderImpl} from specified folder.
-     * 
-     * @param adminUserId The user id of the context admin
-     * @param userizedFolder The requested origin {@link UserizedFolder}
+     * Searches a folder below given folder identifier by folder name
      *
-     * @throws IllegalArgumentException If folder is <code>null</code>
+     * @param treeId The tree identifier
+     * @param rootFolderId The 'root' folder for search operation
+     * @param contentType The content type of folders to search
+     * @param query The query to search
+     * @param date The time stamp to limit search result to folders that are newer
+     * @param includeSubfolders Include all subfolders below given folder identifier
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @param storageParameters The storage parameters
+     * @return {@link List} of {@link Folder} sorted by name
+     * @throws OXException If search fails
      */
-    public PermissionFilterUserizedFolderImpl(int adminUserId, UserizedFolder userizedFolder) {
-        super(userizedFolder);
-        this.adminUserId = adminUserId;
-    }
+    List<Folder> search(String treeId, String rootFolderId, ContentType contentType, String query, long date, boolean includeSubfolders, int start, int end, StorageParameters storageParameters) throws OXException;
 
-    /**
-     * {@inheritDoc}
-     * 
-     * The returned {@link Permission}s will not contain one for the administrator even she actually has got {@link Permission}s for the given {@link UserizedFolder}. So this implementation should be used to view permissions only.
-     */
-    @Override
-    public Permission[] getPermissions() {
-        Permission[] permissions = super.getPermissions();
-        if (permissions == null || permissions.length == 0) {
-            return permissions;
-        }
-        return Arrays.stream(permissions).filter(x -> x.getEntity() != adminUserId).toArray(Permission[]::new);
-    }
 }

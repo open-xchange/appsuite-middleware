@@ -207,6 +207,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The account could not be updated 1$s
     public static final String UNALLOWED_ACCOUNT_UPDATE_MSG = "The account could not be updated: 1$s";
 
+    // Searching folder by folder name is not supported
+    public static final String NO_SEARCH_SUPPORT_MSG = "Searching folder by folder name is not supported";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

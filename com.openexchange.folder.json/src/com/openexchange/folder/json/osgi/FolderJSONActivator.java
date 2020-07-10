@@ -51,11 +51,13 @@ package com.openexchange.folder.json.osgi;
 
 import static com.openexchange.folder.json.services.ServiceRegistry.getInstance;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.file.storage.limit.FileLimitService;
 import com.openexchange.folder.json.Constants;
+import com.openexchange.folder.json.FolderConverter;
 import com.openexchange.folder.json.FolderFieldRegistry;
 import com.openexchange.folder.json.actions.FolderActionFactory;
 import com.openexchange.folder.json.preferences.Tree;
@@ -138,6 +140,10 @@ public class FolderJSONActivator extends AJAXModuleActivator {
              */
             registerService(PreferencesItemService.class, new Tree());
             registerService(LoginHandlerService.class, new FolderConsistencyLoginHandler());
+            /*
+             * Result converter
+             */
+            registerService(ResultConverter.class, new FolderConverter());
         } catch (Exception e) {
             LOG.error("", e);
             throw e;

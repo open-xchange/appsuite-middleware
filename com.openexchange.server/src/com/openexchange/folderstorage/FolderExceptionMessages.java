@@ -124,6 +124,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see the subfolders of \"%1$s\" will lose access.
     public static final String MOVE_SHARED_SUBFOLDERS_TO_SHARED_WARNING = "This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see the subfolders of \"%1$s\" will lose access.";
 
+    // User tries to search folder by folder name, but that functionality is not supported
+    public static final String NO_SEARCH_SUPPORT_MSG = "Searching folder by folder name is not supported";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

@@ -501,4 +501,24 @@ public interface FolderService {
      */
     FolderResponse<String> createFolder(Folder folder, Session session, FolderServiceDecorator decorator) throws OXException;
 
+    /**
+     * Searches a folder below given folder identifier by folder name
+     *
+     * @param treeId The tree identifier
+     * @param folderId The 'root' folder for search operation
+     * @param contentType The content type of folders to search
+     * @param query The query to search
+     * @param date The time stamp to limit search result to folders that are newer
+     * @param includeSubfolders Include all subfolders below given folder identifier
+     * @param all <code>true</code> to deliver all subfolders regardless of their subscribed status; <code>false</code> to deliver
+     *            subscribed folders only
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @param session The session
+     * @param decorator The optional folder service decorator
+     * @return @{@link FolderResponse} containing {@link List} of {@link UserizedFolder} sorted by name
+     * @throws OXException If search fails
+     */
+    FolderResponse<List<UserizedFolder>> searchFolderByName(String treeId, String folderId, ContentType contentType, String query, long date, boolean includeSubfolders, boolean all, int start, int end, Session session, FolderServiceDecorator decorator) throws OXException;
+
 }

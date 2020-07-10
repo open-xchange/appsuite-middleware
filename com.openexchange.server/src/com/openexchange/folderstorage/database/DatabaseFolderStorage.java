@@ -84,6 +84,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.caching.Cache;
@@ -102,6 +103,7 @@ import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.AfterReadAwareFolderStorage;
+import com.openexchange.folderstorage.CalculatePermission;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FederatedSharingFolders;
 import com.openexchange.folderstorage.Folder;
@@ -116,6 +118,7 @@ import com.openexchange.folderstorage.LockCleaningFolderStorage;
 import com.openexchange.folderstorage.MoveFolderPermissionMode;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.RestoringFolderStorage;
+import com.openexchange.folderstorage.SearchableFolderNameFolderStorage;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -174,6 +177,7 @@ import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -202,7 +206,7 @@ import gnu.trove.set.hash.TIntHashSet;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage, LockCleaningFolderStorage, RestoringFolderStorage {
+public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage, LockCleaningFolderStorage, RestoringFolderStorage, SearchableFolderNameFolderStorage {
 
     private static final String DEL_OXFOLDER_PERMISSIONS = "del_oxfolder_permissions";
 
@@ -1288,14 +1292,47 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         return DatabaseFolderType.getInstance();
     }
 
-    @Override
-    public SortableId[] getVisibleFolders(String rootFolderId, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
-        // No Support for root folders...
-        return getVisibleFolders(treeId, contentType, type, storageParameters);
+    /**
+     * Get all user-visible folder in module referred by given content-type below given root folder
+     *
+     * @param rootFolderId The root folder identifier
+     * @param contentType The content-type
+     * @param storageParameters The storage parameters
+     * @return {@link TIntArrayList} containing identifier of all visible folders
+     * @throws OXException On server error
+     */
+    public TIntArrayList getVisibleFolders(String rootFolderId, ContentType contentType, StorageParameters storageParameters) throws OXException {
+        final User user = storageParameters.getUser();
+        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
+
+        try {
+            final Connection con = provider.getConnection();
+            final int userId = user.getId();
+            final Context ctx = storageParameters.getContext();
+            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
+            final int iModule = getModuleByContentType(contentType);
+            final List<FolderObject> list;
+            if (Strings.isEmpty(rootFolderId)) {
+                list = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(userId, user.getGroups(), userPermissionBits.getAccessibleModules(), iModule, ctx, con)).asList();
+            } else {
+                final int iParent = Integer.parseInt(rootFolderId);
+                list = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(iParent, userId, user.getGroups(), ctx, userPermissionBits, null, con)).asList();
+            }
+            TIntArrayList result = new TIntArrayList();
+            for (FolderObject folderObject : list) {
+                result.add(folderObject.getObjectID());
+                if (folderObject.hasSubfolders()) {
+                    result.addAll(getVisibleFolders(String.valueOf(folderObject.getObjectID()), contentType, storageParameters));
+                }
+            }
+            return result;
+        } finally {
+            provider.close();
+        }
     }
 
     @Override
-    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
+    public SortableId[] getVisibleFolders(String rootFolderId, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
         final User user = storageParameters.getUser();
         final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
@@ -1305,7 +1342,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
             final int iType = getTypeByFolderTypeWithShared(type);
             final int iModule = getModuleByContentType(contentType);
-            final List<FolderObject> list = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, user.getGroups(), userPermissionBits.getAccessibleModules(), iType, new int[] { iModule }, ctx, con)).asList();
+            final List<FolderObject> list;
+            if (Strings.isEmpty(rootFolderId)) {
+                list = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, user.getGroups(), userPermissionBits.getAccessibleModules(), iType, new int[] { iModule }, ctx)).asList();
+            } else {
+                final int iParent = Integer.parseInt(rootFolderId);
+                list = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, user.getGroups(), userPermissionBits.getAccessibleModules(), iType, new int[] { iModule }, iParent, ctx)).asList();
+            }
             if (FolderObject.PRIVATE == iType) {
                 /*
                  * Remove shared ones manually
@@ -1378,6 +1421,11 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         } finally {
             provider.close();
         }
+    }
+
+    @Override
+    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
+        return getVisibleFolders(null, treeId, contentType, type, storageParameters);
     }
 
     @Override
@@ -3044,6 +3092,118 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             folderId = getFolderObject(folderId, storageParameters.getContext(), con, storageParameters).getParentFolderID();
         }
         return false;
+    }
+
+    @Override
+    public List<Folder> search(String treeId, String rootFolderId, ContentType contentType, String query, long date, boolean includeSubfolders, int start, int end, StorageParameters storageParameters) throws OXException {
+        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
+        List<Folder> result = new ArrayList<Folder>();
+        try {
+            final Connection con = provider.getConnection();
+            int[] folderIds;
+            if (includeSubfolders) {
+                int[] ids = getVisibleFolders(rootFolderId, contentType, storageParameters).toArray();
+                folderIds = OXFolderSQL.searchByFolderName(query, ids, contentType.getModule(), date, start, end, storageParameters.getContext(), con);
+            } else {
+                folderIds = OXFolderSQL.searchByFolderName(query, Integer.parseInt(rootFolderId), contentType.getModule(), date, start, end, storageParameters.getContext(), con);
+            }
+            for (int id : folderIds) {
+                DatabaseFolder folder = loadFolder(String.valueOf(id), StorageType.WORKING, storageParameters, con, treeId);
+                if (storageParameters.getUser().isAnonymousGuest()) {
+                    handleAnonymousUser(folder, treeId, StorageType.WORKING, storageParameters, con);
+                }
+                Permission ownPermission = CalculatePermission.calculate(folder, storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator().getAllowedContentTypes());
+                if (ownPermission.isVisible()) {
+                    result.add(folder);
+                }
+            }
+            matchAndAddUsersDefaultMediaFolders(result, query, treeId, contentType, storageParameters, con);
+            return result;
+        } catch (SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+
+    /**
+     * Check query against special media folders like 'Pictures' or 'Music' which are translated for the user
+     *
+     * @param result The result list to add folders to
+     * @param query The query to search
+     * @param treeId The tree identifier
+     * @param contentType The content type of folders to search
+     * @param storageParameters The storage parameters
+     * @param con The (readable) database connection
+     * @throws OXException On server error
+     * @throws SQLException On SQL-error
+     */
+    private void matchAndAddUsersDefaultMediaFolders(List<Folder> result, String query, String treeId, ContentType contentType, StorageParameters storageParameters, Connection con) throws OXException, SQLException {
+        int[] defaultFolderIds = OXFolderSQL.getDefaultMediaFoldersForModuleForUser(contentType.getModule(), storageParameters, con);
+        for (int id : defaultFolderIds) {
+            DatabaseFolder folder = loadFolder(String.valueOf(id), StorageType.WORKING, storageParameters, con, treeId);
+            if (false == result.contains(folder)) {
+                if (localizedNameMatchesQuery(folder, query, storageParameters.getUser().getLocale())) {
+                    if (storageParameters.getUser().isAnonymousGuest()) {
+                        handleAnonymousUser(folder, treeId, StorageType.WORKING, storageParameters, con);
+                    }
+                    Permission ownPermission = CalculatePermission.calculate(folder, storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator().getAllowedContentTypes());
+                    if (ownPermission.isVisible()) {
+                        result.add(folder);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if localized folder name matches query, needed for default folders like 'Documents', 'Templates', etc
+     *
+     * @param folder The folder
+     * @param query The query
+     * @param locale The user's locale
+     * @return <code>true</code> if localized folder name matches query, <code>false</code> if not
+     */
+    private boolean localizedNameMatchesQuery(DatabaseFolder folder, String query, Locale locale) {
+        if (null == folder || Strings.isEmpty(query)) {
+            return false;
+        }
+        String localizedName = folder.getLocalizedName(locale);
+        if (Strings.isEmpty(localizedName)) {
+            return false;
+        }
+        return Pattern.matches(createRegexFromQuery(query), localizedName);
+    }
+
+    /**
+     * Create a regex from query string with wildcards
+     *
+     * @param query The query to convert
+     * @return The regex
+     */
+    private static String createRegexFromQuery(String query) {
+        StringBuilder regex = new StringBuilder("^");
+        for (int i = 0; i < query.length(); ++i) {
+            final char c = query.charAt(i);
+            switch (c) {
+                case '*':
+                    regex.append(".*");
+                    break;
+                case '?':
+                    regex.append('.');
+                    break;
+                case '.':
+                    regex.append("\\.");
+                    break;
+                case '\\':
+                    regex.append("\\\\");
+                    break;
+                default:
+                    regex.append(c);
+            }
+        }
+        regex.append('$');
+        return regex.toString();
     }
 
 }

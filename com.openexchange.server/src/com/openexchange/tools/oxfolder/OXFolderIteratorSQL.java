@@ -1370,6 +1370,14 @@ public final class OXFolderIteratorSQL {
     }
 
     /**
+     * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible folders of certain
+     * types regardless of their parent folder.
+     */
+    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int[] types, final int[] modules, final Context ctx) throws OXException {
+        return getAllVisibleFoldersIteratorOfType(userId, memberInGroups, accessibleModules, types, modules, null, false, ctx, null);
+    }
+
+    /**
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible folders of a certain
      * type regardless of their parent folder.
      */
@@ -1386,11 +1394,171 @@ public final class OXFolderIteratorSQL {
     }
 
     /**
-     * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible folders of a certain
-     * type and a certain parent folder.
+     * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible folders of certain
+     * types and a certain parent folder.
+     */
+    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int[] types, final int[] modules, final int parent, final Context ctx) throws OXException {
+        return getAllVisibleFoldersIteratorOfType(userId, memberInGroups, accessibleModules, types, modules, Integer.valueOf(parent), true, ctx, null);
+    }
+
+    /**
+     * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible folders of certain
+     * types and a certain parent folder.
      */
     private static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Integer parent, final Context ctx, final Connection con) throws OXException {
+        return getAllVisibleFoldersIteratorOfType(userId, memberInGroups, accessibleModules, new int[] { type }, modules, parent, false, ctx, con);
+    }
+
+    /**
+     * Collect all user-visible subfolders below a list of parent folders
+     *
+     * @param folders The folder list to check
+     * @param userId The user identifier
+     * @param memberInGroups The group identifiers where user is member
+     * @param accessibleModules The accessible modules
+     * @param types Array of allowed folder types
+     * @param modules Array of allowed modules
+     * @param gatherVisibleSubfolders Check found subfolders recursively for own subfolders
+     * @param ctx The context
+     * @param con The connection
+     * @return A list of {@link FolderObject} representing the collected folders
+     * @throws OXException On error
+     */
+    private static List<FolderObject> gatherVisibleSubfolders(List<FolderObject> folders, int userId, int[] memberInGroups, int[] accessibleModules, int[] types, int[] modules, boolean gatherVisibleSubfolders, Context ctx, Connection con) throws OXException {
+        List<FolderObject> result = new ArrayList<FolderObject>();
+        for (FolderObject folder : folders) {
+            if (folder.hasSubfolders()) {
+                result.addAll(((FolderObjectIterator) getAllVisibleFoldersIteratorOfType(userId, memberInGroups, accessibleModules, types, modules, I(folder.getObjectID()), gatherVisibleSubfolders, ctx, con)).asList());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Gather recursively all user-visible subfolders for specified parent folders from database
+     *
+     * @param parents The parent folders to check
+     * @param userId The user identifier
+     * @param memberInGroups The group identifier where user is member
+     * @param modules The folder modules to check
+     * @param types The folder types to check
+     * @param ctx The context
+     * @param con The conntection
+     * @return An array of folder identifier visible for specified user
+     * @throws OXException On error
+     */
+    private static int[] gatherVisibleSubfoldersFromDB(int[] parents, int userId, int[] memberInGroups, int[] modules, int[] types, Context ctx, Connection con) throws OXException {
+        if (null == parents || parents.length == 0) {
+            return new int[0];
+        }
+        StringBuilder sb = new StringBuilder("SELECT ot.fuid FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = op.cid WHERE ot.cid = ? AND ot.parent IN (");
+        for (int i = 0; i < parents.length; i++) {
+            sb.append("?,");
+        }
+        sb.deleteCharAt(sb.length() - 1).append(") AND ");
+        if (null != modules && modules.length > 0) {
+            sb.append("ot.module IN (");
+            for (int i = 0; i < modules.length; i++) {
+                sb.append("?,");
+            }
+            sb.deleteCharAt(sb.length() - 1).append(") AND ");
+        }
+        if (null != types && types.length > 0) {
+            sb.append("ot.type IN (");
+            for (int i = 0; i < types.length; i++) {
+                sb.append("?,");
+            }
+            sb.deleteCharAt(sb.length() - 1).append(") ");
+        }
+        sb.append("AND (op.admin_flag = 1 AND op.permission_id = ?) ");
+        sb.append("UNION SELECT ot.fuid FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = op.cid WHERE ot.cid = ? AND ot.parent IN (");
+        for (int i = 0; i < parents.length; i++) {
+            sb.append("?,");
+        }
+        sb.deleteCharAt(sb.length() - 1).append(") AND (op.fp > 0 AND op.permission_id IN (?,");
+        if (null != memberInGroups && memberInGroups.length > 0) {
+            for (int i = 0; i < memberInGroups.length; i++) {
+                sb.append("?,");
+            }
+        }
+        sb.deleteCharAt(sb.length() - 1).append(")) AND ");
+        if (null != modules && modules.length > 0) {
+            sb.append("ot.module IN (");
+            for (int i = 0; i < modules.length; i++) {
+                sb.append("?,");
+            }
+            sb.deleteCharAt(sb.length() - 1).append(") AND ");
+        }
+        if (null != types && types.length > 0) {
+            sb.append("ot.type IN (");
+            for (int i = 0; i < types.length; i++) {
+                sb.append("?,");
+            }
+            sb.deleteCharAt(sb.length() - 1).append(") ");
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(sb.toString());
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            for (int parent : parents) {
+                stmt.setInt(pos++, parent);
+            }
+            if (null != modules) {
+                for (int module : modules) {
+                    stmt.setInt(pos++, module);
+                }
+            }
+            if (null != types) {
+                for (int type : types) {
+                    stmt.setInt(pos++, type);
+                }
+            }
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, ctx.getContextId());
+            for (int parent : parents) {
+                stmt.setInt(pos++, parent);
+            }
+            stmt.setInt(pos++, userId);
+            if (null != memberInGroups) {
+                for (int group : memberInGroups) {
+                    stmt.setInt(pos++, group);
+                }
+            }
+            if (null != modules) {
+                for (int module : modules) {
+                    stmt.setInt(pos++, module);
+                }
+            }
+            if (null != types) {
+                for (int type : types) {
+                    stmt.setInt(pos++, type);
+                }
+            }
+            rs = stmt.executeQuery();
+            TIntSet folders = new TIntHashSet();
+            while (rs.next()) {
+                folders.add(rs.getInt(1));
+            }
+            folders.addAll(gatherVisibleSubfoldersFromDB(folders.toArray(), userId, memberInGroups, modules, types, ctx, con));
+            return folders.toArray();
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeResources(rs, stmt, null, true, ctx);
+        }
+    }
+
+    /**
+     * Returns a <code>List</code> of <code>FolderObject</code> instances, which represent all user-visible folders of a certain
+     * type and a certain parent folder.
+     */
+    private static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, int[] types, final int[] modules, final Integer parent, boolean gatherVisibleSubfolders, final Context ctx, final Connection con) throws OXException {
         final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
+        if (null == types || types.length == 0) {
+            return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
+        }
         if (null != treeMap) {
             try {
                 final List<Condition> conditions = new ArrayList<Condition>(3);
@@ -1402,13 +1570,21 @@ public final class OXFolderIteratorSQL {
                     }
                     conditions.add(new ConditionTreeMap.ModulesCondition(set));
                 }
-                conditions.add(new ConditionTreeMap.TypeCondition(type, userId));
+                if (types.length == 1) {
+                    conditions.add(new ConditionTreeMap.TypeCondition(types[0], userId));
+                } else {
+                    conditions.add(new ConditionTreeMap.TypesCondition(types));
+                }
                 if (parent != null) {
                     conditions.add(new ConditionTreeMap.ParentCondition(parent.intValue()));
                 }
                 final TIntSet set = treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions);
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
-                return new FolderObjectIterator(list, false);
+                List<FolderObject> result = new ArrayList<FolderObject>(list);
+                if (gatherVisibleSubfolders) {
+                    result.addAll(gatherVisibleSubfolders(list, userId, memberInGroups, accessibleModules, types, modules, gatherVisibleSubfolders, ctx, con));
+                }
+                return new FolderObjectIterator(result, false);
             } catch (OXException e) {
                 handleConditionTreeMapException(e, ctx);
             }
@@ -1429,14 +1605,20 @@ public final class OXFolderIteratorSQL {
                 condBuilder.append("))");
             }
         }
-        if (type == SHARED) {
-            condBuilder.append(" AND (ot.type = ").append(PRIVATE);
-            condBuilder.append(" AND ot.created_from != ").append(userId).append(')');
+        if (types.length == 1) {
+            if (types[0] == SHARED) {
+                condBuilder.append(" AND (ot.type = ").append(PRIVATE);
+                condBuilder.append(" AND ot.created_from != ").append(userId).append(')');
+            } else {
+                condBuilder.append(" AND (ot.type = ").append(types[0]).append(')');
+            }
         } else {
-            condBuilder.append(" AND (ot.type = ").append(type).append(')');
-        }
-        if (parent != null) {
-            condBuilder.append(" AND (ot.parent = ").append(parent.intValue()).append(')');
+            condBuilder.append(" AND ot.type IN (");
+            for (int type : types) {
+                condBuilder.append(type).append(",");
+            }
+            condBuilder.deleteCharAt(condBuilder.length() - 1);
+            condBuilder.append(")");
         }
         Connection readCon = con;
         boolean closeCon = false;
@@ -1447,6 +1629,20 @@ public final class OXFolderIteratorSQL {
             if (null == readCon) {
                 readCon = DBPool.pickup(ctx);
                 closeCon = true;
+            }
+            if (false == gatherVisibleSubfolders) {
+                if (parent != null) {
+                    condBuilder.append(" AND (ot.parent = ").append(parent.intValue()).append(')');
+                }
+            } else {
+                if (parent != null) {
+                    int[] visibleSubfolderIds = gatherVisibleSubfoldersFromDB(new int[] {parent.intValue()}, userId, memberInGroups, modules, types, ctx, readCon);
+                    condBuilder.append(" AND ot.parent IN (").append(parent.intValue()).append(",");
+                    for (int id : visibleSubfolderIds) {
+                        condBuilder.append(id).append(",");
+                    }
+                    condBuilder.deleteCharAt(condBuilder.length() - 1).append(")");
+                }
             }
             stmt = readCon.prepareStatement(getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT, 0)));
             int pos = 1;

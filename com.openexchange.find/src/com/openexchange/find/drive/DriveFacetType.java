@@ -49,10 +49,12 @@
 
 package com.openexchange.find.drive;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.java.Strings;
 
@@ -68,7 +70,8 @@ public enum DriveFacetType implements FacetType {
     FILE_TYPE(DriveStrings.FACET_FILE_TYPE),
     FILE_DESCRIPTION(null),
     FILE_CONTENT(null),
-    FILE_SIZE(DriveStrings.FACET_FILE_SIZE)
+    FILE_SIZE(DriveStrings.FACET_FILE_SIZE),
+    FOLDER_NAME(DriveStrings.FACET_FOLDER_NAME, FILE_SIZE, FILE_TYPE, CommonFacetType.FOLDER_TYPE),
     ;
 
     private static final Map<String, DriveFacetType> typesById = new HashMap<String, DriveFacetType>();
@@ -80,10 +83,16 @@ public enum DriveFacetType implements FacetType {
 
     private final String displayName;
 
-    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
+    private final List<FacetType> conflictingFacets;
 
     private DriveFacetType(final String displayName) {
         this.displayName = displayName;
+        this.conflictingFacets = new LinkedList<FacetType>();
+    }
+
+    private DriveFacetType(String displayName, FacetType... conflictingFacet) {
+        this.displayName = displayName;
+        this.conflictingFacets = Arrays.asList(conflictingFacet);
     }
 
     @Override

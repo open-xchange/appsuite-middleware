@@ -52,6 +52,7 @@ package com.openexchange.find;
 import com.openexchange.find.calendar.CalendarDocument;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.drive.FileDocument;
+import com.openexchange.find.drive.FolderDocument;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.tasks.TasksDocument;
 
@@ -97,5 +98,12 @@ public interface DocumentVisitor {
      * @param calendarDocument The calendar document
      */
     void visit(CalendarDocument calendarDocument);
+
+    /**
+     * Handles given folder document
+     *
+     * @param folderDocument The folder document
+     */
+    void visit(FolderDocument folderDocument);
 
 }

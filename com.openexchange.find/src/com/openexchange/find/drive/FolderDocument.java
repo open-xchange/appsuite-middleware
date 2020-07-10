@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,48 +47,36 @@
  *
  */
 
-package com.openexchange.config.admin.internal;
+package com.openexchange.find.drive;
 
-import java.util.Arrays;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.UserizedFolderImpl;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.find.Document;
+import com.openexchange.find.DocumentVisitor;
+
 
 /**
- * {@link PermissionFilterUserizedFolderImpl} overrides {@link UserizedFolderImpl} to filter out administrators permission
+ * {@link FolderDocument}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.2
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.5
  */
-public class PermissionFilterUserizedFolderImpl extends UserizedFolderImpl implements UserizedFolder {
+public class FolderDocument implements Document {
 
-    private static final long serialVersionUID = 3941871306938103932L;
-    private final int adminUserId;
+    private static final long serialVersionUID = -2512496183337208649L;
+    private FileStorageFolder folder;
 
-    /**
-     * Initializes a new {@link PermissionFilterUserizedFolderImpl} from specified folder.
-     * 
-     * @param adminUserId The user id of the context admin
-     * @param userizedFolder The requested origin {@link UserizedFolder}
-     *
-     * @throws IllegalArgumentException If folder is <code>null</code>
-     */
-    public PermissionFilterUserizedFolderImpl(int adminUserId, UserizedFolder userizedFolder) {
-        super(userizedFolder);
-        this.adminUserId = adminUserId;
+    public FolderDocument(FileStorageFolder folder) {
+        super();
+        this.folder = folder;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * The returned {@link Permission}s will not contain one for the administrator even she actually has got {@link Permission}s for the given {@link UserizedFolder}. So this implementation should be used to view permissions only.
-     */
+    public FileStorageFolder getFolder() {
+        return folder;
+    }
+
     @Override
-    public Permission[] getPermissions() {
-        Permission[] permissions = super.getPermissions();
-        if (permissions == null || permissions.length == 0) {
-            return permissions;
-        }
-        return Arrays.stream(permissions).filter(x -> x.getEntity() != adminUserId).toArray(Permission[]::new);
+    public void accept(DocumentVisitor visitor) {
+        visitor.visit(this);
     }
+
 }

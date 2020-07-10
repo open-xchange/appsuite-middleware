@@ -79,6 +79,7 @@ import com.openexchange.folderstorage.internal.performers.ListPerformer;
 import com.openexchange.folderstorage.internal.performers.PathPerformer;
 import com.openexchange.folderstorage.internal.performers.ReinitializePerformer;
 import com.openexchange.folderstorage.internal.performers.RestorePerformer;
+import com.openexchange.folderstorage.internal.performers.SearchPerformer;
 import com.openexchange.folderstorage.internal.performers.SubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UnsubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
@@ -361,6 +362,13 @@ public final class FolderServiceImpl implements FolderService, TrashAwareFolderS
         RestorePerformer performer = new RestorePerformer(ServerSessionAdapter.valueOf(session), decorator);
         Map<String, List<UserizedFolder>> result = performer.doRestore(tree, folderIds, defaultDestFolder);
         return FolderResponseImpl.newFolderResponse(result, performer.getWarnings());
+    }
+
+    @Override
+    public FolderResponse<List<UserizedFolder>> searchFolderByName(String treeId, String folderId, ContentType contentType, String query, long date, boolean includeSubfolders, boolean all, int start, int end, Session session, FolderServiceDecorator decorator) throws OXException {
+        SearchPerformer performer = new SearchPerformer(ServerSessionAdapter.valueOf(session), decorator);
+        List<UserizedFolder> folders = performer.doSearch(treeId, folderId, contentType, query, date, includeSubfolders, all, start, end);
+        return FolderResponseImpl.newFolderResponse(folders, performer.getWarnings());
     }
 
 }

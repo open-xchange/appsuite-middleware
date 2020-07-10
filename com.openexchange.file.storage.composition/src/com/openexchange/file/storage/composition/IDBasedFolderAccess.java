@@ -452,6 +452,22 @@ public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
      * @return The restored paths mapped by folder id
      * @throws OXException If restore fails
      */
-     Map<String, FileStorageFolder[]> restoreFolderFromTrash(List<String> folderIds, String defaultDestFolderId) throws OXException;
+    Map<String, FileStorageFolder[]> restoreFolderFromTrash(List<String> folderIds, String defaultDestFolderId) throws OXException;
+
+    /**
+     * Searches a folder below given folder identifier by folder name
+     *
+     * @param query The query to search
+     * @param folderId The 'root' folder for search operation
+     * @param date Timestamp to limit search result to folders that are newer
+     * @param includeSubfolders Include all subfolders below given folder identifier
+     * @param all Whether all or only subscribed subfolders shall be returned. If underlying file storage system does not support folder
+     *            subscription, this argument should always be treated as <code>true</code>
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @return Array of {@link FileStorageFolder} sorted by name
+     * @throws OXException If search fails
+     */
+    FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException;
 
 }

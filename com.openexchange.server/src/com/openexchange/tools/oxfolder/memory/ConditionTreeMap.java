@@ -898,6 +898,22 @@ public final class ConditionTreeMap {
 
     }
 
+    public static final class TypesCondition implements Condition {
+
+        private final TIntSet types;
+
+        public TypesCondition(int[] types) {
+            super();
+            this.types = new TIntHashSet(types);
+        }
+
+        @Override
+        public boolean fulfilled(Permission p) {
+            return types.contains(p.type);
+        }
+
+    }
+
     public static final class ModuleCondition implements Condition {
 
         private static final ConcurrentMap<Integer, ModuleCondition> conditions = new ConcurrentHashMap<Integer, ModuleCondition>(8, 0.9f, 1);

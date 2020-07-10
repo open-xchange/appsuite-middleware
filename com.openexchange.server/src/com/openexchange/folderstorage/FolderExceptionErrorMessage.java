@@ -267,6 +267,11 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
      * This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see the subfolders of \"%1$s\" will lose access.
      */
     MOVE_SHARED_SUBFOLDERS_TO_SHARED_WARNING("This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see the subfolders of \"%1$s\" will lose access.", CATEGORY_WARNING, 1049, FolderExceptionMessages.MOVE_SHARED_SUBFOLDERS_TO_SHARED_WARNING),
+    /**
+     * Searching folder by folder name is not supported
+     */
+    NO_SEARCH_SUPPORT("Searching folder by folder name is not supported", CATEGORY_ERROR, 1050, FolderExceptionMessages.NO_SEARCH_SUPPORT_MSG),
+
     ;
 
     private static final String PREFIX = "FLD";

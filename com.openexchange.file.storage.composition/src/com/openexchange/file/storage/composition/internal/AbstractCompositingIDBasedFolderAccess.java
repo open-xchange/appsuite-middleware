@@ -96,6 +96,7 @@ import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.RootFolderPermissionsAware;
+import com.openexchange.file.storage.SearchableFolderNameFolderAccess;
 import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
@@ -626,6 +627,16 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
 
         FileStorageFolder[] pathFolders = folderAccess.getPath2DefaultFolder(folderId);
         return getPath(pathFolders, serviceId, accountId);
+    }
+
+    @Override
+    public FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
+        FileStorageFolderAccess folderAccess = getFolderAccess(new FolderID(folderId));
+        if (SearchableFolderNameFolderAccess.class.isInstance(folderAccess)) {
+            SearchableFolderNameFolderAccess searchableFolderAccess = (SearchableFolderNameFolderAccess) folderAccess;
+            return searchableFolderAccess.searchFolderByName(query, folderId, date, includeSubfolders, all, start, end);
+        }
+        return null;
     }
 
     private Map<String,FolderID[]> getFolderPaths(List<String> folderIds, FileStorageFolderAccess folderAccess) throws OXException {

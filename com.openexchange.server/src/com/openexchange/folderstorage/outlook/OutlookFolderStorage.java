@@ -101,6 +101,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.RestoringFolderStorage;
+import com.openexchange.folderstorage.SearchableFolderNameFolderStorage;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
@@ -180,7 +181,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OutlookFolderStorage implements FolderStorage, SubfolderListingFolderStorage, RestoringFolderStorage {
+public final class OutlookFolderStorage implements FolderStorage, SubfolderListingFolderStorage, RestoringFolderStorage, SearchableFolderNameFolderStorage {
 
     static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
 
@@ -1564,6 +1565,19 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
 
         RestoringFolderStorage restoringFolderStorage = (RestoringFolderStorage) folderStorage;
         return restoringFolderStorage.restoreFromTrash(realTreeId, folderIds, defaultDestFolderId, storageParameters);
+    }
+
+    @Override
+    public List<Folder> search(String treeId, String rootFolderId, ContentType contentType, String query, long date, boolean includeSubfolders, int start, int end, StorageParameters storageParameters) throws OXException {
+        FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, rootFolderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, rootFolderId);
+        }
+        if (false == SearchableFolderNameFolderStorage.class.isInstance(folderStorage)) {
+            throw FolderExceptionErrorMessage.NO_SEARCH_SUPPORT.create();
+        }
+        SearchableFolderNameFolderStorage searchableFolderStorage = (SearchableFolderNameFolderStorage) folderStorage;
+        return searchableFolderStorage.search(realTreeId, rootFolderId, contentType, query, date, includeSubfolders, start, end, storageParameters);
     }
 
     @Override
