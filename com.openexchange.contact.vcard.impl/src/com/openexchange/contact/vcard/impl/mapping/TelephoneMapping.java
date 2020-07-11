@@ -97,8 +97,7 @@ public class TelephoneMapping extends AbstractMapping {
         exportTelephone(vCard, properties, 0, false, null, contact, Contact.TELEPHONE_TTYTDD, TelephoneType.TEXTPHONE.getValue());
         exportTelephone(vCard, properties, 0, false, null, contact, Contact.TELEPHONE_ISDN, TelephoneType.ISDN.getValue());
         exportTelephone(vCard, properties, 0, false, null, contact, Contact.TELEPHONE_CAR, TelephoneType.CAR.getValue());
-        exportTelephone(vCard, properties, 0, false, new String[] { TelephoneType.PREF.getValue() }, contact, Contact.CELLULAR_TELEPHONE1, TelephoneType.CELL.getValue());
-        exportTelephone(vCard, properties, 1, false, new String[] { TYPE_2ND }, contact, Contact.CELLULAR_TELEPHONE2, TelephoneType.CELL.getValue());
+        exportTelephones(vCard, properties, true, contact, Contact.CELLULAR_TELEPHONE1, Contact.CELLULAR_TELEPHONE2, TelephoneType.CELL.getValue());
         exportTelephone(vCard, properties, 0, false, null, contact, Contact.TELEPHONE_CALLBACK, TYPE_CALLBACK);
         exportTelephone(vCard, properties, 0, false, null, contact, Contact.TELEPHONE_COMPANY, TYPE_COMPANY);
         exportTelephone(vCard, properties, 0, false, null, contact, Contact.TELEPHONE_ASSISTANT, TYPE_ASSISTENT);
@@ -114,10 +113,8 @@ public class TelephoneMapping extends AbstractMapping {
         /*
          * voice
          */
-        exportTelephone(vCard, properties, 0, true, new String[] { TelephoneType.PREF.getValue() }, contact, Contact.TELEPHONE_BUSINESS1, TelephoneType.WORK.getValue());
-        exportTelephone(vCard, properties, 1, true, new String[] { TYPE_2ND }, contact, Contact.TELEPHONE_BUSINESS2, TelephoneType.WORK.getValue());
-        exportTelephone(vCard, properties, 0, true, new String[] { TelephoneType.PREF.getValue() }, contact, Contact.TELEPHONE_HOME1, TelephoneType.HOME.getValue());
-        exportTelephone(vCard, properties, 1, true, new String[] { TYPE_2ND }, contact, Contact.TELEPHONE_HOME2, TelephoneType.HOME.getValue());
+        exportTelephones(vCard, properties, true, contact, Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2, TelephoneType.WORK.getValue());
+        exportTelephones(vCard, properties, true, contact, Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2, TelephoneType.HOME.getValue());
         exportTelephone(vCard, properties, 0, true, null, contact, Contact.TELEPHONE_OTHER, TYPE_OTHER);
     }
 
@@ -153,6 +150,27 @@ public class TelephoneMapping extends AbstractMapping {
         importTelephone(properties, 0, true, contact, Contact.TELEPHONE_HOME1, TelephoneType.HOME.getValue());
         importTelephone(properties, 1, true, contact, Contact.TELEPHONE_HOME2, TelephoneType.HOME.getValue());
         importTelephone(properties, 0, true, contact, Contact.TELEPHONE_OTHER, TYPE_OTHER);
+    }
+
+    /**
+     * Exports up to two telephone properties of the same type for a contact. If the second one is assigned, the numbers will be exported
+     * with the <code>pref</code> and <code>x-2nd</code> parameters implicitly, otherwise, no such distinguishing parameters are added.
+     *
+     * @param vCard The target vCard
+     * @param properties All existing telephone properties of the vCard
+     * @param voice <code>true</code> to only match telephone properties of type <i>voice</i>, <code>false</code>, otherwise
+     * @param contact The contact to export from
+     * @param firstField The first source contact field
+     * @param secondField The second source contact field
+     * @param types The vCard telephone types to match
+     */
+    private static void exportTelephones(VCard vCard, List<Telephone> properties, boolean voice, Contact contact, int firstField, int secondField, String... types) {
+        if (has(contact, secondField)) {
+            exportTelephone(vCard, properties, 0, false, new String[] { TelephoneType.PREF.getValue() }, contact, firstField, types);
+            exportTelephone(vCard, properties, 1, false, new String[] { TYPE_2ND }, contact, secondField, types);
+        } else {
+            exportTelephone(vCard, properties, 0, false, null, contact, firstField, types);
+        }
     }
 
     /**
