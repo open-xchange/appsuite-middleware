@@ -259,9 +259,10 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             int poolId = -1;
             UpdateTaskInformation updateTaskInformation = null;
 
-            final BufferedReader in = new BufferedReader(new FileReader(fileName));
+            BufferedReader in = null;
             BufferedWriter bufferedWriter = null;
             try {
+                in = new BufferedReader(new FileReader(fileName));
                 while ((c = in.read()) != -1) {
                     if (0 == state && c == '-') {
                         state = 1; // Started comment line
