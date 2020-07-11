@@ -66,7 +66,7 @@ import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug67667Test}
- * 
+ *
  * Appointments tend to lose confirmation status
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -128,6 +128,10 @@ public class Bug67667Test extends CalDAVTest {
         Property attendeeProperty = iCalResource.getVEvent().getAttendee(catm.getClient().getValues().getDefaultAddress());
         assertNotNull("No matching attendee in iCal found", attendeeProperty);
         assertEquals("PARTSTAT wrong", "ACCEPTED", attendeeProperty.getAttribute("PARTSTAT"));
+        /*
+         * wait a second before the next update to catch concurrent updates properly (timestamp precision is limited to seconds)
+         */
+        Thread.sleep(1000L);
         /*
          * as user a, get & "decline" the appointment using the web client
          */
