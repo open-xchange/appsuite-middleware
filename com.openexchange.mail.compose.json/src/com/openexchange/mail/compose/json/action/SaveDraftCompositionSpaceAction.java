@@ -135,13 +135,7 @@ public class SaveDraftCompositionSpaceAction extends AbstractMailComposeAction {
                 }
 
                 if (hasFileUploads) {
-                    // File upload available...
-                    if (null != jMessage && false == jMessage.optBoolean("streamThrough", true)) {
-                        compositionSpaceService.addAttachmentToCompositionSpace(uuid, upload.getUploadFiles(), disposition, session);
-                    } else {
-                        // Stream through
-                        optionalUploadedAttachments = Optional.of(upload.getUploadFiles());
-                    }
+                    optionalUploadedAttachments = Optional.of(upload.getUploadFiles());
                 }
             } else if (uploadEvent != null) {
                 String disposition = uploadEvent.getFormField("contentDisposition");

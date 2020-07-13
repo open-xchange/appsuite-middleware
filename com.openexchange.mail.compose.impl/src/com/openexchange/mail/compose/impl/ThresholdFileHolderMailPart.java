@@ -54,7 +54,6 @@ import static com.openexchange.mail.utils.MessageUtility.readStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.MessageRemovedException;
@@ -73,118 +72,96 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
 
 /**
- * {@link StreamedAttachmentMailPart} - The mail part backed by an attachment.
+ * {@link ThresholdFileHolderMailPart} - The mail part backed by an attachment.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public class StreamedAttachmentMailPart extends MailPart implements ComposedMailPart {
+public class ThresholdFileHolderMailPart extends MailPart implements ComposedMailPart {
 
     private static final long serialVersionUID = 1406440848691751504L;
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(StreamedAttachmentMailPart.class);
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ThresholdFileHolderMailPart.class);
     }
 
     private final transient AttachmentDescription attachmentDescription;
-    private final transient InputStream input;
-    private final transient Optional<ThresholdFileHolder> optionalFileHolder;
-    private transient DataSource dataSource;
+    private final transient ThresholdFileHolder fileHolder;
+    private final transient DataSource dataSource;
     private transient Object cachedContent;
 
     /**
-     * Initializes a new {@link StreamedAttachmentMailPart}.
+     * Initializes a new {@link ThresholdFileHolderMailPart}.
      *
      * @param attachmentDescription The attachment description
-     * @param input The attachment data as an input stream
+     * @param fileHolder The attachment data as a {@link ThresholdFileHolder} instance
      * @throws OXException If initialization fails
      */
-    public StreamedAttachmentMailPart(AttachmentDescription attachmentDescription, InputStream input) throws OXException {
+    public ThresholdFileHolderMailPart(AttachmentDescription attachmentDescription, ThresholdFileHolder fileHolder) throws OXException {
         super();
-        Optional<ThresholdFileHolder> optionalFileHolder = Optional.empty();
         boolean error = true;
         try {
             this.attachmentDescription = attachmentDescription;
             String preparedFileName = attachmentDescription.getName();
-            try {
-                setContentType(prepareContentType(attachmentDescription.getMimeType(), preparedFileName));
-            } catch (@SuppressWarnings("unused") OXException e) {
-                // Retry with guess by file name
-                setContentType(MimeType2ExtMap.getContentType(preparedFileName));
-            }
+            ContentType contentType = determineContentType(attachmentDescription, preparedFileName);
+            fileHolder.setContentType(contentType.getBaseType());
 
-            {
-                final ContentType contentType = getContentType();
-                if (contentType.startsWith(TEXT)) {
-                    // Transfer text content to file holder instance
-                    ThresholdFileHolder fileHolder = null;
-                    try {
-                        fileHolder = new ThresholdFileHolder();
-                        fileHolder.write(input);
-                        optionalFileHolder = Optional.of(fileHolder);
-                        fileHolder = null;
-                    } finally {
-                        Streams.close(fileHolder);
-                    }
-
-                    if ("GB18030".equalsIgnoreCase(contentType.getCharsetParameter())) {
-                        // Examine stream data
-                        InputStream in = null;
-                        try {
-                            in = optionalFileHolder.get().getStream();
-                            contentType.setCharsetParameter(CharsetDetector.detectCharset(in));
-                            setContentType(contentType);
-                        } catch (@SuppressWarnings("unused") Exception e) {
-                            // Ignore
-                        } finally {
-                            Streams.close(in);
-                        }
-                    }
-                } else if (contentType.startsWith("application/force")) {
-                    contentType.setBaseType(MimeType2ExtMap.getContentType(preparedFileName));
-                    setContentType(contentType);
-                }
-            }
-            {
-                String contentId = attachmentDescription.getContentId();
-                if (Strings.isNotEmpty(contentId)) {
-                    contentId = contentId.trim();
-                    if (!contentId.startsWith("<") && !contentId.endsWith(">")) {
-                        contentId = new StringBuilder(contentId.length() + 2).append('<').append(contentId).append('>').toString();
-                    }
-                    setContentId(contentId);
-                }
-            }
+            determineContentId(attachmentDescription);
             setFileName(preparedFileName);
             setSize(attachmentDescription.getSize());
-            final ContentDisposition cd = new ContentDisposition();
+            ContentDisposition cd = new ContentDisposition();
             cd.setDisposition(Part.ATTACHMENT);
             cd.setFilenameParameter(getFileName());
             setContentDisposition(cd);
-            this.optionalFileHolder = optionalFileHolder;
-            this.input = input;
+            this.fileHolder = fileHolder;
+            dataSource = new AttachmentDescriptionDataSource(attachmentDescription, fileHolder);
             error = false;
         } finally {
             if (error) {
-                Streams.close(input);
-                if (optionalFileHolder.isPresent()) {
-                    Streams.close(optionalFileHolder.get());
-                }
+                Streams.close(fileHolder);
             }
         }
     }
 
-    /**
-     * Gets the attachment description
-     *
-     * @return The attachment description
-     */
-    public AttachmentDescription getAttachmentDescription() {
-        return attachmentDescription;
+    private void determineContentId(AttachmentDescription attachmentDescription) {
+        String contentId = attachmentDescription.getContentId();
+        if (Strings.isNotEmpty(contentId)) {
+            contentId = contentId.trim();
+            if (!contentId.startsWith("<") && !contentId.endsWith(">")) {
+                contentId = new StringBuilder(contentId.length() + 2).append('<').append(contentId).append('>').toString();
+            }
+            setContentId(contentId);
+        }
+    }
+
+    private ContentType determineContentType(AttachmentDescription attachmentDescription, String preparedFileName) throws OXException {
+        try {
+            setContentType(prepareContentType(attachmentDescription.getMimeType(), preparedFileName));
+        } catch (@SuppressWarnings("unused") OXException e) {
+            // Retry with guess by file name
+            setContentType(MimeType2ExtMap.getContentType(preparedFileName));
+        }
+
+        ContentType contentType = getContentType();
+        if (contentType.startsWith(TEXT)) {
+            if (contentType.getCharsetParameter() == null || "GB18030".equalsIgnoreCase(contentType.getCharsetParameter())) {
+                // Examine stream data
+                try {
+                    contentType.setCharsetParameter(CharsetDetector.detectCharset(fileHolder.getStream()));
+                    setContentType(contentType);
+                } catch (@SuppressWarnings("unused") Exception e) {
+                    // Ignore
+                }
+            }
+        } else if (contentType.startsWith("application/force")) {
+            contentType.setBaseType(MimeType2ExtMap.getContentType(preparedFileName));
+            setContentType(contentType);
+        }
+
+        return getContentType();
     }
 
     private static String prepareContentType(String contentType, String preparedFileName) {
@@ -213,26 +190,6 @@ public class StreamedAttachmentMailPart extends MailPart implements ComposedMail
     private static final String TEXT = "text/";
 
     private DataSource getDataSource() {
-        /*
-         * Lazy creation
-         */
-        if (null == dataSource) {
-            try {
-                ContentType contentType = getContentType();
-                if (contentType.getCharsetParameter() == null && contentType.startsWith(TEXT) && optionalFileHolder.isPresent()) {
-                    /*
-                     * Guess charset for textual attachment
-                     */
-                    String cs = detectCharset(optionalFileHolder.get().getStream());
-                    contentType.setCharsetParameter(cs);
-                    LoggerHolder.LOG.debug("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", cs);
-                }
-                dataSource = new AttachmentDescriptionDataSource(attachmentDescription, optionalFileHolder.isPresent() ? optionalFileHolder.get().getStream() : input, contentType.toString());
-            } catch (Exception e) {
-                LoggerHolder.LOG.error("", e);
-                dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
-            }
-        }
         return dataSource;
     }
 
@@ -241,16 +198,16 @@ public class StreamedAttachmentMailPart extends MailPart implements ComposedMail
         if (cachedContent != null) {
             return cachedContent;
         }
-        if (getContentType().startsWith(TEXT) && optionalFileHolder.isPresent()) {
+        if (getContentType().startsWith(TEXT)) {
             String charset = getContentType().getCharsetParameter();
             if (charset == null) {
-                charset = detectCharset(optionalFileHolder.get().getStream());
+                charset = detectCharset(fileHolder.getStream());
                 LoggerHolder.LOG.debug("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", charset);
             }
 
             InputStream fis = null;
             try {
-                fis = optionalFileHolder.get().getStream();
+                fis = fileHolder.getStream();
                 cachedContent = readStream(fis, charset);
             } catch (FileNotFoundException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -284,7 +241,7 @@ public class StreamedAttachmentMailPart extends MailPart implements ComposedMail
 
     @Override
     public InputStream getInputStream() throws OXException {
-        return optionalFileHolder.isPresent() ? optionalFileHolder.get().getStream() : input;
+        return fileHolder.getStream();
     }
 
     @Override
