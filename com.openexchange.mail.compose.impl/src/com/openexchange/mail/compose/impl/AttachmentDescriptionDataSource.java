@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.activation.DataSource;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.compose.AttachmentDescription;
 
 
@@ -66,6 +68,7 @@ public class AttachmentDescriptionDataSource implements DataSource {
 
     private final AttachmentDescription attachmentDescription;
     private final InputStream input;
+    private final ThresholdFileHolder fileHolder;
     private final String contentType;
 
     /**
@@ -89,7 +92,27 @@ public class AttachmentDescriptionDataSource implements DataSource {
         super();
         this.attachmentDescription = attachmentDescription;
         this.input = input;
+        this.fileHolder = null;
         this.contentType = contentType;
+    }
+
+    /**
+     * Initializes a new {@link AttachmentDescriptionDataSource} with an explicit MIME type.
+     *
+     * @param attachment The attachment description
+     * @param fileHolder The attachment data
+     * @param contentType The MIME type
+     */
+    public AttachmentDescriptionDataSource(AttachmentDescription attachmentDescription, ThresholdFileHolder fileHolder) {
+        super();
+        this.attachmentDescription = attachmentDescription;
+        this.fileHolder = fileHolder;
+        this.input = null;
+        if (fileHolder.getContentType() == null) {
+            this.contentType = attachmentDescription.getMimeType();
+        } else {
+            this.contentType = fileHolder.getContentType();
+        }
     }
 
     @Override
@@ -99,7 +122,15 @@ public class AttachmentDescriptionDataSource implements DataSource {
 
     @Override
     public InputStream getInputStream() throws IOException {
-        return input;
+        try {
+            return fileHolder == null ? input : fileHolder.getStream();
+        } catch (OXException e) {
+            if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+
+            throw new IOException(e.getMessage(), e);
+        }
     }
 
 
