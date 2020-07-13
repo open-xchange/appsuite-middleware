@@ -258,34 +258,23 @@ public class DefaultShareService implements ShareService {
         if (false == guestUser.isGuest()) {
             throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guestID));
         }
-
-        int userId = session.getUserId();
-        if ((guestUser.getCreatedBy() == userId) || ShareTool.isAnonymousGuest(guestUser)) {
+        /*
+         * check if guest was created by session's user
+         */
+        ;
+        if (guestID == session.getUserId() || guestUser.getCreatedBy() == session.getUserId() || ShareTool.isAnonymousGuest(guestUser)) {
             return true;
         }
-
-        List<TargetProxy> targets = requireService(ModuleSupport.class).listTargets(session.getContextId(), guestID);
-        GroupService groupService = null;
-        for (TargetProxy target : targets) {
-            List<TargetPermission> permissions = target.getPermissions();
-            if (null != permissions && 0 < permissions.size()) {
-                for (TargetPermission permission : permissions) {
-                    if (userId == permission.getEntity()) {
-                        return true;
-                    }
-                    if (permission.isGroup()) {
-                        groupService = requireService(GroupService.class, groupService);
-                        Group group = groupService.getGroup(context, permission.getEntity());
-                        for (int memberId : group.getMember()) {
-                            if (userId == memberId) {
-                                return true;
-                            }
-                        }
-                    }
-                }
+        /*
+         * check if any share target is visible to session's user, using the share target path to have the global view on the target
+         */
+        ModuleSupport moduleSupport = requireService(ModuleSupport.class);
+        for (TargetProxy target : moduleSupport.listTargets(session.getContextId(), guestID)) {
+            ShareTargetPath targetPath = target.getTargetPath();
+            if (moduleSupport.isVisible(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem(), session.getContextId(), session.getUserId())) {
+                return true;
             }
         }
-
         return false;
     }
 
