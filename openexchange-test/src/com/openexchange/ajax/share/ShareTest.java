@@ -871,7 +871,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @return The message, or <code>null</code> if not found
      */
     protected Message discoverInvitationMessage(AJAXClient client, String emailAddress) throws Exception {
-        return discoverInvitationMessage(client.execute(new GetMailsRequest()).getMessages(), emailAddress);
+        return discoverInvitationMessage(client, emailAddress, 5000L);
     }
 
     /**
