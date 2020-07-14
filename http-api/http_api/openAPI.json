@@ -5261,17 +5261,17 @@
       "get" : {
         "operationId" : "downloadClientOnboardingProfile",
         "tags" : [ "Clientonboarding" ],
-        "summary" : "Direct-downloads a profile to configure an apple device for CalDAV and/or CardDAV",
+        "summary" : "Direct-downloads a profile to configure an apple device for CalDAV and/or CardDAV as well as IMAP/SMTP access",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
           "in" : "query",
           "name" : "type",
-          "description" : "The identifier of profile to download; one of\n- caldav\n- carddav\n- dav\n",
+          "description" : "The identifier of profile to download; one of\n- caldav\n- carddav\n- dav\n- mail\n",
           "required" : true,
           "schema" : {
             "type" : "string",
-            "enum" : [ "caldav", "carddav", "dav" ]
+            "enum" : [ "caldav", "carddav", "dav", "mail" ]
           }
         } ],
         "responses" : {
@@ -6689,6 +6689,37 @@
         }
       }
     },
+    "/mailfilter/v2?action=getscript" : {
+      "put" : {
+        "operationId" : "getScript_v2",
+        "tags" : [ "Mailfilter" ],
+        "summary" : "Gets the whole mail filter script.",
+        "description" : "This call is only used as workaround for parsing errors in the backend, so that the user is able to get the plaintext of a complete script.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "username",
+          "description" : "Must contain the user name for **admin mode**. So the normal credentials are taken for authentication but the mail filter of the user with this username is being changed.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object with the text of the complete sieve script. In case of errors the responsible fields\nin the response are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MailFilterScriptResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mailfilter/v2?action=update" : {
       "put" : {
         "operationId" : "updateRule_v2",
@@ -6727,37 +6758,6 @@
           },
           "description" : "A JSON object describing the rule with the `id` set (which identifies the rule to change). Only modified fields are present.",
           "required" : true
-        }
-      }
-    },
-    "/mailfilter/v2?action=getscript" : {
-      "put" : {
-        "operationId" : "getScript_v2",
-        "tags" : [ "Mailfilter" ],
-        "summary" : "Gets the whole mail filter script.",
-        "description" : "This call is only used as workaround for parsing errors in the backend, so that the user is able to get the plaintext of a complete script.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "username",
-          "description" : "Must contain the user name for **admin mode**. So the normal credentials are taken for authentication but the mail filter of the user with this username is being changed.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object with the text of the complete sieve script. In case of errors the responsible fields\nin the response are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailFilterScriptResponse"
-                }
-              }
-            }
-          }
         }
       }
     },
@@ -8438,6 +8438,64 @@
         }
       }
     },
+    "/infostore?action=saveAs" : {
+      "put" : {
+        "operationId" : "importAttachment",
+        "tags" : [ "Infostore" ],
+        "summary" : "Saves an attachment in the infostore.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamAttached"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamAttachmentsFolder"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamAttachmentsModule"
+        }, {
+          "in" : "query",
+          "name" : "attachment",
+          "description" : "The ID of the attachment to save.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "pushToken",
+          "description" : "The client's push token to restrict the generated drive event",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InfoItemUpdateResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/components/schemas/InfoItemBody"
+                }
+              }
+            }
+          },
+          "description" : "A JSON object describing the attachment's infoitem. The field `id`is not included. The fields in\nthis infoitem object override values from the attachment. The folder_id must be given. It is possible to\nlet added object permission entities be notified about newly shared files. In that case add a \"notification\" object.\n",
+          "required" : true
+        }
+      }
+    },
     "/infostore?action=document" : {
       "get" : {
         "operationId" : "getInfoItemDocument",
@@ -8519,64 +8577,6 @@
               }
             }
           }
-        }
-      }
-    },
-    "/infostore?action=saveAs" : {
-      "put" : {
-        "operationId" : "importAttachment",
-        "tags" : [ "Infostore" ],
-        "summary" : "Saves an attachment in the infostore.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamAttached"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamAttachmentsFolder"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamAttachmentsModule"
-        }, {
-          "in" : "query",
-          "name" : "attachment",
-          "description" : "The ID of the attachment to save.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "pushToken",
-          "description" : "The client's push token to restrict the generated drive event",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InfoItemUpdateResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/components/schemas/InfoItemBody"
-                }
-              }
-            }
-          },
-          "description" : "A JSON object describing the attachment's infoitem. The field `id`is not included. The fields in\nthis infoitem object override values from the attachment. The folder_id must be given. It is possible to\nlet added object permission entities be notified about newly shared files. In that case add a \"notification\" object.\n",
-          "required" : true
         }
       }
     },
@@ -13117,6 +13117,11 @@
                   "JSON" : {
                     "description" : "Represents the request body as JSON string containing the [MailMessageModel](#/definitions/MailComposeMessageModel).",
                     "type" : "string"
+                  },
+                  "file" : {
+                    "description" : "The optional file to add",
+                    "type" : "string",
+                    "format" : "binary"
                   }
                 },
                 "required" : [ "JSON" ]
@@ -13485,30 +13490,6 @@
         }
       }
     },
-    "/account?action=all" : {
-      "get" : {
-        "operationId" : "getAllAccounts",
-        "tags" : [ "Mailaccount" ],
-        "summary" : "Gets all mail accounts.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamAccountColumns"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array with data for all mail accounts. Each array element describes one account and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailAccountsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/account?action=new" : {
       "put" : {
         "operationId" : "createAccount",
@@ -13539,6 +13520,30 @@
           },
           "description" : "A JSON object describing the new account to create.",
           "required" : true
+        }
+      }
+    },
+    "/account?action=all" : {
+      "get" : {
+        "operationId" : "getAllAccounts",
+        "tags" : [ "Mailaccount" ],
+        "summary" : "Gets all mail accounts.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamAccountColumns"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array with data for all mail accounts. Each array element describes one account and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MailAccountsResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -16083,17 +16088,17 @@
       "get" : {
         "operationId" : "generateDownloadLinkForClientOnboardingProfile",
         "tags" : [ "Clientonboarding" ],
-        "summary" : "Generate link to direct-download a profile to configure an apple device for CalDAV and/or CardDAV",
+        "summary" : "Generate link to direct-download a profile to configure an apple device for CalDAV and/or CardDAV as well as IMAP/SMTP access",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
           "in" : "query",
           "name" : "type",
-          "description" : "The identifier of profile to download; one of\n- caldav\n- carddav\n- dav\n",
+          "description" : "The identifier of profile to download; one of\n- caldav\n- carddav\n- dav\n- mail\n",
           "required" : true,
           "schema" : {
             "type" : "string",
-            "enum" : [ "caldav", "carddav", "dav" ]
+            "enum" : [ "caldav", "carddav", "dav", "mail" ]
           }
         } ],
         "responses" : {
