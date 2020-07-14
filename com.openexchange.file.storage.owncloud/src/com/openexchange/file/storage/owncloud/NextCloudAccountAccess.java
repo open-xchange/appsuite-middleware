@@ -68,6 +68,7 @@ import com.openexchange.webdav.client.WebDAVClient;
  */
 public class NextCloudAccountAccess extends OwnCloudAccountAccess {
 
+    @SuppressWarnings("hiding")
     public final static String HTTP_CLIENT_ID = "nextcloud";
 
     /**
