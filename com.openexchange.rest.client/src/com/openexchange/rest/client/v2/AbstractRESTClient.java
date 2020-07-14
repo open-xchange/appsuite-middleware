@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -66,7 +65,6 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
@@ -102,10 +100,9 @@ public abstract class AbstractRESTClient {
     public AbstractRESTClient(ServiceLookup services, String httpClientId, RESTResponseParser parser) {
         super();
         this.parser = parser;
-        this.services= services;
+        this.services = services;
         this.httpClientId = httpClientId;
     }
-
 
     /**
      * Executes the specified {@link HttpRequestBase} and returns the response.
@@ -130,7 +127,8 @@ public abstract class AbstractRESTClient {
 
     /**
      * Executes the specified {@link HttpRequestBase} and returns the {@link InputStream}
-     * of the response. Use to stream data to client.
+     * of the response. Use to stream data to client. Clients are obliged to close the
+     * returning {@link InputStream}.
      *
      * @param httpRequest The HTTP request to execute
      * @return The {@link InputStream} of the response
@@ -138,9 +136,11 @@ public abstract class AbstractRESTClient {
      */
     public InputStream download(HttpRequestBase httpRequest) throws OXException {
         HttpResponse httpResponse = null;
+        boolean success = false;
         try {
             httpResponse = execute(httpRequest);
-            if (httpResponse.getStatusLine().getStatusCode() == 200) {
+            success = httpResponse.getStatusLine().getStatusCode() == 200;
+            if (success) {
                 return httpResponse.getEntity().getContent();
             }
             throw RESTExceptionCodes.UNEXPECTED_ERROR.create(httpResponse.getStatusLine());
@@ -149,7 +149,11 @@ public abstract class AbstractRESTClient {
         } catch (IOException e) {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e, e.getMessage());
         } finally {
-            HttpClients.close(httpRequest, httpResponse);
+            if (success) {
+                httpRequest.reset();
+            } else {
+                HttpClients.close(httpRequest, httpResponse);
+            }
         }
     }
 
@@ -265,25 +269,11 @@ public abstract class AbstractRESTClient {
     }
 
     /**
-     * Consumes the specified {@link HttpResponse}
+     * Retrieves the HTTP client
      *
-     * @param response the {@link HttpResponse} to consume
+     * @return the HTTP client
+     * @throws OXException if the {@link HttpClientService} is absent
      */
-    private void consume(HttpResponse response) {
-        if (null == response) {
-            return;
-        }
-        HttpEntity entity = response.getEntity();
-        if (null == entity) {
-            return;
-        }
-        try {
-            EntityUtils.consume(entity);
-        } catch (Throwable e) {
-            LOGGER.debug("Error while consuming the entity of the HTTP response {}", e.getMessage(), e);
-        }
-    }
-
     private HttpClient getHttpClient() throws OXException {
         return services.getServiceSafe(HttpClientService.class).getHttpClient(httpClientId);
     }
