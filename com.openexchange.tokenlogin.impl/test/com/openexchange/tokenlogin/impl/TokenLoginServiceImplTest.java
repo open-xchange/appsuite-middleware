@@ -280,6 +280,7 @@ public class TokenLoginServiceImplTest {
     @Test
     public void testRedeemToken_EverythingFine_ReturnSession() throws OXException {
         PowerMockito.when(this.sessiondService.getSession(ArgumentMatchers.anyString())).thenReturn(this.session);
+        PowerMockito.when(this.sessiondService.peekSession(ArgumentMatchers.anyString())).thenReturn(this.session);
         PowerMockito.when(this.sessiondService.addSession((AddSessionParameter) Mockito.anyObject())).thenReturn(this.session);
         PowerMockito.when(Services.getService(SessiondService.class)).thenReturn(this.sessiondService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
