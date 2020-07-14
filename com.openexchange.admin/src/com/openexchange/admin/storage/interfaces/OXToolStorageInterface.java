@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -378,10 +379,11 @@ public abstract class OXToolStorageInterface {
      * <code>0</code> to be a indicator for missing context.
      *
      * @param ctx The context
-     * @throws InvalidDataException If the context has a invalid identifier or a context with this identifier exists
+     * @throws InvalidDataException If the context has a invalid identifier
      * @throws StorageException If existence check fails
+     * @throws ContextExistsException If the context already exists
      */
-    public abstract void checkContextIdentifier(Context ctx) throws InvalidDataException, StorageException;
+    public abstract void checkContextIdentifier(Context ctx) throws InvalidDataException, StorageException, ContextExistsException;
 
     /**
      * Checks context existence and if there is no other context with the same name

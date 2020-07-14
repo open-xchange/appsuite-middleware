@@ -77,6 +77,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -2587,7 +2588,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public void checkContextIdentifier(Context ctx) throws InvalidDataException, StorageException {
+    public void checkContextIdentifier(Context ctx) throws InvalidDataException, StorageException, ContextExistsException {
         if (null == ctx || null == ctx.getId()) {
             throw new InvalidDataException("There must be a context identifier!");
         }
@@ -2605,7 +2606,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             stmt.setInt(1, contextId);
             rs = stmt.executeQuery();
             while (rs.next()) {
-                throw new InvalidDataException("Context " + ctx.getId() + " already exists!");
+                throw new ContextExistsException("Context " + ctx.getId().intValue() + " already exists!");
             }
         } catch (PoolException e) {
             log.error("Pool Error", e);
