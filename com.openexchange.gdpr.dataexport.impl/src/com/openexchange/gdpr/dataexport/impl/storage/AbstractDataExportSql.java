@@ -61,6 +61,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -215,11 +216,12 @@ public abstract class AbstractDataExportSql<R> {
     /**
      * Gets the schema references for given arguments.
      *
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @return The schema reference
      * @throws OXException If schema reference cannot be returned
      */
-    protected abstract R getSchemaReference(int contextId) throws OXException;
+    protected abstract R getSchemaReference(int userId, int contextId) throws OXException;
 
     /**
      * Gets a certain Export Task.
@@ -335,7 +337,7 @@ public abstract class AbstractDataExportSql<R> {
                                     if (tasksToDelete == null) {
                                         tasksToDelete = new ArrayList<>();
                                     }
-                                    tasksToDelete.add(new TaskInfo(UUIDs.toUUID(rs.getBytes(2)/* uuid */), 0, rs.getInt(1)/* cid */));
+                                    tasksToDelete.add(new TaskInfo(UUIDs.toUUID(rs.getBytes(2)/* uuid */), 0, rs.getInt(4)/* user */, rs.getInt(1)/* cid */));
                                 } else if (status.isDone() || status.isFailed()) {
                                     UUID taskId = UUIDs.toUUID(rs.getBytes(2)/* uuid */);
                                     // Check if part of result set because expired or has pending notification
@@ -343,7 +345,7 @@ public abstract class AbstractDataExportSql<R> {
                                         if (tasksToDelete == null) {
                                             tasksToDelete = new ArrayList<>();
                                         }
-                                        tasksToDelete.add(new TaskInfo(taskId, 0, rs.getInt(1)/* cid */));
+                                        tasksToDelete.add(new TaskInfo(taskId, 0, rs.getInt(4)/* user */, rs.getInt(1)/* cid */));
                                     } else {
                                         if (taskInfos == null) {
                                             taskInfos = new ArrayList<>();
@@ -366,7 +368,7 @@ public abstract class AbstractDataExportSql<R> {
 
         if (tasksToDelete != null) {
             for (TaskInfo taskInfo : tasksToDelete) {
-                deleteTask(taskInfo.taskId, taskInfo.contextId);
+                deleteTask(taskInfo.taskId, taskInfo.userId,  taskInfo.contextId);
             }
         }
 
@@ -413,7 +415,7 @@ public abstract class AbstractDataExportSql<R> {
     }
 
     boolean createIfAbsent(DataExportTask task, int userId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+        R schemaReference = getSchemaReference(userId, contextId);
         boolean created = false;
         int rollback = 0;
         Connection con = getWritable(schemaReference);
@@ -485,15 +487,16 @@ public abstract class AbstractDataExportSql<R> {
      * @param taskId The task identifier
      * @param module The module identifier
      * @param savePoint The save-point to be set
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @throws OXException
      */
-    void updateSavePoint(UUID taskId, String module, DataExportSavepoint savePoint, int contextId) throws OXException {
+    void updateSavePoint(UUID taskId, String module, DataExportSavepoint savePoint, int userId, int contextId) throws OXException {
         Optional<JSONObject> jSavePoint = savePoint.getSavepoint();
         Optional<DataExportDiagnosticsReport> report = savePoint.getReport();
         Optional<String> fileStorageLocation = savePoint.getFileStorageLocation();
 
-        R schemaReference = getSchemaReference(contextId);
+        R schemaReference = getSchemaReference(userId, contextId);
         int rollback = 0;
         boolean modified = false;
         Connection con = getWritable(schemaReference);
@@ -563,11 +566,12 @@ public abstract class AbstractDataExportSql<R> {
      * @param jFailureInfo Optional failure information if the work item failed
      * @param taskId The task identifier
      * @param moduleId The module identifier
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @throws OXException
      */
-    void updateWorkItemStatus(DataExportStatus status, String fileStorageLocation, JSONObject jFailureInfo, UUID taskId, String moduleId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+    void updateWorkItemStatus(DataExportStatus status, String fileStorageLocation, JSONObject jFailureInfo, UUID taskId, String moduleId, int userId, int contextId) throws OXException {
+        R schemaReference = getSchemaReference(userId, contextId);
         boolean modified = false;
         Connection con = getWritable(schemaReference);
         try {
@@ -627,7 +631,7 @@ public abstract class AbstractDataExportSql<R> {
      * @throws OXException If operation fails
      */
     void touchTask(int userId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+        R schemaReference = getSchemaReference(userId, contextId);
         boolean success = false;
         boolean readOnly = true;
         Connection con = null;
@@ -705,12 +709,13 @@ public abstract class AbstractDataExportSql<R> {
      * @param update The new status to set
      * @param expect The expected status
      * @param taskId The identifier for the data export task
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @return <code>true</code> if status could be successfully set; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
-    boolean compareAndSetTaskStatus(DataExportStatus update, DataExportStatus expect, UUID taskId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+    boolean compareAndSetTaskStatus(DataExportStatus update, DataExportStatus expect, UUID taskId, int userId, int contextId) throws OXException {
+        R schemaReference = getSchemaReference(userId, contextId);
         boolean modified = false;
         Connection con = getWritable(schemaReference);
         try (PreparedStatement stmt = con.prepareStatement("UPDATE dataExportTask SET status = ?, timestamp = ? WHERE uuid = ? AND status = ?")) {
@@ -732,13 +737,14 @@ public abstract class AbstractDataExportSql<R> {
      *
      * @param status The status
      * @param taskId The task identifier
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @param abortIfAnyOf An optional listing of statuses that are not allowed being changed through this invocation
      * @return The previous status if this invocation successfully set given status; otherwise <code>null</code>
      * @throws OXException
      */
-    DataExportStatus updateTaskStatus(DataExportStatus status, UUID taskId, int contextId, DataExportStatus... abortIfAnyOf) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+    DataExportStatus updateTaskStatus(DataExportStatus status, UUID taskId, int userId, int contextId, DataExportStatus... abortIfAnyOf) throws OXException {
+        R schemaReference = getSchemaReference(userId, contextId);
         boolean modified = false;
         Connection con = getWritable(schemaReference);
         try {
@@ -794,12 +800,13 @@ public abstract class AbstractDataExportSql<R> {
      *
      * @param taskId The identifier of the data export task
      * @param moduleId The identifier of the provider
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @return <code>true</code> if successfully incremented; otherwise <code>false</code> if max. fail count already reached
      * @throws OXException If operation fails
      */
-    boolean incrementFailCount(UUID taskId, String moduleId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+    boolean incrementFailCount(UUID taskId, String moduleId, int userId, int contextId) throws OXException {
+        R schemaReference = getSchemaReference(userId, contextId);
         boolean modified = false;
         Connection con = getWritable(schemaReference);
         try {
@@ -840,11 +847,12 @@ public abstract class AbstractDataExportSql<R> {
      * Sets the marker that notification has been sent out for specified task.
      *
      * @param taskId The identifier of the data export task
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @throws OXException
      */
-    boolean setNotificationSent(UUID taskId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+    boolean setNotificationSent(UUID taskId, int userId, int contextId) throws OXException {
+        R schemaReference = getSchemaReference(userId, contextId);
         boolean modified = false;
         Connection con = getWritable(schemaReference);
         try (PreparedStatement stmt = con.prepareStatement("UPDATE dataExportTask SET notificationSent = 1 WHERE uuid = ? AND notificationSent = 0")) {
@@ -862,11 +870,12 @@ public abstract class AbstractDataExportSql<R> {
      * Un-sets the marker that notification has been sent out for specified task.
      *
      * @param taskId The identifier of the data export task
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @throws OXException
      */
-    boolean unsetNotificationSent(UUID taskId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+    boolean unsetNotificationSent(UUID taskId, int userId, int contextId) throws OXException {
+        R schemaReference = getSchemaReference(userId, contextId);
         boolean modified = false;
         Connection con = getWritable(schemaReference);
         try (PreparedStatement stmt = con.prepareStatement("UPDATE dataExportTask SET notificationSent = 0 WHERE uuid = ? AND notificationSent = 1")) {
@@ -885,12 +894,13 @@ public abstract class AbstractDataExportSql<R> {
      *
      * @param taskId The task identifier
      * @param moduleId The module identifier
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @return The save-point
      * @throws OXException
      */
-    DataExportSavepoint selectSavePoint(UUID taskId, String moduleId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+    DataExportSavepoint selectSavePoint(UUID taskId, String moduleId, int userId, int contextId) throws OXException {
+        R schemaReference = getSchemaReference(userId, contextId);
         Connection con = getReadOnly(schemaReference);
         try {
             DataExportSavepoint.Builder savepoint = DataExportSavepoint.builder();
@@ -964,12 +974,13 @@ public abstract class AbstractDataExportSql<R> {
      * deletes a certain task and all of its work items.
      *
      * @param taskId The task Identifier
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @return <code>true</code> if the task was deleted, <code>false</code> otherwise.
      * @throws OXException
      */
-    boolean deleteTask(UUID taskId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+    boolean deleteTask(UUID taskId, int userId, int contextId) throws OXException {
+        R schemaReference = getSchemaReference(userId, contextId);
         return deleteTask(taskId, schemaReference);
     }
 
@@ -1095,7 +1106,7 @@ public abstract class AbstractDataExportSql<R> {
      * @throws OXException
      */
     boolean deleteTask(int userId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+        R schemaReference = getSchemaReference(userId, contextId);
         Connection connection = getWritable(schemaReference);
         int rollback = 0;
         boolean modified = false;
@@ -1220,7 +1231,7 @@ public abstract class AbstractDataExportSql<R> {
             try {
                 con = getReadOnly(schemaReference);
                 if (tableExists(con, con.getCatalog())) {
-                    try (PreparedStatement stmt = con.prepareStatement("SELECT uuid, cid, timestamp FROM dataExportTask WHERE status IN (?, ?) OR (status = ? AND timestamp < ?) ORDER BY timestamp ASC LIMIT 1")) {
+                    try (PreparedStatement stmt = con.prepareStatement("SELECT uuid, cid, user, timestamp FROM dataExportTask WHERE status IN (?, ?) OR (status = ? AND timestamp < ?) ORDER BY timestamp ASC LIMIT 1")) {
                         stmt.setString(1, DataExportStatus.PAUSED.toString());
                         stmt.setString(2, DataExportStatus.PENDING.toString());
                         stmt.setString(3, DataExportStatus.RUNNING.toString());
@@ -1231,7 +1242,7 @@ public abstract class AbstractDataExportSql<R> {
                                     tasks = new ArrayList<>();
                                 }
                                 do {
-                                    tasks.add(new TaskInfo(UUIDs.toUUID(rs.getBytes(1)), rs.getLong(3), rs.getInt(2)));
+                                    tasks.add(new TaskInfo(UUIDs.toUUID(rs.getBytes(1)), rs.getLong(4), rs.getInt(3), rs.getInt(2)));
                                 } while (rs.next());
                             }
                         }
@@ -1256,7 +1267,7 @@ public abstract class AbstractDataExportSql<R> {
 
         now = System.currentTimeMillis();
         for (TaskInfo task : tasks) {
-            R schemaReference = getSchemaReference(task.contextId);
+            R schemaReference = getSchemaReference(task.userId, task.contextId);
             boolean modified = false;
             Connection con = getWritable(schemaReference);
             try {
@@ -1304,12 +1315,13 @@ public abstract class AbstractDataExportSql<R> {
      * Returns the next work item for a specific task.
      *
      * @param taskId The task identifier
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @return The next work item
      * @throws OXException
      */
-    DataExportWorkItem getNextWorkItem(UUID taskId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+    DataExportWorkItem getNextWorkItem(UUID taskId, int userId, int contextId) throws OXException {
+        R schemaReference = getSchemaReference(userId, contextId);
         boolean modified = false;
         Connection con = getWritable(schemaReference);
         try {
@@ -1353,8 +1365,8 @@ public abstract class AbstractDataExportSql<R> {
         return null;
     }
 
-    void addResultFile(String fileStorageLocation, int number, long size, UUID taskId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+    void addResultFile(String fileStorageLocation, int number, long size, UUID taskId, int userId, int contextId) throws OXException {
+        R schemaReference = getSchemaReference(userId, contextId);
         boolean modified = false;
         Connection con = getWritable(schemaReference);
         try (PreparedStatement stmt = con.prepareStatement("INSERT INTO dataExportFilestoreLocation (cid, taskId, num, filestoreLocation, size) VALUES (?, ?, ?, ?, ?)")) {
@@ -1371,8 +1383,8 @@ public abstract class AbstractDataExportSql<R> {
         }
     }
 
-    void deleteResultFiles(UUID taskId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+    void deleteResultFiles(UUID taskId, int userId, int contextId) throws OXException {
+        R schemaReference = getSchemaReference(userId, contextId);
         boolean modified = false;
         Connection connection = getWritable(schemaReference);
         try {
@@ -1425,8 +1437,8 @@ public abstract class AbstractDataExportSql<R> {
         }
     }
 
-    void dropIntermediateFiles(UUID taskId, int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+    void dropIntermediateFiles(UUID taskId, int userId, int contextId) throws OXException {
+        R schemaReference = getSchemaReference(userId, contextId);
         boolean modified = false;
         Connection connection = getWritable(schemaReference);
         try {
@@ -1527,7 +1539,7 @@ public abstract class AbstractDataExportSql<R> {
      * @throws OXException
      */
     DataExportStatus selectTaskStatus(int contextId, int userId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+        R schemaReference = getSchemaReference(userId, contextId);
         Connection con = getReadOnly(schemaReference);
         try (PreparedStatement stmt = con.prepareStatement("SELECT status FROM dataExportTask WHERE cid = ? AND user = ?")) {
             stmt.setInt(1, contextId);
@@ -1547,7 +1559,7 @@ public abstract class AbstractDataExportSql<R> {
     }
 
     Date selectLastAccessedTimeStamp(int contextId, int userId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+        R schemaReference = getSchemaReference(userId, contextId);
         Connection con = getReadOnly(schemaReference);
         try (PreparedStatement stmt = con.prepareStatement("SELECT timestamp FROM dataExportTask WHERE cid = ? AND user = ?")) {
             stmt.setInt(1, contextId);
@@ -1566,7 +1578,7 @@ public abstract class AbstractDataExportSql<R> {
     }
 
     FileLocations selectResultFiles(int contextId, int userId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+        R schemaReference = getSchemaReference(userId, contextId);
         Connection con = getReadOnly(schemaReference);
         try {
             UUID taskId = null;
@@ -1611,7 +1623,7 @@ public abstract class AbstractDataExportSql<R> {
     }
 
     FileLocation selectResultFile(int number, int contextId, int userId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+        R schemaReference = getSchemaReference(userId, contextId);
         Connection con = getReadOnly(schemaReference);
         try {
             UUID taskId = null;
@@ -1653,12 +1665,13 @@ public abstract class AbstractDataExportSql<R> {
     /**
      * Returns the tasks for a specific context.
      *
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @return The tasks for the context or an empty list
      * @throws OXException
      */
-    List<DataExportTask> selectTasks(int contextId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
+    List<DataExportTask> selectTasksForContext(int userId, int contextId) throws OXException {
+        R schemaReference = getSchemaReference(userId, contextId);
         Connection con = getReadOnly(schemaReference);
         try (PreparedStatement stmt = con.prepareStatement("SELECT cid, uuid, user, status, filestore, creationTime, startTime, duration, arguments FROM dataExportTask WHERE cid = ?")) {
             stmt.setInt(1, contextId);
@@ -1690,34 +1703,105 @@ public abstract class AbstractDataExportSql<R> {
      * Returns the task for a specific user.
      *
      * @param contextId The context identifier
-     * @param userId The user identifier
-     * @return The task for the user or <code>null</code> if the user has currently no active task
+     * @param userIds The user identifiers
+     * @param dropNullElements Whether to drop <code>null</code> elements from returned array
+     * @return The tasks for the users or <code>null</code> at array position if the user has currently no active task
      * @throws OXException
      */
-    DataExportTask selectTask(int contextId, int userId) throws OXException {
-        R schemaReference = getSchemaReference(contextId);
-        Connection con = getReadOnly(schemaReference);
-        try (PreparedStatement stmt = con.prepareStatement("SELECT cid, uuid, user, status, filestore, creationTime, startTime, duration, arguments FROM dataExportTask WHERE cid = ? AND user = ?")) {
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    DataExportTask retval = parsetTask(rs);
-                    retval.setWorkItems(selectWorkItems(retval.getId(), con));
-                    List<DataExportResultFile> resultFiles = selectResultFiles(retval.getId(), con);
-                    if (resultFiles != null && !resultFiles.isEmpty()) {
-                        retval.setResultFiles(resultFiles);
-                    }
-                    return retval;
-                }
-            }
-        } catch (SQLException e) {
-            throw handleException(e);
-        } finally {
-            backReadOnly(schemaReference, con);
+    DataExportTask[] selectTasks(int contextId, int[] userIds, boolean dropNullElements) throws OXException {
+        if (userIds == null) {
+            return new DataExportTask[0];
         }
 
-        return null;
+        int length = userIds.length;
+        if (length <= 0) {
+            return new DataExportTask[0];
+        }
+
+        if (length == 1) {
+            int userId = userIds[0];
+            R schemaReference = getSchemaReference(userId, contextId);
+            Connection con = getReadOnly(schemaReference);
+            try (PreparedStatement stmt = con.prepareStatement("SELECT cid, uuid, user, status, filestore, creationTime, startTime, duration, arguments FROM dataExportTask WHERE cid = ? AND user = ?")) {
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        DataExportTask retval = parsetTask(rs);
+                        retval.setWorkItems(selectWorkItems(retval.getId(), con));
+                        List<DataExportResultFile> resultFiles = selectResultFiles(retval.getId(), con);
+                        if (resultFiles != null && !resultFiles.isEmpty()) {
+                            retval.setResultFiles(resultFiles);
+                        }
+                        return new DataExportTask[] { retval };
+                    }
+                }
+            } catch (SQLException e) {
+                throw handleException(e);
+            } finally {
+                backReadOnly(schemaReference, con);
+            }
+
+            return dropNullElements ? new DataExportTask[0] : new DataExportTask[1];
+        }
+
+        Map<R, List<Integer>> schemaReference2Users = new HashMap<>(length);
+        for (int userId : userIds) {
+            R schemaReference = getSchemaReference(userId, contextId);
+            List<Integer> users = schemaReference2Users.get(schemaReference);
+            if (users == null) {
+                users = new ArrayList<>();
+                schemaReference2Users.put(schemaReference, users);
+            }
+            users.add(I(userId));
+        }
+
+        Map<Integer, DataExportTask> loadedTasks = new HashMap<>(length);
+        for (Map.Entry<R, List<Integer>> entry : schemaReference2Users.entrySet()) {
+            R schemaReference = entry.getKey();
+            List<Integer> users = entry.getValue();
+            Connection con = getReadOnly(schemaReference);
+            try (PreparedStatement stmt = con.prepareStatement(Databases.getIN("SELECT cid, uuid, user, status, filestore, creationTime, startTime, duration, arguments FROM dataExportTask WHERE cid = ? AND user IN (", users.size()))) {
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                for (Integer user : users) {
+                    stmt.setInt(pos++, user.intValue());
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        DataExportTask retval = parsetTask(rs);
+                        retval.setWorkItems(selectWorkItems(retval.getId(), con));
+                        List<DataExportResultFile> resultFiles = selectResultFiles(retval.getId(), con);
+                        if (resultFiles != null && !resultFiles.isEmpty()) {
+                            retval.setResultFiles(resultFiles);
+                        }
+                        loadedTasks.put(I(retval.getUserId()), retval);
+                    }
+                }
+            } catch (SQLException e) {
+                throw handleException(e);
+            } finally {
+                backReadOnly(schemaReference, con);
+            }
+        }
+
+        DataExportTask[] retval;
+        if (dropNullElements) {
+            List<DataExportTask> nonNulls = new ArrayList<>(length);
+            for (int i = length; i-- > 0;) {
+                DataExportTask task = loadedTasks.get(I(userIds[i]));
+                if (task != null) {
+                    nonNulls.add(task);
+                }
+            }
+            retval = nonNulls.toArray(new DataExportTask[nonNulls.size()]);
+        } else {
+            retval = new DataExportTask[length];
+            for (int i = length; i-- > 0;) {
+                retval[i] = loadedTasks.get(I(userIds[i]));
+            }
+        }
+        return retval;
     }
 
     private static List<DataExportWorkItem> selectWorkItems(UUID taskUuid, Connection connection) throws SQLException, OXException {
@@ -1892,12 +1976,14 @@ public abstract class AbstractDataExportSql<R> {
 
         final UUID taskId;
         final long timestamp;
+        final int userId;
         final int contextId;
 
-        TaskInfo(UUID taskId, long timestamp, int contextId) {
+        TaskInfo(UUID taskId, long timestamp, int userId, int contextId) {
             super();
             this.taskId = taskId;
             this.timestamp = timestamp;
+            this.userId = userId;
             this.contextId = contextId;
         }
 

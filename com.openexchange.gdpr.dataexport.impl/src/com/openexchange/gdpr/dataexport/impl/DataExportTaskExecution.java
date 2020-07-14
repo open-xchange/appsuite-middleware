@@ -380,7 +380,7 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
 
                         // Drop work items' files to free space
                         try {
-                            storageService.dropIntermediateFiles(taskId, contextId);
+                            storageService.dropIntermediateFiles(taskId, userId, contextId);
                         } catch (Exception e) {
                             LOG.warn("Failed to drop intermediate files from data export task {} of user {} in context {}", stringFor(taskId), I(userId), I(contextId), e);
                         }

@@ -117,8 +117,8 @@ public class GlobalDbDataExportSql extends AbstractDataExportSql<String> {
     private static final String DEFAULT_GROUP = "default";
 
     @Override
-    protected String getSchemaReference(int contextId) throws OXException {
-        ConfigView view = configViewFactory.getView(-1, contextId);
+    protected String getSchemaReference(int userId, int contextId) throws OXException {
+        ConfigView view = configViewFactory.getView(userId, contextId);
         String group = view.opt("com.openexchange.context.group", String.class, null);
         return Strings.isEmpty(group) ? DEFAULT_GROUP : group;
     }
