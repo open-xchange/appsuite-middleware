@@ -200,7 +200,16 @@ public final class FunctionTest extends AbstractAJAXSession {
         Group[] groupsViaSearch = getClient().execute(new SearchRequest("*")).getGroups();
         UpdatesResponse response = getClient().execute(new UpdatesRequest(new Date(0), false));
         List<Group> groupsViaUpdates = response.getModified();
-        assertEquals("Should find the same amount of groups via *-search as via updates since day 0", groupsViaSearch.length, groupsViaUpdates.size());
+        for (Group group : groupsViaSearch) {
+            Group matchingGroup = null;
+            for (Group updatedGroup : groupsViaUpdates) {
+                if (updatedGroup.getIdentifier() == group.getIdentifier()) {
+                    matchingGroup = updatedGroup;
+                    break;
+                }
+            }
+            assertNotNull("Group " + group.getDisplayName() + " not find via updates since day 0", matchingGroup);
+        }
     }
 
     @Test
