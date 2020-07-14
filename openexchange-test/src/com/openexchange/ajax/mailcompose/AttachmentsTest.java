@@ -53,13 +53,17 @@ import static com.openexchange.java.Autoboxing.l;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Collections;
+import java.util.UUID;
 import org.junit.Test;
+import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.models.ComposeBody;
 import com.openexchange.testing.httpclient.models.MailComposeAttachmentResponse;
 import com.openexchange.testing.httpclient.models.MailComposeMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeResponse;
+import com.openexchange.testing.httpclient.models.MailComposeSendResponse;
 
 /**
  * {@link AttachmentsTest}
@@ -79,6 +83,30 @@ public class AttachmentsTest extends AbstractMailComposeTest {
         assertEquals("Expected one attachment.", 1, response.getData().getAttachments().size());
         assertEquals("Wrong attachment name.", attachment.getName(), response.getData().getAttachments().get(0).getName());
         assertTrue("Empty file.", l(response.getData().getAttachments().get(0).getSize()) > 0L);
+    }
+
+    @Test
+    public void testSendWithAttachment() throws Exception {
+        MailComposeMessageModel model = createNewCompositionSpace();
+        check(api.postAttachments(getSessionId(), model.getId(), attachment));
+
+        MailComposeResponse loaded = api.getMailComposeById(getSessionId(), model.getId());
+        check(loaded);
+        assertNotNull(loaded);
+        assertEquals("Wrong Composition Space loaded.", model.getId(), loaded.getData().getId());
+
+        model.setFrom(getSender());
+        model.setTo(getRecipient());
+        model.setSubject(UUID.randomUUID().toString());
+        model.setContent(UUID.randomUUID().toString());
+
+        MailComposeSendResponse postMailComposeSend = api.postMailComposeSend(getSessionId(), model.getId(), model.toJson(), attachment2);
+        check(postMailComposeSend);
+        assertTrue(postMailComposeSend.getErrorDesc(), Strings.isEmpty(postMailComposeSend.getError()));
+
+        loaded = api.getMailComposeById(getSessionId(), model.getId());
+        assertEquals("Error expected.", "MSGCS-0007", loaded.getCode());
+        assertNull("No data expected", loaded.getData());
     }
 
     @Test
