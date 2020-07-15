@@ -103,13 +103,12 @@ import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddContentEn
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddCustomHeaders;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddFileStorageIdentifier;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddReplyTo;
-import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateAttachmentBinaryChunkTableTask;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableService;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableTask;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceDeleteListener;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceEnlargeAttachmentNameField;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceEnlargeSubjectField;
-import com.openexchange.mail.compose.impl.groupware.CompositionSpaceMigrateAttachmentBinaryDataTask;
+import com.openexchange.mail.compose.impl.groupware.CompositionSpaceRestoreAttachmentBinaryDataColumn;
 import com.openexchange.mail.compose.impl.rmi.RemoteCompositionSpaceServiceImpl;
 import com.openexchange.mail.compose.impl.security.CompositionSpaceKeyStorageServiceImpl;
 import com.openexchange.mail.compose.impl.security.FileStorageCompositionSpaceKeyStorage;
@@ -130,7 +129,6 @@ import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
-import com.openexchange.uploaddir.UploadDirService;
 import com.openexchange.user.UserService;
 
 /**
@@ -227,7 +225,6 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         rememberTracker(attachmentStorageService);
 
         trackService(UnifiedInboxManagement.class);
-        trackService(UploadDirService.class);
 
         openTrackers();
 
@@ -345,8 +342,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
             new CompositionSpaceAddCustomHeaders(),
             new CompositionSpaceEnlargeAttachmentNameField(),
             new CompositionSpaceAddReplyTo(),
-            new CompositionSpaceCreateAttachmentBinaryChunkTableTask(),
-            new CompositionSpaceMigrateAttachmentBinaryDataTask()
+            new CompositionSpaceRestoreAttachmentBinaryDataColumn()
         ));
         registerService(DeleteListener.class, new CompositionSpaceDeleteListener(this));
 

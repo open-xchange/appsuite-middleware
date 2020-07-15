@@ -63,9 +63,9 @@ import org.apache.http.entity.InputStreamEntity;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.sproxyd.SproxydExceptionCode;
-import com.openexchange.filestore.sproxyd.osgi.Services;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link SproxydClient}
@@ -76,6 +76,7 @@ public class SproxydClient {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydClient.class);
 
+    private final ServiceLookup services;
     private final EndpointPool endpointPool;
     private final String prefix;
     private final String filestoreID;
@@ -84,12 +85,14 @@ public class SproxydClient {
     /**
      * Initializes a new {@link SproxydClient}.
      *
+     * @param services The service lookup
      * @param endpointPool The Endpoint pool
      * @param prefix The prefix to use
      * @param filestoreID The filestore ID
      */
-    public SproxydClient(EndpointPool endpointPool, String prefix, String filestoreID) {
+    public SproxydClient(ServiceLookup services, EndpointPool endpointPool, String prefix, String filestoreID) {
         super();
+        this.services = services;
         this.endpointPool = endpointPool;
         this.prefix = prefix;
         this.filestoreID = filestoreID;
@@ -247,7 +250,7 @@ public class SproxydClient {
     }
 
     private HttpClient getHttpClient() throws OXException {
-        return Services.getService(HttpClientService.class).getHttpClient(filestoreID);
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(filestoreID);
     }
 
 }

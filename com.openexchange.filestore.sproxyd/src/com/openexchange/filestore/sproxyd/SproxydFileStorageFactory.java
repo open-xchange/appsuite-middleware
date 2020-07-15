@@ -80,7 +80,6 @@ import com.openexchange.filestore.utils.DefaultDatabaseAccess;
 import com.openexchange.filestore.utils.PropertyNameBuilder;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link SproxydFileStorageFactory}
@@ -259,7 +258,7 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
      * @return The client
      */
     private SproxydClient initClient(String filestoreID, String prefix) throws OXException {
-        return new SproxydClient(initSproxydConfig(filestoreID), prefix, filestoreID);
+        return new SproxydClient(services, initSproxydConfig(filestoreID), prefix, filestoreID);
     }
 
     /**
@@ -311,7 +310,7 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.sproxyd." + filestoreID + ".hosts': " + hosts);
         }
 
-        return new EndpointPool(filestoreID, urls, heartbeatInterval, services.getServiceSafe(TimerService.class));
+        return new EndpointPool(filestoreID, urls, heartbeatInterval, services);
     }
 
     /**

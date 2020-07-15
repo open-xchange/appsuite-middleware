@@ -100,7 +100,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
         cache = ClientAdminThread.cache;
         prop = cache.getProperties();
         log(LogLevel.INFO, LOGGER, null, null, "Class loaded: {}", this.getClass().getName());
-        basicauth = BasicAuthenticator.createNonPluginAwareAuthenticator();
+        basicauth = BasicAuthenticator.createPluginAwareAuthenticator();
     }
 
     private void logAndEnhanceException(Throwable t, final Credentials credentials, final Context ctx, final Resource res) {

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,73 +47,57 @@
  *
  */
 
-package com.openexchange.mail.compose.impl.attachment.rdb;
+package com.openexchange.mail.compose.impl.groupware;
 
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
+
 
 /**
- * {@link BoundedInputStream} - Allows that only a certain number of bytes can be read from passed input stream.
+ * {@link CompositionSpaceRestoreAttachmentBinaryDataColumn}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.10.4
  */
-public class BoundedInputStream extends FilterInputStream {
-
-    private final long boundary;
-    private long count;
-
-    /**
-     * Initializes a new {@link BoundedInputStream}.
-     */
-    public BoundedInputStream(InputStream inputStream, long boundary) {
-        super(inputStream);
-        this.boundary = boundary;
-        count = 0L;
-    }
+public class CompositionSpaceRestoreAttachmentBinaryDataColumn extends UpdateTaskAdapter {
 
     @Override
-    public int read() throws IOException {
-        if (count + 1 > boundary) {
-            return -1;
-        }
-        count++;
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        int rollback = 0;
+        try {
+            connection.setAutoCommit(false);
+            rollback = 1;
 
-        int res = super.read();
-        if (res < 0) {
-            // No more bytes available from underlying stream
-            count--;
-        }
-        return res;
-    }
+            Tools.checkAndAddColumns(connection, "compositionSpaceAttachmentBinary", new Column("data", "LONGBLOB NOT NULL"));
 
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        int bytesToRead = len;
-        if (count + bytesToRead > boundary) {
-            bytesToRead = (int) (boundary - count);
-            if (bytesToRead <= 0) {
-                return -1;
+            connection.commit();
+            rollback = 2;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback > 0) {
+                if (rollback==1) {
+                    rollback(connection);
+                }
+                autocommit(connection);
             }
         }
-        count += bytesToRead;
-
-        int res = super.read(b, off, bytesToRead);
-        if (res < 0) {
-            // No more bytes available from underlying stream
-            count -= bytesToRead;
-        }
-        return res;
     }
 
-    /**
-     * Gets the number of bytes that were read from this stream.
-     *
-     * @return The number of read bytes
-     */
-    public long getCount() {
-        return count;
+    @Override
+    public String[] getDependencies() {
+        return new String[] { CompositionSpaceAddReplyTo.class.getName() };
     }
 
 }
