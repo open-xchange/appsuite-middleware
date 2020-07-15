@@ -52,25 +52,20 @@ package com.openexchange.mail.compose.impl.attachment.rdb;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.nio.channels.Channels;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.Spool;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -127,143 +122,46 @@ public class RdbAttachmentStorage extends AbstractNonCryptoAttachmentStorage {
     }
 
     @Override
-    protected AttachmentStorageIdentifier saveData(InputStream is, long size, Session session) throws OXException {
-        if (null == is) {
+    protected AttachmentStorageIdentifier saveData(InputStream input, long size, Session session) throws OXException {
+        if (null == input) {
             throw CompositionSpaceErrorCode.ERROR.create("Attempted attachment storage without an input stream");
         }
 
-        InputStream input = is;
-        File tempFile = null;
+        int contextId = session.getContextId();
+        DatabaseService databaseService = requireDatabaseService();
+        int rollback = 0;
+        Connection con = databaseService.getWritable(contextId);
         try {
-            int contextId = session.getContextId();
-            DatabaseService databaseService = requireDatabaseService();
+            Databases.startTransaction(con);
+            rollback = 1;
 
-            // Spool to temporary file to not exhaust/block resources (e.g. database transaction)
-            if (spool(input)) {
-                tempFile = newTempFile(false, services);
-                transferToFile(input, tempFile);
-                input = null;
-            }
+            AttachmentStorageIdentifier retval = saveData(input, session, con);
 
-            int rollback = 0;
-            Connection con = databaseService.getWritable(contextId);
-            try {
-                Databases.startTransaction(con);
-                rollback = 1;
-
-                AttachmentStorageIdentifier retval;
-                if (tempFile == null) {
-                    retval = saveData(input, session, con);
-                } else {
-                    retval = saveData(tempFile, session, con);
-                }
-
-                con.commit();
-                rollback = 2;
-                return retval;
-            } catch (SQLException e) {
-                throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                if (rollback > 0) {
-                    if (rollback == 1) {
-                        Databases.rollback(con);
-                    }
-                    Databases.autocommit(con);
-                }
-                databaseService.backWritable(contextId, con);
-            }
-        } catch (IOException e) {
-            throw CompositionSpaceErrorCode.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(input);
-            FileUtils.deleteQuietly(tempFile);
-        }
-    }
-
-    private AttachmentStorageIdentifier saveData(File tempFile, Session session, Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            long maxAllowedPacketSize = getMaxAllowedPacketSize(con);
-
-            if (maxAllowedPacketSize <= 0) {
-                InputStream fileInput = null;
-                try {
-                    fileInput = new FileInputStream(tempFile);
-                    return saveData(fileInput, maxAllowedPacketSize, session, con);
-                } finally {
-                    Streams.close(fileInput);
-                }
-            }
-
-            // Generate identifier for the attachment
-            UUID uuid = UUID.randomUUID();
-            byte[] uuidBytes = UUIDs.toByteArray(uuid);
-
-            RandomAccessFile randomFile = null;
-            try {
-                randomFile = new RandomAccessFile(tempFile, "r");
-                long length = randomFile.length();
-
-                int chunkPos = 1;
-                long pos = 0L;
-                while (pos < length) {
-                    long end = (pos + maxAllowedPacketSize) < length ? maxAllowedPacketSize : -1;
-
-                    if (pos > 0) {
-                        Streams.close(randomFile);
-                        randomFile = new RandomAccessFile(tempFile, "r");
-                    }
-                    randomFile.seek(pos);
-
-                    InputStream is = null;
-                    BoundedInputStream bis = null;
-                    try {
-                        is = Channels.newInputStream(randomFile.getChannel());
-                        if (end > 0) {
-                            bis = new BoundedInputStream(is, end);
-                        }
-                        stmt = con.prepareStatement("INSERT INTO compositionSpaceAttachmentBinaryChunk (uuid, cid, user, chunk, data) VALUES (?, ?, ?, ?, ?)");
-                        stmt.setBytes(1, uuidBytes);
-                        stmt.setInt(2, session.getContextId());
-                        stmt.setInt(3, session.getUserId());
-                        stmt.setInt(4, chunkPos++);
-                        stmt.setBinaryStream(5, bis == null ? is : bis);
-                        stmt.executeUpdate();
-                        Databases.closeSQLStuff(stmt);
-                        stmt = null;
-                    } finally {
-                        Streams.close(bis, is);
-                    }
-
-                    pos = bis == null ? length : pos + bis.getCount();
-                }
-            } finally {
-                Streams.close(randomFile);
-            }
-
-            stmt = con.prepareStatement("INSERT INTO compositionSpaceAttachmentBinary (uuid, cid, user) VALUES (?, ?, ?)");
-            stmt.setBytes(1, uuidBytes);
-            stmt.setInt(2, session.getContextId());
-            stmt.setInt(3, session.getUserId());
-            stmt.executeUpdate();
-
-            return new AttachmentStorageIdentifier(UUIDs.getUnformattedString(uuid));
-        } catch (IOException e) {
-            throw CompositionSpaceErrorCode.IO_ERROR.create(e, e.getMessage());
+            con.commit();
+            rollback = 2;
+            return retval;
         } catch (SQLException e) {
             throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            Databases.closeSQLStuff(stmt);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+            }
+            databaseService.backWritable(contextId, con);
         }
     }
 
     private AttachmentStorageIdentifier saveData(InputStream input, Session session, Connection con) throws OXException {
-        return saveData(input, getMaxAllowedPacketSize(con), session, con);
-    }
-
-    private AttachmentStorageIdentifier saveData(InputStream input, long maxAllowedPacketSize, Session session, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
+            long maxAllowedPacketSize = Databases.getMaxAllowedPacketSize(con);
+            if (maxAllowedPacketSize > 0) {
+                // Keep a buffer for non-binary portion of the package
+                maxAllowedPacketSize = (long) (maxAllowedPacketSize * 0.66);
+            }
+
             // Generate identifier for the attachment
             UUID uuid = UUID.randomUUID();
             byte[] uuidBytes = UUIDs.toByteArray(uuid);
@@ -456,61 +354,6 @@ public class RdbAttachmentStorage extends AbstractNonCryptoAttachmentStorage {
             throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-        }
-    }
-
-    /**
-     * Transfers content of given source input stream to specified (temporary) file and returns a {@code FileInputStream} reading from that
-     * file.
-     *
-     * @param in The source input stream to transfer to file
-     * @param tmpFile The file to transfer to and create the {@code FileInputStream} from
-     * @return The {@code FileInputStream} reading from given file
-     * @throws IOException If an I/O error occurs
-     * @throws FileNotFoundException If given file does not exist
-     */
-    private static void transferToFile(InputStream in, File tmpFile) throws IOException, FileNotFoundException {
-        OutputStream out = null;
-        try {
-            out = FileUtils.openOutputStream(tmpFile);
-            byte[] buffer = new byte[0xFFFF];
-            for (int n; (n = in.read(buffer)) > 0;) {
-                out.write(buffer, 0, n);
-            }
-            out.flush();
-        } finally {
-            Streams.close(in, out);
-        }
-    }
-
-    /**
-     * Checks if stream is supposed to be spooled.
-     *
-     * @param spoolToFile The flag to examine
-     * @param source The source to examine
-     * @return <code>true</code> to spool; otherwise <code>false</code>
-     */
-    private static boolean spool(InputStream source) {
-        return ((source.getClass().getAnnotation(Spool.class) != null) || "true".equals(LogProperties.get(LogProperties.Name.FILESTORE_SPOOL)));
-    }
-
-    /**
-     * Gets the value for the "max_packet_size" setting.
-     *
-     * @param con The connection to use to retrieve the value
-     * @return The max. packet size in bytes or <code>-1</code>
-     * @throws OXException If max. packet size cannot be returned
-     */
-    private static long getMaxAllowedPacketSize(Connection con) throws OXException {
-        try {
-            long maxAllowedPacketSize = Databases.getMaxAllowedPacketSize(con);
-            if (maxAllowedPacketSize > 0) {
-                // Keep a buffer for non-binary portion of the package
-                maxAllowedPacketSize = (long) (maxAllowedPacketSize * 0.66);
-            }
-            return maxAllowedPacketSize;
-        } catch (SQLException e) {
-            throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
