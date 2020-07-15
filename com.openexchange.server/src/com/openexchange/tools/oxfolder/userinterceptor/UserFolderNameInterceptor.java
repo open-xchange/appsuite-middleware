@@ -205,26 +205,33 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
         long lastModified = System.currentTimeMillis();
         try {
             /*
-             * Determine the users default folder identifier
+             * Determine the users default folder identifier and name
              */
             int defaultInfostoreFolderId = OXFolderSQL.getUserDefaultFolder(userId, FolderObject.INFOSTORE, connection, context);
             if (-1 == defaultInfostoreFolderId) {
-                LOGGER.debug("Unable to ensure folder name uniqueness", OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(FolderObject.SYSTEM_INFOSTORE_FOLDER_NAME, I(userId), I(context.getContextId())));
+                LOGGER.debug("No default infostore folder available for user {}, skip propagation of changed display name.", I(userId));
                 return;
             }
-
+            FolderObject folder = FolderObject.loadFolderObjectFromDB(defaultInfostoreFolderId, context, connection);
+            if (displayName.equals(folder.getFolderName())) {
+                //Nothing changed, nothing to do (MWB-329)
+                return;
+            }
             /*
              * Update folder name
              */
-            String folderName = OXFolderAdminHelper.determineUserstoreFolderName(context, displayName, connection);
+            String folderName;
+            if (displayName.equalsIgnoreCase(folder.getFolderName())) {
+                folderName = displayName;
+            } else {
+                folderName = OXFolderAdminHelper.determineUserstoreFolderName(context, displayName, connection);
+            }
             OXFolderSQL.updateName(defaultInfostoreFolderId, folderName, lastModified, context.getMailadmin(), connection, context);
-
             /*
              * Clear caches
              */
             updateLastModified(context, connection, lastModified);
             clearFolderCache(context, defaultInfostoreFolderId);
-
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }

@@ -93,6 +93,8 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -333,8 +335,13 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             final String folderField;
             switch (moduleId) {
             case 1:
-                join = " LEFT JOIN calendar_event AS aux ON (pa.cid = aux.cid AND pa.attached = aux.id AND 0 = aux.account)";
-                folderField = "aux.folder";
+                if (isLegacyCalendarStorage(ctx.getContextId())) {
+                    join = " LEFT JOIN prg_dates AS aux ON (pa.cid = aux.cid AND pa.attached = aux.intfield01)";
+                    folderField = "aux.fid";
+                } else {
+                    join = " LEFT JOIN calendar_event AS aux ON (pa.cid = aux.cid AND pa.attached = aux.id AND 0 = aux.account)";
+                    folderField = "aux.folder";
+                }
                 break;
             case 4:
                 join = " LEFT JOIN task_folder AS aux ON (pa.cid = aux.cid AND pa.attached = aux.id)";
@@ -389,6 +396,11 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             Integer.valueOf(moduleId),
             Integer.valueOf(attachedId),
             Integer.valueOf(ctx.getContextId())));
+    }
+
+    private static boolean isLegacyCalendarStorage(int contextId) throws OXException {
+        UpdateStatus updateStatus = Updater.getInstance().getStatus(contextId);
+        return false == updateStatus.isExecutedSuccessfully("com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask");
     }
 
     @Override
@@ -667,7 +679,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
     }
 
-    private String saveFile(final InputStream data, final AttachmentMetadata attachment, Context ctx, boolean calculateChecksum) throws OXException {
+    private String saveFile(final InputStream data, final AttachmentMetadata attachment, Context ctx, boolean calculateChecksum) throws OXException, OXException {
         SaveFileAction action = new SaveFileAction(getFileStorage(ctx), data, attachment.getFilesize(), calculateChecksum);
         action.perform();
         addUndoable(action);
@@ -727,9 +739,10 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     private InputStream retrieveFile(String fileId, Context ctx) throws OXException {
-        FileStorage fs = getFileStorage(ctx);
         try {
+            final FileStorage fs = getFileStorage(ctx);
             return fs.getFile(fileId);
+
         } catch (OXException e) {
             throw AttachmentExceptionCodes.READ_FAILED.create(e, fileId);
         }

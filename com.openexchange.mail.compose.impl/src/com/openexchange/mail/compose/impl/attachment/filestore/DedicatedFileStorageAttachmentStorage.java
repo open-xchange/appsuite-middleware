@@ -59,6 +59,7 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageInfoService;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.mail.compose.AttachmentStorageType;
 import com.openexchange.mail.compose.KnownAttachmentStorageType;
@@ -162,6 +163,56 @@ public class DedicatedFileStorageAttachmentStorage extends FileStorageAttachment
 
         URI uri = FileStorages.getFullyQualifyingUriForPrefix(prefix, baseUri);
         return new Pair<>(storageService.getFileStorage(uri), uri);
+    }
+
+    /**
+     * Extracts the context identifier from given path prefix.
+     *
+     * @param prefix The path prefix; e.g. "4321_mailcompose_store"
+     * @return The extracted context identifier or <code>-1</code>
+     */
+    public static int extractContextIdFrom(String prefix) {
+        if (Strings.isEmpty(prefix)) {
+            return -1;
+        }
+
+        String toExtractFrom = prefix.trim();
+        if (!toExtractFrom.endsWith("_mailcompose_store")) {
+            return -1;
+        }
+
+        int length = toExtractFrom.length();
+        StringBuilder ctxChars = null;
+        int i = 0;
+        {
+            boolean keepOn = true;
+            while (keepOn && i < length) {
+                char ch = toExtractFrom.charAt(i);
+                int digit = Strings.digitForChar(ch);
+                if (digit >= 0) {
+                    if (ctxChars == null) {
+                        ctxChars = new StringBuilder();
+                    }
+                    ctxChars.append(ch);
+                    i++;
+                } else {
+                    keepOn = false;
+                }
+            }
+            if (ctxChars == null || keepOn) {
+                return -1;
+            }
+        }
+
+        if (toExtractFrom.charAt(i) != '_') {
+            return -1;
+        }
+
+        try {
+            return Integer.parseInt(ctxChars.toString(), 10);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
 }

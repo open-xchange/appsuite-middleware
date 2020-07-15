@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage.rdb;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.l;
+import static com.openexchange.osgi.Tools.requireService;
 import java.util.concurrent.TimeUnit;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -60,6 +61,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -103,13 +105,29 @@ public class RdbCalendarStorageFactory implements CalendarStorageFactory {
     @Override
     public CalendarStorage create(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
         if (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == accountId) {
-            /*
-             * fall back to legacy storage in read-only mode if not yet migrated
-             */
             UpdateStatus updateStatus = Updater.getInstance().getStatus(context.getContextId());
+            /*
+             * choose target storage for default account based update status and configuration overrides
+             */
+            if (updateStatus.isExecutedSuccessfully("com.openexchange.chronos.storage.rdb.migration.ChronosStorageDropLegacyStorageTask")) {
+                LOG.debug("ChronosStorageDropLegacyStorageTask executed successfully, using default calendar storage for account '0'.");
+                return new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, accountId, entityResolver, dbProvider, txPolicy);
+            }
+            if (updateStatus.isExecutedSuccessfully("com.openexchange.chronos.storage.rdb.migration.ChronosStoragePurgeLegacyDataTask")) {
+                LOG.debug("ChronosStoragePurgeLegacyDataTask executed successfully, using default calendar storage for account '0'.");
+                return new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, accountId, entityResolver, dbProvider, txPolicy);
+            }
+
             if (false == updateStatus.isExecutedSuccessfully("com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask")) {
-                logLegacyStorageWarning(context.getContextId(), "ChronosStorageMigrationTask not executed successfully, falling back to read-only 'legacy' calendar storage for account '0'.");
+                logLegacyStorageWarning(context.getContextId(), "ChronosStorageMigrationTask not executed successfully, falling back to 'legacy' calendar storage for account '0'.");
                 return new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, txPolicy);
+            }
+            ConfigurationService configService = requireService(ConfigurationService.class, services);
+            if (configService.getBoolProperty("com.openexchange.calendar.replayToLegacyStorage", false)) {
+                LOG.debug("Using 'replaying' calendar storage for default account '0'.");
+                CalendarStorage legacyStorage = new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, txPolicy);
+                CalendarStorage storage = new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, accountId, entityResolver, dbProvider, txPolicy);
+                return new com.openexchange.chronos.storage.rdb.replaying.RdbCalendarStorage(storage, makeResilient(legacyStorage));
             }
         }
         return new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, accountId, entityResolver, dbProvider, txPolicy);

@@ -19,7 +19,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 16
+%define        ox_release 17
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -785,9 +785,33 @@ com.openexchange.hazelcast.network.join=empty
 
 # Configures a comma-separated list of IP addresses / hostnames of possible
 EOF
-  fi
-  ox_add_property com.openexchange.hazelcast.network.join.dns.domainNames "" /opt/open-xchange/etc/hazelcast.properties
+    fi
+    ox_add_property com.openexchange.hazelcast.network.join.dns.domainNames "" /opt/open-xchange/etc/hazelcast.properties
 
+    SCR=SCR-698
+    if ox_scr_todo ${SCR}
+    then
+        PFILE=/opt/open-xchange/etc/cache.ccf
+        if ! grep "jcs.region.Group=LTCP" > /dev/null $PFILE; then
+            echo -e "\n# Pre-defined cache region for Group data" >> $PFILE
+            echo "jcs.region.Group=LTCP" >> $PFILE
+            echo "jcs.region.Group.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes" >> $PFILE
+            echo "jcs.region.Group.cacheattributes.MaxObjects=4000000" >> $PFILE
+            echo "jcs.region.Group.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache" >> $PFILE
+            echo "jcs.region.Group.cacheattributes.UseMemoryShrinker=true" >> $PFILE
+            echo "jcs.region.Group.cacheattributes.MaxMemoryIdleTimeSeconds=360" >> $PFILE
+            echo "jcs.region.Group.cacheattributes.ShrinkerIntervalSeconds=60" >> $PFILE
+            echo "jcs.region.Group.cacheattributes.MaxSpoolPerRun=500" >> $PFILE
+            echo "jcs.region.Group.elementattributes=org.apache.jcs.engine.ElementAttributes" >> $PFILE
+            echo "jcs.region.Group.elementattributes.IsEternal=false" >> $PFILE
+            echo "jcs.region.Group.elementattributes.MaxLifeSeconds=-1" >> $PFILE
+            echo "jcs.region.Group.elementattributes.IdleTime=360" >> $PFILE
+            echo "jcs.region.Group.elementattributes.IsSpool=false" >> $PFILE
+            echo "jcs.region.Group.elementattributes.IsRemote=false" >> $PFILE
+            echo -e "jcs.region.Group.elementattributes.IsLateral=false\n" >> $PFILE
+        fi
+        ox_scr_done ${SCR}
+    fi
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -840,6 +864,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Thu Jul 09 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-07-13 (5804)
 * Fri Jun 26 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-07-02 (5792)
 * Wed Jun 24 2020 Marcus Klein <marcus.klein@open-xchange.com>

@@ -72,7 +72,20 @@ public interface GroupStorage {
      */
     public static final int GUEST_GROUP_IDENTIFIER = Integer.MAX_VALUE;
 
+    /**
+     * The reserved name for special group containing all users.
+     */
     public static final String GROUP_STANDARD_SIMPLE_NAME = "users";
+
+    /**
+     * The special (cache) identifier referencing the identifiers of all groups in a context.
+     */
+    public static final int SPECIAL_FOR_ALL_GROUP_IDS = -1;
+
+    /**
+     * The name for the cache region holding group information.
+     */
+    public static final String CACHE_REGION_NAME = "Group";
 
     /**
      * This method inserts a group without its members into the storage.
@@ -110,7 +123,7 @@ public interface GroupStorage {
 
     /**
      * Insert a member into a group
-     * 
+     *
      * @param ctx The context
      * @param con The connection to use
      * @param group The group to change
@@ -121,7 +134,7 @@ public interface GroupStorage {
 
     /**
      * Removes a member from a group.
-     * 
+     *
      * @param ctx The context
      * @param con The connection to use
      * @param group The group to change

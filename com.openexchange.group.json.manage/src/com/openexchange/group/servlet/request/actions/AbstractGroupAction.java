@@ -94,12 +94,12 @@ public abstract class AbstractGroupAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            final GroupAJAXRequest reminderRequest = new GroupAJAXRequest(requestData, session);
+            final GroupAJAXRequest groupRequest = new GroupAJAXRequest(requestData, session);
             final String sTimeZone = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             if (null != sTimeZone) {
-                reminderRequest.setTimeZone(getTimeZone(sTimeZone));
+                groupRequest.setTimeZone(getTimeZone(sTimeZone));
             }
-            return perform(reminderRequest);
+            return perform(groupRequest);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

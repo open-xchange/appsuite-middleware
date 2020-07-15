@@ -61,13 +61,16 @@ public class ExtractionResult {
     private final int userId;
     private final Association association;
     private final String prefix;
+    private final String rawPrefix;
 
     /**
      * Initializes a new {@link ExtractionResult}.
      */
     public ExtractionResult(int userId, int contextId) {
         super();
-        prefix = contextId + "/" + userId;
+        String prefix = contextId + "/" + userId;
+        this.prefix = prefix;
+        this.rawPrefix = prefix;
         this.userId = userId;
         this.contextId = contextId;
         this.association = Association.CONTEXT_AND_USER;
@@ -76,9 +79,10 @@ public class ExtractionResult {
     /**
      * Initializes a new {@link ExtractionResult}.
      */
-    public ExtractionResult(String prefix) {
+    public ExtractionResult(String prefix, String rawPrefix) {
         super();
         this.prefix = prefix;
+        this.rawPrefix = rawPrefix;
         contextId = -1;
         userId = -1;
         this.association = Association.CUSTOM;
@@ -127,6 +131,15 @@ public class ExtractionResult {
      */
     public String getPrefix() {
         return prefix;
+    }
+
+    /**
+     * Gets the raw prefix
+     *
+     * @return The raw prefix
+     */
+    public String getRawPrefix() {
+        return rawPrefix;
     }
 
 }

@@ -139,6 +139,7 @@ import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -1188,6 +1189,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                // Invalidate cache
+                {
+                    CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                    if (null != cacheService) {
+                        try {
+                            Cache jcs = cacheService.getCache(GroupService.CACHE_REGION_NAME);
+                            jcs.remove(jcs.newCacheKey(contextId, def_group_id));
+                        } catch (OXException e) {
+                            LOG.error("", e);
+                        }
+                    }
+                }
 
                 if (mustMapAdmin) {
                     stmt = con.prepareStatement("INSERT INTO user_setting_admin (cid,user) VALUES (?,?)");
@@ -1367,11 +1380,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         if (viewFactory != null) {
             try {
                 ConfigView view = viewFactory.getView(userId, contextId);
-                return view.get(propertyName, Boolean.class);
+                Boolean value = view.get(propertyName, Boolean.class);
+                return null == value ? defaultValue : value;
             } catch (OXException e) {
                 if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
                     LOG.debug("Context {} is being created. Therefore can't load context sensitive properties. Try to load \"{}\" on global view.", I(contextId), propertyName, e);
-                    return getConfigViewValue(propertyName, null, viewFactory);
+                    return getConfigViewValue(propertyName, defaultValue, viewFactory);
                 }
                 LOG.debug("Unable to load {}.", propertyName, e);
             }
@@ -1390,7 +1404,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     private Boolean getConfigViewValue(String propertyName, Boolean defaultValue, ConfigViewFactory viewFactory) {
         try {
             ConfigView view = viewFactory.getView();
-            return view.get(propertyName, Boolean.class);
+            Boolean value = view.get(propertyName, Boolean.class);
+            return null == value ? defaultValue : value;
         } catch (OXException e) {
             LOG.debug("Unable to load {}.", propertyName, e);
         }
@@ -2165,9 +2180,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public void delete(final Context ctx, final User[] users, Integer destUser, final Connection write_ox_con) throws StorageException {
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
             // delete all users
             int contextId = ctx.getId().intValue();
+            Integer adminId = null;
             for (User user : users) {
                 int userId = user.getId().intValue();
 
@@ -2215,6 +2232,30 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
                 LOG.debug("Delete user {}({}) from groups member...", user.getId(), ctx.getId());
+                // Invalidate cache
+                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        stmt = write_ox_con.prepareStatement("SELECT id FROM groups_member WHERE cid = ? AND member = ?");
+                        stmt.setInt(1, contextId);
+                        stmt.setInt(2, userId);
+                        rs = stmt.executeQuery();
+                        if (rs.next()) {
+                            Cache groupCache = cacheService.getCache(GroupService.CACHE_REGION_NAME);
+                            List<Serializable> keys = new ArrayList<>();
+                            do {
+                                keys.add(groupCache.newCacheKey(contextId, rs.getInt(1)));
+                            } while (rs.next());
+                            groupCache.remove(keys);
+                        }
+                        rs.close();
+                        rs = null;
+                        stmt.close();
+                    } catch (OXException e) {
+                        LOG.error("", e);
+                    }
+                }
+                // Delete from groups member
                 stmt = write_ox_con.prepareStatement("DELETE FROM groups_member WHERE cid = ? AND member = ?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
@@ -2301,27 +2342,45 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
 
+                // Reassign guestCreatedBy values
+                if (destUser == null && adminId == null) {
+                    // Determine context admin
+                    stmt = write_ox_con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid = ?");
+                    stmt.setInt(1, contextId);
+                    rs = stmt.executeQuery();
+                    if (!rs.next()) {
+                        throw new StorageException("Failed to determine context administrator for context " + contextId);
+                    }
+                    adminId = I(rs.getInt(1));
+                    rs.close();
+                    rs = null;
+                    stmt.close();
+                }
+                stmt = write_ox_con.prepareStatement("UPDATE user SET guestCreatedBy = ? WHERE cid = ? AND guestCreatedBy = ?");
+                stmt.setInt(1, destUser == null ? i(adminId) : i(destUser));
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
+                stmt.executeUpdate();
+                stmt.close();
+
                 // JCS
-                {
-                    CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-                    if (null != cacheService) {
-                        try {
-                            CacheKey key = cacheService.newCacheKey(contextId, user.getId().intValue());
-                            Cache cache = cacheService.getCache("User");
-                            cache.remove(key);
-                            cache = cacheService.getCache("UserPermissionBits");
-                            cache.remove(key);
-                            cache = cacheService.getCache("UserConfiguration");
-                            cache.remove(key);
-                            cache = cacheService.getCache("UserSettingMail");
-                            cache.remove(key);
-                            cache = cacheService.getCache("UserAlias");
-                            cache.remove(key);
-                            cache = cacheService.getCache("Capabilities");
-                            cache.removeFromGroup(user.getId(), ctx.getId().toString());
-                        } catch (OXException e) {
-                            LOG.error("", e);
-                        }
+                if (null != cacheService) {
+                    try {
+                        CacheKey key = cacheService.newCacheKey(contextId, user.getId().intValue());
+                        Cache cache = cacheService.getCache("User");
+                        cache.remove(key);
+                        cache = cacheService.getCache("UserPermissionBits");
+                        cache.remove(key);
+                        cache = cacheService.getCache("UserConfiguration");
+                        cache.remove(key);
+                        cache = cacheService.getCache("UserSettingMail");
+                        cache.remove(key);
+                        cache = cacheService.getCache("UserAlias");
+                        cache.remove(key);
+                        cache = cacheService.getCache("Capabilities");
+                        cache.removeFromGroup(user.getId(), ctx.getId().toString());
+                    } catch (OXException e) {
+                        LOG.error("", e);
                     }
                 }
                 // End of JCS
@@ -2344,7 +2403,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             LOG.error("", e);
             throw new StorageException(e);
         } finally {
-            Databases.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -2713,7 +2772,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     private void myChangeInsertModuleAccess(final Context ctx, final int userId, final UserModuleAccess access, final boolean insert, final Connection writeCon, final int[] groups) throws StorageException {
-        checkForIllegalCombination(access);
+        checkForIllegalCombination(ctx.getId().intValue(), userId, access);
         try {
             final UserPermissionBits user = RdbUserPermissionBitsStorage.adminLoadUserPermissionBits(userId, groups, ctx.getId().intValue(), writeCon);
             user.setCalendar(access.getCalendar());
@@ -2757,8 +2816,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void checkForIllegalCombination(final UserModuleAccess access) throws StorageException {
-        if (access.isGlobalAddressBookDisabled()) {
+    private void checkForIllegalCombination(int contextId, int userId, final UserModuleAccess access) throws StorageException {
+        if (access.isGlobalAddressBookDisabled() && false == b(getConfigViewValue(userId, contextId, "com.openexchange.admin.bypassAccessCombinationChecks", Boolean.FALSE))) {
+
             // At least Outlook does not work if global address book is not available. All other groupware functionality gets useless.
             if (access.getEditPublicFolders()) {
                 throw new StorageException("Global address book can not be disabled for non-PIM users.");

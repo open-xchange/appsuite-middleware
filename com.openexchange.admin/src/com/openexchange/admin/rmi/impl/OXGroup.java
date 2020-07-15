@@ -82,6 +82,10 @@ import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
+import com.openexchange.group.GroupService;
+import com.openexchange.group.GroupStorage;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 /**
  * Implementation for the RMI interface of group
@@ -181,11 +185,15 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             if (null != cacheService) {
                 try {
-                    final Cache cache = cacheService.getCache("User");
-                    final int contextId = ctx.getId().intValue();
-                    for (final User user : members) {
+                    Cache cache = cacheService.getCache("User");
+                    int contextId = ctx.getId().intValue();
+                    for (User user : members) {
                         cache.remove(cacheService.newCacheKey(contextId, user.getId().intValue()));
+                        UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
                     }
+
+                    Cache groupCache = cacheService.getCache(GroupService.CACHE_REGION_NAME);
+                    groupCache.remove(cacheService.newCacheKey(contextId, grp_id));
                 } catch (OXException e) {
                     LOGGER.error("", e);
                 }
@@ -273,14 +281,19 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         if (new_members != null) {
                             for (final User user : new_members) {
                                 cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
+                                UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
                             }
                         }
 
                         if (grp.getMembers() != null && grp.getMembers().length > 0) {
                             for (final Integer old_user_id : grp.getMembers()) {
                                 cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), old_user_id.intValue()));
+                                UserConfigurationStorage.getInstance().invalidateCache(old_user_id.intValue(), new ContextImpl(ctx.getId().intValue()));
                             }
                         }
+
+                        Cache groupCache = cacheService.getCache(GroupService.CACHE_REGION_NAME);
+                        groupCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), grp.getId().intValue()));
                     } catch (OXException e) {
                         LOGGER.error("", e);
                     }
@@ -434,14 +447,29 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             // JCS
             // If members sent, remove each from cache
             if (grp.getMembers() != null && grp.getMembers().length > 0) {
-                final Integer[] mems = grp.getMembers();
-                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                Integer[] mems = grp.getMembers();
+                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 if (null != cacheService) {
                     try {
-                        final Cache cache = cacheService.getCache("User");
+                        Cache cache = cacheService.getCache("User");
+                        int contextId = ctx.getId().intValue();
                         for (final Integer member_id : mems) {
-                            cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), member_id.intValue()));
+                            cache.remove(cacheService.newCacheKey(contextId, member_id.intValue()));
+                            UserConfigurationStorage.getInstance().invalidateCache(member_id, new ContextImpl(ctx.getId().intValue()));
                         }
+
+                        Cache groupCache = cacheService.getCache(GroupService.CACHE_REGION_NAME);
+                        groupCache.remove(cacheService.newCacheKey(contextId, GroupStorage.SPECIAL_FOR_ALL_GROUP_IDS));
+                    } catch (OXException e) {
+                        LOGGER.error("", e);
+                    }
+                }
+            } else {
+                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        Cache groupCache = cacheService.getCache(GroupService.CACHE_REGION_NAME);
+                        groupCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), GroupStorage.SPECIAL_FOR_ALL_GROUP_IDS));
                     } catch (OXException e) {
                         LOGGER.error("", e);
                     }
@@ -571,8 +599,15 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         for (final User[] membaz : del_groups_members) {
                             for (final User user : membaz) {
                                 cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
+                                UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
                             }
                         }
+
+                        Cache groupCache = cacheService.getCache(GroupService.CACHE_REGION_NAME);
+                        for (final Group elem : grp) {
+                            groupCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), elem.getId().intValue()));
+                        }
+                        groupCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), GroupStorage.SPECIAL_FOR_ALL_GROUP_IDS));
                     } catch (OXException e) {
                         LOGGER.error("", e);
                     }
@@ -693,8 +728,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 throw e;
             }
 
-            final ArrayList<Group> retval = new ArrayList<Group>();
-
+            List<Group> retval = new ArrayList<Group>(groups.length);
             for (final Group group : groups) {
                 retval.add(oxGroup.get(ctx, group));
             }
@@ -778,7 +812,6 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             if (!tool.existsGroup(ctx, grp_id)) {
                 throw new NoSuchGroupException("No such group");
-
             }
 
             return oxGroup.getMembers(ctx, grp_id);
@@ -916,13 +949,18 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             oxGroup.removeMember(ctx, grp_id, members);
 
             // JCS
-            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+            CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             if (null != cacheService) {
                 try {
-                    final Cache cache = cacheService.getCache("User");
-                    for (final User user : members) {
-                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
+                    Cache cache = cacheService.getCache("User");
+                    int contextId = ctx.getId().intValue();
+                    for (User user : members) {
+                        cache.remove(cacheService.newCacheKey(contextId, user.getId().intValue()));
+                        UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
                     }
+
+                    Cache groupCache = cacheService.getCache(GroupService.CACHE_REGION_NAME);
+                    groupCache.remove(cacheService.newCacheKey(contextId, grp.getId().intValue()));
                 } catch (OXException e) {
                     LOGGER.error("", e);
                 }

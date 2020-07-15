@@ -417,7 +417,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                     cssBuffer.setLength(0);
                 }
                 if (checkMaxContentSize(checkedCSS.length())) {
-                    replaceWith.put(comment, new Comment(checkedCSS, ""));
+                    replaceWith.put(comment, new Comment(checkedCSS));
                 } else {
                     removedNodes.add(comment);
                 }
@@ -454,7 +454,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                         cssBuffer.setLength(0);
                     }
                     if (checkMaxContentSize(checkedCSS.length())) {
-                        replaceWith.put(dataNode, new DataNode(checkedCSS, ""));
+                        replaceWith.put(dataNode, new DataNode(checkedCSS));
                     } else {
                         removedNodes.add(dataNode);
                     }
@@ -491,7 +491,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                         cssBuffer.setLength(0);
                     }
                     if (checkMaxContentSize(checkedCSS.length())) {
-                        replaceWith.put(textNode, new TextNode(checkedCSS, ""));
+                        replaceWith.put(textNode, new TextNode(checkedCSS));
                     } else {
                         removedNodes.add(textNode);
                     }
