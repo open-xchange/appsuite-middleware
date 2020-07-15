@@ -898,7 +898,7 @@ public final class Databases {
 
     /**
      * Executes an SQL query
-     * 
+     *
      * @param databaseService The {@link DatabaseService} to obtain the connection from
      * @param statement The statement to execute
      * @param rc The consumer of the result to use transform into a concrete java object
@@ -912,7 +912,7 @@ public final class Databases {
 
     /**
      * Executes an SQL query.
-     * 
+     *
      * @param contextId The context identifier to use when obtaining the connection. <code>-1</code> to fetch connection without context
      * @param databaseService The {@link DatabaseService} to obtain the connection from
      * @param statement The statement to execute
@@ -940,7 +940,7 @@ public final class Databases {
 
     /**
      * Executes an SQL update
-     * 
+     *
      * @param databaseService The {@link DatabaseService} to obtain the connection from
      * @param statement The statement to execute
      * @param valueSetter The consumers to fill the statement with variables
@@ -954,7 +954,7 @@ public final class Databases {
 
     /**
      * Executes an SQL update
-     * 
+     *
      * @param contextId The context identifier to use when obtaining the connection. <code>-1</code> to fetch connection without context
      * @param databaseService The {@link DatabaseService} to obtain the connection from
      * @param statement The statement to execute
@@ -1097,7 +1097,7 @@ public final class Databases {
     }
 
     /**
-     * 
+     *
      * {@link PreparedStatementValueSetter}
      *
      * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -1116,7 +1116,7 @@ public final class Databases {
     }
 
     /**
-     * 
+     *
      * {@link ResultConsumer}
      *
      * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
