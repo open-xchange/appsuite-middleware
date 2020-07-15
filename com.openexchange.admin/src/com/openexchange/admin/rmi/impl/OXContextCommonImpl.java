@@ -80,7 +80,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         super();
     }
 
-    protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, InvalidDataException {
+    protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, InvalidDataException, ContextExistsException {
         try {
             Boolean ret = null;
 

@@ -54,6 +54,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -61,17 +62,21 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.ws.rs.core.HttpHeaders;
+
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -556,9 +561,9 @@ public class FreeBusyTest extends AbstractChronosTest {
         event.setTransp(visibility);
         event.setSummary(name);
         Date startDate = CalendarUtils.add(new Date(), Calendar.HOUR_OF_DAY, start);
-        event.setStartDate(DateTimeUtil.getDateTime("utc", startDate.getTime()));
+        event.setStartDate(DateTimeUtil.getDateTime(TimeZones.UTC.getID(), startDate.getTime()));
         Date endDate = CalendarUtils.add(new Date(), Calendar.HOUR_OF_DAY, end);
-        event.setEndDate(DateTimeUtil.getDateTime("utc", endDate.getTime()));
+        event.setEndDate(DateTimeUtil.getDateTime(TimeZones.UTC.getID(), endDate.getTime()));
 
         return eventManager.createEvent(event);
     }

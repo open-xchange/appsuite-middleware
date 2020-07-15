@@ -49,6 +49,7 @@
 
 package com.openexchange.gdpr.dataexport.impl.storage;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -68,6 +69,7 @@ import com.openexchange.gdpr.dataexport.DataExportSavepoint;
 import com.openexchange.gdpr.dataexport.FileLocation;
 import com.openexchange.gdpr.dataexport.FileLocations;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.user.UserService;
 
 /**
  * {@link DataExportStorageServiceImpl}
@@ -78,6 +80,7 @@ import com.openexchange.server.ServiceLookup;
 public class DataExportStorageServiceImpl implements DataExportStorageService {
 
     private final AbstractDataExportSql<?> sql;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link DataExportStorageServiceImpl}.
@@ -89,6 +92,7 @@ public class DataExportStorageServiceImpl implements DataExportStorageService {
      */
     public DataExportStorageServiceImpl(boolean useGlobalDb, DataExportConfig config, ServiceLookup services) throws OXException {
         super();
+        this.services = services;
         if (useGlobalDb) {
             this.sql = new GlobalDbDataExportSql(services.getServiceSafe(DatabaseService.class), services.getServiceSafe(ConfigViewFactory.class), config);
         } else {
@@ -128,7 +132,7 @@ public class DataExportStorageServiceImpl implements DataExportStorageService {
 
     @Override
     public boolean markPaused(UUID taskId, int userId, int contextId) throws OXException {
-        return sql.updateTaskStatus(DataExportStatus.PAUSED, taskId, contextId) != null;
+        return sql.updateTaskStatus(DataExportStatus.PAUSED, taskId, userId, contextId) != null;
     }
 
     @Override
@@ -138,12 +142,14 @@ public class DataExportStorageServiceImpl implements DataExportStorageService {
 
     @Override
     public Optional<DataExportTask> getDataExportTask(int userId, int contextId) throws OXException {
-        return Optional.ofNullable(sql.selectTask(contextId, userId));
+        return Optional.ofNullable(sql.selectTasks(contextId, new int[] { userId }, false)[0]);
     }
 
     @Override
     public List<DataExportTask> getDataExportTasks(int contextId) throws OXException {
-        return sql.selectTasks(contextId);
+        int[] userIds = services.getServiceSafe(UserService.class).listAllUser(contextId, true, false);
+        DataExportTask[] dataExportTasks = sql.selectTasks(contextId, userIds, true);
+        return Arrays.asList(dataExportTasks);
     }
 
     @Override
@@ -173,17 +179,17 @@ public class DataExportStorageServiceImpl implements DataExportStorageService {
 
     @Override
     public void setSavePoint(UUID taskId, String moduleId, DataExportSavepoint savePoint, int userId, int contextId) throws OXException {
-        sql.updateSavePoint(taskId, moduleId, savePoint, contextId);
+        sql.updateSavePoint(taskId, moduleId, savePoint, userId, contextId);
     }
 
     @Override
     public boolean markDone(UUID taskId, int userId, int contextId) throws OXException {
-        return sql.updateTaskStatus(DataExportStatus.DONE, taskId, contextId, DataExportStatus.FAILED) != null;
+        return sql.updateTaskStatus(DataExportStatus.DONE, taskId, userId, contextId, DataExportStatus.FAILED) != null;
     }
 
     @Override
     public boolean markAborted(UUID taskId, int userId, int contextId) throws OXException {
-        DataExportStatus prev = sql.updateTaskStatus(DataExportStatus.ABORTED, taskId, contextId, DataExportStatus.DONE, DataExportStatus.FAILED);
+        DataExportStatus prev = sql.updateTaskStatus(DataExportStatus.ABORTED, taskId, userId, contextId, DataExportStatus.DONE, DataExportStatus.FAILED);
         if (prev == DataExportStatus.PENDING) {
             deleteDataExportTask(userId, contextId);
         }
@@ -192,47 +198,47 @@ public class DataExportStorageServiceImpl implements DataExportStorageService {
 
     @Override
     public boolean markFailed(UUID taskId, int userId, int contextId) throws OXException {
-        return sql.updateTaskStatus(DataExportStatus.FAILED, taskId, contextId, DataExportStatus.DONE) != null;
+        return sql.updateTaskStatus(DataExportStatus.FAILED, taskId, userId, contextId, DataExportStatus.DONE) != null;
     }
 
     @Override
     public boolean markPending(UUID taskId, int userId, int contextId) throws OXException {
-        return sql.updateTaskStatus(DataExportStatus.PENDING, taskId, contextId) != null;
+        return sql.updateTaskStatus(DataExportStatus.PENDING, taskId, userId, contextId) != null;
     }
 
     @Override
     public boolean setNotificationSent(UUID taskId, int userId, int contextId) throws OXException {
-        return sql.setNotificationSent(taskId, contextId);
+        return sql.setNotificationSent(taskId, userId, contextId);
     }
 
     @Override
     public boolean unsetNotificationSent(UUID taskId, int userId, int contextId) throws OXException {
-        return sql.unsetNotificationSent(taskId, contextId);
+        return sql.unsetNotificationSent(taskId, userId, contextId);
     }
 
     @Override
     public void markWorkItemDone(String fileStorageLocation, UUID taskId, String moduleId, int userId, int contextId) throws OXException {
-        sql.updateWorkItemStatus(DataExportStatus.DONE, fileStorageLocation, null, taskId, moduleId, contextId);
+        sql.updateWorkItemStatus(DataExportStatus.DONE, fileStorageLocation, null, taskId, moduleId, userId, contextId);
     }
 
     @Override
     public void markWorkItemPaused(String fileStorageLocation, UUID taskId, String moduleId, int userId, int contextId) throws OXException {
-        sql.updateWorkItemStatus(DataExportStatus.PAUSED, fileStorageLocation, null, taskId, moduleId, contextId);
+        sql.updateWorkItemStatus(DataExportStatus.PAUSED, fileStorageLocation, null, taskId, moduleId, userId, contextId);
     }
 
     @Override
     public void markWorkItemFailed(Optional<JSONObject> jFailureInfo, UUID taskId, String moduleId, int userId, int contextId) throws OXException {
-        sql.updateWorkItemStatus(DataExportStatus.DONE, null, jFailureInfo.orElse(null), taskId, moduleId, contextId);
+        sql.updateWorkItemStatus(DataExportStatus.DONE, null, jFailureInfo.orElse(null), taskId, moduleId, userId, contextId);
     }
 
     @Override
     public DataExportSavepoint getSavePoint(UUID taskId, String moduleId, int userId, int contextId) throws OXException {
-        return sql.selectSavePoint(taskId, moduleId, contextId);
+        return sql.selectSavePoint(taskId, moduleId, userId, contextId);
     }
 
     @Override
     public void markWorkItemPending(UUID taskId, String moduleId, int userId, int contextId) throws OXException {
-        sql.updateWorkItemStatus(DataExportStatus.PENDING, null, null, taskId, moduleId, contextId);
+        sql.updateWorkItemStatus(DataExportStatus.PENDING, null, null, taskId, moduleId, userId, contextId);
     }
 
     @Override
@@ -246,23 +252,23 @@ public class DataExportStorageServiceImpl implements DataExportStorageService {
     }
 
     @Override
-    public void addResultFile(String fileStorageLocation, int number, long size, UUID taskId, int contextId) throws OXException {
-        sql.addResultFile(fileStorageLocation, number, size, taskId, contextId);
+    public void addResultFile(String fileStorageLocation, int number, long size, UUID taskId, int userId, int contextId) throws OXException {
+        sql.addResultFile(fileStorageLocation, number, size, taskId, userId, contextId);
     }
 
     @Override
-    public void deleteResultFiles(UUID taskId, int contextId) throws OXException {
-        sql.deleteResultFiles(taskId, contextId);
+    public void deleteResultFiles(UUID taskId, int userId, int contextId) throws OXException {
+        sql.deleteResultFiles(taskId, userId, contextId);
     }
 
     @Override
-    public void dropIntermediateFiles(UUID taskId, int contextId) throws OXException {
-        sql.dropIntermediateFiles(taskId, contextId);
+    public void dropIntermediateFiles(UUID taskId, int userId, int contextId) throws OXException {
+        sql.dropIntermediateFiles(taskId, userId, contextId);
     }
 
     @Override
     public boolean incrementFailCount(UUID taskId, String moduleId, int userId, int contextId) throws OXException {
-        return sql.incrementFailCount(taskId, moduleId, contextId);
+        return sql.incrementFailCount(taskId, moduleId, userId, contextId);
     }
 
 }

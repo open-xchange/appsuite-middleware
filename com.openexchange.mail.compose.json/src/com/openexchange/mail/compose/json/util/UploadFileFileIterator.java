@@ -47,51 +47,93 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.mail.compose.json.util;
 
-import java.util.Collection;
-import com.openexchange.groupware.results.AbstractTimedResult;
-import com.openexchange.tools.iterator.ArrayIterator;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.upload.StreamedUploadFile;
+import com.openexchange.groupware.upload.StreamedUploadFileInputStream;
+import com.openexchange.groupware.upload.StreamedUploadFileIterator;
+import com.openexchange.groupware.upload.UploadFile;
 
 /**
- * {@link FileTimedResult}
+ * {@link UploadFileFileIterator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.4
  */
-public class FileTimedResult extends AbstractTimedResult<File> {
+public class UploadFileFileIterator implements StreamedUploadFileIterator {
+
+    private final Iterator<UploadFile> uploadFilesIter;
 
     /**
-     * Initializes a new {@link FileTimedResult} from given collection.
+     * Initializes a new {@link UploadFileFileIterator}.
      *
-     * @param collection The collection
+     * @param uploadFiles The upload files
      */
-    public FileTimedResult(final Collection<File> collection) {
-        super(new SearchIteratorAdapter<File>(collection.iterator(), collection.size()));
-    }
-
-    /**
-     * Initializes a new {@link FileTimedResult} from given array.
-     *
-     * @param array The array
-     */
-    public FileTimedResult(final File[] array) {
-        super(new ArrayIterator<File>(array));
-    }
-
-    /**
-     * Initializes a new {@link FileTimedResult} from given search iterator.
-     *
-     * @param iter The search iterator
-     */
-    public FileTimedResult(final SearchIterator<File> iter) {
-        super(iter);
+    public UploadFileFileIterator(List<UploadFile> uploadFiles) {
+        super();
+        this.uploadFilesIter = uploadFiles.iterator();
     }
 
     @Override
-    protected long extractTimestamp(final File object) {
-        return object.getSequenceNumber();
+    public boolean hasNext() throws OXException {
+        return uploadFilesIter.hasNext();
+    }
+
+    @Override
+    public StreamedUploadFile next() throws OXException {
+        UploadFile uploadFile = uploadFilesIter.next();
+        return new StreamedUploadFileImpl(uploadFile);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class StreamedUploadFileImpl implements StreamedUploadFile {
+
+        private final UploadFile uploadFile;
+
+        StreamedUploadFileImpl(UploadFile uploadFile) {
+            super();
+            this.uploadFile = uploadFile;
+        }
+
+        @Override
+        public long getSize() {
+            return uploadFile.getSize();
+        }
+
+        @Override
+        public String getPreparedFileName() {
+            return uploadFile.getPreparedFileName();
+        }
+
+        @Override
+        public String getFileName() {
+            return uploadFile.getFileName();
+        }
+
+        @Override
+        public String getFieldName() {
+            return uploadFile.getFieldName();
+        }
+
+        @Override
+        public String getContentType() {
+            return uploadFile.getContentType();
+        }
+
+        @Override
+        public String getContentId() {
+            return uploadFile.getContentId();
+        }
+
+        @Override
+        public StreamedUploadFileInputStream getStream() throws IOException {
+            return StreamedUploadFileInputStream.streamFor(uploadFile.openStream());
+        }
     }
 
 }

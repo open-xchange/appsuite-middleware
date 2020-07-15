@@ -365,7 +365,6 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
                 ret.add(getVersionFile(master, r));
             }
         }
-        master.setVersion(String.valueOf(-1));
         master.setIsCurrentVersion(true);
         ret.add(master);
         sort(ret, sort, order);

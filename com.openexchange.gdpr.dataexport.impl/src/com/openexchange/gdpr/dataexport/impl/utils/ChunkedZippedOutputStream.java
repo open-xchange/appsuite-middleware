@@ -120,7 +120,7 @@ public class ChunkedZippedOutputStream {
      * @throws OXException If an Open-Xchange error occurs
      */
     public synchronized void cleanUp() throws OXException {
-        storageService.deleteResultFiles(task.getId(), task.getContextId());
+        storageService.deleteResultFiles(task.getId(), task.getUserId(), task.getContextId());
         cleanedUp = true;
     }
 
@@ -279,7 +279,7 @@ public class ChunkedZippedOutputStream {
         zipOutputStream.close();
 
         String fileStorageLocation = zipOutputStream.awaitFileStorageLocation();
-        storageService.addResultFile(fileStorageLocation, ++currentChunkNumber, currentSize, task.getId(), task.getContextId());
+        storageService.addResultFile(fileStorageLocation, ++currentChunkNumber, currentSize, task.getId(), task.getUserId(), task.getContextId());
     }
 
     private void constructNewStream() {

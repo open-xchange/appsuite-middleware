@@ -1025,7 +1025,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 exception = e;
                 Exception nextException = e.getNextException();
                 if (nextException instanceof IOException) {
-                    if (nextException.getMessage().equals("Maximum message size is exceeded.")) {
+                    if ("Maximum message size is exceeded.".equals(nextException.getMessage())) {
                         throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(getMaxMailSize(), 0, false, true));
                     }
                 }

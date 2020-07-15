@@ -348,28 +348,31 @@ public interface DataExportStorageService extends DataExportStatusChecker {
      * @param number The file's number
      * @param size The file's size (in bytes)
      * @param taskId The task identifier
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @throws OXException If operation fails
      */
-    void addResultFile(String fileStorageLocation, int number, long size, UUID taskId, int contextId) throws OXException;
+    void addResultFile(String fileStorageLocation, int number, long size, UUID taskId, int userId, int contextId) throws OXException;
 
     /**
      * Deletes the result files from given task
      *
      * @param taskId The identifier of the data export task
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @throws OXException If operation fails
      */
-    void deleteResultFiles(UUID taskId, int contextId) throws OXException;
+    void deleteResultFiles(UUID taskId, int userId, int contextId) throws OXException;
 
     /**
      * Drops the intermediate file artifacts from task-associated work items.
      *
      * @param taskId The identifier of the data export task
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @throws OXException If operation fails
      */
-    void dropIntermediateFiles(UUID taskId, int contextId) throws OXException;
+    void dropIntermediateFiles(UUID taskId, int userId, int contextId) throws OXException;
 
     /**
      * Attempts to increment the fail count for given provider.

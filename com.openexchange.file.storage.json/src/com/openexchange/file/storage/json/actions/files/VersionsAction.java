@@ -140,7 +140,7 @@ public class VersionsAction extends AbstractListingAction {
                     @Override
                     public boolean accept(final File thing) throws OXException {
                         final String version = thing.getVersion();
-                        return version != null && !version.equals("0");
+                        return version == null || !version.equals("0");
                     }
                 };
             }
