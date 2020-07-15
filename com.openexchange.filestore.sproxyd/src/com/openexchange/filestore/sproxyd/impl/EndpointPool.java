@@ -59,10 +59,11 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.apache.http.client.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.filestore.sproxyd.osgi.Services;
+import com.openexchange.exception.OXException;
 import com.openexchange.metrics.micrometer.Micrometer;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import io.micrometer.core.instrument.Metrics;
@@ -92,6 +93,7 @@ public class EndpointPool {
     private final AtomicInteger counter;
     private final String filestoreId;
     private final int numberOfEndpoints;
+    private final ServiceLookup services;
     private ScheduledTimerTask heartbeat;
 
     /**
@@ -100,11 +102,13 @@ public class EndpointPool {
      * @param filestoreId The filestore ID
      * @param endpointUrls A list of endpoint URLs to manage; must not be empty; URLs must always end with a trailing slash
      * @param heartbeatInterval
-     * @param timerService
+     * @param services
+     * @throws OXException
      */
-    public EndpointPool(String filestoreId, List<String> endpointUrls, int heartbeatInterval, TimerService timerService) {
+    public EndpointPool(String filestoreId, List<String> endpointUrls, int heartbeatInterval, ServiceLookup services) throws OXException {
         super();
         this.filestoreId = filestoreId;
+        this.services = services;
         int size = endpointUrls.size();
         numberOfEndpoints = size;
         available = new ArrayList<>(endpointUrls);
@@ -115,7 +119,7 @@ public class EndpointPool {
         }
 
         LOG.debug("Sproxyd endpoint pool [{}]: Scheduling heartbeat timer task", filestoreId);
-        heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(filestoreId, this), heartbeatInterval, heartbeatInterval);
+        heartbeat = services.getServiceSafe(TimerService.class).scheduleWithFixedDelay(new Heartbeat(filestoreId, this), heartbeatInterval, heartbeatInterval);
         initMetrics();
     }
 
@@ -248,7 +252,7 @@ public class EndpointPool {
         }
     }
 
-    private static final class Heartbeat implements Runnable {
+    private final class Heartbeat implements Runnable {
 
         private final String filestoreId;
         private final EndpointPool endpoints;
@@ -270,7 +274,7 @@ public class EndpointPool {
 
                 LOG.debug("Sproxyd endpoint pool [{}]: Heartbeat - blacklist contains {} endpoints", filestoreId, I(blacklist.size()));
                 for (String endpoint : blacklist) {
-                    HttpClient httpClient = Services.getService(HttpClientService.class).getHttpClient(filestoreId);
+                    HttpClient httpClient = services.getServiceSafe(HttpClientService.class).getHttpClient(filestoreId);
                     if (Utils.endpointUnavailable(endpoint, httpClient)) {
                         LOG.warn("Sproxyd endpoint pool [{}]: Endpoint {} is still unavailable", filestoreId, endpoint);
                     } else {
