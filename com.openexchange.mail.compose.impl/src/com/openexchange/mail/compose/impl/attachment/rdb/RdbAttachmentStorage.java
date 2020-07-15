@@ -286,7 +286,6 @@ public class RdbAttachmentStorage extends AbstractNonCryptoAttachmentStorage {
             stmt.setInt(3, session.getUserId());
             stmt.setInt(4, chunkPos);
             stmt.setBinaryStream(5, Streams.asInputStream(baos));
-            stmt.executeUpdate();
         } catch (SQLException e) {
             if (Databases.isPacketTooBigException(e)) {
                 throw OXException.general("Encountered \"package too big\" SQL error while trying to transfer " + baos.size() + " bytes of binary data.", e);
