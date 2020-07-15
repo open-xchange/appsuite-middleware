@@ -104,7 +104,7 @@ public class BasicAuthenticator extends OXCommonImpl {
      *
      * @param context The bundle context; needed to mark the authenticator as plugIn-aware
      * @throws StorageException If instantiation fails
-     * @deprecated Use {@link #createPluginAwareAuthenticator(BundleContext)}
+     * @deprecated Use {@link #createPluginAwareAuthenticator()}
      */
     @Deprecated
     public BasicAuthenticator(BundleContext context) throws StorageException {
