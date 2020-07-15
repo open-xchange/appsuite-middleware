@@ -226,6 +226,7 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
         file.setCreated(r.getCreationDate());
         file.setFileSize(null != r.getContentLength() ? l(r.getContentLength()) : -1L);
         file.setVersion(r.getHref().substring(r.getHref().lastIndexOf("/") + 1));
+        file.setIsCurrentVersion(false);
         return file;
     }
 
