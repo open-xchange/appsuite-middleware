@@ -89,7 +89,7 @@ public class CompositionSpaceMigrateAttachmentBinaryDataTask extends UpdateTaskA
             Databases.startTransaction(writeCon);
             rollback = 1;
 
-            stmt = writeCon.prepareStatement("INSERT INTO compositionSpaceAttachmentBinaryChunk (uuid, cid, user, chunk, data) SELECT uuid, cid, user, 1, data FROM compositionSpaceAttachmentBinary");
+            stmt = writeCon.prepareStatement("INSERT INTO compositionSpaceAttachmentBinaryChunk (uuid, chunk, data) SELECT uuid, 1, data FROM compositionSpaceAttachmentBinary");
             stmt.executeUpdate();
             closeSQLStuff(stmt);
             stmt = null;
