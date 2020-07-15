@@ -51,14 +51,22 @@ package com.openexchange.chronos.itip.json.action;
 
 import static com.openexchange.chronos.itip.json.action.Utils.convertToResult;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.IncomingSchedulingMessageBuilder;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.scheduling.SchedulingBroker;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
@@ -68,6 +76,7 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -157,11 +166,96 @@ public class IncomingSchedulingAction {
         IncomingSchedulingMessageBuilder builder = IncomingSchedulingMessageBuilder.newBuilder();
         builder.setMethod(method);
         builder.setTargetUser(session.getUserId());
-        builder.setResource(new DefaultCalendarObjectResource(calendar.getEvents()));
+        builder.setResource(new DefaultCalendarObjectResource(purifyEvents(calendar)));
         builder.setSchedulingObject(new IncomingSchedulingMail(services, request, session.getSession()));
 
         SchedulingBroker schedulingBroker = services.getServiceSafe(SchedulingBroker.class);
         return schedulingBroker.handleIncomingScheduling(session, SchedulingSource.API, builder.build());
+    }
+
+    /**
+     * Purifies the calendar events based on known client flaws that need to be treated before further
+     * processing.
+     *
+     * @param calendar The calendar to process
+     * @return A list of purified events
+     * @throws OXException In case no events are found
+     */
+    private static List<Event> purifyEvents(ImportedCalendar calendar) throws OXException {
+        if (null == calendar.getEvents() || calendar.getEvents().isEmpty()) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("There are no eventes to process.");
+        }
+        List<Event> events = CalendarUtils.sortSeriesMasterFirst(new LinkedList<>(calendar.getEvents()));
+        if (looksLikeMicrosoft(calendar)) {
+            /*
+             * Special handling for Microsoft behavior
+             */
+            ensureOrganizer(events);
+            ensureAtteendees(events);
+        }
+
+        return events;
+    }
+
+    /**
+     * Adds (if at least present once) the organizer instance to all given events
+     *
+     * @param events The events to add the organizer to
+     */
+    private static void ensureOrganizer(List<Event> events) {
+        /*
+         * Check that the organizer value can and must be added to some events
+         */
+        if (1 == events.size()) {
+            return;
+        }
+        Optional<Event> organizerEvent = events.stream().filter(e -> null != e.getOrganizer()).findFirst();
+        if (false == organizerEvent.isPresent()) {
+            return;
+        }
+        /*
+         * Add organizer to events that have no organizer
+         */
+        Organizer organizer = organizerEvent.get().getOrganizer();
+        events.stream().filter(e -> null == e.getOrganizer()).forEach((e) -> e.setOrganizer(new Organizer(organizer)));
+    }
+    
+    /**
+     * Adds (if at least present once) attendees(s) to all given events
+     *
+     * @param events The events to add the attendee(s) to
+     * @throws OXException If attendees can't be copied
+     */
+    private static void ensureAtteendees(List<Event> events) throws OXException {
+        /*
+         * Check that the attendee value can and must be added to some events
+         */
+        if (1 == events.size()) {
+            return;
+        }
+        Optional<Event> attendeeEvent = events.stream().filter(e -> null != e.getAttendees() && false == e.getAttendees().isEmpty()).findFirst();
+        if (false == attendeeEvent.isPresent()) {
+            return;
+        }
+        /*
+         * Add attendees to events that have no attendees
+         */
+        List<Attendee> attendees = attendeeEvent.get().getAttendees();
+        List<Attendee> copy = AttendeeMapper.getInstance().copy(attendees, (AttendeeField[]) null);
+        events.stream().filter(e -> null == e.getAttendees()).forEach((e) -> e.setAttendees(copy));
+    }
+
+    /**
+     * Gets a value indicating whether the imported calendar looks like it was
+     * generated by a Microsoft software or not
+     *
+     * @param calendar The imported calendar
+     * @return <code>true</code> if the calendar looks like it was generated with a Microsoft software,
+     *         <code>false</code> otherwise
+     */
+    private static boolean looksLikeMicrosoft(ImportedCalendar calendar) {
+        String property = calendar.getProdId();
+        return Strings.isNotEmpty(property) && Strings.toLowerCase(property).indexOf("microsoft") >= 0;
     }
 
 }
