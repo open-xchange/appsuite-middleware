@@ -50,6 +50,7 @@
 package com.openexchange.filestore.sproxyd.chunkstorage;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
 
@@ -85,13 +86,13 @@ public interface ChunkStorage {
      * @return The document's chunks
      * @throws OXException If chunks cannot be returned
      */
-    List<Chunk> optChunks(UUID documentId) throws OXException;
+    Optional<List<Chunk>> optChunks(UUID documentId) throws OXException;
 
     /**
      * Gets the chunk for the denoted document.
      *
      * @param chunkId The chunk's identifier in Scality system
-     * @return The chunk or <code>null</code> if there is no such chunk
+     * @return The chunk
      * @throws OXException If chunk cannot be returned
      */
     Chunk getChunk(UUID chunkId) throws OXException;
@@ -101,7 +102,7 @@ public interface ChunkStorage {
      *
      * @param chunkId The chunk's identifier in Scality system
      * @param documentId The document identifier
-     * @return The next chunk or <code>null</code> if there is no next chunk
+     * @return The next chunk
      * @throws OXException If chunk cannot be returned
      */
     Chunk getNextChunk(UUID chunkId, UUID documentId) throws OXException;
@@ -110,10 +111,10 @@ public interface ChunkStorage {
      * Gets the next chunk following referenced chunk in denoted document.
      *
      * @param documentId The document identifier
-     * @return The last chunk or <code>null</code> if there is no next chunk
+     * @return The last chunk or empty if there is no next chunk
      * @throws OXException If chunk cannot be returned
      */
-    Chunk getLastChunk(UUID documentId) throws OXException;
+    Optional<Chunk> getLastChunk(UUID documentId) throws OXException;
 
     /**
      * Stores a new chunk
