@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_CN.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-04-26 19:33+1000\n"
+"PO-Revision-Date: 2020-07-10 20:57+1000\n"
 "Last-Translator: \n"
 "Language-Team: Simplified Chinese <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.3.1\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:84
@@ -62,6 +62,58 @@ msgid ""
 "The server configuration cannot be retrieved due to an internal server "
 "error. Please try again later."
 msgstr "由于一个内部服务器错误，因而不能检索服务器配置。请再试。"
+
+#. The display name in context of the maximum allowed number of app-specific passwords a user may create.
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:63
+msgid "App-specific passwords"
+msgstr "应用程序指定密码"
+
+#. The display name used for a Drive Sync App / id "drive"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:66
+msgid "Drive Sync App"
+msgstr "Drive 同步应用程序"
+
+#. The display name used for a Calendar Client (CalDAV) / id "caldav"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:69
+msgid "Calendar Client (CalDAV)"
+msgstr "日历客户端（CalDAV）"
+
+#. The display name used for a Addressbook Client (CardDAV) / id "carddav"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:72
+msgid "Addressbook Client (CardDAV)"
+msgstr "地址簿客户端（CardDAV）"
+
+#. The display name used for a WebDAV Client / id "webdav"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:75
+msgid "WebDAV Client"
+msgstr "WebDAV 客户端"
+
+#. The account is not authorized to perform this action.  Displayed when a login without full permission tries to perform action requiring full priv
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:63
+msgid "This account isn't authorized to perform this action."
+msgstr "此户口未被授权进行此动作。"
+
+#. The type of application isn't recognized
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:65
+msgid "Unknown application type $1%s"
+msgstr "未知应用程序类型 $1%s"
+
+#. Unable to update application passwords during a password change action.
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:67
+msgid ""
+"Unable to update application passwords during password change. You may need "
+"to remove then recreate the application passwords."
+msgstr ""
+"在密码更改期间无法更新应用程序密码。您可能需要移除然后重新创建应用程序密码。"
+
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:69
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+msgid "The operation could not be completed due to missing capabilities."
+msgstr "由于缺少功能, 无法完成操作。"
+
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:71
+msgid "This client cannot be used with an application-specific password."
+msgstr "此客户端不能使用应用程序指定的密码。"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -188,39 +240,47 @@ msgid "Every week on %1$s"
 msgstr "每周于%1$s"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:67
+msgid "Every week"
+msgstr "每周"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:69
 msgid "Every %1$s weeks on %2$s"
 msgstr "每 %1$s 周于 %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:69
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:71
+msgid "Every %1$s weeks"
+msgstr "每 %1$s 周"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:73
 msgid "On %1$s. day every %2$s. month"
 msgstr "在 %1$s。天，每 %2$s 的。月"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:71
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:75
 msgid "On %1$s %2$s every %3$s. month"
 msgstr "每 %3$s 的 %1$s %2$s。月"
 
 #. On %1$s %2$s in %3$s; e.g "On third Tuesday in April"
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:73
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:77
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:835
 msgid "On %1$s %2$s in %3$s"
 msgstr "%3$s的第 %1$s 个%2$s"
 
 #. E.g. "Every 2. February"
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:76
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:80
 msgid "Every %1$s. %2$s"
 msgstr "每 %1$s。%2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:78
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:82
 msgid "Work day"
 msgstr "工作日"
 
 #. Weekend day
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:80
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:84
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:918
 msgid "Weekend day"
 msgstr "周末"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:82
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:86
 msgid "Day"
 msgstr "日"
 
@@ -228,43 +288,43 @@ msgstr "日"
 #. * Weekdays
 #.
 #. Monday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:84
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:88
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:891
 msgid "Monday"
 msgstr "星期一"
 
 #. Tuesday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:86
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:90
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:894
 msgid "Tuesday"
 msgstr "星期二"
 
 #. Wednesday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:88
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:92
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:897
 msgid "Wednesday"
 msgstr "星期三"
 
 #. Thursday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:90
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:94
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:900
 msgid "Thursday"
 msgstr "星期四"
 
 #. Friday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:92
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:96
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:903
 msgid "Friday"
 msgstr "星期五"
 
 #. Saturday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:94
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:98
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:906
 msgid "Saturday"
 msgstr "星期六"
 
 #. Sunday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:96
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:100
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:909
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:912
 msgid "Sunday"
@@ -274,73 +334,73 @@ msgstr "星期日"
 #. * Months
 #.
 #. January
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:98
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:102
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:851
 msgid "January"
 msgstr "一月"
 
 #. February
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:100
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:104
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:854
 msgid "February"
 msgstr "二月"
 
 #. March
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:102
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:106
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:857
 msgid "March"
 msgstr "三月"
 
 #. April
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:104
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:108
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:860
 msgid "April"
 msgstr "四月"
 
 #. May
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:106
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:110
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:863
 msgid "May"
 msgstr "五月"
 
 #. June
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:108
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:112
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:866
 msgid "June"
 msgstr "六月"
 
 #. July
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:110
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:114
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:869
 msgid "July"
 msgstr "七月"
 
 #. August
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:112
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:116
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:872
 msgid "August"
 msgstr "八月"
 
 #. September
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:114
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:118
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:875
 msgid "September"
 msgstr "九月"
 
 #. October
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:116
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:120
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:878
 msgid "October"
 msgstr "十月"
 
 #. November
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:118
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:122
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:881
 msgid "November"
 msgstr "十一月"
 
 #. December
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:120
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:124
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:884
 msgid "December"
 msgstr "十二月"
@@ -349,45 +409,45 @@ msgstr "十二月"
 #. * Monthly1 constants
 #.
 #. first
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:122
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:126
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:925
 msgid "first"
 msgstr "第一"
 
 #. second
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:124
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:128
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:928
 msgid "second"
 msgstr "第二"
 
 #. third
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:126
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:130
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:931
 msgid "third"
 msgstr "第三"
 
 #. fourth
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:128
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:132
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:934
 msgid "fourth"
 msgstr "第四"
 
 #. last
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:130
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:134
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:937
 msgid "last"
 msgstr "最后"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:132
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:136
 msgid "Occurs %1$s times"
 msgstr "发生 %1$s 次"
 
 #. E.g. "Until Wednesday, July 11, 2012"
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:135
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:139
 msgid "Until %1$s"
 msgstr "直到 %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:137
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:141
 msgid "No end"
 msgstr "无结束日期"
 
@@ -713,116 +773,120 @@ msgid "Participants"
 msgstr "参与者"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
+msgid "Meeting access"
+msgstr "会议访问"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:208
 msgid "Details"
 msgstr "详细信息"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:208
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
 msgid "Show as:"
 msgstr "显示为:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
 msgid "Created:"
 msgstr "创建时间:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
 msgid "Modified:"
 msgstr "修改时间:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
 msgid ""
 "%1$s has deleted an appointment on behalf of %2$s, or you have been removed "
 "as a participant:"
 msgstr "%1$s 已经代表 %2$s 删除了一个约会，或者你已被从参与者中移除:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
 msgid ""
 "%1$s has deleted an appointment of the series %2$s on behalf of %3$s, or you "
 "have been removed as a participant:"
 msgstr "%1$s 已删除代表 %3$s 的 %2$s 系列的约会，或者您已作为参与者被删除："
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:220
 msgid "%1$s has deleted an appointment on your behalf:"
 msgstr "%1$s 已经代表你删除了一个约会:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:220
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
 msgid "%1$s has deleted an appointment of the series %2$s on your behalf:"
 msgstr "%1$s 已代表您删除了系列 %2$s 的约会："
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:224
 msgid ""
 "%1$s has deleted an appointment, or you have been removed as a participant:"
 msgstr "%1$s 已经删除了一个约会，或者你已被从参与者中移除:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:224
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:226
 msgid ""
 "%1$s has deleted an appointment of the series %2$s, or you have been removed "
 "as a participant:"
 msgstr "%1$s 已删除 %2$s 系列的约会，或者您已作为参与者被删除："
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:226
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:228
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:230
 msgid "Change the subject to %1$s."
 msgstr "修改主题为 %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:230
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:232
 msgid "The appointment has a new subject: %1$s."
 msgstr "约会有了一个新的主题：%1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:232
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:234
 msgid "The appointment will now be shown as: \"%1$s\"."
 msgstr "该约会现在会被显示为: \"%1$s\"。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:234
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:236
 msgid "The appointment timezone was changed to: %1$s"
 msgstr "该约会的时区被更改为: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:236
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:238
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:240
 msgid "Change the location to %1$s."
 msgstr "修改地址为 %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:240
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:242
 msgid "The appointment takes place in a new location: %1$s."
 msgstr "约会有了一个新的位置: %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:242
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:244
 msgid "The location of the appointment has been removed."
 msgstr "约会的位置已被移除。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:244
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:246
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:248
 msgid "Use the appointment description below."
 msgstr "使用以下的约会描述。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:248
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:250
 msgid "The appointment description has changed."
 msgstr "约会描述已修改。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:250
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:252
 msgid "Please invite %1$s to the appointment."
 msgstr "请邀请 %1$s 到约会。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:252
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:254
 msgid "Add %1$s to the appointment."
 msgstr "添加 %1$s 到约会。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:254
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:256
 msgid "%1$s has been invited to the appointment."
 msgstr "%1$s 已被邀请到该约会。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:256
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:258
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:260
 msgid "Remove %1$s from the appointment."
 msgstr "从约会中移除 %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:260
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:262
 msgid "%1$s has been removed from the appointment."
 msgstr "%1$s 已从约会中被移除。"
 
 #. *
 #. * Example: "UserXY has accepted the appointment."
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:265
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:267
 msgid "%1$s has %2$s the appointment."
 msgstr "%1$s 已 %2$s 约会。"
 
@@ -834,160 +898,160 @@ msgstr "%1$s 已 %2$s 约会。"
 #. * Confirmation statuses
 #.
 #. waiting
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:271
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:696
 msgid "waiting"
 msgstr "等待中"
 
 #.
 #. public static final String TENTATIVELY_ACCEPT = "tentatively accept";
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
 msgid "Invite the group %1$s to the appointment."
 msgstr "邀请组 %1$s 到约会。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
 msgid "The group %1$s has been invited to the appointment."
 msgstr "群组 %1$s 已被邀请参加约会。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:285
 msgid "Remove the group %1$s from the appointment."
 msgstr "从约会中移除组 %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:285
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:287
 msgid "The group %1$s has been removed from the appointment."
 msgstr "群组 %1$s 已从约会中移除。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:287
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:289
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
 msgid "Reserve the resource %1$s for the appointment."
 msgstr "为约会保留资源 %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
 msgid "The resource %1$s has been reserved for the appointment."
 msgstr "已为约会预留了资源 %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:297
 msgid "Remove the resource %1$s from the appointment."
 msgstr "从约会中移除资源 %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:297
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:299
 msgid "The resource %1$s is no longer reserved for the appointment."
 msgstr "资源 %1$s 不再为约会保留。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:299
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:301
 msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
 msgstr "已重新安排约会日期。原来日期：%1$s。新的日期：%2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:301
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
 msgid ""
 "The timezone of the appointment was changed. Original timezone: %1$s. New "
 "timezone: %2$s"
 msgstr "约会的时区已更改。原始时区:%1$s。新时区:%2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
 msgid ""
 "The timezone of the appointment's start date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr "约会开始日期的时区已更改。原始时区： %1$s。新时区： %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:307
 msgid ""
 "The timezone of the appointment's end date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr "约会结束日期的时区已更改。原始时区： %1$s。新时区： %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:307
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:309
 msgid "Reschedule the appointment. Original date: %1$s. New date: %2$s"
 msgstr "重新安排约会。原始日期： %1$s。新日期： %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:309
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:311
 msgid "The appointment series was updated, beginning at %1$s."
 msgstr "约会系列已更新，从 %1$s 开始。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:311
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:313
 msgid "The appointment's recurrence rule has changed to: %1$s."
 msgstr "约会的定期规则已更改为：%1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:313
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
 msgid ""
 "Reschedule the appointment. Original date/time: %1$s. New date/time: %2$s"
 msgstr "重新安排约会。原始日期/时间：%1$s。新日期/时间： %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:317
 msgid "Resources"
 msgstr "资源"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:317
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:319
 msgid "The entire day"
 msgstr "全天"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:319
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:321
 msgid "New appointment: %1$s"
 msgstr "新约会：%1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:321
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:323
 msgid "Appointment changed: %1$s"
 msgstr "约会更改: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:323
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:325
 msgid "Appointment canceled: %1$s"
 msgstr "约会取消: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:325
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:327
 msgid "Proposed changes for appointment: %1$s"
 msgstr "建议约会更改: %1$s"
 
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:328
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:330
 msgid "%1$s sets the status to 'none' for: %1$s"
 msgstr "%1$s 设置状态到 '无': %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:331
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:333
 msgid "%1$s %2$s the invitation: %3$s"
 msgstr "%1$s 已 %2$s 邀请: %3$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:333
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:335
 msgid "Resend the invitation for: %1$s"
 msgstr "请重新发送邀请: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:335
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:337
 msgid "Change not accepted for: %1$s"
 msgstr "修改未被接受：%1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:337
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:339
 msgid "All times will be shown in the timezone %1$s"
 msgstr "所有时间将以时区 %1$s 显示"
 
 #. E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:340
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:342
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
 msgstr "%1$s 已 %2$s 约会，但提供了一个对案: "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:343
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:345
 msgid ""
 "You have received this E-Mail because you are the chair for this appointment."
 msgstr "因为你是该聚会的负责人，你收到了这封邮件。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:345
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:347
 msgid ""
 "You have received this E-Mail because you are the organizer of this "
 "appointment."
 msgstr "因为你是该聚会的组织者，你收到了这封邮件。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:347
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:349
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
 msgstr "因为你是该约会使用的资源 %1$s 的管理者，你收到了这封邮件。"
 
 #. You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:350
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:352
 msgid ""
 "You have received an E-Mail containing a reply to an appointment that you "
 "didn't organize. Best ignore it."
@@ -996,17 +1060,37 @@ msgstr "您收到了一封电子邮件, 其中包括对您一个没有组织约�
 #. *
 #. * The organizer of the appointment has changed. New organizer is: %1$s
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:355
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:357
 msgid "The organizer of the appointment has changed. New organizer is: %1$s"
 msgstr "约会的组织者已更改。新的组织者是:%1$s"
 
 #. *
 #. * The organizer of the appointment has changed. This operation is not allowed.
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:360
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:362
 msgid ""
 "The organizer of the appointment has changed. This operation is not allowed."
 msgstr "约会的组织者已更改。不允许执行此操作。"
+
+#. * Used when there are multiple changes in the appointment's conference properties
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:365
+msgid "The meeting access information was changed."
+msgstr "已更改会议访问信息。"
+
+#. * Used when there is one particular conference property in the appointment with URI
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:368
+msgid "The meeting access information was changed: %1$s;"
+msgstr "已更改会议访问信息：%1$s;"
+
+#. * Used when there is one particular conference property in the appointment with URI and additional label
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:371
+msgid "The meeting access information was changed. %1$s: %2$s"
+msgstr "已更改会议访问信息。%1$s： %2$s"
+
+#. * Used when all conference properties in the appointment were removed
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:374
+msgid "The meeting access information was removed."
+msgstr "已删除会议访问信息。"
 
 #. *
 #. * The event %s couldn't be deleted: %s
@@ -1262,25 +1346,30 @@ msgstr "重复"
 msgid "Description"
 msgstr "描述"
 
-#. * The displayed name for the {@link EventField#CLASSIFICATION} property of an event
+#. * The displayed name for the {@link EventField#CONFERENCES} property of an event
 #: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:90
+msgid "Conference"
+msgstr "会议"
+
+#. * The displayed name for the {@link EventField#CLASSIFICATION} property of an event
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:93
 msgid "Visibility"
 msgstr "可见度"
 
 #. * The displayed name for the {@link EventField#COLOR} property of an event
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:93
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:96
 msgid "Color"
 msgstr "颜色"
 
 #. * The displayed name for the {@link EventField#TRANSP} property of an event
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:96
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:99
 msgid "Show as"
 msgstr "显示为"
 
 #. * The displayed name for the {@link EventField#ATTACHMENTS} property of an event
 #. Has attachment
 #. The module attachments
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:99
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:102
 #: com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
 #: com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
 msgid "Attachments"
@@ -1353,10 +1442,6 @@ msgstr "组织者也必须是出席者。"
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
 msgid "All appointments of a series must contain the same organizer."
 msgstr "系列的所有约会都必须包含相同的组织者。"
-
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
-msgid "The operation could not be completed due to missing capabilities."
-msgstr "由于缺少功能, 无法完成操作。"
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
@@ -1563,6 +1648,10 @@ msgid "The appointment contains too many reminders."
 msgstr "约会包含太多提醒。"
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:170
+msgid "The appointment contains too many conferences."
+msgstr "约会包太多括会议。"
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:172
 msgid "The method \"%1$s\" is not supported."
 msgstr "不支持方法 \"%1$s\"。"
 
@@ -2665,6 +2754,10 @@ msgstr "一个名为 \"%1$s\" 的目录已存在于 \"%2$s\"。"
 msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
 msgstr "对用户 \"%1$s\"（于上下文 \"%1$s\" 中），通过长轮询的推送被禁用。"
 
+#: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
+msgid "No external account provider found for module '%1$s'."
+msgstr "找不到模块'%1$s'的外部户口提供者。"
+
 #: com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61
@@ -2798,9 +2891,20 @@ msgstr "因为文档被更改，所以它不能被更新。请再试。"
 msgid "The connection check failed."
 msgstr "连接检查失败。"
 
+#. Cannot connect to URI: %1$s. Please change and try again.
+#: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:75
+msgid "Cannot connect to URI: %1$s. Please change and try again."
+msgstr "无法连接到 URI：%1$s。请更改并重试。"
+
+#. The given URL is invalid. Please change it and try again.
+#: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:78
+msgid "The given URL is invalid. Please change it and try again."
+msgstr "给于的 URL 无效。请更改它，然后重试。"
+
 #. The folder you requested does not exist.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:77
+#: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:143
 msgid "The folder you requested does not exist."
 msgstr "您请求的文件夹不存在。"
 
@@ -4946,6 +5050,11 @@ msgstr "在文件夹 %2$s 中找不到邮件 %1$s。"
 msgid "Invalid OAuth account specified."
 msgstr "指定了无效 OAuth 户口。"
 
+#. The account configuration is invalid.
+#: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:103
+msgid "The account configuration is invalid."
+msgstr "户口配置无效。"
+
 #. An error has occurred on the remote Microsoft end-point. There is nothing we can do about it. Try again later.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphClientExceptionMessages.java:63
 msgid ""
@@ -6360,6 +6469,11 @@ msgstr "由于数据丢失，文件夹没有更新。请复核警告查看详情
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:104
 msgid "Folder name contains illegal characters: \"%1$s\""
 msgstr "文件夹名称包括非法字符：\"%1$s\""
+
+#. User selected one or more permissions that cannot be applied to target folder; e.g. selected guest permission for a mail folder.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:110
+msgid "The chosen permission(s) cannot be set"
+msgstr "无法设置所选的权限"
 
 #. No group given.
 #: com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
@@ -8520,6 +8634,13 @@ msgstr "并存写入尝试，请等候之前的保存操作终结。"
 msgid "Your search took too long in order to be accomplished."
 msgstr "您的搜寻耗时太长未能达成。"
 
+#. The file contains too many permissions. Please reduce the number or use groups instead.
+#: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:146
+msgid ""
+"The file contains too many permissions. Please reduce the number of "
+"permissions or use group permissions instead."
+msgstr "文件包含太多权限。请减少权限数或使用组权限。"
+
 #. A document's version comment
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:79
 msgid "Version comment"
@@ -10399,6 +10520,13 @@ msgstr "您不允许更改垃圾文件夹和它任何子文件夹的权限"
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
 msgid "There is already a folder named \"%1$s\". Please choose another name."
 msgstr "已经有一个名为 \"%1$s\" 的文件夹。请选择其他名称。"
+
+#. The folder contains too many permissions. Please reduce the number or use groups instead.
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:138
+msgid ""
+"The folder contains too many permissions. Please reduce the number of "
+"permissions or use group permissions instead."
+msgstr "文件夹包含太多权限。请减少权限数或使用组权限。"
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
