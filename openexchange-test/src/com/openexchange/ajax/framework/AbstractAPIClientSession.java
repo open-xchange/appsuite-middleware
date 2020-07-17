@@ -73,6 +73,7 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
 
     protected LoginApi loginApi;
     protected ApiClient apiClient;
+    protected ApiClient apiClient2;
 
     private final Set<ApiClient> apiClients = new ConcurrentHashSet<>(1);
 
@@ -89,12 +90,19 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
         return apiClient;
     }
 
+    protected ApiClient getApiClient2() {
+        return apiClient2;
+    }
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
         apiClient = generateApiClient(testUser);
         rememberClient(apiClient);
+
+        apiClient2 = generateApiClient(testUser2);
+        rememberClient(apiClient2);
     }
 
     protected void rememberClient(ApiClient client) {
