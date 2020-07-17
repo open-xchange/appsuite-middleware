@@ -718,7 +718,7 @@ public class UploadHelper {
         /*
          * use separate file when replacing an existing file
          */
-        if (null == originalVersion) {
+        if (null != originalVersion) {
             return true;
         }
         /*
