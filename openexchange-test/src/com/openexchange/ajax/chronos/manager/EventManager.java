@@ -68,6 +68,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1064,4 +1066,26 @@ public class EventManager extends AbstractManager {
         return null != event && null != event.getId() && event.getId().equals(event.getSeriesId()) && null == event.getRecurrenceId();
     }
 
+    /**
+     * Filters the given list of event
+     * 
+     * @param events The event to filter by summary
+     * @param summary The summary each event must begin with
+     * @return A list of events with the same summary
+     */
+    public static List<EventData> filterEventBySummary(List<EventData> events, String summary) {
+        return filterEventBy(events, summary, (e) -> e.getSummary());
+    }
+
+    /**
+     * Filters the given list of event
+     * 
+     * @param events The event to filter by summary
+     * @param comparee The summary each event must begin with
+     * @param f The function to get a string from the event data to compare to the comparee
+     * @return A list of events with the same summary
+     */
+    public static List<EventData> filterEventBy(List<EventData> events, String comparee, Function<EventData, String> f) {
+        return events.stream().filter(e -> f.apply(e).startsWith(comparee)).collect(Collectors.toList());
+    }
 }

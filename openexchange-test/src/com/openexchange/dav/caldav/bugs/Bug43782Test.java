@@ -191,10 +191,10 @@ public class Bug43782Test extends CalDAVTest {
          */
         start = TimeTools.D("next tuesday at 11:30");
         Property dtStart = iCalResource.getVEvent().getProperty("DTSTART");
-        iCalResource.getVEvent().setProperty("DTSTART", format(start, dtStart.getAttribute("TZID")), dtStart.getAttributes());
+        iCalResource.getVEvent().setProperty("DTSTART", null == dtStart.getAttribute("TZID") ? formatAsUTC(start) : format(start, dtStart.getAttribute("TZID")), dtStart.getAttributes());
         end = TimeTools.D("next tuesday at 12:45");
         Property dtEnd = iCalResource.getVEvent().getProperty("DTEND");
-        iCalResource.getVEvent().setProperty("DTEND", format(end, dtEnd.getAttribute("TZID")), dtEnd.getAttributes());
+        iCalResource.getVEvent().setProperty("DTEND", null == dtEnd.getAttribute("TZID") ? formatAsUTC(end) : format(end, dtEnd.getAttribute("TZID")), dtEnd.getAttributes());
         if (false == preserveAcknowledged) {
             iCalResource.getVEvent().getVAlarm().removeProperties("ACKNOWLEDGED");
         }

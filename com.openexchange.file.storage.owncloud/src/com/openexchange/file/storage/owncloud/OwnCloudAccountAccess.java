@@ -115,10 +115,15 @@ public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
         super(service, account, session);
     }
 
+    private static final boolean DEACTIVATE_VERSIONING = true;
+
     @Override
     public Boolean supports(FileStorageCapability capability) {
         switch(capability) {
             case FILE_VERSIONS:
+                if (DEACTIVATE_VERSIONING) {
+                    return Boolean.FALSE;
+                }
                 if (isConnected() == false) {
                     try {
                         connect();

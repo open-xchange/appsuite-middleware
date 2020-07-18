@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.junit.Assert;
@@ -98,6 +99,8 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
     private AJAXClient client3;
     private AJAXClient client4;
 
+    private String summary;
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -106,7 +109,8 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         client3 = generateClient(testUser3);
         client4 = generateClient(testUser4);
 
-        event = EventFactory.createSeriesEvent(apiClient.getUserId().intValue(), System.currentTimeMillis() + "", 10, folderId);
+        summary = this.getClass().getSimpleName() + UUID.randomUUID();
+        event = EventFactory.createSeriesEvent(apiClient.getUserId().intValue(), summary, 10, folderId);
         // The internal attendees
         organizerAttendee = createAttendee(I(getClient().getValues().getUserId()));
         actingAttendee1 = createAttendee(I(getClient2().getValues().getUserId()));
@@ -155,7 +159,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
 
         EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(client3.getSession(), DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
 
-        Assert.assertEquals(1, eventsNeedingAction.getData().size());
+        Assert.assertEquals(1, filter(eventsNeedingAction).size());
     }
 
     @Test
@@ -173,15 +177,14 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.HOURS.toMillis(2));
 
         EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(client3.getSession(), DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
-
-        Assert.assertEquals(2, eventsNeedingAction.getData().size());
+        Assert.assertEquals(2, filter(eventsNeedingAction).size());
     }
 
     @Test
     public void testCreateSeriesWithChangedSummary_returnTwoNeedsAction() throws Exception {
         Calendar start = getStart();
         EventData secondOccurrence = getSecondOccurrence(eventManager, event);
-        secondOccurrence.setSummary("The summary changed and that should result in a dedicated action");
+        secondOccurrence.setSummary(event.getSummary() + "The summary changed and that should result in a dedicated action");
         eventManager.updateOccurenceEvent(secondOccurrence, secondOccurrence.getRecurrenceId(), true);
 
         ApiClient client3 = generateApiClient(testUser3);
@@ -195,7 +198,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
 
         EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(client3.getSession(), DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
 
-        Assert.assertEquals(2, eventsNeedingAction.getData().size());
+        Assert.assertEquals(2, filter(eventsNeedingAction).size());
     }
 
     @Test
@@ -220,14 +223,14 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
 
         EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(client3.getSession(), DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
 
-        Assert.assertEquals(1, eventsNeedingAction.getData().size());
+        Assert.assertEquals(1, filter(eventsNeedingAction).size());
     }
 
     @Test
     public void testCreateSeriesWithChangedSummaryAndOneSingleEvent_returnThreeNeedsAction() throws Exception {
         Calendar start = getStart();
         EventData secondOccurrence = getSecondOccurrence(eventManager, event);
-        secondOccurrence.setSummary("The summary changed and that should result in a dedicated action");
+        secondOccurrence.setSummary(event.getSummary() + "The summary changed and that should result in a dedicated action");
         eventManager.updateOccurenceEvent(secondOccurrence, secondOccurrence.getRecurrenceId(), true);
 
         createSingleEvent();
@@ -243,11 +246,11 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
 
         EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(client3.getSession(), DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
 
-        Assert.assertEquals(3, eventsNeedingAction.getData().size());
+        Assert.assertEquals(3, filter(eventsNeedingAction).size());
     }
 
     private void createSingleEvent() throws ApiException {
-        EventData singleEvent = EventFactory.createSingleTwoHourEvent(apiClient.getUserId().intValue(), System.currentTimeMillis() + "");
+        EventData singleEvent = EventFactory.createSingleTwoHourEvent(apiClient.getUserId().intValue(), summary);
         LinkedList<Attendee> attendees = new LinkedList<>();
         attendees.add(organizerAttendee);
         attendees.add(actingAttendee1);
@@ -281,6 +284,10 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         Calendar start = Calendar.getInstance();
         start.setTimeInMillis(start.getTimeInMillis() - TimeUnit.HOURS.toMillis(1));
         return start;
+    }
+
+    private List<EventData> filter(EventsResponse eventsNeedingAction) {
+        return EventManager.filterEventBySummary(eventsNeedingAction.getData(), summary);
     }
 
 }

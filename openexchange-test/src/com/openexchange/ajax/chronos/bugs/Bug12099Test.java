@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
+import static com.openexchange.ajax.chronos.manager.EventManager.filterEventBySummary;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -57,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.AbstractSecondUserChronosTest;
 import com.openexchange.ajax.chronos.EnhancedApiClient;
@@ -94,14 +96,15 @@ public final class Bug12099Test extends AbstractSecondUserChronosTest {
      */
     @Test
     public void testSeriesChangedFromIsZero() throws Throwable {
-        EventData event = EventFactory.createSeriesEvent(getCalendaruser(), "Bug12099Test", 2, folderId);
+        String summary = "Bug12099Test";
+        EventData event = EventFactory.createSeriesEvent(getCalendaruser(), summary, 2, folderId);
         EventData createEvent = eventManager.createEvent(event);
 
         Date start = DateTimeUtil.parseDateTime(event.getStartDate());
         Date end = DateTimeUtil.parseDateTime(event.getEndDate());
 
         List<EventData> allEvents = eventManager.getAllEvents(folderId, start, new Date(end.getTime() + TimeUnit.DAYS.toMillis(2)), true);
-        assertEquals(2, allEvents.size());
+        assertEquals(2, filterEventBySummary(allEvents, summary).size());
 
         EventId id = new EventId();
         id.setId(createEvent.getId());
@@ -145,7 +148,8 @@ public final class Bug12099Test extends AbstractSecondUserChronosTest {
         UserApi userApi3 = new UserApi(apiClient3, enhancedApiClient3, testUser3, true);
         EventManager eventManager3 = new EventManager(userApi3, sharedFolder);
 
-        EventData eventData = EventFactory.createSeriesEvent(userApi2.getCalUser().intValue(), "Bug12099Test", 2, sharedFolder);
+        String summary = "Bug12099Test";
+        EventData eventData = EventFactory.createSeriesEvent(userApi2.getCalUser().intValue(), summary, 2, sharedFolder);
         List<Attendee> attendees = eventData.getAttendees();
         attendees.add(AttendeeFactory.createIndividual(userApi3.getCalUser()));
         eventData.setAttendees(attendees);
@@ -157,7 +161,7 @@ public final class Bug12099Test extends AbstractSecondUserChronosTest {
 
         String defaultFolder3 = getDefaultFolder(userApi3.getSession(), apiClient3);
         List<EventData> allEvents = eventManager3.getAllEvents(from, until, true, defaultFolder3);
-        assertEquals(2, allEvents.size());
+        assertEquals(2, allEvents.stream().filter(e -> e.getSummary().equals(summary)).collect(Collectors.toList()).size());
 
         EventId id = new EventId();
         id.setFolder(defaultFolder3);

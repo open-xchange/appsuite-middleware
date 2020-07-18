@@ -55,7 +55,6 @@ import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent
 import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.parseICalAttachment;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
-import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -154,8 +153,7 @@ public class Bug65533Test extends AbstractITipTest {
         writer = new FileWriter(tmpFile);
         writer.write(iMip);
         MailDestinationResponse response = new MailApi(apiClientC2).sendOrSaveMail(apiClientC2.getSession(), tmpFile, null, null);
-        // XXX Currently disable validation because of another bug
-        //        assertNull(response.getError(), response.getError());
+        assertNull(response.getError(), response.getError());
 
         /*
          * receive & analyze iMIP request as user a
@@ -189,7 +187,9 @@ public class Bug65533Test extends AbstractITipTest {
         ChronosAttachment attachment = attachments.get(0);
         assertEquals("homer.jpg", attachment.getFilename());
         assertEquals("image/jpeg", attachment.getFmtType());
-        assertEquals(L(177115), attachment.getSize());
+        assertTrue(null != attachment.getSize());
+        assertTrue(attachment.getSize().longValue() >= 177103);
+        assertTrue(attachment.getSize().longValue() <= 177115);
         byte[] attachmentData = chronosApi.getEventAttachment(apiClient.getSession(), eventData.getId(), eventData.getFolder(), attachment.getManagedId());
         assertNotNull(attachmentData);
         /*
