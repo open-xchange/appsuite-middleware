@@ -88,7 +88,6 @@ public class ThresholdFileHolderMailPart extends MailPart implements ComposedMai
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ThresholdFileHolderMailPart.class);
     }
 
-    private final transient AttachmentDescription attachmentDescription;
     private final transient ThresholdFileHolder fileHolder;
     private final transient DataSource dataSource;
     private transient Object cachedContent;
@@ -104,9 +103,8 @@ public class ThresholdFileHolderMailPart extends MailPart implements ComposedMai
         super();
         boolean error = true;
         try {
-            this.attachmentDescription = attachmentDescription;
             String preparedFileName = attachmentDescription.getName();
-            ContentType contentType = determineContentType(attachmentDescription, preparedFileName);
+            ContentType contentType = determineContentType(attachmentDescription, preparedFileName, fileHolder);
             fileHolder.setContentType(contentType.getBaseType());
 
             determineContentId(attachmentDescription);
@@ -137,7 +135,7 @@ public class ThresholdFileHolderMailPart extends MailPart implements ComposedMai
         }
     }
 
-    private ContentType determineContentType(AttachmentDescription attachmentDescription, String preparedFileName) throws OXException {
+    private ContentType determineContentType(AttachmentDescription attachmentDescription, String preparedFileName, ThresholdFileHolder fileHolder) throws OXException {
         try {
             setContentType(prepareContentType(attachmentDescription.getMimeType(), preparedFileName));
         } catch (@SuppressWarnings("unused") OXException e) {
@@ -152,8 +150,8 @@ public class ThresholdFileHolderMailPart extends MailPart implements ComposedMai
                 try {
                     contentType.setCharsetParameter(CharsetDetector.detectCharset(fileHolder.getStream()));
                     setContentType(contentType);
-                } catch (@SuppressWarnings("unused") Exception e) {
-                    // Ignore
+                } catch (Exception e) {
+                    LoggerHolder.LOG.debug("Failed to examine stream data", e);
                 }
             }
         } else if (contentType.startsWith("application/force")) {
