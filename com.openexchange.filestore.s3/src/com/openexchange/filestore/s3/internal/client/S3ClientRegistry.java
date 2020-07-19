@@ -51,7 +51,7 @@ package com.openexchange.filestore.s3.internal.client;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,9 +79,7 @@ public class S3ClientRegistry implements Reloadable {
     private static final Logger LOG = LoggerFactory.getLogger(S3ClientRegistry.class);
 
     private final S3ClientFactory clientFactory;
-
     private final ServiceLookup services;
-
     private final ConcurrentMap<String, S3FileStorageClient> clients;
 
     /**
@@ -89,9 +87,8 @@ public class S3ClientRegistry implements Reloadable {
      *
      * @param clientFactory The client factory
      * @param services The {@link ServiceLookup} containing a {@link LeanConfigurationService}
-     * @throws OXException in case the {@link LeanConfigurationService} is missing
      */
-    public S3ClientRegistry(S3ClientFactory clientFactory, ServiceLookup services) throws OXException {
+    public S3ClientRegistry(S3ClientFactory clientFactory, ServiceLookup services) {
         super();
         this.clientFactory = clientFactory;
         this.services = services;
@@ -106,7 +103,7 @@ public class S3ClientRegistry implements Reloadable {
      *
      * @param clientConfig The client configuration
      * @return The already existing or new {@link S3FilestoreClient}
-     * @throws OXException
+     * @throws OXException If S3 storage client cannot be created
      */
     public S3FileStorageClient getOrCreate(S3ClientConfig clientConfig) throws OXException {
         String key = clientConfig.getClientID().orElse(clientConfig.getFilestoreID());
@@ -136,7 +133,7 @@ public class S3ClientRegistry implements Reloadable {
         try {
             LeanConfigurationService configService = services.getServiceSafe(LeanConfigurationService.class);
             List<S3FileStorageClient> toRemove = new LinkedList<>();
-            for (Entry<String, S3FileStorageClient> entry : clients.entrySet()) {
+            for (Map.Entry<String, S3FileStorageClient> entry : clients.entrySet()) {
                 S3FileStorageClient client = entry.getValue();
                 int recentFingerprint = S3ClientConfig.getFingerprint(configService, client.getScope(), entry.getKey());
                 if (recentFingerprint != client.getConfigFingerprint()) {
