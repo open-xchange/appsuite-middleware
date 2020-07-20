@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.converters;
 
+import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,11 +73,12 @@ public class DebugConverter implements ResultConverter {
 
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        StringBuilder out = new StringBuilder("<!DOCTYPE html><head><title>").append(requestData.getAction()+" Response").append("</title></head><body><h1>Request with action ").append(requestData.getAction()).append("</h1>");
+        StringBuilder out = new StringBuilder(1024).append("<!DOCTYPE html><head><title>").append(escapeHtml4(requestData.getAction())).append(" Response").append("</title></head>");
+        out.append("<body><h1>Request with action ").append(escapeHtml4(requestData.getAction())).append("</h1>");
         out.append("<h2>Parameters:</h2>");
         out.append("<table>");
         for (Map.Entry<String, String> entry : requestData.getParameters().entrySet()) {
-            out.append("<tr><th>").append(entry.getKey()).append("</th><td>").append(entry.getValue()).append("</td></tr>");
+            out.append("<tr><th>").append(escapeHtml4(entry.getKey())).append("</th><td>").append(escapeHtml4(entry.getValue())).append("</td></tr>");
         }
         out.append("</table>");
 
@@ -84,15 +86,15 @@ public class DebugConverter implements ResultConverter {
         if (data != null) {
             if (data instanceof JSONObject) {
                 try {
-                    out.append("<h2>Body:</h2><pre>").append(((JSONObject) data).toString(4));
+                    out.append("<h2>Body:</h2><pre>").append(escapeHtml4(((JSONObject) data).toString(4)));
                 } catch (JSONException e) {
-                    out.append("Error rendering body: ").append(e.toString());
+                    out.append("Error rendering body: ").append(escapeHtml4(e.toString()));
                 }
             } else if (data instanceof JSONArray) {
                 try {
-                    out.append("<h2>Body:</h2><pre>").append(((JSONArray) data).toString(4));
+                    out.append("<h2>Body:</h2><pre>").append(escapeHtml4(((JSONArray) data).toString(4)));
                 } catch (JSONException e) {
-                    out.append("Error rendering body: ").append(e.toString());
+                    out.append("Error rendering body: ").append(escapeHtml4(e.toString()));
                 }
             }
         }
@@ -103,11 +105,11 @@ public class DebugConverter implements ResultConverter {
             Response response = (Response) result.getResultObject();
             JSONObject json = new JSONObject();
             ResponseWriter.write(response, json);
-            out.append("<h2>Response:</h2><pre>").append((json).toString(4));
+            out.append("<h2>Response:</h2><pre>").append(escapeHtml4(json.toString(4)));
 
 
         } catch (Exception e) {
-            out.append("Can't render response: "+e.toString());
+            out.append("Can't render response: ").append(escapeHtml4(e.toString()));
         }
         out.append("</body></html>");
 
