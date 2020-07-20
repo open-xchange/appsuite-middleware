@@ -188,7 +188,22 @@ public final class DownloadUtility {
                 contentType.setSubType(ct.substring(pos + 1));
             }
             boolean harmful = false;
+            boolean indicatesInline = false;
             String sContentDisposition = overridingDisposition;
+            if (sContentDisposition != null) {
+                // Content-Disposition is given. Check for valid/known value
+                String lccd = toLowerCase(sContentDisposition).trim();
+                if (lccd.startsWith("inline")) {
+                    sContentDisposition = "inline";
+                    indicatesInline = true;
+                } else if (lccd.startsWith("attachment")) {
+                    sContentDisposition = "attachment";
+                } else {
+                    // Unknown value. Assume "inline" as default disposition to trigger client's (Browser) internal viewer.
+                    sContentDisposition = "inline";
+                    indicatesInline = true;
+                }
+            }
             long sz = size;
             Readable in = inputStream;
             // Some variables
@@ -200,7 +215,7 @@ public final class DownloadUtility {
                  */
                 if (null == sContentDisposition) {
                     sContentDisposition = "attachment";
-                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
+                } else if (indicatesInline) {
                     if (contentType.contains("application/")) {
                         sContentDisposition = "attachment";
                     } else {
@@ -255,7 +270,7 @@ public final class DownloadUtility {
                  */
                 if (null == sContentDisposition) {
                     sContentDisposition = "attachment";
-                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
+                } else if (indicatesInline) {
                     if (contentType.contains("application/")) {
                         sContentDisposition = "attachment";
                     } else {
@@ -274,10 +289,11 @@ public final class DownloadUtility {
                         }
                         // Escape of XML content
                         {
-                            final ThresholdFileHolder copy = new ThresholdFileHolder();
+                            ThresholdFileHolder copy = null;
                             OutputStreamWriter w = null;
                             Reader r = null;
                             try {
+                                copy = new ThresholdFileHolder();
                                 r = new InputStreamReader(sink.getClosingStream(), Charsets.forName(cs));
                                 w = new OutputStreamWriter(copy.asOutputStream(), Charsets.UTF_8);
                                 HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
@@ -289,10 +305,11 @@ public final class DownloadUtility {
                                     w.write(xmlContent);
                                 }
                                 w.flush();
+                                sink = copy;
+                                copy = null; // Avoid premature closing
                             } finally {
-                                Streams.close(r, w);
+                                Streams.close(r, w, copy);
                             }
-                            sink = copy;
                         }
                         contentType.setSubType("html");
                         contentType.setCharsetParameter("UTF-8");
@@ -331,7 +348,7 @@ public final class DownloadUtility {
                         sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                     }
                     sContentDisposition = "attachment";
-                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
+                } else if (indicatesInline) {
                     /*
                      * Sanitizing of text content needed
                      */
@@ -349,10 +366,11 @@ public final class DownloadUtility {
                     }
                     // Convert to UTF-8
                     {
-                        final ThresholdFileHolder utf8Copy = new ThresholdFileHolder();
+                        ThresholdFileHolder utf8Copy = null;
                         OutputStreamWriter w = null;
                         Reader r = null;
                         try {
+                            utf8Copy = new ThresholdFileHolder();
                             r = new InputStreamReader(sink.getClosingStream(), Charsets.forName(cs));
                             w = new OutputStreamWriter(utf8Copy.asOutputStream(), Charsets.UTF_8);
                             final int buflen = 8192;
@@ -361,10 +379,11 @@ public final class DownloadUtility {
                                 w.write(cbuf, 0, read);
                             }
                             w.flush();
+                            sink = utf8Copy;
+                            utf8Copy = null; // Avoid premature closing
                         } finally {
-                            Streams.close(r, w);
+                            Streams.close(r, w, utf8Copy);
                         }
-                        sink = utf8Copy;
                     }
                     contentType.setCharsetParameter("UTF-8");
                     sz = sink.getLength();
@@ -469,7 +488,7 @@ public final class DownloadUtility {
                  */
                 if (null == sContentDisposition) {
                     sContentDisposition = "attachment";
-                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
+                } else if (indicatesInline) {
                     /*
                      * Sanitizing of HTML content needed
                      */
