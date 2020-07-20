@@ -51,12 +51,15 @@ package com.openexchange.apps.manifests.json;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import org.json.JSONArray;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link ManifestActionFactory}
@@ -65,13 +68,33 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ManifestActionFactory implements AJAXActionServiceFactory {
 
-    private final AJAXActionService all;
-    private final ConfigAction config;
+    private static final String MODULE = "apps/manifests";
 
+    /**
+     * Gets the <code>"apps/manifests"</code> module identifier.
+     *
+     * @return The module identifier
+     */
+    public static String getModule() {
+        return MODULE;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final Map<String, AJAXActionService> actions;
+
+    /**
+     * Initializes a new {@link ManifestActionFactory}.
+     *
+     * @param services The {@link ServiceLookup}
+     * @param manifestBuilder The {@link ManifestBuilder}
+     */
     public ManifestActionFactory(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
         super();
-        all = new AllAction(services, manifests, registry);
-        config = new ConfigAction(services, manifests, registry);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
+        actions.put("all", new AllAction(services, manifests, registry));
+        actions.put("config", new ConfigAction(services, manifests, registry));
+        this.actions = actions.build();
     }
 
     @Override
@@ -81,10 +104,11 @@ public class ManifestActionFactory implements AJAXActionServiceFactory {
 
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
-        if (action.equals("config")) {
-            return config;
+        AJAXActionService actionService = actions.get(action);
+        if (null == actionService) {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, MODULE);
         }
-        return all;
+        return actionService;
     }
 
 }

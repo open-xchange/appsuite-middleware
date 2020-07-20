@@ -6,7 +6,8 @@ Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.apps.manifests.json.osgi.ManifestJSONActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax.requesthandler,
+Import-Package: com.google.common.collect,
+ com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.tools,
  com.openexchange.capabilities,
@@ -20,6 +21,7 @@ Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
  com.openexchange.passwordchange,
  com.openexchange.server,
  com.openexchange.server.impl,

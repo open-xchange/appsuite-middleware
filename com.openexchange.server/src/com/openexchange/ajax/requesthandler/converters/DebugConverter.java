@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.requesthandler.converters;
 
-import java.util.Iterator;
+import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,13 +73,12 @@ public class DebugConverter implements ResultConverter {
 
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        StringBuilder out = new StringBuilder("<!DOCTYPE html><head><title>").append(requestData.getAction()+" Response").append("</title></head><body><h1>Request with action ").append(requestData.getAction()).append("</h1>");
+        StringBuilder out = new StringBuilder(1024).append("<!DOCTYPE html><head><title>").append(escapeHtml(requestData.getAction())).append(" Response").append("</title></head>");
+        out.append("<body><h1>Request with action ").append(escapeHtml(requestData.getAction())).append("</h1>");
         out.append("<h2>Parameters:</h2>");
         out.append("<table>");
-        Iterator<String> parameterNames = requestData.getParameterNames();
-        while(parameterNames.hasNext()) {
-            String paramName = parameterNames.next();
-            out.append("<tr><th>").append(paramName).append("</th><td>").append(requestData.getParameter(paramName)).append("</td></tr>");
+        for (Map.Entry<String, String> entry : requestData.getParameters().entrySet()) {
+            out.append("<tr><th>").append(escapeHtml(entry.getKey())).append("</th><td>").append(escapeHtml(entry.getValue())).append("</td></tr>");
         }
         out.append("</table>");
 
@@ -86,15 +86,15 @@ public class DebugConverter implements ResultConverter {
         if (data != null) {
             if (data instanceof JSONObject) {
                 try {
-                    out.append("<h2>Body:</h2><pre>").append(((JSONObject) data).toString(4));
+                    out.append("<h2>Body:</h2><pre>").append(escapeHtml(((JSONObject) data).toString(4)));
                 } catch (JSONException e) {
-                    out.append("Error rendering body: ").append(e.toString());
+                    out.append("Error rendering body: ").append(escapeHtml(e.toString()));
                 }
             } else if (data instanceof JSONArray) {
                 try {
-                    out.append("<h2>Body:</h2><pre>").append(((JSONArray) data).toString(4));
+                    out.append("<h2>Body:</h2><pre>").append(escapeHtml(((JSONArray) data).toString(4)));
                 } catch (JSONException e) {
-                    out.append("Error rendering body: ").append(e.toString());
+                    out.append("Error rendering body: ").append(escapeHtml(e.toString()));
                 }
             }
         }
@@ -105,11 +105,11 @@ public class DebugConverter implements ResultConverter {
             Response response = (Response) result.getResultObject();
             JSONObject json = new JSONObject();
             ResponseWriter.write(response, json);
-            out.append("<h2>Response:</h2><pre>").append((json).toString(4));
+            out.append("<h2>Response:</h2><pre>").append(escapeHtml(json.toString(4)));
 
 
         } catch (Exception e) {
-            out.append("Can't render response: "+e.toString());
+            out.append("Can't render response: ").append(escapeHtml(e.toString()));
         }
         out.append("</body></html>");
 
