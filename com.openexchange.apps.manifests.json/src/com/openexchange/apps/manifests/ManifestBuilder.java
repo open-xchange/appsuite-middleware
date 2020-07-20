@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,67 +47,27 @@
  *
  */
 
-package com.openexchange.apps.manifests.json;
+package com.openexchange.apps.manifests;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.apps.manifests.ManifestBuilder;
+import org.json.JSONArray;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ManifestActionFactory}
+ * {@link ManifestBuilder} provides a {@link JSONArray} of manifest entries 
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.3
  */
-public class ManifestActionFactory implements AJAXActionServiceFactory {
-
-    private static final String MODULE = "apps/manifests";
+public interface ManifestBuilder {
 
     /**
-     * Gets the <code>"apps/manifests"</code> module identifier.
+     * Compute the manifests from files and {@link ManifestContributor}s.
      *
-     * @return The module identifier
+     * @param session The users {@link ServerSession}
+     * @param version The requested version
+     * @throws OXException
      */
-    public static String getModule() {
-        return MODULE;
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    private final Map<String, AJAXActionService> actions;
-
-    /**
-     * Initializes a new {@link ManifestActionFactory}.
-     *
-     * @param services The {@link ServiceLookup}
-     * @param manifestBuilder The {@link ManifestBuilder}
-     */
-    public ManifestActionFactory(ServiceLookup services, ManifestBuilder manifestBuilder) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("all", new AllAction( manifestBuilder));
-        actions.put("config", new ConfigAction(services, manifestBuilder));
-        this.actions = actions.build();
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return actions.values();
-    }
-
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        AJAXActionService actionService = actions.get(action);
-        if (null == actionService) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, MODULE);
-        }
-        return actionService;
-    }
+    JSONArray buildManifests(ServerSession session, String version) throws OXException;
 
 }
