@@ -79,26 +79,11 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
     private static final String S3_SCHEME = "s3";
 
     /**
-     * The expected pattern for file store names associated with a context - defined by
-     * com.openexchange.filestore.FileStorages.getNameForContext(int) ,
-     * so expect nothing else; e.g. <code>"57462_ctx_store"</code>
-     */
-    private static final Pattern CTX_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_store");
-
-    /**
-     * The expected pattern for file store names associated with a user - defined by
-     * com.openexchange.filestore.FileStorages.getNameForUser(int, int) ,
-     * so expect nothing else; e.g. <code>"57462_ctx_5_user_store"</code>
-     */
-    private static final Pattern USER_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_(\\d+)_user_store");
-
-    /**
      * The file storage's ranking compared to other sharing the same URL scheme.
      */
     private static final int RANKING = 5634;
 
     private final S3ClientRegistry clientRegistry;
-
     private final ServiceLookup services;
 
     /**
@@ -123,7 +108,7 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
         try {
             LOG.debug("Initializing S3 client for {}", uri);
             /*
-             * extract filestore ID from authority part of URI
+             * extract file storage ID from authority part of URI
              */
             String filestoreID = extractFilestoreID(uri);
             LOG.debug("Using \"{}\" as filestore ID.", filestoreID);
@@ -159,16 +144,35 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
         return RANKING;
     }
 
+    // ----------------------------------------------------------- HELPERS -----------------------------------------------------------------
+
     /**
-     * Extracts the filestore prefix from the configured file store URI, i.e. the 'path' part of the URI.
+     * The expected pattern for file store names associated with a context - defined by
+     * com.openexchange.filestore.FileStorages.getNameForContext(int) ,
+     * so expect nothing else; e.g. <code>"57462_ctx_store"</code>
+     */
+    private static final Pattern CTX_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_store");
+
+    /**
+     * The expected pattern for file store names associated with a user - defined by
+     * com.openexchange.filestore.FileStorages.getNameForUser(int, int) ,
+     * so expect nothing else; e.g. <code>"57462_ctx_5_user_store"</code>
+     */
+    private static final Pattern USER_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_(\\d+)_user_store");
+
+    /**
+     * Extracts the file storage's prefix from the configured file storage URI, i.e. the 'path' part of the URI.
      *
-     * @param uri The file store URI
+     * @param uri The file storage URI
      * @return The prefix to use
-     * @throws IllegalArgumentException If the specified bucket name doesn't follow Amazon S3's guidelines
+     * @throws IllegalArgumentException If given URI contains no path component
      */
     private static String extractFilestorePrefix(URI uri) throws IllegalArgumentException {
         // Extract & prepare path to be used as prefix
         String path = uri.getPath();
+        if (path == null) {
+            throw new IllegalArgumentException("Path component of given URI is undefined: " + uri);
+        }
         while (0 < path.length() && '/' == path.charAt(0)) {
             path = path.substring(1);
         }
@@ -176,7 +180,7 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
             path = path.substring(0, path.length() - 1);
         }
 
-        if (path.endsWith("ctx_store")) {
+        if (path.endsWith("_ctx_store")) {
             // Expect context store identifier
             Matcher matcher = CTX_STORE_PATTERN.matcher(path);
             if (false == matcher.matches()) {
@@ -185,7 +189,7 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
             return new StringBuilder(16).append(matcher.group(1)).append("ctxstore").toString();
         }
 
-        if (path.endsWith("user_store")) {
+        if (path.endsWith("_user_store")) {
             // Expect user store identifier
             Matcher matcher = USER_STORE_PATTERN.matcher(path);
             if (false == matcher.matches()) {
@@ -195,7 +199,10 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
         }
 
         // Any path that serves as prefix; e.g. "photos"
-        return sanitizePathForPrefix(path, uri);
+        if (Strings.isEmpty(path)) {
+            throw new IllegalArgumentException("Path is empty in URI: " + uri);
+        }
+        return sanitizePathForPrefix(path);
     }
 
     /**
@@ -203,14 +210,9 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
      * <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html">this article</a>
      *
      * @param path The path to sanitize
-     * @param uri The file store URI containing the path
      * @return The sanitized path ready to be used as prefix
      */
-    private static String sanitizePathForPrefix(String path, URI uri) {
-        if (Strings.isEmpty(path)) {
-            throw new IllegalArgumentException("Path is empty in URI: " + uri);
-        }
-
+    private static String sanitizePathForPrefix(String path) {
         StringBuilder sb = null;
         for (int k = path.length(), i = 0; k-- > 0; i++) {
             char ch = path.charAt(i);
@@ -255,10 +257,10 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
     }
 
     /**
-     * Extracts the filestore ID from the configured file store URI, i.e. the 'authority' part from the URI.
+     * Extracts the file storage ID from the configured file storage URI, i.e. the 'authority' part from the URI.
      *
-     * @param uri The file store URI
-     * @return The filestore ID
+     * @param uri The file storage URI
+     * @return The file storage ID
      * @throws IllegalArgumentException If no valid ID could be extracted
      */
     private static String extractFilestoreID(URI uri) throws IllegalArgumentException {
