@@ -406,7 +406,8 @@ public class MimeMessageFiller {
     private static final String[] SUPPRESS_HEADERS = {
         MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.HDR_X_OX_MARKER, MessageHeaders.HDR_X_OX_NOTIFICATION,
         MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY, HDR_X_MAILER, MessageHeaders.HDR_X_OX_SHARED_ATTACHMENTS,
-        MessageHeaders.HDR_X_OX_SECURITY, MessageHeaders.HDR_X_OX_META };
+        MessageHeaders.HDR_X_OX_SECURITY, MessageHeaders.HDR_X_OX_META, MessageHeaders.HDR_X_OX_CONTENT_TYPE,
+        MessageHeaders.HDR_X_OX_READ_RECEIPT, MessageHeaders.HDR_X_OX_COMPOSITION_SPACE_ID, MessageHeaders.HDR_X_OX_SHARED_FOLDER_REFERENCE };
 
     /**
      * Sets necessary headers in specified MIME message: <code>From</code>/ <code>Sender</code>, <code>To</code>, <code>Cc</code>,

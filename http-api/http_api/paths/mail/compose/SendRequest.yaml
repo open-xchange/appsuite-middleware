@@ -34,6 +34,10 @@
                 description: >-
                   Represents the request body as JSON string containing the
                   [MailMessageModel](#/definitions/MailComposeMessageModel).
+
+                  Note that it is not possible to change the attachments collection during this call.
+                  Furthermore changing shared attachments or Guard options during this call is discouraged
+                  and might lead to unexpected results.
                 type: string
               file:
                 description: The optional file to add

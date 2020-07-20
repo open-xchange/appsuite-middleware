@@ -139,8 +139,10 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.map.TIntLongMap;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TObjectLongMap;
+import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import gnu.trove.set.TIntSet;
@@ -1809,11 +1811,11 @@ public final class IMAPCommandsCollection {
      * <code>$cl_0&nbsp;$cl_1&nbsp;$cl_2&nbsp;$cl_3&nbsp;$cl_4&nbsp;$cl_5&nbsp;$cl_6&nbsp;$cl_7&nbsp;$cl_8&nbsp;$cl_9&nbsp;$cl_10</code>
      * <code>cl_0&nbsp;cl_1&nbsp;cl_2&nbsp;cl_3&nbsp;cl_4&nbsp;cl_5&nbsp;cl_6&nbsp;cl_7&nbsp;cl_8&nbsp;cl_9&nbsp;cl_10</code>
      *
-     * @param imapFolder - the imap folder
-     * @param msgUIDs - the message UIDs
-     * @param colorLabelFlag - the color id
+     * @param imapFolder The imap folder
+     * @param msgUIDs The message UIDs
+     * @param colorLabelFlag The color id
      * @return <code>true</code> if color could be set successfully; otherwise <code>false</code>
-     * @throws MessagingException - if an error occurs in underlying protocol
+     * @throws MessagingException If an error occurs in underlying protocol
      */
     public static void clearAndSetColorLabelSafely(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag) throws MessagingException, OXException {
         // Only set colors allowed in ALL_COLOR_LABELS
@@ -1831,10 +1833,10 @@ public final class IMAPCommandsCollection {
      * <code>$cl_0&nbsp;$cl_1&nbsp;$cl_2&nbsp;$cl_3&nbsp;$cl_4&nbsp;$cl_5&nbsp;$cl_6&nbsp;$cl_7&nbsp;$cl_8&nbsp;$cl_9&nbsp;$cl_10</code>
      * <code>cl_0&nbsp;cl_1&nbsp;cl_2&nbsp;cl_3&nbsp;cl_4&nbsp;cl_5&nbsp;cl_6&nbsp;cl_7&nbsp;cl_8&nbsp;cl_9&nbsp;cl_10</code>
      *
-     * @param imapFolder - the imap folder
-     * @param msgUIDs - the message UIDs
+     * @param imapFolder The imap folder
+     * @param msgUIDs The message UIDs
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
-     * @throws MessagingException - if an error occurs in underlying protocol
+     * @throws MessagingException If an error occurs in underlying protocol
      */
     private static boolean clearAllColorLabels(final IMAPFolder imapFolder, final long[] msgUIDs) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
@@ -1889,11 +1891,11 @@ public final class IMAPCommandsCollection {
     /**
      * Applies the given color flag as an user flag to the messages corresponding to given UIDS.
      *
-     * @param imapFolder - the imap folder
-     * @param msgUIDs - the message UIDs
-     * @param colorLabelFlag - the color label
+     * @param imapFolder The imap folder
+     * @param msgUIDs The message UIDs
+     * @param colorLabelFlag The color label
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
-     * @throws MessagingException - if an error occurs in underlying protocol
+     * @throws MessagingException If an error occurs in underlying protocol
      */
     private static boolean setColorLabel(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
@@ -1951,7 +1953,7 @@ public final class IMAPCommandsCollection {
      * @param flags The flags to set/unset
      * @param set <code>true</code> to set; <code>false</code> to unset flags
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
-     * @throws MessagingException - if an error occurs in underlying protocol
+     * @throws MessagingException If an error occurs in underlying protocol
      */
     public static boolean setUserFlags(final IMAPFolder imapFolder, final long[] msgUIDs, final String[] flags, final boolean set) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
@@ -2424,26 +2426,50 @@ public final class IMAPCommandsCollection {
      * <b>NOTE</b>: The internal message cache of specified instance of {@link IMAPFolder} is left in an inconsistent state cause its kept
      * message references are not marked as expunged. Therefore the folder should be closed afterwards to force a message cache update.
      *
-     * @param imapFolder - the IMAP folder
-     * @return <code>true</code> if everything went fine; otherwise <code>false</code>
-     * @throws MessagingException - if an error occurs in underlying protocol
+     * @param imapFolder The IMAP folder
+     * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static boolean fastExpunge(final IMAPFolder imapFolder) throws MessagingException {
+    public static void fastExpunge(IMAPFolder imapFolder) throws MessagingException {
+        fastExpunge(imapFolder, false);
+    }
+
+    /**
+     * Performs the <code>EXPUNGE</code> command on whole folder referenced by <code>imapFolder</code>.
+     * <p>
+     * <b>NOTE</b>: The internal message cache of specified instance of {@link IMAPFolder} is left in an inconsistent state cause its kept
+     * message references are not marked as expunged. Therefore the folder should be closed afterwards to force a message cache update.
+     *
+     * @param imapFolder The IMAP folder
+     * @param returnRemovedOnes <code>true</code> to return the sequence numbers of removed messages; otherwise <code>false</code> for "don't care"
+     * @return <code>true</code> if everything went fine; otherwise <code>false</code>
+     * @throws MessagingException If an error occurs in underlying protocol
+     */
+    public static int[] fastExpunge(IMAPFolder imapFolder, boolean returnRemovedOnes) throws MessagingException {
         if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
              */
-            return true;
+            return new int[0];
         }
-        return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (int[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 String command = "EXPUNGE";
-                final Response[] r = performCommand(p, command, true);
-                final Response response = r[r.length - 1];
+                Response[] r = performCommand(p, command, !returnRemovedOnes);
+                Response response = r[r.length - 1];
+                TIntList sequenceNumbers = returnRemovedOnes ? new TIntArrayList(r.length) : null;
                 if (response.isOK()) {
-                    return Boolean.TRUE;
+                    if (sequenceNumbers != null) {
+                        int len = r.length - 1;
+                        for (int j = 0; j < len; j++) {
+                            IMAPResponse imapResponse = (IMAPResponse) r[j];
+                            if ("EXPUNGE".equals(imapResponse.getKey())) {
+                                sequenceNumbers.add(imapResponse.getNumber());
+                                r[j] = null;
+                            }
+                        }
+                    }
                 } else if (response.isBAD()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
@@ -2456,9 +2482,9 @@ public final class IMAPCommandsCollection {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
                 }
-                return Boolean.FALSE;
+                return sequenceNumbers == null ? new int[0] : sequenceNumbers.toArray();
             }
-        }))).booleanValue();
+        }));
     }
 
     private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
@@ -2477,15 +2503,54 @@ public final class IMAPCommandsCollection {
      *
      * @param imapFolder The IMAP folder
      * @param uids The UIDs
-     * @param supportsUIDPLUS <code>true</code> if IMAP server's capabilities indicate support of UIDPLUS extension; otherwise
-     *            <code>false</code>
+     * @param supportsUIDPLUS <code>true</code> if IMAP server's capabilities indicate support of UIDPLUS extension; otherwise <code>false</code>
+     * @param returnRemovedOnes <code>true</code> to return the sequence numbers of removed messages; otherwise <code>false</code> for "don't care"
+     * @return The UIDs of removed messages or <code>null</code> in case <code>returnRemovedOnes</code> was set to <code>false</code>
      * @throws MessagingException If a messaging error occurs
      */
-    public static void uidExpungeWithFallback(final IMAPFolder imapFolder, final long[] uids, final boolean supportsUIDPLUS) throws MessagingException {
+    public static void uidExpungeWithFallback(IMAPFolder imapFolder, long[] uids, boolean supportsUIDPLUS) throws MessagingException {
+        uidExpungeWithFallback(imapFolder, uids, supportsUIDPLUS, false);
+    }
+
+    /**
+     * Performs a <i>UID EXPUNGE</i> on specified UIDs on first try. If <i>UID EXPUNGE</i> fails the fallback action as proposed in RFC 3501
+     * is done:
+     * <ol>
+     * <li>Remember all messages which are marked as \Deleted by now</li>
+     * <li>Temporary remove the \Deleted flags from these messages</li>
+     * <li>Set \Deleted flag on messages referenced by given UIDs and perform a normal <i>EXPUNGE</i> on folder</li>
+     * <li>Restore the \Deleted flags on remaining messages</li>
+     * </ol>
+     * <b>NOTE</b>: The internal message cache of specified instance of {@link IMAPFolder} is left in an inconsistent state cause its kept
+     * message references are not marked as expunged. Therefore the folder should be closed afterwards to force a message cache update.
+     *
+     * @param imapFolder The IMAP folder
+     * @param uids The UIDs
+     * @param supportsUIDPLUS <code>true</code> if IMAP server's capabilities indicate support of UIDPLUS extension; otherwise <code>false</code>
+     * @param returnRemovedOnes <code>true</code> to return the sequence numbers of removed messages; otherwise <code>false</code> for "don't care"
+     * @return The UIDs of removed messages or <code>null</code> in case <code>returnRemovedOnes</code> was set to <code>false</code>
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static long[] uidExpungeWithFallback(IMAPFolder imapFolder, long[] uids, boolean supportsUIDPLUS, boolean returnRemovedOnes) throws MessagingException {
+        TIntLongMap seqNums2UIDs = returnRemovedOnes ? seqNums2UIDs(imapFolder, uids) : null;
+
         boolean performFallback = !supportsUIDPLUS;
         if (supportsUIDPLUS) {
             try {
-                IMAPCommandsCollection.uidExpunge(imapFolder, uids);
+                if (seqNums2UIDs == null) {
+                    IMAPCommandsCollection.uidExpunge(imapFolder, uids);
+                    return null;
+                }
+
+                int[] seqNums = IMAPCommandsCollection.uidExpunge(imapFolder, uids, true);
+                TLongList removedOnes = new TLongArrayList(uids.length);
+                for (int seqNum : seqNums) {
+                    long uid = seqNums2UIDs.get(seqNum);
+                    if (uid > 0) {
+                        removedOnes.add(uid);
+                    }
+                }
+                return removedOnes.toArray();
             } catch (FolderClosedException e) {
                 /*
                  * Not possible to retry since connection is broken
@@ -2533,12 +2598,42 @@ public final class IMAPCommandsCollection {
                  * Temporary remove flag \Deleted, perform expunge & restore flag \Deleted
                  */
                 new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, false, true, false).doCommand();
-                IMAPCommandsCollection.fastExpunge(imapFolder);
+                if (seqNums2UIDs == null) {
+                    IMAPCommandsCollection.fastExpunge(imapFolder);
+                    new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, true, true, false).doCommand();
+                    return null;
+                }
+
+                int[] seqNums = IMAPCommandsCollection.fastExpunge(imapFolder, true);
                 new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, true, true, false).doCommand();
-            } else {
-                IMAPCommandsCollection.fastExpunge(imapFolder);
+
+                TLongList removedOnes = new TLongArrayList(uids.length);
+                for (int seqNum : seqNums) {
+                    long uid = seqNums2UIDs.get(seqNum);
+                    if (uid > 0) {
+                        removedOnes.add(uid);
+                    }
+                }
+                return removedOnes.toArray();
             }
+
+            if (seqNums2UIDs == null) {
+                IMAPCommandsCollection.fastExpunge(imapFolder);
+                return null;
+            }
+
+            int[] seqNums = IMAPCommandsCollection.fastExpunge(imapFolder, true);
+            TLongList removedOnes = new TLongArrayList(uids.length);
+            for (int seqNum : seqNums) {
+                long uid = seqNums2UIDs.get(seqNum);
+                if (uid > 0) {
+                    removedOnes.add(uid);
+                }
+            }
+            return removedOnes.toArray();
         }
+
+        return null;
     }
 
     /**
@@ -2719,33 +2814,32 @@ public final class IMAPCommandsCollection {
         }));
     }
 
-    private static final String TEMPL_FETCH_UID = "FETCH %s (UID)";
-
     /**
      * Detects the corresponding UIDs to message range according to specified arguments
      *
      * @param imapFolder The IMAP folder
-     * @param args The arguments
-     * @param size The number of messages in folder
+     * @param uids The UID arguments
      * @return The corresponding UIDs
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static long[] seqNums2UID(final IMAPFolder imapFolder, final String[] args, final int size) throws MessagingException {
-        if (imapFolder.getMessageCount() <= 0) {
+    public static TIntLongMap seqNums2UIDs(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+        int messageCount = imapFolder.getMessageCount();
+        if (messageCount <= 0) {
             /*
              * Empty folder...
              */
-            return new long[0];
+            return new TIntLongHashMap(0);
         }
-        return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+        return (TIntLongMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
                 Response[] r = null;
                 Response response = null;
-                int index = 0;
-                final long[] uids = new long[size];
-                for (int i = 0; (i < args.length) && (index < size); i++) {
+                TIntLongMap seqNum2Uid = new TIntLongHashMap(uids.length);
+                for (String arg : args) {
                     /*-
                      * Arguments:  sequence set
                      * message data item names or macro
@@ -2756,15 +2850,16 @@ public final class IMAPCommandsCollection {
                      *             NO - fetch error: can't fetch that data
                      *             BAD - command unknown or arguments invalid
                      */
-                    final String command = String.format(TEMPL_FETCH_UID, args[i]);
+                    String command = String.format(TEMPL_UID_FETCH_UID, arg);
                     r = performCommand(p, command);
                     final int len = r.length - 1;
                     response = r[len];
                     if (response.isOK()) {
                         for (int j = 0; j < len; j++) {
-                            if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                                final UID uidItem = getItemOf(UID.class, (FetchResponse) r[j], STR_UID);
-                                uids[index++] = uidItem.uid;
+                            IMAPResponse imapResponse = (IMAPResponse) r[j];
+                            if (STR_FETCH.equals(imapResponse.getKey())) {
+                                UID uidItem = getItemOf(UID.class, (FetchResponse) r[j], STR_UID);
+                                seqNum2Uid.put(imapResponse.getNumber(), uidItem.uid);
                                 r[j] = null;
                             }
                         }
@@ -2785,14 +2880,8 @@ public final class IMAPCommandsCollection {
                         p.handleResult(response);
                     }
                 }
-                if (index < size) {
-                    final long[] trim = new long[index];
-                    System.arraycopy(uids, 0, trim, 0, trim.length);
-                    return trim;
-                }
-                return uids;
+                return seqNum2Uid;
             }
-
         }));
     }
 
@@ -2839,7 +2928,7 @@ public final class IMAPCommandsCollection {
                  *             NO - fetch error: can't fetch that data
                  *             BAD - command unknown or arguments invalid
                  */
-                final String command = String.format(TEMPL_FETCH_UID, "1:*");
+                final String command = "FETCH 1:* (UID)";
                 r = performCommand(p, command);
                 final int len = r.length - 1;
                 response = r[len];
@@ -2949,8 +3038,16 @@ public final class IMAPCommandsCollection {
                 /*
                  * Execute command
                  */
-                final TLongIntHashMap seqNumMap = new TLongIntHashMap(length);
-                final String[] args = messageCount == length ? (1 == messageCount ? new String[] { "1" } : ARGS_ALL) : IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
+                TLongIntHashMap seqNumMap = new TLongIntHashMap(length);
+                String[] args;
+                String commandTemplate;
+                if (messageCount == length) {
+                    args = 1 == messageCount ? new String[] { "1" } : ARGS_ALL;
+                    commandTemplate = "FETCH %s (UID)";
+                } else {
+                    args = IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
+                    commandTemplate = TEMPL_UID_FETCH_UID;
+                }
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
                     /*-
@@ -2963,7 +3060,7 @@ public final class IMAPCommandsCollection {
                      *             NO - fetch error: can't fetch that data
                      *             BAD - command unknown or arguments invalid
                      */
-                    final String command = String.format(TEMPL_UID_FETCH_UID, args[k]);
+                    final String command = String.format(commandTemplate, args[k]);
                     final Response[] r = performCommand(p, command);
                     final int len = r.length - 1;
                     final Response response = r[len];
@@ -3026,7 +3123,15 @@ public final class IMAPCommandsCollection {
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final TLongIntHashMap uid2seqNum = new TLongIntHashMap(uids.length);
-                final String[] args = messageCount == uids.length ? (1 == messageCount ? new String[] { "1" } : ARGS_ALL) : IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
+                String[] args;
+                String commandTemplate;
+                if (messageCount == uids.length) {
+                    args = 1 == messageCount ? new String[] { "1" } : ARGS_ALL;
+                    commandTemplate = "FETCH %s (UID)";
+                } else {
+                    args = IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
+                    commandTemplate = TEMPL_UID_FETCH_UID;
+                }
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
                     /*-
@@ -3039,7 +3144,7 @@ public final class IMAPCommandsCollection {
                      *             NO - fetch error: can't fetch that data
                      *             BAD - command unknown or arguments invalid
                      */
-                    final String command = String.format(TEMPL_UID_FETCH_UID, args[k]);
+                    final String command = String.format(commandTemplate, args[k]);
                     final Response[] r = performCommand(p, command);
                     final int len = r.length - 1;
                     final Response response = r[len];
@@ -3651,30 +3756,59 @@ public final class IMAPCommandsCollection {
      * <b>NOTE</b> folder's message cache is left in an inconsistent state cause its kept message references are not marked as expunged.
      * Therefore the folder should be closed afterwards to force message cache update.
      *
-     * @param imapFolder - the imap folder
-     * @param uids - the message UIDs
+     * @param imapFolder The IMAP folder
+     * @param uids The message UIDs
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
-     * @throws MessagingException - if an error occurs in underlying protocol
+     * @throws MessagingException If an error occurs in underlying protocol
      */
     public static boolean uidExpunge(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+        uidExpunge(imapFolder, uids, false);
+        return true;
+    }
+
+    /**
+     * <p>
+     * Performs the <code>EXPUNGE</code> command on messages identified through given <code>uids</code>.
+     * <p>
+     * <b>NOTE</b> folder's message cache is left in an inconsistent state cause its kept message references are not marked as expunged.
+     * Therefore the folder should be closed afterwards to force message cache update.
+     *
+     * @param imapFolder The IMAP folder
+     * @param uids The message UIDs
+     * @param returnRemovedOnes Whether to return the sequence numbers of removed messages
+     * @return The sequence numbers of removed messages or <code>null</code> if <code>returnRemovedOnes</code> was set to <code>false</code>
+     * @throws MessagingException If an error occurs in underlying protocol
+     */
+    public static int[] uidExpunge(IMAPFolder imapFolder, long[] uids, boolean returnRemovedOnes) throws MessagingException {
         if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
              */
-            return true;
+            return returnRemovedOnes ? new int[0] : null;
         }
-        return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (int[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false, 12); // "UID EXPUNGE <uids>"
+                String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false, 12); // "UID EXPUNGE <uids>"
+                TIntList sequenceNumbers = returnRemovedOnes ? new TIntArrayList(uids.length) : null;
                 Response[] r = null;
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
                     final String command = String.format(TEMPL_UID_EXPUNGE, args[i]);
-                    r = performCommand(p, command, true);
+                    r = performCommand(p, command, !returnRemovedOnes);
                     response = r[r.length - 1];
                     if (response.isOK()) {
+                        if (sequenceNumbers != null) {
+                            int len = r.length - 1;
+                            for (int j = 0; j < len; j++) {
+                                IMAPResponse imapResponse = (IMAPResponse) r[j];
+                                if ("EXPUNGE".equals(imapResponse.getKey())) {
+                                    sequenceNumbers.add(imapResponse.getNumber());
+                                    r[j] = null;
+                                }
+                            }
+                        }
                         continue Next;
                     } else if (response.isBAD()) {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
@@ -3689,9 +3823,9 @@ public final class IMAPCommandsCollection {
                         p.handleResult(response);
                     }
                 }
-                return Boolean.TRUE;
+                return sequenceNumbers == null ? null : sequenceNumbers.toArray();
             }
-        }))).booleanValue();
+        }));
     }
 
     // private static final String ATOM_PERMANENTFLAGS = "[PERMANENTFLAGS";

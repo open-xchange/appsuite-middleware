@@ -82,7 +82,7 @@ public class FolderManager {
         super();
         this.tree = tree;
         this.folderApi = api;
-        this.lastTimestamp = Long.valueOf(0l);
+        this.lastTimestamp = Long.valueOf(0L);
     }
 
     public String createFolder(String parent, String name, String module) throws ApiException {
@@ -110,7 +110,7 @@ public class FolderManager {
     }
 
     public void cleanUp() throws ApiException {
-        folderApi.getFoldersApi().deleteFolders(folderApi.getSession(), foldersToDelete, tree, lastTimestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+        folderApi.getFoldersApi().deleteFolders(folderApi.getSession(), foldersToDelete, tree, lastTimestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
     }
 
     /**

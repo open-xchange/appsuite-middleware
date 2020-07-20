@@ -66,7 +66,7 @@ public class SharedAttachmentsInfo {
      * @return The new builder
      */
     public static Builder builder() {
-        return new Builder();
+        return new Builder(null);
     }
 
     /** The builder for an instance of <code>SharedAttachmentsInfo</code> */
@@ -81,7 +81,7 @@ public class SharedAttachmentsInfo {
         /**
          * Initializes a new {@link Builder}.
          */
-        Builder() {
+        Builder(SharedAttachmentsInfo sharedAttachmentsInfo) {
             super();
         }
 
@@ -187,6 +187,57 @@ public class SharedAttachmentsInfo {
      */
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (autoDelete ? 1231 : 1237);
+        result = prime * result + (enabled ? 1231 : 1237);
+        result = prime * result + ((expiryDate == null) ? 0 : expiryDate.hashCode());
+        result = prime * result + ((language == null) ? 0 : language.hashCode());
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof SharedAttachmentsInfo)) {
+            return false;
+        }
+        SharedAttachmentsInfo other = (SharedAttachmentsInfo) obj;
+        if (autoDelete != other.autoDelete) {
+            return false;
+        }
+        if (enabled != other.enabled) {
+            return false;
+        }
+        if (expiryDate == null) {
+            if (other.expiryDate != null) {
+                return false;
+            }
+        } else if (!expiryDate.equals(other.expiryDate)) {
+            return false;
+        }
+        if (language == null) {
+            if (other.language != null) {
+                return false;
+            }
+        } else if (!language.equals(other.language)) {
+            return false;
+        }
+        if (password == null) {
+            if (other.password != null) {
+                return false;
+            }
+        } else if (!password.equals(other.password)) {
+            return false;
+        }
+        return true;
     }
 
     @Override

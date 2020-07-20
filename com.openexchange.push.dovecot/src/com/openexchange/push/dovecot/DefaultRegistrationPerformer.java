@@ -60,9 +60,9 @@ import com.openexchange.dovecot.doveadm.client.DoveAdmCommand;
 import com.openexchange.dovecot.doveadm.client.DoveAdmDataResponse;
 import com.openexchange.dovecot.doveadm.client.DoveAdmResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -192,9 +192,10 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
             // Connect it
             mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
             mailAccess.connect(false);
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess1 = mailAccess;
 
             // Get IMAP store
-            final IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
+            final IMAPStore imapStore = IMAPAccess.getIMAPFolderStorageFrom(mailAccess1).getImapStore();
             logInfo = imapStore.toString();
 
             // Check capability
@@ -263,9 +264,10 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
                 // Connect it
                 mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
                 mailAccess.connect(false);
+                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess1 = mailAccess;
 
                 // Get IMAP store & execute SETMETADATA for unregistration
-                IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
+                IMAPStore imapStore = IMAPAccess.getIMAPFolderStorageFrom(mailAccess1).getImapStore();
                 IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder("INBOX");
                 imapFolder.doCommand(new UnregistrationCommand(imapFolder));
             }
@@ -291,20 +293,6 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
                 // Ignore
             }
         }
-    }
-
-    private IMAPFolderStorage getImapFolderStorageFrom(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        IMailFolderStorage fstore = mailAccess.getFolderStorage();
-        if (!(fstore instanceof IMAPFolderStorage)) {
-            if (!(fstore instanceof IMailFolderStorageDelegator)) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation: " + fstore.getClass().getName());
-            }
-            fstore = ((IMailFolderStorageDelegator) fstore).getDelegateFolderStorage();
-            if (!(fstore instanceof IMAPFolderStorage)) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation: " + fstore.getClass().getName());
-            }
-        }
-        return (IMAPFolderStorage) fstore;
     }
 
     private DoveAdmCommand craftMailboxMetadataSetCommandUsing(String value, String commandId, String user) {

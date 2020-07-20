@@ -49,12 +49,12 @@
 
 package com.openexchange.mail.compose.json.action;
 
-import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -81,15 +81,15 @@ public class DeleteCompositionSpaceAction extends AbstractMailComposeAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        CompositionSpaceService compositionSpaceStorageService = getCompositionSpaceService();
-
         String sId = requestData.requireParameter("id");
-        UUID uuid = parseCompositionSpaceId(sId);
+        CompositionSpaceId compositionSpaceId = parseCompositionSpaceId(sId);
 
-        boolean closed = compositionSpaceStorageService.closeCompositionSpace(uuid, session);
+        CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
+
+        boolean closed = compositionSpaceService.closeCompositionSpace(compositionSpaceId.getId());
         LOG.debug("Closed composition space '{}' as per client request", sId);
 
-        return new AJAXRequestResult(new JSONObject(2).put("success", closed), "json");
+        return new AJAXRequestResult(new JSONObject(2).put("success", closed), "json").addWarnings(compositionSpaceService.getWarnings());
     }
 
 }

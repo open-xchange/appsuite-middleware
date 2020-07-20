@@ -50,6 +50,7 @@
 package com.openexchange.java.util;
 
 import java.security.SecureRandom;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -154,6 +155,23 @@ public final class UUIDs {
             throw new IllegalArgumentException("Given string must not be null");
         }
         return toUUID(decodeHex(unformattedString));
+    }
+
+    /**
+     * Gets the optional UUID from specified unformatted string.
+     *
+     * @param unformattedString The unformatted string; e.g. <code>067e61623b6f4ae2a1712470b63dff00</code>
+     * @return The UUID or empty if given string cannot be parsed
+     */
+    public static Optional<UUID> optionalFromUnformattedString(final String unformattedString) {
+        if (null == unformattedString) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(toUUID(decodeHex(unformattedString)));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
 
     private static byte[] decodeHex(final String data) throws IllegalArgumentException {

@@ -62,10 +62,11 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.compose.Attachment;
+import com.openexchange.mail.compose.AttachmentDataSource;
 import com.openexchange.mail.compose.AttachmentOrigin;
+import com.openexchange.mail.compose.ContentId;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -128,13 +129,9 @@ public class AttachmentMailPart extends MailPart implements ComposedMailPart {
             }
         }
         {
-            String contentId = attachment.getContentId();
-            if (Strings.isNotEmpty(contentId)) {
-                contentId = contentId.trim();
-                if (!contentId.startsWith("<") && !contentId.endsWith(">")) {
-                    contentId = new StringBuilder(contentId.length() + 2).append('<').append(contentId).append('>').toString();
-                }
-                setContentId(contentId);
+            ContentId contentId = attachment.getContentIdAsObject();
+            if (contentId != null) {
+                setContentId(contentId.getContentIdForHeader());
             }
         }
         setFileName(preparedFileName);

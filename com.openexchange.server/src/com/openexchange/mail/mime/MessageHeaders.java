@@ -229,6 +229,16 @@ public final class MessageHeaders {
 
     public static final HeaderName X_OX_SHARED_ATTACHMENTS = HeaderName.valueOf(HDR_X_OX_SHARED_ATTACHMENTS);
 
+    /** "X-OX-Shared-Attachment-Reference" */
+    public static final String HDR_X_OX_SHARED_ATTACHMENT_REFERENCE = "X-OX-Shared-Attachment-Reference";
+
+    public static final HeaderName X_OX_SHARED_ATTACHMENT_REFERENCE = HeaderName.valueOf(HDR_X_OX_SHARED_ATTACHMENT_REFERENCE);
+
+    /** "X-OX-Shared-Folder-Reference" */
+    public static final String HDR_X_OX_SHARED_FOLDER_REFERENCE = "X-OX-Shared-Folder-Reference";
+
+    public static final HeaderName X_OX_SHARED_FOLDER_REFERENCE = HeaderName.valueOf(HDR_X_OX_SHARED_FOLDER_REFERENCE);
+
     /** "X-OX-Security" */
     public static final String HDR_X_OX_SECURITY = "X-OX-Security";
 
@@ -262,5 +272,20 @@ public final class MessageHeaders {
     public static final String HDR_X_OX_CONTENT_TYPE = "X-OX-Content-Type";
 
     public static final HeaderName X_OX_CONTENT_TYPE = HeaderName.valueOf(HDR_X_OX_CONTENT_TYPE);
+
+    /** {@value #HDR_X_OX_COMPOSITION_SPACE_ID} */
+    public static final String HDR_X_OX_COMPOSITION_SPACE_ID = "X-OX-Composition-Space-Id";
+
+    public static final HeaderName X_OX_COMPOSITION_SPACE_ID = HeaderName.valueOf(HDR_X_OX_COMPOSITION_SPACE_ID);
+
+    /** {@value #HDR_X_OX_ATTACHMENT_ORIGIN} */
+    public static final String HDR_X_OX_ATTACHMENT_ORIGIN = "X-OX-Attachment-Origin";
+
+    public static final HeaderName X_OX_ATTACHMENT_ORIGIN = HeaderName.valueOf(HDR_X_OX_ATTACHMENT_ORIGIN);
+
+    /** {@value #HDR_SENDER} */
+    public static final String HDR_SENDER = "Sender";
+
+    public static final HeaderName SENDER = HeaderName.valueOf(HDR_SENDER);
 
 }

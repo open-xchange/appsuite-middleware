@@ -49,14 +49,12 @@
 
 package com.openexchange.mail.compose.json.action;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.compose.Attachment;
+import com.openexchange.mail.compose.AttachmentResult;
+import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -72,7 +70,8 @@ public class AddOriginalAttachmentsMailComposeAction extends AbstractMailCompose
 
     /**
      * Initializes a new {@link AddOriginalAttachmentsMailComposeAction}.
-     * @param services
+     *
+     * @param services The service look-up
      */
     public AddOriginalAttachmentsMailComposeAction(ServiceLookup services) {
         super(services);
@@ -82,12 +81,12 @@ public class AddOriginalAttachmentsMailComposeAction extends AbstractMailCompose
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         // Require composition space identifier
         String sId = requestData.requireParameter("id");
-        UUID uuid = parseCompositionSpaceId(sId);
+        CompositionSpaceId compositionSpaceId = parseCompositionSpaceId(sId);
 
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
-        List<Attachment> attachments = compositionSpaceService.addOriginalAttachmentsToCompositionSpace(uuid, session);
+        CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
+        AttachmentResult attachmentResult = compositionSpaceService.addOriginalAttachmentsToCompositionSpace(compositionSpaceId.getId());
 
-        return new AJAXRequestResult(new ArrayList<Attachment>(attachments), "compositionSpaceAttachment");
+        return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
     }
 
 }

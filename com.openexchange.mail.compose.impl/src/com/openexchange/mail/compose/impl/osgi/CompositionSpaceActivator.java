@@ -88,7 +88,9 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageService;
 import com.openexchange.mail.compose.CompositionSpaceService;
+import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
 import com.openexchange.mail.compose.CompositionSpaceStorageService;
+import com.openexchange.mail.compose.impl.CompositionSpaceServiceFactoryImpl;
 import com.openexchange.mail.compose.impl.CompositionSpaceServiceImpl;
 import com.openexchange.mail.compose.impl.CryptoCompositionSpaceService;
 import com.openexchange.mail.compose.impl.attachment.AttachmentImageDataSource;
@@ -282,12 +284,11 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         }
         registerService(CompositionSpaceStorageService.class, storageService);
 
-        CompositionSpaceServiceImpl serviceImpl = new CompositionSpaceServiceImpl(storageService, attachmentStorageService, this);
-        final CryptoCompositionSpaceService cryptoServiceImpl = new CryptoCompositionSpaceService(serviceImpl, keyStorageService, this);
-        registerService(CompositionSpaceService.class, cryptoServiceImpl);
+        CompositionSpaceServiceFactoryImpl serviceFactoryImpl = new CompositionSpaceServiceFactoryImpl(storageService, attachmentStorageService, keyStorageService, this);
+        registerService(CompositionSpaceServiceFactory.class, serviceFactoryImpl);
 
         {
-            Optional<CompositionSpaceCleanUpRegistry> optionalCleanUpRegistry = CompositionSpaceCleanUpRegistry.initInstance(cryptoServiceImpl, this);
+            Optional<CompositionSpaceCleanUpRegistry> optionalCleanUpRegistry = CompositionSpaceCleanUpRegistry.initInstance(serviceFactoryImpl, this);
             if (optionalCleanUpRegistry.isPresent()) {
                 CompositionSpaceCleanUpRegistry cleanUpRegistry = optionalCleanUpRegistry.get();
                 Dictionary<String, Object> serviceProperties = new Hashtable<>(1);

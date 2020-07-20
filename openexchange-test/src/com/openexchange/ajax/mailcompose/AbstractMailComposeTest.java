@@ -100,31 +100,18 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
     protected File attachment;
     protected File attachment2;
     protected String testMailDir;
-    protected File mailWithAttachmentFile;
     protected final List<MailDestinationData> IMPORTED_EMAILS = new ArrayList<>();
-    protected Long timestamp;
     protected FoldersApi foldersApi;
-    protected String folderId;
-    protected MailDestinationData mailWithAttachment;
 
-    private final String fileName;
-    
+    private String testFolderId = null;
+
     private static final String FOLDER = "default0%2FINBOX";
+
     /**
      * Initializes a new {@link AbstractMailComposeTest}.
      */
     public AbstractMailComposeTest() {
-        this(null);
-    }
-
-    /**
-     * Initializes a new {@link AbstractMailComposeTest}.
-     * 
-     * @param fileName The file name of the mail to upload
-     */
-    public AbstractMailComposeTest(String fileName) {
         super();
-        this.fileName = fileName;
     }
 
     @Override
@@ -135,22 +122,6 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         mailApi = new MailApi(getApiClient());
         foldersApi = new FoldersApi(getApiClient());
         testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
-        mailWithAttachmentFile = new File(testMailDir, null == fileName ? "bug29865.eml" : fileName);
-
-        NewFolderBody body = new NewFolderBody();
-        NewFolderBodyFolder folder = new NewFolderBodyFolder();
-        folder.setTitle(this.getClass().getSimpleName() + "_" + new UID().toString());
-        folder.setModule("mail");
-        folder.setPermissions(null);
-        body.setFolder(folder);
-        FolderUpdateResponse createFolder = foldersApi.createFolder(FOLDER, getApiClient().getSession(), body, "0", null, null, null);
-        folderId = createFolder.getData();
-
-        MailImportResponse response = mailApi.importMail(getApiClient().getSession(), folderId, mailWithAttachmentFile, null, Boolean.TRUE);
-        List<MailDestinationData> data = response.getData();
-        mailWithAttachment = data.get(0);
-        IMPORTED_EMAILS.add(mailWithAttachment);
-        timestamp = response.getTimestamp();
 
         attachment = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         attachment2 = new File(TestInit.getTestProperty("provisioningFile"));
@@ -180,9 +151,44 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
             mailListElement.setId(dest.getId());
             body.add(mailListElement);
         }
-        mailApi.deleteMails(getApiClient().getSession(), body, timestamp, null, null);
-        foldersApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "0", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+        mailApi.deleteMails(getApiClient().getSession(), body, null, null, null);
+
+        if (testFolderId != null) {
+            foldersApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(testFolderId), "0", null, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
+        }
         super.tearDown();
+    }
+
+    protected MailDestinationData importTestMailWithAttachment() throws ApiException {
+        return importTestMail("mailcompose_mail-with-pdf-attachment.eml");
+    }
+
+    /**
+     *
+     * importTestMail
+     *
+     * @param fileName The file name of the mail to upload
+     * @return
+     * @throws ApiException
+     */
+    protected MailDestinationData importTestMail(String fileName) throws ApiException {
+        if (testFolderId == null) {
+            NewFolderBody body = new NewFolderBody();
+            NewFolderBodyFolder folder = new NewFolderBodyFolder();
+            folder.setTitle(this.getClass().getSimpleName() + "_" + new UID().toString());
+            folder.setModule("mail");
+            folder.setPermissions(null);
+            body.setFolder(folder);
+            FolderUpdateResponse createFolder = foldersApi.createFolder(FOLDER, getApiClient().getSession(), body, "0", null, null, null);
+            testFolderId = createFolder.getData();
+        }
+
+        File emlFile = new File(testMailDir, fileName);
+        MailImportResponse response = mailApi.importMail(getApiClient().getSession(), testFolderId, emlFile, null, Boolean.TRUE);
+        List<MailDestinationData> data = response.getData();
+        MailDestinationData mailWithAttachment = data.get(0);
+        IMPORTED_EMAILS.add(mailWithAttachment);
+        return mailWithAttachment;
     }
 
     protected MailComposeMessageModel createNewCompositionSpace() throws Exception {

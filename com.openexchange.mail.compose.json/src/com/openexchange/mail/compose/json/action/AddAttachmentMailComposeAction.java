@@ -50,12 +50,9 @@
 package com.openexchange.mail.compose.json.action;
 
 import java.io.InputStream;
-import java.util.List;
-import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestData.StreamParams;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
@@ -73,7 +70,11 @@ import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.Attachment.ContentDisposition;
 import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentOrigin;
+import com.openexchange.mail.compose.AttachmentResult;
+import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
+import com.openexchange.mail.compose.ContentId;
+import com.openexchange.mail.compose.UploadLimits;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -91,31 +92,25 @@ public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
 
     /**
      * Initializes a new {@link AddAttachmentMailComposeAction}.
-     * @param services
+     *
+     * @param services The service look-up
      */
     public AddAttachmentMailComposeAction(ServiceLookup services) {
         super(services);
-    }
-
-    private boolean hasUploads(long maxFileSize, long maxSize, AJAXRequestData request) throws OXException {
-        return request.hasUploads(maxFileSize, maxSize, StreamParams.streamed(false));
     }
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         // Require composition space identifier
         String sId = requestData.requireParameter("id");
-        UUID uuid = parseCompositionSpaceId(sId);
+        CompositionSpaceId compositionSpaceId = parseCompositionSpaceId(sId);
 
         // Load composition space
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
+        CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
 
         // Determine upload quotas
-        UploadLimitations uploadLimitations = getUploadLimitations(session);
-        long maxSize = uploadLimitations.maxUploadSize;
-        long maxFileSize = uploadLimitations.maxUploadFileSize;
-
-        boolean hasFileUploads = hasUploads(maxFileSize, maxSize, requestData);
+        UploadLimits uploadLimits = compositionSpaceService.getAttachmentUploadLimits(compositionSpaceId.getId());
+        boolean hasFileUploads = hasUploads(uploadLimits, requestData);
 
         StreamedUpload upload = requestData.getStreamedUpload();
         if (null == upload) {
@@ -129,11 +124,8 @@ public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
 
         if (hasFileUploads) {
             // File upload available...
-            List<Attachment> newAttachments = compositionSpaceService.addAttachmentToCompositionSpace(uuid, upload.getUploadFiles(), disposition, session);
-            if (newAttachments.size() == 1) {
-                return new AJAXRequestResult(newAttachments.get(0), "compositionSpaceAttachment");
-            }
-            return new AJAXRequestResult(newAttachments, "compositionSpaceAttachment");
+            AttachmentResult attachmentResult = compositionSpaceService.addAttachmentToCompositionSpace(compositionSpaceId.getId(), upload.getUploadFiles(), disposition);
+            return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
         }
 
         // No file uploads available... Expect a "JSON" form field
@@ -165,12 +157,12 @@ public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
             String version = jAttachment.optString("version", FileStorageFileAccess.CURRENT_VERSION);
 
             AttachmentDescription attachment = new AttachmentDescription();
-            attachment.setCompositionSpaceId(uuid);
+            attachment.setCompositionSpaceId(compositionSpaceId.getId());
             attachment.setContentDisposition(Attachment.ContentDisposition.dispositionFor(disposition));
             InputStream attachmentData = parseDriveAttachment(attachment, id, version, fileAccess);
             try {
-                Attachment newAttachment = compositionSpaceService.addAttachmentToCompositionSpace(uuid, attachment, attachmentData, session);
-                return new AJAXRequestResult(newAttachment, "compositionSpaceAttachment");
+                AttachmentResult attachmentResult = compositionSpaceService.addAttachmentToCompositionSpace(compositionSpaceId.getId(), attachment, attachmentData);
+                return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
             } finally {
                 Streams.close(attachmentData);
             }
@@ -179,8 +171,8 @@ public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
         if ("contacts".equals(origin)) {
             String contactId = jAttachment.getString("id");
             String folderId = jAttachment.getString("folderId");
-            Attachment newAttachment = compositionSpaceService.addContactVCardToCompositionSpace(uuid, contactId, folderId, session);
-            return new AJAXRequestResult(newAttachment, "compositionSpaceAttachment");
+            AttachmentResult attachmentResult = compositionSpaceService.addContactVCardToCompositionSpace(compositionSpaceId.getId(), contactId, folderId);
+            return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
         }
 
         // Unknown origin
@@ -197,7 +189,7 @@ public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
                     attachment.setMimeType(contentType.getBaseType());
                     if (Attachment.ContentDisposition.INLINE == attachment.getContentDisposition() && contentType.startsWith("image/")) {
                         // Set a Content-Id for inline image, too
-                        attachment.setContentId(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange");
+                        attachment.setContentId(ContentId.valueOf(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange"));
                     }
                     attachment.setName(document.getName());
                     attachment.setOrigin(AttachmentOrigin.DRIVE);
@@ -217,7 +209,7 @@ public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
         attachment.setMimeType(contentType.getBaseType());
         if (Attachment.ContentDisposition.INLINE == attachment.getContentDisposition() && contentType.startsWith("image/")) {
             // Set a Content-Id for inline image, too
-            attachment.setContentId(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange");
+            attachment.setContentId(ContentId.valueOf(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange"));
         }
         attachment.setName(metadata.getFileName());
         attachment.setOrigin(AttachmentOrigin.DRIVE);

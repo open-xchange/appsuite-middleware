@@ -408,6 +408,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.Separators.class,
             com.openexchange.groupware.settings.tree.modules.mail.SpamButton.class,
             com.openexchange.groupware.settings.tree.modules.mail.VCard.class,
+            com.openexchange.groupware.settings.tree.modules.mail.MaxMailSize.class,
             com.openexchange.groupware.settings.tree.modules.mailaccount.Module.class,
             com.openexchange.groupware.settings.tree.modules.olox20.Active.class,
             com.openexchange.groupware.settings.tree.modules.olox20.Module.class,

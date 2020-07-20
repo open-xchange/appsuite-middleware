@@ -82,4 +82,13 @@ public interface StreamedUploadFileIterator {
      */
     StreamedUploadFile next() throws OXException;
 
+    /**
+     * Returns the total size of all contained upload files. The value might
+     * include encoding and envelope data overhead, if it could not be determined
+     * exactly upfront.
+     *
+     * @return The size or <code>-1</code> if could not be determined
+     */
+    long getRawTotalBytes();
+
 }

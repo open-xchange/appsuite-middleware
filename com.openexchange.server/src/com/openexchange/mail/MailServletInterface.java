@@ -115,7 +115,30 @@ public abstract class MailServletInterface {
      * @throws OXException
      */
     public static final MailServletInterface getInstance(Session session) throws OXException {
-        return new MailServletInterfaceImpl(session);
+        return getInstance(session, false);
+    }
+
+    /**
+     * Gets a proper implementation of {@link MailServletInterface}
+     * <p>
+     * <b>NOTE:</b> Don't forget to invoke {@link #close(boolean)} after usage
+     *
+     * <pre>
+     * MailInterface mailInterface = MailInterface.getInstance(session);
+     * try {
+     *     //Do some stuff here...
+     * } finally {
+     *     mailInterface.close(true);
+     * }
+     * </pre>
+     *
+     * @param session The session
+     * @param debug The debug flag
+     * @return An instance of {@link MailServletInterface}
+     * @throws OXException
+     */
+    public static final MailServletInterface getInstance(Session session, boolean debug) throws OXException {
+        return new MailServletInterfaceImpl(session, false, null, debug);
     }
 
     /**
@@ -138,8 +161,32 @@ public abstract class MailServletInterface {
      * @throws OXException
      */
     public static final MailServletInterface getInstanceWithDecryptionSupport(Session session, String cryptoAuthentication) throws OXException {
+        return getInstanceWithDecryptionSupport(session, cryptoAuthentication, false);
+    }
+
+    /**
+     * Gets a proper implementation of {@link MailServletInterface} which supports email decryption.
+     * <p>
+     * <b>NOTE:</b> Don't forget to invoke {@link #close(boolean)} after usage
+     *
+     * <pre>
+     * MailInterface mailInterface = MailInterface.getInstance(session);
+     * try {
+     *     //Do some stuff here...
+     * } finally {
+     *     mailInterface.close(true);
+     * }
+     * </pre>
+     *
+     * @param session The session
+     * @param cryptoAuthentication authentication for decrypting emails
+     * @param debug The debug flag
+     * @return An instance of {@link MailServletInterface}
+     * @throws OXException
+     */
+    public static final MailServletInterface getInstanceWithDecryptionSupport(Session session, String cryptoAuthentication, boolean debug) throws OXException {
         final boolean doDecryption = true;
-        return new MailServletInterfaceImpl(session, doDecryption, cryptoAuthentication);
+        return new MailServletInterfaceImpl(session, doDecryption, cryptoAuthentication, debug);
     }
 
     /**
@@ -304,18 +351,18 @@ public abstract class MailServletInterface {
      * Gets both quota limit and quota usage in an array with length set to <code>2</code> for each resource type
      *
      * @param types The resource types; {@link #QUOTA_RESOURCE_STORAGE} or {@link #QUOTA_RESOURCE_MESSAGE}
-     * @return Both quota limit and quota usage in an array with length set to <code>2</code> for each resource type
+     * @return Both quota limit and quota usage in an array with length set to <code>2</code> for each resource type. Storage values are in kilobytes.
      * @throws OXException If quotas cannot be retrieved
      */
     public abstract long[][] getQuotas(int[] types) throws OXException;
 
     /**
-     * Returns the quota limit
+     * Returns the quota limit. Storage values are in kilobytes.
      */
     public abstract long getQuotaLimit(int type) throws OXException;
 
     /**
-     * Returns the current quota usage
+     * Returns the current quota usage. Storage values are in kilobytes.
      */
     public abstract long getQuotaUsage(int type) throws OXException;
 

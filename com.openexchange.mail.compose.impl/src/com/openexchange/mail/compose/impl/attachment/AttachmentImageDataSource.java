@@ -49,25 +49,21 @@
 
 package com.openexchange.mail.compose.impl.attachment;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 import java.util.UUID;
 import com.drew.imaging.FileType;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
-import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Reference;
-import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
+import com.openexchange.mail.compose.AbstractCompositionSpaceImageDataSource;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageService;
@@ -80,16 +76,11 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 /**
  * {@link AttachmentImageDataSource}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AttachmentImageDataSource implements ImageDataSource {
+public class AttachmentImageDataSource extends AbstractCompositionSpaceImageDataSource {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentImageDataSource.class);
-
-    private static final String MIMETYPE_APPLICATION_OCTETSTREAM = "application/octet-stream";
-
-    private static final long EXPIRES = ImageDataSource.YEAR_IN_MILLIS * 50;
 
     // ---------------------------------------------------------------------------------------------------------------------------
 
@@ -107,7 +98,6 @@ public class AttachmentImageDataSource implements ImageDataSource {
     // ---------------------------------------------------------------------------------------------------------------------------
 
     private volatile AttachmentStorageService attachmentStorageService;
-    private final ContentType unknownContentType;
     private final String[] args;
     private final String alias;
     private final String registrationName;
@@ -118,12 +108,8 @@ public class AttachmentImageDataSource implements ImageDataSource {
     private AttachmentImageDataSource() {
         super();
         args = new String[] { "com.openexchange.mail.compose.id" };
-        alias = AttachmentStorage.IMAGE_DATA_SOURCE_ALIAS;
-        registrationName = AttachmentStorage.IMAGE_REGISTRATION_NAME;
-        ContentType ct = new ContentType();
-        ct.setPrimaryType("image");
-        ct.setSubType("unknown");
-        unknownContentType = ct;
+        alias = "/mail/compose/image";
+        registrationName = "com.openexchange.mail.compose.image";
     }
 
     /**
@@ -201,81 +187,11 @@ public class AttachmentImageDataSource implements ImageDataSource {
         }
     }
 
-    private ContentType determineContentType(Attachment attachment, Reference<FileType> fileTypeRef) throws IOException {
-        try {
-            String contentType = attachment.getMimeType();
-            ContentType ct;
-            if (Strings.isNotEmpty(contentType) && false == (ct = new ContentType(contentType)).startsWith(MIMETYPE_APPLICATION_OCTETSTREAM)) {
-                return ct;
-            }
-
-            FileType fileType = detectFileType(attachment);
-            fileTypeRef.setValue(fileType);
-            if (FileType.Unknown == fileType) {
-                return unknownContentType;
-            }
-
-            String mimeType = fileType.getMimeType();
-            return Strings.isEmpty(mimeType) ? unknownContentType : new ContentType(mimeType);
-        } catch (@SuppressWarnings("unused") OXException e) {
-            // Parsing MIME type failed
-            return unknownContentType;
-        }
-    }
-
-    private FileType detectFileType(Attachment attachment) throws OXException, IOException {
-        InputStream in = null;
-        BufferedInputStream bufferedInputStream = null;
-        try {
-            in = attachment.getData();
-            bufferedInputStream = in instanceof BufferedInputStream ? (BufferedInputStream) in : new BufferedInputStream(in, 64);
-            FileType fileType = com.drew.imaging.FileTypeDetector.detectFileType(bufferedInputStream);
-            return null == fileType ? FileType.Unknown : fileType;
-        } finally {
-            Streams.close(bufferedInputStream, in);
-        }
-    }
-
-    private String determineFileName(Attachment attachment, ContentType contentType, Reference<FileType> fileTypeRef, boolean createIfMissing) throws OXException, IOException {
-        String name = attachment.getName();
-        if (Strings.isNotEmpty(name)) {
-            return name;
-        }
-
-        String fileName = contentType.getNameParameter();
-        if (Strings.isNotEmpty(fileName) && !"null".equalsIgnoreCase(fileName)) {
-            return fileName;
-        }
-
-        if (false == createIfMissing) {
-            return null;
-        }
-
-        // Create a file name...
-        FileType fileType = fileTypeRef.getValue();
-        if (null == fileType) {
-            fileType = detectFileType(attachment);
-            fileTypeRef.setValue(fileType);
-        }
-
-        String commonExtension = fileType.getCommonExtension();
-        if (Strings.isEmpty(commonExtension)) {
-            return "image.dat";
-        }
-
-        return commonExtension.charAt(0) == '.' ? "image" + commonExtension : "image." + commonExtension;
-    }
-
     @Override
     public String[] getRequiredArguments() {
         final String[] args = new String[this.args.length];
         System.arraycopy(this.args, 0, args, 0, this.args.length);
         return args;
-    }
-
-    @Override
-    public Class<?>[] getTypes() {
-        return new Class<?>[] { InputStream.class };
     }
 
     @Override
@@ -289,27 +205,10 @@ public class AttachmentImageDataSource implements ImageDataSource {
     }
 
     @Override
-    public ImageLocation parseUrl(String url) {
-        return ImageUtility.parseImageLocationFrom(url);
-    }
-
-    @Override
     public DataArguments generateDataArgumentsFrom(ImageLocation imageLocation) {
         final DataArguments dataArgs = new DataArguments(2);
         dataArgs.put(args[0], imageLocation.getImageId());
         return dataArgs;
-    }
-
-    @Override
-    public String generateUrl(ImageLocation imageLocation, Session session) throws OXException {
-        final StringBuilder sb = new StringBuilder(64);
-        ImageUtility.startImageUrl(imageLocation, session, this, true, sb);
-        return sb.toString();
-    }
-
-    @Override
-    public long getExpires() {
-        return EXPIRES;
     }
 
     @Override
@@ -319,11 +218,6 @@ public class AttachmentImageDataSource implements ImageDataSource {
         builder.append(delim).append(imageLocation.getImageId());
         builder.append(delim);
         return ImageUtility.getMD5(builder.toString(), "hex");
-    }
-
-    @Override
-    public ImageLocation parseRequest(AJAXRequestData requestData) {
-        return ImageUtility.parseImageLocationFrom(requestData);
     }
 
 }

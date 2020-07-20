@@ -51,6 +51,7 @@ package com.openexchange.unifiedinbox;
 
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailProperties;

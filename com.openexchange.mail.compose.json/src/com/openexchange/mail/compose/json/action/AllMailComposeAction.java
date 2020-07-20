@@ -50,13 +50,17 @@
 package com.openexchange.mail.compose.json.action;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -77,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AllMailComposeAction extends AbstractMailComposeAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllMailComposeAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AllMailComposeAction.class);
 
     /**
      * Initializes a new {@link AllMailComposeAction}.
@@ -90,7 +94,7 @@ public class AllMailComposeAction extends AbstractMailComposeAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
+        List<CompositionSpaceService> compositionSpaceServices = getCompositionSpaceServices(session);
 
         MessageField[] fields;
         String columns = requestData.getParameter("columns");
@@ -106,40 +110,58 @@ public class AllMailComposeAction extends AbstractMailComposeAction {
         }
         columns = null;
 
-        List<CompositionSpace> compositionSpaces = compositionSpaceService.getCompositionSpaces(fields, session);
         boolean debugEnabled = LOG.isDebugEnabled();
-        if (null == compositionSpaces) {
-            if (debugEnabled) {
-                LOG.debug("No open composition spaces for user {} in context {}", I(session.getUserId()), I(session.getContextId()));
+        List<OXException> errors = new LinkedList<>();
+        List<CompositionSpace> allCompositionSpaces = new ArrayList<>();
+        for (CompositionSpaceService compositionSpaceService : compositionSpaceServices) {
+            try {
+                List<CompositionSpace> compositionSpaces = compositionSpaceService.getCompositionSpaces(fields);
+                if (compositionSpaces != null && !compositionSpaces.isEmpty()) {
+                    allCompositionSpaces.addAll(compositionSpaces);
+                }
+                errors.addAll(compositionSpaceService.getWarnings());
+            } catch (OXException e) {
+                LOG.warn("Could not load composition spaces from service {}", compositionSpaceService.getServiceId(), e);
+                errors.add(e);
             }
-            return new AJAXRequestResult(JSONArray.EMPTY_ARRAY, "json");
         }
 
-        int size = compositionSpaces.size();
+        int size = allCompositionSpaces.size();
         if (size <= 0) {
             if (debugEnabled) {
                 LOG.debug("No open composition spaces for user {} in context {}", I(session.getUserId()), I(session.getContextId()));
             }
-            return new AJAXRequestResult(JSONArray.EMPTY_ARRAY, "json");
+
+            if (!errors.isEmpty()) {
+                 throw errors.get(0);
+            }
+
+            AJAXRequestResult requestResult = new AJAXRequestResult(JSONArray.EMPTY_ARRAY, "json");
+            requestResult.addWarnings(errors);
+            return requestResult;
         }
 
         if (debugEnabled) {
-            LOG.debug("Detected {} open composition space(s) for user {} in context {}: {}", I(size), I(session.getUserId()), I(session.getContextId()), compositionSpaces.stream().map(c -> UUIDs.getUnformattedString(c.getId())).collect(Collectors.toList()).toString());
+            String sSpaces = allCompositionSpaces.stream().map(c -> UUIDs.getUnformattedString(c.getId().getId())).collect(Collectors.toList()).toString();
+            LOG.debug("Detected {} open composition space(s) for user {} in context {}: {}", I(size), I(session.getUserId()), I(session.getContextId()), sSpaces);
         }
 
         if (hasColumns) {
-            AJAXRequestResult requestResult = new AJAXRequestResult(compositionSpaces, "compositionSpace");
+            AJAXRequestResult requestResult = new AJAXRequestResult(allCompositionSpaces, "compositionSpace");
             if (hasColumns) {
                 requestResult.setParameter("columns", EnumSet.copyOf(Arrays.asList(fields)));
             }
+            requestResult.addWarnings(errors);
             return requestResult;
         }
 
         JSONArray jIds = new JSONArray(size);
-        for (CompositionSpace compositionSpace : compositionSpaces) {
-            jIds.put(new JSONObject(2).put("id", UUIDs.getUnformattedString(compositionSpace.getId())));
+        for (CompositionSpace compositionSpace : allCompositionSpaces) {
+            jIds.put(new JSONObject(2).put("id", compositionSpace.getId().toString()));
         }
-        return new AJAXRequestResult(jIds, "json");
+        AJAXRequestResult requestResult = new AJAXRequestResult(jIds, "json");
+        requestResult.addWarnings(errors);
+        return requestResult;
     }
 
 }

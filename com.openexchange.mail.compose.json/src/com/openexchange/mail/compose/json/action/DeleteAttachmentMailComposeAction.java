@@ -51,10 +51,11 @@ package com.openexchange.mail.compose.json.action;
 
 import java.util.UUID;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.compose.AttachmentResult;
+import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -70,7 +71,8 @@ public class DeleteAttachmentMailComposeAction extends AbstractMailComposeAction
 
     /**
      * Initializes a new {@link DeleteAttachmentMailComposeAction}.
-     * @param services
+     *
+     * @param services The service look-up
      */
     public DeleteAttachmentMailComposeAction(ServiceLookup services) {
         super(services);
@@ -80,17 +82,17 @@ public class DeleteAttachmentMailComposeAction extends AbstractMailComposeAction
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         // Require composition space identifier
         String sId = requestData.requireParameter("id");
-        UUID uuid = parseCompositionSpaceId(sId);
+        CompositionSpaceId compositionSpaceId = parseCompositionSpaceId(sId);
 
         // Require attachment identifier
         String sAttachmentId = requestData.requireParameter("attachmentId");
         UUID attachmentUuid = parseAttachmentId(sAttachmentId);
 
         // Load composition space
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
-        compositionSpaceService.deleteAttachment(uuid, attachmentUuid, session);
+        CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
+        AttachmentResult attachmentResult = compositionSpaceService.deleteAttachment(compositionSpaceId.getId(), attachmentUuid);
 
-        return new AJAXRequestResult(new JSONObject(2).put("success", true), "json");
+        return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
     }
 
 }

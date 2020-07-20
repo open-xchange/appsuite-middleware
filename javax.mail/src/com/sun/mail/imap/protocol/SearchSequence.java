@@ -54,6 +54,7 @@ import javax.mail.search.DateTerm;
 import javax.mail.search.FlagTerm;
 import javax.mail.search.FromStringTerm;
 import javax.mail.search.FromTerm;
+import javax.mail.search.HeaderExistenceTerm;
 import javax.mail.search.HeaderTerm;
 import javax.mail.search.MessageIDTerm;
 import javax.mail.search.NotTerm;
@@ -128,6 +129,8 @@ public class SearchSequence {
 	    return not((NotTerm)term, charset);
 	else if (term instanceof HeaderTerm) 	// HEADER
 	    return header((HeaderTerm)term, charset);
+	else if (term instanceof HeaderExistenceTerm)   // HEADER
+        return headerExistence((HeaderExistenceTerm)term);
 	else if (term instanceof FlagTerm) 	// FLAG
 	    return flag((FlagTerm)term);
 	else if (term instanceof FromTerm) {	// FROM
@@ -317,6 +320,15 @@ public class SearchSequence {
 	result.writeString(term.getHeaderName());
 	result.writeString(term.getPattern(), charset);
 	return result;
+    }
+
+    protected Argument headerExistence(HeaderExistenceTerm term) 
+        throws SearchException, IOException {
+    Argument result = new Argument();
+    result.writeAtom("HEADER");
+    result.writeString(term.getHeaderName());
+    result.writeString("");
+    return result;
     }
 
     protected Argument messageid(MessageIDTerm term, String charset) 

@@ -125,10 +125,9 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         // Polled an existing instance
         IMAPStore imapStore = imapStoreWrapper.imapStore;
 
-        if (checkConnectivityIfPolled && (false == imapStore.isConnected())) {
-            // IMAPStore instance is no more connected
-            final IMAPStore imapStore1 = imapStore;
-            IMAPAccess.closeSafely(imapStore1);
+        if ((checkConnectivityIfPolled && (false == imapStore.isConnected())) || (imapSession.getDebug() != imapStore.getDebug())) {
+            // IMAPStore instance is no more connected OR debug flag does not match
+            IMAPAccess.closeSafely(imapStore);
             imapStore = newStore(server, port, login, pw, imapSession, session);
             LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAP store instance. {} -- {}", imapStore.toString(), I(imapStore.hashCode()));
             return imapStore;

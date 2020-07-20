@@ -58,6 +58,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.compose.Attachment;
+import com.openexchange.mail.compose.AttachmentResult;
+import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.json.AttachmentFileHolder;
 import com.openexchange.server.ServiceLookup;
@@ -76,7 +78,8 @@ public class GetAttachmentMailComposeAction extends AbstractMailComposeAction {
 
     /**
      * Initializes a new {@link GetAttachmentMailComposeAction}.
-     * @param services
+     *
+     * @param services The service look-up
      */
     public GetAttachmentMailComposeAction(ServiceLookup services) {
         super(services);
@@ -86,14 +89,15 @@ public class GetAttachmentMailComposeAction extends AbstractMailComposeAction {
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         // Require composition space identifier
         String sId = requestData.requireParameter("id");
-        UUID uuid = parseCompositionSpaceId(sId);
+        CompositionSpaceId compositionSpaceId = parseCompositionSpaceId(sId);
 
         // Require attachment identifier
         String sAttachmentId = requestData.requireParameter("attachmentId");
         UUID attachmentUuid = parseAttachmentId(sAttachmentId);
 
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
-        Attachment attachment = compositionSpaceService.getAttachment(uuid, attachmentUuid, session);
+        CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
+        AttachmentResult attachmentResult = compositionSpaceService.getAttachment(compositionSpaceId.getId(), attachmentUuid);
+        Attachment attachment = attachmentResult.getFirstAttachment();
 
         if (isNoImage(attachment)) {
             // Require session parameter for non-image contents
@@ -104,7 +108,7 @@ public class GetAttachmentMailComposeAction extends AbstractMailComposeAction {
         }
 
         AttachmentFileHolder fileHolder = new AttachmentFileHolder(attachment, compositionSpaceService, session);
-        return new AJAXRequestResult(fileHolder, "file");
+        return new AJAXRequestResult(fileHolder, "file").addWarnings(compositionSpaceService.getWarnings());
     }
 
 }

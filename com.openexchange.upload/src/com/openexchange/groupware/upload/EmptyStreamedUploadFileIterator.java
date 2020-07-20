@@ -51,8 +51,6 @@ package com.openexchange.groupware.upload;
 
 import java.util.NoSuchElementException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.StreamedUploadFile;
-import com.openexchange.groupware.upload.StreamedUploadFileIterator;
 
 /**
  * The empty streamed upload file iterator.
@@ -83,5 +81,10 @@ public class EmptyStreamedUploadFileIterator implements StreamedUploadFileIterat
     @Override
     public boolean hasNext() {
         return false;
+    }
+
+    @Override
+    public long getRawTotalBytes() {
+        return 0;
     }
 }

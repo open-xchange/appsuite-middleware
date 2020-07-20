@@ -237,7 +237,7 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
     @Override
     public void tearDown() throws Exception {
         ArrayList<String> list = toDelete.stream().collect(Collectors.toCollection(ArrayList::new));
-        foldersApi.deleteFolders(getSessionId(), list, TREE, getLastTimeStamp(), module, TRUE, FALSE, FALSE, null);
+        foldersApi.deleteFolders(getSessionId(), list, TREE, getLastTimeStamp(), module, TRUE, FALSE, FALSE, null, Boolean.FALSE);
         super.tearDown();
     }
 

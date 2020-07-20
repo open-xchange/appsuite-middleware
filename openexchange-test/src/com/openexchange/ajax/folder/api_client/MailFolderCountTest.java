@@ -145,7 +145,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
                 body.add(mailListElement);
             }
             api.deleteMails(getApiClient().getSession(), body, timestamp, null, null);
-            folderApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+            folderApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         } finally {
             super.tearDown();
         }

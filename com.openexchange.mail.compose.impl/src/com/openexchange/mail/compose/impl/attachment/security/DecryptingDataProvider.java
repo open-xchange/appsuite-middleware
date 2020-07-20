@@ -53,8 +53,8 @@ import java.io.InputStream;
 import java.security.Key;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.compose.CryptoUtility;
 import com.openexchange.mail.compose.DataProvider;
-import com.openexchange.mail.compose.impl.CryptoUtility;
 
 /**
  * {@link DecryptingDataProvider} - A decrypting data provider.

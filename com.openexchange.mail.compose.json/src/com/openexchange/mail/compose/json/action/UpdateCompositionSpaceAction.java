@@ -49,13 +49,13 @@
 
 package com.openexchange.mail.compose.json.action;
 
-import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.MessageDescription;
 import com.openexchange.server.ServiceLookup;
@@ -81,19 +81,19 @@ public class UpdateCompositionSpaceAction extends AbstractMailComposeAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
-
         JSONObject jMessage = (JSONObject) requestData.requireData();
 
         String sId = requestData.requireParameter("id");
-        UUID uuid = parseCompositionSpaceId(sId);
+        CompositionSpaceId compositionSpaceId = parseCompositionSpaceId(sId);
+
+        CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
 
         MessageDescription md = new MessageDescription();
         parseJSONMessage(jMessage, md);
 
-        CompositionSpace compositionSpace = compositionSpaceService.updateCompositionSpace(uuid, md, session);
+        CompositionSpace compositionSpace = compositionSpaceService.updateCompositionSpace(compositionSpaceId.getId(), md);
 
-        return new AJAXRequestResult(compositionSpace, "compositionSpace");
+        return new AJAXRequestResult(compositionSpace, "compositionSpace").addWarnings(compositionSpaceService.getWarnings());
     }
 
 }

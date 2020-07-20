@@ -397,7 +397,7 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
     protected List<String> deleteFolder(String folderId, boolean hardDelete) throws ApiException {
         final boolean failOnError = true;
         final boolean extendedResponse = false;
-        FoldersCleanUpResponse response = foldersApi.deleteFolders(getSessionId(), Collections.singletonList(folderId), null, null, null, B(hardDelete), B(failOnError), B(extendedResponse), null);
+        FoldersCleanUpResponse response = foldersApi.deleteFolders(getSessionId(), Collections.singletonList(folderId), null, null, null, B(hardDelete), B(failOnError), B(extendedResponse), null, Boolean.FALSE);
         return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
     }
 

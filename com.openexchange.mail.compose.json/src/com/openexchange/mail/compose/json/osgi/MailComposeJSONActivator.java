@@ -57,7 +57,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.mail.compose.CompositionSpaceService;
+import com.openexchange.mail.compose.CompositionSpaceServiceFactoryRegistry;
 import com.openexchange.mail.compose.json.MailComposeActionFactory;
 import com.openexchange.mail.compose.json.converter.AttachmentJSONResultConverter;
 import com.openexchange.mail.compose.json.converter.CompositionSpaceJSONResultConverter;
@@ -74,13 +74,13 @@ public class MailComposeJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CompositionSpaceService.class, ThreadPoolService.class, DispatcherPrefixService.class,
-            IDBasedFileAccessFactory.class };
+        return new Class<?>[] { ThreadPoolService.class, DispatcherPrefixService.class, IDBasedFileAccessFactory.class, CompositionSpaceServiceFactoryRegistry.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MailComposeJSONActivator.class);
+
         registerModule(new MailComposeActionFactory(this), MailComposeActionFactory.getModule());
         registerService(ResultConverter.class, new CompositionSpaceJSONResultConverter());
         registerService(ResultConverter.class, new AttachmentJSONResultConverter());

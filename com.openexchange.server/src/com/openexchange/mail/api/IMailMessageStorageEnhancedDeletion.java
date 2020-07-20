@@ -80,4 +80,16 @@ public interface IMailMessageStorageEnhancedDeletion extends IMailMessageStorage
      */
     MailPath[] deleteMessagesEnhanced(String folder, String[] mailIds, boolean hardDelete) throws OXException;
 
+    /**
+     * (Hard) Deletes the messages located in given folder identified through given mail IDs.
+     * <p>
+     * If no mail could be found for a given mail ID, it is treated as a no-op.
+     *
+     * @param folder The folder full name
+     * @param mailIds The mail IDs
+     * @return The identifiers of those mails that were removed (if any)
+     * @throws OXException If messages cannot be deleted.
+     */
+    MailPath[] hardDeleteMessages(String folder, String[] mailIds) throws OXException;
+
 }

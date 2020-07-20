@@ -70,6 +70,7 @@ import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentStorageService;
 import com.openexchange.mail.compose.AttachmentStorages;
 import com.openexchange.mail.compose.CompositionSpaces;
+import com.openexchange.mail.compose.ContentId;
 import com.openexchange.mail.compose.Message;
 import com.openexchange.mail.compose.Meta;
 import com.openexchange.mail.compose.OpenCompositionSpaceParameters;
@@ -270,15 +271,16 @@ public class Forward extends AbstractOpener {
                         state.attachments = new ArrayList<>(inlineParts.size());
                     }
 
-                    Map<String, Attachment> inlineAttachments = new HashMap<String, Attachment>(inlineParts.size());
+                    Map<ContentId, Attachment> inlineAttachments = new HashMap<ContentId, Attachment>(inlineParts.size());
                     int i = 0;
                     for (Map.Entry<String, MailPart> inlineEntry : inlineParts.entrySet()) {
                         // Compile & store attachment
                         MailPart mailPart = inlineEntry.getValue();
-                        AttachmentDescription attachment = AttachmentStorages.createInlineAttachmentDescriptionFor(mailPart, inlineEntry.getKey(), i + 1, state.compositionSpaceId);
+                        ContentId contentId = ContentId.valueOf(inlineEntry.getKey());
+                        AttachmentDescription attachment = AttachmentStorages.createInlineAttachmentDescriptionFor(mailPart, contentId, i + 1, state.compositionSpaceId);
                         Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, optionalEncrypt, session, state.attachmentStorage);
                         state.attachments.add(partAttachment);
-                        inlineAttachments.put(inlineEntry.getKey(), partAttachment);
+                        inlineAttachments.put(contentId, partAttachment);
                         i++;
                     }
 

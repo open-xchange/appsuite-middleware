@@ -196,6 +196,10 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      * Client abruptly aborted the connection: %1$s
      */
     CONNECTION_RESET("Client abruptly aborted the connection: %1$s", MESSAGE, Category.CATEGORY_CONNECTIVITY, 32),
+    /**
+     * There is not enough space on the disk
+     */
+    DISK_FULL("There is not enough space on the disk", MESSAGE, Category.CATEGORY_ERROR, 33),
 
     ;
 

@@ -65,7 +65,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.compose.CompositionSpaceService;
+import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -97,18 +97,18 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
     /**
      * Initializes the instance
      *
-     * @param compositionSpaceService The service to use
+     * @param compositionSpaceServiceFactory The service factory to use
      * @param services The service look-up to use
      * @return The freshly initialized instance or empty if already initialized before
      * @throws OXException If initialization fails
      */
-    public static synchronized Optional<CompositionSpaceCleanUpRegistry> initInstance(CompositionSpaceService compositionSpaceService, ServiceLookup services) throws OXException {
+    public static synchronized Optional<CompositionSpaceCleanUpRegistry> initInstance(CompositionSpaceServiceFactory compositionSpaceServiceFactory, ServiceLookup services) throws OXException {
         if (INSTANCE_REFERENCE.get() != null) {
             // Already initialized
             return Optional.empty();
         }
 
-        CompositionSpaceCleanUpRegistry instance = new CompositionSpaceCleanUpRegistry(compositionSpaceService, services);
+        CompositionSpaceCleanUpRegistry instance = new CompositionSpaceCleanUpRegistry(compositionSpaceServiceFactory, services);
         INSTANCE_REFERENCE.set(instance);
         return Optional.of(instance);
     }
@@ -140,7 +140,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final ConcurrentMap<UserAndContext, CleanUpTask> tasks;
-    private final CompositionSpaceService compositionSpaceService;
+    private final CompositionSpaceServiceFactory compositionSpaceServiceFactory;
     private final ScheduledTimerTask checkerTask;
     private final ServiceLookup services;
 
@@ -148,18 +148,18 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
     /**
      * Initializes a new {@link CompositionSpaceCleanUpRegistry}.
      *
-     * @param compositionSpaceService The service to use
+     * @param compositionSpaceServiceFactory The service factory to use
      * @param services The service look-up to use
      * @throws OXException If initialization fails
      */
-    private CompositionSpaceCleanUpRegistry(CompositionSpaceService compositionSpaceService, ServiceLookup services) throws OXException {
+    private CompositionSpaceCleanUpRegistry(CompositionSpaceServiceFactory compositionSpaceServiceFactory, ServiceLookup services) throws OXException {
         super();
         TimerService timerService = services.getOptionalService(TimerService.class);
         if (timerService == null) {
             throw ServiceExceptionCode.absentService(TimerService.class);
         }
 
-        this.compositionSpaceService = compositionSpaceService;
+        this.compositionSpaceServiceFactory = compositionSpaceServiceFactory;
         this.services = services;
         ConcurrentMap<UserAndContext, CleanUpTask> tasks = new ConcurrentHashMap<>(256, 0.9F, 1);
         this.tasks = tasks;
@@ -178,7 +178,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
         UserAndContext key = UserAndContext.newInstance(session);
         CleanUpTask task = tasks.get(key);
         if (task == null) {
-            CleanUpTask newTask = new CleanUpTask(session, compositionSpaceService, this, services);
+            CleanUpTask newTask = new CleanUpTask(session, compositionSpaceServiceFactory, this, services);
             task = tasks.putIfAbsent(key, newTask);
             if (task == null) {
                 scheduleTask = true;
@@ -290,7 +290,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
         private final ConcurrentMap<String, Object> sessionIds;
         private final int userId;
         private final int contextId;
-        private final CompositionSpaceService compositionSpaceService;
+        private final CompositionSpaceServiceFactory compositionSpaceServiceFactory;
         private final CompositionSpaceCleanUpRegistry cleanUpRegistry;
         private final ServiceLookup services;
         private boolean obsolete; // Guarded by synchronized
@@ -300,18 +300,18 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
          * Initializes a new {@link CleanUpTask}.
          *
          * @param initiatingSession The initial session for which this task is started
-         * @param compositionSpaceService The service used to drop expired composition spaces
+         * @param compositionSpaceServiceFactory The service factory used to drop expired composition spaces
          * @param cleanUpRegistry The clean-up registry reference
          * @param services The service look-up to obtain needed services
          */
-        CleanUpTask(Session initiatingSession, CompositionSpaceService compositionSpaceService, CompositionSpaceCleanUpRegistry cleanUpRegistry, ServiceLookup services) {
+        CleanUpTask(Session initiatingSession, CompositionSpaceServiceFactory compositionSpaceServiceFactory, CompositionSpaceCleanUpRegistry cleanUpRegistry, ServiceLookup services) {
             super();
             this.cleanUpRegistry = cleanUpRegistry;
             this.sessionIds = new ConcurrentHashMap<>(10, 0.9F, 1);
             this.sessionIds.put(initiatingSession.getSessionID(), PRESENT);
             userId = initiatingSession.getUserId();
             contextId = initiatingSession.getContextId();
-            this.compositionSpaceService = compositionSpaceService;
+            this.compositionSpaceServiceFactory = compositionSpaceServiceFactory;
             this.services = services;
             obsolete = false;
             timerTaskReference = new AtomicReference<>(null);
@@ -381,7 +381,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
 
                 long maxIdleTimeMillis = getMaxIdleTimeMillis(session);
                 if (maxIdleTimeMillis > 0) {
-                    compositionSpaceService.closeExpiredCompositionSpaces(maxIdleTimeMillis, session);
+                    compositionSpaceServiceFactory.createServiceFor(session).closeExpiredCompositionSpaces(maxIdleTimeMillis);
                 }
             } catch (Exception e) {
                 LoggerHolder.LOG.error("Failed to clean-up expired composition spaces for user {} in context {}", I(userId), I(contextId), e);

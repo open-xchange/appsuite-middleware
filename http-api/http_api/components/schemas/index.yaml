@@ -544,6 +544,8 @@ MailComposeGetResponse:
   $ref: ./mailcompose/MailComposeGetResponse.yaml
 MailComposeMessageModel:
   $ref: ./mailcompose/MessageModel.yaml
+MailComposeMailPathModel:
+  $ref: ./mailcompose/MailComposeMailPathModel.yaml
 MailComposeAttachmentResponse:
   $ref: ./mailcompose/MailComposeAttachmentResponse.yaml
 MailComposeAttachmentPostResponse:
@@ -551,9 +553,13 @@ MailComposeAttachmentPostResponse:
 MailComposeAttachment:
   $ref: ./mailcompose/Attachment.yaml
 MailComposeSendResponse:
-  $ref: ./mailcompose/SendResponse.yaml
+  $ref: ./mailcompose/MailComposeSendResponse.yaml
 MailComposeSaveResponse:
-  $ref: ./mailcompose/SaveResponse.yaml
+  $ref: ./mailcompose/MailComposeSaveResponse.yaml
+MailComposeAttachmentResult:
+  $ref: ./mailcompose/MailComposeAttachmentResult.yaml
+MailComposeInfo:
+  $ref: ./mailcompose/MailComposeInfo.yaml
 # Module: dataexport
 DataExportTask:
   $ref: ./dataexport/DataExportTask.yaml

@@ -50,15 +50,22 @@
 package com.openexchange.mail.compose;
 
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeBodyPart;
 import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
@@ -79,6 +86,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.server.ServiceExceptionCode;
@@ -229,6 +237,20 @@ public class CompositionSpaces {
     }
 
     /**
+     * Parses a composition space's UUID from specified unformatted string.
+     *
+     * @param id The composition space identifier as an unformatted string; e.g. <code>067e61623b6f4ae2a1712470b63dff00</code>
+     * @return The UUID or <code>null</code> if passed string in invalid
+     */
+    public static UUID parseCompositionSpaceIdIfValid(String id) {
+        try {
+            return UUIDs.fromUnformattedString(id);
+        } catch (@SuppressWarnings("unused") IllegalArgumentException x) {
+            return null;
+        }
+    }
+
+    /**
      * Parses an attachment's UUID from specified unformatted string.
      *
      * @param id The attachment identifier as an unformatted string; e.g. <code>067e61623b6f4ae2a1712470b63dff00</code>
@@ -265,14 +287,39 @@ public class CompositionSpaces {
      * @return <code>true</code> if vCard marker is present; otherwise <code>false</code>
      */
     public static boolean hasVCardMarker(MailPart mailPart, Session session) {
+        String header = mailPart.getFirstHeader(MessageHeaders.HDR_X_OX_VCARD);
+        if (Strings.isEmpty(header)) {
+            return false;
+        }
         String userId = new StringBuilder(16).append(session.getUserId()).append('@').append(session.getContextId()).toString();
-        return userId.equals(mailPart.getFirstHeader(MessageHeaders.HDR_X_OX_VCARD));
+        return userId.equals(header);
+    }
+
+    /**
+     * Checks if specified mail part has the vCard marker.
+     *
+     * @param part The part to check
+     * @param session The session
+     * @return <code>true</code> if vCard marker is present; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public static boolean hasVCardMarker(MimeBodyPart part, Session session) throws OXException {
+        try {
+            String header = part.getHeader(MessageHeaders.HDR_X_OX_VCARD, null);
+            if (Strings.isEmpty(header)) {
+                return false;
+            }
+            String userId = new StringBuilder(16).append(session.getUserId()).append('@').append(session.getContextId()).toString();
+            return userId.equals(header);
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
     }
 
     private static final Pattern PATTERN_SRC = MimeMessageUtility.PATTERN_SRC;
 
     /**
-     * Replaces &lt;img&gt; tags providing an inline image through exchanging <code>"src"</code> value appropriately.
+     * Replaces <code>&lt;img&gt;</code> tags providing an inline image through exchanging <code>"src"</code> value appropriately.
      * <p>
      * <code>&lt;img src="cid:123456"&gt;</code> is converted to<br>
      * <code>&lt;img src="/ajax/image/mail/compose/image?uid=71ff23e06f424cc5bcb08a92e006838a"&gt;</code>
@@ -282,9 +329,35 @@ public class CompositionSpaces {
      * @param imageDataSource The image data source to use
      * @param session The session providing user information
      * @return The (possibly) processed HTML content
-     * @throws OXException If replacing &lt;img&gt; tags fails
+     * @throws OXException If replacing <code>&lt;img&gt;</code> tags fails
+     * @see #replaceCidInlineImages(String, Optional, Map, ImageDataSource, Session)
      */
-    public static String replaceCidInlineImages(String htmlContent, Map<String, Attachment> contentId2InlineAttachments, ImageDataSource imageDataSource, Session session) throws OXException {
+    public static String replaceCidInlineImages(String htmlContent, Map<ContentId, Attachment> contentId2InlineAttachments, AbstractCompositionSpaceImageDataSource imageDataSource, Session session) throws OXException {
+        return replaceCidInlineImages(htmlContent, Optional.empty(), contentId2InlineAttachments, imageDataSource, session);
+    }
+
+    /**
+     * Replaces <code>&lt;img&gt;</code> tags providing an inline image through exchanging <code>"src"</code> value appropriately.
+     * <p>
+     * <code>&lt;img src="cid:123456"&gt;</code> is converted to<br>
+     * <code>&lt;img src="/ajax/image/mail/compose/image?uid=71ff23e06f424cc5bcb08a92e006838a"&gt;</code> or<br>
+     * <code>&lt;img src="/ajax/image/mail/compose/image?uid=71ff23e06f424cc5bcb08a92e006838a&id=26aa23e06f424cc5bcb08a92e006838a"&gt;</code>
+     *
+     * @param htmlContent The HTML content to replace in
+     * @param optionalCompositionSpaceId The optional identifier for associated composition space; if present the identifier is considered when building image location for given <code>ImageDataSource</code> instance
+     * @param contentId2InlineAttachments The detected inline images
+     * @param imageDataSource The image data source to use
+     * @param session The session providing user information
+     * @return The (possibly) processed HTML content
+     * @throws OXException If replacing <code>&lt;img&gt;</code> tags fails
+     */
+    public static String replaceCidInlineImages(String htmlContent, Optional<UUID> optionalCompositionSpaceId, Map<ContentId, Attachment> contentId2InlineAttachments, AbstractCompositionSpaceImageDataSource imageDataSource, Session session) throws OXException {
+        // Fast check
+        if (htmlContent.indexOf("<img") < 0) {
+            return htmlContent;
+        }
+
+        // Check with matcher
         Matcher matcher = PATTERN_SRC.matcher(htmlContent);
         if (!matcher.find()) {
             return htmlContent;
@@ -295,10 +368,10 @@ public class CompositionSpaces {
             String imageTag = matcher.group();
             String srcValue = matcher.group(1);
             if (srcValue.startsWith("cid:")) {
-                String contentId = MimeMessageUtility.trimContentId(srcValue.substring(4));
+                ContentId contentId = ContentId.valueOf(srcValue.substring(4));
                 Attachment attachment = contentId2InlineAttachments.get(contentId);
                 if (null != attachment) {
-                    ImageLocation imageLocation = new ImageLocation.Builder(getUnformattedString(attachment.getId())).optImageHost(HtmlProcessing.imageHost()).build();
+                    ImageLocation imageLocation = new ImageLocation.Builder(getUnformattedString(attachment.getId())).id(optionalCompositionSpaceId.isPresent() ? getUnformattedString(optionalCompositionSpaceId.get()) : null).optImageHost(HtmlProcessing.imageHost()).build();
                     String imageUrl = imageDataSource.generateUrl(imageLocation, session);
                     int st = matcher.start(1) - matcher.start();
                     int end = matcher.end(1) - matcher.start();
@@ -314,53 +387,66 @@ public class CompositionSpaces {
 
     private static final String UTF_8 = "UTF-8";
 
+    private static final ConcurrentMap<AbstractCompositionSpaceImageDataSource, Pattern> CACHED_IMAGE_SRC_PATTERNS = new ConcurrentHashMap<>(4, 0.9F, 1);
+
     /*
      * Something like "/ajax/image/mail/compose/image..."
      */
-    private static final Pattern PATTERN_IMAGE_SRC_START_BY_IMAGE = Pattern
-        .compile("[a-zA-Z_0-9&-.]+/(?:[a-zA-Z_0-9&-.]+/)*" + ImageActionFactory.ALIAS_APPENDIX + AttachmentStorage.IMAGE_DATA_SOURCE_ALIAS, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static Pattern getImageSrcPattern(AbstractCompositionSpaceImageDataSource imageDataSource) {
+        Pattern pattern = CACHED_IMAGE_SRC_PATTERNS.get(imageDataSource);
+        if (pattern == null) {
+            Pattern newPattern = Pattern.compile("[a-zA-Z_0-9&-.]+/(?:[a-zA-Z_0-9&-.]+/)*" + ImageActionFactory.ALIAS_APPENDIX + imageDataSource.getAlias(), Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            pattern = CACHED_IMAGE_SRC_PATTERNS.putIfAbsent(imageDataSource, newPattern);
+            if (pattern == null) {
+                pattern = newPattern;
+            }
+        }
+        return pattern;
+    }
 
     /*
      * Something like "/appsuite/api/mail/compose/5e9f9b6d15a94a31a8ba175489e5363a/attachments/8f119070e6af4143bd2f3c74bd8973a9..."
      */
-    private static final Pattern PATTERN_IMAGE_SRC_START_BY_URL = Pattern.compile("[a-zA-Z_0-9&-.]+/(?:[a-zA-Z_0-9&-.]+/)*" + "mail/compose/" + "([a-fA-F0-9]+)" + "/attachments/" + "([a-fA-F0-9]+)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_IMAGE_SRC_START_BY_URL = Pattern.compile("[a-zA-Z_0-9&-.]+/(?:[a-zA-Z_0-9&-.]+/)*" + "mail/compose/" + "([.-_a-zA-Z0-9]+)" + "/attachments/" + "([.-_a-zA-Z0-9]+)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
-     * Replaces &lt;img&gt; tags providing an inline image through exchanging <code>"src"</code> value appropriately.
-     * <p>
-     * <code>&lt;img src="/ajax/image/mail/compose/image?uid=71ff23e06f424cc5bcb08a92e006838a"&gt;</code> is converted to<br>
-     * <code>&lt;img src="cid:123456"&gt;</code>
+     * Gets all attachment UUIDs that are referenced in image URLs as part of <code>&lt;img&gt;</code> tags.
      *
-     * @param htmlContent The HTML content to replace in
-     * @param attachmentId2inlineAttachments The detected inline images
-     * @param contentId2InlineAttachment The map to fill with actually used inline attachments
-     * @param fileAttachments The complete attachment mapping from which to remove actually used inline attachments
-     * @return The (possibly) processed HTML content
+     * @param htmlContent The content to parse
+     * @param imageDataSource The image data source to use for determining image URLs
+     * @return A list of found identifiers
      */
-    public static String replaceLinkedInlineImages(String htmlContent, Map<String, Attachment> attachmentId2inlineAttachments, Map<String, Attachment> contentId2InlineAttachment, Map<UUID, Attachment> fileAttachments) {
-        Matcher matcher = PATTERN_SRC.matcher(htmlContent);
-        if (!matcher.find()) {
-            return htmlContent;
+    public static List<UUID> getReferencedImageAttachmentIds(String htmlContent, AbstractCompositionSpaceImageDataSource imageDataSource) {
+        // Fast check
+        if (htmlContent.indexOf("<img") < 0) {
+            return Collections.emptyList();
         }
 
-        StringBuffer sb = new StringBuffer(htmlContent.length());
+        // Check with matcher
+        Matcher matcher = PATTERN_SRC.matcher(htmlContent);
+        if (!matcher.find()) {
+            return Collections.emptyList();
+        }
+
+        List<UUID> attachmentIds = new ArrayList<>(4);
         Optional<Matcher> mailComposeUrlMatcher;
         do {
-            String imageTag = matcher.group();
+            UUID attachmentId = null;
             String srcValue = matcher.group(1);
-            if (srcValue.indexOf(AttachmentStorage.IMAGE_DATA_SOURCE_ALIAS) > 0 && returnMatcherOnFind(PATTERN_IMAGE_SRC_START_BY_IMAGE, srcValue).isPresent()) {
-                Matcher attachmentIdMatcher = PATTERN_IMAGE_ID.matcher(srcValue);
+            if (srcValue.indexOf(imageDataSource.getAlias()) > 0 && returnMatcherOnFind(getImageSrcPattern(imageDataSource), srcValue).isPresent()) {
+                Matcher attachmentIdMatcher = PATTERN_IMAGE_ID.matcher(Strings.replaceSequenceWith(srcValue, "&amp;", '&'));
                 if (attachmentIdMatcher.find()) {
-                    String attachmentId = AJAXUtility.decodeUrl(attachmentIdMatcher.group(1), UTF_8);
-                    replaceLinkedInlineImage(attachmentId, imageTag, sb, matcher, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments);
+                    attachmentId = parseAttachmentIdIfValid(AJAXUtility.decodeUrl(attachmentIdMatcher.group(1), UTF_8));
                 }
             } else if (srcValue.indexOf("/mail/compose/") > 0 &&  (mailComposeUrlMatcher = returnMatcherOnFind(PATTERN_IMAGE_SRC_START_BY_URL, srcValue)).isPresent()) {
-                String attachmentId = AJAXUtility.decodeUrl(mailComposeUrlMatcher.get().group(2), UTF_8);
-                replaceLinkedInlineImage(attachmentId, imageTag, sb, matcher, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments);
+                attachmentId = parseAttachmentIdIfValid(AJAXUtility.decodeUrl(mailComposeUrlMatcher.get().group(2), UTF_8));
+            }
+            if (attachmentId != null) {
+                attachmentIds.add(attachmentId);
             }
         } while (matcher.find());
-        matcher.appendTail(sb);
-        return sb.toString();
+
+        return attachmentIds;
     }
 
     private static Optional<Matcher> returnMatcherOnFind(Pattern pattern, CharSequence input) {
@@ -389,21 +475,149 @@ public class CompositionSpaces {
         }
     }
 
-    private static void replaceLinkedInlineImage(String attachmentId, String imageTag, StringBuffer sb, Matcher matcher, Map<String, Attachment> attachmentId2inlineAttachments, Map<String, Attachment> contentId2InlineAttachment, Map<UUID, Attachment> fileAttachments) {
+    /**
+     * Replaces <code>&lt;img&gt;</code> tags providing an inline image through exchanging <code>"src"</code> value appropriately.
+     * <p>
+     * <code>&lt;img src="/ajax/image/mail/compose/image?uid=71ff23e06f424cc5bcb08a92e006838a"&gt;</code> is converted to<br>
+     * <code>&lt;img src="cid:123456"&gt;</code>
+     *
+     * @param htmlContent The HTML content to replace in
+     * @param attachmentId2inlineAttachments The detected inline images
+     * @param contentId2InlineAttachment The map to fill with actually used inline attachments
+     * @param fileAttachments The complete attachment mapping from which to remove actually used inline attachments
+     * @param imageDataSource The image data source to use for determining image URLs
+     * @return The (possibly) processed HTML content
+     */
+    public static String replaceLinkedInlineImages(String htmlContent, Map<String, Attachment> attachmentId2inlineAttachments, Map<ContentId, Attachment> contentId2InlineAttachment, Map<UUID, Attachment> fileAttachments, AbstractCompositionSpaceImageDataSource imageDataSource) {
+        // Fast check
+        if (htmlContent.indexOf("<img") < 0) {
+            return htmlContent;
+        }
+
+        // Check with matcher
+        Matcher matcher = PATTERN_SRC.matcher(htmlContent);
+        if (!matcher.find()) {
+            return htmlContent;
+        }
+
+        StringBuffer sb = new StringBuffer(htmlContent.length());
+        Optional<Matcher> mailComposeUrlMatcher;
+        do {
+            String imageTag = matcher.group();
+            String srcValue = matcher.group(1);
+            if (srcValue.indexOf(imageDataSource.getAlias()) > 0 && returnMatcherOnFind(getImageSrcPattern(imageDataSource), srcValue).isPresent()) {
+                Matcher attachmentIdMatcher = PATTERN_IMAGE_ID.matcher(Strings.replaceSequenceWith(srcValue, "&amp;", '&'));
+                if (attachmentIdMatcher.find()) {
+                    String attachmentId = AJAXUtility.decodeUrl(attachmentIdMatcher.group(1), UTF_8);
+                    replaceLinkedInlineImage(attachmentId, imageTag, sb, matcher, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments);
+                }
+            } else if (srcValue.indexOf("/mail/compose/") > 0 &&  (mailComposeUrlMatcher = returnMatcherOnFind(PATTERN_IMAGE_SRC_START_BY_URL, srcValue)).isPresent()) {
+                String attachmentId = AJAXUtility.decodeUrl(mailComposeUrlMatcher.get().group(2), UTF_8);
+                replaceLinkedInlineImage(attachmentId, imageTag, sb, matcher, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments);
+            }
+        } while (matcher.find());
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
+    private static void replaceLinkedInlineImage(String attachmentId, String imageTag, StringBuffer sb, Matcher matcher, Map<String, Attachment> attachmentId2inlineAttachments, Map<ContentId, Attachment> contentId2InlineAttachment, Map<UUID, Attachment> fileAttachments) {
         Attachment attachment = attachmentId2inlineAttachments.get(attachmentId);
         if (null == attachment) {
             // No such inline image... Yield a blank "src" attribute for current <img> tag
             LoggerHolder.LOG.warn("No such inline image found for attachment identifier {}", attachmentId);
             matcher.appendReplacement(sb, "");
         } else {
-            String imageUrl = "cid:" + attachment.getContentId();
+            ContentId contentId = attachment.getContentIdAsObject();
+
+            String imageUrl = "cid:" + contentId.getContentId();
             int st = matcher.start(1) - matcher.start();
             int end = matcher.end(1) - matcher.start();
             matcher.appendReplacement(sb, Matcher.quoteReplacement(imageTag.substring(0, st) + imageUrl + imageTag.substring(end)));
 
-            contentId2InlineAttachment.put(attachment.getContentId(), attachment);
+            contentId2InlineAttachment.put(contentId, attachment);
             fileAttachments.remove(attachment.getId());
         }
+    }
+
+    /**
+     * Replaces <code>&lt;img&gt;</code> tags providing an inline image through exchanging <code>"src"</code> value appropriately.
+     * <p>
+     * <code>&lt;img src="/ajax/image/mail/compose/image?id=5e9f9b6d15a94a31a8ba175489e5363a&uid=71ff23e06f424cc5bcb08a92e006838a"&gt;</code> is converted to<br>
+     * <code>&lt;img src="cid:123456"&gt;</code>
+     *
+     * @param htmlContent The HTML content to replace in
+     * @param contentIdsByAttachmentIds Mapping from known content IDs to attachment IDs
+     * @param imageDataSource The image data source to use for determining image URLs
+     * @return The (possibly) processed HTML content
+     */
+    public static String replaceLinkedInlineImages(String htmlContent, Map<UUID, ContentId> contentIdsByAttachmentIds, AbstractCompositionSpaceImageDataSource imageDataSource) {
+        // Fast check
+        if (htmlContent.indexOf("<img") < 0) {
+            return htmlContent;
+        }
+
+        // Check with matcher
+        Matcher matcher = PATTERN_SRC.matcher(htmlContent);
+        if (!matcher.find()) {
+            return htmlContent;
+        }
+
+        StringBuffer sb = new StringBuffer(htmlContent.length());
+        Optional<Matcher> mailComposeUrlMatcher;
+        do {
+            String imageTag = matcher.group();
+            String srcValue = matcher.group(1);
+            if (srcValue.indexOf(imageDataSource.getAlias()) > 0 && returnMatcherOnFind(getImageSrcPattern(imageDataSource), srcValue).isPresent()) {
+                Matcher attachmentIdMatcher = PATTERN_IMAGE_ID.matcher(Strings.replaceSequenceWith(srcValue, "&amp;", '&'));
+                if (attachmentIdMatcher.find()) {
+                    String attachmentId = AJAXUtility.decodeUrl(attachmentIdMatcher.group(1), UTF_8);
+                    replaceLinkedInlineImage(attachmentId, imageTag, sb, matcher, contentIdsByAttachmentIds);
+                }
+            } else if (srcValue.indexOf("/mail/compose/") > 0 &&  (mailComposeUrlMatcher = returnMatcherOnFind(PATTERN_IMAGE_SRC_START_BY_URL, srcValue)).isPresent()) {
+                String attachmentId = AJAXUtility.decodeUrl(mailComposeUrlMatcher.get().group(2), UTF_8);
+                replaceLinkedInlineImage(attachmentId, imageTag, sb, matcher, contentIdsByAttachmentIds);
+            }
+        } while (matcher.find());
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
+    private static void replaceLinkedInlineImage(String attachmentIdStr, String imageTag, StringBuffer sb, Matcher matcher, Map<UUID, ContentId> contentIdsByAttachmentIds) {
+        ContentId contentId = null;
+        UUID attachmentId = parseAttachmentIdIfValid(attachmentIdStr);
+        if (attachmentId != null) {
+            contentId = contentIdsByAttachmentIds.get(attachmentId);
+        }
+
+        if (contentId == null) {
+            // No such inline image... Yield a blank "src" attribute for current <img> tag
+            LoggerHolder.LOG.warn("No such inline image found for attachment identifier {}", attachmentIdStr);
+            matcher.appendReplacement(sb, "");
+        } else {
+            String imageUrl = "cid:" + contentId.getContentId();
+            int st = matcher.start(1) - matcher.start();
+            int end = matcher.end(1) - matcher.start();
+            matcher.appendReplacement(sb, Matcher.quoteReplacement(imageTag.substring(0, st) + imageUrl + imageTag.substring(end)));
+        }
+    }
+
+    /**
+     * Converts a UUID into a log-friendly object. If used as a positional log argument,
+     * the UUID will appear as unformatted string in log messages.
+     *
+     * @param uuid The uuid
+     * @return The log argument
+     */
+    public static Object getUUIDForLogging(UUID uuid) {
+        if (uuid == null) {
+            return null;
+        }
+        return new Object() {
+            @Override
+            public String toString() {
+                return UUIDs.getUnformattedString(uuid);
+            }
+        };
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------

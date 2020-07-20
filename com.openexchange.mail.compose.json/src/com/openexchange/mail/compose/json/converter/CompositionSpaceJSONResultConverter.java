@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,7 +63,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.compose.Address;
 import com.openexchange.mail.compose.Attachment;
@@ -133,9 +133,15 @@ public class CompositionSpaceJSONResultConverter implements ResultConverter {
 
     private JSONObject convertCompositionSpace(CompositionSpace compositionSpace, Set<MessageField> optFields) throws JSONException {
         final JSONObject json = new JSONObject(16);
-        json.put("id", UUIDs.getUnformattedString(compositionSpace.getId()));
+        json.put("id", compositionSpace.getId().toString());
 
         Message message = compositionSpace.getMessage();
+
+        // Mail path
+        Optional<MailPath> optionalPath = compositionSpace.getMailPath();
+        if (optionalPath.isPresent()) {
+            json.putOpt("mailPath", convertMailPath(optionalPath.get()));
+        }
 
         // Addresses
         if (null == optFields || optFields.contains(MessageField.FROM)) {
@@ -343,6 +349,21 @@ public class CompositionSpaceJSONResultConverter implements ResultConverter {
 
     private Object getNullable(Object value) {
         return null == value ? JSONObject.NULL : value.toString();
+    }
+
+    /**
+     * Converts a {@link MailPath} instance to a JSON object of format
+     * <code>{"folderId": "default0/INBOX/Drafts", "id": "195"}</code>.
+     *
+     * @param mailPath The mail path
+     * @return The JSON representation
+     * @throws JSONException
+     */
+    public static JSONObject convertMailPath(MailPath mailPath) throws JSONException {
+        JSONObject jMailPath = new JSONObject(3);
+        jMailPath.putOpt("id", mailPath.getMailID());
+        jMailPath.putOpt("folderId", mailPath.getFolderArgument());
+        return jMailPath;
     }
 
 }

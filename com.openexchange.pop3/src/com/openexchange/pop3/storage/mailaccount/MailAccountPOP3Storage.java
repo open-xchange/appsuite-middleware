@@ -74,6 +74,7 @@ import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -351,11 +352,11 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
     }
 
     @Override
-    public void connect() throws OXException {
+    public void connect(boolean enableDebug) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = null;
         try {
             defaultMailAccess = getDefaultMailAccess();
-            defaultMailAccess.connect(false);
+            defaultMailAccess.connect(false, enableDebug);
             // Check path existence
             final IMailFolderStorage fs = defaultMailAccess.getFolderStorage();
             Session session = pop3Access.getSession();

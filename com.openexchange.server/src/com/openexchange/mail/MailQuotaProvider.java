@@ -147,11 +147,11 @@ public class MailQuotaProvider implements QuotaProvider {
             IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             Quota storageQuota = folderStorage.getStorageQuota("INBOX");
             if (storageQuota != null) {
-                long limit = storageQuota.getLimit();
+                long limit = storageQuota.getLimitBytes();
                 if (limit == Quota.UNLIMITED) {
                     accountQuota.addQuota(com.openexchange.quota.Quota.UNLIMITED_SIZE);
                 } else {
-                    accountQuota.addQuota(QuotaType.SIZE, limit, storageQuota.getUsage());
+                    accountQuota.addQuota(QuotaType.SIZE, limit, storageQuota.getUsageBytes());
                 }
             }
 

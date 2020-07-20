@@ -52,6 +52,7 @@ package com.openexchange.mail.compose.impl;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
+import static com.openexchange.mail.compose.AttachmentResults.attachmentResultFor;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import java.io.Closeable;
 import java.io.IOException;
@@ -59,6 +60,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -110,8 +112,11 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.compose.Address;
 import com.openexchange.mail.compose.Attachment;
+import com.openexchange.mail.compose.AttachmentComparator;
+import com.openexchange.mail.compose.AttachmentDataSource;
 import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentOrigin;
+import com.openexchange.mail.compose.AttachmentResult;
 import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageService;
 import com.openexchange.mail.compose.AttachmentStorages;
@@ -121,6 +126,9 @@ import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.CompositionSpaceStorageService;
 import com.openexchange.mail.compose.CompositionSpaces;
+import com.openexchange.mail.compose.ContentId;
+import com.openexchange.mail.compose.CryptoUtility;
+import com.openexchange.mail.compose.HeaderUtility;
 import com.openexchange.mail.compose.Message;
 import com.openexchange.mail.compose.Message.Priority;
 import com.openexchange.mail.compose.MessageDescription;
@@ -131,8 +139,9 @@ import com.openexchange.mail.compose.OpenCompositionSpaceParameters;
 import com.openexchange.mail.compose.Security;
 import com.openexchange.mail.compose.SharedAttachmentsInfo;
 import com.openexchange.mail.compose.Type;
+import com.openexchange.mail.compose.UploadLimits;
 import com.openexchange.mail.compose.VCardAndFileName;
-import com.openexchange.mail.compose.impl.attachment.AttachmentComparator;
+import com.openexchange.mail.compose.impl.attachment.AttachmentImageDataSource;
 import com.openexchange.mail.compose.impl.open.EditCopy;
 import com.openexchange.mail.compose.impl.open.Forward;
 import com.openexchange.mail.compose.impl.open.OpenState;
@@ -198,17 +207,20 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     private final ServiceLookup services;
     private final CompositionSpaceStorageService storageService;
     private final AttachmentStorageService attachmentStorageService;
+    private final Session session;
     private volatile Set<String> octetExtensions;
 
     /**
      * Initializes a new {@link CompositionSpaceServiceImpl}.
      *
+     * @param session The session for which the service is created
      * @param storageService The storage service
      * @param attachmentStorageService The attachment storage service
      * @param services The service look-up
      */
-    public CompositionSpaceServiceImpl(CompositionSpaceStorageService storageService, AttachmentStorageService attachmentStorageService, ServiceLookup services) {
+    public CompositionSpaceServiceImpl(Session session, CompositionSpaceStorageService storageService, AttachmentStorageService attachmentStorageService, ServiceLookup services) {
         super();
+        this.session = session;
         if (null == storageService) {
             throw new IllegalArgumentException("Storage service must not be null");
         }
@@ -258,8 +270,13 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData request, List<OXException> warnings, boolean deleteAfterTransport, Session ses) throws OXException {
-        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, ses);
+    public Collection<OXException> getWarnings() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData request, List<OXException> warnings, boolean deleteAfterTransport) throws OXException {
+        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
 
         Message m = compositionSpace.getMessage();
         if (null == m) {
@@ -268,13 +285,13 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
         // Check if attachments are supposed to be shared
         SharedAttachmentsInfo sharedAttachmentsInfo = m.getSharedAttachments();
-        if (null != sharedAttachmentsInfo && sharedAttachmentsInfo.isEnabled() && false == mayShareAttachments(ses)) {
+        if (null != sharedAttachmentsInfo && sharedAttachmentsInfo.isEnabled() && false == mayShareAttachments(session)) {
             // User wants to share attachments, but is not allowed to do so
-            throw MailExceptionCode.SHARING_NOT_POSSIBLE.create(I(ses.getUserId()), I(ses.getContextId()));
+            throw MailExceptionCode.SHARING_NOT_POSSIBLE.create(I(session.getUserId()), I(session.getContextId()));
         }
 
         // Yield server session
-        ServerSession session = ServerSessionAdapter.valueOf(ses);
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
 
         // Check From address
         InternetAddress fromAddresss;
@@ -289,7 +306,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         // Determine the account identifier by From address
         int accountId;
         try {
-            accountId = MimeMessageFiller.resolveFrom2Account(session, fromAddresss, true, true);
+            accountId = MimeMessageFiller.resolveFrom2Account(serverSession, fromAddresss, true, true);
         } catch (OXException e) {
             if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e) || MailExceptionCode.INVALID_SENDER.equals(e)) {
                 // Re-throw
@@ -319,23 +336,23 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 if (Strings.isNotEmpty(content)) {
                     // Replace image URLs with src="cid:1234"
                     int numOfAttachments = fileAttachments.size();
-                    Map<String, Attachment> contentId2InlineAttachment = new HashMap<>(numOfAttachments);
+                    Map<ContentId, Attachment> contentId2InlineAttachment = new HashMap<>(numOfAttachments);
                     Map<String, Attachment> attachmentId2inlineAttachments = new HashMap<>(numOfAttachments);
 
                     for (Attachment attachment : fileAttachments.values()) {
-                        if (INLINE == attachment.getContentDisposition() && null != attachment.getContentId() && new ContentType(attachment.getMimeType()).startsWith("image/")) {
+                        if (INLINE == attachment.getContentDisposition() && null != attachment.getContentIdAsObject() && new ContentType(attachment.getMimeType()).startsWith("image/")) {
                             attachmentId2inlineAttachments.put(getUnformattedString(attachment.getId()), attachment);
-                            contentId2InlineAttachment.put(attachment.getContentId(), attachment);
+                            contentId2InlineAttachment.put(attachment.getContentIdAsObject(), attachment);
                         }
                     }
-                    content = CompositionSpaces.replaceLinkedInlineImages(content, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments);
+                    content = CompositionSpaces.replaceLinkedInlineImages(content, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments, AttachmentImageDataSource.getInstance());
                 }
             }
         }
 
         // Create a new compose message
-        TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
-        ComposedMailMessage sourceMessage = provider.getNewComposedMailMessage(session, session.getContext());
+        TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(serverSession, accountId);
+        ComposedMailMessage sourceMessage = provider.getNewComposedMailMessage(serverSession, serverSession.getContext());
         sourceMessage.setAccountId(accountId);
 
         // From
@@ -505,7 +522,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             }
 
             // User settings
-            UserSettingMail usm = session.getUserSettingMail();
+            UserSettingMail usm = serverSession.getUserSettingMail();
             usm.setNoSave(true);
             {
                 final String paramName = "copy2Sent";
@@ -519,7 +536,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     }
                 } else {
                     MailAccountStorageService mass = services.getOptionalService(MailAccountStorageService.class);
-                    if (mass != null && MailAccounts.isGmailTransport(mass.getTransportAccount(accountId, session.getUserId(), session.getContextId()))) {
+                    if (mass != null && MailAccounts.isGmailTransport(mass.getTransportAccount(accountId, serverSession.getUserId(), serverSession.getContextId()))) {
                         // Deny copy to sent folder for Gmail
                         usm.setNoCopyIntoStandardSentFolder(true);
                     }
@@ -535,7 +552,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 sentMessage.setMailSettings(usm);
             }
 
-            mailInterface = MailServletInterface.getInstance(session);
+            mailInterface = MailServletInterface.getInstance(serverSession);
 
             // Reply or (inline) forward?
             Meta meta = m.getMeta();
@@ -606,7 +623,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     }
                 }
                 MailPath editFor = meta.getEditFor();
-                if (null != editFor && MailProperties.getInstance().isDeleteDraftOnTransport(session.getUserId(), session.getContextId())) {
+                if (null != editFor && MailProperties.getInstance().isDeleteDraftOnTransport(serverSession.getUserId(), serverSession.getContextId())) {
                     try {
                         mailInterface.deleteMessages(editFor.getFolderArgument(), new String[] { editFor.getMailID() }, true);
                     } catch (Exception e) {
@@ -619,8 +636,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             // Trigger contact collector
             try {
-                boolean memorizeAddresses = ServerUserSetting.getInstance().isContactCollectOnMailTransport(session.getContextId(), session.getUserId()).booleanValue();
-                ContactCollectorUtility.triggerContactCollector(session, composedMails, memorizeAddresses, true);
+                boolean memorizeAddresses = ServerUserSetting.getInstance().isContactCollectOnMailTransport(serverSession.getContextId(), serverSession.getUserId()).booleanValue();
+                ContactCollectorUtility.triggerContactCollector(serverSession, composedMails, memorizeAddresses, true);
             } catch (Exception e) {
                 LOG.warn("Contact collector could not be triggered.", e);
             }
@@ -641,7 +658,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
         if (deleteAfterTransport) {
             try {
-                boolean closed = closeCompositionSpace(compositionSpaceId, session);
+                boolean closed = closeCompositionSpace(compositionSpaceId);
                 if (!closed) {
                     LOG.warn("Compositon space {} could not be closed after transport.", getUnformattedString(compositionSpaceId));
                 } else {
@@ -783,8 +800,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, boolean deleteAfterSave, Session session) throws OXException {
-        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, session);
+    public MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, boolean deleteAfterSave) throws OXException {
+        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
 
         Message m = compositionSpace.getMessage();
 
@@ -936,7 +953,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             if (deleteAfterSave) {
                 try {
-                    boolean closed = closeCompositionSpace(compositionSpaceId, session);
+                    boolean closed = closeCompositionSpace(compositionSpaceId);
                     if (!closed) {
                         LOG.warn("Compositon space {} could not be closed after saving it to a draft mail.", getUnformattedString(compositionSpaceId));
                     } else {
@@ -989,7 +1006,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         List<Closeable> closeables = null;
         if (isHtml) {
             // An HTML message
-            Map<String, Attachment> contentId2InlineAttachment;
+            Map<ContentId, Attachment> contentId2InlineAttachment;
 
             String content = m.getContent();
             if (Strings.isEmpty(content)) {
@@ -1005,9 +1022,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     attachmentId2inlineAttachments = new HashMap<>(numOfAttachments);
 
                     for (Attachment attachment : fileAttachments.values()) {
-                        if (INLINE == attachment.getContentDisposition() && null != attachment.getContentId() && new ContentType(attachment.getMimeType()).startsWith("image/")) {
+                        if (INLINE == attachment.getContentDisposition() && null != attachment.getContentIdAsObject() && new ContentType(attachment.getMimeType()).startsWith("image/")) {
                             attachmentId2inlineAttachments.put(getUnformattedString(attachment.getId()), attachment);
-                            contentId2InlineAttachment.put(attachment.getContentId(), attachment);
+                            contentId2InlineAttachment.put(attachment.getContentIdAsObject(), attachment);
                         }
                     }
                 } else {
@@ -1015,7 +1032,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     attachmentId2inlineAttachments = Collections.emptyMap();
                 }
 
-                content = CompositionSpaces.replaceLinkedInlineImages(content, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments);
+                content = CompositionSpaces.replaceLinkedInlineImages(content, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments, AttachmentImageDataSource.getInstance());
                 HtmlService htmlService = services.getService(HtmlService.class);
                 content = htmlService.getConformHTML(content, charset);
             }
@@ -1091,7 +1108,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         return closeables;
     }
 
-    private Multipart createMultipartRelated(String wellFormedHTMLContent, String charset, Map<String, Attachment> contentId2InlineAttachment, Session session) throws MessagingException, OXException {
+    private Multipart createMultipartRelated(String wellFormedHTMLContent, String charset, Map<ContentId, Attachment> contentId2InlineAttachment, Session session) throws MessagingException, OXException {
         Multipart relatedMultipart = new MimeMultipart("related");
 
         relatedMultipart.addBodyPart(createHtmlBodyPart(wellFormedHTMLContent, charset), 0);
@@ -1152,13 +1169,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(cd.toString()));
 
         // Content-ID
-        String contentId = attachment.getContentId();
+        ContentId contentId = attachment.getContentIdAsObject();
         if (contentId != null) {
-            if (contentId.charAt(0) == '<') {
-                messageBodyPart.setContentID(contentId);
-            } else {
-                messageBodyPart.setContentID(new StringBuilder(contentId.length() + 2).append('<').append(contentId).append('>').toString());
-            }
+            messageBodyPart.setContentID(contentId.getContentIdForHeader());
         }
 
         // vCard
@@ -1226,13 +1239,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(cd.toString()));
 
             // Content-ID
-            String contentId = attachmentDescription.getContentId();
+            ContentId contentId = attachmentDescription.getContentId();
             if (contentId != null) {
-                if (contentId.charAt(0) == '<') {
-                    messageBodyPart.setContentID(contentId);
-                } else {
-                    messageBodyPart.setContentID(new StringBuilder(contentId.length() + 2).append('<').append(contentId).append('>').toString());
-                }
+                messageBodyPart.setContentID(contentId.getContentIdForHeader());
             }
 
             // vCard
@@ -1448,7 +1457,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public CompositionSpace openCompositionSpace(OpenCompositionSpaceParameters parameters, Session session) throws OXException {
+    public CompositionSpace openCompositionSpace(OpenCompositionSpaceParameters parameters) throws OXException {
         UUID uuid = null;
 
         AttachmentStorage attachmentStorage = null;
@@ -1537,15 +1546,28 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
                 // Create VCard
                 VCardAndFileName userVCard = CompositionSpaces.getUserVCard(session);
-                byte[] vcard = userVCard.getVcard();
 
-                // Compile attachment
-                AttachmentDescription attachment = AttachmentStorages.createVCardAttachmentDescriptionFor(userVCard, uuid);
-                Attachment vcardAttachment = AttachmentStorages.saveAttachment(Streams.newByteArrayInputStream(vcard), attachment, Optional.of(encrypt), session, attachmentStorage);
-                if (null == attachments) {
-                    attachments = new ArrayList<>(1);
+                // Check by file name
+                boolean contained = false;
+                if (null != attachments) {
+                    for (Iterator<Attachment> it = attachments.iterator(); !contained && it.hasNext();) {
+                        Attachment existingAttachment = it.next();
+                        String fileName = existingAttachment.getName();
+                        if (fileName != null && fileName.equals(userVCard.getFileName())) {
+                            // vCard already contained
+                            contained = true;
+                        }
+                    }
                 }
-                attachments.add(vcardAttachment);
+                // Compile attachment (if not contained)
+                if (!contained) {
+                    AttachmentDescription attachment = AttachmentStorages.createVCardAttachmentDescriptionFor(userVCard, uuid, true);
+                    Attachment vcardAttachment = AttachmentStorages.saveAttachment(Streams.newByteArrayInputStream(userVCard.getVcard()), attachment, Optional.of(encrypt), session, attachmentStorage);
+                    if (null == attachments) {
+                        attachments = new ArrayList<>(1);
+                    }
+                    attachments.add(vcardAttachment);
+                }
             }
 
             if (null != attachments) {
@@ -1554,12 +1576,12 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             }
 
             CompositionSpace compositionSpace = getStorageService().openCompositionSpace(session, new CompositionSpaceDescription().setUuid(uuid).setMessage(message), Optional.of(encrypt));
-            if (!compositionSpace.getId().equals(uuid)) {
+            if (!compositionSpace.getId().getId().equals(uuid)) {
                 // Composition space identifier is not equal to generated one
-                getStorageService().closeCompositionSpace(session, compositionSpace.getId());
+                getStorageService().closeCompositionSpace(session, compositionSpace.getId().getId());
                 throw CompositionSpaceErrorCode.OPEN_FAILED.create();
             }
-            LOG.debug("Opened composition space '{}'", getUnformattedString(compositionSpace.getId()));
+            LOG.debug("Opened composition space '{}'", compositionSpace.getId());
             attachments = null; // Avoid premature deletion
             return compositionSpace;
         } finally {
@@ -1580,9 +1602,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public Attachment addAttachmentToCompositionSpace(UUID compositionSpaceId, AttachmentDescription attachmentDesc, InputStream data, Session session) throws OXException {
+    public AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, AttachmentDescription attachmentDesc, InputStream data) throws OXException {
         try {
-            CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, session);
+            CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
             // Obtain attachment storage
             AttachmentStorage attachmentStorage = getAttachmentStorage(session);
             Attachment newAttachment = null;
@@ -1602,7 +1624,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                         // Add new attachments to composition space
                         MessageDescription md = new MessageDescription();
                         md.setAttachments(attachments);
-                        getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                        CompositionSpace updatedCompositionSpace = getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                        compositionSpace = updatedCompositionSpace;
                         retry = false;
                     } catch (OXException e) {
                         if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -1613,12 +1636,12 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                         exponentialBackoffWait(++retryCount, 1000L);
 
                         // Reload & retry
-                        compositionSpace = getCompositionSpace(compositionSpaceId, session);
+                        compositionSpace = getCompositionSpace(compositionSpaceId);
                     }
                 } while (retry);
 
                 // Everything went fine
-                Attachment retval = newAttachment;
+                AttachmentResult retval = attachmentResultFor(newAttachment, compositionSpace);
                 newAttachment = null;
                 return retval;
             } finally {
@@ -1632,8 +1655,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public Attachment replaceAttachmentInCompositionSpace(UUID compositionSpaceId, UUID attachmentId, StreamedUploadFileIterator uploadedAttachments, String disposition, Session session) throws OXException {
-        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, session);
+    public AttachmentResult replaceAttachmentInCompositionSpace(UUID compositionSpaceId, UUID attachmentId, StreamedUploadFileIterator uploadedAttachments, String disposition) throws OXException {
+        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
 
         // Check attachment existence
         {
@@ -1666,25 +1689,24 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         // Obtain attachment storage
         AttachmentStorage attachmentStorage = getAttachmentStorage(session);
 
-        List<Attachment> newAttachments = new LinkedList<Attachment>();
+        Attachment newAttachment = null;
         try {
             if (uploadedAttachments.hasNext()) {
                 StreamedUploadFile uploadFile = uploadedAttachments.next();
                 AttachmentDescription attachment = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, disposition, compositionSpaceId);
                 LogProperties.put(LogProperties.Name.FILESTORE_SPOOL, "true");
                 try {
-                    newAttachments.add(AttachmentStorages.saveAttachment(uploadFile.getStream(), attachment, session, attachmentStorage));
+                    newAttachment = AttachmentStorages.saveAttachment(uploadFile.getStream(), attachment, session, attachmentStorage);
                 } finally {
                     LogProperties.remove(LogProperties.Name.FILESTORE_SPOOL);
                 }
             }
 
-            if (newAttachments.isEmpty()) {
+            if (newAttachment == null) {
                 // Nothing added
                 return null;
             }
 
-            Attachment newAttachment = newAttachments.get(0);
             boolean retry = true;
             int retryCount = 0;
             do {
@@ -1718,7 +1740,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     // Replace attachment in composition space
                     MessageDescription md = new MessageDescription();
                     md.setAttachments(attachments);
-                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                    CompositionSpace updatedCompositionSpace = getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                    compositionSpace = updatedCompositionSpace;
                     retry = false;
                 } catch (OXException e) {
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -1729,27 +1752,26 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     exponentialBackoffWait(++retryCount, 1000L);
 
                     // Reload & retry
-                    compositionSpace = getCompositionSpace(compositionSpaceId, session);
+                    compositionSpace = getCompositionSpace(compositionSpaceId);
                 }
             } while (retry);
 
             // Everything went fine
-            newAttachments = null;
-            return newAttachment;
+            AttachmentResult retval = attachmentResultFor(newAttachment, compositionSpace);
+            newAttachment = null;
+            return retval;
         } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
-            if (null != newAttachments) {
-                for (Attachment attachment : newAttachments) {
-                    attachmentStorage.deleteAttachment(attachment.getId(), session);
-                }
+            if (null != newAttachment) {
+                attachmentStorage.deleteAttachment(newAttachment.getId(), session);
             }
         }
     }
 
     @Override
-    public List<Attachment> addAttachmentToCompositionSpace(UUID compositionSpaceId, StreamedUploadFileIterator uploadedAttachments, String disposition, Session session) throws OXException {
-        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, session);
+    public AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, StreamedUploadFileIterator uploadedAttachments, String disposition) throws OXException {
+        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
 
         // Obtain attachment storage
         AttachmentStorage attachmentStorage = getAttachmentStorage(session);
@@ -1783,7 +1805,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     // Add new attachments to composition space
                     MessageDescription md = new MessageDescription();
                     md.setAttachments(attachments);
-                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                    CompositionSpace updatedCompositionSpace = getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                    compositionSpace = updatedCompositionSpace;
                     retry = false;
                 } catch (OXException e) {
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -1794,12 +1817,12 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     exponentialBackoffWait(++retryCount, 1000L);
 
                     // Reload & retry
-                    compositionSpace = getCompositionSpace(compositionSpaceId, session);
+                    compositionSpace = getCompositionSpace(compositionSpaceId);
                 }
             } while (retry);
 
             // Everything went fine
-            List<Attachment> retval = newAttachments;
+            AttachmentResult retval = attachmentResultFor(newAttachments, compositionSpace);
             newAttachments = null;
             return retval;
         } catch (IOException e) {
@@ -1814,12 +1837,12 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public Attachment addVCardToCompositionSpace(UUID compositionSpaceId, Session session) throws OXException {
-        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, session);
+    public AttachmentResult addVCardToCompositionSpace(UUID compositionSpaceId) throws OXException {
+        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
         for (Attachment existingAttachment : compositionSpace.getMessage().getAttachments()) {
             if (AttachmentOrigin.VCARD == existingAttachment.getOrigin()) {
                 // vCard already contained
-                return existingAttachment;
+                return attachmentResultFor(existingAttachment, compositionSpace);
             }
         }
 
@@ -1830,10 +1853,18 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         {
             // Create VCard
             VCardAndFileName userVCard = CompositionSpaces.getUserVCard(session);
-            byte[] vcard = userVCard.getVcard();
 
-            AttachmentDescription attachment = AttachmentStorages.createVCardAttachmentDescriptionFor(userVCard, compositionSpaceId);
-            vcardAttachment = AttachmentStorages.saveAttachment(Streams.newByteArrayInputStream(vcard), attachment, session, attachmentStorage);
+            // Check by file name
+            for (Attachment existingAttachment : compositionSpace.getMessage().getAttachments()) {
+                String fileName = existingAttachment.getName();
+                if (fileName != null && fileName.equals(userVCard.getFileName())) {
+                    // vCard already contained
+                    return attachmentResultFor(existingAttachment, compositionSpace);
+                }
+            }
+
+            AttachmentDescription attachment = AttachmentStorages.createVCardAttachmentDescriptionFor(userVCard, compositionSpaceId, true);
+            vcardAttachment = AttachmentStorages.saveAttachment(Streams.newByteArrayInputStream(userVCard.getVcard()), attachment, session, attachmentStorage);
         }
 
         try {
@@ -1848,7 +1879,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
                     // Add new attachments to composition space
                     MessageDescription md = new MessageDescription().setAttachments(attachments);
-                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                    CompositionSpace updatedCompositionSpace = getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                    compositionSpace = updatedCompositionSpace;
                     retry = false;
                 } catch (OXException e) {
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -1859,11 +1891,26 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     exponentialBackoffWait(++retryCount, 1000L);
 
                     // Reload & retry
-                    compositionSpace = getCompositionSpace(compositionSpaceId, session);
+                    compositionSpace = getCompositionSpace(compositionSpaceId);
+                }
+
+                if (retry) {
+                    for (Attachment existingAttachment : compositionSpace.getMessage().getAttachments()) {
+                        if (AttachmentOrigin.VCARD == existingAttachment.getOrigin()) {
+                            // vCard already contained
+                            return attachmentResultFor(existingAttachment, compositionSpace);
+                        }
+
+                        String fileName = existingAttachment.getName();
+                        if (fileName != null && fileName.equals(vcardAttachment.getName())) {
+                            // vCard already contained
+                            return attachmentResultFor(existingAttachment, compositionSpace);
+                        }
+                    }
                 }
             } while (retry);
 
-            Attachment retval = vcardAttachment;
+            AttachmentResult retval = attachmentResultFor(vcardAttachment, compositionSpace);
             vcardAttachment = null;
             return retval;
         } finally {
@@ -1874,8 +1921,15 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public Attachment addContactVCardToCompositionSpace(UUID compositionSpaceId, String contactId, String folderId, Session session) throws OXException {
-        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, session);
+    public AttachmentResult addContactVCardToCompositionSpace(UUID compositionSpaceId, String contactId, String folderId) throws OXException {
+        if (contactId == null) {
+            throw CompositionSpaceErrorCode.ERROR.create("Contact identifier must not be null");
+        }
+        if (folderId == null) {
+            throw CompositionSpaceErrorCode.ERROR.create("Folder identifier must not be null");
+        }
+
+        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
         AttachmentStorage attachmentStorage = getAttachmentStorage(session);
 
         // Compile & save vCard attachment
@@ -1885,8 +1939,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             VCardAndFileName contactVCard = CompositionSpaces.getContactVCard(contactId, folderId, session);
             byte[] vcard = contactVCard.getVcard();
 
-            AttachmentDescription attachment = AttachmentStorages.createVCardAttachmentDescriptionFor(contactVCard, compositionSpaceId);
-            attachment.setOrigin(AttachmentOrigin.CONTACT);
+            AttachmentDescription attachment = AttachmentStorages.createVCardAttachmentDescriptionFor(contactVCard, compositionSpaceId, false);
             vcardAttachment = AttachmentStorages.saveAttachment(Streams.newByteArrayInputStream(vcard), attachment, session, attachmentStorage);
         }
 
@@ -1902,7 +1955,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
                     // Add new attachments to composition space
                     MessageDescription md = new MessageDescription().setAttachments(attachments);
-                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                    CompositionSpace updatedCompositionSpace = getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                    compositionSpace = updatedCompositionSpace;
                     retry = false;
                 } catch (OXException e) {
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -1913,11 +1967,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     exponentialBackoffWait(++retryCount, 1000L);
 
                     // Reload & retry
-                    compositionSpace = getCompositionSpace(compositionSpaceId, session);
+                    compositionSpace = getCompositionSpace(compositionSpaceId);
                 }
             } while (retry);
 
-            Attachment retval = vcardAttachment;
+            AttachmentResult retval = attachmentResultFor(vcardAttachment, compositionSpace);
             vcardAttachment = null;
             return retval;
         } finally {
@@ -1928,7 +1982,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public CompositionSpace getCompositionSpace(UUID compositionSpaceId, Session session) throws OXException {
+    public CompositionSpace getCompositionSpace(UUID compositionSpaceId) throws OXException {
         CompositionSpace compositionSpace = getStorageService().getCompositionSpace(session, compositionSpaceId);
         if (null == compositionSpace) {
             throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(getUnformattedString(compositionSpaceId));
@@ -1937,19 +1991,19 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public List<CompositionSpace> getCompositionSpaces(MessageField[] fields, Session session) throws OXException {
+    public List<CompositionSpace> getCompositionSpaces(MessageField[] fields) throws OXException {
         return getStorageService().getCompositionSpaces(session, fields);
     }
 
     @Override
-    public CompositionSpace updateCompositionSpace(UUID compositionSpaceId, MessageDescription md, Session session) throws OXException {
+    public CompositionSpace updateCompositionSpace(UUID compositionSpaceId, MessageDescription md) throws OXException {
         CompositionSpace compositionSpace = null;
 
         boolean retry = true;
         int retryCount = 0;
         do {
             try {
-                compositionSpace = getCompositionSpace(compositionSpaceId, session);
+                compositionSpace = getCompositionSpace(compositionSpaceId);
 
                 // Check if attachment identifiers are about to be changed
                 Set<UUID> oldAttachmentIds = null;
@@ -1999,8 +2053,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public boolean closeCompositionSpace(UUID compositionSpaceId, Session session) throws OXException {
-
+    public boolean closeCompositionSpace(UUID compositionSpaceId) throws OXException {
         boolean closed = getStorageService().closeCompositionSpace(session, compositionSpaceId);
         if (closed) {
             if (LOG.isInfoEnabled()) {
@@ -2017,7 +2070,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public void closeExpiredCompositionSpaces(long maxIdleTimeMillis, Session session) throws OXException {
+    public void closeExpiredCompositionSpaces(long maxIdleTimeMillis) throws OXException {
         List<UUID> deleted = getStorageService().deleteExpiredCompositionSpaces(session, maxIdleTimeMillis);
         if (null != deleted && !deleted.isEmpty()) {
             if (LOG.isDebugEnabled()) {
@@ -2039,8 +2092,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public List<Attachment> addOriginalAttachmentsToCompositionSpace(UUID compositionSpaceId, Session session) throws OXException {
-        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, session);
+    public AttachmentResult addOriginalAttachmentsToCompositionSpace(UUID compositionSpaceId) throws OXException {
+        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
 
         // Acquire meta information and determine the "replyFor" path
         Meta meta = compositionSpace.getMessage().getMeta();
@@ -2059,7 +2112,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             MailMessage originalMail = requireMailMessage(replyFor, mailInterface);
 
             if (!originalMail.getContentType().startsWith("multipart/")) {
-                return Collections.emptyList();
+                return attachmentResultFor(compositionSpace);
             }
 
             // Grab first seen text from original message and check for possible referenced inline images
@@ -2074,7 +2127,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMail, handler);
             List<MailPart> nonInlineParts = handler.getNonInlineParts();
             if (null == nonInlineParts || nonInlineParts.isEmpty()) {
-                return Collections.emptyList();
+                return attachmentResultFor(compositionSpace);
             }
 
             newAttachments = new ArrayList<>(nonInlineParts.size());
@@ -2101,7 +2154,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     // Add new attachments to composition space
                     MessageDescription md = new MessageDescription();
                     md.setAttachments(attachments);
-                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                    CompositionSpace updatedCompositionSpace = getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                    compositionSpace = updatedCompositionSpace;
                     retry = false;
                 } catch (OXException e) {
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -2112,12 +2166,12 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     exponentialBackoffWait(++retryCount, 1000L);
 
                     // Reload & retry
-                    compositionSpace = getCompositionSpace(compositionSpaceId, session);
+                    compositionSpace = getCompositionSpace(compositionSpaceId);
                 }
             } while (retry);
 
             // Everything went fine
-            List<Attachment> retval = newAttachments;
+            AttachmentResult retval = attachmentResultFor(newAttachments, compositionSpace);
             newAttachments = null;
             return retval;
         } finally {
@@ -2133,8 +2187,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public Attachment getAttachment(UUID compositionSpaceId, UUID attachmentId, Session session) throws OXException {
-        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, session);
+    public AttachmentResult getAttachment(UUID compositionSpaceId, UUID attachmentId) throws OXException {
+        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
 
         // Obtain attachment storage
         AttachmentStorage attachmentStorage = getAttachmentStorage(session);
@@ -2186,7 +2240,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     Collections.sort(attachments, AttachmentComparator.getInstance());
 
                     MessageDescription md = new MessageDescription().setAttachments(attachments);
-                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                    CompositionSpace updatedCompositionSpace = getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                    compositionSpace = updatedCompositionSpace;
                     retry = false;
                 } catch (OXException e) {
                     if (CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -2194,7 +2249,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                         exponentialBackoffWait(++retryCount, 1000L);
 
                         // Reload & retry
-                        compositionSpace = getCompositionSpace(compositionSpaceId, session);
+                        compositionSpace = getCompositionSpace(compositionSpaceId);
                     } else {
                         LOG.warn("Failed to delete non-existent attachment {} from composition space {}", getUnformattedString(attachmentId), getUnformattedString(compositionSpaceId), e);
                         retry = false;
@@ -2208,12 +2263,12 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_RESOURCE.create(getUnformattedString(attachmentId));
         }
 
-        return attachment;
+        return attachmentResultFor(attachment, compositionSpace);
     }
 
     @Override
-    public void deleteAttachment(UUID compositionSpaceId, UUID attachmentId, Session session) throws OXException {
-        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, session);
+    public AttachmentResult deleteAttachment(UUID compositionSpaceId, UUID attachmentId) throws OXException {
+        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
 
         // Obtain attachment storage
         AttachmentStorage attachmentStorage = getAttachmentStorage(session);
@@ -2260,7 +2315,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
                 // Update composition space
                 MessageDescription md = new MessageDescription().setAttachments(attachments);
-                getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                CompositionSpace updatedCompositionSpace = getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
+                compositionSpace = updatedCompositionSpace;
                 retry = false;
             } catch (OXException e) {
                 if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -2271,12 +2327,23 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 exponentialBackoffWait(++retryCount, 1000L);
 
                 // Reload & retry
-                compositionSpace = getCompositionSpace(compositionSpaceId, session);
+                compositionSpace = getCompositionSpace(compositionSpaceId);
             }
         } while (retry);
 
         // Delete the denoted attachment
         attachmentStorage.deleteAttachment(attachmentId, session);
+        return attachmentResultFor(compositionSpace);
+    }
+
+    @Override
+    public UploadLimits getAttachmentUploadLimits(UUID compositionSpaceId) throws OXException {
+        SharedAttachmentsInfo sharedAttachmentsInfo;
+        CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
+        sharedAttachmentsInfo = compositionSpace.getMessage().getSharedAttachments();
+
+        UploadLimits.Type type = sharedAttachmentsInfo.isEnabled() ? UploadLimits.Type.DRIVE : UploadLimits.Type.MAIL;
+        return UploadLimits.get(type, session);
     }
 
     private static final String HDR_MESSAGE_ID = MessageHeaders.HDR_MESSAGE_ID;

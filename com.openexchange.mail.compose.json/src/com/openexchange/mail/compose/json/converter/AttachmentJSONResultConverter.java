@@ -49,7 +49,8 @@
 
 package com.openexchange.mail.compose.json.converter;
 
-import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,7 +60,10 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.compose.Attachment;
+import com.openexchange.mail.compose.AttachmentResult;
+import com.openexchange.mail.compose.CompositionSpaceInfo;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -96,22 +100,40 @@ public class AttachmentJSONResultConverter implements ResultConverter {
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         try {
-            final Object resultObject = result.getResultObject();
-            if (resultObject instanceof Attachment) {
-                Attachment attachment = (Attachment) resultObject;
-                result.setResultObject(convertAttachment(attachment), "json");
+            AttachmentResult attachmentResult = (AttachmentResult) result.getResultObject();
+            List<? extends Attachment> attachments = attachmentResult.getAttachments();
+
+            int numberOfAttachments = attachments.size();
+            if (numberOfAttachments <= 0) {
+                // No attachments at all
+                JSONObject jResponse = new JSONObject(2);
+                jResponse.put("attachments", JSONArray.EMPTY_ARRAY);
+                jResponse.put("compositionSpace", convertCompositionSpaceInfo(attachmentResult.getCompositionSpaceInfo()));
+                result.setResultObject(jResponse, "json");
                 return;
             }
-            /*
-             * Collection of attachments
-             */
-            @SuppressWarnings("unchecked")
-            Collection<Attachment> attachments = (Collection<Attachment>) resultObject;
-            final JSONArray jArray = new JSONArray(attachments.size());
-            for (Attachment attachment : attachments) {
-                jArray.put(convertAttachment(attachment));
+
+            if (numberOfAttachments == 1) {
+                // A single attachment
+                JSONObject jResponse = new JSONObject(2);
+                jResponse.put("attachments", new JSONArray(1).put(convertAttachment(attachments.get(0))));
+                jResponse.put("compositionSpace", convertCompositionSpaceInfo(attachmentResult.getCompositionSpaceInfo()));
+                result.setResultObject(jResponse, "json");
+                return;
             }
-            result.setResultObject(jArray, "json");
+
+            // Collection of attachments
+            JSONObject jResponse = new JSONObject(2);
+            {
+                JSONArray jAttachments = new JSONArray(numberOfAttachments);
+                for (Attachment attachment : attachments) {
+                    jAttachments.put(convertAttachment(attachment));
+                }
+                jResponse.put("attachments", jAttachments);
+            }
+            jResponse.put("compositionSpace", convertCompositionSpaceInfo(attachmentResult.getCompositionSpaceInfo()));
+            result.setResultObject(jResponse, "json");
+            return;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
@@ -138,6 +160,27 @@ public class AttachmentJSONResultConverter implements ResultConverter {
         jAttachment.putOpt("contentDisposition", attachment.getContentDisposition());
         jAttachment.putOpt("origin", attachment.getOrigin());
         return jAttachment;
+    }
+
+    /**
+     * Converts specified composition space information to its JSON representation.
+     *
+     * @param compositionSpaceInfo The composition space information
+     * @return The JSON representation
+     * @throws JSONException If conversion fails
+     */
+    public static JSONObject convertCompositionSpaceInfo(CompositionSpaceInfo compositionSpaceInfo) throws JSONException {
+        if (null == compositionSpaceInfo) {
+            return null;
+        }
+
+        JSONObject json = new JSONObject(2);
+        json.putOpt("id", compositionSpaceInfo.getId().toString());
+        Optional<MailPath> optionalPath = compositionSpaceInfo.getMailPath();
+        if (optionalPath.isPresent()) {
+            json.putOpt("mailPath", CompositionSpaceJSONResultConverter.convertMailPath(optionalPath.get()));
+        }
+        return json;
     }
 
 }

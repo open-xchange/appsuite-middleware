@@ -162,9 +162,9 @@ public final class IMAPSessionProperties {
          */
         properties.put("mail.imap.partialfetch", "true");
         /*
-         * Partial fetch size in bytes. Defaults to 16K.
+         * Partial fetch size in bytes. Defaults to 1MB.
          */
-        properties.put("mail.imap.fetchsize", "65536");
+        properties.put("mail.imap.fetchsize", "1048576");
         /*
          * Deny NTLM authentication
          */

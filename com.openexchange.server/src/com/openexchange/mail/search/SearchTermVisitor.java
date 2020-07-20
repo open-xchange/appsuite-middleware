@@ -114,6 +114,13 @@ public interface SearchTermVisitor {
     public void visit(HeaderTerm term);
 
     /**
+     * Calls this visitor with specified header-existence term.
+     *
+     * @param term The header-existence term
+     */
+    public void visit(HeaderExistenceTerm term);
+
+    /**
      * Calls this visitor with specified NOT term.
      *
      * @param term The NOT term

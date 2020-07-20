@@ -153,7 +153,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
             try {
                 if (folderToDelete != null) {
-                    defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "event", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+                    defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "event", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
                 }
             } catch (Exception e) {
                 exception = e;
@@ -384,7 +384,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      */
     protected void changeTimezone(TimeZone tz) throws ApiException {
         String body = "{timezone: \"" + tz.getID() + "\"}";
-        CommonResponse updateJSlob = defaultUserApi.getJslob().updateJSlob(defaultUserApi.getSession(), body, "io.ox/core", null);
+        CommonResponse updateJSlob = defaultUserApi.getJslob().updateJSlob(defaultUserApi.getSession(), "io.ox/core", null, body, null);
         assertNull(updateJSlob.getErrorDesc(), updateJSlob.getError());
     }
 

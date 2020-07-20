@@ -61,22 +61,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestData.StreamParams;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.authentication.application.ajax.RestrictedAction;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.compose.Address;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.Attachment.ContentDisposition;
 import com.openexchange.mail.compose.AttachmentOrigin;
+import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
-import com.openexchange.mail.compose.CompositionSpaceStorageService;
+import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
+import com.openexchange.mail.compose.CompositionSpaceServiceFactoryRegistry;
 import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.compose.DefaultAttachment;
 import com.openexchange.mail.compose.Message.ContentType;
@@ -84,10 +85,10 @@ import com.openexchange.mail.compose.Message.Priority;
 import com.openexchange.mail.compose.MessageDescription;
 import com.openexchange.mail.compose.Security;
 import com.openexchange.mail.compose.SharedAttachmentsInfo;
+import com.openexchange.mail.compose.UploadLimits;
 import com.openexchange.mail.compose.json.MailComposeActionFactory;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -98,12 +99,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 @RestrictedAction(module = MailComposeActionFactory.MODULE, type = RestrictedAction.Type.WRITE)
 public abstract class AbstractMailComposeAction implements AJAXActionService {
-
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailComposeAction.class);
-    }
 
     /**
      * The service look-up
@@ -121,17 +116,63 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
     }
 
     /**
-     * Gets the composition space service.
+     * Gets the composition space service with highest ranking.
      *
+     * @param session The session
      * @return The composition space service
      * @throws OXException If composition space service cannot be returned
      */
-    protected CompositionSpaceService getCompositionSpaceService() throws OXException {
-        CompositionSpaceService service = services.getService(CompositionSpaceService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CompositionSpaceStorageService.class.getName());
+    protected CompositionSpaceService getHighestRankedService(Session session) throws OXException {
+        CompositionSpaceServiceFactoryRegistry registry = services.getServiceSafe(CompositionSpaceServiceFactoryRegistry.class);
+        CompositionSpaceServiceFactory factory = registry.getHighestRankedFactoryFor(session);
+        return factory.createServiceFor(session);
+    }
+
+    /**
+     * Gets the composition space service for given service identifier.
+     *
+     * @param serviceId The service identifier
+     * @param session The session
+     * @return The composition space service
+     * @throws OXException If composition space service cannot be returned
+     */
+    protected CompositionSpaceService getCompositionSpaceService(String serviceId, Session session) throws OXException {
+        CompositionSpaceServiceFactoryRegistry registry = services.getServiceSafe(CompositionSpaceServiceFactoryRegistry.class);
+        return registry.getFactoryFor(serviceId, session).createServiceFor(session);
+    }
+
+    /**
+     * Gets the composition space services.
+     *
+     * @param serviceId The service identifier
+     * @param session The session
+     * @return The composition space service
+     * @throws OXException If composition space service cannot be returned
+     */
+    protected List<CompositionSpaceService> getCompositionSpaceServices(Session session) throws OXException {
+        CompositionSpaceServiceFactoryRegistry registry = services.getServiceSafe(CompositionSpaceServiceFactoryRegistry.class);
+        List<CompositionSpaceServiceFactory> factories = registry.getFactoriesFor(session);
+        if (factories.isEmpty()) {
+            return Collections.emptyList();
         }
-        return service;
+
+        List<CompositionSpaceService> services = new ArrayList<>(factories.size());
+        for (CompositionSpaceServiceFactory factory : factories) {
+            services.add(factory.createServiceFor(session));
+        }
+        return services;
+    }
+
+    /**
+     * Checks for present file uploads in the AJAX request and applies according size limitations.
+     *
+     * @param uploadLimits The upload limits for affected composition space
+     * @param request The AJAX request
+     * @return {@code true} if request contains file uploads
+     * @throws OXException - If upload files cannot be processed
+     */
+    protected boolean hasUploads(UploadLimits uploadLimits, AJAXRequestData request) throws OXException {
+        return request.hasUploads(uploadLimits.getPerAttachmentLimit(), uploadLimits.getPerRequestLimit(), StreamParams.streamed(false));
     }
 
     /**
@@ -373,7 +414,7 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
 
         {
             String language = jSharedAttachments.optString("language", null);
-            if (null != language) {
+            if (Strings.isNotEmpty(language)) {
                 sharedAttachments.withLanguage(LocaleTools.getLocale(language));
             }
         }
@@ -389,7 +430,7 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
 
         {
             String password = jSharedAttachments.optString("password", null);
-            if (null != password) {
+            if (Strings.isNotEmpty(password)) {
                 sharedAttachments.withPassword(password);
             }
         }
@@ -422,11 +463,16 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
             .withEncrypt(jSecurity.optBoolean("encrypt"))
             .withPgpInline(jSecurity.optBoolean("pgpInline"))
             .withSign(jSecurity.optBoolean("sign"))
-            .withLanguage(jSecurity.optString("language", null))
-            .withMessage(jSecurity.optString("message", null))
-            .withPin(jSecurity.optString("pin", null))
-            .withMsgRef(jSecurity.optString("msgRef", null))
+            .withLanguage(getNonEmptyElseNull(jSecurity.optString("language", null)))
+            .withMessage(getNonEmptyElseNull(jSecurity.optString("message", null)))
+            .withPin(getNonEmptyElseNull(jSecurity.optString("pin", null)))
+            .withMsgRef(getNonEmptyElseNull(jSecurity.optString("msgRef", null)))
+            .withAuthToken(getNonEmptyElseNull(jSecurity.optString("authToken", null)))
             .build();
+    }
+
+    private static String getNonEmptyElseNull(String s) {
+        return Strings.isEmpty(s) ? null : s;
     }
 
     /**
@@ -501,50 +547,18 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
     }
 
     /**
-     * Gets the upload limitations for the maximum allowed size of a single uploaded file and the maximum allowed size of a complete request.
-     *
-     * @param session The session
-     * @return The upload limitations
-     */
-    protected UploadLimitations getUploadLimitations(ServerSession session) {
-        // Determine upload quotas
-        long maxSize;
-        long maxFileSize;
-        {
-            UserSettingMail usm = session.getUserSettingMail();
-            maxFileSize = usm.getUploadQuotaPerFile();
-            if (maxFileSize <= 0) {
-                maxFileSize = -1L;
-            }
-            maxSize = usm.getUploadQuota();
-            if (maxSize <= 0) {
-                if (maxSize == 0) {
-                    maxSize = -1L;
-                } else {
-                    LoggerHolder.LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
-                    long globalQuota;
-                    try {
-                        globalQuota = ServerConfig.getLong(Property.MAX_UPLOAD_SIZE).longValue();
-                    } catch (OXException e) {
-                        LoggerHolder.LOG.error("", e);
-                        globalQuota = 0L;
-                    }
-                    maxSize = globalQuota <= 0 ? -1L : globalQuota;
-                }
-            }
-        }
-        return new UploadLimitations(maxFileSize, maxSize);
-    }
-
-    /**
      * Gets a composition space's UUID from specified unformatted string.
      *
-     * @param id The composition space identifier as an unformatted string; e.g. <code>067e61623b6f4ae2a1712470b63dff00</code>
+     * @param id The composition space identifier; e.g. <code>rdb://067e61623b6f4ae2a1712470b63dff00</code>
      * @return The UUID
      * @throws OXException If passed string in invalid
      */
-    protected static UUID parseCompositionSpaceId(String id) throws OXException {
-        return CompositionSpaces.parseCompositionSpaceId(id);
+    protected static CompositionSpaceId parseCompositionSpaceId(String id) throws OXException {
+        try {
+            return new CompositionSpaceId(id);
+        } catch (IllegalArgumentException e) {
+            throw OXException.general("Invalid composition space identifier: " + id, e);
+        }
     }
 
     /**

@@ -64,6 +64,7 @@ import com.openexchange.testing.httpclient.models.MailComposeAttachmentResponse;
 import com.openexchange.testing.httpclient.models.MailComposeMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeResponse;
 import com.openexchange.testing.httpclient.models.MailComposeSendResponse;
+import com.openexchange.testing.httpclient.models.MailDestinationData;
 
 /**
  * {@link AttachmentsTest}
@@ -131,10 +132,13 @@ public class AttachmentsTest extends AbstractMailComposeTest {
 
     @Test
     public void testOriginalAttachment() throws Exception {
+        MailDestinationData mailWithAttachment = importTestMailWithAttachment();
+
         ComposeBody body = new ComposeBody();
         body.setFolderId(mailWithAttachment.getFolderId());
         body.setId(mailWithAttachment.getId());
         MailComposeResponse reply = api.postMailCompose(getSessionId(), "REPLY", null, Collections.singletonList(body));
+
         check(reply);
         MailComposeMessageModel data = reply.getData();
         compositionSpaceIds.add(data.getId());
@@ -185,7 +189,7 @@ public class AttachmentsTest extends AbstractMailComposeTest {
         MailComposeMessageModel model = createNewCompositionSpace();
         MailComposeAttachmentResponse postAttachments = api.postAttachments(getSessionId(), model.getId(), attachment);
         check(postAttachments);
-        byte[] attachmentsById = api.getAttachmentsById(getSessionId(), model.getId(), postAttachments.getData().getId());
+        byte[] attachmentsById = api.getAttachmentsById(getSessionId(), model.getId(), postAttachments.getData().getAttachments().get(0).getId());
         assertTrue("No data.", attachmentsById.length > 100);
     }
 }

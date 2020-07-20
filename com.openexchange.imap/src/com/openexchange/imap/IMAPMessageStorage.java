@@ -56,6 +56,7 @@ import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfil
 import static com.openexchange.mail.utils.StorageUtility.prepareMailFieldsForSearch;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1359,6 +1360,169 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     };
 
     @Override
+    public InputStream getMimeStream(String fullName, String id) throws OXException {
+        try {
+            int desiredMode = READ_ONLY;
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
+            } catch (MessagingException e) {
+                final Exception next = e.getNextException();
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (Strings.toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw handleMessagingException(fullName, e);
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
+            }
+            if (0 >= imapFolder.getMessageCount()) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            }
+            long uid = parseUnsignedLong(id);
+            IMAPMessage msg;
+            try {
+                msg = (IMAPMessage) imapFolder.getMessageByUID(uid);
+            } catch (java.lang.NullPointerException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                LOG.trace("Obviously message was removed in the meantime", e);
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            } catch (java.lang.IndexOutOfBoundsException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                LOG.trace("Obviously message was removed in the meantime", e);
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            } catch (MessageRemovedException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                LOG.trace("Obviously message was removed in the meantime", e);
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            } catch (MessagingException e) {
+                final Exception cause = e.getNextException();
+                if (!(cause instanceof BadCommandException)) {
+                    throw e;
+                }
+                // Hm... Something weird with executed "UID FETCH" command; retry manually...
+                final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, new long[] { uid });
+                if ((null == seqNums) || (0 == seqNums.length)) {
+                    LOG.warn("No message with UID '{}' found in folder '{}'", id, fullName, cause);
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+                }
+                final int msgnum = seqNums[0];
+                if (msgnum < 1) {
+                    /*
+                     * message-numbers start at 1
+                     */
+                    LOG.warn("No message with UID '{}' found in folder '{}'", id, fullName, cause);
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+                }
+                msg = (IMAPMessage) imapFolder.getMessage(msgnum);
+            }
+            if (msg == null || msg.isExpunged()) {
+                // throw new OXException(OXException.Code.MAIL_NOT_FOUND,
+                // String.valueOf(msgUID), imapFolder
+                // .toString());
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            }
+            msg.setPeek(true);
+            int blkSize = imapStore.getFetchBlockSize();
+            try {
+                imapStore.setFetchBlockSize(-1);
+                return msg.getMimeStream();
+            } finally {
+                // Restore fetch block size
+                imapStore.setFetchBlockSize(blkSize);
+            }
+        } catch (MessagingException e) {
+            if (ImapUtility.isInvalidMessageset(e)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            }
+            throw handleMessagingException(fullName, e);
+        } catch (RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    @Override
+    public void writeMimeMessage(String fullName, String id, OutputStream os) throws OXException {
+        try {
+            int desiredMode = READ_ONLY;
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
+            } catch (MessagingException e) {
+                final Exception next = e.getNextException();
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (Strings.toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw handleMessagingException(fullName, e);
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
+            }
+            if (0 >= imapFolder.getMessageCount()) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            }
+            long uid = parseUnsignedLong(id);
+            IMAPMessage msg;
+            try {
+                msg = (IMAPMessage) imapFolder.getMessageByUID(uid);
+            } catch (java.lang.NullPointerException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                LOG.trace("Obviously message was removed in the meantime", e);
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            } catch (java.lang.IndexOutOfBoundsException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                LOG.trace("Obviously message was removed in the meantime", e);
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            } catch (MessageRemovedException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                LOG.trace("Obviously message was removed in the meantime", e);
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            } catch (MessagingException e) {
+                final Exception cause = e.getNextException();
+                if (!(cause instanceof BadCommandException)) {
+                    throw e;
+                }
+                // Hm... Something weird with executed "UID FETCH" command; retry manually...
+                final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, new long[] { uid });
+                if ((null == seqNums) || (0 == seqNums.length)) {
+                    LOG.warn("No message with UID '{}' found in folder '{}'", id, fullName, cause);
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+                }
+                final int msgnum = seqNums[0];
+                if (msgnum < 1) {
+                    /*
+                     * message-numbers start at 1
+                     */
+                    LOG.warn("No message with UID '{}' found in folder '{}'", id, fullName, cause);
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+                }
+                msg = (IMAPMessage) imapFolder.getMessage(msgnum);
+            }
+            if (msg == null || msg.isExpunged()) {
+                // throw new OXException(OXException.Code.MAIL_NOT_FOUND,
+                // String.valueOf(msgUID), imapFolder
+                // .toString());
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            }
+            msg.setPeek(true);
+            msg.writeTo(os);
+        } catch (MessagingException e) {
+            if (ImapUtility.isInvalidMessageset(e)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            }
+            throw handleMessagingException(fullName, e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    @Override
     public Message getMimeMessage(String fullName, String id, boolean markSeen) throws OXException {
         if (null == id) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create("null", fullName);
@@ -1381,8 +1545,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             IMAPMessage msg;
             try {
                 final long start = System.currentTimeMillis();
+                imapFolder.fetch(null, new long[] { uid }, FETCH_PROFILE_ENVELOPE, null);
                 msg = (IMAPMessage) imapFolder.getMessageByUID(uid);
-                imapFolder.fetch(new Message[] {msg}, FETCH_PROFILE_ENVELOPE);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
             } catch (java.lang.NullPointerException e) {
                 /*
@@ -1429,6 +1593,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 // .toString());
                 throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
             }
+            msg.setPeek(!markSeen);
+            msg.setUID(uid);
             return msg;
         } catch (MessagingException e) {
             if (ImapUtility.isInvalidMessageset(e)) {
@@ -2775,7 +2941,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final boolean marked = setMarker(opKey);
             try {
                 if (hardDelete || getUserSettingMail().isHardDeleteMsgs()) {
-                    blockwiseDeletion(msgUIDs, false, null, false);
+                    blockwiseDeletion(msgUIDs, false, null, DeleteOptions.optionsForNeiherNor());
                     notifyIMAPFolderModification(fullName);
                     return;
                 }
@@ -2785,7 +2951,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     throw IMAPException.create(IMAPException.Code.MISSING_DEFAULT_FOLDER_NAME, imapConfig, session, "trash");
                 }
                 final boolean backup = (!isSubfolderOf(fullName, trashFullname, getSeparator(imapFolder)));
-                blockwiseDeletion(msgUIDs, backup, backup ? trashFullname : null, false);
+                blockwiseDeletion(msgUIDs, backup, backup ? trashFullname : null, DeleteOptions.optionsForNeiherNor());
                 if (IMAPSessionStorageAccess.isEnabled()) {
                     IMAPSessionStorageAccess.removeDeletedSessionData(msgUIDs, accountId, session, fullName);
                 }
@@ -2805,6 +2971,60 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public boolean isEnhancedDeletionSupported() throws OXException {
         return imapConfig.getImapCapabilities().hasUIDPlus();
+    }
+
+    @Override
+    public MailPath[] hardDeleteMessages(String fullName, String[] mailIds) throws OXException {
+        if (null == mailIds) {
+            return null;
+        }
+        if (0 == mailIds.length) {
+            return new MailPath[0];
+        }
+
+        try {
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
+            } catch (MessagingException e) {
+                final Exception next = e.getNextException();
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (Strings.toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw handleMessagingException(fullName, e);
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
+            }
+            try {
+                if (!holdsMessages()) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, imapFolder.getFullName());
+                }
+                if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(RightsCache.getCachedRights( imapFolder, true, session, accountId))) {
+                    throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                }
+            } catch (MessagingException e) {
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
+            }
+            long[] msgUIDs = uids2longs(mailIds);
+            /*
+             * Set marker
+             */
+            final OperationKey opKey = new OperationKey(Type.MSG_DELETE, accountId, new Object[] { fullName });
+            final boolean marked = setMarker(opKey);
+            try {
+                MailPath[] removedPaths = blockwiseDeletion(msgUIDs, false, null, DeleteOptions.optionsForReturnRemovedOnes());
+                if (IMAPSessionStorageAccess.isEnabled()) {
+                    IMAPSessionStorageAccess.removeDeletedSessionData(msgUIDs, accountId, session, fullName);
+                }
+                notifyIMAPFolderModification(fullName);
+                return removedPaths;
+            } finally {
+                if (marked) {
+                    unsetMarker(opKey);
+                }
+            }
+        } catch (MessagingException e) {
+            throw handleMessagingException(fullName, e);
+        } catch (RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
     }
 
     @Override
@@ -2844,7 +3064,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final boolean marked = setMarker(opKey);
             try {
                 if (hardDelete || getUserSettingMail().isHardDeleteMsgs()) {
-                    blockwiseDeletion(msgUIDs, false, null, false);
+                    blockwiseDeletion(msgUIDs, false, null, DeleteOptions.optionsForNeiherNor());
                     notifyIMAPFolderModification(fullName);
                     return new MailPath[0];
                 }
@@ -2854,7 +3074,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     throw IMAPException.create(IMAPException.Code.MISSING_DEFAULT_FOLDER_NAME, imapConfig, session, "trash");
                 }
                 final boolean backup = (!isSubfolderOf(fullName, trashFullname, getSeparator(imapFolder)));
-                MailPath[] targetPaths = blockwiseDeletion(msgUIDs, backup, backup ? trashFullname : null, backup);
+                MailPath[] targetPaths = blockwiseDeletion(msgUIDs, backup, backup ? trashFullname : null, backup ? DeleteOptions.optionsForReturnTargetPaths() : DeleteOptions.optionsForNeiherNor());
                 if (IMAPSessionStorageAccess.isEnabled()) {
                     IMAPSessionStorageAccess.removeDeletedSessionData(msgUIDs, accountId, session, fullName);
                 }
@@ -2872,12 +3092,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private MailPath[] blockwiseDeletion(long[] msgUIDs, boolean backup, String trashFullname, boolean returnTargetPaths) throws OXException, MessagingException {
+    private MailPath[] blockwiseDeletion(long[] msgUIDs, boolean backup, String trashFullname, DeleteOptions deleteOptions) throws OXException, MessagingException {
         if (0 == msgUIDs.length) {
             // Nothing to do on empty ID array
-            return returnTargetPaths ? new MailPath[0] : null;
+            return deleteOptions.returnTargetPaths || deleteOptions.returnRemovedOnes ? new MailPath[0] : null;
         }
-        List<MailPath> targetPaths = returnTargetPaths ? new ArrayList<MailPath>(msgUIDs.length) : null;
+        List<MailPath> targetPaths = deleteOptions.returnTargetPaths ? new ArrayList<MailPath>(msgUIDs.length) : null;
+        List<MailPath> removedPaths = deleteOptions.returnRemovedOnes ? new ArrayList<MailPath>(msgUIDs.length) : null;
         long[] remain;
         int blockSize = getIMAPProperties().getBlockSize();
         if (blockSize > 0 && msgUIDs.length > blockSize) {
@@ -2889,10 +3110,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             for (int len = msgUIDs.length; len > blockSize; len -= blockSize) {
                 System.arraycopy(msgUIDs, offset, tmp, 0, tmp.length);
                 offset += blockSize;
-                MailPath[] chunk = deleteByUIDs(trashFullname, backup, tmp, returnTargetPaths);
+                MailPath[] chunk = deleteByUIDs(trashFullname, backup, tmp, deleteOptions);
                 if (targetPaths != null && chunk != null) {
                     for (MailPath mailPath : chunk) {
                         targetPaths.add(mailPath); // Supports null elements
+                    }
+                }
+                if (removedPaths != null && chunk != null) {
+                    for (MailPath mailPath : chunk) {
+                        removedPaths.add(mailPath); // Supports null elements
                     }
                 }
             }
@@ -2901,10 +3127,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } else {
             remain = msgUIDs;
         }
-        MailPath[] chunk = deleteByUIDs(trashFullname, backup, remain, returnTargetPaths);
+        MailPath[] chunk = deleteByUIDs(trashFullname, backup, remain, deleteOptions);
         if (targetPaths != null && chunk != null) {
             for (MailPath mailPath : chunk) {
                 targetPaths.add(mailPath); // Supports null elements
+            }
+        }
+        if (removedPaths != null && chunk != null) {
+            for (MailPath mailPath : chunk) {
+                removedPaths.add(mailPath); // Supports null elements
             }
         }
         /*
@@ -2912,10 +3143,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
          */
         imapFolder.close(false);
         resetIMAPFolder();
-        return returnTargetPaths && targetPaths != null ? targetPaths.toArray(new MailPath[targetPaths.size()]) : null;
+        if (deleteOptions.returnTargetPaths) {
+            return targetPaths != null ? targetPaths.toArray(new MailPath[targetPaths.size()]) : null;
+        }
+        return deleteOptions.returnRemovedOnes && removedPaths != null ? removedPaths.toArray(new MailPath[removedPaths.size()]) : null;
     }
 
-    private MailPath[] deleteByUIDs(String trashFullname, boolean backup, long[] uids, boolean returnTargetPaths) throws OXException, MessagingException {
+    private MailPath[] deleteByUIDs(String trashFullname, boolean backup, long[] uids, DeleteOptions deleteOptions) throws OXException, MessagingException {
         MailPath[] targetPaths = null;
         if (backup) {
             /*
@@ -2925,12 +3159,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             try {
                 AbstractIMAPCommand<long[]> command;
                 if (supportsMove) {
-                    command = new MoveIMAPCommand(imapFolder, uids, trashFullname, false, returnTargetPaths ? false : true);
+                    command = new MoveIMAPCommand(imapFolder, uids, trashFullname, false, deleteOptions.returnTargetPaths ? false : true);
                 } else {
-                    command = new CopyIMAPCommand(imapFolder, uids, trashFullname, false, returnTargetPaths ? false : true);
+                    command = new CopyIMAPCommand(imapFolder, uids, trashFullname, false, deleteOptions.returnTargetPaths ? false : true);
                 }
                 long[] targetUids = command.doCommand();
-                if (returnTargetPaths) {
+                if (deleteOptions.returnTargetPaths) {
                     targetPaths = new MailPath[targetUids.length];
                     for (int i = targetUids.length; i-- > 0;) {
                         long uid = targetUids[i];
@@ -2941,7 +3175,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final String err = com.openexchange.java.Strings.toLowerCase(e.getMessage());
                 if (err.indexOf("[nonexistent]") >= 0) {
                     // Obviously message does not/no more exist
-                    return returnTargetPaths ? new MailPath[0] : null;
+                    return deleteOptions.returnTargetPaths ? new MailPath[0] : null;
                 }
                 if (err.indexOf("quota") >= 0) {
                     /*
@@ -2968,7 +3202,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw IMAPException.create(IMAPException.Code.MOVE_ON_DELETE_FAILED, imapConfig, session, e, new Object[0]);
             }
             if (supportsMove) {
-                return returnTargetPaths ? targetPaths : null;
+                return deleteOptions.returnTargetPaths ? targetPaths : null;
             }
         }
         /*
@@ -2979,6 +3213,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
          * ... and perform EXPUNGE
          */
         try {
+            if (deleteOptions.returnRemovedOnes) {
+                long[] removedOnes = IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, uids, imapConfig.getImapCapabilities().hasUIDPlus(), true);
+                MailPath[] removedPaths = new MailPath[removedOnes.length];
+                for (int i = 0; i < removedOnes.length; i++) {
+                    long uid = removedOnes[i];
+                    removedPaths[i] = new MailPath(accountId, imapFolder.getFullName(), Long.toString(uid));
+                }
+                return removedPaths;
+            }
+
             IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, uids, imapConfig.getImapCapabilities().hasUIDPlus());
         } catch (FolderClosedException e) {
             /*
@@ -3017,7 +3261,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         /*
          * Return target paths (if demanded)
          */
-        return returnTargetPaths ? targetPaths : null;
+        return deleteOptions.returnTargetPaths ? targetPaths : null;
     }
 
     @Override
@@ -4319,6 +4563,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Fill message
              */
+            MailMessage appendedMail;
             if (mimeMessage == null) {
                 mimeMessage = new MimeMessage(imapAccess.getMailSession());
                 try {
@@ -4345,13 +4590,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     /*
                      * Append message to draft folder
                      */
-                    uid = appendMessagesLong(draftFullName, new MailMessage[] { MimeMessageConverter.convertMessage(mimeMessage, false) })[0];
-                } catch (OXException ex) {
-                    if (MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.equals(ex) || MimeMailExceptionCode.QUOTA_EXCEEDED.equals(ex)) {
-                        throw MailExceptionCode.UNABLE_TO_SAVE_DRAFT_QUOTA.create(ex);
-                    }
-                    throw ex;
-
+                    appendedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
+                    uid = appendMessagesLong(draftFullName, new MailMessage[] { appendedMail })[0];
                 } finally {
                     composedMail.cleanUp();
                 }
@@ -4359,7 +4599,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Append message to draft folder
                  */
-                uid = appendMessagesLong(draftFullName, new MailMessage[] { MimeMessageConverter.convertMessage(mimeMessage, false) })[0];
+                appendedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
+                uid = appendMessagesLong(draftFullName, new MailMessage[] { appendedMail })[0];
             }
             /*
              * Check for draft-edit operation: Delete old version
@@ -4382,7 +4623,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Return draft mail
              */
-            return getMessageLong(draftFullName, uid, true);
+            appendedMail.setMailId(Long.toString(uid));
+            appendedMail.setFolder(draftFullName);
+            return appendedMail;
+        } catch (OXException ex) {
+            if (MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.equals(ex) || MimeMailExceptionCode.QUOTA_EXCEEDED.equals(ex)) {
+                throw MailExceptionCode.UNABLE_TO_SAVE_DRAFT_QUOTA.create(ex);
+            }
+            throw ex;
         } catch (MessagingException e) {
             throw handleMessagingException(draftFullName, e);
         } catch (IOException e) {
@@ -4918,4 +5166,31 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return (IMAPMessageStorage) mstore;
     }
 
+    private static class DeleteOptions {
+
+        private static final DeleteOptions NEITHER_NOR = new DeleteOptions(false, false);
+
+        static DeleteOptions optionsForNeiherNor() {
+            return NEITHER_NOR;
+        }
+
+        static DeleteOptions optionsForReturnTargetPaths() {
+            return new DeleteOptions(true, false);
+        }
+
+        static DeleteOptions optionsForReturnRemovedOnes() {
+            return new DeleteOptions(false, true);
+        }
+
+        final boolean returnTargetPaths;
+        final boolean returnRemovedOnes;
+
+        private DeleteOptions(boolean returnTargetPaths, boolean returnRemovedOnes) {
+            super();
+            this.returnTargetPaths = returnTargetPaths;
+            this.returnRemovedOnes = returnRemovedOnes;
+        }
+
+
+    }
 }

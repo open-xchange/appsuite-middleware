@@ -50,10 +50,14 @@
 package com.openexchange.mail.compose.impl.storage.inmemory;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.java.BufferingQueue;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.CompositionSpaceId;
+import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
 import com.openexchange.mail.compose.MessageDescription;
 
 /**
@@ -64,7 +68,7 @@ import com.openexchange.mail.compose.MessageDescription;
  */
 public class InMemoryCompositionSpace implements CompositionSpace {
 
-    private final UUID id;
+    private final CompositionSpaceId id;
     private final AtomicLong lastModifiedStamp;
     private final InMemoryMessage message;
     private final int userId;
@@ -75,7 +79,7 @@ public class InMemoryCompositionSpace implements CompositionSpace {
      */
     public InMemoryCompositionSpace(UUID id, MessageDescription initialMessageDesc, BufferingQueue<InMemoryMessage> bufferingQueue, int userId, int contextId) {
         super();
-        this.id = id;
+        this.id = new CompositionSpaceId(CompositionSpaceServiceFactory.DEFAULT_SERVICE_ID, id);
         this.userId = userId;
         this.contextId = contextId;
 
@@ -102,8 +106,13 @@ public class InMemoryCompositionSpace implements CompositionSpace {
     }
 
     @Override
-    public UUID getId() {
+    public CompositionSpaceId getId() {
         return id;
+    }
+
+    @Override
+    public Optional<MailPath> getMailPath() {
+        return Optional.empty();
     }
 
     @Override

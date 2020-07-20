@@ -65,7 +65,7 @@ public class AttachmentDescription {
     private String name;
     private long size;
     private String mimeType;
-    private String contentId;
+    private ContentId contentId;
     private ContentDisposition contentDisposition;
     private AttachmentOrigin origin;
 
@@ -127,7 +127,7 @@ public class AttachmentDescription {
      *
      * @return The content identifier
      */
-    public String getContentId() {
+    public ContentId getContentId() {
         return contentId;
     }
 
@@ -200,6 +200,15 @@ public class AttachmentDescription {
      * @param contentId The content identifier to set
      */
     public void setContentId(String contentId) {
+        this.contentId = ContentId.valueOf(contentId);
+    }
+
+    /**
+     * Sets the content identifier
+     *
+     * @param contentId The content identifier to set
+     */
+    public void setContentId(ContentId contentId) {
         this.contentId = contentId;
     }
 

@@ -251,15 +251,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private final boolean checkParameters;
     private final boolean doDecryption;
     private final String cryptoAuthentication;
-
-    /**
-     * Initializes a new {@link MailServletInterfaceImpl}.
-     *
-     * @throws OXException If user has no mail access or properties cannot be successfully loaded
-     */
-    MailServletInterfaceImpl(Session session) throws OXException {
-        this(session, false, null);
-    }
+    private final boolean debug;
 
     /**
      * Initializes a new {@link MailServletInterfaceImpl}.
@@ -267,9 +259,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
      * @param session The session
      * @param doDecryption True in order to perform email decryption, false to use the raw messages.
      * @param cryptoAuthentication Authentication for decrypting emails.
+     * @param debug The debug flag
      * @throws OXException If user has no mail access or properties cannot be successfully loaded
      */
-    MailServletInterfaceImpl(Session session, boolean doDecryption, String cryptoAuthentication) throws OXException {
+    MailServletInterfaceImpl(Session session, boolean doDecryption, String cryptoAuthentication, boolean debug) throws OXException {
         super();
         warnings = new ArrayList<>(2);
         mailImportResults = new ArrayList<>();
@@ -294,6 +287,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         checkParameters = false;
         this.doDecryption = doDecryption;
         this.cryptoAuthentication = cryptoAuthentication;
+        this.debug = debug;
     }
 
     @Override
@@ -313,7 +307,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
             try {
                 ma = MailAccess.getInstance(session, accountId);
-                ma.connect(false);
+                ma.connect(false, debug);
                 sep = Character.valueOf(ma.getFolderStorage().getFolder(INBOX_ID).getSeparator());
                 sessionCache.putParameter(accountId, MailSessionParameterNames.getParamSeparator(), sep);
             } finally {
@@ -2936,7 +2930,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             long start = System.currentTimeMillis();
             try {
-                localMailAccess.connect();
+                localMailAccess.connect(true, debug);
                 warnings.addAll(localMailAccess.getWarnings());
                 MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 MailServletInterface.mailInterfaceMonitor.changeNumSuccessfulLogins(true);
@@ -3010,7 +3004,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     origMail = mailAccess.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false);
                 } else {
                     otherAccess = MailAccess.getInstance(session, msgref.getAccountId());
-                    otherAccess.connect(true);
+                    otherAccess.connect(true, debug);
                     origMail = otherAccess.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false);
                 }
                 if (origMail != null) {
@@ -3709,7 +3703,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
             try {
                 otherAccess = MailAccess.getInstance(session, pathAccount);
-                otherAccess.connect(true);
+                otherAccess.connect(true, debug);
                 otherAccess.getMessageStorage().updateMessageFlags(fullName, uids, MailMessage.FLAG_FORWARDED, true);
                 try {
                     if (MailMessageCache.getInstance().containsFolderMessages(otherAccess.getAccountId(), fullName, session.getUserId(), contextId)) {
@@ -3753,7 +3747,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
                 try {
                     otherAccess = MailAccess.getInstance(session, pathAccount);
-                    otherAccess.connect(true);
+                    otherAccess.connect(true, debug);
                     otherAccess.getMessageStorage().updateMessageFlags(path.getFolder(), ids, MailMessage.FLAG_FORWARDED, true);
                     try {
                         if (MailMessageCache.getInstance().containsFolderMessages(otherAccess.getAccountId(), path.getFolder(), session.getUserId(), contextId)) {
@@ -3791,7 +3785,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
             try {
                 otherAccess = MailAccess.getInstance(session, pathAccount);
-                otherAccess.connect(true);
+                otherAccess.connect(true, debug);
                 otherAccess.getMessageStorage().deleteMessages(fullName, uids, true);
                 try {
                     MailMessageCache.getInstance().removeMessages(uids, pathAccount, fullName, session.getUserId(), session.getContextId());
@@ -3839,7 +3833,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
             try {
                 otherAccess = MailAccess.getInstance(session, pathAccount);
-                otherAccess.connect(true);
+                otherAccess.connect(true, debug);
                 otherAccess.getMessageStorage().updateMessageFlags(fullName, uids, MailMessage.FLAG_ANSWERED, true);
                 try {
                     /*

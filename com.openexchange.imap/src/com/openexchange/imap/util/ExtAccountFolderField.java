@@ -72,9 +72,7 @@ import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.mime.MimeMailException;
@@ -138,9 +136,10 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                         mailAccess.connect();
                     }
                 }
+                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess1 = mailAccess;
 
 
-                folderStorage = getImapFolderStorage(mailAccess);
+                folderStorage = com.openexchange.imap.IMAPAccess.getIMAPFolderStorageFrom(mailAccess1);
                 IMAPStore imapStore = folderStorage.getImapStore();
                 Map<String, FolderInfo> folders = getExternalAccountFolders((IMAPFolder) imapStore.getDefaultFolder());
                 if (null == folders) {
@@ -239,27 +238,6 @@ public class ExtAccountFolderField implements AdditionalFolderField {
             builder.append('}');
             return builder.toString();
         }
-    }
-
-    /**
-     * Get the IMP folder storage from the specified mail access
-     *
-     * @param mailAccess
-     * @return
-     * @throws OXException
-     */
-    private IMAPFolderStorage getImapFolderStorage(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        IMailFolderStorage fstore = mailAccess.getFolderStorage();
-        if (!(fstore instanceof IMAPFolderStorage)) {
-            if (!(fstore instanceof IMailFolderStorageDelegator)) {
-                throw MailExceptionCode.UNEXPECTED_ERROR.create("Unknown MAL implementation");
-            }
-            fstore = ((IMailFolderStorageDelegator) fstore).getDelegateFolderStorage();
-            if (!(fstore instanceof IMAPFolderStorage)) {
-                throw MailExceptionCode.UNEXPECTED_ERROR.create("Unknown MAL implementation");
-            }
-        }
-        return (IMAPFolderStorage) fstore;
     }
 
     /**

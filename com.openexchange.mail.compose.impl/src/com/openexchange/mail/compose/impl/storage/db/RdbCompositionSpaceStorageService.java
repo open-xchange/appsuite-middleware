@@ -66,13 +66,15 @@ import com.openexchange.mail.compose.AttachmentStorageService;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaceDescription;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
+import com.openexchange.mail.compose.CompositionSpaceId;
+import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
 import com.openexchange.mail.compose.DefaultAttachment;
+import com.openexchange.mail.compose.ImmutableCompositionSpace;
+import com.openexchange.mail.compose.ImmutableMessage;
 import com.openexchange.mail.compose.Message;
 import com.openexchange.mail.compose.MessageDescription;
 import com.openexchange.mail.compose.MessageField;
 import com.openexchange.mail.compose.impl.storage.AbstractCompositionSpaceStorageService;
-import com.openexchange.mail.compose.impl.storage.ImmutableCompositionSpace;
-import com.openexchange.mail.compose.impl.storage.ImmutableMessage;
 import com.openexchange.mail.compose.impl.storage.db.filecache.FileCache;
 import com.openexchange.mail.compose.impl.storage.db.filecache.FileCacheImpl;
 import com.openexchange.server.ServiceLookup;
@@ -87,6 +89,8 @@ import com.openexchange.session.Session;
 public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceStorageService {
 
     // private static final DBTransactionPolicy txPolicy = DBTransactionPolicy.NORMAL_TRANSACTIONS;
+
+    private static final String SERVICE_ID = CompositionSpaceServiceFactory.DEFAULT_SERVICE_ID;
 
     private final DBProvider dbProvider;
     private final AttachmentStorageService attachmentStorageService;
@@ -164,7 +168,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         applyCachedContent(m, id, session);
         List<Attachment> attachmentsToUpdate = resolveAttachments(m, Optional.empty(), session);
         Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
-        ImmutableCompositionSpace ics = new ImmutableCompositionSpace(id, message, cs.getLastModified().getTime());
+        ImmutableCompositionSpace ics = new ImmutableCompositionSpace(new CompositionSpaceId(SERVICE_ID, id), null, message, cs.getLastModified().getTime());
 
         if (!attachmentsToUpdate.isEmpty()) {
             CompositionSpaceContainer ucs = new CompositionSpaceContainer();
@@ -209,7 +213,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
                 }
             }
             Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
-            spaces.add(new ImmutableCompositionSpace(cs.getUuid(), message, cs.getLastModified().getTime()));
+            spaces.add(new ImmutableCompositionSpace(new CompositionSpaceId(SERVICE_ID, cs.getUuid()), null, message, cs.getLastModified().getTime()));
         }
 
         if (toUpdate != null) {
@@ -247,7 +251,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         MessageDescription m = csc.getMessage();
         resolveAttachments(m, optionalEncrypt, session);
         Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
-        return new ImmutableCompositionSpace(csc.getUuid(), message, csc.getLastModified().getTime());
+        return new ImmutableCompositionSpace(new CompositionSpaceId(SERVICE_ID, csc.getUuid()), null, message, csc.getLastModified().getTime());
     }
 
     @Override
@@ -263,7 +267,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         MessageDescription m = cs.getMessage();
         List<Attachment> attachmentsToUpdate = resolveAttachments(m, Optional.empty(), session);
         Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
-        ImmutableCompositionSpace ics = new ImmutableCompositionSpace(compositionSpaceDesc.getUuid(), message, cs.getLastModified().getTime());
+        ImmutableCompositionSpace ics = new ImmutableCompositionSpace(new CompositionSpaceId(SERVICE_ID, compositionSpaceDesc.getUuid()), null, message, cs.getLastModified().getTime());
 
         if (!attachmentsToUpdate.isEmpty()) {
             CompositionSpaceContainer ucs = new CompositionSpaceContainer();

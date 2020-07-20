@@ -70,6 +70,7 @@ import com.openexchange.ajax.fileholder.FileRandomAccess;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.fileholder.InputStreamReadable;
 import com.openexchange.ajax.fileholder.Readable;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
@@ -121,6 +122,9 @@ public final class ThresholdFileHolder implements IFileHolder {
     /** <code>true</code> to signal automatic management for the created file (deleted after processing threads terminates); otherwise <code>false</code> to let the caller control file's life-cycle */
     private final boolean autoManaged;
 
+    /** The directory in which the file is to be created when exceeding in-memory threshold */
+    private final File tempFileDirectory;
+
     /**
      * Initializes a new {@link ThresholdFileHolder} with default threshold (500 KB) and default initial capacity (64 KB).
      */
@@ -164,6 +168,18 @@ public final class ThresholdFileHolder implements IFileHolder {
      * @param autoManaged <code>true</code> to signal automatic management for the created file (deleted after processing threads terminates); otherwise <code>false</code> to let the caller control file's life-cycle
      */
     public ThresholdFileHolder(int threshold, int initalCapacity, boolean autoManaged) {
+        this(threshold, initalCapacity, autoManaged, null);
+    }
+
+    /**
+     * Initializes a new {@link ThresholdFileHolder}.
+     *
+     * @param threshold The threshold
+     * @param initalCapacity The initial capacity
+     * @param autoManaged <code>true</code> to signal automatic management for the created file (deleted after processing threads terminates); otherwise <code>false</code> to let the caller control file's life-cycle
+     * @param tempFileDirectory The directory in which the file is to be created when exceeding in-memory threshold
+     */
+    public ThresholdFileHolder(int threshold, int initalCapacity, boolean autoManaged, File tempFileDirectory) {
         super();
         this.autoManaged = autoManaged;
         count = 0;
@@ -171,6 +187,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         contentType = "application/octet-stream";
         this.initalCapacity = initalCapacity > 0 ? initalCapacity : 65536;
         tasks = new LinkedList<Runnable>();
+        this.tempFileDirectory = tempFileDirectory == null ? ServerConfig.getTmpDir() : tempFileDirectory;
     }
 
     /**
@@ -204,6 +221,30 @@ public final class ThresholdFileHolder implements IFileHolder {
         if (null != baos) {
             baos.reset();
         }
+    }
+
+    /**
+     * Creates a new temporary file.
+     *
+     * @return The newly created file
+     * @throws OXException If temporary file cannot be created
+     */
+    private File newTempFile() throws OXException {
+        return TmpFileFileHolder.newTempFile(null, autoManaged, tempFileDirectory);
+    }
+
+    /**
+     * Handles specified I/O error.
+     *
+     * @param e The I/O error to handle
+     * @return The appropriate exception result
+     */
+    private static OXException handleIOException(IOException e) {
+        String message = e.getMessage();
+        if (message != null && message.indexOf("not enough space on the disk") >= 0) {
+            return AjaxExceptionCodes.DISK_FULL.create(e, new Object[0]);
+        }
+        return AjaxExceptionCodes.IO_ERROR.create(e, message);
     }
 
     /**
@@ -301,7 +342,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         }
         if (null == tempFile && null == buf && bytes.length > threshold) {
             // Nothing written & content does exceed threshold
-            final File tempFile = TmpFileFileHolder.newTempFile(autoManaged);
+            final File tempFile = newTempFile();
             this.tempFile = tempFile;
             OutputStream out = null;
             try {
@@ -309,7 +350,7 @@ public final class ThresholdFileHolder implements IFileHolder {
                 out.write(bytes, 0, bytes.length);
                 out.flush();
             } catch (IOException e) {
-                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                throw handleIOException(e);
             } finally {
                 Streams.close(out);
             }
@@ -373,7 +414,7 @@ public final class ThresholdFileHolder implements IFileHolder {
                     count += len;
                     if ((null == tempFile) && (count > inMemoryThreshold) && baos != null) {
                         // Stream to file because threshold is exceeded
-                        tempFile = TmpFileFileHolder.newTempFile(autoManaged);
+                        tempFile = newTempFile();
                         this.tempFile = tempFile;
                         out = new FileOutputStream(tempFile);
                         baos.writeTo(out);
@@ -397,7 +438,7 @@ public final class ThresholdFileHolder implements IFileHolder {
             }
             this.count = count;
         } catch (IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw handleIOException(e);
         } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -440,7 +481,7 @@ public final class ThresholdFileHolder implements IFileHolder {
             } catch (NoSuchAlgorithmException e) {
                 throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } catch (IOException e) {
-                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                throw handleIOException(e);
             } finally {
                 Streams.close(digestStream);
             }
@@ -454,7 +495,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         } catch (NoSuchAlgorithmException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw handleIOException(e);
         }
     }
 
@@ -508,7 +549,7 @@ public final class ThresholdFileHolder implements IFileHolder {
             final File tempFile = this.tempFile;
             if (null == tempFile) {
                 final IOException e = new IOException("Already closed.");
-                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                throw handleIOException(e);
             }
             InputStream in = null;
             try {
@@ -519,7 +560,7 @@ public final class ThresholdFileHolder implements IFileHolder {
                     out.write(buffer, 0, len);
                 }
             } catch (IOException e) {
-                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                throw handleIOException(e);
             } finally {
                 Streams.close(in);
             }
@@ -527,7 +568,7 @@ public final class ThresholdFileHolder implements IFileHolder {
             try {
                 buf.writeTo(out);
             } catch (IOException e) {
-                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                throw handleIOException(e);
             }
         }
     }
@@ -549,7 +590,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         final File tempFile = this.tempFile;
         if (null == tempFile) {
             final IOException e = new IOException("Already closed.");
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw handleIOException(e);
         }
         InputStream in = null;
         try {
@@ -563,7 +604,7 @@ public final class ThresholdFileHolder implements IFileHolder {
             baos.flush();
             return baos.toByteArray();
         } catch (IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw handleIOException(e);
         } finally {
             Streams.close(in);
         }
@@ -613,7 +654,7 @@ public final class ThresholdFileHolder implements IFileHolder {
                 copyFile(source.tempFile, newTempFile);
                 copy.tempFile = newTempFile;
             } catch (IOException e) {
-                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                throw handleIOException(e);
             }
         }
 
@@ -655,7 +696,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         File tempFile = this.tempFile;
         if (null == tempFile) {
             IOException e = new IOException("Already closed.");
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw handleIOException(e);
         }
         FileInputStream fis = null;
         try {
@@ -664,7 +705,7 @@ public final class ThresholdFileHolder implements IFileHolder {
             fis = null; // Avoid premature closing
             return retval;
         } catch (IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw handleIOException(e);
         } finally {
             Streams.close(fis);
         }

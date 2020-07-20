@@ -93,6 +93,7 @@ import com.openexchange.groupware.settings.tree.modules.mail.MailColorModePrefer
 import com.openexchange.groupware.settings.tree.modules.mail.MailFlaggedModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
 import com.openexchange.groupware.settings.tree.modules.mail.MaliciousListing;
+import com.openexchange.groupware.settings.tree.modules.mail.MaxMailSize;
 import com.openexchange.groupware.settings.tree.modules.mail.Whitelist;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.jslob.ConfigTreeEquivalent;
@@ -295,6 +296,9 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
         DeleteDraftOnTransport deleteDraftOnTransport = new DeleteDraftOnTransport(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, deleteDraftOnTransport);
+
+        MaxMailSize maxMailSize = new MaxMailSize(); // --> Statically registered via ConfigTree class
+        registerService(ConfigTreeEquivalent.class, maxMailSize);
     }
 
     @Override

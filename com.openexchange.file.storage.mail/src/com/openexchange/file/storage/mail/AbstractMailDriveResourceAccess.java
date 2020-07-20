@@ -58,9 +58,7 @@ import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPMessageStorage;
 import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.IMailMessageStorageDelegator;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.StorageUtility;
@@ -187,59 +185,6 @@ public abstract class AbstractMailDriveResourceAccess {
     protected static IMAPFolder getIMAPFolderFor(final FullName fullName, IMAPStore imapStore) throws MessagingException {
         String fn = fullName.getFullName();
         return (IMAPFolder) (fn.length() == 0 ? imapStore.getDefaultFolder() : imapStore.getFolder(fn));
-    }
-
-    /**
-     * Gets the connected IMAP store associated with specified mail access
-     *
-     * @param mailAccess The connected mail access
-     * @return The connected IMAP store
-     * @throws OXException If connected IMAP store cannot be returned
-     */
-    protected static IMAPStore getIMAPStore(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        return getImapMessageStorageFrom(mailAccess).getImapStore();
-    }
-
-    /**
-     * Gets the connected {@link IMAPFolderStorage} instance associated with specified mail access
-     *
-     * @param mailAccess The connected mail access
-     * @return The connected {@code IMAPFolderStorage} instance
-     * @throws OXException If connected {@code IMAPFolderStorage} instance cannot be returned
-     */
-    public static IMAPFolderStorage getImapFolderStorageFrom(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        IMailFolderStorage fstore = mailAccess.getFolderStorage();
-        if (!(fstore instanceof IMAPFolderStorage)) {
-            if (!(fstore instanceof IMailFolderStorageDelegator)) {
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation \"" + (null == fstore ? "null" : fstore.getClass().getName()) + "\"");
-            }
-            fstore = ((IMailFolderStorageDelegator) fstore).getDelegateFolderStorage();
-            if (!(fstore instanceof IMAPFolderStorage)) {
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation \"" + (null == fstore ? "null" : fstore.getClass().getName()) + "\"");
-            }
-        }
-        return (IMAPFolderStorage) fstore;
-    }
-
-    /**
-     * Gets the connected {@link IMAPMessageStorage} instance associated with specified mail access
-     *
-     * @param mailAccess The connected mail access
-     * @return The connected {@code IMAPMessageStorage} instance
-     * @throws OXException If connected {@code IMAPMessageStorage} instance cannot be returned
-     */
-    public static IMAPMessageStorage getImapMessageStorageFrom(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        IMailMessageStorage mstore = mailAccess.getMessageStorage();
-        if (!(mstore instanceof IMAPMessageStorage)) {
-            if (!(mstore instanceof IMailMessageStorageDelegator)) {
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation \"" + (null == mstore ? "null" : mstore.getClass().getName()) + "\"");
-            }
-            mstore = ((IMailMessageStorageDelegator) mstore).getDelegateMessageStorage();
-            if (!(mstore instanceof IMAPMessageStorage)) {
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation \"" + (null == mstore ? "null" : mstore.getClass().getName()) + "\"");
-            }
-        }
-        return (IMAPMessageStorage) mstore;
     }
 
     /**

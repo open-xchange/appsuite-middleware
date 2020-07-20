@@ -210,6 +210,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     /** Whether this access is trackable by {@link MailAccessWatcher} */
     protected volatile boolean trackable;
 
+    /** Whether this access has debug logging enabled */
+    protected volatile boolean debug;
+
     /** Indicates if <tt>MailAccess</tt> is currently held in {@link SingletonMailAccessCache}. */
     protected volatile boolean cached;
 
@@ -252,6 +255,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         this.accountId = accountId;
         cacheable = true;
         trackable = true;
+        debug = false;
     }
 
     @Override
@@ -688,7 +692,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             if (mailConfig.isRequireTls() && false == mailConfig.isSecure()) {
                 throw MailExceptionCode.NON_SECURE_DENIED.create(mailConfig.getServer());
             }
-            connect0(false);
+            connect0(false, false);
             close(false);
             return true;
         } catch (OXException e) {
@@ -702,7 +706,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If the connection could not be established for various reasons
      */
     public final void connect() throws OXException {
-        connect0(true);
+        connect0(true, false);
     }
 
     /**
@@ -712,7 +716,18 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If the connection could not be established for various reasons
      */
     public final void connect(final boolean checkDefaultFolders) throws OXException {
-        connect0(checkDefaultFolders);
+        connect0(checkDefaultFolders, false);
+    }
+
+    /**
+     * Opens this access. May be invoked on an already opened access.
+     *
+     * @param checkDefaultFolders <code>true</code> to check existence of default folders; otherwise <code>false</code> to omit check
+     * @param enableDebug Whether to enabled debug logging
+     * @throws OXException If the connection could not be established for various reasons
+     */
+    public final void connect(boolean checkDefaultFolders, boolean enableDebug) throws OXException {
+        connect0(checkDefaultFolders, enableDebug);
     }
 
     /**
@@ -738,7 +753,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     public MailFolder getRootFolder() throws OXException {
         if (!isConnected()) {
-            connect0(false);
+            connect0(false, false);
         }
         return getFolderStorage().getRootFolder();
     }
@@ -766,18 +781,26 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     public int getUnreadMessagesCount(final String fullname) throws OXException {
         if (!isConnected()) {
-            connect0(false);
+            connect0(false, false);
         }
         return getFolderStorage().getFolder(fullname).getUnreadMessageCount();
     }
 
-    private final void connect0(final boolean checkDefaultFolder) throws OXException {
+    private final void connect0(boolean checkDefaultFolder, boolean enableDebug) throws OXException {
         applyNewThread();
+
+        boolean connect = true;
         if (isConnected()) {
-            if (checkDefaultFolder) {
-                checkDefaultFolderOnConnect();
+            if (enableDebug == debug) {
+                // Current debug logging flag matches parameter. Re-use already connected instance as-is.
+                connect = false;
+            } else {
+                // Current debug logging flag does not match parameter. Enforce closing and re-connect.
+                close(false);
             }
-        } else {
+        }
+
+        if (connect) {
             MailConfig mailConfig = getMailConfig();
             checkFieldsBeforeConnect(mailConfig);
             if (!supports(mailConfig.getAuthType())) {
@@ -785,6 +808,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
             checkIfDisabled(mailConfig);
             try {
+                debug = enableDebug;
                 connectInternal();
             } catch (OXException e) {
                 AuthenticationFailureHandlerResult result = handleConnectFailure(e, mailConfig);
@@ -799,13 +823,16 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                         throw e;
                 }
             }
-            if (checkDefaultFolder) {
-                checkDefaultFolderOnConnect();
-            }
         }
+
+        if (checkDefaultFolder) {
+            checkDefaultFolderOnConnect();
+        }
+
         if ((MailAccount.DEFAULT_ID == accountId) && (session instanceof PutIfAbsent)) {
             ((PutIfAbsent) session).setParameterIfAbsent(PARAM_MAIL_ACCESS, this);
         }
+
         if (isTrackable() && !tracked) {
             MailAccessWatcher.addMailAccess(this);
             tracked = true;
@@ -1048,6 +1075,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 }
             }
             // Close mail connection
+            debug = false;
             closeInternal();
         } finally {
             if (MailAccount.DEFAULT_ID == accountId) {
@@ -1305,6 +1333,24 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     public int getCacheIdleSeconds() {
         return -1;
+    }
+
+    /**
+     * Indicates if this mail access has debug logging enabled.
+     *
+     * @return <code>true</code> if debug loggingis  enabled; otherwise <code>false</code>
+     */
+    public boolean isDebug() {
+        return debug;
+    }
+
+    /**
+     * Sets whether this mail access has debug logging enabled.
+     *
+     * @param debug <code>true</code> if debug loggingis  enabled; otherwise <code>false</code>
+     */
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     /**

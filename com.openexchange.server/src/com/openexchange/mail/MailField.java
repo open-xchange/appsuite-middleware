@@ -410,6 +410,26 @@ public enum MailField {
      * Checks if specified fields contains one of the given fields
      *
      * @param mailFields The fields
+     * @param fieldToCheck The field to check for
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public static boolean contains(MailField[] mailFields, MailField fieldToCheck) {
+        if (null == mailFields || fieldToCheck == null) {
+            return false;
+        }
+
+        for (MailField mailField : mailFields) {
+            if (mailField == fieldToCheck) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if specified fields contains one of the given fields
+     *
+     * @param mailFields The fields
      * @param fieldsToCheck The fields to check for
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */

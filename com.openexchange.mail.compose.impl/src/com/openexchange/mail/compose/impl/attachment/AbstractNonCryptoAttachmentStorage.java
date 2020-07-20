@@ -76,7 +76,9 @@ import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageIdentifier;
 import com.openexchange.mail.compose.AttachmentStorageIdentifier.KnownArgument;
 import com.openexchange.mail.compose.AttachmentStorageReference;
+import com.openexchange.mail.compose.AttachmentStorages;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
+import com.openexchange.mail.compose.ContentId;
 import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.mail.compose.DefaultAttachment;
 import com.openexchange.mail.compose.SizeProvider;
@@ -509,12 +511,18 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
         PreparedStatement stmt = null;
         try {
             // Build appropriate attachment instance.
-            DefaultAttachment.Builder builder = DefaultAttachment.builder(UUID.randomUUID());
+            UUID uuid = UUID.randomUUID();
+            ContentId contentId = attachmentDesc.getContentId();
+            if (contentId == null && ContentDisposition.INLINE == attachmentDesc.getContentDisposition()) {
+                contentId = AttachmentStorages.generateContentIdForAttachmentId(uuid);
+            }
+
+            DefaultAttachment.Builder builder = DefaultAttachment.builder(uuid);
             builder.withStorageReference(new AttachmentStorageReference(storageIdentifierToDelete, getStorageType()));
             builder.withName(attachmentDesc.getName());
             builder.withSize(identifierAndSize.size);
             builder.withMimeType(attachmentDesc.getMimeType());
-            builder.withContentId(attachmentDesc.getContentId());
+            builder.withContentId(contentId);
             builder.withDisposition(attachmentDesc.getContentDisposition());
             builder.withOrigin(attachmentDesc.getOrigin());
             builder.withCompositionSpaceId(attachmentDesc.getCompositionSpaceId());
@@ -531,7 +539,7 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
             setOptVarChar(6, attachmentDesc.getName(), stmt);
             stmt.setLong(7, identifierAndSize.size);
             setOptVarChar(8, attachmentDesc.getMimeType(), stmt);
-            setOptVarChar(9, attachmentDesc.getContentId(), stmt);
+            setOptVarChar(9, contentId.getContentId(), stmt);
             setOptVarChar(10, null == attachmentDesc.getContentDisposition() ? null : attachmentDesc.getContentDisposition().getId(), stmt);
             setOptVarChar(11, null == attachmentDesc.getOrigin() ? null : attachmentDesc.getOrigin().getIdentifier(), stmt);
             stmt.setBytes(12, UUIDs.toByteArray(attachmentDesc.getCompositionSpaceId()));

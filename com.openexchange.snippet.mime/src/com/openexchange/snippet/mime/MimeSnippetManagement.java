@@ -1148,6 +1148,11 @@ public final class MimeSnippetManagement implements SnippetManagement {
      * @return The extracted image identifiers
      */
     protected static Set<String> extractContentIDs(String htmlContent) {
+        // Fast check
+        if (htmlContent.indexOf("<img") < 0) {
+            return Collections.emptySet();
+        }
+
         Matcher matcher = MimeMessageUtility.PATTERN_SRC.matcher(htmlContent);
         if (!matcher.find()) {
             return Collections.emptySet();

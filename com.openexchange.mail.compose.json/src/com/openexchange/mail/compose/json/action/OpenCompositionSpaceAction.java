@@ -89,7 +89,7 @@ public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         // Acquire needed service
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
+        CompositionSpaceService compositionSpaceService = getHighestRankedService(session);
 
         // Determine type
         Type type = Type.NEW;
@@ -193,7 +193,14 @@ public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
                     parameters.withContentType(ct);
                 }
             } else if (Type.NEW == type) {
-                parameters.withContentType(usm.isDisplayHtmlInlineContent() ? ContentType.TEXT_HTML : ContentType.TEXT_PLAIN);
+                int msgFormat = usm.getMsgFormat();
+                if (UserSettingMail.MSG_FORMAT_BOTH == msgFormat) {
+                    parameters.withContentType(ContentType.MULTIPART_ALTERNATIVE);
+                } else if (UserSettingMail.MSG_FORMAT_TEXT_ONLY == msgFormat) {
+                    parameters.withContentType(ContentType.TEXT_PLAIN);
+                } else {
+                    parameters.withContentType(ContentType.TEXT_HTML);
+                }
             }
         }
 
@@ -217,8 +224,8 @@ public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
         //            }
         //        }
 
-        CompositionSpace compositionSpace = compositionSpaceService.openCompositionSpace(parameters.build(), session);
-        return new AJAXRequestResult(compositionSpace, "compositionSpace");
+        CompositionSpace compositionSpace = compositionSpaceService.openCompositionSpace(parameters.build());
+        return new AJAXRequestResult(compositionSpace, "compositionSpace").addWarnings(compositionSpaceService.getWarnings());
     }
 
 }

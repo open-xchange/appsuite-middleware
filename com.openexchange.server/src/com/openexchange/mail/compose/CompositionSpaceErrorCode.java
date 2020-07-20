@@ -148,15 +148,23 @@ public enum CompositionSpaceErrorCode implements DisplayableOXExceptionCode {
      * The entered "Reply-To" address is too long. Please use a shorter one.
      */
     REPLY_TO_TOO_LONG("The entered \"Reply-To\" address is too long.", CompositionSpaceExceptionMessages.REPLY_TO_TOO_LONG_MSG, CATEGORY_USER_INPUT, 21),
+    /**
+     * The folder "%1$s" containing the attachments to share does no more exist for composition space %2$s.
+     */
+    MISSING_SHARED_ATTACHMENTS_FOLDER("The folder \"%1$s\" containing the attachments to share does no more exist for composition space %2$s.", CompositionSpaceExceptionMessages.MISSING_SHARED_ATTACHMENTS_FOLDER_MSG, CATEGORY_WARNING, 22),
+    /**
+     * Available attachments in shared attachments folder "%1$s" are inconsistent with the ones held by composition space %2$s.
+     */
+    INCONSISTENT_SHARED_ATTACHMENTS("Available attachments in shared attachments folder \"%1$s\" are inconsistent with the ones held by composition space %2$s.", CompositionSpaceExceptionMessages.INCONSISTENT_SHARED_ATTACHMENTS_MSG, CATEGORY_WARNING, 23),
 
     ;
 
     private static final String PREFIX = "MSGCS";
 
-    private String message;
-    private String displayMessage;
-    private Category category;
-    private int number;
+    private final String message;
+    private final String displayMessage;
+    private final Category category;
+    private final int number;
 
     private CompositionSpaceErrorCode(String message, String displayMessage, Category category, int number) {
         this.message = message;

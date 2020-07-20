@@ -134,6 +134,7 @@ public class MultipartStreamedUpload implements StreamedUpload {
     final String charEnc;
     final String action;
     FileItemStream current;
+    final long contentLength;
 
     /**
      * Initializes a new {@link MultipartStreamedUpload}.
@@ -141,7 +142,8 @@ public class MultipartStreamedUpload implements StreamedUpload {
      * @throws MissingStartingFormField If <code>requireStartingFormField</code> parameter is set to <code>true</code> and multipart upload
      * does not start with a simple form field.
      */
-    public MultipartStreamedUpload(FileItemIterator iter, String uuid, List<StreamedUploadFileListener> listeners, String action, String fileName, String requestCharacterEncoding, boolean requireStartingFormField, Session session) throws OXException {
+    public MultipartStreamedUpload(FileItemIterator iter, String uuid, List<StreamedUploadFileListener> listeners, String action, String fileName,
+            String requestCharacterEncoding, long contentLength, boolean requireStartingFormField, Session session) throws OXException {
         super();
         formFields = new LinkedHashMap<String, String>();
         iteratorCreated = false;
@@ -152,6 +154,7 @@ public class MultipartStreamedUpload implements StreamedUpload {
         this.fileName = fileName;
         this.charEnc = null == requestCharacterEncoding ? ServerConfig.getProperty(Property.DefaultEncoding) : requestCharacterEncoding;
         this.session = session;
+        this.contentLength = contentLength;
 
         // Consume form fields
         try {
@@ -404,6 +407,11 @@ public class MultipartStreamedUpload implements StreamedUpload {
             } catch (Exception e) {
                 throw handleException(uuid, e, action, session, listeners);
             }
+        }
+
+        @Override
+        public long getRawTotalBytes() {
+            return streamedUpload.contentLength;
         }
     }
 

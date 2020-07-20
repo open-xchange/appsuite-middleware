@@ -53,9 +53,11 @@ import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.HOURS;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -68,11 +70,13 @@ import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStorageGuestPermission;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.NameBuilder;
+import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FilenameValidationUtils.ValidityResult;
@@ -86,6 +90,7 @@ import com.openexchange.folderstorage.filestorage.contentType.FileStorageContent
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -93,7 +98,6 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.compose.ComposeContext;
-import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -104,6 +108,8 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionAwares;
@@ -232,8 +238,238 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     }
 
     @Override
-    public boolean applicableFor(ComposeRequest composeRequest) throws OXException {
+    public boolean applicableFor(Session session) {
         return true;
+    }
+
+    @Override
+    public StoredAttachments storeAttachments(List<MailPart> attachments, String subject, ServerSession session) throws OXException {
+        DefaultAttachmentStorageContext storageContext = new DefaultAttachmentStorageContext(getFileAccess(session), getFolderAccess(session), session);
+        boolean rollback = false;
+        try {
+            storageContext.startTransaction();
+            rollback = true;
+
+            Locale locale = session.getUser().getLocale();
+
+            // Get folder identifier
+            Item folder = createFolder(subject, null, null, false, false, locale, storageContext);
+
+            // Save attachments into that folder
+            List<Item> files = saveAttachments(attachments, folder.getId(), null, locale, storageContext);
+
+            StoredAttachments storedAttachments = new StoredAttachments(folder, files);
+            storageContext.commit();
+            rollback = false;
+            return storedAttachments;
+        } finally {
+            if (rollback) {
+                rollback(storageContext);
+            }
+            storageContext.finish();
+        }
+    }
+
+    @Override
+    public StoredAttachments storeAttachments(FileItems attachments, String subject, ServerSession session) throws OXException {
+        DefaultAttachmentStorageContext storageContext = new DefaultAttachmentStorageContext(getFileAccess(session), getFolderAccess(session), session);
+        boolean rollback = false;
+        try {
+            storageContext.startTransaction();
+            rollback = true;
+
+            Locale locale = session.getUser().getLocale();
+
+            // Get folder identifier
+            Item folder = createFolder(subject, null, null, false, false, locale, storageContext);
+
+            // Save attachments into that folder
+            List<Item> files = saveAttachments(attachments, folder.getId(), null, locale, storageContext);
+
+            StoredAttachments storedAttachments = new StoredAttachments(folder, files);
+            storageContext.commit();
+            rollback = false;
+            return storedAttachments;
+        } finally {
+            if (rollback) {
+                rollback(storageContext);
+            }
+            storageContext.finish();
+        }
+    }
+
+    @Override
+    public Item appendAttachment(MailPart attachment, String folderId, ServerSession session) throws OXException {
+        DefaultAttachmentStorageContext storageContext = new DefaultAttachmentStorageContext(getFileAccess(session), getFolderAccess(session), session);
+        boolean rollback = false;
+        try {
+            storageContext.startTransaction();
+            rollback = true;
+
+            Locale locale = session.getUser().getLocale();
+
+            // Save attachments into folder
+            Item file = saveAttachment(attachment, folderId, null, locale, storageContext);
+
+            storageContext.commit();
+            rollback = false;
+            return file;
+        } finally {
+            if (rollback) {
+                rollback(storageContext);
+            }
+            storageContext.finish();
+        }
+    }
+
+    @Override
+    public Item appendAttachment(FileItem attachment, String folderId, ServerSession session) throws OXException {
+        DefaultAttachmentStorageContext storageContext = new DefaultAttachmentStorageContext(getFileAccess(session), getFolderAccess(session), session);
+        boolean rollback = false;
+        try {
+            storageContext.startTransaction();
+            rollback = true;
+
+            Locale locale = session.getUser().getLocale();
+
+            // Save attachments into folder
+            Item file = saveAttachment(attachment, folderId, null, locale, storageContext);
+
+            storageContext.commit();
+            rollback = false;
+            return file;
+        } finally {
+            if (rollback) {
+                rollback(storageContext);
+            }
+            storageContext.finish();
+        }
+    }
+
+    @Override
+    public List<Item> getAttachments(String folderId, ServerSession session) throws OXException {
+        IDBasedFileAccess fileAccess = getFileAccess(session);
+
+        SearchIterator<File> results = null;
+        try {
+            TimedResult<File> documents = fileAccess.getDocuments(folderId, Arrays.asList(File.Field.ID, File.Field.FILENAME));
+            results = documents.results();
+
+            if (false == results.hasNext()) {
+                return Collections.emptyList();
+            }
+
+            List<Item> items = new ArrayList<>();
+            do {
+                File file = results.next();
+                items.add(new Item(file.getId(), file.getFileName()));
+            } while (results.hasNext());
+            return items;
+        } finally {
+            SearchIterators.close(results);
+        }
+    }
+
+    @Override
+    public FileItem getAttachment(String attachmentId, String folderId, ServerSession session) throws OXException {
+        IDBasedFileAccess fileAccess = getFileAccess(session);
+        File metadata = fileAccess.getFileMetadata(attachmentId, FileStorageFileAccess.CURRENT_VERSION);
+        FileItem.DataProvider dataProvider = new FileAccessDataProvider(attachmentId, fileAccess);
+        return new FileItem(attachmentId, metadata.getFileName(), metadata.getFileSize(), metadata.getFileMIMEType(), dataProvider);
+    }
+
+    @Override
+    public void deleteAttachment(String attachmentId, String folderId, ServerSession session) throws OXException {
+        DefaultAttachmentStorageContext storageContext = new DefaultAttachmentStorageContext(getFileAccess(session), getFolderAccess(session), session);
+        boolean rollback = false;
+        try {
+            storageContext.startTransaction();
+            rollback = true;
+
+            // Delete attachments from folder
+            deleteAttachment(attachmentId, storageContext);
+
+            storageContext.commit();
+            rollback = false;
+        } finally {
+            if (rollback) {
+                rollback(storageContext);
+            }
+            storageContext.finish();
+        }
+    }
+
+    @Override
+    public boolean existsFolder(String folderId, ServerSession session) throws OXException {
+        IDBasedFolderAccess folderAccess = getFolderAccess(session);
+        return folderAccess.exists(folderId);
+    }
+
+    @Override
+    public void deleteFolder(String folderId, ServerSession session) throws OXException {
+        DefaultAttachmentStorageContext storageContext = new DefaultAttachmentStorageContext(getFileAccess(session), getFolderAccess(session), session);
+        boolean rollback = false;
+        try {
+            storageContext.startTransaction();
+            rollback = true;
+
+            // Delete attachments from folder
+            deleteFolder(folderId, storageContext);
+
+            storageContext.commit();
+            rollback = false;
+        } finally {
+            if (rollback) {
+                rollback(storageContext);
+            }
+            storageContext.finish();
+        }
+    }
+
+    @Override
+    public void renameFolder(String subject, String folderId, ServerSession session) throws OXException {
+        DefaultAttachmentStorageContext storageContext = new DefaultAttachmentStorageContext(getFileAccess(session), getFolderAccess(session), session);
+        boolean rollback = false;
+        try {
+            storageContext.startTransaction();
+            rollback = true;
+
+            // Delete attachments from folder
+            renameFolder(subject, folderId, storageContext);
+
+            storageContext.commit();
+            rollback = false;
+        } finally {
+            if (rollback) {
+                rollback(storageContext);
+            }
+            storageContext.finish();
+        }
+    }
+
+    @Override
+    public ShareTarget createShareTarget(String folderId, String password, Date expiry, boolean autoDelete, ServerSession session) throws OXException {
+        DefaultAttachmentStorageContext storageContext = new DefaultAttachmentStorageContext(getFileAccess(session), getFolderAccess(session), session);
+        boolean rollback = false;
+        try {
+            storageContext.startTransaction();
+            rollback = true;
+
+            // Update meta
+            applyMetaData(folderId, password, expiry, autoDelete, session.getUserId(), storageContext);
+
+            // Create share target for that folder for an anonymous user
+            ShareTarget folderTarget = new ShareTarget(FileStorageContentType.getInstance().getModule(), folderId);
+
+            storageContext.commit();
+            rollback = false;
+            return folderTarget;
+        } finally {
+            if (rollback) {
+                rollback(storageContext);
+            }
+            storageContext.finish();
+        }
     }
 
     @Override
@@ -250,10 +486,10 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
             Locale locale = session.getUser().getLocale();
 
             // Get folder identifier
-            Item folder = createFolder(sourceMessage, password, expiry, autoDelete, locale, storageContext);
+            Item folder = createFolder(sourceMessage.getSubject(), password, expiry, autoDelete, true, locale, storageContext);
 
             // Save attachments into that folder
-            List<Item> files = saveAttachments(context.getAllParts(), folder, autoDelete ? expiry : null, locale, storageContext);
+            List<Item> files = saveAttachments(context.getAllParts(), folder.getId(), autoDelete ? expiry : null, locale, storageContext);
 
             // Create share target for that folder for an anonymous user
             ShareTarget folderTarget = new ShareTarget(FileStorageContentType.getInstance().getModule(), folder.getId());
@@ -266,6 +502,19 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
                 rollback(storageContext);
             }
         }
+    }
+
+    @Override
+    public StorageQuota getStorageQuota(ServerSession session) throws OXException {
+        IDBasedFolderAccess folderAccess = getFolderAccess(session);
+        DefaultAttachmentStorageContext storageContext = new DefaultAttachmentStorageContext(getFileAccess(session), folderAccess, session);
+        String attachmentsFolderID = discoverEMailAttachmentsFolderID(storageContext);
+        Quota quota = folderAccess.getStorageQuota(attachmentsFolderID);
+        if (quota.getLimit() < 0) {
+            return StorageQuota.UNLIMITED;
+        }
+
+        return new StorageQuota(quota.getUsage(), quota.getLimit());
     }
 
     /**
@@ -301,20 +550,54 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     // ------------------------------------------------------------------------------------------------------------------------------------
 
     /**
+     * Deletes a single attachment.
+     *
+     * @param attachmentId The identifier of the attachment to delete
+     * @param storageContext The associated storage context
+     * @throws OXException If delete attempt fails
+     */
+    protected void deleteAttachment(String attachmentId, DefaultAttachmentStorageContext storageContext) throws OXException {
+        storageContext.fileAccess.removeDocument(Collections.singletonList(attachmentId), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, true);
+    }
+
+    /**
+     * Deletes a folder.
+     *
+     * @param folderId The folder to delete
+     * @param storageContext The associated storage context
+     * @throws OXException If delete attempt fails
+     */
+    protected void deleteFolder(String folderId, DefaultAttachmentStorageContext storageContext) throws OXException {
+        storageContext.folderAccess.deleteFolder(folderId, true);
+    }
+
+    /**
+     * Renames a folder.
+     *
+     * @param subject The subject
+     * @param folderId The folder to rename
+     * @param storageContext The associated storage context
+     * @throws OXException If delete attempt fails
+     */
+    protected void renameFolder(String subject, String folderId, DefaultAttachmentStorageContext storageContext) throws OXException {
+        storageContext.folderAccess.renameFolder(folderId, subject);
+    }
+
+    /**
      * Saves specified attachments into denoted folder.
      *
      * @param attachments The attachments to save
-     * @param folder The folder to save to
+     * @param folderId The folder to save to
      * @param expiry The optional expiration date or <code>null</code>
      * @param locale The locale of session-associated user
      * @param storageContext The associated storage context
      * @return The identifiers of the saved attachments
      * @throws OXException If save attempt fails
      */
-    protected List<Item> saveAttachments(List<MailPart> attachments, Item folder, Date expiry, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
+    protected List<Item> saveAttachments(List<MailPart> attachments, String folderId, Date expiry, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
         List<Item> createdFiles = new ArrayList<Item>(attachments.size());
         for (MailPart attachment : attachments) {
-            createdFiles.add(saveAttachment(attachment, folder, expiry, locale, storageContext));
+            createdFiles.add(saveAttachment(attachment, folderId, expiry, locale, storageContext));
         }
         return createdFiles;
     }
@@ -323,15 +606,15 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      * Saves a single attachment into specified folder.
      *
      * @param attachment The attachment to save
-     * @param folder The folder
+     * @param folderId The folder
      * @param expiry The optional expiration date or <code>null</code>
      * @param locale The locale of session-associated user
      * @param storageContext The associated storage context
      * @return The identifier of the saved attachment
      * @throws OXException If save attempt fails
      */
-    protected Item saveAttachment(MailPart attachment, Item folder, Date expiry, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
-        File file = prepareMetadata(attachment, folder, expiry, locale);
+    protected Item saveAttachment(MailPart attachment, String folderId, Date expiry, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
+        File file = prepareMetadata(attachment, folderId, expiry, locale);
         InputStream inputStream = null;
         try {
             inputStream = attachment.getInputStream();
@@ -342,15 +625,101 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     }
 
     /**
+     * Saves specified attachments into denoted folder.
+     *
+     * @param attachments The attachments to save
+     * @param folderId The folder to save to
+     * @param expiry The optional expiration date or <code>null</code>
+     * @param locale The locale of session-associated user
+     * @param storageContext The associated storage context
+     * @return The identifiers of the saved attachments
+     * @throws OXException If save attempt fails
+     */
+    protected List<Item> saveAttachments(FileItems attachments, String folderId, Date expiry, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
+        List<Item> createdFiles = new ArrayList<Item>(attachments.size());
+        for (FileItem attachment : attachments) {
+            createdFiles.add(saveAttachment(attachment, folderId, expiry, locale, storageContext));
+        }
+        return createdFiles;
+    }
+
+    /**
+     * Saves a single attachment into specified folder.
+     *
+     * @param attachment The attachment to save
+     * @param folderId The folder
+     * @param expiry The optional expiration date or <code>null</code>
+     * @param locale The locale of session-associated user
+     * @param storageContext The associated storage context
+     * @return The identifier of the saved attachment
+     * @throws OXException If save attempt fails
+     */
+    protected Item saveAttachment(FileItem attachment, String folderId, Date expiry, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
+        File file = prepareMetadata(attachment, folderId, expiry, locale);
+        InputStream inputStream = null;
+        try {
+            inputStream = attachment.getData();
+            return new Item(storageContext.fileAccess.saveDocument(file, inputStream, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER), file.getFileName());
+        } finally {
+            Streams.close(inputStream);
+        }
+    }
+
+    protected void applyMetaData(String folderId, String password, Date expiry, boolean autoDelete, int userId, DefaultAttachmentStorageContext storageContext) throws OXException {
+        SearchIterator<File> iterator = null;
+        try {
+            if (autoDelete && expiry != null) {
+                TimedResult<File> documents = storageContext.fileAccess.getDocuments(folderId);
+                iterator = documents.results();
+
+                List<String> fileIds = new LinkedList<>();
+                while (iterator.hasNext()) {
+                    File file = iterator.next();
+                    fileIds.add(file.getId());
+                }
+                SearchIterators.close(iterator);
+                iterator = null;
+
+                for (String fileId : fileIds) {
+                    File file = new DefaultFile();
+                    file.setId(fileId);
+                    file.setMeta(mapFor("expiration-date-" + getId(), Long.valueOf(expiry.getTime())));
+                    storageContext.fileAccess.saveDocument(file, null, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Collections.singletonList(Field.META));
+                }
+            }
+
+            if (password != null || expiry != null) {
+                DefaultFileStorageFolder f = new DefaultFileStorageFolder();
+                f.setId(folderId);
+                List<FileStoragePermission> permissions = new ArrayList<FileStoragePermission>(2);
+                DefaultFileStoragePermission userPermission = DefaultFileStoragePermission.newInstance();
+                userPermission.setMaxPermissions();
+                userPermission.setEntity(userId);
+                permissions.add(userPermission);
+                DefaultFileStorageGuestPermission guestPermission = new DefaultFileStorageGuestPermission(prepareRecipient(password, expiry));
+                guestPermission.setAllPermissions(FileStoragePermission.READ_FOLDER, FileStoragePermission.READ_ALL_OBJECTS, FileStoragePermission.NO_PERMISSIONS, FileStoragePermission.NO_PERMISSIONS);
+                permissions.add(guestPermission);
+                f.setPermissions(permissions);
+                if (autoDelete && null != expiry) {
+                    f.setMeta(mapFor("expiration-date-" + getId(), Long.valueOf(expiry.getTime())));
+                }
+                storageContext.folderAccess.updateFolder(folderId, f);
+            }
+        } finally {
+            SearchIterators.close(iterator);
+        }
+    }
+
+    /**
      * Creates an appropriate <code>File</code> instance for given attachment.
      *
      * @param attachment The attachment
-     * @param folder The folder
+     * @param folderId The folder
      * @param expiry The optional expiration date or <code>null</code>
      * @param locale The locale of session-associated user
      * @return The resulting <code>File</code> instance
      */
-    protected File prepareMetadata(MailPart attachment, Item folder, Date expiry, Locale locale) {
+    protected File prepareMetadata(MailPart attachment, String folderId, Date expiry, Locale locale) {
         // Determine & (possibly) decode attachment file name
         String fileName = attachment.getFileName();
         if (Strings.isEmpty(fileName)) {
@@ -363,9 +732,42 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         // Create a file instance for it
         File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
-        file.setFolderId(folder.getId());
+        file.setFolderId(folderId);
         file.setFileName(fileName);
         file.setFileMIMEType(attachment.getContentType().getBaseType());
+        file.setTitle(fileName);
+        file.setFileSize(attachment.getSize());
+        if (null != expiry) {
+            file.setMeta(mapFor("expiration-date-" + getId(), Long.valueOf(expiry.getTime())));
+        }
+        return file;
+    }
+
+    /**
+     * Creates an appropriate <code>File</code> instance for given attachment.
+     *
+     * @param attachment The attachment
+     * @param folderId The folder
+     * @param expiry The optional expiration date or <code>null</code>
+     * @param locale The locale of session-associated user
+     * @return The resulting <code>File</code> instance
+     */
+    protected File prepareMetadata(FileItem attachment, String folderId, Date expiry, Locale locale) {
+        // Determine & (possibly) decode attachment file name
+        String fileName = attachment.getName();
+        if (Strings.isEmpty(fileName)) {
+            fileName = StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FILE);
+        } else {
+            fileName = MimeMessageUtility.decodeMultiEncodedHeader(fileName);
+            fileName = sanitizeName(fileName, StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FILE));
+        }
+
+        // Create a file instance for it
+        File file = new DefaultFile();
+        file.setId(FileStorageFileAccess.NEW);
+        file.setFolderId(folderId);
+        file.setFileName(fileName);
+        file.setFileMIMEType(attachment.getMimeType());
         file.setTitle(fileName);
         file.setFileSize(attachment.getSize());
         if (null != expiry) {
@@ -465,16 +867,17 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     /**
      * Creates the folder that is supposed to contain the attachments' files.
      *
-     * @param source The source message
+     * @param subject The subject
      * @param password The optional password or <code>null</code>
      * @param expiry The optional expiration date or <code>null</code>
      * @param autoDelete <code>true</code> to have the files being cleansed provided that <code>expiry</code> is given; otherwise <code>false</code> to leave them
+     * @param createGuestPermission <code>true</code> to create guest permission; otherwise <code>false</code>
      * @param locale The locale of session-associated user
      * @param storageContext The associated storage context
      * @return The identifier of the newly created folder
      * @throws OXException If folder cannot be created
      */
-    protected Item createFolder(ComposedMailMessage source, String password, Date expiry, boolean autoDelete, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
+    protected Item createFolder(String subject, String password, Date expiry, boolean autoDelete, boolean createGuestPermission, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
         // Get or create base share attachments folder
         Session session = storageContext.session;
         String parentFolderID;
@@ -490,7 +893,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         }
 
         // Create folder, pre-shared to an anonymous recipient, for this message
-        DefaultFileStorageFolder folder = prepareFolder(source, parentFolderID, password, expiry, autoDelete, session, locale);
+        DefaultFileStorageFolder folder = prepareFolder(subject, parentFolderID, password, expiry, autoDelete, createGuestPermission, session, locale);
         IDBasedFolderAccess folderAccess = storageContext.folderAccess;
         NameBuilder name = null;
         do {
@@ -552,27 +955,32 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     /**
      * Prepares a new folder holding the anonymous guest permission for the share.
      *
-     * @param source The source message
+     * @param subject The subject
      * @param parentId The identifier of the parent folder
      * @param password The optional password for the share
      * @param expiry The optional expiration date for the share
      * @param autoDelete <code>true</code> to have the files being cleansed provided that <code>expiry</code> is given; otherwise <code>false</code> to leave them
+     * @param createGuestPermission <code>true</code> to create guest permission; otherwise <code>false</code>
      * @param session The associated session
      * @param locale The locale to use
      * @return A new folder instance (not yet created)
      */
-    protected DefaultFileStorageFolder prepareFolder(ComposedMailMessage source, String parentId, String password, Date expiry, boolean autoDelete, Session session, Locale locale) {
+    protected DefaultFileStorageFolder prepareFolder(String subject, String parentId, String password, Date expiry, boolean autoDelete, boolean createGuestPermission, Session session, Locale locale) {
         DefaultFileStorageFolder folder = new DefaultFileStorageFolder();
         folder.setParentId(parentId);
-        folder.setName(sanitizeName(source.getSubject(), StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FOLDER)));
+        folder.setName(sanitizeName(subject, StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FOLDER)));
         List<FileStoragePermission> permissions = new ArrayList<FileStoragePermission>(2);
-        DefaultFileStoragePermission userPermission = DefaultFileStoragePermission.newInstance();
-        userPermission.setMaxPermissions();
-        userPermission.setEntity(session.getUserId());
-        permissions.add(userPermission);
-        DefaultFileStorageGuestPermission guestPermission = new DefaultFileStorageGuestPermission(prepareRecipient(password, expiry));
-        guestPermission.setAllPermissions(FileStoragePermission.READ_FOLDER, FileStoragePermission.READ_ALL_OBJECTS, FileStoragePermission.NO_PERMISSIONS, FileStoragePermission.NO_PERMISSIONS);
-        permissions.add(guestPermission);
+        {
+            DefaultFileStoragePermission userPermission = DefaultFileStoragePermission.newInstance();
+            userPermission.setMaxPermissions();
+            userPermission.setEntity(session.getUserId());
+            permissions.add(userPermission);
+        }
+        if (createGuestPermission) {
+            DefaultFileStorageGuestPermission guestPermission = new DefaultFileStorageGuestPermission(prepareRecipient(password, expiry));
+            guestPermission.setAllPermissions(FileStoragePermission.READ_FOLDER, FileStoragePermission.READ_ALL_OBJECTS, FileStoragePermission.NO_PERMISSIONS, FileStoragePermission.NO_PERMISSIONS);
+            permissions.add(guestPermission);
+        }
         folder.setPermissions(permissions);
         if (autoDelete && null != expiry) {
             folder.setMeta(mapFor("expiration-date-" + getId(), Long.valueOf(expiry.getTime())));
@@ -684,5 +1092,44 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         }
         return map;
     }
+
+    /**
+     * A data provider using file access.
+     */
+    protected static class FileAccessDataProvider implements FileItem.DataProvider {
+
+        private final String attachmentId;
+        private final IDBasedFileAccess fileAccess;
+
+        /**
+         * Initializes a new {@link FileAccessDataProvider}.
+         *
+         * @param attachment The identifier of the attachment
+         * @param fileAccess The file access to use
+         */
+        FileAccessDataProvider(String attachmentId, IDBasedFileAccess fileAccess) {
+            this.attachmentId = attachmentId;
+            this.fileAccess = fileAccess;
+        }
+
+        @Override
+        public InputStream getData() throws OXException {
+            return fileAccess.getDocument(attachmentId, FileStorageFileAccess.CURRENT_VERSION);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append('[');
+            if (attachmentId != null) {
+                builder.append("attachmentId=").append(attachmentId).append(", ");
+            }
+            if (fileAccess != null) {
+                builder.append("fileAccess=").append(fileAccess);
+            }
+            builder.append(']');
+            return builder.toString();
+        }
+    } // End of class FileAccessDataProvider
 
 }

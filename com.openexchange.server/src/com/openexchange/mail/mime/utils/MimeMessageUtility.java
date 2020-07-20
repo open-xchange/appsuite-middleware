@@ -2996,6 +2996,48 @@ public final class MimeMessageUtility {
         }
     }
 
+    /**
+     * Creates a new MIME message from given mail message
+     *
+     * @param msg The mail message to copy from
+     * @return The new MIME message
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public static MimeMessage mimeMessageFrom(final MailMessage msg) throws MessagingException, IOException {
+        ThresholdFileHolder sink = null;
+        boolean closeSink = true;
+        try {
+            sink = new ThresholdFileHolder();
+            msg.writeTo(sink.asOutputStream());
+            File tempFile = sink.getTempFile();
+            MimeMessage tmp;
+            if (null == tempFile) {
+                tmp = new InMemoryMimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream(), msg.getReceivedDate(), false);
+            } else {
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, msg.getReceivedDate(), false);
+            }
+            closeSink = false;
+            return tmp;
+        } catch (OXException e) {
+            if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+            throw new IOException(e);
+        } catch (com.sun.mail.util.MessageRemovedIOException e) {
+            throw new MessageRemovedException(e.getMessage());
+        } catch (IOException e) {
+            if (e.getCause() instanceof MessageRemovedException) {
+                throw (MessageRemovedException) e.getCause();
+            }
+            throw e;
+        } finally {
+            if (closeSink && null != sink) {
+                sink.close();
+            }
+        }
+    }
+
     private static final class FileBackedMimeMessage extends com.openexchange.mail.mime.converters.FileBackedMimeMessage {
 
         private final boolean retainDate;

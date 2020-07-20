@@ -76,6 +76,7 @@ public class Security {
         private String message;
         private String pin;
         private String msgRef;
+        private String authToken;
 
         /**
          * Initializes a new {@link Builder}.
@@ -119,15 +120,20 @@ public class Security {
             return this;
         }
 
+        public Builder withAuthToken(String authToken) {
+            this.authToken = authToken;
+            return this;
+        }
+
         public Security build() {
-            return new Security(encrypt, pgpInline, sign, language, message, pin, msgRef);
+            return new Security(encrypt, pgpInline, sign, language, message, pin, msgRef, authToken);
         }
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------
 
     /** The constant for disabled security */
-    public static final Security DISABLED = new Security(false, false, false, null, null, null, null);
+    public static final Security DISABLED = new Security(false, false, false, null, null, null, null, null);
 
     private final boolean encrypt;
     private final boolean pgpInline;
@@ -136,6 +142,8 @@ public class Security {
     private final String message;
     private final String pin;
     private final String msgRef;
+
+    private String authToken;
 
     /**
      * Initializes a new {@link Security}.
@@ -148,7 +156,7 @@ public class Security {
      * @param msgRef Message reference ID for guest emails
      * @param pin The PIN code
      */
-    Security(boolean encrypt, boolean pgpInline, boolean sign, String language, String message, String pin, String msgRef) {
+    Security(boolean encrypt, boolean pgpInline, boolean sign, String language, String message, String pin, String msgRef, String authToken) {
         super();
         this.encrypt = encrypt;
         this.pgpInline = pgpInline;
@@ -157,6 +165,7 @@ public class Security {
         this.message = message;
         this.pin = pin;
         this.msgRef = msgRef;
+        this.authToken = authToken;
     }
 
     /**
@@ -231,6 +240,88 @@ public class Security {
         return msgRef;
     }
 
+    public String getAuthToken() {
+        return authToken;
+    }
+
+    public void setAuthToken(String authToken) {
+        this.authToken = authToken;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (encrypt ? 1231 : 1237);
+        result = prime * result + (pgpInline ? 1231 : 1237);
+        result = prime * result + (sign ? 1231 : 1237);
+        result = prime * result + ((language == null) ? 0 : language.hashCode());
+        result = prime * result + ((message == null) ? 0 : message.hashCode());
+        result = prime * result + ((msgRef == null) ? 0 : msgRef.hashCode());
+        result = prime * result + ((pin == null) ? 0 : pin.hashCode());
+        result = prime * result + ((authToken == null) ? 0 : authToken.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Security)) {
+            return false;
+        }
+        Security other = (Security) obj;
+        if (encrypt != other.encrypt) {
+            return false;
+        }
+        if (pgpInline != other.pgpInline) {
+            return false;
+        }
+        if (sign != other.sign) {
+            return false;
+        }
+        if (language == null) {
+            if (other.language != null) {
+                return false;
+            }
+        } else if (!language.equals(other.language)) {
+            return false;
+        }
+        if (message == null) {
+            if (other.message != null) {
+                return false;
+            }
+        } else if (!message.equals(other.message)) {
+            return false;
+        }
+        if (msgRef == null) {
+            if (other.msgRef != null) {
+                return false;
+            }
+        } else if (!msgRef.equals(other.msgRef)) {
+            return false;
+        }
+        if (pin == null) {
+            if (other.pin != null) {
+                return false;
+            }
+        } else if (!pin.equals(other.pin)) {
+            return false;
+        }
+
+        if(authToken == null) {
+            if(other.authToken != null) {
+                return false;
+            }
+        } else if(!authToken.equals(other.authToken)) {
+            return false;
+        }
+
+
+        return true;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder2 = new StringBuilder();
@@ -246,6 +337,9 @@ public class Security {
         }
         if (msgRef != null) {
             builder2.append("msgRef=").append(msgRef);
+        }
+        if(authToken != null) {
+            builder2.append("authToken=***");
         }
         builder2.append("]");
         return builder2.toString();

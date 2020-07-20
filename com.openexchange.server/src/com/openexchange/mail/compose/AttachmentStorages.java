@@ -64,6 +64,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -84,6 +85,16 @@ public class AttachmentStorages {
         super();
     }
 
+    /**
+     * Generates an appropriate Content-ID for given attachment.
+     *
+     * @param attachmentId The attachment identifier
+     * @return The Content-ID
+     */
+    public static ContentId generateContentIdForAttachmentId(UUID attachmentId) {
+        return attachmentId == null ? null : ContentId.valueOf(new StringBuilder(64).append(UUIDs.getUnformattedString(attachmentId)).append("@open-xchange.com").toString());
+    }
+
     private static final ContentDisposition ATTACHMENT = ContentDisposition.ATTACHMENT;
     private static final ContentDisposition INLINE = ContentDisposition.INLINE;
 
@@ -98,6 +109,13 @@ public class AttachmentStorages {
      */
     public static AttachmentDescription createAttachmentDescriptionFor(MailPart mailPart, int partNumber, UUID compositionSpaceId, Session session) {
         AttachmentDescription attachment = new AttachmentDescription();
+        String partId = mailPart.getFirstHeader(MessageHeaders.HDR_X_PART_ID);
+        if (Strings.isNotEmpty(partId)) {
+            UUID attachmentId = CompositionSpaces.parseAttachmentIdIfValid(partId);
+            if (attachmentId != null) {
+                attachment.setId(attachmentId);
+            }
+        }
         attachment.setCompositionSpaceId(compositionSpaceId);
         attachment.setContentDisposition(ATTACHMENT);
         attachment.setMimeType(mailPart.getContentType().getBaseType());
@@ -118,6 +136,13 @@ public class AttachmentStorages {
      */
     public static AttachmentDescription createAttachmentDescriptionFor(MailMessage mailMessage, int partNumber, long size, UUID compositionSpaceId) {
         AttachmentDescription attachment = new AttachmentDescription();
+        String partId = mailMessage.getFirstHeader(MessageHeaders.HDR_X_PART_ID);
+        if (Strings.isNotEmpty(partId)) {
+            UUID attachmentId = CompositionSpaces.parseAttachmentIdIfValid(partId);
+            if (attachmentId != null) {
+                attachment.setId(attachmentId);
+            }
+        }
         attachment.setCompositionSpaceId(compositionSpaceId);
         attachment.setContentDisposition(ATTACHMENT);
         attachment.setMimeType(MimeTypes.MIME_MESSAGE_RFC822);
@@ -137,8 +162,15 @@ public class AttachmentStorages {
      * @param compositionSpaceId The identifier of the composition space
      * @return The newly created attachment description
      */
-    public static AttachmentDescription createInlineAttachmentDescriptionFor(MailPart mailPart, String contentId, int partNumber, UUID compositionSpaceId) {
+    public static AttachmentDescription createInlineAttachmentDescriptionFor(MailPart mailPart, ContentId contentId, int partNumber, UUID compositionSpaceId) {
         AttachmentDescription attachment = new AttachmentDescription();
+        String partId = mailPart.getFirstHeader(MessageHeaders.HDR_X_PART_ID);
+        if (Strings.isNotEmpty(partId)) {
+            UUID attachmentId = CompositionSpaces.parseAttachmentIdIfValid(partId);
+            if (attachmentId != null) {
+                attachment.setId(attachmentId);
+            }
+        }
         attachment.setCompositionSpaceId(compositionSpaceId);
         attachment.setContentDisposition(INLINE);
         attachment.setContentId(contentId);
@@ -156,17 +188,15 @@ public class AttachmentStorages {
      * @param compositionSpaceId The identifier of the composition space
      * @return The newly created attachment description
      */
-    public static AttachmentDescription createVCardAttachmentDescriptionFor(VCardAndFileName userVCard, UUID compositionSpaceId) {
-        byte[] vcard = userVCard.getVcard();
-
+    public static AttachmentDescription createVCardAttachmentDescriptionFor(VCardAndFileName userVCard, UUID compositionSpaceId, boolean isSessionUserVCard) {
         // Compile attachment
         AttachmentDescription attachment = new AttachmentDescription();
         attachment.setCompositionSpaceId(compositionSpaceId);
         attachment.setContentDisposition(ContentDisposition.ATTACHMENT);
         attachment.setMimeType(MimeTypes.MIME_TEXT_VCARD + "; charset=\"UTF-8\"");
         attachment.setName(userVCard.getFileName());
-        attachment.setSize(vcard.length);
-        attachment.setOrigin(AttachmentOrigin.VCARD);
+        attachment.setSize(userVCard.getVcard().length);
+        attachment.setOrigin(isSessionUserVCard ? AttachmentOrigin.VCARD : AttachmentOrigin.CONTACT);
         return attachment;
     }
 
@@ -186,14 +216,8 @@ public class AttachmentStorages {
             ContentDisposition contentDisposition = ContentDisposition.dispositionFor(disposition);
             attachment.setContentDisposition(null == contentDisposition ? ATTACHMENT : contentDisposition);
         }
-
         ContentType contentType = new ContentType(uploadFile.getContentType());
         attachment.setMimeType(contentType.getBaseType());
-        if (INLINE == attachment.getContentDisposition() && contentType.startsWith("image/")) {
-            // Set a Content-Id for inline image, too
-            attachment.setContentId(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange");
-        }
-
         {
             String fileName = uploadFile.getPreparedFileName();
             if (fileName.indexOf('.') < 0) {

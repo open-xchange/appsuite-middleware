@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.compose.impl.attachment.security;
 
-import static com.openexchange.mail.compose.impl.CryptoUtility.encrypt;
+import static com.openexchange.mail.compose.CryptoUtility.encrypt;
 import java.io.InputStream;
 import java.security.Key;
 import java.util.ArrayList;
@@ -67,11 +67,11 @@ import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageType;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositionSpaceStorageService;
+import com.openexchange.mail.compose.CryptoUtility;
 import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.mail.compose.SizeProvider;
 import com.openexchange.mail.compose.SizeReturner;
 import com.openexchange.mail.compose.impl.AbstractCryptoAware;
-import com.openexchange.mail.compose.impl.CryptoUtility;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;

@@ -96,6 +96,8 @@
     description: >-
       Payload is JSON that reflects changes. Response is the current composition
       space message model after update.
+
+      Note that it is not possible to change the attachments collection during this call.
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
       - in: path

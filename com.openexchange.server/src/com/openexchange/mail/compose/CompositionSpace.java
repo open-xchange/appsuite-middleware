@@ -49,22 +49,13 @@
 
 package com.openexchange.mail.compose;
 
-import java.util.UUID;
-
 /**
  * {@link CompositionSpace} - Represents a composition space, which is uniquely identifiable and holds a message, which is being composed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public interface CompositionSpace {
-
-    /**
-     * Gets the identifier
-     *
-     * @return The identifier
-     */
-    UUID getId();
+public interface CompositionSpace extends CompositionSpaceInfo {
 
     /**
      * Gets the message, which is being composed.

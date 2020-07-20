@@ -132,9 +132,9 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
 
     @Override
     public void tearDown() throws Exception {
-        api.deleteFolders(getApiClient().getSession(), createdFolders, TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+        api.deleteFolders(getApiClient().getSession(), createdFolders, TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         if (Strings.isNotEmpty(sharedFolderId)) {
-            api2.deleteFolders(api2.getApiClient().getSession(), Collections.singletonList(sharedFolderId), TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+            api2.deleteFolders(api2.getApiClient().getSession(), Collections.singletonList(sharedFolderId), TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         }
         super.tearDown();
     }

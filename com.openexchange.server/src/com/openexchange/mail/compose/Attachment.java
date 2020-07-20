@@ -146,6 +146,11 @@ public interface Attachment {
     InputStream getData() throws OXException;
 
     /**
+     * Closes this attachment's data provider (if any and if possible), relinquishing any underlying resources.
+     */
+    void close();
+
+    /**
      * Gets the file name
      *
      * @return The name
@@ -174,6 +179,16 @@ public interface Attachment {
     String getContentId();
 
     /**
+     * Gets the content identifier reference as an object.
+     *
+     * @return The content identifier object
+     */
+    default ContentId getContentIdAsObject() {
+        String contentId = getContentId();
+        return contentId == null ? null : new ContentId(contentId);
+    }
+
+    /**
      * Gets the content disposition
      *
      * @return The content disposition
@@ -186,4 +201,5 @@ public interface Attachment {
      * @return The origin
      */
     AttachmentOrigin getOrigin();
+
 }

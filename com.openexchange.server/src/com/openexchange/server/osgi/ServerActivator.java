@@ -208,7 +208,7 @@ import com.openexchange.mail.conversion.AttachmentMailPartDataSource;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
-import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
+import com.openexchange.mail.json.compose.share.AttachmentStorageRegistry;
 import com.openexchange.mail.json.compose.share.internal.EnabledCheckerRegistry;
 import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;

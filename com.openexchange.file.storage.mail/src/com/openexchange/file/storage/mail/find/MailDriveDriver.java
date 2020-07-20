@@ -403,7 +403,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             mailAccess = MailAccess.getInstance(session);
             mailAccess.connect();
 
-            messageStorage = AbstractMailDriveResourceAccess.getImapMessageStorageFrom(mailAccess);
+            messageStorage = com.openexchange.imap.IMAPAccess.getImapMessageStorageFrom(mailAccess);
 
             boolean hasEsort;
             {

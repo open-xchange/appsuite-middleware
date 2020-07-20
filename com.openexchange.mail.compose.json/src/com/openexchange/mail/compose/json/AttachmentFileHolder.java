@@ -101,7 +101,7 @@ public class AttachmentFileHolder implements IFileHolder {
      */
     void deleteSafe() {
         try {
-            compositionSpaceService.deleteAttachment(attachment.getCompositionSpaceId(), attachment.getId(), session);
+            compositionSpaceService.deleteAttachment(attachment.getCompositionSpaceId(), attachment.getId());
         } catch (Exception e) {
             LoggerHolder.LOG.warn("Failed to delete non-existent attachment {} from composition space {}", UUIDs.getUnformattedString(attachment.getId()), UUIDs.getUnformattedString(attachment.getCompositionSpaceId()), e);
         }

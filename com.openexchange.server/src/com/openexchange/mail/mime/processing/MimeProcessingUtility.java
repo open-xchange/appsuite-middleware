@@ -517,7 +517,7 @@ public final class MimeProcessingUtility {
      * @param session The session identifying the user, may be <code>null</code>
      * @return The formatted time
      */
-    static final String getFormattedTime(final Date date, final int style, final Locale locale, final TimeZone timeZone, Session session) {
+    public static final String getFormattedTime(final Date date, final int style, final Locale locale, final TimeZone timeZone, Session session) {
         DateFormat dateFormat;
         if (null != session) {
             RegionalSettingsService service = ServerServiceRegistry.getInstance().getService(RegionalSettingsService.class);

@@ -60,13 +60,23 @@ import com.openexchange.mail.api.IMailMessageStorage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface POP3Storage {
-
+    
     /**
      * Connects this POP3 storage.
      *
      * @throws OXException If establishing a connection for this storage fails
      */
-    public void connect() throws OXException;
+    default public void connect() throws OXException {
+        connect(false);
+    }
+
+    /**
+     * Connects this POP3 storage.
+     *
+     * @param enableDebug Whether to enabled debug logging
+     * @throws OXException If establishing a connection for this storage fails
+     */
+    public void connect(boolean enableDebug) throws OXException;
 
     /**
      * Closes this storage and releases occupied resources.

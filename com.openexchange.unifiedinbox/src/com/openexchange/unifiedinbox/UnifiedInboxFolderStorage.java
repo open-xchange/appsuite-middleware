@@ -165,7 +165,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         try {
                             final int accountId = mailAccount.getId();
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
-                            mailAccess.connect();
+                            mailAccess.connect(true, access.isDebug());
                             final String fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, fullName);
                             // Check if denoted account has such a default folder
                             if (fn == null) {
@@ -230,7 +230,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
         try {
             final int accountId = fa.getAccountId();
             mailAccess = MailAccess.getInstance(session, accountId);
-            mailAccess.connect();
+            mailAccess.connect(true, access.isDebug());
             // Get account's messages
             final String fn = fa.getFullname();
 
@@ -285,7 +285,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         try {
                             final int accountId = mailAccount.getId();
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
-                            mailAccess.connect();
+                            mailAccess.connect(true, access.isDebug());
                             final String fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, fullName);
                             // Check if denoted account has such a default folder
                             if (fn == null) {
@@ -347,7 +347,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
         try {
             final int accountId = fa.getAccountId();
             mailAccess = MailAccess.getInstance(session, accountId);
-            mailAccess.connect();
+            mailAccess.connect(true, access.isDebug());
             // Get account's messages
             IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
 
@@ -392,7 +392,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         try {
                             final int accountId = mailAccount.getId();
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
-                            mailAccess.connect();
+                            mailAccess.connect(true, access.isDebug());
                             final String fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, fullName);
                             // Check if denoted account has such a default folder
                             if (fn == null) {
@@ -438,7 +438,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
         try {
             final int accountId = fa.getAccountId();
             mailAccess = MailAccess.getInstance(session, accountId);
-            mailAccess.connect();
+            mailAccess.connect(true, access.isDebug());
             // Get account's messages
 
             IMailFolderStorageEnhanced storageEnhanced = mailAccess.getFolderStorage().supports(IMailFolderStorageEnhanced.class);
@@ -472,7 +472,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         try {
                             final int accountId = mailAccount.getId();
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
-                            mailAccess.connect();
+                            mailAccess.connect(true, access.isDebug());
                             final String fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, fullName);
                             // Check if denoted account has such a default folder
                             if (fn == null) {
@@ -519,7 +519,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
         try {
             final int accountId = fa.getAccountId();
             mailAccess = MailAccess.getInstance(session, accountId);
-            mailAccess.connect();
+            mailAccess.connect(true, access.isDebug());
             // Get account's messages
 
             IMailFolderStorageEnhanced storageEnhanced = mailAccess.getFolderStorage().supports(IMailFolderStorageEnhanced.class);
@@ -554,7 +554,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         try {
                             final int accountId = mailAccount.getId();
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
-                            mailAccess.connect();
+                            mailAccess.connect(true, access.isDebug());
                             final String fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, fullName);
                             // Check if denoted account has such a default folder
                             if (fn == null) {
@@ -600,7 +600,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
         try {
             final int accountId = fa.getAccountId();
             mailAccess = MailAccess.getInstance(session, accountId);
-            mailAccess.connect();
+            mailAccess.connect(true, access.isDebug());
             // Get account's messages
 
             IMailFolderStorageEnhanced storageEnhanced = mailAccess.getFolderStorage().supports(IMailFolderStorageEnhanced.class);
@@ -635,7 +635,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-            mailAccess.connect();
+            mailAccess.connect(true, access.isDebug());
             return mailAccess.getFolderStorage().exists(fa.getFullname());
         } finally {
             if (null != mailAccess) {
@@ -662,7 +662,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
             MailAccess<?, ?> mailAccess = null;
             try {
                 mailAccess = MailAccess.getInstance(session, nestedAccountId);
-                mailAccess.connect();
+                mailAccess.connect(true, access.isDebug());
                 final String nestedFullname = fa.getFullname();
                 final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(nestedFullname);
                 final String startingKnownFullname = getStartingKnownFullname(fullname);
@@ -847,7 +847,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                     MailAccess<?, ?> mailAccess = null;
                     try {
                         mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());
-                        mailAccess.connect();
+                        mailAccess.connect(true, access.isDebug());
                         final String accountFullname = UnifiedInboxUtility.determineAccountFullName(mailAccess, parentFullName);
                         // Check if account fullname is not null
                         if (null == accountFullname) {
@@ -958,7 +958,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         String fn = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
-                            mailAccess.connect();
+                            mailAccess.connect(true, access.isDebug());
                             // Get real full name
                             fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, fullName);
                             // Check if denoted account has such a default folder
@@ -999,7 +999,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-            mailAccess.connect();
+            mailAccess.connect(true, access.isDebug());
             // Clear folder
             mailAccess.getFolderStorage().clearFolder(fullName, hardDelete);
         } finally {

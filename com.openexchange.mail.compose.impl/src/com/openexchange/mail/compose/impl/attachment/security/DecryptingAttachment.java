@@ -60,7 +60,8 @@ import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.AttachmentOrigin;
 import com.openexchange.mail.compose.AttachmentStorageReference;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
-import com.openexchange.mail.compose.impl.CryptoUtility;
+import com.openexchange.mail.compose.ContentId;
+import com.openexchange.mail.compose.CryptoUtility;
 
 /**
  * {@link DecryptingAttachment}
@@ -111,6 +112,11 @@ public class DecryptingAttachment implements Attachment { // Do not implement Ra
     }
 
     @Override
+    public void close() {
+        attachment.close();
+    }
+
+    @Override
     public InputStream getData() throws OXException {
         return CryptoUtility.decryptingStreamFor(attachment.getData(), key, cryptoService);
     }
@@ -133,6 +139,11 @@ public class DecryptingAttachment implements Attachment { // Do not implement Ra
     @Override
     public String getContentId() {
         return attachment.getContentId();
+    }
+
+    @Override
+    public ContentId getContentIdAsObject() {
+        return attachment.getContentIdAsObject();
     }
 
     @Override
