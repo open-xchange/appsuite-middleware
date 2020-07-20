@@ -64,23 +64,24 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ProviderAwareManifestBuilder implements ManifestBuilder {
 
-    
     private final RankingAwareNearRegistryServiceTracker<ManifestProvider> providerTracker;
-    private ManifestBuilder delegate;
+    private final ManifestBuilder delegate;
 
     /**
      * Initializes a new {@link ProviderAwareManifestBuilder}.
+     *
+     * @param providerTracker The tracker for possibly registered providers
+     * @param delegate The delegate manifest builder to use when there is no suitable manifest provider
      */
     public ProviderAwareManifestBuilder(RankingAwareNearRegistryServiceTracker<ManifestProvider> providerTracker, ManifestBuilder delegate) {
         super();
         this.providerTracker = providerTracker;
         this.delegate = delegate;
-
     }
-    
+
     @Override
     public JSONArray buildManifests(ServerSession session, String version) throws OXException {
-        for(ManifestProvider provider: providerTracker.getServiceList()) {
+        for (ManifestProvider provider : providerTracker.getServiceList()) {
             if (provider.isApplicable(session, version)) {
                 return provider.getManifestBuilder().buildManifests(session, version);
             }
