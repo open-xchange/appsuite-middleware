@@ -140,7 +140,7 @@ public class DropDuplicateEntryFromUpdateTaskTable extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { UnifiedINBOXRenamerTask.class.getName() };
+        return new String[] { com.openexchange.groupware.update.tasks.DropFKTask.class.getName() };
     }
 
 }
