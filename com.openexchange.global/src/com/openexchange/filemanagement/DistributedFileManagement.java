@@ -62,6 +62,11 @@ import com.openexchange.exception.OXException;
 public interface DistributedFileManagement {
 
     /**
+     * Specifies the path component for a distributed file and is therefore also the name in the URI namespace of the Http Service at which the registration will be mapped.
+     */
+    public static final String PATH = "/dfm/distributedFiles";
+
+    /**
      * Registers the file associated with given identifier for distributed access among Open-Xchange nodes.
      *
      * @param id The identifier
