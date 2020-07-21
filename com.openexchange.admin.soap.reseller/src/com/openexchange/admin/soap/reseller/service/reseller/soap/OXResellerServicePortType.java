@@ -37,6 +37,14 @@ public interface OXResellerServicePortType {
         @WebParam(partName = "parameters", name = "change", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         Change parameters
     ) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception, InvalidDataException_Exception;
+    
+    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+    @Action(input = "urn:change", output = "urn:changeResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:changeInvalidCredentialsException"), @FaultAction(className = StorageException_Exception.class, value = "urn:changeStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:changeRemoteException"), @FaultAction(className = OXResellerException_Exception.class, value = "urn:changeOXResellerException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:changeInvalidDataException")})
+    @WebMethod(action = "urn:change")
+    public void changeSelf(
+        @WebParam(partName = "parameters", name = "change", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        Change parameters
+    ) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception, InvalidDataException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
     @Action(input = "urn:getAvailableRestrictions", output = "urn:getAvailableRestrictionsResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:getAvailableRestrictionsInvalidCredentialsException"), @FaultAction(className = StorageException_Exception.class, value = "urn:getAvailableRestrictionsStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:getAvailableRestrictionsRemoteException"), @FaultAction(className = OXResellerException_Exception.class, value = "urn:getAvailableRestrictionsOXResellerException")})

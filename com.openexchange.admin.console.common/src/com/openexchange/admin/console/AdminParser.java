@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console;
 
 import java.util.ArrayList;
@@ -64,6 +65,7 @@ import com.openexchange.java.Strings;
  * 2. The ability to have mandatory options
  */
 public class AdminParser extends CLIParser {
+
     public enum NeededQuadState {
         notneeded,
         possibly,
@@ -110,10 +112,12 @@ public class AdminParser extends CLIParser {
     private final CLIOption noNewlineOption;
 
     private boolean allowDynamic;
+    private boolean allowFlexibleDynamic;
 
     private final Map<String, Map<String, String>> dynamicMaps = new HashMap<String, Map<String, String>>();
 
     private static class OptionInfo {
+
         public NeededQuadState needed = NeededQuadState.notneeded;
 
         public CLIOption option = null;
@@ -207,7 +211,6 @@ public class AdminParser extends CLIParser {
         this.responseTimeoutOption = this.addOption(OPT_RESPONSETIMEOUT_LONG, OPT_RESPONSETIMEOUT_LONG, "response timeout in seconds for reading response from the backend (default 0s; infinite)", false, true);
     }
 
-
     /**
      * This method is used to add an option with a mandatory field
      *
@@ -295,7 +298,7 @@ public class AdminParser extends CLIParser {
         this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description));
         return retval;
     }
-    
+
     /**
      * Adds an option at the given position
      * 
@@ -479,7 +482,7 @@ public class AdminParser extends CLIParser {
 
     private String[] extractDynamic(String[] args) {
         List<String> staticArgs = new ArrayList<String>(args.length);
-        for(String arg : args) {
+        for (String arg : args) {
             if (isExtendedOption(arg) && isDynamicOption(arg)) {
                 parseDynamicOption(arg);
             } else {
@@ -490,17 +493,22 @@ public class AdminParser extends CLIParser {
     }
 
     private void parseDynamicOption(String arg) {
-
         String namespace = null;
         String name = null;
         String value = null;
 
         int slashPos = arg.indexOf('/');
 
-
-        if (arg.startsWith("--remove-")) {
+        if (allowFlexibleDynamic) {
+            namespace = arg.substring(2, slashPos);
+            int equalPos = arg.indexOf('=');
+            name = equalPos > 0 ? arg.substring(slashPos + 1, equalPos) : arg.substring(slashPos + 1);
+            if (equalPos > 0) {
+                value = arg.substring(equalPos + 1);
+            }
+        } else if (arg.startsWith("--remove-")) {
             namespace = arg.substring(9, slashPos);
-            name = arg.substring(slashPos+1);
+            name = arg.substring(slashPos + 1);
         } else {
             int equalPos = arg.indexOf('=');
 
@@ -512,14 +520,13 @@ public class AdminParser extends CLIParser {
                 return;
             }
 
-            namespace = arg.substring(2,slashPos);
-            name = arg.substring(slashPos+1, equalPos);
-            value = arg.substring(equalPos+1);
+            namespace = arg.substring(2, slashPos);
+            name = arg.substring(slashPos + 1, equalPos);
+            value = arg.substring(equalPos + 1);
         }
 
         getDynamicMap(namespace).put(name, value);
     }
-
 
     private Map<String, String> getDynamicMap(String namespace) {
         Map<String, String> namespacedMap = dynamicMaps.get(namespace);
@@ -530,15 +537,13 @@ public class AdminParser extends CLIParser {
         return namespacedMap;
     }
 
-
     private boolean isDynamicOption(String arg) {
         int slashPos = arg.indexOf('/');
         if (slashPos == -1) {
             return false;
         }
-        return slashPos < arg.indexOf('=') || arg.startsWith("--remove-");
+        return allowFlexibleDynamic || slashPos < arg.indexOf('=') || arg.startsWith("--remove-");
     }
-
 
     private boolean isExtendedOption(String arg) {
         return arg.startsWith("--");
@@ -549,14 +554,13 @@ public class AdminParser extends CLIParser {
     }
 
     public final void setExtendedOptions() {
-        this.extendedoption = addOption(1, OPT_EXTENDED_LONG, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false,false);
+        this.extendedoption = addOption(1, OPT_EXTENDED_LONG, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false, false);
     }
 
     public final void printEnvUsage() {
-        System.out.println("\nThe following environment variables and their current value are known\n" +
-        		"and can be modified to change behaviour:\n");
+        System.out.println("\nThe following environment variables and their current value are known\n" + "and can be modified to change behaviour:\n");
         final Hashtable<String, String> env = BasicCommandlineOptions.getEnvOptions();
-        for( final Entry<String, String> entry : env.entrySet()) {
+        for (final Entry<String, String> entry : env.entrySet()) {
             System.out.println("\t" + entry.getKey() + "=" + entry.getValue());
         }
         System.out.println("\n");
@@ -569,8 +573,8 @@ public class AdminParser extends CLIParser {
     public final void printUsage() {
         System.out.print("Usage: " + this.appname);
         System.out.println(" " + usage);
-        if (Strings.isNotEmpty(cltDescription)){
-            System.out.println(cltDescription+"\n");
+        if (Strings.isNotEmpty(cltDescription)) {
+            System.out.println(cltDescription + "\n");
         }
 
         for (final OptionInfo optInfo : this.optinfolist) {
@@ -592,8 +596,8 @@ public class AdminParser extends CLIParser {
     public final void printUsageExtended() {
         System.out.println("Usage: " + this.appname);
         System.out.println(" " + usage);
-        if (Strings.isNotEmpty(cltDescription)){
-            System.out.println("Description: "+cltDescription);
+        if (Strings.isNotEmpty(cltDescription)) {
+            System.out.println("Description: " + cltDescription);
         }
 
         for (final OptionInfo optInfo : this.optinfolist) {
@@ -662,11 +666,11 @@ public class AdminParser extends CLIParser {
         final HashSet<String> longset = new HashSet<String>();
         for (final OptionInfo optinfo : this.optinfolist) {
             if (null != optinfo.shortForm && !set.add(optinfo.shortForm)) {
-                System.err.println(this.appname + ": The option: " + optinfo.shortForm + " for "+ optinfo.description + " is duplicate");
+                System.err.println(this.appname + ": The option: " + optinfo.shortForm + " for " + optinfo.description + " is duplicate");
                 System.exit(1);
             }
             if (null != optinfo.longForm && !longset.add(optinfo.longForm)) {
-                System.err.println(this.appname + ": The option: " + optinfo.longForm + " for "+ optinfo.description + " is duplicate");
+                System.err.println(this.appname + ": The option: " + optinfo.longForm + " for " + optinfo.description + " is duplicate");
                 System.exit(1);
             }
         }
@@ -674,26 +678,33 @@ public class AdminParser extends CLIParser {
     }
 
     private String getrightmarker(final NeededQuadState needed) {
-        if (needed == NeededQuadState.needed) {
-            return "*";
-        } else if (needed == NeededQuadState.possibly) {
-            return "?";
-        } else if (needed == NeededQuadState.eitheror) {
-            return "|";
-        } else {
-            return " ";
+        switch (needed) {
+            case needed:
+                return "*";
+            case possibly:
+                return "?";
+            case eitheror:
+                return "|";
+            default:
+                return " ";
         }
     }
 
-
     public void allowDynamicOptions() {
-        allowDynamic=true;
+        allowDynamic = true;
     }
 
     public void forbidDynamicOptions() {
-        allowDynamic=false;
+        allowDynamic = false;
     }
 
+    public void allowFlexibleDynamicOptions() {
+        allowFlexibleDynamic = true;
+    }
+
+    public void forbidFlexibleDynamicOptions() {
+        allowFlexibleDynamic = false;
+    }
 
     public Map<String, Map<String, String>> getDynamicArguments() {
         return dynamicMaps;

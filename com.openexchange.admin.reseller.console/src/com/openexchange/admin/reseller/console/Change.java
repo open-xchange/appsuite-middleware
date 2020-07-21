@@ -58,30 +58,36 @@ import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 /**
+ * {@link Change} - changereseller command line tool
+ * 
  * @author choeger
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Change extends ResellerAbstraction {
 
-    protected final void setOptions(final AdminParser parser) {
-        setChangeOptions(parser);
-    }
-
     /**
-     *
-     */
-    public Change() {
-    }
-
-    /**
-     * @param args
+     * Entry point
+     * 
+     * @param args command line arguments
      */
     public static void main(String[] args) {
-        final Change change = new Change();
-        change.start(args);
+        new Change().start(args);
     }
 
-    public void start(final String[] args) {
-        final AdminParser parser = new AdminParser("changeadmin");
+    /**
+     * Initializes a new {@link Change}.
+     */
+    private Change() {
+        super();
+    }
+
+    /**
+     * Start the clt
+     *
+     * @param args the command line arguments
+     */
+    private void start(String[] args) {
+        AdminParser parser = new AdminParser("changeadmin");
 
         setOptions(parser);
 
@@ -90,21 +96,29 @@ public class Change extends ResellerAbstraction {
         try {
             parser.ownparse(args);
 
-            final Credentials auth = credentialsparsing(parser);
-            final ResellerAdmin adm = parseChangeOptions(parser);
+            Credentials auth = credentialsparsing(parser);
+            ResellerAdmin adm = parseChangeOptions(parser);
 
-            final OXResellerInterface rsi = getResellerInterface();
+            OXResellerInterface rsi = getResellerInterface();
 
             parseAndSetAdminId(parser, adm);
             parseAndSetAdminname(parser, adm);
 
             successtext = nameOrIdSetInt(this.adminid, this.adminname, "admin");
 
-            final HashSet<String> removeRes = getRestrictionsToRemove(parser, this.removeRestrictionsOption);
-            final HashSet<Restriction> editRes = getRestrictionsToEdit(parser, this.editRestrictionsOption);
-            final ResellerAdmin dbadm = rsi.getData(adm, auth);
-            final HashSet<Restriction> dbres = OXResellerTools.array2HashSet(dbadm.getRestrictions());
-            final HashSet<Restriction> retRestrictions = handleAddEditRemoveRestrictions(dbres, OXResellerTools.array2HashSet(adm.getRestrictions()), removeRes, editRes);
+            // Capabilities
+            adm.setCapabilitiesToAdd(parseAndSetCapabilitiesToAdd(parser));
+            adm.setCapabilitiesToRemove(parseAndSetCapabilitiesToRemove(parser));
+            adm.setCapabilitiesToDrop(parseAndSetCapabilitiesToDrop(parser));
+
+            // Configuration & Taxonomies
+            applyDynamicOptionsToReseller(parser, adm);
+
+            HashSet<String> removeRes = getRestrictionsToRemove(parser, this.removeRestrictionsOption);
+            HashSet<Restriction> editRes = getRestrictionsToEdit(parser, this.editRestrictionsOption);
+            ResellerAdmin dbadm = rsi.getData(adm, auth);
+            HashSet<Restriction> dbres = OXResellerTools.array2HashSet(dbadm.getRestrictions());
+            HashSet<Restriction> retRestrictions = handleAddEditRemoveRestrictions(dbres, OXResellerTools.array2HashSet(adm.getRestrictions()), removeRes, editRes);
             if (null != retRestrictions) {
                 adm.setRestrictions(retRestrictions.toArray(new Restriction[retRestrictions.size()]));
             }
@@ -117,4 +131,14 @@ public class Change extends ResellerAbstraction {
         }
     }
 
+    /**
+     * Sets the extra options for the clt
+     *
+     * @param parser The {@link AdminParser}
+     */
+    private void setOptions(AdminParser parser) {
+        setChangeOptions(parser);
+        parser.allowDynamicOptions();
+        parser.allowFlexibleDynamicOptions();
+    }
 }

@@ -50,6 +50,8 @@
 package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Class representing one configuration property for a user
@@ -62,10 +64,9 @@ public class UserProperty implements Serializable {
     private static final long serialVersionUID = 1751457900331133343L;
 
     private final String scope;
-
     private final String name;
-
     private final String value;
+    private final Map<String, String> metadata;
 
     /**
      *
@@ -76,9 +77,17 @@ public class UserProperty implements Serializable {
      * @param value The value of the property
      */
     public UserProperty(String scope, String name, String value) {
+        this(scope, name, value, ImmutableMap.of());
+    }
+
+    /**
+     * Initializes a new {@link UserProperty}.
+     */
+    public UserProperty(String scope, String name, String value, Map<String, String> metadata) {
         this.scope = scope;
         this.name = name;
         this.value = value;
+        this.metadata = metadata;
     }
 
     /**
@@ -109,14 +118,26 @@ public class UserProperty implements Serializable {
     }
 
     /**
+     * Gets the metadata
+     *
+     * @return The metadata
+     */
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
+    /**
      * Returns the state in pattern: "property-name: property-value; Scope: property-scope"<br>
      * <br>
      * {@inheritDoc}
      */
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(name + ": " + value + "; Scope: " + scope);
-
+        StringBuilder builder = new StringBuilder();
+        builder.append(name).append(": ").append(value).append("; Scope: ").append(scope);
+        if (false == metadata.isEmpty()) {
+            builder.append("; Metadata: ").append(metadata);
+        }
         return builder.toString();
     }
 }

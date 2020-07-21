@@ -56,6 +56,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -77,9 +78,9 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.exception.LogLevel;
-import com.openexchange.log.LogProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.PermissionConfigurationChecker;
+import com.openexchange.log.LogProperties;
 
 /**
  * General abstraction class used by all impl classes
@@ -96,7 +97,7 @@ public abstract class OXCommonImpl {
 
     /**
      * Initializes a new {@link OXCommonImpl}.
-
+     * 
      * @throws StorageException In case the PermissionConfigurationChecker service is unavailable
      */
     public OXCommonImpl() {
@@ -228,11 +229,13 @@ public abstract class OXCommonImpl {
     }
 
     /**
-     * @param objects
-     * @throws InvalidDataException
+     * Performs a null check and throws an exception if any of the passed objects is <code>null</code>
+     *
+     * @param objects The objects to perform the null check
+     * @throws InvalidDataException if any of the passed objects is <code>null</code>
      */
-    protected final static void doNullCheck(final Object... objects) throws InvalidDataException {
-        for (final Object object : objects) {
+    protected static void doNullCheck(Object... objects) throws InvalidDataException {
+        for (Object object : objects) {
             if (object == null) {
                 throw new InvalidDataException();
             }
@@ -240,7 +243,25 @@ public abstract class OXCommonImpl {
     }
 
     /**
+     * Performs a null check and logs any exceptions before throwing
+     *
+     * @param logger The logger to log the exceptions
+     * @param credentials The credentials
+     * @param objects The objects to perform the null check
+     * @throws InvalidDataException if any of the passed objects is <code>null</code>
+     */
+    protected static void doNullCheck(Logger logger, Credentials credentials, Object... objects) throws InvalidDataException {
+        try {
+            doNullCheck(objects);
+        } catch (InvalidDataException e) {
+            log(LogLevel.ERROR, logger, credentials, e, "Invalid data sent by client!");
+            throw e;
+        }
+    }
+
+    /**
      * Checks whether the context exists and updates the schema if needed
+     * 
      * @param ctx
      * @throws StorageException
      * @throws com.openexchange.admin.rmi.exceptions.DatabaseUpdateException

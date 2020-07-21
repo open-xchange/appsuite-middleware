@@ -11,5 +11,6 @@ Export-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.extensions
 Bundle-ClassPath: .
 Eclipse-BuddyPolicy: registered
-Import-Package: com.openexchange.log,
+Import-Package: com.google.common.collect;version="28.2.0",
+ com.openexchange.log,
  com.openexchange.tools.oxfolder

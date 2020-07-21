@@ -62,7 +62,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.strings.StringParser;
 
-
 /**
  * {@link ConfigCascadeActivator}
  *
@@ -208,7 +207,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator {
         if (configured) {
             return;
         }
-        final String scops = scopes == null ? "user, context, server" : scopes;
+        final String scops = scopes == null ? "user, context, reseller, contextSets, server" : scopes;
         configured = true;
 
         String[] searchPath = scops.split("\\s*,\\s*");
