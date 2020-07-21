@@ -96,7 +96,7 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { com.openexchange.groupware.update.tasks.DropIndividualUserPermissionsOnPublicFolderTask.class.getName() };
+        return new String[0];
     }
 
     @Override
