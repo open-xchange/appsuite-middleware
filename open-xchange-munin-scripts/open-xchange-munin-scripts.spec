@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 18
+%define        ox_release 19
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -118,6 +118,8 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/ox
 
 %changelog
+* Tue Jul 21 2020 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2020-07-27 (5821)
 * Wed Jul 15 2020 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2020-07-17 (5819)
 * Thu Jul 09 2020 Carsten Hoeger <choeger@open-xchange.com>
