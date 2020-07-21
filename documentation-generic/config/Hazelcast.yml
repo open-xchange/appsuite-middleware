@@ -61,6 +61,7 @@ properties:
           <li><code>static</code> - Fixed set of cluster member nodes</li>
           <li><code>multicast</code> - Automatic discovery of other nodes via multicast</li>
           <li><code>dns</code> - Consult a DNS server to resolve configured domain names to the most recent set of IP addresses of all service nodes</li>
+          <li><code>kubernetes</code> - Automatic discovery of other nodes via a kubernetes service</li>
         </ul>
         Depending on the specified value, further configuration might be needed.
       defaultValue:
@@ -566,3 +567,15 @@ properties:
       file: hazelcast.properties
       packageName: open-xchange-cluster-upgrade-from-*
       tags: ["Hazelcast", "Port"]
+      tags: ["Hazelcast"]      
+    - key: com.openexchange.hazelcast.network.join.k8s.serviceName
+      description: |
+        The kubernetes service name which provides all hazelcast instances. Only valid in case [[com.openexchange.hazelcast.network.join]] is set to `kubernetes`.
+      defaultValue:
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.network.join
+      file: hazelcast.properties
+      packageName: open-xchange-core
+      tags: ["Hazelcast", "Kubernetes"]

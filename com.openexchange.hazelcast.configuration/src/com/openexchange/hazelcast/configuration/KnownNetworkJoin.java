@@ -79,6 +79,10 @@ public enum KnownNetworkJoin {
      * Consult a DNS server to resolve the domain names to the most recent set of IP addresses of all service nodes.
      */
     DNS("dns"),
+    /**
+     * Automatically joins with other nodes in a kubernetes cluster
+     */
+    KUBERNETES("kubernetes"),
     ;
 
     private final String identifier;

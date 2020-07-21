@@ -47,9 +47,12 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/bundles/
 %dir /opt/open-xchange/bundles/com.hazelcast
 /opt/open-xchange/bundles/com.hazelcast/*
+%dir /opt/open-xchange/bundles/com.hazelcast.kubernetes
+/opt/open-xchange/bundles/com.hazelcast.kubernetes/*
 %dir %attr(750,open-xchange,open-xchange) /opt/open-xchange/osgi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/com.hazelcast.ini
+/opt/open-xchange/osgi/bundle.d/com.hazelcast.kubernetes.ini
 
 %changelog
 * Wed Aug 05 2020 Martin Schneider <martin.schneider@open-xchange.com>

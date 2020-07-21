@@ -303,6 +303,8 @@ public class HazelcastActivator implements BundleActivator {
                 LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getTcpIpConfig(), lf);
             } else if (join == KnownNetworkJoin.DNS) {
                 LOG.info("{}Hazelcast:{}    Using DNS-based network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getTcpIpConfig(), lf);
+            } else if (join == KnownNetworkJoin.KUBERNETES) {
+                LOG.info("{}Hazelcast:{}    Using kubernetes network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getKubernetesConfig(), lf);
             }
         }
 

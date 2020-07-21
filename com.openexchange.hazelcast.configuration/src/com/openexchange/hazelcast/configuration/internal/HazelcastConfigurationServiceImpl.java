@@ -410,6 +410,16 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 // Initialize DNS look-up
                 hazelcastConfig.reinitializeDnsLookUp(config, configService);
                 break;
+            case KUBERNETES:
+                config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+                config.getNetworkConfig().getJoin().getKubernetesConfig().setEnabled(true);
+                config.getNetworkConfig().getJoin().getKubernetesConfig().setProperty("namespace", configService.getProperty("com.openexchange.hazelcast.network.join.k8s.namespace", "default"));
+                String serviceName = configService.getProperty("com.openexchange.hazelcast.network.join.k8s.serviceName");
+                if (Strings.isEmpty(serviceName)) {
+                    throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.network.join.k8s.serviceName");
+                }
+                config.getNetworkConfig().getJoin().getKubernetesConfig().setProperty("service-name", serviceName);
+                break;
             default:
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("com.openexchange.hazelcast.network.join");
         }
