@@ -57,7 +57,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -71,28 +70,51 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DistributedFileServlet extends HttpServlet {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -3293278521646131568L;
 
     private final ServiceLookup services;
 
-    private final ManagedFileManagement fileManagement;
-
-    private final int port;
-
-    public static final String PATH = "distributedFiles";
-
+    /**
+     * Initializes a new {@link DistributedFileServlet}.
+     *
+     * @param services The service look-up
+     */
     public DistributedFileServlet(ServiceLookup services) {
+        super();
         this.services = services;
-        fileManagement = services.getService(ManagedFileManagement.class);
-        port = services.getService(ConfigurationService.class).getIntProperty("com.openexchange.filemanagement.distributed.port", 2003);
+    }
+
+    private ManagedFileManagement getFileManagement(HttpServletResponse resp) throws IOException {
+        try {
+            ManagedFileManagement service = services.getOptionalService(ManagedFileManagement.class);
+            if (service == null) {
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Missing service");
+                return null;
+            }
+            return service;
+        } catch (Exception e) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Missing service");
+            return null;
+        }
+    }
+
+    private static String crop(String uri) {
+        int pos = uri.lastIndexOf('/');
+        return pos < 0 ? uri : uri.substring(pos + 1);
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        ManagedFileManagement fileManagement = getFileManagement(resp);
+        if (fileManagement == null) {
+            return;
+        }
+
         String uri = req.getRequestURI();
         String id = crop(uri);
 
         if (!fileManagement.containsLocal(id)) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No such file");
             return;
         }
 
@@ -117,13 +139,13 @@ public class DistributedFileServlet extends HttpServlet {
         }
     }
 
-    private String crop(String uri) {
-        String[] split = uri.split("/");
-        return split[split.length-1];
-    }
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        ManagedFileManagement fileManagement = getFileManagement(resp);
+        if (fileManagement == null) {
+            return;
+        }
+
         String uri = req.getRequestURI();
         String id = crop(uri);
 
@@ -140,6 +162,11 @@ public class DistributedFileServlet extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        ManagedFileManagement fileManagement = getFileManagement(resp);
+        if (fileManagement == null) {
+            return;
+        }
+
         String uri = req.getRequestURI();
         String id = crop(uri);
 

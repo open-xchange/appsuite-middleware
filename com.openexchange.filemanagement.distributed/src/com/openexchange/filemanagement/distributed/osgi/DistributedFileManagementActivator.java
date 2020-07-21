@@ -9,7 +9,6 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.filemanagement.DistributedFileManagement;
 import com.openexchange.filemanagement.distributed.DistributedFileManagementImpl;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
@@ -27,7 +26,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, ConfigurationService.class, DispatcherPrefixService.class, ThreadPoolService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, ConfigurationService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -36,7 +35,6 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
         logger.info("Starting bundle: com.openexchange.filemanagement.distributed");
 
         HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
-        final String prefix = getService(DispatcherPrefixService.class).getPrefix();
         final int port = getService(ConfigurationService.class).getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
         final ServiceLookup services = this;
         final BundleContext context = this.context;
@@ -52,7 +50,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
                     // Address and map name
                     String address = service.getCluster().getLocalMember().getSocketAddress().getHostName();
                     String mapName = discoverMapName(service.getConfig(), logger);
-                    address = address + ":" + port + prefix;
+                    address = address + ":" + port;
 
                     // Clean-up task
                     Runnable shutDownTask = new Runnable() {
