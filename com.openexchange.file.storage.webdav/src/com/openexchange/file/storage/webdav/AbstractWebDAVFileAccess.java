@@ -65,6 +65,8 @@ import static com.openexchange.webdav.client.PropertyName.DAV_LOCKDISCOVERY;
 import static com.openexchange.webdav.client.WebDAVClient.DEPTH_0;
 import static com.openexchange.webdav.client.WebDAVClient.DEPTH_1;
 import static com.openexchange.webdav.client.WebDAVClient.DEPTH_INFINITY;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,6 +82,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.xml.namespace.QName;
 import org.apache.http.HttpStatus;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.Document;
@@ -94,9 +97,12 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.webdav.exception.WebdavExceptionCodes;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.FileKnowingInputStream;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -331,7 +337,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         List<Field> fieldsToUpdate = new ArrayList<Field>(null == modifiedFields ? Arrays.asList(Field.values()) : modifiedFields);
-        WebDAVPath path;
+        WebDAVPath path = null;
         if (NEW == file.getId()) {
             /*
              * upload new file
@@ -342,15 +348,57 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
             if (null == data) {
                 throw FileStorageExceptionCodes.NO_CONTENT.create(file.getFileName());
             }
-            path = getWebDAVPath(file.getFolderId()).append(file.getFileName(), false);
-            Map<String, String> headers = Collections.singletonMap("If-None-Match", "*");
-            try {
-                client.put(path.toString(), data, file.getFileMIMEType(), file.getFileSize(), headers);
-            } catch (WebDAVClientException e) {
-                if (HttpStatus.SC_PRECONDITION_FAILED == e.getStatusCode()) {
-                    throw FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create(e);
+
+            NameBuilder name = NameBuilder.nameBuilderFor(file.getFileName());
+            boolean retry = true;
+            if (data instanceof FileKnowingInputStream) {
+                java.io.File backingFile = ((FileKnowingInputStream) data).getFile();
+                InputStream in = data;
+
+                while (retry) {
+                    path = getWebDAVPath(file.getFolderId()).append(name.toString(), false);
+                    Map<String, String> headers = Collections.singletonMap("If-None-Match", "*");
+                    try {
+                        client.put(path.toString(), in, file.getFileMIMEType(), file.getFileSize(), headers);
+                        retry = false;
+                    } catch (WebDAVClientException e) {
+                        if (HttpStatus.SC_PRECONDITION_FAILED == e.getStatusCode()) {
+                            name.advance();
+                            try {
+                                in = new FileInputStream(backingFile);
+                            } catch (FileNotFoundException fnfe) {
+                                throw FileStorageExceptionCodes.IO_ERROR.create(fnfe, fnfe.getMessage());
+                            }
+                            continue;
+                        }
+                        throw asOXException(e, file.getFolderId(), NEW);
+                    }
                 }
-                throw asOXException(e, file.getFolderId(), NEW);
+
+            } else {
+                ThresholdFileHolder sink = null;
+                try {
+                    sink = new ThresholdFileHolder();
+                    sink.write(data); // Implicitly closes 'data' input stream
+
+                    while (retry) {
+                        path = getWebDAVPath(file.getFolderId()).append(name.toString(), false);
+                        Map<String, String> headers = Collections.singletonMap("If-None-Match", "*");
+                        try {
+                            InputStream in = sink.getStream();
+                            client.put(path.toString(), in, file.getFileMIMEType(), file.getFileSize(), headers);
+                            retry = false;
+                        } catch (WebDAVClientException e) {
+                            if (HttpStatus.SC_PRECONDITION_FAILED == e.getStatusCode()) {
+                                name.advance();
+                                continue;
+                            }
+                            throw asOXException(e, file.getFolderId(), NEW);
+                        }
+                    }
+                } finally {
+                    Streams.close(sink);
+                }
             }
             file.setId(getFileId(path).getId());
         } else {
