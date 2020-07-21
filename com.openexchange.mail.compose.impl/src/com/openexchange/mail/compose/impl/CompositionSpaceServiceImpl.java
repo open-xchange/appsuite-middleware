@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -72,6 +73,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import java.util.stream.Collectors;
 import javax.activation.DataHandler;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
@@ -435,33 +437,6 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         sourceMessage.setContentType(textPart.getContentType());
         // sourceMessage.setBodyPart(textPart); --> Happens in 'c.o.mail.json.compose.AbstractComposeHandler.doCreateTransportResult()'
 
-        // Collect parts
-        List<MailPart> parts;
-        if ((attachments != null && !attachments.isEmpty()) || optionalUploadedAttachments.isPresent()) {
-            parts = new ArrayList<MailPart>();
-            if (attachments != null) {
-                for (Attachment attachment : attachments) {
-                    parts.add(new AttachmentMailPart(attachment));
-                }
-            }
-            if (optionalUploadedAttachments.isPresent()) {
-                StreamedUploadFileIterator uploadedAttachments = optionalUploadedAttachments.get();
-                if (uploadedAttachments.hasNext()) {
-                    try {
-                        do {
-                            StreamedUploadFile uploadFile = uploadedAttachments.next();
-                            AttachmentDescription attachmentDescription = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT.getId(), compositionSpaceId);
-                            parts.add(new StreamedAttachmentMailPart(attachmentDescription, uploadFile.getStream()));
-                        } while (uploadedAttachments.hasNext());
-                    } catch (IOException e) {
-                        throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                    }
-                }
-            }
-        } else {
-            parts = Collections.emptyList();
-        }
-
         // Check for shared attachments
         Map<String, Object> params = Collections.emptyMap();
         if (null != sharedAttachmentsInfo && sharedAttachmentsInfo.isEnabled()) {
@@ -488,18 +463,24 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             params = parameters.build();
         }
 
-        // Create compose request to process
-        ComposeRequest composeRequest = new ComposeRequest(accountId, sourceMessage, textPart, parts, params, request, warnings);
 
-        // Determine appropriate compose handler
-        ComposeHandlerRegistry handlerRegistry = services.getService(ComposeHandlerRegistry.class);
-        ComposeHandler composeHandler = handlerRegistry.getComposeHandlerFor(composeRequest);
-
+        List<CloseableMailPartWrapper> closeableParts = null;
         MailPath sentMailPath = null;
         MailServletInterface mailInterface = null;
         ComposeTransportResult transportResult = null;
         try {
             boolean newMessageId = AJAXRequestDataTools.parseBoolParameter(AJAXServlet.ACTION_NEW, request);
+
+            // Collect parts
+            closeableParts = getMailPartsFromAttachments(compositionSpaceId, optionalUploadedAttachments, attachments);
+            List<MailPart> parts = closeableParts.stream().map(c -> c.getMailPart()).collect(Collectors.toList());
+
+            // Create compose request to process
+            ComposeRequest composeRequest = new ComposeRequest(accountId, sourceMessage, textPart, parts, params, request, warnings);
+
+            // Determine appropriate compose handler
+            ComposeHandlerRegistry handlerRegistry = services.getService(ComposeHandlerRegistry.class);
+            ComposeHandler composeHandler = handlerRegistry.getComposeHandlerFor(composeRequest);
 
             // As new/transport message
             transportResult = composeHandler.createTransportResult(composeRequest);
@@ -646,6 +627,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             }
 
         } finally {
+            Streams.close(closeableParts);
+
             if (transportResult != null) {
                 transportResult.rollback();
                 transportResult.finish();
@@ -654,6 +637,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             if (null != mailInterface) {
                 mailInterface.close();
             }
+
         }
 
         if (deleteAfterTransport) {
@@ -667,6 +651,79 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         }
 
         return sentMailPath;
+    }
+
+    /**
+     * Converts stored and uploaded attachments into {@link MailPart} instances. After processing all attachments,
+     * callers must close the returned instances.
+     *
+     * @param compositionSpaceId
+     * @param optionalUploadedAttachments
+     * @param attachments
+     * @return A list of closeable wrapper instances.
+     * @throws OXException
+     */
+    private List<CloseableMailPartWrapper> getMailPartsFromAttachments(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, List<Attachment> attachments) throws OXException {
+        List<CloseableMailPartWrapper> parts;
+        if ((attachments != null && !attachments.isEmpty()) || optionalUploadedAttachments.isPresent()) {
+            parts = new ArrayList<>();
+            if (attachments != null) {
+                for (Attachment attachment : attachments) {
+                    parts.add(new CloseableMailPartWrapper(new AttachmentMailPart(attachment)));
+                }
+            }
+            if (optionalUploadedAttachments.isPresent()) {
+                StreamedUploadFileIterator uploadedAttachments = optionalUploadedAttachments.get();
+                if (uploadedAttachments.hasNext()) {
+                    List<ThresholdFileHolder> fileHolders = new LinkedList<>();
+                    try {
+                        do {
+                            StreamedUploadFile uploadFile = uploadedAttachments.next();
+                            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+                            fileHolders.add(fileHolder);
+                            fileHolder.write(uploadFile.getStream());
+
+                            AttachmentDescription attachmentDescription = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT.getId(), compositionSpaceId);
+                            parts.add(new CloseableMailPartWrapper(new ThresholdFileHolderMailPart(attachmentDescription, fileHolder)));
+                        } while (uploadedAttachments.hasNext());
+                        // prevent premature closing of file holders
+                        fileHolders = null;
+                    } catch (IOException e) {
+                        throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    } finally {
+                        Streams.close(fileHolders);
+                    }
+                }
+            }
+        } else {
+            parts = Collections.emptyList();
+        }
+        return parts;
+    }
+
+    private static final class CloseableMailPartWrapper implements Closeable {
+        private final MailPart mailPart;
+        private final ThresholdFileHolder fileHolder;
+
+        CloseableMailPartWrapper(MailPart mailPart) {
+            this(mailPart, null);
+        }
+
+        CloseableMailPartWrapper(MailPart mailPart, ThresholdFileHolder fileHolder) {
+            this.mailPart = mailPart;
+            this.fileHolder = fileHolder;
+        }
+
+        public MailPart getMailPart() {
+            return mailPart;
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (fileHolder != null) {
+                fileHolder.close();
+            }
+        }
     }
 
     /**
@@ -730,6 +787,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         Message m = compositionSpace.getMessage();
 
         MailServletInterface mailInterface = null;
+        List<Closeable> closeables = null;
         try {
             MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
             int accountId = MailAccount.DEFAULT_ID;
@@ -835,7 +893,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 } else {
                     attachmentId2inlineAttachments = Collections.emptyMap();
                 }
-                fillMessageWithAttachments(compositionSpaceId, m, mimeMessage, attachmentId2inlineAttachments, optionalUploadedAttachments, charset, isHtml, session);
+                closeables = fillMessageWithAttachments(compositionSpaceId, m, mimeMessage, attachmentId2inlineAttachments, optionalUploadedAttachments, charset, isHtml, session);
             } else {
                 // No attachments
                 fillMessageWithoutAttachments(m, mimeMessage, charset, isHtml);
@@ -891,6 +949,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             if (null != mailInterface) {
                 mailInterface.close();
             }
+
+            Streams.close(closeables);
         }
     }
 
@@ -920,7 +980,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         }
     }
 
-    private void fillMessageWithAttachments(UUID compositionSpaceId, Message m, MimeMessage mimeMessage, Map<UUID, Attachment> fileAttachments, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, String charset, boolean isHtml, Session session) throws OXException, MessagingException {
+    private List<Closeable> fillMessageWithAttachments(UUID compositionSpaceId, Message m, MimeMessage mimeMessage, Map<UUID, Attachment> fileAttachments, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, String charset, boolean isHtml, Session session) throws OXException, MessagingException {
+        List<Closeable> closeables = null;
         if (isHtml) {
             // An HTML message
             Map<String, Attachment> contentId2InlineAttachment;
@@ -971,11 +1032,19 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 if (optionalUploadedAttachments.isPresent()) {
                     StreamedUploadFileIterator uploadedAttachments = optionalUploadedAttachments.get();
                     if (uploadedAttachments.hasNext()) {
-                        do {
-                            StreamedUploadFile uploadFile = uploadedAttachments.next();
-                            AttachmentDescription attachmentDescription = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT.getId(), compositionSpaceId);
-                            addAttachment(attachmentDescription, uploadFile, primaryMultipart, session);
-                        } while (uploadedAttachments.hasNext());
+                        List<Closeable> tmp = new LinkedList<>();
+                        try {
+                            do {
+                                StreamedUploadFile uploadFile = uploadedAttachments.next();
+                                AttachmentDescription attachmentDescription = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT.getId(), compositionSpaceId);
+                                tmp.add(addAttachment(attachmentDescription, uploadFile, primaryMultipart, session));
+                            } while (uploadedAttachments.hasNext());
+
+                            closeables = tmp;
+                            tmp = null;
+                        } finally {
+                            Streams.close(tmp);
+                        }
                     }
                 }
             } else {
@@ -1013,6 +1082,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             mimeMessage.setContent(primaryMultipart);
         }
+
+        return closeables;
     }
 
     private Multipart createMultipartRelated(String wellFormedHTMLContent, String charset, Map<String, Attachment> contentId2InlineAttachment, Session session) throws MessagingException, OXException {
@@ -1094,11 +1165,10 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         mp.addBodyPart(messageBodyPart);
     }
 
-    private void addAttachment(AttachmentDescription attachmentDescription, StreamedUploadFile uploadFile, Multipart mp, Session session) throws MessagingException, OXException {
+    private Closeable addAttachment(AttachmentDescription attachmentDescription, StreamedUploadFile uploadFile, Multipart mp, Session session) throws MessagingException, OXException {
         ContentType ct = new ContentType(attachmentDescription.getMimeType());
         if (ct.startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
-            addNestedMessage(attachmentDescription, uploadFile, mp);
-            return;
+            return addNestedMessage(attachmentDescription, uploadFile, mp);
         }
 
         // A non-message attachment
@@ -1115,9 +1185,16 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         }
 
         // Create MIME body part and set its content
+        boolean error = true;
+        InputStream input = null;
+        ThresholdFileHolder fileHolder = null;
         try {
             MimeBodyPart messageBodyPart = new MimeBodyPart();
-            messageBodyPart.setDataHandler(new DataHandler(new AttachmentDescriptionDataSource(attachmentDescription, uploadFile.getStream())));
+            fileHolder = new ThresholdFileHolder();
+            input = uploadFile.getStream();
+            fileHolder.write(input);
+
+            messageBodyPart.setDataHandler(new DataHandler(new AttachmentDescriptionDataSource(attachmentDescription, fileHolder)));
 
             if (fileName != null && !ct.containsNameParameter()) {
                 ct.setNameParameter(fileName);
@@ -1160,8 +1237,16 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             // Add to parental multipart
             mp.addBodyPart(messageBodyPart);
+
+            error = false;
+            return fileHolder;
         } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            if (error) {
+                Streams.close(input);
+                Streams.close(fileHolder);
+            }
         }
     }
 
@@ -1213,18 +1298,18 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         mp.addBodyPart(origMsgPart);
     }
 
-    private void addNestedMessage(AttachmentDescription attachmentDescription, StreamedUploadFile uploadFile, Multipart mp) throws MessagingException, OXException {
-        InputStream input = null;
-        Optional<ThresholdFileHolder> optionalFileHolder = Optional.empty();
+    private Closeable addNestedMessage(AttachmentDescription attachmentDescription, StreamedUploadFile uploadFile, Multipart mp) throws MessagingException, OXException {
         boolean error = true;
+        InputStream input = null;
+        ThresholdFileHolder fileHolder = null;
         try {
-            input = uploadFile.getStream();
             String fn;
-            if (null == attachmentDescription.getName()) {
-                ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-                optionalFileHolder = Optional.of(fileHolder);
-                fileHolder.write(input);
+            fileHolder = new ThresholdFileHolder();
+            input = uploadFile.getStream();
+            fileHolder.write(input);
+            fileHolder.setContentType(MimeTypes.MIME_MESSAGE_RFC822);
 
+            if (null == attachmentDescription.getName()) {
                 InputStream data = fileHolder.getStream();
                 try {
                     String subject = MimeMessageUtility.checkNonAscii(new InternetHeaders(data).getHeader(MessageHeaders.HDR_SUBJECT, null));
@@ -1243,7 +1328,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             //Create MIME body part and set its content
             MimeBodyPart origMsgPart = new MimeBodyPart();
-            origMsgPart.setDataHandler(new DataHandler(new AttachmentDescriptionDataSource(attachmentDescription, optionalFileHolder.isPresent() ? optionalFileHolder.get().getStream() : input, MimeTypes.MIME_MESSAGE_RFC822)));
+            origMsgPart.setDataHandler(new DataHandler(new AttachmentDescriptionDataSource(attachmentDescription, fileHolder)));
 
             // Content-Type
             ContentType ct = new ContentType(MimeTypes.MIME_MESSAGE_RFC822);
@@ -1268,15 +1353,15 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             // Add to parental multipart
             mp.addBodyPart(origMsgPart);
+
             error = false;
+            return fileHolder;
         } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             if (error) {
                 Streams.close(input);
-                if (optionalFileHolder.isPresent()) {
-                    Streams.close(optionalFileHolder.get());
-                }
+                Streams.close(fileHolder);
             }
         }
     }

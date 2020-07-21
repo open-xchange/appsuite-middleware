@@ -88,7 +88,7 @@ public class CompositionSpaceTest extends AbstractMailComposeTest {
         model.setTo(getRecipient());
         model.setSubject(UUID.randomUUID().toString());
         model.setContent(UUID.randomUUID().toString());
-        MailComposeSendResponse postMailComposeSend = api.postMailComposeSend(getSessionId(), model.getId(), model.toJson());
+        MailComposeSendResponse postMailComposeSend = api.postMailComposeSend(getSessionId(), model.getId(), model.toJson(), null);
         check(postMailComposeSend);
         assertTrue(postMailComposeSend.getErrorDesc(), Strings.isEmpty(postMailComposeSend.getError()));
         System.out.println("\n\n\t" + postMailComposeSend);

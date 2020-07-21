@@ -77,6 +77,14 @@ import com.openexchange.testing.httpclient.modules.MailComposeApi;
 
 /**
  * {@link ITipAnalyzeReplyTest}
+ * Starting with:
+ * - Test User 1 from context C1
+ * - Test User 2 from context C2
+ * and their API clients as well as user information
+ *
+ * <p>
+ * Note: Also tests should only check one specific aspect, iTIP test require to do some steps. Therefore we can test
+ * everything at once, to avoid duplicating code.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -166,7 +174,7 @@ public class ITipAnalyzeReplyTest extends AbstractITipAnalyzeTest {
         fromList.add(userResponseC2.getData().getEmail1());
         data.setTo(Collections.singletonList(toList));
         data.setFrom(fromList);
-        MailComposeSendResponse forwardedMail = mailComposeApi.postMailComposeSend(apiClientC2.getSession(), data.getId(), data.toJson());
+        MailComposeSendResponse forwardedMail = mailComposeApi.postMailComposeSend(apiClientC2.getSession(), data.getId(), data.toJson(), null);
         assertNull(forwardedMail.getErrorDesc());
 
         /*

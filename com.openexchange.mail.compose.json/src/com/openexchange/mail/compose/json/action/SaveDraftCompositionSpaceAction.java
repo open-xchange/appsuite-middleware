@@ -58,9 +58,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.StreamedUpload;
 import com.openexchange.groupware.upload.StreamedUploadFileIterator;
+import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.compose.Attachment.ContentDisposition;
+import com.openexchange.mail.compose.json.util.UploadFileFileIterator;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.MessageDescription;
 import com.openexchange.server.ServiceLookup;
@@ -100,7 +103,16 @@ public class SaveDraftCompositionSpaceAction extends AbstractMailComposeAction {
             long maxFileSize = uploadLimitations.maxUploadFileSize;
 
             boolean hasFileUploads = requestData.hasUploads(maxFileSize, maxSize, true);
-            StreamedUpload upload = requestData.getStreamedUpload();
+            StreamedUpload upload = null;
+            UploadEvent uploadEvent = null;
+            try {
+                upload = requestData.getStreamedUpload();
+            } catch (OXException e) {
+                if (!UploadException.UploadCode.FAILED_STREAMED_UPLOAD.equals(e)) {
+                    throw e;
+                }
+                uploadEvent = requestData.getUploadEvent();
+            }
             if (null != upload) {
                 String disposition = upload.getFormField("contentDisposition");
                 if (null == disposition) {
@@ -123,12 +135,31 @@ public class SaveDraftCompositionSpaceAction extends AbstractMailComposeAction {
                 }
 
                 if (hasFileUploads) {
-                    // File upload available...
-                    if (null != jMessage && jMessage.optBoolean("streamThrough", false)) {
-                        optionalUploadedAttachments = Optional.of(upload.getUploadFiles());
-                    } else {
-                        compositionSpaceService.addAttachmentToCompositionSpace(uuid, upload.getUploadFiles(), disposition, session);
+                    optionalUploadedAttachments = Optional.of(upload.getUploadFiles());
+                }
+            } else if (uploadEvent != null) {
+                String disposition = uploadEvent.getFormField("contentDisposition");
+                if (null == disposition) {
+                    disposition = ContentDisposition.ATTACHMENT.getId();
+                }
+
+                // Check for JSON data
+                JSONObject jMessage = null;
+                {
+                    String expectedJsonContent = uploadEvent.getFormField("JSON");
+                    if (Strings.isNotEmpty(expectedJsonContent)) {
+                        jMessage = new JSONObject(expectedJsonContent);
                     }
+                }
+
+                if (null != jMessage) {
+                    MessageDescription md = new MessageDescription();
+                    parseJSONMessage(jMessage, md);
+                    compositionSpaceService.updateCompositionSpace(uuid, md, session);
+                }
+
+                if (hasFileUploads) {
+                    optionalUploadedAttachments = Optional.of(new UploadFileFileIterator(uploadEvent.getUploadFiles()));
                 }
             }
         }
