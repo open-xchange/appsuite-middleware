@@ -49,6 +49,7 @@
 
 package com.openexchange.apps.manifests;
 
+import com.openexchange.osgi.annotation.Service;
 import com.openexchange.session.Session;
 
 /**
@@ -57,6 +58,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.4
  */
+@Service
 public interface ManifestProvider {
 
     /**
@@ -66,13 +68,13 @@ public interface ManifestProvider {
      * @param version The requested version
      * @return <code>true</code> if it is applicable, <code>false</code> otherwise
      */
-    public boolean isApplicable(Session session, String version);
-    
+    boolean isApplicable(Session session, String version);
+
     /**
      * Gets the {@link ManifestBuilder}
      *
      * @return The {@link DefaultManifestBuilder}
      */
-    public ManifestBuilder getManifestBuilder();
-    
+    ManifestBuilder getManifestBuilder();
+
 }

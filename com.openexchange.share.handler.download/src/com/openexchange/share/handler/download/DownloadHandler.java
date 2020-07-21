@@ -68,6 +68,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.RenderListener;
 import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
 import com.openexchange.antivirus.AntiVirusService;
+import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
@@ -259,8 +260,15 @@ public class DownloadHandler extends HttpAuthShareHandler {
         if (null == service || null == evaluator) {
             return false;
         }
-        if (false == service.isEnabled(session)) {
-            return false;
+        try {
+            if (false == service.isEnabled(session)) {
+                return false;
+            }
+        } catch (OXException e) {
+            if (AntiVirusServiceExceptionCodes.CAPABILITY_DISABLED.equals(e) || AntiVirusServiceExceptionCodes.ANTI_VIRUS_SERVICE_DISABLED.equals(e)) {
+                return false;
+            }
+            throw e;
         }
         try {
             AntiVirusResult result = service.scan(fileHolder, uniqueId);

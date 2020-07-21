@@ -141,7 +141,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
         DefaultManifestBuilder manifestBuilder = new DefaultManifestBuilder(initialManifests, manifestContributors);
         this.manifestBuilder = manifestBuilder;
         manifestContributors.setManifestBuilder(manifestBuilder);
-        registerModule(new ManifestActionFactory(this, new ProviderAwareManifestBuilder(manifestProviderTracker, manifestBuilder)), "apps/manifests");
+        registerModule(new ManifestActionFactory(this, new ProviderAwareManifestBuilder(manifestProviderTracker, manifestBuilder)), ManifestActionFactory.getModule());
     }
 
     private JSONArray readManifests(ConfigurationService configService) {
