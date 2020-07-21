@@ -65,7 +65,7 @@ public class EnabledColumn extends ExtendedColumnCreationTask {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.CreateSubscribeTableTask" };
+        return new String[] { CreateSubscriptionTables.class.getName() };
     }
 
     @Override
