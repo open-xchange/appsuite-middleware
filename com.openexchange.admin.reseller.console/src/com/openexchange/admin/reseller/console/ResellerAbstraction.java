@@ -54,7 +54,9 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
@@ -65,6 +67,7 @@ import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException.Code;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.java.Strings;
 
 /**
  * @author choeger
@@ -94,6 +97,16 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     public static final char OPT_PARENT_ID_SHORT = 'n';
     public static final String OPT_PARENT_ID_LONG = "parentid";
 
+    protected static final String OPT_CAPABILITIES_TO_ADD = "capabilities-to-add";
+    protected static final String OPT_CAPABILITIES_TO_REMOVE = "capabilities-to-remove";
+    protected static final String OPT_CAPABILITIES_TO_DROP = "capabilities-to-drop";
+
+    protected static final String OPT_CONFIGURATION_TO_ADD = "config";
+    protected static final String OPT_CONFIGURATION_TO_REMOVE = "remove-config";
+
+    protected static final String OPT_TAXONOMIES_TO_ADD = "taxonomies";
+    protected static final String OPT_TAXONOMIES_TO_REMOVE = "remove-taxonomies";
+
     protected CLIOption idOption = null;
     protected CLIOption adminNameOption = null;
     protected CLIOption displayNameOption = null;
@@ -104,23 +117,36 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected CLIOption removeRestrictionsOption = null;
     protected CLIOption parentIdOption = null;
 
+    // Caps
+    protected CLIOption capsToAdd = null;
+    protected CLIOption capsToRemove = null;
+    protected CLIOption capsToDrop = null;
+
+    // Config
+    protected CLIOption configToAdd = null;
+    protected CLIOption configToRemove = null;
+
+    // Taxonomies
+    protected CLIOption taxonomiesToAdd = null;
+    protected CLIOption taxonomiesToRemove = null;
+
     protected Integer adminid = null;
     protected String adminname = null;
 
-    protected final void setIdOption(final AdminParser admp){
-        this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, NeededQuadState.eitheror);
+    protected final void setIdOption(final AdminParser admp) {
+        this.idOption = setShortLongOpt(admp, OPT_ID_SHORT, OPT_ID_LONG, "Id of the user", true, NeededQuadState.eitheror);
     }
 
     protected final void setAdminnameOption(final AdminParser admp, final NeededQuadState needed) {
-        this.adminNameOption = setShortLongOpt(admp,OPT_ADMINNAME_SHORT,OPT_ADMINNAME_LONG,"Name of the admin user", true, needed);
+        this.adminNameOption = setShortLongOpt(admp, OPT_ADMINNAME_SHORT, OPT_ADMINNAME_LONG, "Name of the admin user", true, needed);
     }
 
     protected final void setDisplayNameOption(final AdminParser admp, final NeededQuadState needed) {
-        this.displayNameOption = setShortLongOpt(admp,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the admin user", true, needed);
+        this.displayNameOption = setShortLongOpt(admp, OPT_DISPLAYNAME_SHORT, OPT_DISPLAYNAME_LONG, "Display name of the admin user", true, needed);
     }
 
     protected final void setPasswordOption(final AdminParser admp, final NeededQuadState needed) {
-        this.passwordOption =  setShortLongOpt(admp,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the admin user", true, needed);
+        this.passwordOption = setShortLongOpt(admp, OPT_PASSWORD_SHORT, OPT_PASSWORD_LONG, "Password for the admin user", true, needed);
     }
 
     protected final void setPasswordMechOption(final AdminParser admp) {
@@ -139,8 +165,36 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         this.removeRestrictionsOption = setShortLongOpt(admp, OPT_REMOVE_RESTRICTION_SHORT, OPT_REMOVE_RESTRICTION_LONG, "Restriction to remove (can be specified multiple times)", true, NeededQuadState.notneeded);
     }
 
-    protected final void setParentIdOption(final AdminParser admp){
+    protected final void setParentIdOption(final AdminParser admp) {
         this.parentIdOption = setShortLongOpt(admp, OPT_PARENT_ID_SHORT, OPT_PARENT_ID_LONG, "ParentId of the user", true, NeededQuadState.notneeded);
+    }
+
+    protected void setCapsToAdd(final AdminParser parser) {
+        this.capsToAdd = setLongOpt(parser, OPT_CAPABILITIES_TO_ADD, "The capabilities to add as a comma-separated string; e.g. \"portal, -autologin\"", true, false, false);
+    }
+
+    protected void setCapsToRemove(final AdminParser parser) {
+        this.capsToRemove = setLongOpt(parser, OPT_CAPABILITIES_TO_REMOVE, "The capabilities to remove as a comma-separated string; e.g. \"cap2, cap2\"", true, false, false);
+    }
+
+    protected void setCapsToDrop(final AdminParser parser) {
+        this.capsToDrop = setLongOpt(parser, OPT_CAPABILITIES_TO_DROP, "The capabilities to drop (clean from storage) as a comma-separated string; e.g. \"cap2, cap2\"", true, false, false);
+    }
+
+    protected void setConfigToAdd(final AdminParser parser) {
+        this.configToAdd = setLongOpt(parser, OPT_CONFIGURATION_TO_ADD, "Add/Change reseller specific configuration as a comma-separated list, e. g. '--config \"com.openexchange.oauth.twitter=false,com.openexchange.oauth.google=true\"'", true, false, false);
+    }
+
+    protected void setConfigToRemove(final AdminParser parser) {
+        this.configToRemove = setLongOpt(parser, OPT_CONFIGURATION_TO_REMOVE, "Remove reseller specific configuration, e. g. '--remove-config \"com.openexchange.oauth.twitter, com.openexchange.oauth.google\"'", true, false, false);
+    }
+
+    protected void setTaxonomiesToAdd(final AdminParser parser) {
+        this.taxonomiesToAdd = setLongOpt(parser, OPT_TAXONOMIES_TO_ADD, "Add reseller specific taxonomies as a comma-separated list, e. g. '--taxonomies \"some-taxonomy\"'", true, false, false);
+    }
+
+    protected void setTaxonomiesToRemove(final AdminParser parser) {
+        this.taxonomiesToRemove = setLongOpt(parser, OPT_TAXONOMIES_TO_REMOVE, "Remove reseller specific taxonomies, e. g. '--remove-taxonomies \"some-taxonomy\"'", true, false, false);
     }
 
     protected void setNameAndIdOptions(final AdminParser parser) {
@@ -157,6 +211,13 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         setPasswordOption(parser, NeededQuadState.notneeded);
         setPasswordMechOption(parser);
         setAddRestrictionsOption(parser);
+        setCapsToAdd(parser);
+        setCapsToRemove(parser);
+        setCapsToDrop(parser);
+        setConfigToAdd(parser);
+        setConfigToRemove(parser);
+        setTaxonomiesToAdd(parser);
+        setTaxonomiesToRemove(parser);
         setEditRestrictionsOption(parser);
         setRemoveRestrictionsOption(parser);
         setParentIdOption(parser);
@@ -235,7 +296,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
 
     protected static void parseAndSetAddRestrictions(final AdminParser parser, final ResellerAdmin adm, final CLIOption option) throws InvalidDataException {
         HashSet<Restriction> res = parseRestrictions(parser, option);
-        if ( res.size() > 0 ) {
+        if (res.size() > 0) {
             adm.setRestrictions(res.toArray(new Restriction[res.size()]));
         }
     }
@@ -251,15 +312,72 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     }
 
     public static Restriction getRestrictionFromString(final String opt) throws InvalidDataException {
-        if ( opt.indexOf('=') < 0 ) {
+        if (opt.indexOf('=') < 0) {
             throw new InvalidDataException("Restriction must be key=value pair");
         }
         final String[] keyval = opt.split("=");
-        if ( keyval.length > 2 ) {
+        if (keyval.length > 2) {
             throw new InvalidDataException("Restriction must only contain one \"=\" character");
         }
         final Restriction restriction = new Restriction(keyval[0], keyval[1]);
         return restriction;
+    }
+
+    public Set<String> parseAndSetCapabilitiesToAdd(final AdminParser parser) {
+        if (null == capsToAdd) {
+            setCapsToAdd(parser);
+        }
+        return parseAndSetCapabilities(capsToAdd, parser);
+    }
+
+    public Set<String> parseAndSetCapabilitiesToRemove(final AdminParser parser) {
+        if (null == capsToRemove) {
+            setCapsToRemove(parser);
+        }
+        return parseAndSetCapabilities(capsToRemove, parser);
+    }
+
+    public Set<String> parseAndSetCapabilitiesToDrop(final AdminParser parser) {
+        if (null == capsToDrop) {
+            setCapsToDrop(parser);
+        }
+        return parseAndSetCapabilities(capsToDrop, parser);
+    }
+
+    private Set<String> parseAndSetCapabilities(CLIOption cliOption, AdminParser parser) {
+        String s = (String) parser.getOptionValue(cliOption);
+        if (Strings.isEmpty(s)) {
+            return Collections.emptySet();
+        }
+        s = s.trim();
+        if ('"' == s.charAt(0)) {
+            if (s.length() <= 1) {
+                return Collections.emptySet();
+            }
+            s = s.substring(1);
+            if (Strings.isEmpty(s)) {
+                return Collections.emptySet();
+            }
+        }
+        if ('"' == s.charAt(s.length() - 1)) {
+            if (s.length() <= 1) {
+                return Collections.emptySet();
+            }
+            s = s.substring(0, s.length() - 1);
+            if (Strings.isEmpty(s)) {
+                return Collections.emptySet();
+            }
+        }
+        // Split
+        String[] arr = s.split(" *, *", 0);
+        Set<String> set = new HashSet<String>(arr.length);
+        for (String element : arr) {
+            String cap = element;
+            if (Strings.isNotEmpty(cap)) {
+                set.add(Strings.toLowerCase(cap));
+            }
+        }
+        return set;
     }
 
     public static final String parseCustomId(final AdminParser parser, final CLIOption customIdOption) {
@@ -295,7 +413,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         return adm;
     }
 
-    protected OXResellerInterface getResellerInterface() throws MalformedURLException, RemoteException, NotBoundException{
+    protected OXResellerInterface getResellerInterface() throws MalformedURLException, RemoteException, NotBoundException {
         return (OXResellerInterface) Naming.lookup(RMI_HOSTNAME + OXResellerInterface.RMI_NAME);
     }
 

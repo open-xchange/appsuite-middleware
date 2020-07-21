@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,97 +47,42 @@
  *
  */
 
-package com.openexchange.admin.rmi.dataobjects;
+package com.openexchange.config.cascade.reseller.osgi;
 
-import java.io.Serializable;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
+import com.openexchange.config.cascade.reseller.ResellerConfigProvider;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.reseller.ResellerService;
 
 /**
- * Class representing one configuration property for a user
+ * {@link ResellerConfigCascadeActivator}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.5
  */
-public class UserProperty implements Serializable {
-
-    private static final long serialVersionUID = 1751457900331133343L;
-
-    private final String scope;
-    private final String name;
-    private final String value;
-    private final Map<String, String> metadata;
+public class ResellerConfigCascadeActivator extends HousekeepingActivator {
 
     /**
-     *
-     * Initializes a new {@link UserProperty}.
-     * 
-     * @param scope The scope
-     * @param name The name of the property
-     * @param value The value of the property
+     * Initializes a new {@link ResellerConfigCascadeActivator}.
      */
-    public UserProperty(String scope, String name, String value) {
-        this(scope, name, value, ImmutableMap.of());
+    public ResellerConfigCascadeActivator() {
+        super();
     }
 
-    /**
-     * Initializes a new {@link UserProperty}.
-     */
-    public UserProperty(String scope, String name, String value, Map<String, String> metadata) {
-        this.scope = scope;
-        this.name = name;
-        this.value = value;
-        this.metadata = metadata;
-    }
-
-    /**
-     * Gets the scope
-     *
-     * @return The scope
-     */
-    public String getScope() {
-        return scope;
-    }
-
-    /**
-     * Gets the name
-     *
-     * @return The name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Gets the value
-     *
-     * @return The value
-     */
-    public String getValue() {
-        return value;
-    }
-
-    /**
-     * Gets the metadata
-     *
-     * @return The metadata
-     */
-    public Map<String, String> getMetadata() {
-        return metadata;
-    }
-
-    /**
-     * Returns the state in pattern: "property-name: property-value; Scope: property-scope"<br>
-     * <br>
-     * {@inheritDoc}
-     */
     @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(name).append(": ").append(value).append("; Scope: ").append(scope);
-        if (false == metadata.isEmpty()) {
-            builder.append("; Metadata: ").append(metadata);
-        }
-        return builder.toString();
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { ResellerService.class, ConfigurationService.class, ConfigViewFactory.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+        properties.put("scope", ConfigViewScope.RESELLER.getScopeName());
+        registerService(ConfigProviderService.class, new ResellerConfigProvider(this), properties);
     }
 }

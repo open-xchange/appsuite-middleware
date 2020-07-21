@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,65 +47,48 @@
  *
  */
 
-package com.openexchange.admin.rmi.dataobjects;
-
-import java.io.Serializable;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
+package com.openexchange.reseller.data;
 
 /**
- * Class representing one configuration property for a user
+ * {@link ResellerConfigProperty}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.5
  */
-public class UserProperty implements Serializable {
+public class ResellerConfigProperty {
 
-    private static final long serialVersionUID = 1751457900331133343L;
-
-    private final String scope;
-    private final String name;
+    private final String key;
     private final String value;
-    private final Map<String, String> metadata;
+    private final int resellerId;
+    private final int hashCode;
 
     /**
-     *
-     * Initializes a new {@link UserProperty}.
+     * Initializes a new {@link ResellerConfigProperty}.
      * 
-     * @param scope The scope
-     * @param name The name of the property
-     * @param value The value of the property
+     * @param key The property's key
+     * @param value The property's value
+     * @param resellerId The reseller identifier
      */
-    public UserProperty(String scope, String name, String value) {
-        this(scope, name, value, ImmutableMap.of());
-    }
-
-    /**
-     * Initializes a new {@link UserProperty}.
-     */
-    public UserProperty(String scope, String name, String value, Map<String, String> metadata) {
-        this.scope = scope;
-        this.name = name;
+    public ResellerConfigProperty(String key, String value, int resellerId) {
+        super();
+        this.key = key;
         this.value = value;
-        this.metadata = metadata;
+        this.resellerId = resellerId;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        result = prime * result + resellerId;
+        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        hashCode = result;
     }
 
     /**
-     * Gets the scope
+     * Gets the key
      *
-     * @return The scope
+     * @return The key
      */
-    public String getScope() {
-        return scope;
-    }
-
-    /**
-     * Gets the name
-     *
-     * @return The name
-     */
-    public String getName() {
-        return name;
+    public String getKey() {
+        return key;
     }
 
     /**
@@ -118,26 +101,55 @@ public class UserProperty implements Serializable {
     }
 
     /**
-     * Gets the metadata
+     * Gets the resellerId
      *
-     * @return The metadata
+     * @return The resellerId
      */
-    public Map<String, String> getMetadata() {
-        return metadata;
+    public int getResellerId() {
+        return resellerId;
     }
 
-    /**
-     * Returns the state in pattern: "property-name: property-value; Scope: property-scope"<br>
-     * <br>
-     * {@inheritDoc}
-     */
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ResellerConfigProperty other = (ResellerConfigProperty) obj;
+        if (key == null) {
+            if (other.key != null) {
+                return false;
+            }
+        } else if (!key.equals(other.key)) {
+            return false;
+        }
+        if (resellerId != other.resellerId) {
+            return false;
+        }
+        if (value == null) {
+            if (other.value != null) {
+                return false;
+            }
+        } else if (!value.equals(other.value)) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append(name).append(": ").append(value).append("; Scope: ").append(scope);
-        if (false == metadata.isEmpty()) {
-            builder.append("; Metadata: ").append(metadata);
-        }
+        builder.append("ResellerConfigProperty [key=").append(key).append(", value=").append(value).append(", resellerId=").append(resellerId).append("]");
         return builder.toString();
     }
 }

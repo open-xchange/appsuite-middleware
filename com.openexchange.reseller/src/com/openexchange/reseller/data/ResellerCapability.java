@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,97 +47,89 @@
  *
  */
 
-package com.openexchange.admin.rmi.dataobjects;
-
-import java.io.Serializable;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
+package com.openexchange.reseller.data;
 
 /**
- * Class representing one configuration property for a user
+ * {@link ResellerCapability}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.5
  */
-public class UserProperty implements Serializable {
+public class ResellerCapability {
 
-    private static final long serialVersionUID = 1751457900331133343L;
-
-    private final String scope;
-    private final String name;
-    private final String value;
-    private final Map<String, String> metadata;
+    private final String id;
+    private final int resellerId;
+    private final int hashCode;
 
     /**
-     *
-     * Initializes a new {@link UserProperty}.
+     * Initializes a new {@link ResellerCapability}.
      * 
-     * @param scope The scope
-     * @param name The name of the property
-     * @param value The value of the property
+     * @param id The capability identifier
+     * @param resellerAdmin The {@link ResellerAdmin}
      */
-    public UserProperty(String scope, String name, String value) {
-        this(scope, name, value, ImmutableMap.of());
+    public ResellerCapability(String id, int resellerId) {
+        super();
+        this.id = id;
+        this.resellerId = resellerId;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + resellerId;
+        hashCode = result;
     }
 
     /**
-     * Initializes a new {@link UserProperty}.
-     */
-    public UserProperty(String scope, String name, String value, Map<String, String> metadata) {
-        this.scope = scope;
-        this.name = name;
-        this.value = value;
-        this.metadata = metadata;
-    }
-
-    /**
-     * Gets the scope
+     * Gets the id
      *
-     * @return The scope
+     * @return The id
      */
-    public String getScope() {
-        return scope;
+    public String getId() {
+        return id;
     }
 
     /**
-     * Gets the name
+     * Gets the reseller identifier
      *
-     * @return The name
+     * @return The reseller identifier
      */
-    public String getName() {
-        return name;
+    public int getResellerId() {
+        return resellerId;
     }
 
-    /**
-     * Gets the value
-     *
-     * @return The value
-     */
-    public String getValue() {
-        return value;
+    @Override
+    public int hashCode() {
+        return hashCode;
     }
 
-    /**
-     * Gets the metadata
-     *
-     * @return The metadata
-     */
-    public Map<String, String> getMetadata() {
-        return metadata;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ResellerCapability other = (ResellerCapability) obj;
+        if (id == null) {
+            if (other.id != null) {
+                return false;
+            }
+        } else if (!id.equals(other.id)) {
+            return false;
+        }
+        if (resellerId != other.resellerId) {
+            return false;
+        }
+        return true;
     }
 
-    /**
-     * Returns the state in pattern: "property-name: property-value; Scope: property-scope"<br>
-     * <br>
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append(name).append(": ").append(value).append("; Scope: ").append(scope);
-        if (false == metadata.isEmpty()) {
-            builder.append("; Metadata: ").append(metadata);
-        }
+        builder.append("ResellerCapability [id=").append(id).append(", resellerId=").append(resellerId).append("]");
         return builder.toString();
     }
 }

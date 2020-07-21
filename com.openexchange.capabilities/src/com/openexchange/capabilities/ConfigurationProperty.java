@@ -50,39 +50,52 @@
 package com.openexchange.capabilities;
 
 import java.io.Serializable;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
  *
  * {@link ConfigurationProperty}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.8.0
  */
 public final class ConfigurationProperty implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -4968698023048792666L;
 
     private final String scope;
-
     private final String name;
-
     private final String value;
+    private final Map<String, String> metadata;
 
     /**
      *
      * Initializes a new {@link UserProperty}.
      *
-     * @param scope
-     * @param name
-     * @param value
+     * @param scope The scope
+     * @param name The name
+     * @param value The value
      */
     public ConfigurationProperty(String scope, String name, String value) {
+        this(scope, name, value, ImmutableMap.of());
+    }
+
+    /**
+     *
+     * Initializes a new {@link UserProperty}.
+     *
+     * @param scope The scope
+     * @param name The name
+     * @param value The value
+     * @param metadata The metadata
+     */
+    public ConfigurationProperty(String scope, String name, String value, Map<String, String> metadata) {
         this.scope = scope;
         this.name = name;
         this.value = value;
+        this.metadata = metadata;
     }
 
     /**
@@ -110,5 +123,14 @@ public final class ConfigurationProperty implements Serializable {
      */
     public String getValue() {
         return value;
+    }
+
+    /**
+     * Gets the metadata
+     *
+     * @return the metadata
+     */
+    public Map<String, String> getMetadata() {
+        return metadata;
     }
 }

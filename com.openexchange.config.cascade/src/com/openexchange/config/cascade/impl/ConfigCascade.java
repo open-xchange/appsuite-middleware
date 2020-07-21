@@ -258,7 +258,7 @@ public class ConfigCascade implements ConfigViewFactory {
 
                 @Override
                 public String getScope() throws OXException {
-                	final String finalScope = getFinalScope();
+                    final String finalScope = getFinalScope();
                     for (final ConfigProviderService provider : getConfigProviders(finalScope)) {
                         final String value = provider.get(property, context, user).get();
                         if (value != null) {
@@ -294,7 +294,6 @@ public class ConfigCascade implements ConfigViewFactory {
                     }
                     return new ArrayList<String>(metadataNames);
                 }
-
 
                 @Override
                 public <M> ComposedConfigProperty<String> set(final String metadataName, final M value) throws OXException {
@@ -344,7 +343,6 @@ public class ConfigCascade implements ConfigViewFactory {
                 public <M> ComposedConfigProperty<M> to(final Class<M> otherType) throws OXException {
                     return new CoercingComposedConfigProperty<M>(otherType, this, stringParser);
                 }
-
 
             }, stringParser);
         }
