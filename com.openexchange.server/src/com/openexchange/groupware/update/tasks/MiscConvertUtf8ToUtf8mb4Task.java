@@ -64,6 +64,6 @@ public class MiscConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Upda
      * Initializes a new {@link MiscConvertUtf8ToUtf8mb4Task}.
      */
     public MiscConvertUtf8ToUtf8mb4Task() {
-        super(ImmutableList.of("prg_links", "filestore_usage"), AddInitialFilestoreUsage.class.getName());
+        super(ImmutableList.of("prg_links", "filestore_usage"), "com.openexchange.filestore.impl.groupware.AddUserColumnToFilestoreUsageTable");
     }
 }

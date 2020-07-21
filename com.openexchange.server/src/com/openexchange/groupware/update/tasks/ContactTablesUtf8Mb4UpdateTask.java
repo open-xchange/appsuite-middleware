@@ -76,7 +76,7 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
     public ContactTablesUtf8Mb4UpdateTask() {
         //@formatter:off
         super(Arrays.asList("prg_dlist", "del_dlist", "prg_contacts_image", "del_contacts_image"),
-            "com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask");
+            ContactAddVCardIdTask.class.getName());
         //@formatter:on
     }
 
