@@ -176,7 +176,16 @@ public class Reply extends AbstractOpener {
 
         // Determine "From"
         InternetAddress from = null;
-        {
+        if (preferToAsRecipient) {
+            // Replying to a message residing in "Sent" folder
+            Optional<InternetAddress> optionalValidatedFrom = MimeProcessingUtility.validateFrom(originalMail, accountId, session, context);
+            if (optionalValidatedFrom.isPresent()) {
+                from = optionalValidatedFrom.get();
+            }
+        }
+
+        // Set "From" address
+        if (from == null) {
             FromAddressProvider fromAddressProvider = FromAddressProvider.byAccountId();
             if (null != fromAddressProvider) {
                 if (fromAddressProvider.isDetectBy()) {
@@ -194,6 +203,8 @@ public class Reply extends AbstractOpener {
                     }
                 }
             }
+        } else {
+            state.message.setFrom(toAddress(from));
         }
 
         /*
