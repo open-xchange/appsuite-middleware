@@ -49,25 +49,14 @@
 
 package com.openexchange.subscribe.database;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.tools.update.Tools;
 
 /**
  * Creates the tables needed for the subscription part of PubSub
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CreateSubscriptionTables extends AbstractCreateTableImpl implements UpdateTaskV2 {
+public class CreateSubscriptionTables extends AbstractCreateTableImpl {
 
     @Override
     public String[] getCreateStatements() {
@@ -104,39 +93,6 @@ public class CreateSubscriptionTables extends AbstractCreateTableImpl implements
     @Override
     public String[] tablesToCreate() {
         return new String[]{"subscriptions","sequence_subscriptions"};
-    }
-
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        String[] tables = tablesToCreate();
-        for (int i = 0; i < tables.length; i++) {
-            createTable(tables[i], getCreateStatements()[i], params.getConnection());
-        }
-    }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[0];
-    }
-
-    @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes();
-    }
-
-    private void createTable(String tablename, String sqlCreate, Connection writeCon) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            if (Tools.tableExists(writeCon, tablename)) {
-                return;
-            }
-            stmt = writeCon.prepareStatement(sqlCreate);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
     }
 
 }

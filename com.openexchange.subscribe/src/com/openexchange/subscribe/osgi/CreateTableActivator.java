@@ -49,11 +49,7 @@
 
 package com.openexchange.subscribe.osgi;
 
-import java.util.Collection;
-import java.util.Collections;
 import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.subscribe.database.CreateSubscriptionTables;
 
@@ -66,15 +62,7 @@ public class CreateTableActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        CreateSubscriptionTables service = new CreateSubscriptionTables();
-        registerService(CreateTableService.class, service);
-        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
-
-            @Override
-            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
-                return Collections.singletonList(service);
-            }
-        });
+        registerService(CreateTableService.class, new CreateSubscriptionTables());
     }
 
     @Override
