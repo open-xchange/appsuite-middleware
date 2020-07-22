@@ -143,26 +143,13 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jcl-over-slf4j-1.7.26.jar" sourcepath="/com.openexchange.bundles/source/jcl-over-slf4j-1.7.26-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.26.jar" sourcepath="/com.openexchange.bundles/source/slf4j-api-1.7.26-sources.jar"/>
 	<classpathentry kind="lib" path="lib/http_api_client-1.0-SNAPSHOT.jar" sourcepath="lib/source/http_api_client-1.0-SNAPSHOT-sources.jar"/>
-	<classpathentry kind="lib" path="lib/rest_api_client-1.0-SNAPSHOT.jar" sourcepath="lib/source/http_api_client-1.0-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="lib/rest_api_client-1.0-SNAPSHOT.jar" sourcepath="lib/source/rest_api_client-1.0-SNAPSHOT-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-json-provider-2.9.9.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-json-provider-2.9.9-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-base-2.9.9.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-base-2.9.9-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.media.multipart_2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.media.multipart.source_2.17.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.ws.rs-api-2.0.1.jar" sourcepath="/com.openexchange.bundles/source/javax.ws.rs-api-2.0.1-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-client-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-client.source_2.17.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-common-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-common.source_2.17.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-server-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-server.source_2.17.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.bundles.repackaged.jersey-guava-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.bundles.repackaged.jersey-guava.source_2.17.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.api-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.api.source-2.4.0-b10.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.utils-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.utils.source-2.4.0-b10.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.external.javax.inject-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.external.javax.inject.source-2.4.0-b10.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.locator-2.4.0-b10.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-test-framework-provider-grizzly2-2.17.jar" sourcepath="lib/source/jersey-test-framework-provider-grizzly2-2.17-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.guava"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.userfeedback.rest"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.rest.services"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.advertisement.json"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jersey-media-json-jackson-2.17.jar" sourcepath="/com.openexchange.bundles/source/jersey-media-json-jackson-2.17-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jersey-entity-filtering-2.17.jar" sourcepath="/com.openexchange.bundles/source/jersey-entity-filtering-2.17-sources.jar"/>
 	<classpathentry kind="lib" path="lib/mimepull-1.6.jar" sourcepath="lib/source/mimepull-1.6-sources.jar"/>
 	<classpathentry kind="lib" path="lib/migbase64-2.2.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.session.management"/>
@@ -199,4 +186,27 @@
 	<classpathentry kind="lib" path="lib/jackson-datatype-joda-2.9.9.jar" sourcepath="lib/source/jackson-datatype-joda-2.9.9-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-datatype-jsr310-2.9.9.jar" sourcepath="lib/source/jackson-datatype-jsr310-2.9.9-sources.jar"/>
 	<classpathentry kind="output" path="build"/>
+	<classpathentry kind="lib" path="lib/mimepull-1.9.6.jar"/>
+    <classpathentry kind="lib" path="lib/javax.annotation-api-1.2.jar"/>
+    <classpathentry kind="lib" path="lib/javax.inject-2.5.0-b42.jar"/>
+    <classpathentry kind="lib" path="lib/javax.ws.rs-api-2.1.jar" sourcepath="lib/source/javax.ws.rs-api-2.1-source.jar"/>
+    <classpathentry kind="lib" path="lib/jackson-core-2.8.4.jar"/>
+    <classpathentry kind="lib" path="lib/jackson-annotations-2.8.4.jar"/>
+    <classpathentry kind="lib" path="lib/joda-time-2.9.4.jar"/>
+    <classpathentry kind="lib" path="lib/osgi-resource-locator-1.0.1.jar"/>
+    <classpathentry kind="lib" path="lib/swagger-annotations-1.5.8.jar"/>
+    <classpathentry kind="lib" path="lib/jackson-databind-2.8.4.jar" sourcepath="lib/source/jackson-databind-2.8.4-sources.jar"/>
+    <classpathentry kind="lib" path="lib/jackson-module-jaxb-annotations-2.8.4.jar" sourcepath="lib/source/jackson-module-jaxb-annotations-2.8.4-sources.jar"/>
+    <classpathentry kind="lib" path="lib/jersey-client-2.26.jar" sourcepath="lib/source/jersey-client-2.26-sources.jar"/>
+    <classpathentry kind="lib" path="lib/jersey-server-2.26.jar" sourcepath="lib/source/jersey-server-2.26-sources.jar"/>
+    <classpathentry kind="lib" path="lib/jersey-common-2.26.jar" sourcepath="lib/source/jersey-common-2.26-sources.jar"/>
+    <classpathentry kind="lib" path="lib/jersey-hk2-2.26.jar" sourcepath="lib/source/jersey-hk2-2.26-sources.jar"/>
+    <classpathentry kind="lib" path="lib/jersey-entity-filtering-2.26.jar" sourcepath="lib/source/jersey-entity-filtering-2.26-sources.jar"/>
+    <classpathentry kind="lib" path="lib/jersey-media-json-jackson-2.26.jar" sourcepath="lib/source/jersey-media-json-jackson-2.26-sources.jar"/>
+    <classpathentry kind="lib" path="lib/jersey-media-multipart-2.26.jar" sourcepath="lib/source/jersey-media-multipart-2.26-sources.jar"/>	
+    <classpathentry kind="lib" path="lib/hk2-utils-2.5.0-b42.jar" sourcepath="lib/source/hk2-utils-2.5.0-b42-sources.jar"/>	
+    <classpathentry kind="lib" path="lib/hk2-api-2.5.0-b42.jar" sourcepath="lib/source/hk2-api-2.5.0-b42-sources.jar"/>	
+    <classpathentry kind="lib" path="lib/hk2-locator-2.5.0-b42.jar" sourcepath="lib/source/hk2-locator-2.5.0-b42-sources.jar"/>	
+	<classpathentry kind="lib" path="lib/jersey-test-framework-provider-grizzly2-2.26.jar" sourcepath="lib/source/jersey-test-framework-provider-grizzly2-2.26-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jersey-test-framework-core-2.26.jar" sourcepath="lib/source/jersey-test-framework-core-2.26-sources.jar"/>
 </classpath>
