@@ -74,6 +74,7 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.LockCleaningFolderStorage;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.PermissionTypeAwareFolder;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParametersUtility;
@@ -304,7 +305,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * restore inherited/legator permission type from original folder's permissions as needed
              */
-            if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
+            if ((false == folder instanceof PermissionTypeAwareFolder) && 
+                (storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) ||
+                (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
                 restorePermissionType(folder, storageFolder);
             }
 
