@@ -189,6 +189,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // Restore from trash is not supported.
     public static final String NO_RESTORE_SUPPORT_MSG = "Restore from trash is not supported";
 
+    // The account name is too long. Please limit the account name to a maximum of %1$s characters.
+    public static final String ACCOUNT_NAME_TO_LONG_MSG = "The account name is too long. Please limit the account name to a maximum of %1$s characters.";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

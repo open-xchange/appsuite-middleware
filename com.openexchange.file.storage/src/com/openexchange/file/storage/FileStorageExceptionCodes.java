@@ -366,6 +366,11 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      */
     NO_RESTORE_SUPPORT("Restore from trash is not supported", Category.CATEGORY_ERROR, 72, FileStorageExceptionMessages.NO_RESTORE_SUPPORT_MSG),
 
+    /**
+     * Invalid account name
+     */
+    ACCOUNT_NAME_TOO_LONG("Invalid account name.", Category.CATEGORY_ERROR, 73, FileStorageExceptionMessages.ACCOUNT_NAME_TO_LONG_MSG),
+
     ;
 
     /**
