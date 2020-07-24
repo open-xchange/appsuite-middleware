@@ -107,7 +107,9 @@ public class SplitDescriber implements ChangeDescriber {
         RelatedTo originalRelatedTo = eventUpdate.getOriginal().getRelatedTo();
         RelatedTo updatedRelatedTo = eventUpdate.getUpdate().getRelatedTo();
         return CalendarUtils.isSeriesMaster(eventUpdate.getUpdate()) && 
-            false == Objects.equals(originalRelatedTo, updatedRelatedTo) && "X-CALENDARSERVER-RECURRENCE-SET".equals(updatedRelatedTo.getRelType());
+            Objects.nonNull(updatedRelatedTo) &&
+            false == Objects.equals(originalRelatedTo, updatedRelatedTo) &&
+            "X-CALENDARSERVER-RECURRENCE-SET".equals(updatedRelatedTo.getRelType());
     }
 
 }
