@@ -206,7 +206,7 @@ public class AppPasswordServiceImpl implements AppPasswordService, AppAuthentica
     @Override
     public List<AppPasswordApplication> getApplications(Session session) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        if (serverSession.getUser() == null || serverSession.getUser().isGuest()) {
+        if (serverSession == null || serverSession.getUser() == null || serverSession.getUser().isGuest()) {
             return Collections.emptyList();
         }
         Collection<AppPasswordApplication> applications = getApplicationsById(session.getContextId(), session.getUserId()).values();
