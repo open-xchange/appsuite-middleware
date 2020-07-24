@@ -586,6 +586,9 @@ public final class HtmlServiceImpl implements HtmlService {
             return htmlSanitizeResult;
         }
 
+        // First, check size
+        checkSize(htmlContent);
+
         try {
             String html = htmlContent;
 
@@ -652,9 +655,6 @@ public final class HtmlServiceImpl implements HtmlService {
                 html = handler.getHTML();
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } else {
-                // First, check size
-                checkSize(html);
-
                 if (options.isSanitize()) {
                     boolean[] sanitized = new boolean[] { true };
                     while (sanitized[0]) {
