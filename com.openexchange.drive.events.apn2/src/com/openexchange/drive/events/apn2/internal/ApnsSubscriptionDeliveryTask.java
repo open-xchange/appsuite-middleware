@@ -90,6 +90,9 @@ public class ApnsSubscriptionDeliveryTask extends SubscriptionDeliveryTask {
         if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
             return null;
         }
+        if (null == options) {
+            return null;
+        }
         ApnsHttp2Notification.Builder builder = new ApnsHttp2Notification.Builder(subscription.getToken(), options.getTopic())
             .withCustomField("root", subscription.getRootFolderID())
             .withCustomField("action", "sync")
