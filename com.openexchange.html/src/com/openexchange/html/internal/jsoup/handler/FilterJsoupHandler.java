@@ -636,7 +636,7 @@ public final class FilterJsoupHandler implements JsoupHandler {
                  * Handle style attribute
                  */
                 String css = attribute.getValue();
-                if (!Strings.isEmpty(css)) {
+                if (Strings.isNotEmpty(css)) {
                     checkCSS(cssBuffer.append(css), styleMap, true);
                     css = cssBuffer.toString();
                     cssBuffer.setLength(0);
@@ -979,13 +979,13 @@ public final class FilterJsoupHandler implements JsoupHandler {
         final int restoreLen = builder.length();
         try {
             builder.append(HtmlServiceImpl.checkURL(url));
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             /*
              * Not a valid URL
              */
             builder.setLength(restoreLen);
             builder.append(url);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HTMLURLReplacerHandler.class);
             log.warn("URL replacement failed.", e);
             builder.setLength(restoreLen);

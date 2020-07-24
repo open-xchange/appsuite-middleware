@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,86 +47,59 @@
  *
  */
 
-package com.openexchange.html.internal.jsoup.control;
+package com.openexchange.html.internal.jsoup;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.DelayQueue;
+import static com.openexchange.java.Strings.toLowerCase;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import com.openexchange.java.Strings;
 
 /**
- * {@link JsoupParseControl}
+ * {@link JsoupHandlers} - Utility class for {@link JsoupHandler Jsoup handlers}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.10.2
  */
-public class JsoupParseControl {
-
-    private static final JsoupParseControl INSTANCE = new JsoupParseControl();
+public class JsoupHandlers {
 
     /**
-     * Gets the instance
-     *
-     * @return The instance
+     * Initializes a new {@link JsoupHandlers}.
      */
-    public static JsoupParseControl getInstance() {
-        return INSTANCE;
-    }
-
-    // ------------------------------------------------------------------------------------------------------------------------
-
-    private final DelayQueue<JsoupParseTask> queue;
-
-    /**
-     * Initializes a new {@link JsoupParseControl}.
-     */
-    private JsoupParseControl() {
+    private JsoupHandlers() {
         super();
-        queue = new DelayQueue<JsoupParseTask>();
     }
 
-    /**
-     * Adds the specified task.
-     *
-     * @param task The task
-     * @return <tt>true</tt>
-     */
-    public boolean add(JsoupParseTask task) {
-        return queue.offer(task);
-    }
+    // -------------------------------------- Image check --------------------------------------------- //
+
+    private static final String CID = "cid:";
+    private static final String DATA = "data:";
+    private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
 
     /**
-     * Removes the specified task.
+     * Checks if specified value from &lt;img&gt; tag's <code>"src"</code> attribute appears to be an inline/embedded image.
      *
-     * @param task The task to remove
-     * @return <code>true</code> if such a task was removed; otherwise <code>false</code>
+     * @param src The value of the <code>"src"</code> attribute to examine
+     * @param extactCheckForEmbeddedImage Whether an exact check for an embedded image should be performed
+     * @return <code>true</code> for an inline/embedded image; otherwisae <code>false</code>
      */
-    public boolean remove(JsoupParseTask task) {
-        return queue.remove(task);
+    public static boolean isInlineImage(String src, boolean extactCheckForEmbeddedImage) {
+        if (Strings.isEmpty(src)) {
+            return false;
+        }
+        String tmp = toLowerCase(src);
+        return tmp.startsWith(CID) || (tmp.startsWith(DATA) && (extactCheckForEmbeddedImage ? isEmbeddedImage(tmp) : true)) || PATTERN_FILENAME.matcher(tmp).matches();
     }
 
-    /**
-     * Await expired parse tasks from this control.
-     *
-     * @return The expired parse tasks
-     * @throws InterruptedException If interrupted while waiting
-     */
-    List<JsoupParseTask> awaitExpired() throws InterruptedException {
-        JsoupParseTask expired = queue.take();
-        List<JsoupParseTask> expirees = new LinkedList<JsoupParseTask>();
-        expirees.add(expired);
-        queue.drainTo(expirees);
-        return expirees;
+    /** Simple class to delay initialization until needed */
+    private static class DataBase64PatternHolder {
+        static final Pattern PATTERN_DATA_BASE64 = Pattern.compile("data:([\\p{L}_0-9-]+(?:/([\\p{L}_0-9-]+))?)?;base64,"); // data:image/jpeg;base64
     }
 
-    /**
-     * Removes expired parse tasks from this control.
-     *
-     * @return The expired parse tasks
-     */
-    List<JsoupParseTask> removeExpired() {
-        List<JsoupParseTask> expirees = new LinkedList<JsoupParseTask>();
-        queue.drainTo(expirees);
-        return expirees;
+    private static boolean isEmbeddedImage(String val) {
+        Matcher m = DataBase64PatternHolder.PATTERN_DATA_BASE64.matcher(val);
+        return m.find() && (m.start() == 0);
     }
+
+    // ----------------------------------------------------------------------------------------------- //
 
 }

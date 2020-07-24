@@ -55,6 +55,7 @@ import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
+import static com.openexchange.html.internal.jsoup.JsoupHandlers.isInlineImage;
 import static com.openexchange.java.Strings.toLowerCase;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -84,7 +85,6 @@ import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.css.CSSMatcher;
 import com.openexchange.html.internal.filtering.FilterMaps;
 import com.openexchange.html.internal.jsoup.JsoupHandler;
-import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.java.InterruptibleCharSequence;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
@@ -416,7 +416,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                     cssBuffer.setLength(0);
                 }
                 if (checkMaxContentSize(checkedCSS.length())) {
-                    replaceWith.put(comment, new Comment(checkedCSS, ""));
+                    replaceWith.put(comment, new Comment(checkedCSS));
                 } else {
                     removedNodes.add(comment);
                 }
@@ -425,6 +425,11 @@ public final class CleaningJsoupHandler implements JsoupHandler {
             String cmt = comment.toString();
             if (false == checkMaxContentSize(cmt.length())) {
                 removedNodes.add(comment);
+                return;
+            }
+            if (HtmlServices.containsEventHandler(cmt) || !HtmlServices.isNonJavaScriptURL(cmt, null)) {
+                removedNodes.add(comment);
+                return;
             }
         }
     }
@@ -448,7 +453,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                         cssBuffer.setLength(0);
                     }
                     if (checkMaxContentSize(checkedCSS.length())) {
-                        replaceWith.put(dataNode, new DataNode(checkedCSS, ""));
+                        replaceWith.put(dataNode, new DataNode(checkedCSS));
                     } else {
                         removedNodes.add(dataNode);
                     }
@@ -485,7 +490,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                         cssBuffer.setLength(0);
                     }
                     if (checkMaxContentSize(checkedCSS.length())) {
-                        replaceWith.put(textNode, new TextNode(checkedCSS, ""));
+                        replaceWith.put(textNode, new TextNode(checkedCSS));
                     } else {
                         removedNodes.add(textNode);
                     }
@@ -626,7 +631,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                 boolean isFine = true;
                 for (final Attribute attribute : attributes) {
                     final String val = attribute.getValue();
-                    if (isNonJavaScriptURL(val, tagName, "url=")) {
+                    if (Strings.isEmpty(val) || isNonJavaScriptURL(val, tagName, "url=")) {
                         // Nothing
                     } else {
                         isFine = false;
@@ -648,6 +653,12 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                 if (Strings.isNotEmpty(height)) {
                     prependWidthHeightToStyleIfAbsent(mapFor("width", width + "px", "height", height + "px"), attributes, startTag);
                 }
+            }
+            String src = attributes.getIgnoreCase("src");
+            if (Strings.isNotEmpty(src) && false == isInlineImage(src, false) && (src.indexOf('<') >= 0 || src.indexOf('\n') >= 0 || src.indexOf('\r') >= 0)) {
+                // Invalid <img> tag
+                removedNodes.add(startTag);
+                return;
             }
         } else if ("table".equals(tagName)) {
             addTableTag(attributes, startTag);
@@ -674,7 +685,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                  * Handle style attribute
                  */
                 String css = attribute.getValue();
-                if (!Strings.isEmpty(css)) {
+                if (Strings.isNotEmpty(css)) {
                     checkCSS(cssBuffer.append(css), styleMap, true);
                     css = cssBuffer.toString();
                     cssBuffer.setLength(0);
@@ -747,6 +758,10 @@ public final class CleaningJsoupHandler implements JsoupHandler {
             return false;
         }
 
+        if (Strings.isEmpty(val)) {
+            return true;
+        }
+
         if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
             attribute.setValue("");
             imageURLFound = true;
@@ -754,7 +769,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
         }
 
         if (dropExternalImages && ("img".equals(tagName) || "input".equals(tagName)) && "src".equals(attr)) {
-            if (isInlineImage(val)) {
+            if (isInlineImage(val, true)) {
                 // Allow inline images
                 return true;
             }
@@ -912,17 +927,6 @@ public final class CleaningJsoupHandler implements JsoupHandler {
         return map;
     }
 
-    // --------------------------------- Image check --------------------------------------- //
-
-    private static final String CID = "cid:";
-    private static final String DATA_BASE64 = "data:;base64,";
-    private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
-
-    private boolean isInlineImage(final String val) {
-        final String tmp = toLowerCase(val);
-        return tmp.startsWith(CID) || tmp.startsWith(DATA_BASE64) || PATTERN_FILENAME.matcher(tmp).matches();
-    }
-
     // ----------------------------------------------------------------------------------- //
 
     private static final Pattern SPLIT_WORDS = Pattern.compile(" +");
@@ -972,6 +976,9 @@ public final class CleaningJsoupHandler implements JsoupHandler {
      * @return The checked attribute value
      */
     public static String checkPossibleURL(String val, StringBuilder urlBuilder) {
+        if (Strings.isEmpty(val)) {
+            return val;
+        }
         final Matcher m = PATTERN_URL_SOLE.matcher(val);
         if (!m.matches()) {
             return val;
@@ -991,14 +998,14 @@ public final class CleaningJsoupHandler implements JsoupHandler {
         final int restoreLen = builder.length();
         try {
             builder.append(HtmlServiceImpl.checkURL(url));
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             /*
              * Not a valid URL
              */
             builder.setLength(restoreLen);
             builder.append(url);
-        } catch (final Exception e) {
-            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HTMLURLReplacerHandler.class);
+        } catch (Exception e) {
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CleaningJsoupHandler.class);
             log.warn("URL replacement failed.", e);
             builder.setLength(restoreLen);
             builder.append(url);

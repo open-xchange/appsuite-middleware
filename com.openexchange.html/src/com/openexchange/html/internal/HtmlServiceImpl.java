@@ -202,7 +202,7 @@ public final class HtmlServiceImpl implements HtmlService {
         this.htmlEntityMap = htmlEntityMap;
         tika = new Tika();
         htmlCodec = new HTMLEntityCodec();
-        
+
         DefaultWhitelist.Builder builder = DefaultWhitelist.builder();
         builder.setHtmlWhitelistMap(FilterMaps.getStaticHTMLMap());
         builder.setStyleWhitelistMap(FilterMaps.getStaticStyleMap());
@@ -579,6 +579,9 @@ public final class HtmlServiceImpl implements HtmlService {
             return htmlSanitizeResult;
         }
 
+        // First, check size
+        checkSize(htmlContent);
+
         try {
             String html = htmlContent;
 
@@ -645,11 +648,11 @@ public final class HtmlServiceImpl implements HtmlService {
                 html = handler.getHTML();
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } else {
-                // First, check size
-                int maxLength = HtmlServices.htmlThreshold();
-                if (maxLength > 0 && html.length() > maxLength) {
-                    LOG.info("HTML content is too big: max. '{}', but is '{}'.", I(maxLength), I(html.length()));
-                    throw HtmlExceptionCodes.TOO_BIG.create(I(maxLength), I(html.length()));
+                boolean[] sanitized = new boolean[] { true };
+                while (sanitized[0]) {
+                    sanitized[0] = false;
+                    // Start sanitizing round
+                    html = SaneScriptTags.saneScriptTags(html, sanitized);
                 }
 
                 CleaningJsoupHandler handler = getJsoupHandlerFor(options.getOptConfigName());
@@ -659,7 +662,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 boolean[] modified = options.getModified();
 
                 // Parse the HTML content
-                JsoupParser.getInstance().parse(html, handler, false);
+                JsoupParser.getInstance().parse(html, handler, false, false);
 
                 // Check if modified by handler
                 if (options.isDropExternalImages() && null != modified) {
@@ -669,6 +672,9 @@ public final class HtmlServiceImpl implements HtmlService {
                 // Get HTML content
                 if (options.isReplaceBodyWithDiv()) {
                     html = handler.getHtml();
+                    if (false == startsWith("<!doctype html>", html, true)) {
+                        html = "<!doctype html>\n" + html;
+                    }
                     htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                     htmlSanitizeResult.setBodyReplacedWithDiv(true);
                 } else {
@@ -687,6 +693,14 @@ public final class HtmlServiceImpl implements HtmlService {
         } catch (final RuntimeException e) {
             LOG.warn("HTML content will be returned un-sanitized.", e);
             return htmlSanitizeResult;
+        }
+    }
+
+    private void checkSize(String html) throws OXException {
+        int maxLength = HtmlServices.htmlThreshold();
+        if (maxLength > 0 && html.length() > maxLength) {
+            LOG.info("HTML content is too big: max. '{}', but is '{}'.", I(maxLength), I(html.length()));
+            throw HtmlExceptionCodes.TOO_BIG.create(I(maxLength), I(html.length()));
         }
     }
 
@@ -1840,7 +1854,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 html = handler.getHTML();
             } else {
                 UrlReplacerJsoupHandler handler = new UrlReplacerJsoupHandler();
-                JsoupParser.getInstance().parse(html, handler, false);
+                JsoupParser.getInstance().parse(html, handler, false, true);
                 html = handler.getDocument().toString();
             }
         }
@@ -2422,6 +2436,30 @@ public final class HtmlServiceImpl implements HtmlService {
         } finally {
             Streams.close(fos);
         }
+    }
+
+    private static boolean startsWith(String prefix, String toCheck, boolean ignoreHeadingWhitespaces) {
+        if (null == toCheck) {
+            return false;
+        }
+
+        int len = toCheck.length();
+        if (len <= 0) {
+            return false;
+        }
+
+        if (!ignoreHeadingWhitespaces) {
+            return toCheck.startsWith(prefix);
+        }
+
+        int i = 0;
+        while (i < len && Strings.isWhitespace(toCheck.charAt(i))) {
+            i++;
+        }
+        if (i >= len) {
+            return false;
+        }
+        return toCheck.startsWith(prefix, i);
     }
 
 }
