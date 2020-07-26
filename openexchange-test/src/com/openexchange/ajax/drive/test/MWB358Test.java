@@ -58,6 +58,7 @@ import static org.junit.Assert.assertNull;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
@@ -198,7 +199,11 @@ public class MWB358Test extends AbstractAPIClientSession {
     }
 
     private void clearTrash() throws ApiException {
-        FoldersCleanUpResponse clearFoldersResponse = folderApi.clearFolders(apiClient1.getSession(), Arrays.asList("35"), "1", null, null);
+        ConfigResponse configResponse = new ConfigApi(apiClient1).getConfigNode("/modules/infostore/folder/trash", apiClient1.getSession());
+        assertNull(configResponse.getError(), configResponse.getError());
+        String trashFolderId = String.valueOf(configResponse.getData());
+
+        FoldersCleanUpResponse clearFoldersResponse = folderApi.clearFolders(apiClient1.getSession(), Collections.singletonList(trashFolderId), "1", null, null);
         assertNotNull(clearFoldersResponse);
         assertNull(clearFoldersResponse.getErrorDesc(), clearFoldersResponse.getError());
     }

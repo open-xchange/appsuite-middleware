@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.rdb.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -354,8 +355,21 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
 
     private static final String SQL_INSERT = "INSERT INTO filestorageAccount (cid, user, account, confId, serviceId, displayName) VALUES (?, ?, ?, ?, ?, ?)";
 
+    /**
+     * Performs some basic constraint checks on the given account.
+     *
+     * @param account The {@link FileStorageAccount} to check
+     * @throws OXException in case the account is not valid
+     */
+    private void checkAccount(FileStorageAccount account) throws OXException {
+        if (account.getDisplayName().length() > 128) {
+            throw FileStorageExceptionCodes.ACCOUNT_NAME_TOO_LONG.create(I(128));
+        }
+    }
+
     @Override
     public int addAccount(final String serviceId, final FileStorageAccount account, final Session session) throws OXException {
+        checkAccount(account);
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
@@ -593,6 +607,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
 
     @Override
     public void updateAccount(final String serviceId, final FileStorageAccount account, final Session session) throws OXException {
+        checkAccount(account);
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection

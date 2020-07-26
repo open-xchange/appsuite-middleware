@@ -320,7 +320,8 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         assertContentTypeAndPermissions(sharedFolders);
         expectedFolderIds.clear();
         expectedFolderIds.add(I(sharedSubfolder.getObjectID()));
-        Assert.assertTrue(collectFolderIds(sharedFolders).containsAll(expectedFolderIds));
+        Set<Integer> sharedFoldersIds = collectFolderIds(sharedFolders);
+		Assert.assertTrue("Updated folders do not contain expected ones. Expected: " + expectedFolderIds + " but was: " + sharedFoldersIds, sharedFoldersIds.containsAll(expectedFolderIds));
     }
 
     @Test
@@ -335,7 +336,8 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         expectedFolderIds.add(I(privateSubfolder.getObjectID()));
         expectedFolderIds.add(I(publicSubfolder.getObjectID()));
         expectedFolderIds.add(I(sharedSubfolder.getObjectID()));
-        Assert.assertTrue(collectFolderIds(folders).containsAll(expectedFolderIds));
+        Set<Integer> updatedFolderIds = collectFolderIds(folders);
+		Assert.assertTrue("Updated folders do not contain expected ones. Expected: " + expectedFolderIds + " but was: " + updatedFolderIds, updatedFolderIds.containsAll(expectedFolderIds));
     }
 
     @Test

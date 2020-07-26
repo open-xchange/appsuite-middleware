@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,52 +47,16 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter;
+package com.openexchange.folderstorage;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.ajax.mail.filter.apiclient.ApplyMailFilterTest;
-import com.openexchange.ajax.mail.filter.tests.api.AuxiliaryAPITest;
-import com.openexchange.ajax.mail.filter.tests.api.ConfigTest;
-import com.openexchange.ajax.mail.filter.tests.api.NewTest;
-import com.openexchange.ajax.mail.filter.tests.api.ReorderTest;
-import com.openexchange.ajax.mail.filter.tests.api.UpdateTest;
-import com.openexchange.ajax.mail.filter.tests.api.VacationTest;
-import com.openexchange.ajax.mail.filter.tests.bug.Bug11519Test;
-import com.openexchange.ajax.mail.filter.tests.bug.Bug18490Test;
-import com.openexchange.ajax.mail.filter.tests.bug.Bug31253Test;
-import com.openexchange.ajax.mail.filter.tests.bug.Bug44363Test;
-import com.openexchange.ajax.mail.filter.tests.bug.Bug46589Test;
-import com.openexchange.ajax.mail.filter.tests.bug.Bug46714Test;
-import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
- * {@link MailFilterTestSuite}
+ * {@link PermissionTypeAwareFolder} is a marker interface which marks {@link Folder}s which are created internally and therefore don't need their permission types to be adjusted.
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- *
+ * @see FolderPermissionType
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    Bug11519Test.class,
-    Bug18490Test.class,
-    Bug31253Test.class,
-    Bug44363Test.class,
-    Bug46589Test.class,
-    Bug46714Test.class,
-    ConfigTest.class,
-    NewTest.class,
-    UpdateTest.class,
-    VacationTest.class,
-    // Deactivated the PGPTest because the email server of the test environment does not support the custom pgp plugin
-    // PGPTest.class,
-    ReorderTest.class,
-    AuxiliaryAPITest.class,
-
-    // new apiclient tests ---------
-    ApplyMailFilterTest.class
-
-})
-public final class MailFilterTestSuite {
+public interface PermissionTypeAwareFolder extends Folder {
 
 }
