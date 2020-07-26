@@ -909,7 +909,7 @@ public final class MimeMessageUtility {
                 return true;
             }
 
-            if (bodystructure.disposition == null && bodystructure.cParams.get("name") != null) {
+            if (bodystructure.disposition == null && bodystructure.cParams != null && bodystructure.cParams.get("name") != null) {
                 return true;
             }
         }
