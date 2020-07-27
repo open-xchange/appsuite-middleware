@@ -51,6 +51,7 @@ package com.openexchange.chronos.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.exception.OXException;
@@ -221,5 +222,12 @@ public interface CalendarServiceUtilities {
      * @return The recurrence data
      */
     RecurrenceData loadRecurrenceData(CalendarSession session, String seriesId) throws OXException;
+
+    /**
+     * Gets the registered calendar service interceptors.
+     * 
+     * @return The calendar service interceptors, or an emoty set if there are none.
+     */
+    Set<CalendarInterceptor> getInterceptors();
 
 }

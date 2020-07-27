@@ -90,6 +90,7 @@ import com.openexchange.chronos.impl.performer.UpdateAttendeePerformer;
 import com.openexchange.chronos.impl.performer.UpdatePerformer;
 import com.openexchange.chronos.impl.performer.UpdatesPerformer;
 import com.openexchange.chronos.impl.session.DefaultCalendarSession;
+import com.openexchange.chronos.service.CalendarInterceptor;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
@@ -103,6 +104,7 @@ import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -116,15 +118,18 @@ public class CalendarServiceImpl implements CalendarService {
 
     private final ServiceLookup services;
     private final SchedulingUtilitiesImpl schedulingUtils;
+    private final CalendarServiceUtilities utilities;
 
     /**
      * Initializes a new {@link CalendarServiceImpl}.
      *
      * @param services A service lookup reference
+     * @param interceptors The calendar interceptor service set to use
      */
-    public CalendarServiceImpl(ServiceLookup services) {
+    public CalendarServiceImpl(ServiceLookup services, ServiceSet<CalendarInterceptor> interceptors) {
         super();
         this.services = services;
+        this.utilities = new CalendarServiceUtilitiesImpl(interceptors);
         schedulingUtils = new SchedulingUtilitiesImpl(services);
     }
 
@@ -146,7 +151,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public CalendarServiceUtilities getUtilities() {
-        return CalendarServiceUtilitiesImpl.getInstance();
+        return utilities;
     }
     
     @Override

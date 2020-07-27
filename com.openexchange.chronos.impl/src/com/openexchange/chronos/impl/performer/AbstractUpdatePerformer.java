@@ -127,6 +127,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.InterceptorRegistry;
 import com.openexchange.chronos.impl.JSONPrintableEvent;
 import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.impl.Utils;
@@ -158,6 +159,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected final Date timestamp;
     protected final ResultTracker resultTracker;
     protected final SchedulingHelper schedulingHelper;
+    protected final InterceptorRegistry interceptorRegistry;
     protected EnumSet<Role> roles;
 
     /**
@@ -176,6 +178,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         this.timestamp = new Date();
         this.resultTracker = new ResultTracker(storage, session, folder, timestamp.getTime(), getSelfProtection());
         this.schedulingHelper = new SchedulingHelper(Services.getServiceLookup(), session, folder, resultTracker);
+        this.interceptorRegistry = new InterceptorRegistry(session, folder);
         this.roles = roles;
     }
 
@@ -203,6 +206,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         this.timestamp = updatePerformer.timestamp;
         this.resultTracker = updatePerformer.resultTracker;
         this.schedulingHelper = updatePerformer.schedulingHelper;
+        this.interceptorRegistry = updatePerformer.interceptorRegistry;
         this.roles = updatePerformer.roles;
     }
 
@@ -300,6 +304,10 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
         }
         Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
+        /*
+         * trigger calendar interceptors & update event in storage
+         */
+        interceptorRegistry.triggerInterceptorsOnBeforeUpdate(originalMasterEvent, eventUpdate);
         storage.getEventStorage().updateEvent(eventUpdate);
     }
 
@@ -311,6 +319,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * <p/>
      * The deletion includes:
      * <ul>
+     * <li>triggering registered calendar service interceptors</li>
      * <li>insertion of a <i>tombstone</i> record for the original event</li>
      * <li>insertion of <i>tombstone</i> records for the original event's attendees</li>
      * <li>deletion of any alarms associated with the event</li>
@@ -333,6 +342,10 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 deletedEvents.addAll(delete(changeException));
             }
         }
+        /*
+         * trigger calendar interceptors
+         */
+        interceptorRegistry.triggerInterceptorsOnBeforeDelete(originalEvent);
         /*
          * delete event data from storage
          */
@@ -1158,6 +1171,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * Adds a specific recurrence identifier to the series master's delete exception array, i.e. creates a new delete exception. A
      * previously existing entry for the recurrence identifier in the master's change exception date array is removed implicitly. In case
      * there are no occurrences remaining at all after the deletion, the whole series event is deleted.
+     * <p/>
+     * Registered calendar service interceptors are triggered for the update of the series master event, too.
      *
      * @param originalMasterEvent The original series master event
      * @param recurrenceId The recurrence identifier of the occurrence to add
@@ -1212,6 +1227,10 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         }
         Consistency.setModified(session, timestamp, eventUpdate, calendarUserId);
         Consistency.normalizeRecurrenceIDs(originalMasterEvent.getStartDate(), eventUpdate);
+        /*
+         * trigger calendar interceptors & update event in storage
+         */
+        interceptorRegistry.triggerInterceptorsOnBeforeUpdate(originalMasterEvent, eventUpdate);
         storage.getEventStorage().updateEvent(eventUpdate);
         Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
 
@@ -1268,10 +1287,12 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             eventUpdate.setChangeExceptionDates(splittedChangeExceptionDates.getKey());
         }
         /*
-         * update series master in storage & track results as updated request for adjusted event series, or as cancel message for orphaned attendees
+         * trigger calendar interceptors, update series master in storage & track results as updated request for adjusted event series,
+         * or as cancel message for orphaned attendees
          */
         eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
         Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
+        interceptorRegistry.triggerInterceptorsOnBeforeUpdate(originalMasterEvent, eventUpdate);
         storage.getEventStorage().updateEvent(eventUpdate);
         Event updatedEvent = loadEventData(originalMasterEvent.getId());
         updateAlarmTrigger(originalMasterEvent, updatedEvent);

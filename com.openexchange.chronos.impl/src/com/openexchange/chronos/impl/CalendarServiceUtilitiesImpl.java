@@ -54,6 +54,7 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -62,6 +63,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.CountEventsPerformer;
 import com.openexchange.chronos.impl.performer.ForeignEventsPerformer;
 import com.openexchange.chronos.impl.performer.ResolvePerformer;
+import com.openexchange.chronos.service.CalendarInterceptor;
 import com.openexchange.chronos.service.CalendarServiceUtilities;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
@@ -69,6 +71,7 @@ import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.quota.Quota;
 
 /**
@@ -79,25 +82,21 @@ import com.openexchange.quota.Quota;
  */
 public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
 
-    private static CalendarServiceUtilities instance = null;
-
-    /**
-     * Gets the calendar service utilities instance.
-     *
-     * @return The calendar service utilities
-     */
-    public static CalendarServiceUtilities getInstance() {
-        if (instance == null){
-            instance = new CalendarServiceUtilitiesImpl();
-        }
-        return instance;
-    }
+    private final ServiceSet<CalendarInterceptor> interceptors;
 
     /**
      * Initializes a new {@link CalendarServiceUtilitiesImpl}.
+     * 
+     * @param interceptors The calendar interceptor service set to use
      */
-    private CalendarServiceUtilitiesImpl() {
+    public CalendarServiceUtilitiesImpl(ServiceSet<CalendarInterceptor> interceptors) {
         super();
+        this.interceptors = interceptors;
+    }
+
+    @Override
+    public Set<CalendarInterceptor> getInterceptors() {
+        return interceptors;
     }
 
     @Override

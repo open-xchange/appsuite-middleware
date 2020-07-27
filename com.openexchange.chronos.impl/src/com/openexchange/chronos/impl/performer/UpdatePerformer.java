@@ -397,6 +397,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             }
         }
         /*
+         * trigger calendar interceptors
+         */
+        interceptorRegistry.triggerInterceptorsOnBeforeUpdate(eventUpdate.getOriginal(), eventUpdate.getUpdate());
+        /*
          * update event data in storage, checking permissions as required
          */
         storeEventUpdate(originalEvent, eventUpdate.getDelta(), eventUpdate.getUpdatedFields(), assumeExternalOrganizerUpdate);
