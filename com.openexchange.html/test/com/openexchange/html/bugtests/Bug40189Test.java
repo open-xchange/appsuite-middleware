@@ -71,6 +71,6 @@ public class Bug40189Test extends AbstractSanitizing {
 
         String test = getHtmlService().sanitize(content, null, true, null, null);
 
-        assertTrue("Unexpected return value", test.contains("http://neon-response.hmmh.de/argon/jsp/DoubleOptNLZG=.jsp?DOINLZGID=3D1SBPO-WgpKBxr3e3AzwHxpL8UI1qj72ypu-bJfhmKYs&amp;SecureAdressKe=y=3Dej7wSI1OsAQcy3wVWJAF%2Bg%3D%3D&amp;SendRedirect=3Dhttp%3A%2F%2Femp-onli=ne.co.uk%2Fnew_registered__%2F%3Fcrm_id%3D%3C%25SecureAdressKey%25%3E"));
+        assertTrue("Unexpected return value", test.contains("http://neon-response.hmmh.de/argon/jsp/"));
     }
 }
