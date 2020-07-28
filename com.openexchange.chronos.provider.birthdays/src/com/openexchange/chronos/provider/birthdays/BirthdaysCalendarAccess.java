@@ -115,6 +115,7 @@ import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
@@ -295,6 +296,10 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
                 Contact contact = getBirthdayContact(trigger.getEventId());
                 return null == trigger.getRecurrenceId() ? eventConverter.getSeriesMaster(contact) : eventConverter.getOccurrence(contact, trigger.getRecurrenceId());
             } catch (OXException e) {
+                if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e) || ContactExceptionCodes.NO_ACCESS_PERMISSION.equals(e)) {
+                    LOG.trace("Error getting birthday event {} referenced by alarm trigger", trigger.getEventId(), e);
+                    return null;
+                }
                 LOG.warn("Error getting birthday event {} referenced by alarm trigger", trigger.getEventId(), e);
                 return null;
             }

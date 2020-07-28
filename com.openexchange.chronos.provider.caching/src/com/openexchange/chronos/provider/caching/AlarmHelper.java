@@ -115,8 +115,8 @@ public class AlarmHelper {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AlarmHelper.class);
 
-    private final ServiceLookup services;
-    private final Context context;
+    final ServiceLookup services;
+    final Context context;
     final CalendarAccount account;
 
     /**
@@ -412,13 +412,20 @@ public class AlarmHelper {
                      */
                     Event event = loadEventFunction.apply(storage, trigger);
                     if (null == event) {
-                        try {
-                            storage.getAlarmStorage().deleteAlarms(trigger.getEventId(), account.getUserId());
-                            storage.getAlarmTriggerStorage().deleteTriggers(trigger.getEventId());
-                            LOG.info("Removed inaccessible alarm for event {} in account {}.", trigger.getEventId(), account);
-                        } catch (OXException e) {
-                            LOG.warn("Error removing inaccessible alarm for event {} in account {}", trigger.getEventId(), account, e);
-                        }
+                        new OSGiCalendarStorageOperation<Void>(services, context.getContextId(), account.getAccountId()) {
+
+                            @Override
+                            protected Void call(CalendarStorage storage) throws OXException {
+                                try {
+                                    storage.getAlarmStorage().deleteAlarms(trigger.getEventId(), account.getUserId());
+                                    storage.getAlarmTriggerStorage().deleteTriggers(trigger.getEventId());
+                                    LOG.debug("Removed inaccessible alarm for event {} in account {}.", trigger.getEventId(), account);
+                                } catch (OXException e) {
+                                    LOG.warn("Error removing inaccessible alarm for event {} in account {}", trigger.getEventId(), account, e);
+                                }
+                                return null;
+                            }
+                        }.executeUpdate();
                         iterator.remove();
                         continue;
                     }
