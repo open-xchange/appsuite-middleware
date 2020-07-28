@@ -47,32 +47,55 @@
  *
  */
 
-package com.openexchange.html.bugtests;
+package com.openexchange.switchboard.osgi;
 
-import org.junit.Assert;
-import org.junit.Test;
-import com.openexchange.html.AbstractSanitizing;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CalendarInterceptor;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.switchboard.zoom.ZoomConferenceHandler;
+import com.openexchange.switchboard.zoom.ZoomInterceptor;
 
 /**
- * {@link Bug28094Test}
+ * 
+ * {@link Activator}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.10.4
  */
-public class Bug28094Test extends AbstractSanitizing {
-     @Test
-     public void testInsecureHref() throws Exception {
-        String content = "<a href=\"http://www.raumausstatter-innung-schwalm-eder.de/"
-            + "index.php?eID=tx_cms_showpic&amp;file=uploads%2Fpics%2F13-06-Raumausstatter-JHV.jpg"
-            + "&amp;width=500m&amp;height=500&amp;bodyTag=%3Cbody%20bgColor%3D%22%23ffffff%22%3E"
-            + "&amp;wrap=%3Ca%20href%3D%22javascript%3Aclose%28%29%3B%22%3E%20%7C%20%3C%2Fa%3E"
-            + "&amp;md5=a0a07697cb8be1898b5e9ec79d249de2\">"
-            + "<span style='mso-fareast-font-family:\"Times New Roman\";color:windowtext;mso-fareast-language:DE;mso-no-proof:yes;text-decoration:none;text-underline:none'>"
-            + "<img border=0 width=144 height=76 id=\"Bild_x0020_9\" src=\"cid:image004.jpg@01CE6E59.FDD59220\" alt=\"http://www.raumausstatter-innung-schwalm-eder.de/typo3temp/pics/3794d580f5.jpg\">"
-            + "</span>"
-            + "</a>";
+public class Activator extends HousekeepingActivator {
 
-        String test = getHtmlService().sanitize(content, null, true, null, null);
+    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
-        Assert.assertTrue("Unexpected value: " + test, test.indexOf("javascript") < 0);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { HttpClientService.class, ConversionService.class, LeanConfigurationService.class };
     }
+
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("starting bundle {}", context.getBundle());
+        try {
+            Services.setServiceLookup(this);
+
+            /**
+             * Register CalendarInterceptor
+             */
+            registerService(CalendarInterceptor.class, new ZoomInterceptor(this));
+
+            /**
+             * Register CalendarHandler
+             */
+            registerService(CalendarHandler.class, new ZoomConferenceHandler());
+        } catch (Exception e) {
+            LOG.error("error starting {}", context.getBundle(), e);
+            throw e;
+        }
+
+    }
+
 }

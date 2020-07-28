@@ -47,32 +47,58 @@
  *
  */
 
-package com.openexchange.html.bugtests;
+package com.openexchange.switchboard.zoom;
 
-import org.junit.Assert;
-import org.junit.Test;
-import com.openexchange.html.AbstractSanitizing;
+import static com.openexchange.chronos.common.CalendarUtils.optExtendedParameterValue;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.Event;
 
 /**
- * {@link Bug28094Test}
+ * {@link Utils}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.10.4
  */
-public class Bug28094Test extends AbstractSanitizing {
-     @Test
-     public void testInsecureHref() throws Exception {
-        String content = "<a href=\"http://www.raumausstatter-innung-schwalm-eder.de/"
-            + "index.php?eID=tx_cms_showpic&amp;file=uploads%2Fpics%2F13-06-Raumausstatter-JHV.jpg"
-            + "&amp;width=500m&amp;height=500&amp;bodyTag=%3Cbody%20bgColor%3D%22%23ffffff%22%3E"
-            + "&amp;wrap=%3Ca%20href%3D%22javascript%3Aclose%28%29%3B%22%3E%20%7C%20%3C%2Fa%3E"
-            + "&amp;md5=a0a07697cb8be1898b5e9ec79d249de2\">"
-            + "<span style='mso-fareast-font-family:\"Times New Roman\";color:windowtext;mso-fareast-language:DE;mso-no-proof:yes;text-decoration:none;text-underline:none'>"
-            + "<img border=0 width=144 height=76 id=\"Bild_x0020_9\" src=\"cid:image004.jpg@01CE6E59.FDD59220\" alt=\"http://www.raumausstatter-innung-schwalm-eder.de/typo3temp/pics/3794d580f5.jpg\">"
-            + "</span>"
-            + "</a>";
+public class Utils {
 
-        String test = getHtmlService().sanitize(content, null, true, null, null);
+    private static final String TYPE_PARAMETER = "X-OX-TYPE";
+    private static final String ID_PARAMETER = "X-OX-ID";
+    private static final String PROVIDER_ZOOM = "zoom";
 
-        Assert.assertTrue("Unexpected value: " + test, test.indexOf("javascript") < 0);
+    static List<Conference> getZoomConferences(Event event) {
+        List<Conference> conferences = event.getConferences();
+        if (conferences == null || conferences.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Conference> retval = new ArrayList<>();
+        for (Conference conference : event.getConferences()) {
+            if (PROVIDER_ZOOM.equals(optExtendedParameterValue(conference.getExtendedParameters(), TYPE_PARAMETER))) {
+                retval.add(conference);
+            }
+        }
+
+        return retval;
     }
+
+    /**
+     * 
+     * Checks, if the two given conferences match according to their zoom id
+     *
+     * @param conf1 The first conference
+     * @param conf2 The second conference
+     * @return true if the zoom ids match, false otherwise
+     */
+    static boolean matches(Conference conf1, Conference conf2) {
+        if (conf1 == null || conf2 == null) {
+            return false;
+        }
+
+        String param1 = optExtendedParameterValue(conf1.getExtendedParameters(), ID_PARAMETER);
+        return null != param1 && param1.equals(optExtendedParameterValue(conf2.getExtendedParameters(), ID_PARAMETER));
+    }
+
 }

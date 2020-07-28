@@ -136,6 +136,10 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Check.quotaNotExceeded(storage, session);
         Check.noConflicts(storage, session, newEvent, newEvent.getAttendees());
         /*
+         * trigger calendar interceptors
+         */
+        interceptorRegistry.triggerInterceptorsOnBeforeCreate(newEvent);
+        /*
          * insert event, attendees, attachments & conferences
          */
         storage.getEventStorage().insertEvent(newEvent);

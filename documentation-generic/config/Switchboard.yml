@@ -1,0 +1,32 @@
+feature_name: Switchboard
+properties:
+    - key: com.openexchange.conference.switchboard.baseUri
+      description: |
+        Defines the base URI to the Switchboard API. Must be configured for communicating with the Switchboard service.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: switchboard.properties
+      packageName: open-xchange-switchboard
+      tags: ["Calendar", "Switchboard", "Conference"]
+    - key: com.openexchange.conference.switchboard.webhookSecret
+      description: |
+        Configures the webhook secret for communicating with the Switchboard service.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: switchboard.properties
+      packageName: open-xchange-switchboard
+      tags: ["Calendar", "Switchboard", "Conference"]
+    - key: com.openexchange.conference.switchboard.enableZoomInterceptor
+      description: |
+        Enables or disables integrity checks prior storing appointments that are associated with Zoom meetings. If enabled, incompatible start/endtimes or recurrence rules will be prevented.
+      defaultValue: true
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: switchboard.properties
+      packageName: open-xchange-switchboard
+      tags: ["Calendar", "Switchboard", "Conference"]

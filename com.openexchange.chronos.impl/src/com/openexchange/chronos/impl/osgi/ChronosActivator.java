@@ -72,6 +72,7 @@ import com.openexchange.chronos.service.AdministrativeFreeBusyService;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CalendarInterceptor;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.FreeBusyService;
@@ -144,6 +145,11 @@ public class ChronosActivator extends HousekeepingActivator {
             CalendarEventNotificationService notificationService = new CalendarEventNotificationServiceImpl(calendarHandlers);
             registerService(CalendarEventNotificationService.class, notificationService);
             /*
+             * track calendar interceptors
+             */
+            ServiceSet<CalendarInterceptor> calendarInterceptors = new ServiceSet<CalendarInterceptor>();
+            track(CalendarInterceptor.class, calendarInterceptors);
+            /*
              * register services
              */
             DefaultCalendarUtilities calendarUtilities = new DefaultCalendarUtilities(this);
@@ -152,7 +158,7 @@ public class ChronosActivator extends HousekeepingActivator {
                 props.put("RMIName", ChronosRMIService.RMI_NAME);
                 registerService(Remote.class, new ChronosRMIServiceImpl(calendarUtilities), props);
             }
-            registerService(CalendarService.class, new CalendarServiceImpl(this));
+            registerService(CalendarService.class, new CalendarServiceImpl(this, calendarInterceptors));
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(AdministrativeFreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, calendarUtilities);

@@ -92,11 +92,11 @@ public final class SaneScriptTags {
             return html;
         }
 
-        html = decode(html);
-        html = dropConcatenations(html);
-        html = dropScriptTags(sanitized, html);
+        String processed = decode(html);
+        processed = dropConcatenations(processed);
+        processed = dropScriptTags(sanitized, processed);
 
-        return html;
+        return sanitized[0] ? processed : html;
     }
 
     private static final Pattern PAT_URLDECODE_PERCENT = Pattern.compile("%25");

@@ -68,6 +68,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -131,9 +132,10 @@ public class ClearPerformer extends AbstractUpdatePerformer {
 
     private int deleteEvents(SearchTerm<?> searchTerm, SearchOptions searchOptions, long clientTimestamp) throws OXException {
         /*
-         * load original events
+         * load original events, ensuring that all relevant metadata for downstream interceptors is available
          */
-        EventField[] fields = getFields(new EventField[0]);
+        Set<EventField> interceptorFields = interceptorRegistry.getRelevantFields();
+        EventField[] fields = getFields(new EventField[0], interceptorFields.toArray(new EventField[interceptorFields.size()]));
         List<Event> originalEvents = storage.getEventStorage().searchEvents(searchTerm, searchOptions, fields);
         if (null == originalEvents || 0 == originalEvents.size()) {
             return 0;
@@ -178,7 +180,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
 
     private void deleteEvents(List<Event> eventsToDelete) throws OXException {
         /*
-         * collect data to delete & prepare tombstone data
+         * collect data to delete, prepare tombstone data & notify interceptors
          */
         List<String> eventIds = new ArrayList<String>(eventsToDelete.size());
         Map<String, List<Attachment>> attachmentsByEventId = new HashMap<String, List<Attachment>>();
@@ -193,6 +195,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
             if (null != originalEvent.getAttachments() && 0 < originalEvent.getAttachments().size()) {
                 attachmentsByEventId.put(originalEvent.getId(), originalEvent.getAttachments());
             }
+            interceptorRegistry.triggerInterceptorsOnBeforeDelete(originalEvent);
         }
         /*
          * insert tombstone data & perform deletion

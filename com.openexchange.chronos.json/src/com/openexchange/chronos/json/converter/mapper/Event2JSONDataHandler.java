@@ -50,6 +50,10 @@
 package com.openexchange.chronos.json.converter.mapper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -62,6 +66,7 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
@@ -101,14 +106,23 @@ public class Event2JSONDataHandler implements DataHandler {
          * Get data to serialize
          */
         Event convertee = (Event) object;
-        ArrayList<EventField> fields = new ArrayList<>();
+        Set<EventField> requestedFields = null;
         if (null != dataArguments && Strings.isNotEmpty(dataArguments.get(FIELDS))) {
+            requestedFields = new HashSet<EventField>();
             String sFields = dataArguments.get(FIELDS);
             for (String field : sFields.split(",")) {
-                fields.add(EventField.valueOf(field));
+                requestedFields.add(EventField.valueOf(field));
             }
-
         }
+
+        List<EventField> fields = new ArrayList<EventField>();
+        for (Entry<EventField, ? extends JsonMapping<? extends Object, Event>> entry : EventMapper.getInstance().getMappings().entrySet()) {
+            JsonMapping<? extends Object, Event> mapping = entry.getValue();
+            if ((null == requestedFields || requestedFields.contains(entry.getKey())) && mapping.isSet(convertee) && null != mapping.get(convertee)) {
+                fields.add(entry.getKey());
+            }
+        }
+
         String timeZone = null;
         if (null != dataArguments) {
             timeZone = dataArguments.get(TIMEZONE);
@@ -120,7 +134,7 @@ public class Event2JSONDataHandler implements DataHandler {
         ConversionResult result = new ConversionResult();
         JSONObject out = new JSONObject();
         try {
-            EventMapper.getInstance().serialize(convertee, out, fields.isEmpty() ? EventMapper.getInstance().getMappedFields(): fields.toArray(new EventField[fields.size()]), timeZone, session);
+            EventMapper.getInstance().serialize(convertee, out, fields.toArray(new EventField[fields.size()]), timeZone, session);
         } catch (JSONException e) {
             LOGGER.debug("Unable to convert event to JSON", e);
             result.addWarning(new OXException(e));
