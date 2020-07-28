@@ -688,7 +688,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     } else {
                         Document document = handler.getDocument();
                         handlePrettyPrint(options, document);
-                        html = hasBody ? document.outerHtml() : document.body().html();
+                        html = hasBody || document.body() == null ? document.outerHtml() : document.body().html();
                         htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                     }
                 } else {
@@ -717,7 +717,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     } else {
                         Document document = handler.getDocument();
                         handlePrettyPrint(options, document);
-                        html = hasBody ? document.outerHtml() : document.body().html();
+                        html = hasBody || document.body() == null ? document.outerHtml() : document.body().html();
                         htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                     }
                 }
