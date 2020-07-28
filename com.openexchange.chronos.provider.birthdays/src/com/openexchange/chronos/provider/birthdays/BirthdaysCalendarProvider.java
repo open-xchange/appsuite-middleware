@@ -87,6 +87,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -376,16 +377,31 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
         EventConverter eventConverter = new EventConverter(services, session.getUser().getLocale(), account.getUserId());
         int[] decodeEventId = eventConverter.decodeEventId(eventId);
         ContactService contactService = Tools.requireService(ContactService.class, services);
-        Contact contact = contactService.getContact(session, String.valueOf(decodeEventId[0]), String.valueOf(decodeEventId[1]));
-        Event event = null;
-        if (recurrenceId != null) {
-            event = eventConverter.getOccurrence(contact, recurrenceId);
-        } else {
-            event = eventConverter.getSeriesMaster(contact);
-        }
+        try {
+            Contact contact = contactService.getContact(session, String.valueOf(decodeEventId[0]), String.valueOf(decodeEventId[1]));
 
-        AlarmHelper alarmHelper = new AlarmHelper(services, context, account);
-        return alarmHelper.applyAlarms(event);
+            Event event = null;
+            if (recurrenceId != null) {
+                event = eventConverter.getOccurrence(contact, recurrenceId);
+            } else {
+                event = eventConverter.getSeriesMaster(contact);
+            }
+
+            AlarmHelper alarmHelper = new AlarmHelper(services, context, account);
+            return alarmHelper.applyAlarms(event);
+        } catch (OXException e) {
+            if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e) || ContactExceptionCodes.NO_ACCESS_PERMISSION.equals(e)) {
+                // Contact doesn't exist anymore or is inaccessible
+                // Deleting all existing alarms for this contact
+                getAlarmHelper(context, account).deleteAlarms(eventId);
+                return null;
+            }
+            throw e;
+        }
+    }
+
+    private AlarmHelper getAlarmHelper(Context context, CalendarAccount account) {
+        return new AlarmHelper(services, context, account);
     }
 
     @Override
