@@ -191,8 +191,14 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
      * Callback routine that is invoked after an existing account for the calendar provider has been updated.
      */
     public void onAccountUpdated() throws OXException {
-        onAccountDeleted();
-        onAccountCreated();
+        AlarmHelper alarmHelper = getAlarmHelper();
+        if (alarmHelper.hasDefaultAlarms()) {
+            List<Contact> contacts = getBirthdayContacts();
+            List<Event> seriesMasters = eventConverter.getSeriesMasters(contacts, null, null, getTimeZone());
+            alarmHelper.replaceAllAlarms(seriesMasters);
+        } else {
+            onAccountDeleted();
+        }
     }
 
     /**

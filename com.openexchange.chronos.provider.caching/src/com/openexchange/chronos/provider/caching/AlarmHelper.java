@@ -235,6 +235,28 @@ public class AlarmHelper {
     }
 
     /**
+     * Replaces all alarms with new ones.
+     * Basically the same as calling both {@link #deleteAllAlarms()} and {@link #insertDefaultAlarms(List)} but it is performed in one storage operation.
+     */
+    public void replaceAllAlarms(List<Event> events) throws OXException {
+        final List<Alarm> defaultAlarms = getDefaultAlarms();
+        final List<Alarm> defaultDateAlarms = getDateDefaultAlarms();
+        new OSGiCalendarStorageOperation<Void>(services, context.getContextId(), account.getAccountId()) {
+
+            @Override
+            protected Void call(CalendarStorage storage) throws OXException {
+                storage.getAlarmStorage().deleteAlarms(account.getUserId());
+                storage.getAlarmTriggerStorage().deleteTriggers(account.getUserId());
+                if ((null == defaultAlarms || defaultAlarms.isEmpty()) && (null == defaultDateAlarms || defaultDateAlarms.isEmpty())) {
+                    return null;
+                }
+                insertDefaultAlarms(storage, defaultAlarms, defaultDateAlarms, events);
+                return null;
+            }
+        }.executeUpdate();
+    }
+
+    /**
      * Gets a value indicating whether default alarms are configured for the calendar account or not.
      *
      * @return <code>true</code> if default alarms are configured, <code>false</code>, otherwise
@@ -650,7 +672,7 @@ public class AlarmHelper {
     }
 
     /**
-     * Try and shift the trigger to a more recent occurrence if trigger time is before requested range as needed 
+     * Try and shift the trigger to a more recent occurrence if trigger time is before requested range as needed
      *
      * @param storage The {@link CalendarStorage}
      * @param trigger The {@link AlarmTrigger} to shift
@@ -679,7 +701,7 @@ public class AlarmHelper {
     /**
      * Prepares new alarms for the given default alarms
      *
-     * @param storage The initialized {@link CalendarStorage} to use 
+     * @param storage The initialized {@link CalendarStorage} to use
      * @param defaultAlarms The default alarms
      * @return A list of new {@link Alarm}s
      * @throws OXException
