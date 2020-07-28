@@ -112,12 +112,12 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
 
         return ScheduleStatus.SENT;
     }
-    
+
     /**
      * Gets a value indicating whether to prefer the <i>no-reply</i> transport account when sending notification mails, or to stick to
      * the user's primary mail transport account instead.
      * <p/>
-     * By default, the decisions is made based on the user's and session's capabilities. Override if applicable. 
+     * By default, the decisions is made based on the user's and session's capabilities. Override if applicable.
      *
      * @param session The session to decide the preference for
      * @return <code>true</code> if the no-reply account should be used, <code>false</code>, otherwise
@@ -130,9 +130,9 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
             return true;
         }
         /*
-         * otherwise use no-reply if session is restricted and has no required scope
+         * otherwise use no-reply only if session is restricted and has no required scope
          */
-        return AppPasswordUtils.isNotRestrictedOrHasScopes(session, "write_mail");
+        return false == AppPasswordUtils.isNotRestrictedOrHasScopes(session, "write_mail");
     }
 
     protected Map<String, String> getAdditionalHeaders(ChangeNotification notification) {
