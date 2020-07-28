@@ -1,3 +1,9 @@
+open-xchange-blackwhitelist (7.10.4-3) stable; urgency=medium
+
+  * First candidate for 7.10.4 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 28 Jul 2020 10:24:07 +0000
+
 open-xchange-blackwhitelist (7.10.4-2) stable; urgency=medium
 
   * Second preview of 7.10.4 release
