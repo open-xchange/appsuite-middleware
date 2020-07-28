@@ -198,8 +198,4 @@ public class IMipTransportProvider extends AbstractMailTransportProvider {
         return subject;
     }
 
-    @Override
-    protected boolean preferNoReplyAccount(Session session) {
-        return false;
-    }
 }
