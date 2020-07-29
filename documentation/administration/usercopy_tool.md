@@ -68,7 +68,11 @@ Any additional permissions on folders are not copied. The resulting folders of t
 
 ### Calendar
 
-TODO
+Besides the user's primary calendar account configuration, all further calendar accounts are copied, yet without any cached calendar data that would be retrieved upon the first usage.
+
+For the internal default account, all private calendar folders and the contained appointments are transferred. This includes the event data itself, alarms and attendees. Attachments are implicitly taken over, too.   
+
+Calendar users associated with the appointments (either as organizer or attendee) are exchanged, so that individual calendar users other than the copied user are effectively converted to external calendar users. Group- and resource attendees are silently omitted.
 
 
 ### Contacts
