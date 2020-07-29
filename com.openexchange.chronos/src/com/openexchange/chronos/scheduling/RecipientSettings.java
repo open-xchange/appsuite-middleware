@@ -52,6 +52,7 @@ package com.openexchange.chronos.scheduling;
 import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.regional.RegionalSettings;
 
@@ -65,10 +66,17 @@ public interface RecipientSettings {
 
     /**
      * Gets the recipient.
-     * 
+     *
      * @return The recipient
      */
     CalendarUser getRecipient();
+
+    /**
+     * Gets the calendar user type of the recipient.
+     *
+     * @return The calendar user type of the recipient
+     */
+    CalendarUserType getRecipientType();
 
     /**
      * Gets a value indicating the preferred message format for the recipient.
@@ -82,28 +90,28 @@ public interface RecipientSettings {
 
     /**
      * Gets the preferred locale to use for the recipient.
-     * 
+     *
      * @return The preferred locale
      */
     Locale getLocale();
 
     /**
      * Gets the preferred timezone to use for the recipient.
-     * 
+     *
      * @return The preferred timezone
      */
     TimeZone getTimeZone();
 
     /**
      * Gets customized regional settings to use for the recipient, if configured.
-     * 
+     *
      * @return The preferred regional settings, or <code>null</code> if not configured
      */
     RegionalSettings getRegionalSettings();
-    
+
     /**
      * Gets a direct link to a specific event, from the recipient point of view.
-     * 
+     *
      * @param event The event to generate the link for
      * @return The direct link, or <code>null</code> if not applicable
      */

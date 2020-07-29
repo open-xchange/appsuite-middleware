@@ -462,6 +462,16 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether an attendee represents a <i>resource</i> or <i>room</i>.
+     *
+     * @param attendee The attendee to check
+     * @return <code>true</code> if the attendee is a resource or room, <code>false</code>, otherwise
+     */
+    public static boolean isResourceOrRoom(Attendee attendee) {
+        return null != attendee && (CalendarUserType.RESOURCE.matches(attendee.getCuType()) || CalendarUserType.ROOM.matches(attendee.getCuType()));
+    }
+
+    /**
      * Gets a value indicating whether a collection of attendees contains a specific internal attendee based on its entity identifier or
      * not.
      *

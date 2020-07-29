@@ -72,7 +72,7 @@ public class Utils {
 
     /**
      * Selects a specific event from a calendar object resource that is referenced by the supplied list of changes.
-     * 
+     *
      * @param resource The calendar object resource to select the event from
      * @param changes The changes for which to get the event for
      * @return The described event, or the resource's first event if no better match could be selected
@@ -92,7 +92,7 @@ public class Utils {
 
     /**
      * Gets a calendar user's display name, falling back to his e-mail or URI properties as needed.
-     * 
+     *
      * @param calendarUser The calendar user to get the display name from
      * @return The display name
      */
@@ -115,7 +115,7 @@ public class Utils {
     public static boolean isInternalCalendarUser(CalendarUser calendarUser) {
         if (Attendee.class.isAssignableFrom(calendarUser.getClass())) {
             Attendee attendee = (Attendee) calendarUser;
-            return CalendarUtils.isInternal(attendee);
+            return CalendarUtils.isInternalUser(attendee);
         }
         return CalendarUtils.isInternal(calendarUser, CalendarUserType.INDIVIDUAL);
     }
