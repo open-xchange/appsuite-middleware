@@ -173,15 +173,15 @@ public enum UserExceptionCode implements DisplayableOXExceptionCode {
         UserExceptionMessage.UPDATE_ATTRIBUTES_FAILED_DISPLAY, Category.CATEGORY_ERROR, 19),
 
     /**
-     * Invalid password length. The password must be of minimum length %1$d.
+     * Invalid password length. The password must have a minimum length of %1$d characters.
      */
-    INVALID_MIN_LENGTH("Invalid password length. The password must have a minimum length of %1$d.",
+    INVALID_MIN_LENGTH("The password must have a minimum length of %1$d characters.",
         UserExceptionMessage.INVALID_MIN_LENGTH_DISPLAY, Category.CATEGORY_USER_INPUT, 20),
 
     /**
-     * Invalid password length. The password must be of maximum length %1$d.
+     * Invalid password length. The password must have a maximum length of %1$d characters.
      */
-    INVALID_MAX_LENGTH("Invalid password length. The password must have a maximum length of %1$d.",
+    INVALID_MAX_LENGTH("The password must have a maximum length of %1$d characters.",
         UserExceptionMessage.INVALID_MAX_LENGTH_DISPLAY, Category.CATEGORY_USER_INPUT, 21),
 
     /**
