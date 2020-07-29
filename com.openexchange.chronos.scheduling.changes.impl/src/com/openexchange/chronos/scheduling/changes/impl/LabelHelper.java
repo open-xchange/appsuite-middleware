@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.scheduling.changes.impl;
 
-import com.openexchange.chronos.Attendee;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
@@ -76,7 +76,6 @@ public class LabelHelper {
 
     final Event update;
     final CalendarUser originator;
-    final CalendarUser recipient;
 
     final MessageContext messageContext;
 
@@ -104,10 +103,9 @@ public class LabelHelper {
         this.update = update;
         this.recipientSettings = recipientSettings;
         this.originator = originator;
-        this.recipient = recipientSettings.getRecipient();
         this.comment = comment;
         this.seriesMaster = seriesMaster;
-        this.delegationState = getDelegationState(originator, recipient);
+        this.delegationState = getDelegationState(originator, recipientSettings.getRecipient());
         this.dateHelper = new DateHelper(update, recipientSettings.getLocale(), recipientSettings.getTimeZone(), recipientSettings.getRegionalSettings());
         this.serviceLookup = serviceLookup;
     }
@@ -226,10 +224,10 @@ public class LabelHelper {
     }
 
     public String getAttachmentNote() {
-        if (update.getAttachments() == null || update.getAttachments().isEmpty() || false == Utils.isInternalCalendarUser(recipient)) {
-            return "";
+        if (null != update.getAttachments() && false == update.getAttachments().isEmpty() && isInternal(recipientSettings.getRecipient(), recipientSettings.getRecipientType()) && CalendarUserType.INDIVIDUAL.matches(recipientSettings.getRecipientType())) {
+            return new SentenceImpl(Messages.HAS_ATTACHMENTS).add(getDirectLink(), ArgumentType.REFERENCE).getMessage(messageContext);
         }
-        return new SentenceImpl(Messages.HAS_ATTACHMENTS).add(getDirectLink(), ArgumentType.REFERENCE).getMessage(messageContext);
+        return "";
     }
 
     public String getWhenLabel() {
@@ -292,10 +290,10 @@ public class LabelHelper {
         //        if (recipient.hasRole(ITipRole.PRINCIPAL)) {
         //            return new Sentence(Messages.PRINCIPAL_JUSTIFICATION).getMessage(messageContext);
         //        } else
-        if (CalendarUtils.matches(recipient, update.getOrganizer())) {
+        if (CalendarUtils.matches(recipientSettings.getRecipient(), update.getOrganizer())) {
             return new SentenceImpl(Messages.ORGANIZER_JUSTIFICATION).getMessage(messageContext);
-        } else if (Attendee.class.isAssignableFrom(recipient.getClass()) && CalendarUserType.RESOURCE.matches(((Attendee) recipient).getCuType())) {
-            return new SentenceImpl(Messages.RESOURCE_MANAGER_JUSTIFICATION).add(recipient.getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
+        } else if (CalendarUserType.RESOURCE.matches(recipientSettings.getRecipientType()) || CalendarUserType.ROOM.matches(recipientSettings.getRecipientType())) {
+            return new SentenceImpl(Messages.RESOURCE_MANAGER_JUSTIFICATION).add(Utils.getDisplayName(recipientSettings.getRecipient()), ArgumentType.PARTICIPANT).getMessage(messageContext);
         }
         return null;
     }

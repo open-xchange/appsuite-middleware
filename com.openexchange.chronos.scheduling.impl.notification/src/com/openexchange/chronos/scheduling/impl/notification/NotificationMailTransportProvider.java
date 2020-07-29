@@ -59,6 +59,7 @@ import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.scheduling.ChangeNotification;
 import com.openexchange.chronos.scheduling.RecipientSettings;
@@ -120,7 +121,7 @@ public class NotificationMailTransportProvider extends AbstractMailTransportProv
     @NonNull
     private ScheduleStatus sendMail(Session session, CalendarUser originator, CalendarUser recipient, ChangeAction action, ScheduleChange scheduleChange, CalendarObjectResource resource, RecipientSettings recipientSettings, Map<String, String> additionals) {
         try {
-            if (false == canHandle(recipient)) {
+            if (false == CalendarUtils.isInternal(recipient, recipientSettings.getRecipientType())) {
                 return ScheduleStatus.REJECTED;
             }
 
@@ -154,10 +155,6 @@ public class NotificationMailTransportProvider extends AbstractMailTransportProv
             LOGGER.error("Unable to send message from {} to {}", originator, recipient, e);
         }
         return ScheduleStatus.NOT_DELIVERED;
-    }
-
-    private boolean canHandle(CalendarUser recipient) {
-        return Utils.isInternalCalendarUser(recipient);
     }
 
     private String getSubject(RecipientSettings recipientSettings, ChangeAction action, CalendarUser originator, String summary, ParticipationStatus partStat) {

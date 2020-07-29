@@ -540,3 +540,14 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar"]
+    - key: com.openexchange.calendar.notifyResourceAttendees
+      description: |
+        Configures whether notification mails for new, modified and deleted appointments are sent to internal resource attendees or not.
+      defaultValue: true
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      file: calendar.properties
+      packageName: open-xchange-core
+      related: com.openexchange.noreply.address
+      tags: ["Calendar", "Notification", "Resource"]
