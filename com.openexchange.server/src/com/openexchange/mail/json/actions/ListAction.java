@@ -90,7 +90,7 @@ public final class ListAction extends AbstractMailAction {
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
             // Read in parameters
-            ColumnCollection columnCollection = req.checkColumnsAndHeaders();
+            ColumnCollection columnCollection = req.checkColumnsAndHeaders(true);
             int[] columns = columnCollection.getFields();
             String[] headers = columnCollection.getHeaders();
             /*

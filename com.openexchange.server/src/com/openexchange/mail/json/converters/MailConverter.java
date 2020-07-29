@@ -218,7 +218,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     }
 
     private void convertMailThreads(final MailThreads mailThreads, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
-        List<Column> columns = MailRequest.requireColumnsAndHeaders(requestData).getColumns();
+        List<Column> columns = MailRequest.requireColumnsAndHeaders(requestData, false).getColumns();
         String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
         TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
         tmp = null;
@@ -329,7 +329,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
          *
          * [{ id: 1234, folder_id: 'default0/INBOX', thread: [{ id: 1234, folder_id: 'default0/INBOX'}, {id: 4711, folder_id: 'default0/INBOX' }, ...]
          */
-        List<Column> columns = MailRequest.requireColumnsAndHeaders(requestData).getColumns();
+        List<Column> columns = MailRequest.requireColumnsAndHeaders(requestData, false).getColumns();
         String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
         final TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
         tmp = null;
@@ -481,7 +481,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     }
 
     private void convertMultiple4List(final Collection<MailMessage> mails, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
-        List<Column> columns = MailRequest.requireColumnsAndHeaders(requestData).getColumns();
+        List<Column> columns = MailRequest.requireColumnsAndHeaders(requestData, false).getColumns();
         String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
         TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
         tmp = null;
@@ -531,7 +531,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     }
 
     private void convertMultiple4All(final Collection<MailMessage> mails, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
-        List<Column> columns = MailRequest.requireColumnsAndHeaders(requestData).getColumns();
+        List<Column> columns = MailRequest.requireColumnsAndHeaders(requestData, false).getColumns();
         String sort = requestData.getParameter(AJAXServlet.PARAMETER_SORT);
         String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
         TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());

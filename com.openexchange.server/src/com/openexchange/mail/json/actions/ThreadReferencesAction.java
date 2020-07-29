@@ -102,7 +102,7 @@ public class ThreadReferencesAction extends AbstractMailAction {
     protected AJAXRequestResult perform(MailRequest req) throws OXException, JSONException {
         // Read parameters
         String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-        ColumnCollection columnCollection = req.checkColumnsAndHeaders();
+        ColumnCollection columnCollection = req.checkColumnsAndHeaders(true);
         int[] columns = columnCollection.getFields();
         String[] headers = columnCollection.getHeaders();
         String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);

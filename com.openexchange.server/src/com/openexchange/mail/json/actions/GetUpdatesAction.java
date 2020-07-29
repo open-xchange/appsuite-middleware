@@ -110,7 +110,7 @@ public final class GetUpdatesAction extends AbstractMailAction {
             final OXJSONWriter jsonWriter = new OXJSONWriter();
             jsonWriter.array();
             if (!bIgnoreModified || !bIgnoreDelete) {
-                ColumnCollection columnCollection = req.checkColumnsAndHeaders();
+                ColumnCollection columnCollection = req.checkColumnsAndHeaders(true);
                 int[] columns = columnCollection.getFields();
                 int userId = session.getUserId();
                 int contextId = session.getContextId();

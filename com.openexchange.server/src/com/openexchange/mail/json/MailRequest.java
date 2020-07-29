@@ -216,10 +216,11 @@ public final class MailRequest {
      * Checks for columns.
      *
      * @param requestData The associated request data
+     * @param replaceDateField Whether to replace date field with sent/received date dependent on configuration (see <code>"com.openexchange.mail.preferSentDate"</code>) or to keep it as-is
      * @return The column collection
      * @throws OXException If parameter is missing
      */
-    public static ColumnCollection requireColumnsAndHeaders(AJAXRequestData requestData) throws OXException {
+    public static ColumnCollection requireColumnsAndHeaders(AJAXRequestData requestData, boolean replaceDateField) throws OXException {
         String parameter = requestData.getParameter(PARAMETER_COLUMNS);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_COLUMNS);
@@ -240,13 +241,17 @@ public final class MailRequest {
             for (String s : sa) {
                 int field = Tools.getUnsignedInteger(s);
                 if (field > 0) {
-                    if (field == MailListField.DATE.getField()) {
+                    if (replaceDateField && field == MailListField.DATE.getField()) {
                         field = MailProperties.getInstance().isPreferSentDate(userId, contextId) ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
                     }
                     l.add(Column.field(field));
                 } else {
                     if (MailJSONField.DATE.getKey().equalsIgnoreCase(s)) {
-                        field = MailProperties.getInstance().isPreferSentDate(userId, contextId) ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
+                        if (replaceDateField) {
+                            field = MailProperties.getInstance().isPreferSentDate(userId, contextId) ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
+                        } else {
+                            field = MailListField.DATE.getField();
+                        }
                         l.add(Column.field(field));
                     } else {
                         l.add(Column.header(s));
@@ -269,11 +274,12 @@ public final class MailRequest {
     /**
      * Checks for columns.
      *
+     * @param replaceDateField Whether to keep date file or to replace it with sent/received date dependent on configuration (see <code>"com.openexchange.mail.preferSentDate"</code>)
      * @return The column collection
      * @throws OXException If parameter is missing
      */
-    public ColumnCollection checkColumnsAndHeaders() throws OXException {
-        return requireColumnsAndHeaders(requestData);
+    public ColumnCollection checkColumnsAndHeaders(boolean replaceDateField) throws OXException {
+        return requireColumnsAndHeaders(requestData, replaceDateField);
     }
 
     /**

@@ -234,7 +234,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 LogProperties.put(LogProperties.Name.MAIL_FULL_NAME, arg.getFullname());
                 LogProperties.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.toString(arg.getAccountId()));
             }
-            ColumnCollection columnCollection = req.checkColumnsAndHeaders();
+            ColumnCollection columnCollection = req.checkColumnsAndHeaders(true);
             int[] columns = columnCollection.getFields();
             String[] headers = columnCollection.getHeaders();
             String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
