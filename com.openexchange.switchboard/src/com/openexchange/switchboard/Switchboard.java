@@ -111,8 +111,9 @@ public class Switchboard {
     public void update(Conference conference, Event update, long timestamp) {
         try {
             post(serialize(UPDATED, conference, update, timestamp));
+            LOG.info("Successfully sent {} for event {} and conference {} to switchboard.", UPDATED, update.getId(), conference.getId());
         } catch (JSONException | OXException e) {
-            LOG.error("Unable to searlize the conference.", e);
+            LOG.error("Unable to send conference update to the switchboard.", e);
         }
     }
 
@@ -125,8 +126,9 @@ public class Switchboard {
     public void delete(Conference conference, long timestamp) {
         try {
             post(serialize(DELETED, conference, null, timestamp));
+            LOG.info("Successfully sent {} for conference {} to switchboard.", UPDATED, conference.getId());
         } catch (JSONException | OXException e) {
-            LOG.error("Unable to searlize the conference.", e);
+            LOG.error("Unable to send conference delete to the switchboard.", e);
         }
     }
 
