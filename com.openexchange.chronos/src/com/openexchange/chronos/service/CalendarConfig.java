@@ -184,6 +184,16 @@ public interface CalendarConfig {
     boolean isResolveGroupAttendees();
 
     /**
+     * Gets a value indicating whether notifications to <i>internal</i> resource attendees are are enabled or not.
+     * <p/>
+     * <i>External</i> attendees of calendar user type <code>RESOURCE</code> are always considered for scheduling messages, independently
+     * of this setting.
+     *
+     * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
+     */
+    boolean isNotifyResourceAttendees();
+
+    /**
      * Gets the configured minimum search pattern length.
      *
      * @return The minimum search pattern length, or <code>0</code> for no limitation
