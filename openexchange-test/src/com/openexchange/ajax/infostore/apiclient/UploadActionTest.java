@@ -55,12 +55,11 @@ public class UploadActionTest extends InfostoreApiClientTest {
 
     @Test
     public void testLargeFileUpload() throws Exception {
-
         final File file = File.createTempFile("test", "bin");
         file.deleteOnExit();
         BufferedOutputStream out = null;
         try {
-            out = new BufferedOutputStream(new FileOutputStream(file), 1000000);
+            out = new BufferedOutputStream(new FileOutputStream(file), 800000);
             for (int i = 0; i < SIZE; i++) {
                 out.write(megabyte);
                 out.flush();
@@ -78,7 +77,6 @@ public class UploadActionTest extends InfostoreApiClientTest {
     // Bug 3928
     @Test
     public void testVersionCommentForNewDocument() throws Exception {
-
         final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.jpg");
         String id = uploadInfoItem(null, file, MIME_IMAGE_JPG, "my comment");
 
