@@ -52,6 +52,7 @@ package com.openexchange.ajax;
 import java.io.File;
 import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.test.TestInit;
 
 public abstract class AttachmentTest extends AbstractAJAXSession {
@@ -63,7 +64,7 @@ public abstract class AttachmentTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        testFile2 = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        testFile = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.html.txt");
+        testFile2 = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.html.txt");
     }
 }

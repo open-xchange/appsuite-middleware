@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-pns-impl
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -52,6 +52,8 @@ GLOBIGNORE='*'
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Jul 28 2020 Thorben Betten <thorben.betten@open-xchange.com>
+First candidate for 7.10.4 release
 * Tue Jun 30 2020 Thorben Betten <thorben.betten@open-xchange.com>
 Second preview of 7.10.4 release
 * Wed May 20 2020 Thorben Betten <thorben.betten@open-xchange.com>

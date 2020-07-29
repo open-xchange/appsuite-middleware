@@ -54,13 +54,14 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Date;
+
 import javax.mail.internet.MailDateFormat;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
+
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.ajax.mail.actions.SearchRequest;

@@ -1,3 +1,9 @@
+open-xchange-userfeedback (7.10.4-3) stable; urgency=medium
+
+  * First candidate for 7.10.4 release
+
+ -- Martin Schneider <martin.schneider@open-xchange.com>  Tue, 28 Jul 2020 10:25:13 +0000
+
 open-xchange-userfeedback (7.10.4-2) stable; urgency=medium
 
   * Second preview of 7.10.4 release
