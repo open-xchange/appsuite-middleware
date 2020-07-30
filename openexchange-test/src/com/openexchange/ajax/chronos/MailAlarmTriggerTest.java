@@ -229,7 +229,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
                 MailListElement element = new MailListElement();
                 element.setFolder("default0/INBOX");
                 element.setId(mail.get(0));
-                mailApi.deleteMails(getSessionId(), Collections.singletonList(element), L(Long.MAX_VALUE));
+                mailApi.deleteMails(getSessionId(), Collections.singletonList(element), L(Long.MAX_VALUE), null, null);
                 found++;
                 boolean matchAnySentDate = false;
                 long closest = 0;

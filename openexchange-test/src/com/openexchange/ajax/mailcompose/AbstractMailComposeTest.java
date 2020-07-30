@@ -180,7 +180,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
             mailListElement.setId(dest.getId());
             body.add(mailListElement);
         }
-        mailApi.deleteMails(getApiClient().getSession(), body, timestamp);
+        mailApi.deleteMails(getApiClient().getSession(), body, timestamp, null, null);
         foldersApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "0", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
         super.tearDown();
     }

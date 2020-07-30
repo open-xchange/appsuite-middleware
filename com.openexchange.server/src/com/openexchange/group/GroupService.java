@@ -114,6 +114,8 @@ public interface GroupService {
 
     /**
      * Returns the all groups of a given context.
+     * <p/>
+     * <b>Note:</b> If the request originates from a client, the method {@link #getGroups(Session, boolean)} should be preferred.
      *
      * @param ctx The context
      * @param loadMembers Whether to load members or not.
@@ -134,6 +136,9 @@ public interface GroupService {
 
     /**
      * Searches for groups by their display name.
+     * <p/>
+     * <b>Note:</b> If the request originates from a client, the method {@link #searchGroups(Session, String, boolean)} should be
+     * preferred.
      *
      * @param context The context
      * @param pattern The pattern to search for
@@ -145,6 +150,8 @@ public interface GroupService {
 
     /**
      * Lists all groups in the given context
+     * <p/>
+     * <b>Note:</b> If the request originates from a client, the method {@link #getGroups(Session, boolean)} should be preferred.
      *
      * @param context The context
      * @param loadMembers Whether to load member or not
@@ -187,6 +194,8 @@ public interface GroupService {
 
     /**
      * Similar to {@link #search(Context, String, boolean)} but sorts the results according to the use count.
+     * <p/>
+     * Additionally, groups that are configured to be hidden are filtered implicitly from the results.
      *
      * @param session The user session
      * @param pattern this pattern will be searched in the displayName of the group.
@@ -194,16 +203,18 @@ public interface GroupService {
      * @return an array of groups that match the search pattern sorted by use count.
      * @throws OXException if searching has some storage related problem.
      */
-    public Group[] searchGroups(Session session, String pattern, boolean loadMembers) throws OXException;
+    Group[] searchGroups(Session session, String pattern, boolean loadMembers) throws OXException;
 
     /**
      * Similar to {@link #getGroups(Context, boolean)} but sorts the results according to the use count.
+     * <p/>
+     * Additionally, groups that are configured to be hidden are filtered implicitly from the results.
      *
      * @param session The user session
      * @param loadMembers Whether to load members or not.
      * @return An array of groups
      * @throws OXException If group cannot be returned
      */
-    public Group[] getGroups(Session session, boolean loadMembers) throws OXException;
+    Group[] getGroups(Session session, boolean loadMembers) throws OXException;
 
 }

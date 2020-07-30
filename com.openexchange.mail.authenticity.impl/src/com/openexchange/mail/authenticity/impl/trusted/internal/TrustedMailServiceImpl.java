@@ -121,15 +121,30 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
         }
     };
 
-    private final Map<String, List<TrustedMail>> trustedMailAddressesPerTenant;
-    private final List<TrustedMail> fallbackTenant;
-
-    private enum Protocol {
+    private static enum Protocol {
         file,
         http,
         https;
     }
 
+    /**
+     * Initializes the fetchers
+     *
+     * @return An {@link ImmutableMap} with the fetchers
+     */
+    private static ImmutableMap<Protocol, TrustedMailIconFetcher> initializeFetchers() {
+        ImmutableMap.Builder<Protocol, TrustedMailIconFetcher> builder = ImmutableMap.builder();
+        TrustedMailIconURLFetcher fetcher = new TrustedMailIconURLFetcher();
+        builder.put(Protocol.http, fetcher);
+        builder.put(Protocol.https, fetcher);
+        builder.put(Protocol.file, new TrustedMailIconFileFetcher());
+        return builder.build();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final Map<String, List<TrustedMail>> trustedMailAddressesPerTenant;
+    private final List<TrustedMail> fallbackTenant;
     private final Map<Protocol, TrustedMailIconFetcher> fetchers;
 
     /**
@@ -140,7 +155,7 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
         this.trustedMailAddressesPerTenant = new ConcurrentHashMap<>(4);
         this.fallbackTenant = new CopyOnWriteArrayList<>();
 
-        fetchers = initialiseFetchers();
+        fetchers = initializeFetchers();
 
         ConfigurationService configurationService = services.getService(ConfigurationService.class);
         TimerService timerService = services.getService(TimerService.class);
@@ -148,22 +163,8 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
     }
 
     /**
-     * Initialises the fetchers
-     * 
-     * @return An {@link ImmutableMap} with the fetchers
-     */
-    private ImmutableMap<Protocol, TrustedMailIconFetcher> initialiseFetchers() {
-        ImmutableMap.Builder<Protocol, TrustedMailIconFetcher> builder = ImmutableMap.builder();
-        TrustedMailIconURLFetcher fetcher = new TrustedMailIconURLFetcher();
-        builder.put(Protocol.http, fetcher);
-        builder.put(Protocol.https, fetcher);
-        builder.put(Protocol.file, new TrustedMailIconFileFetcher());
-        return builder.build();
-    }
-
-    /**
      * Initialises the service
-     * 
+     *
      * @param configurationService The {@link ConfigurationService}
      */
     private boolean init(ConfigurationService configurationService) {
@@ -327,7 +328,7 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
 
     /**
      * Gets the {@link TrustedMail}
-     * 
+     *
      * @param mailAddress A mail address or a mail address configuration
      * @param images The map of configured images
      * @param fallbackImage The fall-back image
@@ -351,7 +352,7 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
 
     /**
      * Gets the {@link Icon} from the specified resource URL for the specified tenant
-     * 
+     *
      * @param resourceUrl The resource URL that points to the image
      * @param tenant The tenant
      * @return The {@link Icon} or <code>null</code> if the specified resource URL points to
@@ -382,7 +383,7 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
 
     /**
      * Returns the appropriate {@link TrustedMailIconFetcher} for the specified resource URL
-     * 
+     *
      * @param resourceUrl The resource URL
      * @return the appropriate {@link TrustedMailIconFetcher} for the specified resource URL
      *         or <code>null</code> if none found
@@ -403,7 +404,7 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
 
     /**
      * Logs an error for the specified resource URL and tenant
-     * 
+     *
      * @param tenant The tenant
      * @param resourceURL The resource URL
      */
@@ -418,7 +419,7 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
     /**
      * Returns the value of the {@link MailAuthenticityResultKey#TRUSTED_SENDER} attribute from the specified
      * {@link MailMessage}
-     * 
+     *
      * @param msg The {@link MailMessage}
      * @return the value of the {@link MailAuthenticityResultKey#TRUSTED_SENDER} attribute or <code>null</code>
      *         if the key is either absent or is assigned a <code>null</code> value.

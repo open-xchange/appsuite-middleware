@@ -50,6 +50,7 @@
 package com.openexchange.group.internal.osgi;
 
 import com.openexchange.config.admin.HideAdminService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.group.internal.CachingGroupStorage;
@@ -82,7 +83,7 @@ public class GroupActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class[] { HideAdminService.class, PrincipalUseCountService.class };
+        return new Class[] { HideAdminService.class, PrincipalUseCountService.class, LeanConfigurationService.class };
     }
 
     @Override

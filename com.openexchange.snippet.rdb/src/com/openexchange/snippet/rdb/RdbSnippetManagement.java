@@ -53,6 +53,7 @@ import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.snippet.rdb.Services.getService;
 import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
+import static com.openexchange.snippet.utils.SnippetUtils.sanitizeHtmlContent;
 import java.io.Closeable;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -503,6 +504,8 @@ public final class RdbSnippetManagement implements SnippetManagement {
             }
         }
 
+        String contentSubType = determineContentSubtype(snippet.getMisc());
+
         DatabaseService databaseService = getDatabaseService();
         int contextId = this.contextId;
         Connection con = databaseService.getWritable(contextId);
@@ -526,7 +529,13 @@ public final class RdbSnippetManagement implements SnippetManagement {
             }
             // Store content
             {
-                final String content = sanitizeContent(snippet.getContent());
+                String content = snippet.getContent();
+                if (content == null) {
+                    // Set to empty string
+                    content = "";
+                } else if (contentSubType.indexOf("htm") >= 0) {
+                    content = sanitizeHtmlContent(content);
+                }
                 if (null != content) {
                     stmt = con.prepareStatement("INSERT INTO snippetContent (cid, user, id, content) VALUES (?, ?, ?, ?)");
                     stmt.setInt(1, contextId);
@@ -1160,6 +1169,14 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 databaseService.backReadOnly(contextId, con);
             }
         }
+    }
+
+    private static String determineContentSubtype(final Object misc) throws OXException {
+        if (misc == null) {
+            return "plain";
+        }
+        final String ct = SnippetUtils.parseContentTypeFromMisc(misc);
+        return Strings.asciiLowerCase(new ContentType(ct).getSubType());
     }
 
 }

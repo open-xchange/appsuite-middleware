@@ -77,10 +77,12 @@ import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.metadata.DriveMetadata;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 
 /**
@@ -421,7 +423,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 return 1;
             } else {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Non-trivial conflicting change detected [root={}, path={}]:\n{}", 
+                    LOG.debug("Non-trivial conflicting change detected [root={}, path={}]:\n{}",
                         session.getRootFolderID(), path, dumpComparisonDetails(comparison));
                 }
                 /*
@@ -511,17 +513,24 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
         if (session.getDriveSession().useDriveMeta() && DriveConstants.METADATA_FILENAME.equals(version.getName())) {
             return false;
         }
+        /*
+         * check permissions based on parent folder, as well as the file's object permissions if set
+         */
         int writePermission = getPermission().getWritePermission();
         if (FileStoragePermission.WRITE_ALL_OBJECTS <= writePermission) {
             return true;
-        } else if (FileStoragePermission.WRITE_OWN_OBJECTS > writePermission) {
-            return false;
-        } else if (FileStoragePermission.WRITE_OWN_OBJECTS == writePermission) {
-            ServerFileVersion serverFileVersion = ServerFileVersion.valueOf(version, path, session);
-            return serverFileVersion.getFile().getCreatedBy() == session.getServerSession().getUserId();
-        } else {
-            throw new UnsupportedOperationException("unknown permission: " + writePermission);
         }
+        File file = session.getStorage().getFile(ServerFileVersion.valueOf(version, path, session).getFile().getId());
+        if (FileStoragePermission.WRITE_OWN_OBJECTS == writePermission && file.getCreatedBy() == session.getServerSession().getUserId()) {
+            return true;
+        }
+        if (FileStorageObjectPermission.WRITE <= getMaxApplicablePermissions(file.getObjectPermissions(), session.getServerSession().getUser())) {
+            return true;
+        }
+        /*
+         * otherwise not allowed to modify the file contents
+         */
+        return false;
     }
 
     private FileStoragePermission getPermission() throws OXException {
@@ -572,7 +581,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
         }
         return normalizedDirectoryNames;
     }
-    
+
     private String dumpComparisonDetails(ThreeWayComparison<FileVersion> comparison) {
         FileVersion originalVersion = comparison.getOriginalVersion();
         FileVersion clientVersion = comparison.getClientVersion();
@@ -626,6 +635,25 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             .append(", modifiedBy=").append(file.getModifiedBy())
             .append(']')
         .toString(); // @formatter:on
+    }
+
+    private static int getMaxApplicablePermissions(List<FileStorageObjectPermission> objectPermissions, User user) {
+        int maxApplicablePermissions = FileStorageObjectPermission.NONE;
+        if (null != objectPermissions && 0 < objectPermissions.size()) {
+            for (FileStorageObjectPermission objectPermission : objectPermissions) {
+                if (objectPermission.getPermissions() < maxApplicablePermissions) {
+                    continue;
+                }
+                if (objectPermission.isGroup()) {
+                    if (com.openexchange.tools.arrays.Arrays.contains(user.getGroups(), objectPermission.getEntity())) {
+                        maxApplicablePermissions = objectPermission.getPermissions();
+                    }
+                } else if (objectPermission.getEntity() == user.getId()) {
+                    maxApplicablePermissions = objectPermission.getPermissions();
+                }
+            }
+        }
+        return maxApplicablePermissions;
     }
 
 }

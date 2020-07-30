@@ -126,6 +126,11 @@ public class UploadFileFileIterator implements StreamedUploadFileIterator {
         }
 
         @Override
+        public long getSize() {
+            return uploadFile.getSize();
+        }
+
+        @Override
         public StreamedUploadFileInputStream getStream() throws IOException {
             return StreamedUploadFileInputStream.streamFor(uploadFile.openStream());
         }

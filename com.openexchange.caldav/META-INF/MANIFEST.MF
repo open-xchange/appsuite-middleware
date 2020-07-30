@@ -5,7 +5,9 @@ Bundle-SymbolicName: com.openexchange.caldav
 Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.google.common.io,
+Import-Package: com.google.common.escape,
+ com.google.common.io,
+ com.google.common.xml,
  com.openexchange.ajax.customizer.folder,
  com.openexchange.ajax.fileholder,
  com.openexchange.ajax.requesthandler,
