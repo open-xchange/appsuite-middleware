@@ -68,6 +68,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ResourceId;
@@ -284,9 +285,12 @@ public class ChronosCopyTask implements CopyUserTaskService {
                     if (organizer.getEntity() == srcUsrId) {
                         organizer.setEntity(dstUsrId);
                         organizer.setUri(calendarUser.getUri());
-                    } else {
-                        organizer.setUri(organizer.getEMail());
+                        organizer.setEMail(calendarUser.getEMail());
+                    } else if (CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL)) {
                         organizer.setEntity(0);
+                        if (null == CalendarUtils.optEMailAddress(organizer.getUri()) && Strings.isNotEmpty(organizer.getEMail())) {
+                            organizer.setUri(CalendarUtils.getURI(organizer.getEMail()));
+                        }
                     }
                 }
                 srcEvent.setId(dstEventId);
@@ -318,12 +322,20 @@ public class ChronosCopyTask implements CopyUserTaskService {
             String srcEventId = entry.getKey();
             List<Attendee> attendees = new ArrayList<>(entry.getValue().size());
             for (Attendee attendee : entry.getValue()) {
-                //setters for attendee values
-                if (attendee.getEntity() == srcUsrId) {
-                    attendee.setFolderId(getDestinationFolder(folderMapping, Integer.parseInt(attendee.getFolderId())));
-                    attendee.setEntity(dstUsrId);
-                } else if (CalendarUtils.isExternalUser(attendee)) {
-                    attendee.setFolderId(null);
+                if (CalendarUtils.isInternal(attendee)) {
+                    if (false == CalendarUserType.INDIVIDUAL.matches(attendee.getCuType())) {
+                        continue; // skip internal group- and resource attendees
+                    }
+                    if (srcUsrId == attendee.getEntity()) {
+                        // exchange with destination user
+                        attendee.setFolderId(getDestinationFolder(folderMapping, Integer.parseInt(attendee.getFolderId())));
+                        attendee.setEntity(dstUsrId);
+                    } else {
+                        // turn into external calendar user
+                        attendee.setFolderId(null);
+                        attendee.setEntity(0);
+                    }
+                    attendee.setMember(null);
                 }
                 attendees.add(attendee);
             }
