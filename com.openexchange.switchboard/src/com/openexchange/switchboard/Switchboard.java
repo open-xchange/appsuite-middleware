@@ -69,6 +69,7 @@ import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
@@ -191,7 +192,7 @@ public class Switchboard {
             if (null == handler) {
                 throw ServiceExceptionCode.absentService(DataHandler.class);
             }
-            ConversionResult result = handler.processData(new SimpleData<Event>(updatedEvent, null), null, null);
+            ConversionResult result = handler.processData(new SimpleData<Event>(updatedEvent, null), new DataArguments(), null);
             JSONObject eventJson = (JSONObject) result.getData();
             payload.putSafe("startDate", eventJson.getJSONObject("startDate"));
             payload.putSafe("endDate", eventJson.getJSONObject("endDate"));
