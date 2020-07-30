@@ -90,7 +90,7 @@ public class PermissionLimitTest extends InfostoreApiClientTest {
         assertNull(resp.getError());
         assertNotNull(resp.getData());
         @SuppressWarnings("unchecked") ArrayList<ArrayList<Object>> allUsers = (ArrayList<ArrayList<Object>>) resp.getData();
-        allEntities = allUsers.parallelStream().map((list) -> (Integer) list.get(0)).collect(Collectors.toList());
+        allEntities = allUsers.stream().limit(4).map((list) -> (Integer) list.get(0)).collect(Collectors.toList());
         validPerms = allEntities.stream().limit(2).toArray(Integer[]::new);
         invalidPerms = allEntities.stream().toArray(Integer[]::new);
     }

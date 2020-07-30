@@ -88,10 +88,7 @@ public final class SendResponse extends AbstractAJAXResponse {
             }
             try {
                 final MailPath mp = new MailPath(str);
-                if (false && Boolean.parseBoolean(AJAXConfig.getProperty(AJAXConfig.Property.IS_SP3))) {
-                    return new String[] { mp.getFolder(), mp.toString() };
-                }
-                return new String[] { mp.getFolder(), String.valueOf(mp.getMailID()) };
+                return new String[] { mp.getFullnameArgument().getPreparedName(), String.valueOf(mp.getMailID()) };
             } catch (OXException e) {
                 LOG.error("", e);
                 return null;
