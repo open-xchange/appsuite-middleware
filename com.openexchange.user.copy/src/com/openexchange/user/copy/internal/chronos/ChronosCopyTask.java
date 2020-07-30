@@ -338,17 +338,22 @@ public class ChronosCopyTask implements CopyUserTaskService {
         Map<Integer, List<Alarm>> alarmsByUser = null;
         List<Alarm> alarmList;
         for (Entry<String,  List<Alarm>> alarmsPerEvent : alarmByEvent.entrySet()) {
-                alarmsByUser = new HashMap<>(1);
-                alarmList = new ArrayList<>(alarmsPerEvent.getValue().size());
-                for (Alarm alarm : alarmsPerEvent.getValue()) {
-                    alarm.setId(dstCalendarStorage.getAlarmStorage().nextId());
-                    alarm.setTimestamp(System.currentTimeMillis());
-                    //add to list
-                    alarmList.add(alarm);
-                }
-                //add to inner map
-                alarmsByUser.put(I(dstUsrId), alarmList);
-                alarmsByUserByEventId.put(dstEventMapping.get(alarmsPerEvent.getKey()).getId(), alarmsByUser);
+            Event dstEvent = dstEventMapping.get(alarmsPerEvent.getKey());
+            if (null == dstEvent) {
+                continue; // skip alarms of events that weren't copied
+            }
+
+            alarmsByUser = new HashMap<>(1);
+            alarmList = new ArrayList<>(alarmsPerEvent.getValue().size());
+            for (Alarm alarm : alarmsPerEvent.getValue()) {
+                alarm.setId(dstCalendarStorage.getAlarmStorage().nextId());
+                alarm.setTimestamp(System.currentTimeMillis());
+                //add to list
+                alarmList.add(alarm);
+            }
+            //add to inner map
+            alarmsByUser.put(I(dstUsrId), alarmList);
+            alarmsByUserByEventId.put(dstEvent.getId(), alarmsByUser);
         }
         return alarmsByUserByEventId;
     }
