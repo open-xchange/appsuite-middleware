@@ -66,7 +66,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 public class JsoupParseTask extends AbstractTask<Void> implements Delayed {
 
     /** The special poison task to stop taking from queue */
-    public static final JsoupParseTask POISON = new JsoupParseTask(null, null, 0, null) {
+    public static final JsoupParseTask POISON = new JsoupParseTask(null, null, 0, false, null) {
 
         @Override
         public int compareTo(Delayed o) {
@@ -85,6 +85,7 @@ public class JsoupParseTask extends AbstractTask<Void> implements Delayed {
     private final JsoupHandler handler;
     private final JsoupParser parser;
     private final int timeoutSec;
+    private final boolean prettyPrint;
     private volatile long stamp;
     private volatile Thread worker;
 
@@ -95,13 +96,15 @@ public class JsoupParseTask extends AbstractTask<Void> implements Delayed {
      * @param handler The handler to call-back
      * @param checkSize Whether to check the size of the HTML content
      * @param timeoutSec The timeout seconds
+     * @param prettyPrint Whether resulting HTML content is supposed to be pretty-printed
      * @param parser The parser instance
      */
-    public JsoupParseTask(String html, JsoupHandler handler, int timeoutSec, JsoupParser parser) {
+    public JsoupParseTask(String html, JsoupHandler handler, int timeoutSec, boolean prettyPrint, JsoupParser parser) {
         super();
         this.html = html;
         this.handler = handler;
         this.timeoutSec = timeoutSec;
+        this.prettyPrint = prettyPrint;
         this.parser = parser;
     }
 
@@ -130,7 +133,7 @@ public class JsoupParseTask extends AbstractTask<Void> implements Delayed {
         worker = Thread.currentThread();
         control.add(this);
         try {
-            parser.doParse(html, handler);
+            parser.doParse(html, handler, prettyPrint);
             return null;
         } finally {
             control.remove(this);

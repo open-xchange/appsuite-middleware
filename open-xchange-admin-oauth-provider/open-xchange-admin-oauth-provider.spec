@@ -20,7 +20,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 72
+%define        ox_release 73
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -66,6 +66,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.oauth.provider.rmi/javadoc
 
 %changelog
+* Mon Jul 27 2020 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2020-08-07 (5828)
 * Wed Jun 24 2020 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2020-06-30 (5779)
 * Fri Jun 05 2020 Steffen Templin <steffen.templin@open-xchange.com>

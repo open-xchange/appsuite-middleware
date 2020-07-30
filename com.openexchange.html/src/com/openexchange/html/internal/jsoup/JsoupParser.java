@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal.jsoup;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Map;
@@ -84,7 +85,7 @@ import com.openexchange.html.services.ServiceRegistry;
  */
 public class JsoupParser {
 
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JsoupParser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JsoupParser.class);
 
     private static final JsoupParser INSTANCE = new JsoupParser();
 
@@ -143,24 +144,27 @@ public class JsoupParser {
      *
      * @param html The real-life HTML document
      * @param handler The handler
+     * @param checkSize Whether length of specified HTML content should be checked against {@link HtmlServices#htmlThreshold()}
+     * @param prettyPrint Whether resulting HTML content is supposed to be pretty-printed
      * @throws OXException If specified HTML content cannot be parsed
      */
-    public void parse(String html, JsoupHandler handler, boolean checkSize) throws OXException {
+    public void parse(String html, JsoupHandler handler, boolean checkSize, boolean prettyPrint) throws OXException {
         // Check size
         int maxLength = checkSize ? HtmlServices.htmlThreshold() : 0;
         if (maxLength > 0 && html.length() > maxLength) {
-            LOG.info("HTML content is too big: max. '{}', but is '{}'.", Integer.valueOf(maxLength), Integer.valueOf(html.length()));
-            throw HtmlExceptionCodes.TOO_BIG.create(Integer.valueOf(maxLength), Integer.valueOf(html.length()));
+            Integer iMaxLength = I(maxLength); Integer iLength = I(html.length());
+            LOG.info("HTML content is too big: max. '{}', but is '{}'.", iMaxLength, iLength);
+            throw HtmlExceptionCodes.TOO_BIG.create(iMaxLength, iLength);
         }
 
         int timeout = htmlParseTimeoutSec;
         if (timeout <= 0) {
-            doParse(html, handler);
+            doParse(html, handler, prettyPrint);
             return;
         }
 
         // Run as a monitored task
-        new JsoupParseTask(html, handler, timeout, this).call();
+        new JsoupParseTask(html, handler, timeout, prettyPrint, this).call();
     }
 
     /**
@@ -168,12 +172,18 @@ public class JsoupParser {
      *
      * @param html The real-life HTML document
      * @param handler The handler
+     * @param prettyPrint Whether resulting HTML content is supposed to be pretty-printed
      * @throws OXException If specified HTML content cannot be parsed
      */
-    public void doParse(String html, JsoupHandler handler) throws OXException {
+    public void doParse(String html, JsoupHandler handler, boolean prettyPrint) throws OXException {
         try {
             // Parse HTML input to a Jsoup document
             Document document = Parser.htmlParser().parseInput(new InterruptibleStringReader(html), "");
+
+            if (!prettyPrint) {
+                // Disable pretty-print: If disabled, the HTML output methods will not re-format the output, and the output will generally look like the input.
+                document.outputSettings().prettyPrint(false);
+            }
 
             // Check <style> tag sizes against threshold
             {
@@ -192,12 +202,12 @@ public class JsoupParser {
             document.traverse(new InterruptibleJsoupNodeVisitor(handler));
             handler.finished(document);
         } catch (InterruptedParsingException e) {
-            throw HtmlExceptionCodes.PARSING_FAILED.create("Parser timeout.", e);
+            throw HtmlExceptionCodes.PARSING_FAILED.create(e, "Parser timeout.");
         } catch (StackOverflowError parserOverflow) {
             throw HtmlExceptionCodes.PARSING_FAILED.create("Parser overflow detected.", parserOverflow);
         }
     }
-    
+
     private static final class InterruptibleJsoupNodeVisitor implements NodeVisitor {
 
         private static interface Invoker {
