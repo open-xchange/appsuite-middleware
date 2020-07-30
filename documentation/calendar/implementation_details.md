@@ -252,6 +252,24 @@ For synchronization via CalDAV, the event classification is passed and read *as-
 ***
 
 
+# Transparency / Busy Status
+
+The time transparency is used in an event to specify whether it actually consumes time on a calendar, hence is detected as such in free/busy time searches. In iCalendar, this is represented as ``OPAQUE`` in the ``TRANSP`` property. Events that should not consume the calendar user's time should be recorded as ``TRANSPARENT``, so that they're not taken into account in free/busy time searches. 
+
+In the legacy calendar implementation, there were two additional states available, aligned to the corresponding property in Microsoft Exchange/Outlook ``PidLidBusyStatus``: *absent* (``olOutOfOffice``) and *temporary* (``olTentative``). However, for increased compatibility with the iCalendar standard, and to avoid ambiguities with the event's overall ``STATUS``, they're no longer used and both mapped to a transparency of ``OPAQUE`` when using the new APIs.
+
+The ``TRANSP`` property of an event should normally be managed separately for each user. However, this is not yet supported by the implementation, so that currently the overall transparency of the event applies to all attendees. However, a participation status of ``DECLINED`` will automatically make the event ``TRANSPARENT`` in free/busy queries for the attendee.   
+
+
+**_References / further reading:_**
+
+- https://tools.ietf.org/html/rfc5545#section-3.8.2.7
+- https://docs.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxcical/cd68eae7-ed65-4dd3-8ea7-ad585c76c736
+- com.openexchange.chronos.compat.ShownAsTransparency  
+
+***
+
+
 # Move between Folders
 
 Whenever events are moved between different folders, some special handling applies, especially for move operations between different *types* of folders. We basically differentiate between two types of folders, which are on the one hand *personal* calendar folders of the internal users, and *public* folders on the other hand that are not directly associated explicitly with a user. The following gives an overview about the possible move actions and their outcome.
