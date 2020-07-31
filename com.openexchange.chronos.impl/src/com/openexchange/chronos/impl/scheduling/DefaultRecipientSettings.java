@@ -233,7 +233,7 @@ public class DefaultRecipientSettings implements RecipientSettings {
             if (isInternal(recipient, recipientType) && CalendarUserType.INDIVIDUAL.matches(recipientType)) {
                 return session.getEntityResolver().getLocale(recipient.getEntity());
             }
-            if (isInternal(recipient, recipientType) && CalendarUserType.INDIVIDUAL.matches(recipientType)) {
+            if (isInternal(originator, CalendarUserType.INDIVIDUAL)) {
                 return session.getEntityResolver().getLocale(originator.getEntity());
             }
         } catch (OXException e) {
@@ -247,7 +247,7 @@ public class DefaultRecipientSettings implements RecipientSettings {
             if (isInternal(recipient, recipientType) && CalendarUserType.INDIVIDUAL.matches(recipientType)) {
                 return session.getEntityResolver().getTimeZone(recipient.getEntity());
             }
-            if (isInternal(recipient, recipientType) && CalendarUserType.INDIVIDUAL.matches(recipientType)) {
+            if (isInternal(originator, CalendarUserType.INDIVIDUAL)) {
                 return session.getEntityResolver().getTimeZone(originator.getEntity());
             }
         } catch (OXException e) {
