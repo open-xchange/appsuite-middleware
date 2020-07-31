@@ -127,6 +127,7 @@ public class ZoomConferenceHandler implements CalendarHandler {
             if (timeHasChanged(update)) {
                 changed(changed, update.getUpdate(), event);
             }
+            delete(removed, event);
         }
     }
 
