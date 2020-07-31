@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires:  open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:	@OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -59,6 +59,8 @@ fi
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
+* Fri Jul 31 2020 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Second candidate for 7.10.4 release
 * Tue Jul 28 2020 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 First candidate for 7.10.4 release
 * Tue Jun 30 2020 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
