@@ -329,7 +329,7 @@ public class DefaultShareService implements ShareService {
         ModuleSupport moduleSupport = requireService(ModuleSupport.class);
         TargetProxy proxy = moduleSupport.load(target, session);
         if (false == proxy.mayAdjust()) {
-            return null; // don't expose share link info if no admin access to target  
+            return null; // don't expose share link info if no admin access to target
         }
         DefaultShareInfo shareInfo = optLinkShare(session, context, proxy, null);
         return null != shareInfo ? new DefaultShareLink(shareInfo, proxy.getTimestamp(), false) : null;
@@ -395,6 +395,7 @@ public class DefaultShareService implements ShareService {
 
             boolean guestUserUpdated = false;
             boolean passwordChanged = false;
+            boolean folderPermissionUpdate = false;
             if (linkUpdate.containsExpiryDate()) {
                 String expiryDateValue = null != linkUpdate.getExpiryDate() ? String.valueOf(linkUpdate.getExpiryDate().getTime()) : null;
                 userService.setAttribute(connectionHelper.getConnection(), ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue, guest.getId(), context);
@@ -406,9 +407,7 @@ public class DefaultShareService implements ShareService {
                     passwordChanged = true;
                 }
             }
-
-            boolean folderPermissionUpdate = false;
-            if (shareInfo.isIncludeSubfolders() != linkUpdate.isIncludeSubfolders() && shareInfo.getTarget().getModule() == FolderObject.INFOSTORE) {
+            if (linkUpdate.containsIncludeSubfolders() && shareInfo.isIncludeSubfolders() != linkUpdate.isIncludeSubfolders() && shareInfo.getTarget().getModule() == FolderObject.INFOSTORE) {
                 TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, LINK_PERMISSION_BITS, FolderPermissionType.LEGATOR.getTypeNumber(), null, 0);
                 if (shareInfo.isIncludeSubfolders()) {
                     // Remove permission in case includeSubfolders is changed from 'true' to 'false' so handed down permissions get removed as well
@@ -436,7 +435,9 @@ public class DefaultShareService implements ShareService {
                         service.removeUserSessionsGlobally(guest.getId(), session.getContextId());
                     }
                 }
-                return new DefaultShareLink(shareInfo, moduleSupport.load(target, session).getTimestamp(), false);
+                targetProxy = moduleSupport.load(target, session);
+                shareInfo = optLinkShare(session, context, targetProxy, null);
+                return new DefaultShareLink(shareInfo, targetProxy.getTimestamp(), false);
             }
             return new DefaultShareLink(shareInfo, targetProxy.getTimestamp(), false);
         } finally {

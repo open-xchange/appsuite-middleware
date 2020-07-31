@@ -63,10 +63,12 @@ import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderPermissionType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FolderID;
@@ -231,7 +233,14 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
         }
         JSONArray jsonArray = new JSONArray(permissions.size());
         for (FileStoragePermission permission : permissions) {
-            jsonArray.put(extended ? getExtendedJSONPermission(permission) : getJSONPermission(permission));
+            if (extended) {
+                jsonArray.put(getExtendedJSONPermission(permission));
+            } else {
+                if (FileStorageFolderPermissionType.INHERITED.equals(permission.getType())) {
+                    continue; // skip inherited permissions for plain permission array implicitly
+                }
+                jsonArray.put(getJSONPermission(permission));
+            }
         }
         return jsonArray;
     }
@@ -249,6 +258,10 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
         jsonObject.put("entity", permission.getEntity());
         jsonObject.put("bits", Permissions.createPermissionBits(permission.getFolderPermission(), permission.getReadPermission(),
             permission.getWritePermission(), permission.getDeletePermission(), permission.isAdmin()));
+        if (FileStorageFolderPermissionType.INHERITED.equals(permission.getType())) {
+            jsonObject.put("isInherited", true);
+            jsonObject.put("isInheritedFrom", permission.getPermissionLegator());
+        }
         if (permission.isGroup()) {
             jsonObject.put("type", "group");
             addGroupInfo(jsonObject, session.getPermissionResolver().getGroup(permission.getEntity()));
@@ -266,7 +279,13 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
 
                 jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
                 if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
-                    addShareInfo(jsonObject, session.getPermissionResolver().getShare(folder, permission.getEntity()));
+                    if (FileStorageFolderPermissionType.INHERITED.equals(permission)) {
+                        DefaultFileStorageFolder legator = new DefaultFileStorageFolder();
+                        legator.setId(permission.getPermissionLegator());
+                        addShareInfo(jsonObject, session.getPermissionResolver().getShare(legator, permission.getEntity()));
+                    } else {
+                        addShareInfo(jsonObject, session.getPermissionResolver().getShare(folder, permission.getEntity()));
+                    }
                 } else {
                     addUserInfo(jsonObject, user);
                 }
@@ -283,6 +302,9 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
         if (null != permissions && 0 < permissions.size()) {
             int userID = session.getServerSession().getUserId();
             for (FileStoragePermission permission : permissions) {
+                if (FileStorageFolderPermissionType.INHERITED.equals(permission.getType())) {
+                    continue; // skip inherited permissions for plain permission array implicitly
+                }
                 if (permission.getEntity() != userID) {
                     return true;
                 }

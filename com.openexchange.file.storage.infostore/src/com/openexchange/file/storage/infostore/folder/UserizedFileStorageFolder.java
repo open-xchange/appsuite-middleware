@@ -58,6 +58,7 @@ import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderPermissionType;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FolderPath;
@@ -65,6 +66,7 @@ import com.openexchange.file.storage.OriginAwareFileStorageFolder;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.DocumentsType;
@@ -158,6 +160,7 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
         try {
             final int entity = permission.getEntity();
             final DefaultFileStoragePermission oclPerm = DefaultFileStoragePermission.newInstance();
+            oclPerm.setType(parsePermissionType(permission.getType()));
             oclPerm.setEntity(entity);
             oclPerm.setGroup(permission.isGroup());
             oclPerm.setAdmin(permission.isAdmin());
@@ -169,6 +172,20 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
                 return (oclPerm);
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static FileStorageFolderPermissionType parsePermissionType(FolderPermissionType type) {
+        if (null == type) {
+            return null;
+        }
+        switch (type) {
+            case INHERITED:
+                return FileStorageFolderPermissionType.INHERITED;
+            case LEGATOR:
+                return FileStorageFolderPermissionType.LEGATOR;
+            default:
+                return FileStorageFolderPermissionType.NORMAL;
         }
     }
 
