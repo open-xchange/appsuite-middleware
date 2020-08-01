@@ -135,7 +135,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
     @After
     public void tearDown() throws Exception {
         if (!fileIds.isEmpty()) {
-            infostoreApi.deleteInfoItems(getApiClient().getSession(), timestamp, fileIds, Boolean.TRUE, null);
+            infostoreApi.deleteInfoItems(getApiClient().getSession(), L(new Date().getTime()), fileIds, Boolean.TRUE, null);
         }
         if (!folders.isEmpty()) {
             FoldersApi folderApi = new FoldersApi(getApiClient());

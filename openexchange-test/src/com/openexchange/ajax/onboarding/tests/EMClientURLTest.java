@@ -89,6 +89,11 @@ public class EMClientURLTest extends AbstractConfigAwareAjaxSession {
         setUpConfiguration();
     }
 
+    @Override
+    public String getScope() {
+        return "user";
+    }
+
     @Test
     public void testEMClientURL() throws Exception {
         ExecuteRequest req = new ExecuteRequest("windows.desktop/emclientinstall", "link", null, false);

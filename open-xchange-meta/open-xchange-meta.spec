@@ -3,7 +3,7 @@
 Name:           open-xchange-meta
 BuildArch:      noarch
 Version:        @OXVERSION@
-%define         ox_release 3
+%define         ox_release 4
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -460,6 +460,8 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Fri Jul 31 2020 Carsten Hoeger <choeger@open-xchange.com>
+Second candidate for 7.10.4 release
 * Tue Jul 28 2020 Carsten Hoeger <choeger@open-xchange.com>
 First candidate for 7.10.4 release
 * Tue Jun 30 2020 Carsten Hoeger <choeger@open-xchange.com>
