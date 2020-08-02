@@ -279,7 +279,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
 
                 jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
                 if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
-                    if (FileStorageFolderPermissionType.INHERITED.equals(permission)) {
+                    if (FileStorageFolderPermissionType.INHERITED.equals(permission.getType())) {
                         DefaultFileStorageFolder legator = new DefaultFileStorageFolder();
                         legator.setId(permission.getPermissionLegator());
                         addShareInfo(jsonObject, session.getPermissionResolver().getShare(legator, permission.getEntity()));
