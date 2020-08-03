@@ -72,7 +72,7 @@ import com.openexchange.java.Strings;
  */
 public class CreateTimeZoneMappings {
 
-    private static final String URL = "http://unicode.org/repos/cldr/trunk/common/supplemental/windowsZones.xml";
+    private static final String URL = "https://raw.githubusercontent.com/unicode-org/cldr/master/common/supplemental/windowsZones.xml";
 
     public static void main(String[] args) throws Exception {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -95,7 +95,7 @@ public class CreateTimeZoneMappings {
         for (Entry<String, String> entry : mapppings.entrySet()) {
             stringBuilder.append("    .put(\"").append(entry.getKey()).append("\", \"").append(entry.getValue()).append("\")\n");
         }
-        stringBuilder.append("build();");
+        stringBuilder.append(".build();");
         System.out.println(stringBuilder.toString());
     }
 
