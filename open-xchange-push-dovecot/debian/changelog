@@ -1,3 +1,9 @@
+open-xchange-push-dovecot (7.10.4-6) stable; urgency=medium
+
+  * Fourth candidate for 7.10.4 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 04 Aug 2020 14:08:08 +0000
+
 open-xchange-push-dovecot (7.10.4-5) stable; urgency=medium
 
   * Third candidate for 7.10.4 release

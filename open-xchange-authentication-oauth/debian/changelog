@@ -1,3 +1,9 @@
+open-xchange-authentication-oauth (7.10.4-6) stable; urgency=medium
+
+  * Fourth candidate for 7.10.4 release
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 04 Aug 2020 14:07:20 +0000
+
 open-xchange-authentication-oauth (7.10.4-5) stable; urgency=medium
 
   * Third candidate for 7.10.4 release
