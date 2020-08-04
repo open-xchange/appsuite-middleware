@@ -51,8 +51,6 @@ package com.openexchange.appsuite.client;
 
 import java.util.Map;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
@@ -143,6 +141,14 @@ public interface AppsuiteApiCall<T> {
      * @return The desired object
      * @throws OXException
      */
-    T parse(HttpResponse response, HttpContext httpContext) throws OXException;
+    //T parse(HttpResponse response, HttpContext httpContext) throws OXException;
+
+    /**
+     * Returns a parser to parse the HTTP response
+     *
+     * @return The parser
+     * @throws OXException
+     */
+    HttpResponseParser<T> getParser() throws OXException;
 
 }

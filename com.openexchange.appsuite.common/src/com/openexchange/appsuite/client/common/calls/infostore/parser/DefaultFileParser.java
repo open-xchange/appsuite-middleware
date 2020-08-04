@@ -47,62 +47,35 @@
  *
  */
 
-package com.openexchange.appsuite.client.common.calls.system;
+package com.openexchange.appsuite.client.common.calls.infostore.parser;
 
-import static com.openexchange.appsuite.client.common.AppsuiteClientUtils.parseJSONObject;
-import java.util.Map;
 import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.annotation.NonNull;
 import com.openexchange.appsuite.client.AppsuiteClientExceptions;
 import com.openexchange.appsuite.client.HttpResponseParser;
-import com.openexchange.appsuite.client.common.calls.AbstractGetAppsuiteCall;
+import com.openexchange.appsuite.client.common.AppsuiteClientUtils;
+import com.openexchange.appsuite.client.common.calls.infostore.mapping.DefaultFileMapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 
 /**
- * {@link WhoamiCall}
+ * {@link DefaultFileParser}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-
-public class WhoamiCall extends AbstractGetAppsuiteCall<WhoamiInformation> {
-
-    @Override
-    public @NonNull String getPath() {
-        return "/system";
-    }
+public class DefaultFileParser implements HttpResponseParser<DefaultFile> {
 
     @Override
-    protected String getAction() {
-        return "whoami";
-    }
-
-    @Override
-    protected void fillParameters(Map<String, String> parameters) {}
-
-    @Override
-    public HttpResponseParser<WhoamiInformation> getParser() throws OXException {
-        return new HttpResponseParser<WhoamiInformation>() {
-
-            @Override
-            public WhoamiInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
-                JSONObject responseObject = parseJSONObject(response);
-                try {
-                    JSONObject data = responseObject.getJSONObject("data");
-                    String sessionId = data.getString("session");
-                    String user = data.getString("user");
-                    int userId = data.getInt("user_id");
-                    int contextId = data.getInt("context_id");
-                    String locale = data.getString("locale");
-
-                    return new WhoamiInformation(sessionId, user, userId, contextId, locale);
-                } catch (JSONException e) {
-                    throw AppsuiteClientExceptions.JSON_ERROR.create(e, e.getMessage());
-                }
-            }
-        };
+    public DefaultFile parse(HttpResponse response, org.apache.http.protocol.HttpContext httpContext) throws OXException {
+        JSONObject json = AppsuiteClientUtils.parseDataObject(response);
+        DefaultFileMapper mapper = new DefaultFileMapper();
+        try {
+            DefaultFile file = mapper.deserialize(json, mapper.getMappedFields());
+            return file;
+        } catch (JSONException e) {
+            throw AppsuiteClientExceptions.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 }

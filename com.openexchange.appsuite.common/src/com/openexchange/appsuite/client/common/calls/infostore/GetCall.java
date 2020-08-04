@@ -50,15 +50,10 @@
 package com.openexchange.appsuite.client.common.calls.infostore;
 
 import java.util.Map;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.appsuite.client.AppsuiteClientExceptions;
-import com.openexchange.appsuite.client.common.AppsuiteClientUtils;
+import com.openexchange.appsuite.client.HttpResponseParser;
 import com.openexchange.appsuite.client.common.calls.AbstractGetAppsuiteCall;
-import com.openexchange.appsuite.client.common.calls.infostore.mapping.DefaultFileMapper;
+import com.openexchange.appsuite.client.common.calls.infostore.parser.DefaultFileParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 
@@ -104,19 +99,6 @@ public class GetCall extends AbstractGetAppsuiteCall<DefaultFile> {
     }
 
     @Override
-    public DefaultFile parse(HttpResponse response, HttpContext httpContext) throws OXException {
-        JSONObject json = AppsuiteClientUtils.parseDataObject(response);
-        DefaultFileMapper mapper = new DefaultFileMapper();
-        try {
-            DefaultFile file = mapper.deserialize(json, mapper.getMappedFields());
-            return file;
-        }
-        catch(JSONException e) {
-            throw AppsuiteClientExceptions.JSON_ERROR.create(e,e.getMessage());
-        }
-    }
-
-    @Override
     protected void fillParameters(Map<String, String> parameters) {
         parameters.put("id", id);
         parameters.put("folder", folder);
@@ -128,5 +110,10 @@ public class GetCall extends AbstractGetAppsuiteCall<DefaultFile> {
     @Override
     protected String getAction() {
         return "get";
+    }
+
+    @Override
+    public HttpResponseParser<DefaultFile> getParser() throws OXException {
+        return new DefaultFileParser();
     }
 }

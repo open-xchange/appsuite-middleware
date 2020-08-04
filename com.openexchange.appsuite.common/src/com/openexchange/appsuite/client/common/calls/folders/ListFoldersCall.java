@@ -58,6 +58,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.appsuite.client.AppsuiteClientExceptions;
+import com.openexchange.appsuite.client.HttpResponseParser;
 import com.openexchange.appsuite.client.common.AppsuiteClientUtils;
 import com.openexchange.appsuite.client.common.calls.AbstractGetAppsuiteCall;
 import com.openexchange.exception.OXException;
@@ -107,19 +108,8 @@ public class ListFoldersCall extends AbstractGetAppsuiteCall<List<RemoteFolder>>
     }
 
     @Override
-    public List<RemoteFolder> parse(HttpResponse response, HttpContext httpContext) throws OXException {
-        try {
-            JSONArray data = AppsuiteClientUtils.parseDataArray(response);
-            RemoteFolderMapper mapper = new RemoteFolderMapper();
-            return mapper.deserialize(data, columns);
-        } catch (JSONException e) {
-            throw AppsuiteClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
     protected void fillParameters(Map<String, String> parameters) {
-        final int[] columnIds = Arrays.stream(columns).mapToInt( f -> f.getColumn()).toArray();
+        final int[] columnIds = Arrays.stream(columns).mapToInt(f -> f.getColumn()).toArray();
         parameters.put("parent", parent);
         parameters.put("columns", AppsuiteClientUtils.toCommaString(columnIds));
     }
@@ -127,5 +117,22 @@ public class ListFoldersCall extends AbstractGetAppsuiteCall<List<RemoteFolder>>
     @Override
     protected String getAction() {
         return "list";
+    }
+
+    @Override
+    public HttpResponseParser<List<RemoteFolder>> getParser() throws OXException {
+        return new HttpResponseParser<List<RemoteFolder>>() {
+
+            @Override
+            public List<RemoteFolder> parse(HttpResponse response, HttpContext httpContext) throws OXException {
+                try {
+                    JSONArray data = AppsuiteClientUtils.parseDataArray(response);
+                    RemoteFolderMapper mapper = new RemoteFolderMapper();
+                    return mapper.deserialize(data, columns);
+                } catch (JSONException e) {
+                    throw AppsuiteClientExceptions.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        };
     }
 }

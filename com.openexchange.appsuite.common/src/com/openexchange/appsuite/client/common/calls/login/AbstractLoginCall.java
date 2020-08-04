@@ -56,6 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.appsuite.client.Credentials;
 import com.openexchange.appsuite.client.HttpMethods;
+import com.openexchange.appsuite.client.HttpResponseParser;
 import com.openexchange.appsuite.client.LoginInformation;
 import com.openexchange.appsuite.client.common.DefaultLoginInformation;
 import com.openexchange.appsuite.client.common.calls.AbstractAppsuiteCall;
@@ -73,7 +74,7 @@ public abstract class AbstractLoginCall extends AbstractAppsuiteCall<LoginInform
 
     /**
      * Initializes a new {@link AbstractLoginCall}.
-     * 
+     *
      * @param credentials The credentials to login with
      * @throws OXException In case parameter is missing
      */
@@ -97,9 +98,14 @@ public abstract class AbstractLoginCall extends AbstractAppsuiteCall<LoginInform
     }
 
     @Override
-    public LoginInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
-        JSONObject json = parseJSONObject(response);
-        return DefaultLoginInformation.parse(json.asMap());
-    }
+    public HttpResponseParser<LoginInformation> getParser() throws OXException {
+        return new HttpResponseParser<LoginInformation>() {
 
+            @Override
+            public LoginInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
+                JSONObject json = parseJSONObject(response);
+                return DefaultLoginInformation.parse(json.asMap());
+            }
+        };
+    }
 }

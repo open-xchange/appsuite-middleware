@@ -50,17 +50,21 @@
 package com.openexchange.appsuite.client.impl;
 
 import static com.openexchange.appsuite.client.AppsuiteApiCall.SESSION;
-import static com.openexchange.appsuite.client.common.AppsuiteClientUtils.checkJSESSIONCookie;
-import static com.openexchange.appsuite.client.common.AppsuiteClientUtils.checkPublicSessionCookie;
 import static com.openexchange.appsuite.client.common.AppsuiteClientUtils.checkSameOrigin;
-import static com.openexchange.appsuite.client.common.AppsuiteClientUtils.checkSecretCookie;
+import static com.openexchange.appsuite.client.common.AppsuiteClientUtils.parseJSONObject;
 import static com.openexchange.appsuite.client.common.OXExceptionParser.matches;
+import static com.openexchange.appsuite.client.common.OXExceptionParser.parseException;
 import static com.openexchange.appsuite.client.impl.osgi.AppsuiteClientWildcardProvider.HTTP_CLIENT_IDENTIFIER;
 import static com.openexchange.java.Autoboxing.I;
+import static org.apache.http.entity.ContentType.APPLICATION_JSON;
+import static org.apache.http.entity.ContentType.TEXT_HTML;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -79,6 +83,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.BufferedHttpEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.BasicHttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +95,7 @@ import com.openexchange.appsuite.client.AppsuiteClientExceptions;
 import com.openexchange.appsuite.client.HttpResponseParser;
 import com.openexchange.appsuite.client.LoginInformation;
 import com.openexchange.appsuite.client.common.AppsuiteClientUtils;
-import com.openexchange.appsuite.client.common.OXExceptionParser;
+import com.openexchange.appsuite.client.common.ResourceReleasingInputStream;
 import com.openexchange.appsuite.client.common.calls.login.LogoutCall;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -117,6 +122,12 @@ public abstract class AbstractAppsuiteClient implements AppsuiteClient {
     /** The base number of milliseconds to wait until retrying */
     private static final int RETRY_BASE_DELAY = 500;
 
+    /** The content type for "text/javascript" */
+    public static final ContentType TEXT_JAVA_SCRIPT = ContentType.create("text/javascript");
+
+    /** A list of content types which can be buffered to memory */
+    public static final List<ContentType> BUFFERED_CONTENT_TYPES = Arrays.asList(TEXT_JAVA_SCRIPT, APPLICATION_JSON, TEXT_HTML);
+
     protected final ServiceLookup services;
 
     protected final int contextId;
@@ -130,7 +141,7 @@ public abstract class AbstractAppsuiteClient implements AppsuiteClient {
 
     /**
      * Initializes a new {@link AbstractAppsuiteClient}.
-     * 
+     *
      * @param services The service lookup
      * @param contextId The context identifier of this local OX node for logging
      * @param userId The user identifier of this local OX node for logging
@@ -168,7 +179,7 @@ public abstract class AbstractAppsuiteClient implements AppsuiteClient {
 
     @Override
     public <T> T execute(AppsuiteApiCall<T> call) throws OXException {
-        return execute(buildRequest(call), (r, hc) -> call.parse(r, hc));
+        return execute(buildRequest(call), call.getParser());
     }
 
     @Override
@@ -181,21 +192,27 @@ public abstract class AbstractAppsuiteClient implements AppsuiteClient {
         HttpResponse response = null;
         try {
             /*
-             * Execute the request, log if necessary
+             * Execute the request
              */
             response = getHttpClient().execute(request, httpContext);
-            response = ensureRepeatability(response);
-            logResponse(response);
 
             /*
-             * Check that cookies are set
+             * Log response if necessary
              */
-            checkJSESSIONCookie(cookieStore, loginLink);
-            LoginInformation infos = getLoginInformation();
-            if (null != infos && Strings.isNotEmpty(infos.getRemoteSessionId())) {
-                checkPublicSessionCookie(cookieStore, loginLink);
-                checkSecretCookie(cookieStore, loginLink);
+            if (canBuffer(response)) {
+                response = ensureRepeatability(response);
             }
+            log(request, response);
+
+            /*
+             * Check that session related cookies are set
+             */
+            //            LoginInformation infos = getLoginInformation();
+            //            if (null != infos && Strings.isNotEmpty(infos.getRemoteSessionId())) {
+            //                AppsuiteClientUtils.checkJSESSIONCookie(cookieStore, loginLink);
+            //                AppsuiteClientUtils.checkPublicSessionCookie(cookieStore, loginLink);
+            //                AppsuiteClientUtils.checkSecretCookie(cookieStore, loginLink);
+            //            }
 
             /*
              * Check status code
@@ -205,19 +222,26 @@ public abstract class AbstractAppsuiteClient implements AppsuiteClient {
             /*
              * Check response for exceptions, try to re-login if session expired
              */
-            OXException oxException = getNestedOXException(response);
+            OXException oxException = response.getEntity().isRepeatable() ? getNestedOXException(response) : null;
             if (null != oxException) {
                 if (matches(SessionExceptionCodes.SESSION_EXPIRED, oxException)) {
                     reLogin();
                     return execute(request, parser);
                 }
-                throw AppsuiteClientExceptions.REMOTE_OX_EXCEPTION.create(oxException, oxException.getMessage());
+                throw oxException;
             }
 
             /*
              * Finally parse object
              */
-            return parser.parse(response, httpContext);
+            T ret = parser != null ? parser.parse(response, httpContext) : null;
+            if (ret instanceof InputStream) {
+                //Do not release resources yet if we return an input stream
+                ret = (T) new ResourceReleasingInputStream(request, response);
+                request = null;
+                response = null;
+            }
+            return ret;
         } catch (IOException e) {
             throw AppsuiteClientExceptions.IO_ERROR.create(e, e.getMessage());
         } finally {
@@ -238,10 +262,10 @@ public abstract class AbstractAppsuiteClient implements AppsuiteClient {
              */
             LoginInformation infos = getLoginInformation();
             if (null == infos || Strings.isEmpty(infos.getRemoteSessionId())) {
-                LOGGER.trace("Unable to logout client due missing session ID.");
+                LOGGER.debug("Unable to logout client due missing session ID.");
                 return;
             }
-            LOGGER.trace("Client is closed. Logging out user {} in context {} on host {}", I(userId), I(contextId), loginLink.getHost());
+            LOGGER.debug("Client is closed. Logging out user {} in context {} on host {}", I(userId), I(contextId), loginLink.getHost());
 
             /*
              * Execute the logout request manually to avoid constrains from execute method (cookies, shutdown flag, etc.)
@@ -346,8 +370,8 @@ public abstract class AbstractAppsuiteClient implements AppsuiteClient {
      * Builds the path for the request based on the prefix and
      * the actual API path for the original targeted host.
      * <p>
-     * If the login information are not yet set, a login request is
-     * assumed and the path is returned as-is
+     * If the {@link AppsuiteApiCall#appendPathPrefix()} is set to
+     * <code>false</code> the path is returned as-is.
      *
      * @param call The call to get the information from
      * @return the full qualified path
@@ -371,10 +395,8 @@ public abstract class AbstractAppsuiteClient implements AppsuiteClient {
     }
 
     /**
-     * Handles a status error by generating a appropriated exception
-     * <p>
-     * If the remote server provided an exception of the cause, the exception
-     * will be set as cause of the exception
+     * Handles a status error. Either will throw the transmitted exception
+     * or will generate an appropriated exception.
      *
      * @param response The response
      * @param statusCode The current status code
@@ -387,15 +409,41 @@ public abstract class AbstractAppsuiteClient implements AppsuiteClient {
         }
         OXException parsedException = null;
         try {
-            JSONObject jsonObject = AppsuiteClientUtils.parseJSONObject(response);
-            parsedException = OXExceptionParser.parseException(jsonObject);
+            JSONObject jsonObject = parseJSONObject(response);
+            parsedException = parseException(jsonObject);
         } catch (Exception e) {
             LOGGER.debug("Error while getting error stack", e);
         }
-        if (statusCode < HttpStatus.SC_INTERNAL_SERVER_ERROR) {
-            throw AppsuiteClientExceptions.CLIENT_ERROR.create(parsedException, I(statusCode));
+
+        if (null != parsedException) {
+            throw parsedException;
         }
-        throw AppsuiteClientExceptions.REMOTE_SERVER_ERROR.create(parsedException, I(statusCode));
+
+        if (statusCode < HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+            throw AppsuiteClientExceptions.CLIENT_ERROR.create(I(statusCode));
+        }
+        throw AppsuiteClientExceptions.REMOTE_SERVER_ERROR.create(I(statusCode));
+    }
+
+    /**
+     * Checks whether or not the given {@link HttpResponse} can be buffered to memory
+     *
+     * @param response The {@link HttpResponse}
+     * @return True if it can be buffered to memory, false otherwise
+     */
+    private boolean canBuffer(HttpResponse response) {
+        ContentType contentType = null;
+        if (response.getEntity().getContentType() != null) {
+            contentType = ContentType.parse(response.getEntity().getContentType().getValue());
+        }
+        if (contentType != null) {
+            for (ContentType t : BUFFERED_CONTENT_TYPES) {
+                if (t.getMimeType().contentEquals(contentType.getMimeType())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -430,7 +478,7 @@ public abstract class AbstractAppsuiteClient implements AppsuiteClient {
      * Content will not be checked for other known and used content types of the OX, namely:
      * <li>application/octet-stream</li>
      * <li>application/zip</li>
-     * 
+     *
      * @param response The response to check
      * @return A {@link OXException} In case a exception is found in the response or <code>null</code>
      */
@@ -441,17 +489,17 @@ public abstract class AbstractAppsuiteClient implements AppsuiteClient {
         }
         try {
             JSONObject jsonObject = null;
-            if (contentType.indexOf("text/javascript") > -1 || contentType.indexOf("application/json") > -1) {
-                jsonObject = AppsuiteClientUtils.parseJSONObject(response);
+            if (contentType.indexOf(TEXT_JAVA_SCRIPT.getMimeType()) > -1 || contentType.indexOf(APPLICATION_JSON.getMimeType()) > -1) {
+                jsonObject = parseJSONObject(response);
             }
-            if (contentType.indexOf("text/html") > -1) {
+            if (contentType.indexOf(TEXT_HTML.getMimeType()) > -1) {
                 String json = AppsuiteClientUtils.getJSONFromBody(response);
                 if (Strings.isNotEmpty(json)) {
-                    jsonObject = AppsuiteClientUtils.parseJSONObject(json);
+                    jsonObject = parseJSONObject(json);
                 }
             }
             if (null != jsonObject) {
-                return OXExceptionParser.parseException(jsonObject);
+                return parseException(jsonObject);
             }
         } catch (OXException | JSONException e) {
             LOGGER.debug("Unable to parse content", e);
@@ -460,18 +508,21 @@ public abstract class AbstractAppsuiteClient implements AppsuiteClient {
     }
 
     /**
-     * Receives the response and logs it if the level is set to <code>TRACE</code>
+     * Receives the request and response and logs them if the level is set to <code>TRACE</code>
      *
+     * @param request The actual request
      * @param response The actual response
      */
-    private static void logResponse(HttpResponse response) {
+    private static void log(HttpRequestBase request, HttpResponse response) {
         if (false == LOGGER.isTraceEnabled()) {
             return;
         }
-        String body = AppsuiteClientUtils.getBody(response);
-        if (Strings.isNotEmpty(body)) {
-            LOGGER.trace("Recieved following content:\n\n{}\n", body);
+        String content = "data stream";
+        if (response.getEntity().isRepeatable()) {
+            content = AppsuiteClientUtils.getBody(response);
         }
+
+        LOGGER.trace("Request executed: {}. Received the following content:\n\n{}\n", request, content);
     }
 
     /**

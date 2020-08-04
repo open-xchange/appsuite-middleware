@@ -57,6 +57,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.appsuite.client.AppsuiteClientExceptions;
+import com.openexchange.appsuite.client.HttpResponseParser;
 import com.openexchange.appsuite.client.common.AppsuiteClientUtils;
 import com.openexchange.appsuite.client.common.calls.AbstractGetAppsuiteCall;
 import com.openexchange.exception.OXException;
@@ -101,17 +102,6 @@ public class GetFolderCall extends AbstractGetAppsuiteCall<RemoteFolder> {
     }
 
     @Override
-    public RemoteFolder parse(HttpResponse response, HttpContext httpContext) throws OXException {
-        try {
-            JSONObject json = AppsuiteClientUtils.parseDataObject(response);
-            RemoteFolderMapper mapper = new RemoteFolderMapper();
-            return mapper.deserialize(json, mapper.getMappedFields());
-        } catch (JSONException e) {
-            throw AppsuiteClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
     protected void fillParameters(Map<String, String> parameters) {
         parameters.put("id", id);
         if (tree != null) {
@@ -126,9 +116,25 @@ public class GetFolderCall extends AbstractGetAppsuiteCall<RemoteFolder> {
 
     }
 
-
     @Override
     protected String getAction() {
         return "get";
+    }
+
+    @Override
+    public HttpResponseParser<RemoteFolder> getParser() throws OXException {
+        return new HttpResponseParser<RemoteFolder>() {
+
+            @Override
+            public RemoteFolder parse(HttpResponse response, HttpContext httpContext) throws OXException {
+                try {
+                    JSONObject json = AppsuiteClientUtils.parseDataObject(response);
+                    RemoteFolderMapper mapper = new RemoteFolderMapper();
+                    return mapper.deserialize(json, mapper.getMappedFields());
+                } catch (JSONException e) {
+                    throw AppsuiteClientExceptions.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        };
     }
 }

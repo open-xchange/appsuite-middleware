@@ -49,7 +49,6 @@
 
 package com.openexchange.appsuite.client.common;
 
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.share.core.ShareConstants.SHARE_SERVLET;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -86,7 +85,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAppender;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.Pair;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -112,18 +110,17 @@ public final class AppsuiteClientUtils {
     }
 
     /**
-     * Parses the given path for a share token. If the share token is present,
-     * it will be splitted into the remote context and remote user identifiers
+     * Parses the given path for a base token.
      *
-     * @param path The path to get the share token from
-     * @return The context and user IDs (this order) or <code>null</code> if not applicable
+     * @param path The path to get the base token from
+     * @return The token or <code>null</code> if not applicable
      */
-    public static Pair<Integer, Integer> getContextUserFrom(String path) {
+    public static String getBaseToken(String path) {
         ShareToken shareToken = getShareToken(path);
         if (null == shareToken) {
             return null;
         }
-        return new Pair<Integer, Integer>(I(shareToken.getContextID()), I(shareToken.getUserID()));
+        return shareToken.getToken();
     }
 
     /**
@@ -197,17 +194,17 @@ public final class AppsuiteClientUtils {
     /**
      * Checks that the redirect target is still on the same server
      *
-     * @param targetHost The original targeted host
+     * @param originHost The original targeted host
      * @param redirectTarget The redirect to follow
      * @throws OXException In case the new target is invalid or redirects to another host
      */
-    public static void checkSameOrigin(URL targetHost, String redirectTarget) throws OXException {
+    public static void checkSameOrigin(URL originHost, String redirectTarget) throws OXException {
         try {
             //relative or absolute redirect?
-            URL redirect = redirectTarget.startsWith("/") ? new URL(targetHost, redirectTarget) : new URL(redirectTarget);
+            URL redirect = redirectTarget.startsWith("/") ? new URL(originHost, redirectTarget) : new URL(redirectTarget);
             if (null != redirect.getHost()) {
-                if (false == targetHost.getHost().equals(redirect.getHost())) {
-                    throw AppsuiteClientExceptions.INVALIDE_REDIRECT.create();
+                if (false == originHost.getHost().equals(redirect.getHost())) {
+                    throw AppsuiteClientExceptions.NOT_SAME_ORIGIN.create(redirect.getHost(), originHost.getHost());
                 }
             }
         } catch (MalformedURLException e) {

@@ -56,6 +56,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.appsuite.client.AppsuiteClientExceptions;
+import com.openexchange.appsuite.client.HttpResponseParser;
 import com.openexchange.appsuite.client.common.calls.AbstractGetAppsuiteCall;
 import com.openexchange.exception.OXException;
 
@@ -102,17 +103,6 @@ public class DocumentCall extends AbstractGetAppsuiteCall<InputStream> {
     }
 
     @Override
-    public InputStream parse(HttpResponse response, HttpContext httpContext) throws OXException {
-        try {
-            return response.getEntity().getContent();
-        } catch (UnsupportedOperationException e) {
-            throw AppsuiteClientExceptions.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (IOException e) {
-            throw AppsuiteClientExceptions.IO_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
     protected void fillParameters(Map<String, String> parameters) {
         parameters.put("id", id);
         parameters.put("folder", folderId);
@@ -124,5 +114,23 @@ public class DocumentCall extends AbstractGetAppsuiteCall<InputStream> {
     @Override
     protected String getAction() {
         return "document";
+    }
+
+    @Override
+    public HttpResponseParser<InputStream> getParser() throws OXException {
+
+        return new HttpResponseParser<InputStream>() {
+
+            @Override
+            public InputStream parse(HttpResponse response, HttpContext httpContext) throws OXException {
+                try {
+                    return response.getEntity().getContent();
+                } catch (UnsupportedOperationException e) {
+                    throw AppsuiteClientExceptions.UNEXPECTED_ERROR.create(e, e.getMessage());
+                } catch (IOException e) {
+                    throw AppsuiteClientExceptions.IO_ERROR.create(e, e.getMessage());
+                }
+            }
+        };
     }
 }
