@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.http.HttpResponse;
@@ -92,7 +93,8 @@ public class ApacheHTTPClient extends AbstractHTTPClient implements HTTPClient {
 
 	public Reader extractReader(HttpResponse resp) throws OXException {
 		try {
-			return new InputStreamReader(resp.getEntity().getContent(), ContentType.getOrDefault(resp.getEntity()).getCharset());
+            ContentType contentType = ContentType.getOrDefault(resp.getEntity());
+            return new InputStreamReader(resp.getEntity().getContent(), contentType.getCharset() == null ? Charset.defaultCharset() : contentType.getCharset());
 		} catch (IOException e) {
             throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		}
