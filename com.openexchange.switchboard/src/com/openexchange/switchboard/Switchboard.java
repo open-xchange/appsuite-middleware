@@ -157,7 +157,7 @@ public class Switchboard {
         HttpPost post = null;
         HttpResponse response = null;
         try {
-            post = new HttpPost(URITools.getFinalURL(config.getUri(), Optional.empty()));
+            post = new HttpPost(config.getUri());
             post.setEntity(new InputStreamEntity(new JSONInputStream(json, com.openexchange.java.Charsets.UTF_8_NAME), json.toString().length(), ContentType.APPLICATION_JSON));
             post.addHeader(AUTHORIZATION_HEADER, config.getWebhookSecret());
 
@@ -182,9 +182,9 @@ public class Switchboard {
 
     private JSONObject serialize(String action, Conference conference, Event updatedEvent, long timestamp) throws OXException, JSONException {
         JSONObject payload = new JSONObject();
-        payload.putSafe("id", getExtendedParameter(conference, ID_PROPERTY));
+        payload.putSafe("meetingId", getExtendedParameter(conference, ID_PROPERTY));
         payload.putSafe("owner", getExtendedParameter(conference, OWNER_PROPERTY));
-        payload.putSafe("timestamp", timestamp);
+        payload.putSafe("type", "zoom");
 
         if (action.equals(UPDATED)) {
             ConversionService conversionService = Services.getService(ConversionService.class, true);
@@ -204,7 +204,7 @@ public class Switchboard {
             }
             payload.putSafe("appointment", eventJson);
         }
-        return new JSONObject(2).putSafe("event", action).putSafe("payload", payload);
+        return new JSONObject(2).putSafe("event", action).putSafe("timestamp", timestamp).putSafe("payload", payload);
     }
 
     private String getExtendedParameter(Conference conference, String param) {
