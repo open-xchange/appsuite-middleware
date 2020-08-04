@@ -75,6 +75,9 @@ final class ConsistencyUtil {
      * @return
      */
     static boolean diffSet(SortedSet<String> first, SortedSet<String> second, String name1, String name2) {
+        if (first.isEmpty()) {
+            return false;
+        }
         first.removeAll(second);
         if (first.isEmpty()) {
             return false;

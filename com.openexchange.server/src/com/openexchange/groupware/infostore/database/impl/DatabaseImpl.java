@@ -59,7 +59,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -753,14 +752,13 @@ public class DatabaseImpl extends DBService {
                 stmt.setInt(4, contextId);
             }
             result = stmt.executeQuery();
-
+            SortedSet<String> fileStorageLocations = new TreeSet<String>();
             if (!result.next()) {
                 // No such results
-                return Collections.emptySortedSet();
+                return fileStorageLocations;
             }
 
             // Collect file store locations
-            SortedSet<String> fileStorageLocations = new TreeSet<String>();
             do {
                 fileStorageLocations.add(result.getString(1));
             } while (result.next());
@@ -810,12 +808,12 @@ public class DatabaseImpl extends DBService {
             stmt.setInt(3, FolderObject.INFOSTORE);
             stmt.setInt(4, usr.getId());
             result = stmt.executeQuery();
+            SortedSet<String> fileStorageLocations = new TreeSet<String>();
             if (!result.next()) {
                 // No such results
-                return Collections.emptySortedSet();
+                return fileStorageLocations;
             }
 
-            SortedSet<String> fileStorageLocations = new TreeSet<String>();
             do {
                 fileStorageLocations.add(result.getString(1));
             } while (result.next());
