@@ -79,7 +79,7 @@ final class ConsistencyUtil {
         if (first.isEmpty()) {
             return false;
         }
-        LOG.info("Inconsistencies found in {}, the following files aren''t in {}:{}", name1, name2, Strings.getLineSeparator());
+        LOG.info("Inconsistencies found in {}, the following files aren't in {}:{}", name1, name2, Strings.getLineSeparator());
         outputSet(first);
         return true;
     }
