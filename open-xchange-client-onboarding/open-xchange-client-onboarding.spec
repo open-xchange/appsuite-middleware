@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -164,6 +164,8 @@ fi
 %doc com.openexchange.client.onboarding/doc/examples
 
 %changelog
+* Tue Aug 04 2020 Thorben Betten <thorben.betten@open-xchange.com>
+Third candidate for 7.10.4 release
 * Fri Jul 31 2020 Thorben Betten <thorben.betten@open-xchange.com>
 Second candidate for 7.10.4 release
 * Tue Jul 28 2020 Thorben Betten <thorben.betten@open-xchange.com>
