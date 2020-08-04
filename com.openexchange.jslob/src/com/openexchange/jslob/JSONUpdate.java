@@ -72,7 +72,7 @@ public final class JSONUpdate {
      */
     public JSONUpdate(final String path, final Object value) throws OXException {
         super();
-        this.path = JSONPathElement.parsePath(path);
+        this.path = JSONPathElement.parsePath(path.startsWith("/") ? path.substring(1) : path);
         this.value = value;
     }
 

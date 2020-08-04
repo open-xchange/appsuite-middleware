@@ -1,0 +1,41 @@
+/jslob/{jslobPath}?action=get:
+  get:
+    operationId: getJSlob
+    tags:
+      - JSlob
+    summary: Gets a single JSlob.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: serviceId
+        description: >-
+          The identifier for the JSlob service, default is
+          "com.openexchange.jslob.config".
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: id
+        description: >-
+          The JSlob identifier.
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: jslobPath
+        schema:
+          type: string
+        required: false
+        description: The path to the jslob entry
+    responses:
+      '200':
+        description: >
+          A jsob object containing either the complete jslob or the specific jslob segment if it exists.
+
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              description: 
+              type: string

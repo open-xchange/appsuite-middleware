@@ -1,14 +1,32 @@
-/jslob?action=update:
+/jslob/{jslobPath}?action=update:
   put:
     operationId: updateJSlob
     tags:
       - JSlob
     summary: Updates a JSlob.
+    description: >-
+     When updating a JSlob entry there are three different ways to do so:
+     1. Using a path parameter
+     When a valid jslobPath is provided the JSlob sub path is replaced by the given request data.
+
+     2. Using a path and value field in the request body
+     The same as in 1. but the path is provided in the request body as 'path' and the value is provided as 'value'.
+     For example:
+     <code>
+     {
+      "path":"path/to/the/sub/tree"
+      "value": {...}
+     }
+     </code>
+     3. Performing a merge
+     In case no path is given the provided value is merged with the existing jslob entry and only provided fields are updated.
+
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The JSlob indentifier.
+        required: true
         schema:
           type: string
       - in: query
@@ -19,6 +37,12 @@
         required: false
         schema:
           type: string
+      - in: path
+        name: jslobPath
+        schema:
+          type: string
+        required: false
+        description: The path to the jslob entry
     responses:
       '200':
         description: >-
@@ -34,7 +58,8 @@
           schema:
             type: object
       description: >-
-        The JSON object containing the updated JSON configuration to store.
-        Fields that are not included are thus not affected and survive the
-        change. Use `/jslob?action=set` to delete fields or entire JSlob.
+        Either a JSON object which contains the new JSON configuration or a json object which contains a path and value field which provides the JSlob sub path and its value respectively.
+        In case the configuration is provided directly it is either merged in case no path is given or it is used to update the subpath.
+
+        Use `/jslob?action=set` to delete fields or entire JSlob.
       required: true

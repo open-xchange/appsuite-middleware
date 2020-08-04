@@ -1034,7 +1034,7 @@ public final class ConfigJSlobService implements JSlobService {
                 if (equiv != null) {
                     String configTreePath = equiv.lob2config.get(path.get(0).getName());
                     Object value = jsonUpdate.getValue();
-                    if (null != value) {
+                    if (null != value && configTreePath != null) {
                         SettingStorage stor = SettingStorage.getInstance(session);
                         ConfigTree configTree = ConfigTree.getInstance();
                         Setting setting = configTree.getSettingByPath(configTreePath);
