@@ -49,12 +49,11 @@
 
 package com.openexchange.appsuite.client.impl;
 
-import static com.openexchange.appsuite.client.common.AppsuiteClientUtils.getContextUserFrom;
+import static com.openexchange.appsuite.client.common.AppsuiteClientUtils.getBaseToken;
 import static com.openexchange.appsuite.client.common.AppsuiteClientUtils.isShare;
 import static com.openexchange.appsuite.client.impl.AppsuiteClientBlacklist.isBlacklisted;
 import static com.openexchange.appsuite.client.impl.AppsuiteClientBlacklist.isPortAllowed;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.i;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -77,7 +76,6 @@ import com.openexchange.appsuite.client.impl.share.AppsuiteShareClient;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -191,8 +189,8 @@ public class AppsuiteClientFactoryImpl implements AppsuiteClientFactory {
      * @throws OXException in case link is unusable
      */
     private static @NonNull URL generateURL(String shareLink) throws OXException {
-        if (null == shareLink) {
-            throw AppsuiteClientExceptions.EMPTY_LINK.create();
+        if (Strings.isEmpty(shareLink)) {
+            throw AppsuiteClientExceptions.INVALIDE_TARGET.create(shareLink);
         }
         try {
             if (false == shareLink.startsWith("http")) { // includes 'https'
@@ -223,30 +221,16 @@ public class AppsuiteClientFactoryImpl implements AppsuiteClientFactory {
      * @return The cache key
      */
     private static Integer generateCacheKey(int contextId, int userId, URL host) {
-        int hash = 2027;
-        hash = hash * contextId;
-        hash = hash + userId;
-        hash = hash * host.getHost().hashCode();
-        if (isShare(host.getPath())) {
-            /*
-             * Parse the share link and get the remote context and user ID.
-             * Thus one client with one session can handle multiple share links
-             */
-            Pair<Integer, Integer> remoteContextUser = getContextUserFrom(host.getPath());
-            hash = hash * i(remoteContextUser.getFirst()); // Save without null check, checked through isShare()
-            hash = hash * i(remoteContextUser.getSecond());
-        } else if (null != host.getPath()) {
-            /*
-             * Use specific path thus client
-             */
-            hash = hash * host.getPath().hashCode();
-        } else {
-            /*
-             * Use full link as fallback
-             */
-            hash = hash * host.hashCode();
-        }
-        return I(hash);
+        final int prime = 2027;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + userId;
+
+        String key = host.getHost();
+        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        key = getBaseToken(host.getPath());
+        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        return I(result);
     }
 
     /**

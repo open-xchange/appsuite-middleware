@@ -47,62 +47,51 @@
  *
  */
 
-package com.openexchange.appsuite.client.common.calls.system;
+package com.openexchange.appsuite.client.common;
 
-import static com.openexchange.appsuite.client.common.AppsuiteClientUtils.parseJSONObject;
-import java.util.Map;
+import java.io.IOException;
+import java.util.Objects;
 import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.annotation.NonNull;
-import com.openexchange.appsuite.client.AppsuiteClientExceptions;
-import com.openexchange.appsuite.client.HttpResponseParser;
-import com.openexchange.appsuite.client.common.calls.AbstractGetAppsuiteCall;
-import com.openexchange.exception.OXException;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.tools.stream.CountingOnlyInputStream;
 
 /**
- * {@link WhoamiCall}
+ * {@link ResourceReleasingInputStream} - Wraps the content stream of a {@link HttpResponse}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
+public class ResourceReleasingInputStream extends CountingOnlyInputStream {
 
-public class WhoamiCall extends AbstractGetAppsuiteCall<WhoamiInformation> {
+    private final static Logger LOG = LoggerFactory.getLogger(ResourceReleasingInputStream.class);
 
-    @Override
-    public @NonNull String getPath() {
-        return "/system";
+    private final HttpRequestBase request;
+    private final HttpResponse response;
+    private final long contentLength;
+
+    /**
+     * Initializes a new {@link ResourceReleasingInputStream}.
+     * 
+     * @param request The request to close along the response
+     * @param response The response to wrap
+     * @throws IOException If the stream could not be created
+     */
+    @SuppressWarnings("resource")
+    public ResourceReleasingInputStream(HttpRequestBase request, HttpResponse response) throws IOException {
+        super((Objects.requireNonNull(response, "response must not be null")).getEntity().getContent());
+        this.request = request;
+        this.response = response;
+        this.contentLength = response.getEntity().getContentLength();
     }
 
     @Override
-    protected String getAction() {
-        return "whoami";
-    }
-
-    @Override
-    protected void fillParameters(Map<String, String> parameters) {}
-
-    @Override
-    public HttpResponseParser<WhoamiInformation> getParser() throws OXException {
-        return new HttpResponseParser<WhoamiInformation>() {
-
-            @Override
-            public WhoamiInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
-                JSONObject responseObject = parseJSONObject(response);
-                try {
-                    JSONObject data = responseObject.getJSONObject("data");
-                    String sessionId = data.getString("session");
-                    String user = data.getString("user");
-                    int userId = data.getInt("user_id");
-                    int contextId = data.getInt("context_id");
-                    String locale = data.getString("locale");
-
-                    return new WhoamiInformation(sessionId, user, userId, contextId, locale);
-                } catch (JSONException e) {
-                    throw AppsuiteClientExceptions.JSON_ERROR.create(e, e.getMessage());
-                }
-            }
-        };
+    public void close() throws IOException {
+        if (0 < contentLength && contentLength > getCount()) {
+            LOG.warn("Closing not entirely consumed response {}", response);
+        }
+        HttpClients.close(request, response);
     }
 }

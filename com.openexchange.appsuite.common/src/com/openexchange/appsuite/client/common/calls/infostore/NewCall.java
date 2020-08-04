@@ -53,17 +53,17 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.protocol.HttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.appsuite.client.AppsuiteClientExceptions;
+import com.openexchange.appsuite.client.HttpResponseParser;
 import com.openexchange.appsuite.client.common.calls.AbstractPostAppsuiteCall;
 import com.openexchange.appsuite.client.common.calls.infostore.mapping.DefaultFileMapper;
+import com.openexchange.appsuite.client.common.calls.infostore.parser.DefaultFileParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 
@@ -142,11 +142,6 @@ public class NewCall extends AbstractPostAppsuiteCall<DefaultFile> {
         }
     }
 
-    @Override
-    public DefaultFile parse(HttpResponse response, HttpContext httpContext) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
     @Override
     protected void fillParameters(Map<String, String> parameters) {
@@ -158,4 +153,8 @@ public class NewCall extends AbstractPostAppsuiteCall<DefaultFile> {
         }
     }
 
+    @Override
+    public HttpResponseParser<DefaultFile> getParser() throws OXException {
+        return new DefaultFileParser();
+    }
 }

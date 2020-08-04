@@ -50,9 +50,8 @@
 package com.openexchange.appsuite.client.common.calls.login;
 
 import java.util.Map;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.appsuite.client.HttpResponseParser;
 import com.openexchange.appsuite.client.common.calls.AbstractGetAppsuiteCall;
 import com.openexchange.exception.OXException;
 
@@ -86,8 +85,7 @@ public class LogoutCall extends AbstractGetAppsuiteCall<Void> {
     protected void fillParameters(Map<String, String> parameters) {}
 
     @Override
-    public Void parse(HttpResponse response, HttpContext httpContext) throws OXException {
+    public HttpResponseParser<Void> getParser() throws OXException {
         return null;
     }
-
 }

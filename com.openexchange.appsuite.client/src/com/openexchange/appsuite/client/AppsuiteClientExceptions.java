@@ -66,38 +66,29 @@ public enum AppsuiteClientExceptions implements DisplayableOXExceptionCode {
     /** Can not access the link %1$s */
     NO_ACCESS("Can not access the link %1$s", Category.CATEGORY_ERROR, 1),
 
-    /** The link is empty and can not be accessed. */
-    EMPTY_LINK("The link is empty and can not be accessed.", Category.CATEGORY_USER_INPUT, 2, OXExceptionStrings.BAD_REQUEST),
-
     /** An I/O error occurred: %1$s */
-    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 3),
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 2),
 
     /** The link %1$s is invalid */
-    INVALIDE_TARGET("The link %1$s is invalid.", Category.CATEGORY_ERROR, 4, OXExceptionStrings.BAD_REQUEST),
-
-    /** Share link %1$s was redirected to the invalid address %2$s. */
-    INVALIDE_REDIRECT("The link %1$s was redirected to the invalid address %2$s.", Category.CATEGORY_ERROR, 5),
+    INVALIDE_TARGET("The link \"%1$s\" is invalid.", Category.CATEGORY_ERROR, 3, OXExceptionStrings.BAD_REQUEST),
 
     /** A functional necessary cookie is missing */
-    MISSING_COOKIE("A functional necessary cookie is missing.", Category.CATEGORY_ERROR, 6),
+    MISSING_COOKIE("A functional necessary cookie is missing.", Category.CATEGORY_ERROR, 4),
 
     /** The targeted host %1$s is not covered by the same origin policy for %2$s . */
-    NOT_SAME_ORIGIN("The targeted host %1$s is not covered by the same origin policy for %2$s.", Category.CATEGORY_ERROR, 7),
+    NOT_SAME_ORIGIN("The targeted host %1$s is not covered by the same origin policy for %2$s.", Category.CATEGORY_ERROR, 5),
 
     /** The requested URL doesn't contain characteristics that identifies a certain API module. Can't communicate with unknown API module. */
-    UNKOWN_API("The requested URL doesn't contain characteristics that identifies a certain API module. Can't communicate with unknown API module.", Category.CATEGORY_ERROR, 8),
+    UNKOWN_API("The requested URL doesn't contain characteristics that identifies a certain API module. Can't communicate with unknown API module.", Category.CATEGORY_ERROR, 6),
 
     /** Unexpected error [%1$s] */
-    UNEXPECTED_ERROR("Unexpected error [%1$s]", Category.CATEGORY_ERROR, 9),
+    UNEXPECTED_ERROR("Unexpected error [%1$s]", Category.CATEGORY_ERROR, 7),
 
     /** Unexpected error while building JSON [%1$s] */
-    JSON_ERROR("Unexpected error while building JSON [%1$s]", Category.CATEGORY_ERROR, 10),
+    JSON_ERROR("Unexpected error while building JSON [%1$s]", Category.CATEGORY_ERROR, 8),
 
     /** A parameter for the request is missing. */
-    MISSING_PARAMETER("A parameter for the request is missing.", Category.CATEGORY_ERROR, 11),
-
-    /** The response contained an error that happened on the remote system. Error:[%1$s]. */
-    REMOTE_OX_EXCEPTION(" The response contained an error that happened on the remote system. Error:[%1$s]. ", Category.CATEGORY_ERROR, 12),
+    MISSING_PARAMETER("A parameter for the request is missing.", Category.CATEGORY_ERROR, 9),
 
     /** The remote server responded with a client error code of %1$d. */
     CLIENT_ERROR("The remote server responded with a client error code of %1$d.", Category.CATEGORY_USER_INPUT, 400),
@@ -109,7 +100,7 @@ public enum AppsuiteClientExceptions implements DisplayableOXExceptionCode {
     /**
      * The error code prefix for password-change module.
      */
-    public static final String PREFIX = "FSE";
+    public static final String PREFIX = "ACE";
 
     private final Category category;
 

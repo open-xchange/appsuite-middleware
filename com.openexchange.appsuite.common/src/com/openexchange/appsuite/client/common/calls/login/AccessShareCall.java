@@ -64,6 +64,7 @@ import org.apache.http.cookie.Cookie;
 import org.apache.http.protocol.HttpContext;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.appsuite.client.AppsuiteClientExceptions;
+import com.openexchange.appsuite.client.HttpResponseParser;
 import com.openexchange.appsuite.client.common.calls.AbstractGetAppsuiteCall;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -80,7 +81,7 @@ public class AccessShareCall extends AbstractGetAppsuiteCall<ShareLoginInformati
 
     /**
      * Initializes a new {@link AccessShareCall}.
-     * 
+     *
      * @param loginLink The login link
      */
     public AccessShareCall(URL loginLink) {
@@ -111,47 +112,52 @@ public class AccessShareCall extends AbstractGetAppsuiteCall<ShareLoginInformati
     @Override
     protected void fillParameters(Map<String, String> parameters) {}
 
-    @Override
-    public ShareLoginInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
-        /*
-         * Check that we got a redirect and that the redirect is set
-         */
-        if (HttpStatus.SC_MOVED_TEMPORARILY != response.getStatusLine().getStatusCode()) {
-            throw AppsuiteClientExceptions.NO_ACCESS.create(loginLink);
-        }
-        String location = getHeaderValue(response, HttpHeaders.LOCATION);
-        if (Strings.isEmpty(location)) {
-            throw AppsuiteClientExceptions.NO_ACCESS.create(loginLink);
-        }
-
-        /*
-         * Check if the redirect is still on the same server.
-         */
-        checkSameOrigin(loginLink, location);
-        ShareLoginInformation infos = parseLocationHeader(location);
-        /*
-         * Parse prefix from location header
-         */
-        if (Strings.isEmpty(infos.getRemoteSessionId())) {
-            Optional<Cookie> sessionCookie = getSessionCookie(getCookieStore(httpContext));
-            if (sessionCookie.isPresent()) {
-                infos.setRemoteSessionId(sessionCookie.get().getValue());
-            }
-        }
-        return infos;
-    }
-
     /**
      * Parses the location header into its parameters and make them available to the information member
      * <p>
      * Values from
      * <li> com.openexchange.share.servlet.utils.ShareRedirectUtils.getWebSessionRedirectURL()</li>
      * <li> com.openexchange.share.servlet.utils.LoginLocation</li>
-     * 
+     *
      * @param location The location header
      */
     protected ShareLoginInformation parseLocationHeader(String location) {
         return ShareLoginInformation.parse(parseParameters(location));
     }
 
+    @Override
+    public HttpResponseParser<ShareLoginInformation> getParser() throws OXException {
+        return new HttpResponseParser<ShareLoginInformation>() {
+
+            @Override
+            public ShareLoginInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
+                /*
+                 * Check that we got a redirect and that the redirect is set
+                 */
+                if (HttpStatus.SC_MOVED_TEMPORARILY != response.getStatusLine().getStatusCode()) {
+                    throw AppsuiteClientExceptions.NO_ACCESS.create(loginLink);
+                }
+                String location = getHeaderValue(response, HttpHeaders.LOCATION);
+                if (Strings.isEmpty(location)) {
+                    throw AppsuiteClientExceptions.NO_ACCESS.create(loginLink);
+                }
+
+                /*
+                 * Check if the redirect is still on the same server.
+                 */
+                checkSameOrigin(loginLink, location);
+                ShareLoginInformation infos = parseLocationHeader(location);
+                /*
+                 * Parse prefix from location header
+                 */
+                if (Strings.isEmpty(infos.getRemoteSessionId())) {
+                    Optional<Cookie> sessionCookie = getSessionCookie(getCookieStore(httpContext));
+                    if (sessionCookie.isPresent()) {
+                        infos.setRemoteSessionId(sessionCookie.get().getValue());
+                    }
+                }
+                return infos;
+            }
+        };
+    }
 }

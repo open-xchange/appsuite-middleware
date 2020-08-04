@@ -47,62 +47,49 @@
  *
  */
 
-package com.openexchange.appsuite.client.common.calls.system;
+package com.openexchange.appsuite.client.common.calls.infostore.parser;
 
-import static com.openexchange.appsuite.client.common.AppsuiteClientUtils.parseJSONObject;
-import java.util.Map;
+import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.annotation.NonNull;
 import com.openexchange.appsuite.client.AppsuiteClientExceptions;
 import com.openexchange.appsuite.client.HttpResponseParser;
-import com.openexchange.appsuite.client.common.calls.AbstractGetAppsuiteCall;
+import com.openexchange.appsuite.client.common.AppsuiteClientUtils;
+import com.openexchange.appsuite.client.common.calls.infostore.mapping.DefaultFileMapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 
 /**
- * {@link WhoamiCall}
+ * {@link DefaultFileListParser}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
+public class DefaultFileListParser implements HttpResponseParser<List<DefaultFile>> {
 
-public class WhoamiCall extends AbstractGetAppsuiteCall<WhoamiInformation> {
+    private final int[] columns;
 
-    @Override
-    public @NonNull String getPath() {
-        return "/system";
+    /**
+     * Initializes a new {@link DefaultFileListParser}.
+     *
+     * @param columns The columns to parse
+     */
+    public DefaultFileListParser(int[] columns) {
+        this.columns = columns;
     }
 
     @Override
-    protected String getAction() {
-        return "whoami";
+    public List<DefaultFile> parse(HttpResponse response, HttpContext httpContext) throws OXException {
+        JSONArray data = AppsuiteClientUtils.parseDataArray(response);
+        DefaultFileMapper mapper = new DefaultFileMapper();
+        try {
+            List<DefaultFile> files = mapper.deserialize(data, mapper.getMappedFields(columns));
+            return files;
+        } catch (JSONException e) {
+            throw AppsuiteClientExceptions.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
-    @Override
-    protected void fillParameters(Map<String, String> parameters) {}
-
-    @Override
-    public HttpResponseParser<WhoamiInformation> getParser() throws OXException {
-        return new HttpResponseParser<WhoamiInformation>() {
-
-            @Override
-            public WhoamiInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
-                JSONObject responseObject = parseJSONObject(response);
-                try {
-                    JSONObject data = responseObject.getJSONObject("data");
-                    String sessionId = data.getString("session");
-                    String user = data.getString("user");
-                    int userId = data.getInt("user_id");
-                    int contextId = data.getInt("context_id");
-                    String locale = data.getString("locale");
-
-                    return new WhoamiInformation(sessionId, user, userId, contextId, locale);
-                } catch (JSONException e) {
-                    throw AppsuiteClientExceptions.JSON_ERROR.create(e, e.getMessage());
-                }
-            }
-        };
-    }
 }

@@ -51,15 +51,11 @@ package com.openexchange.appsuite.client.common.calls.infostore;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
-import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.appsuite.client.AppsuiteClientExceptions;
+import com.openexchange.appsuite.client.HttpResponseParser;
 import com.openexchange.appsuite.client.common.AppsuiteClientUtils;
 import com.openexchange.appsuite.client.common.calls.AbstractGetAppsuiteCall;
-import com.openexchange.appsuite.client.common.calls.infostore.mapping.DefaultFileMapper;
+import com.openexchange.appsuite.client.common.calls.infostore.parser.DefaultFileListParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
@@ -100,18 +96,6 @@ public class VersionsCall extends AbstractGetAppsuiteCall<List<DefaultFile>> {
     }
 
     @Override
-    public List<DefaultFile> parse(HttpResponse response, HttpContext httpContext) throws OXException {
-        JSONArray data = AppsuiteClientUtils.parseDataArray(response);
-        DefaultFileMapper mapper = new DefaultFileMapper();
-        try {
-            List<DefaultFile> files = mapper.deserialize(data, mapper.getMappedFields(columns));
-            return files;
-        } catch (JSONException e) {
-            throw AppsuiteClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
     protected void fillParameters(Map<String, String> parameters) {
         parameters.put("id", id);
         parameters.put("columns", AppsuiteClientUtils.toCommaString(columns));
@@ -124,5 +108,10 @@ public class VersionsCall extends AbstractGetAppsuiteCall<List<DefaultFile>> {
     @Override
     protected String getAction() {
         return "versions";
+    }
+
+    @Override
+    public HttpResponseParser<List<DefaultFile>> getParser() throws OXException {
+        return new DefaultFileListParser(columns);
     }
 }

@@ -55,6 +55,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.appsuite.client.HttpResponseParser;
 import com.openexchange.appsuite.client.common.calls.AbstractGetAppsuiteCall;
 import com.openexchange.exception.OXException;
 
@@ -70,7 +71,7 @@ public class RedeemTokenCall extends AbstractGetAppsuiteCall<ShareLoginInformati
 
     /**
      * Initializes a new {@link RedeemTokenCall}.
-     * 
+     *
      * @param token The token to request
      * @throws OXException In case the <code>token</code> is missing
      */
@@ -98,9 +99,15 @@ public class RedeemTokenCall extends AbstractGetAppsuiteCall<ShareLoginInformati
     }
 
     @Override
-    public ShareLoginInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
-        JSONObject json = parseJSONObject(response);
-        return ShareLoginInformation.parse(json.asMap());
+    public HttpResponseParser<ShareLoginInformation> getParser() throws OXException {
+        return new HttpResponseParser<ShareLoginInformation>() {
+
+            @Override
+            public ShareLoginInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
+                JSONObject json = parseJSONObject(response);
+                return ShareLoginInformation.parse(json.asMap());
+            }
+        };
     }
 
 }
