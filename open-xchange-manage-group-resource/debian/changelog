@@ -1,3 +1,9 @@
+open-xchange-manage-group-resource (7.10.4-7) stable; urgency=medium
+
+  * Fifth candidate for 7.10.4 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Aug 2020 11:18:19 +0000
+
 open-xchange-manage-group-resource (7.10.4-6) stable; urgency=medium
 
   * Fourth candidate for 7.10.4 release
