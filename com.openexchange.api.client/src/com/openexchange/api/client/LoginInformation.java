@@ -47,41 +47,77 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.openexchange.annotation.Nullable;
 
 /**
- * {@link Activator}
+ * {@link LoginInformation}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public interface LoginInformation {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    /**
+     * Get the remote session ID
+     *
+     * @return The remote session ID or <code>null</code> if not available
+     */
+    @Nullable
+    String getRemoteSessionId();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
-    }
+    /**
+     * Get the user or rather the guest mail address the user has on the target system
+     *
+     * @return The user or rather guest user mail address or <code>null</code> if not available
+     */
+    @Nullable
+    String getRemoteMailAddress();
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
+    /**
+     * Get the user or rather guest identifier the user has on the target system
+     *
+     * @return The user or rather guest user ID or <code>-1</code> if not available
+     */
+    int getRemoteUserId();
 
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
-    }
+    /**
+     * Get the context identifier of the user or rather guest the user has on the target system
+     *
+     * @return The context ID or <code>-1</code> if not available
+     */
+    int getRemoteContextId();
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
-    }
+    /**
+     * Get the folder identifier of the target
+     *
+     * @return The folder ID or <code>null</code> if not available
+     */
+    @Nullable
+    String getRemoteFolderId();
+
+    /**
+     * The module that has been accessed
+     * 
+     * @return The module
+     */
+    String getModule();
+
+    /**
+     * The remote item identifier that has been accessed, in case one file and not a folder was accessed
+     * 
+     * @return The item
+     */
+    String getItem();
+
+    /**
+     * Get an additional value that was gathered along the login request
+     *
+     * @param key The key value
+     * @return The value fitting to the key
+     */
+    @Nullable
+    String getAdditional(String key);
+
 }

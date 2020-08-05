@@ -47,41 +47,39 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client.impl.osgi;
 
 import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
+import com.openexchange.api.client.impl.ApiClientServiceImpl;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
+import com.openexchange.user.UserService;
+import com.openexchange.version.VersionService;
 
 /**
- * {@link Activator}
+ * {@link ApiClientActivator}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+public class ApiClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+        return new Class[] { HttpClientService.class, UserService.class, LeanConfigurationService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { LeanConfigurationService.class, VersionService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
+        registerService(ApiClientService.class, new ApiClientServiceImpl(this));
+        registerService(WildcardHttpClientConfigProvider.class, new ApiClientWildcardProvider());
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
-    }
 }

@@ -47,41 +47,30 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Activator}
+ * {@link HttpResponseParser}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @param <T> The type of the parsed object
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+@FunctionalInterface
+public interface HttpResponseParser<T> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    /**
+     * Parses a HTTP response to the desired object
+     *
+     * @param response The HTTP response to parse
+     * @param httpContext The HTTP context with additional information
+     * @return The desired object
+     * @throws OXException
+     */
+    T parse(HttpResponse response, HttpContext httpContext) throws OXException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
-    }
 }

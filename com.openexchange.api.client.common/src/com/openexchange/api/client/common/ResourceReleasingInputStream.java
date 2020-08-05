@@ -47,41 +47,51 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client.common;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.io.IOException;
+import java.util.Objects;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.tools.stream.CountingOnlyInputStream;
 
 /**
- * {@link Activator}
+ * {@link ResourceReleasingInputStream} - Wraps the content stream of a {@link HttpResponse}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public class ResourceReleasingInputStream extends CountingOnlyInputStream {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ResourceReleasingInputStream.class);
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    private final HttpRequestBase request;
+    private final HttpResponse response;
+    private final long contentLength;
+
+    /**
+     * Initializes a new {@link ResourceReleasingInputStream}.
+     * 
+     * @param request The request to close along the response
+     * @param response The response to wrap
+     * @throws IOException If the stream could not be created
+     */
+    @SuppressWarnings("resource")
+    public ResourceReleasingInputStream(HttpRequestBase request, HttpResponse response) throws IOException {
+        super((Objects.requireNonNull(response, "response must not be null")).getEntity().getContent());
+        this.request = request;
+        this.response = response;
+        this.contentLength = response.getEntity().getContentLength();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    public void close() throws IOException {
+        if (0 < contentLength && contentLength > getCount()) {
+            LOG.warn("Closing not entirely consumed response {}", response);
+        }
+        HttpClients.close(request, response);
     }
 }

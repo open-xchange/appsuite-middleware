@@ -47,41 +47,35 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client.common.calls.infostore.parser;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.http.HttpResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.api.client.ApiClientExceptions;
+import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.common.ApiClientUtils;
+import com.openexchange.api.client.common.calls.infostore.mapping.DefaultFileMapper;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 
 /**
- * {@link Activator}
+ * {@link DefaultFileParser}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+public class DefaultFileParser implements HttpResponseParser<DefaultFile> {
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    public DefaultFile parse(HttpResponse response, org.apache.http.protocol.HttpContext httpContext) throws OXException {
+        JSONObject json = ApiClientUtils.parseDataObject(response);
+        DefaultFileMapper mapper = new DefaultFileMapper();
+        try {
+            DefaultFile file = mapper.deserialize(json, mapper.getMappedFields());
+            return file;
+        } catch (JSONException e) {
+            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 }

@@ -47,41 +47,67 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client.common.calls.login;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.openexchange.api.client.common.ApiClientUtils.parseJSONObject;
+import java.util.Map;
+import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
+import org.json.JSONObject;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.common.calls.AbstractGetCall;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Activator}
+ * {@link RedeemTokenCall}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public class RedeemTokenCall extends AbstractGetCall<ShareLoginInformation> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    private final String token;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    /**
+     * Initializes a new {@link RedeemTokenCall}.
+     *
+     * @param token The token to request
+     * @throws OXException In case the <code>token</code> is missing
+     */
+    public RedeemTokenCall(String token) throws OXException {
+        super();
+        checkParameters(token);
+        this.token = token;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
+    @NonNull
+    public String getModule() {
+        return "/share/redeem/token";
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    protected String getAction() {
+        return null;
     }
+
+    @Override
+    protected void fillParameters(Map<String, String> parameters) {
+        parameters.put("token", token);
+        parameters.put("language", "en_US");
+    }
+
+    @Override
+    public HttpResponseParser<ShareLoginInformation> getParser() throws OXException {
+        return new HttpResponseParser<ShareLoginInformation>() {
+
+            @Override
+            public ShareLoginInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
+                JSONObject json = parseJSONObject(response);
+                return ShareLoginInformation.parse(json.asMap());
+            }
+        };
+    }
+
 }

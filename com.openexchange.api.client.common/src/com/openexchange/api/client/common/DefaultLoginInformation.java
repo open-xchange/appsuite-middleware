@@ -1,0 +1,263 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.api.client.common;
+
+import static com.openexchange.api.client.common.ApiClientUtils.parseInt;
+import static com.openexchange.api.client.common.ApiClientUtils.parseString;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import com.openexchange.annotation.Nullable;
+import com.openexchange.api.client.LoginInformation;
+
+/**
+ * {@link DefaultLoginInformation}
+ *
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
+ */
+public class DefaultLoginInformation implements LoginInformation {
+
+    private String remoteSessionId;
+    protected final Map<String, String> additionals = new HashMap<>(5);
+    private String remoteMailAddress;
+    private int remoteUserId;
+    private int remoteContextId;
+    private String folderId;
+    private String module;
+    private String item;
+
+    /**
+     * Initializes a new {@link DefaultLoginInformation}.
+     */
+    public DefaultLoginInformation() {
+        super();
+    }
+
+    @Override
+    @Nullable
+    public String getRemoteSessionId() {
+        return remoteSessionId;
+    }
+
+    @Override
+    @Nullable
+    public String getRemoteMailAddress() {
+        return remoteMailAddress;
+    }
+
+    @Override
+    public int getRemoteUserId() {
+        return remoteUserId;
+    }
+
+    @Override
+    public int getRemoteContextId() {
+        return remoteContextId;
+    }
+
+    @Override
+    @Nullable
+    public String getRemoteFolderId() {
+        return folderId;
+    }
+
+    @Override
+    public String getModule() {
+        return module;
+    }
+
+    @Override
+    public String getItem() {
+        return item;
+    }
+
+    @Override
+    @Nullable
+    public String getAdditional(String key) {
+        return additionals.get(key);
+    }
+
+    /**
+     * Sets the remoteSessionId
+     *
+     * @param remoteSessionId The remoteSessionId to set
+     */
+    public void setRemoteSessionId(String remoteSessionId) {
+        this.remoteSessionId = remoteSessionId;
+    }
+
+    /**
+     * Sets the remoteMailAddress
+     *
+     * @param remoteMailAddress The remoteMailAddress to set
+     */
+    public void setRemoteMailAddress(String remoteMailAddress) {
+        this.remoteMailAddress = remoteMailAddress;
+    }
+
+    /**
+     * Sets the remoteUserId
+     *
+     * @param remoteUserId The remoteUserId to set
+     */
+    public void setRemoteUserId(int remoteUserId) {
+        this.remoteUserId = remoteUserId;
+    }
+
+    /**
+     * Sets the remoteContextId
+     *
+     * @param remoteContextId The remoteContextId to set
+     */
+    public void setRemoteContextId(int remoteContextId) {
+        this.remoteContextId = remoteContextId;
+    }
+
+    /**
+     * Sets the folderId
+     *
+     * @param folderId The folderId to set
+     */
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+    }
+
+    /**
+     * Adds an additional value
+     * 
+     * @param key The key to save the value for
+     * @param value The value
+     */
+    public void addAdditiona(String key, String value) {
+        additionals.put(key, value);
+    }
+
+    /**
+     * Sets the module
+     *
+     * @param module The module to set
+     */
+    public void setModule(String module) {
+        this.module = module;
+    }
+
+    /**
+     * Sets the item
+     *
+     * @param item The item to set
+     */
+    public void setItem(String item) {
+        this.item = item;
+    }
+    
+    
+    /**
+     * Parses the values of the map to a {@link DefaultLoginInformation}
+     * <p>
+     * Values from
+     * <li> com.openexchange.share.servlet.utils.ShareRedirectUtils.getWebSessionRedirectURL()</li>
+     * <li> com.openexchange.share.servlet.utils.LoginLocation</li>
+     *
+     * @param values values to parse
+     * @return Login information
+     */
+    public static DefaultLoginInformation parse(Map<String, ? extends Object> values) {
+        DefaultLoginInformation information = new DefaultLoginInformation();
+        for (Entry<String, ? extends Object> entry : values.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (false == parseForLoginInformation(information, key, value)) {
+                information.addAdditiona(key, String.valueOf(value));
+            }
+        }
+        return information;
+    }
+
+    /**
+     * Parses for login information
+     *
+     * @param information The object to add the parsed infos to
+     * @param key The key to identify the property
+     * @param value The value to set
+     * @return <code>true</code> if the value was set, <code>false</code> otherwise
+     */
+    protected static boolean parseForLoginInformation(DefaultLoginInformation information, String key, Object value) {
+        switch (key) {
+            case "session":
+                information.setRemoteSessionId(parseString(value));
+                return true;
+            case "user":
+                information.setRemoteMailAddress(parseString(value));
+                return true;
+            case "user_id":
+                information.setRemoteUserId(parseInt(value));
+                return true;
+            case "context_id":
+                information.setRemoteContextId(parseInt(value));
+                return true;
+            case "f":
+            case "folder":
+                information.setFolderId(parseString(value));
+                return true;
+            case "m":
+            case "module":
+                information.setModule(parseString(value));
+                return true;
+            case "i":
+                information.setItem(parseString(value));
+                return true;
+            default:
+                // Fall trough
+        }
+        return false;
+    }
+
+}

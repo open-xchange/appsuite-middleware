@@ -47,41 +47,49 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client.common.calls.infostore.parser;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
+import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.api.client.ApiClientExceptions;
+import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.common.ApiClientUtils;
+import com.openexchange.api.client.common.calls.infostore.mapping.DefaultFileMapper;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 
 /**
- * {@link Activator}
+ * {@link DefaultFileListParser}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public class DefaultFileListParser implements HttpResponseParser<List<DefaultFile>> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    private final int[] columns;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    /**
+     * Initializes a new {@link DefaultFileListParser}.
+     *
+     * @param columns The columns to parse
+     */
+    public DefaultFileListParser(int[] columns) {
+        this.columns = columns;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
+    public List<DefaultFile> parse(HttpResponse response, HttpContext httpContext) throws OXException {
+        JSONArray data = ApiClientUtils.parseDataArray(response);
+        DefaultFileMapper mapper = new DefaultFileMapper();
+        try {
+            List<DefaultFile> files = mapper.deserialize(data, mapper.getMappedFields(columns));
+            return files;
+        } catch (JSONException e) {
+            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
-    }
 }

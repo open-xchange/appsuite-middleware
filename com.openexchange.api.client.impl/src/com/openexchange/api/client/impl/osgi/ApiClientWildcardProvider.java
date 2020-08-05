@@ -47,41 +47,47 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client.impl.osgi;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.http.impl.client.HttpClientBuilder;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.rest.client.httpclient.AbstractHttpClientModifer;
+import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
 
 /**
- * {@link Activator}
+ * {@link ApiClientWildcardProvider}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public class ApiClientWildcardProvider extends AbstractHttpClientModifer implements WildcardHttpClientConfigProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    /** The identifier for HTTP clients regarding federated sharing */
+    public static final String HTTP_CLIENT_IDENTIFIER = "AppsuiteHttpClient";
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    /**
+     * Initializes a new {@link ApiClientWildcardProvider}.
+     */
+    public ApiClientWildcardProvider() {
+        super(AbstractHttpClientModifer.DEFAULT_UA);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
+    @NonNull
+    public String getClientIdPattern() {
+        return HTTP_CLIENT_IDENTIFIER + "*";
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    @NonNull
+    public String getGroupName() {
+        return HTTP_CLIENT_IDENTIFIER;
+    }
+
+    @Override
+    public void modify(HttpClientBuilder builder) {
+        //We do handle redirects manually in order to resolve share links
+        builder.disableRedirectHandling();
+        super.modify(builder);
     }
 }

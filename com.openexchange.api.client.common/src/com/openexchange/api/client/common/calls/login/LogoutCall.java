@@ -47,41 +47,45 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client.common.calls.login;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Map;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.common.calls.AbstractGetCall;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Activator}
+ * {@link LogoutCall}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public class LogoutCall extends AbstractGetCall<Void> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    /**
+     * Initializes a new {@link LogoutCall}.
+     */
+    public LogoutCall() {
+        super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
+    @NonNull
+    public String getModule() {
+        return "/login";
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    protected String getAction() {
+        return "logout";
+    }
+
+    @Override
+    protected void fillParameters(Map<String, String> parameters) {}
+
+    @Override
+    public HttpResponseParser<Void> getParser() throws OXException {
+        return null;
     }
 }

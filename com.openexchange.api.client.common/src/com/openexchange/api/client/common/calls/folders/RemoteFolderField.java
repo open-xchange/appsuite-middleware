@@ -47,41 +47,74 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
-
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.openexchange.api.client.common.calls.folders;
 
 /**
- * {@link Activator}
+ * {@link RemoteFolderField}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public enum RemoteFolderField {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    /**
+     * The ID of the folder
+     */
+    ID(1, "id"),
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    /**
+     * The ID of the creator
+     */
+    CREATED_BY(2, "created_by"),
+
+    /**
+     * The date of creation
+     */
+    CREATION_DATE(4, "creation_date"),
+
+    /**
+     * The date of modification
+     */
+    LAST_MODIFIED(5, "last_modified"),
+
+    /**
+     * The folder's title
+     */
+    TITLE(300, "title"),
+
+    ;
+
+    private final int column;
+
+    private final String name;
+
+    /**
+     * Initializes a new {@link RemoteFolderField}.
+     *
+     * @param column The column ID
+     * @param name The name of the field
+     */
+    private RemoteFolderField(int column, String name) {
+        this.column = column;
+        this.name = name;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
+    /**
+     *
+     * Gets the column ID
+     *
+     * @return The column ID
+     */
+    public int getColumn() {
+        return column;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
     }
 }

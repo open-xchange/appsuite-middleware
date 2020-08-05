@@ -47,41 +47,65 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client.common.calls.login;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.openexchange.api.client.common.ApiClientUtils.parseJSONObject;
+import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
+import org.json.JSONObject;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.api.client.Credentials;
+import com.openexchange.api.client.HttpMethods;
+import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.LoginInformation;
+import com.openexchange.api.client.common.DefaultLoginInformation;
+import com.openexchange.api.client.common.calls.AbstractApiCall;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Activator}
+ * {@link AbstractLoginCall}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public abstract class AbstractLoginCall extends AbstractApiCall<LoginInformation> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    protected final Credentials credentials;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    /**
+     * Initializes a new {@link AbstractLoginCall}.
+     *
+     * @param credentials The credentials to login with
+     * @throws OXException In case parameter is missing
+     */
+    public AbstractLoginCall(Credentials credentials) throws OXException {
+        super();
+        checkParameters(credentials);
+
+        this.credentials = credentials;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
+    @NonNull
+    public HttpMethods getHttpMehtod() {
+        return HttpMethods.POST;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    @NonNull
+    public String getModule() {
+        return "/login";
+    }
+
+    @Override
+    public HttpResponseParser<LoginInformation> getParser() throws OXException {
+        return new HttpResponseParser<LoginInformation>() {
+
+            @Override
+            public LoginInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
+                JSONObject json = parseJSONObject(response);
+                return DefaultLoginInformation.parse(json.asMap());
+            }
+        };
     }
 }

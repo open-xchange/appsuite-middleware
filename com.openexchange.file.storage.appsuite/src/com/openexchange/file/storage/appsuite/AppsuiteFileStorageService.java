@@ -54,7 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import com.openexchange.appsuite.client.AppsuiteClientFactory;
+import com.openexchange.api.client.ApiClientService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
@@ -114,8 +114,8 @@ public class AppsuiteFileStorageService implements AccountAware, SharingFileStor
         return m;
     }
 
-    private AppsuiteClientFactory getClientFactory() throws OXException {
-        return this.services.getServiceSafe(AppsuiteClientFactory.class);
+    private ApiClientService getClientFactory() throws OXException {
+        return this.services.getServiceSafe(ApiClientService.class);
     }
 
     private List<FileStorageAccount> getAccounts0(Session session) throws OXException {

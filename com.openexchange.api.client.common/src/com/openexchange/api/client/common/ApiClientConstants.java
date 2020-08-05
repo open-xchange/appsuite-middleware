@@ -47,41 +47,53 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
-
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.openexchange.api.client.common;
 
 /**
- * {@link Activator}
+ * {@link ApiClientConstants}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public class ApiClientConstants {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    /** Static string for {@value #ACTION} */
+    public final static String ACTION = "action";
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
-    }
+    /** Static string for {@value #ANONYMOUS} */
+    public final static String ANONYMOUS = "anonymous";
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
+    /** Static string for {@value #CLIENT} */
+    public final static String CLIENT = "client";
 
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
-    }
+    /** Static string for the client value, {@value #CLIENT_VALUE} */
+    public final static String CLIENT_VALUE = "open-xchange-appsuite-http";
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
-    }
+    /** Static string for {@value #GUEST} */
+    public final static String GUEST = "guest";
+
+    /** Static string for {@value #LOGIN} */
+    public final static String LOGIN = "login";
+
+    /** Static string for {@value #NAME} */
+    public final static String NAME = "name";
+
+    /** Static string for {@value #PASSWORD} */
+    public final static String PASSWORD = "password";
+
+    /** Static string for {@value #RAMP_UP} */
+    public final static String RAMP_UP = "rampup";
+
+    /** Static string for {@value #SESSION} */
+    public final static String SESSION = "session";
+
+    /** Static string for {@value #SHARE} */
+    public final static String SHARE = "share";
+
+    /** Static string for {@value #STAY_SIGNED_IN} */
+    public final static String STAY_SIGNED_IN = "staySignedIn";
+
+    /** Static string for {@value #TARGET} */
+    public final static String TARGET = "target";
+
 }

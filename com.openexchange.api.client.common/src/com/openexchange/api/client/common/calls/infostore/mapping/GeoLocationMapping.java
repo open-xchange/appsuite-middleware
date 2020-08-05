@@ -47,41 +47,48 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client.common.calls.infostore.mapping;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
+import com.openexchange.java.GeoLocation;
+import com.openexchange.session.Session;
 
 /**
- * {@link Activator}
+ * {@link GeoLocationMapping}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public abstract class GeoLocationMapping<O> extends DefaultJsonMapping<GeoLocation, O> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    private static Pattern pattern = Pattern.compile("\\((.*),(.*)\\)");
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    public GeoLocationMapping(String ajaxName, Integer columnID) {
+        super(ajaxName, columnID);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
+    public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException, OXException {
+        GeoLocation geolocation = this.get(from);
+        if (geolocation != null) {
+            return geolocation.toString();
+        }
+        return JSONObject.NULL;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    public void deserialize(JSONObject from, O to) throws JSONException, OXException {
+        if (from.has("geolocation")) {
+            Matcher matcher = pattern.matcher(from.getString("geolocation"));
+            if (matcher.find()) {
+                this.set(to, new GeoLocation(Double.parseDouble(matcher.group(1)), Double.parseDouble(matcher.group(2))));
+            }
+        }
     }
 }
