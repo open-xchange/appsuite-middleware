@@ -171,12 +171,12 @@ public class ZoomConferenceHandler implements CalendarHandler {
      *
      * @param conferences The list of deleted conferences
      * @param event The event
-     * @param caledarEvent The calendarEvent
+     * @param calendarEvent The calendarEvent
      */
-    private void delete(List<Conference> conferences, Event event, CalendarEvent caledarEvent) {
-        Switchboard switchboard = new Switchboard(getConfig(caledarEvent.getCalendarUser(), caledarEvent.getContextId()));
+    private void delete(List<Conference> conferences, Event event, CalendarEvent calendarEvent) {
+        Switchboard switchboard = new Switchboard(getConfig(calendarEvent.getCalendarUser(), calendarEvent.getContextId()));
         for (Conference conf : conferences) {
-            switchboard.delete(conf, event, caledarEvent.getTimestamp());
+            switchboard.delete(conf, event, calendarEvent.getTimestamp());
         }
     }
 

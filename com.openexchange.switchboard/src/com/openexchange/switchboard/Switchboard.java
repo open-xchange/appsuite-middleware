@@ -126,8 +126,8 @@ public class Switchboard {
      */
     public void delete(Conference conference, Event original, long timestamp) {
         try {
-            post(serialize(DELETED, conference, null, timestamp));
-            LOG.info("Successfully sent {} for conference {} to switchboard.", UPDATED, conference.getId());
+            post(serialize(DELETED, conference, original, timestamp));
+            LOG.info("Successfully sent {} for conference {} to switchboard.", DELETED, conference.getId());
         } catch (JSONException | OXException e) {
             LOG.error("Unable to send conference delete to the switchboard.", e);
         }
