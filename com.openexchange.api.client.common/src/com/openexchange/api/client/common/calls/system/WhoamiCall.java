@@ -47,41 +47,62 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client.common.calls.system;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.openexchange.api.client.common.ApiClientUtils.parseJSONObject;
+import java.util.Map;
+import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.api.client.ApiClientExceptions;
+import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.common.calls.AbstractGetCall;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Activator}
+ * {@link WhoamiCall}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+public class WhoamiCall extends AbstractGetCall<WhoamiInformation> {
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    public @NonNull String getModule() {
+        return "/system";
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
+    protected String getAction() {
+        return "whoami";
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    protected void fillParameters(Map<String, String> parameters) {}
+
+    @Override
+    public HttpResponseParser<WhoamiInformation> getParser() throws OXException {
+        return new HttpResponseParser<WhoamiInformation>() {
+
+            @Override
+            public WhoamiInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
+                JSONObject responseObject = parseJSONObject(response);
+                try {
+                    JSONObject data = responseObject.getJSONObject("data");
+                    String sessionId = data.getString("session");
+                    String user = data.getString("user");
+                    int userId = data.getInt("user_id");
+                    int contextId = data.getInt("context_id");
+                    String locale = data.getString("locale");
+
+                    return new WhoamiInformation(sessionId, user, userId, contextId, locale);
+                } catch (JSONException e) {
+                    throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        };
     }
 }

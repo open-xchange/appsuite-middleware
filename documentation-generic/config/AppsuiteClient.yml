@@ -1,6 +1,9 @@
-feature_name: Appsuite HTTP Client
+feature_name: HTTP API Client
+feature_description: |
+  Properties relating to the HTTP API client used within the server to access remote content
+  provided by another Open Xchange server.
 properties:
-    - key: com.openexchange.appsuite.client.blacklistedHosts
+    - key: com.openexchange.api.client.blacklistedHosts
       description: |
         Defines hosts that are blacklisted which means that they are not allowed to be accessed.
       defaultValue: 127.0.0.1-127.255.255.255,localhost
@@ -10,9 +13,9 @@ properties:
       related: 
       file: 
       packageName: open-xchange-core
-      tags: ["HTTP client", "Appsuite Client", "Black list"]
+      tags: ["HTTP client", "API Client", "Black list"]
 properties:
-    - key: com.openexchange.appsuite.client.allowedPorts
+    - key: com.openexchange.api.client.allowedPorts
       description: |
         Defines ports that are allowed to access.
       defaultValue:
@@ -22,4 +25,4 @@ properties:
       related: 
       file: 
       packageName: open-xchange-core
-      tags: ["HTTP client", "Appsuite Client"]
+      tags: ["HTTP client", "API Client"]

@@ -47,41 +47,84 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
-
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.openexchange.api.client.common.calls.system;
 
 /**
- * {@link Activator}
+ * {@link WhoamiInformation}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public class WhoamiInformation {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    private final String sessionId;
+    private final String user;
+    private final int userId;
+    private final int contextId;
+    private final String locale;
+    /**
+     * Initializes a new {@link WhoamiInformation}.
+     *
+     * @param sessionId
+     * @param user
+     * @param userId
+     * @param contextId
+     * @param locale
+     */
+    public WhoamiInformation(String sessionId, String user, int userId, int contextId, String locale) {
+        super();
+        this.sessionId = sessionId;
+        this.user = user;
+        this.userId = userId;
+        this.contextId = contextId;
+        this.locale = locale;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
+    /**
+     * Gets the sessionId
+     *
+     * @return The sessionId
+     */
+    public String getSessionId() {
+        return sessionId;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    /**
+     * Gets the user
+     *
+     * @return The user
+     */
+    public String getUser() {
+        return user;
     }
+
+    /**
+     * Gets the userId
+     *
+     * @return The userId
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Gets the contextId
+     *
+     * @return The contextId
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
+    /**
+     * Gets the locale
+     *
+     * @return The locale
+     */
+    public String getLocale() {
+        return locale;
+    }
+
+
 }

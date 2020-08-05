@@ -54,16 +54,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import com.openexchange.annotation.Nullable;
-import com.openexchange.appsuite.client.AppsuiteClient;
-import com.openexchange.appsuite.client.common.calls.folders.GetFolderCall;
-import com.openexchange.appsuite.client.common.calls.folders.ListFoldersCall;
-import com.openexchange.appsuite.client.common.calls.folders.RemoteFolder;
-import com.openexchange.appsuite.client.common.calls.infostore.DocumentCall;
-import com.openexchange.appsuite.client.common.calls.infostore.GetAllCall;
-import com.openexchange.appsuite.client.common.calls.infostore.GetCall;
-import com.openexchange.appsuite.client.common.calls.infostore.NewCall;
-import com.openexchange.appsuite.client.common.calls.infostore.VersionsCall;
-import com.openexchange.appsuite.client.common.calls.system.WhoamiCall;
+import com.openexchange.api.client.ApiClient;
+import com.openexchange.api.client.common.calls.folders.GetFolderCall;
+import com.openexchange.api.client.common.calls.folders.ListFoldersCall;
+import com.openexchange.api.client.common.calls.folders.RemoteFolder;
+import com.openexchange.api.client.common.calls.infostore.DocumentCall;
+import com.openexchange.api.client.common.calls.infostore.GetAllCall;
+import com.openexchange.api.client.common.calls.infostore.GetCall;
+import com.openexchange.api.client.common.calls.infostore.NewCall;
+import com.openexchange.api.client.common.calls.infostore.VersionsCall;
+import com.openexchange.api.client.common.calls.system.WhoamiCall;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -85,7 +85,7 @@ import static com.openexchange.java.Autoboxing.I;
  */
 public class ShareClient {
 
-    private final AppsuiteClient ajaxClient;
+    private final ApiClient ajaxClient;
     private final Session session;
 
     private static final String USER_INFOSTORE_FOLDER = "10";
@@ -94,9 +94,9 @@ public class ShareClient {
      * Initializes a new {@link ShareClient}.
      *
      * @param session A session
-     * @param client The underlying {@link AppsuiteClient} to use
+     * @param client The underlying {@link ApiClient} to use
      */
-    public ShareClient(Session session, AppsuiteClient client) {
+    public ShareClient(Session session, ApiClient client) {
         this.session = Objects.requireNonNull(session, "session must not be null");
         this.ajaxClient = Objects.requireNonNull(client, "client must not be null");
     }

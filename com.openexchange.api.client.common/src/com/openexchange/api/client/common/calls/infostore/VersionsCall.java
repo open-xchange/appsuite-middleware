@@ -47,41 +47,71 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client.common.calls.infostore;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.common.ApiClientUtils;
+import com.openexchange.api.client.common.calls.AbstractGetCall;
+import com.openexchange.api.client.common.calls.infostore.parser.DefaultFileListParser;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 
 /**
- * {@link Activator}
+ * {@link VersionsCall}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @since v7.10.2
  */
-public class Activator extends HousekeepingActivator {
+public class VersionsCall extends AbstractGetCall<List<DefaultFile>> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    private final String id;
+    private final int[] columns;
+    private final Integer sortColumn;
+    private final SortDirection sortDirection;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    /**
+     * Initializes a new {@link VersionsCall}.
+     *
+     * @param id The ID of the item to get the version from
+     * @param columns The columns to fetch
+     * @param sortColumn The sorting column
+     * @param sortDirection The sort direction
+     */
+    public VersionsCall(String id, int[] columns, Integer sortColumn, SortDirection sortDirection) {
+        super();
+        this.id = id;
+        this.columns = columns;
+        this.sortColumn = sortColumn;
+        this.sortDirection = sortDirection;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
+    @NonNull
+    public String getModule() {
+        return "/infostore";
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    protected void fillParameters(Map<String, String> parameters) {
+        parameters.put("id", id);
+        parameters.put("columns", ApiClientUtils.toCommaString(columns));
+        if (this.sortColumn != null) {
+            parameters.put("sort", sortColumn.toString());
+            parameters.put("order", sortDirection.toString());
+        }
+    }
+
+    @Override
+    protected String getAction() {
+        return "versions";
+    }
+
+    @Override
+    public HttpResponseParser<List<DefaultFile>> getParser() throws OXException {
+        return new DefaultFileListParser(columns);
     }
 }

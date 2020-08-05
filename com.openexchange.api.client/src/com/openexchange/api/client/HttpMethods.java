@@ -47,41 +47,34 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
-
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.openexchange.api.client;
 
 /**
- * {@link Activator}
+ * {@link HttpMethods}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public enum HttpMethods {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    /** The <code>DELETE</code> HTTP methods */
+    DELETE,
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
-    }
+    /** The <code>GET</code> HTTP methods */
+    GET,
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
+    /** The <code>PATCH</code> HTTP methods */
+    PATCH,
 
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
-    }
+    /** The <code>PUT</code> HTTP methods */
+    PUT,
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
-    }
+    /** The <code>POST</code> HTTP methods */
+    POST,
+
+    /** The <code>OPTIONS</code> HTTP methods */
+    OPTIONS
+
+    ;
+
 }

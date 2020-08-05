@@ -52,8 +52,8 @@ package com.openexchange.file.storage.appsuite;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import com.openexchange.appsuite.client.AppsuiteClientFactory;
-import com.openexchange.appsuite.client.Credentials;
+import com.openexchange.api.client.ApiClientService;
+import com.openexchange.api.client.Credentials;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -78,7 +78,7 @@ public class AppsuiteAccountAccess implements CapabilityAware {
     private final FileStorageAccount account;
     private final FileStorageService service;
     private final Session session;
-    private final AppsuiteClientFactory clientFactory;
+    private final ApiClientService clientFactory;
 
     private ShareClient appsuiteClient;
 
@@ -86,11 +86,11 @@ public class AppsuiteAccountAccess implements CapabilityAware {
      * Initializes a new {@link AppsuiteAccountAccess}.
      *
      * @param service The {@link FileStorageService}
-     * @param clientFactory The {@link AppsuiteClientFactory}
+     * @param clientFactory The {@link ApiClientService}
      * @param account The {@link FileStorageAccount}
      * @param session The {@link Session}
      */
-    public AppsuiteAccountAccess(FileStorageService service, AppsuiteClientFactory clientFactory, FileStorageAccount account, Session session) {
+    public AppsuiteAccountAccess(FileStorageService service, ApiClientService clientFactory, FileStorageAccount account, Session session) {
         this.service = Objects.requireNonNull(service, "service must not be null");
         this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory must not be null");
         this.account = Objects.requireNonNull(account, "account must not be null");
@@ -157,7 +157,7 @@ public class AppsuiteAccountAccess implements CapabilityAware {
         String password = (String) configuration.get(AppsuiteFileStorageConstants.PASSWORD);
         Optional<Credentials> credentials = password != null ? Optional.of(new Credentials("", password)) : Optional.empty();
 
-        this.appsuiteClient = new ShareClient(session, clientFactory.generate(session, shareUrl, credentials));
+        this.appsuiteClient = new ShareClient(session, clientFactory.getApiClient(session, shareUrl, credentials));
     }
 
     @Override

@@ -47,41 +47,59 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Optional;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
- * {@link Activator}
+ * {@link ApiClientService}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+@SingletonService
+public interface ApiClientService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    /**
+     * Gets a client that can execute requests to another OX server
+     *
+     * @param session The user's session
+     * @param loginLink The link to the login endpoint
+     * @param credentials The optional credentials to access the share
+     * @return A client
+     * @throws OXException In case an access can't be generated
+     */
+    ApiClient getApiClient(Session session, String loginLink, Optional<Credentials> credentials) throws OXException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
-    }
+    /**
+     * Gets a client that can execute requests to another OX server
+     * 
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param loginLink The link to the login endpoint
+     * @param credentials The optional credentials to access the share
+     * @return A client
+     * @throws OXException In case an access can't be generated
+     */
+    ApiClient getApiClient(int contextId, int userId, String loginLink, Optional<Credentials> credentials) throws OXException;
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
+    /**
+     * Closes the client and logs out from the remote system
+     *
+     * @param client The client to close
+     */
+    void close(ApiClient client);
 
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
-    }
+    /**
+     * Closes the client and logs out from the remote system
+     * 
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param loginLink The optional login link the client was created with. If not set, all clients for the user will be removed
+     */
+    void close(int contextId, int userId, Optional<String> loginLink);
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
-    }
 }

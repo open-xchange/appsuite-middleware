@@ -47,41 +47,90 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client.common.calls.infostore;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.api.client.ApiClientExceptions;
+import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.common.calls.AbstractGetCall;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Activator}
+ * {@link DocumentCall}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @since v7.10.2
  */
-public class Activator extends HousekeepingActivator {
+public class DocumentCall extends AbstractGetCall<InputStream> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    private final String folderId;
+    private final String id;
+    private final String version;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    /**
+     * Initializes a new {@link DocumentCall}.
+     *
+     * @param folderId The ID of the folder
+     * @param id The ID of the document
+     */
+    public DocumentCall(String folderId, String id) {
+        this(folderId, id, null);
+    }
+
+    /**
+     * Initializes a new {@link DocumentCall}.
+     *
+     * @param folderId The ID of the folder
+     * @param id The ID of the document
+     * @param version The version to fetch
+     */
+    public DocumentCall(String folderId, String id, String version) {
+        super();
+        this.folderId = folderId;
+        this.id = id;
+        this.version = version;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
+    @NonNull
+    public String getModule() {
+        return "/infostore";
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    protected void fillParameters(Map<String, String> parameters) {
+        parameters.put("id", id);
+        parameters.put("folder", folderId);
+        if (version != null) {
+            parameters.put("version", version);
+        }
+    }
+
+    @Override
+    protected String getAction() {
+        return "document";
+    }
+
+    @Override
+    public HttpResponseParser<InputStream> getParser() throws OXException {
+
+        return new HttpResponseParser<InputStream>() {
+
+            @Override
+            public InputStream parse(HttpResponse response, HttpContext httpContext) throws OXException {
+                try {
+                    return response.getEntity().getContent();
+                } catch (UnsupportedOperationException e) {
+                    throw ApiClientExceptions.UNEXPECTED_ERROR.create(e, e.getMessage());
+                } catch (IOException e) {
+                    throw ApiClientExceptions.IO_ERROR.create(e, e.getMessage());
+                }
+            }
+        };
     }
 }

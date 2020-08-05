@@ -7,12 +7,12 @@ Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.file.storage.appsuite
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.annotation,
- com.openexchange.appsuite.client,
- com.openexchange.appsuite.client.common,
- com.openexchange.appsuite.client.common.calls,
- com.openexchange.appsuite.client.common.calls.folders,
- com.openexchange.appsuite.client.common.calls.infostore,
- com.openexchange.appsuite.client.common.calls.system,
+ com.openexchange.api.client,
+ com.openexchange.api.client.common,
+ com.openexchange.api.client.common.calls,
+ com.openexchange.api.client.common.calls.folders,
+ com.openexchange.api.client.common.calls.infostore,
+ com.openexchange.api.client.common.calls.system,
  com.openexchange.datatypes.genericonf,
  com.openexchange.exception,
  com.openexchange.file.storage,

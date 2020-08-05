@@ -47,41 +47,102 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.api.client;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.openexchange.java.Strings;
 
 /**
- * {@link Activator}
+ * {@link Credentials}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public class Credentials {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    private final String login;
+    private final String password;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    /**
+     * Initializes a new {@link Credentials}.
+     *
+     * @param login The login name, mail address or other identifier for a authentication against a remote system
+     */
+    public Credentials(String login) {
+        this(login, null);
+    }
+
+    /**
+     * Initializes a new {@link Credentials}.
+     *
+     * @param login The login name, mail address or other identifier for a authentication against a remote system
+     * @param password The optional password
+     */
+    public Credentials(String login, String password) {
+        super();
+        this.login = login;
+        this.password = password;
+    }
+
+    /**
+     * Gets the login
+     *
+     * @return The login
+     */
+    public String getLogin() {
+        return login;
+    }
+
+    /**
+     * Gets the password
+     *
+     * @return The password
+     */
+    public String getPassword() {
+        return password;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((login == null) ? 0 : login.hashCode());
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        return result;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+
+        Credentials other = (Credentials) obj;
+        if (login == null) {
+            if (other.login != null) {
+                return false;
+            }
+        } else if (!login.equals(other.login)) {
+            return false;
+        }
+        if (password == null) {
+            if (other.password != null) {
+                return false;
+            }
+        } else if (!password.equals(other.password)) {
+            return false;
+        }
+        return true;
     }
+
+    @Override
+    public String toString() {
+        return "Credentials [login=" + login + ", password=" + (Strings.isNotEmpty(password) ? "present" : "absent") + "]";
+    }
+
 }
