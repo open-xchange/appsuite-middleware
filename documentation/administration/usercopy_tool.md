@@ -34,13 +34,14 @@ Limitations
 
 * Users assigned to a per-user filestore of a different user (foreign filestore owner) cannot be copied.
 * Users having unified quota enabled cannot be copied.
-* Any copied data that consumed quota in the source context will consume quota in the target context. It must be ensured that enough quota is available before copying or the process will terminate with an error.
+* Any copied data that consumed quota in the source context will consume quota in the target context. It must be ensured that enough quota is available before copying or the process will terminate with an error. 
 * Many App Suite UI settings and remembered states will not survive the copy roundtrip. Technically this refers to anything stored in "JSlob" (DB table `jsonStorage`). This data is solely managed by App Suite UI and has no server-side semantics. As it relies on folder and item IDs of the source context, it cannot be properly adjusted during copying and is therefore not copied at all.
 * Any share links the user created will break after deletion of the user from the source contet. As long as both user entities (the one in the old context and the newly copied one) exist, share links will point to the old account.
 * User accounts are not automatically locked when starting the copy process. The system administrator needs to take care about the user not being active during the process.
 * No data from public folders is ever copied. Any items or folders created by the user below "Public files" or any public folder from other modules are not considered.
 * No data from shared folders is ever copied. Any items or folders created by the user below a folder shared by another user are not considered.
 * External accounts from modules other than Mail, that have been added by the user directly (e.g. an added Google Drive integration), are not preserved.
+* In case of unexpected errors during the copy operation, uncommitted changes in the destination database are rolled back automatically. However, the destination filestore may need to be cleaned up manually if some data was already copied, e.g. using the `checkconsistency` commandline tool.
 
 
 Copied Data
@@ -84,7 +85,7 @@ Every contact has a per-user "use-count" assigned to rank frequently used contac
 
 ### Tasks
 
-All tasks from private task folders are copied. Task participiants are preserved. If a task participant refers to a user from the source context, it is converted into an external participant. In that case, the participants email address and display name are preserved. Note that display name refers to the provisioned display name, this might differ from the actually displayed name within App Suite UI.
+All tasks from private task folders are copied. Task participants are preserved. If a task participant refers to a user from the source context, it is converted into an external participant. In that case, the participant's email address and display name are preserved. Note that display name refers to the provisioned display name, this might differ from the actually displayed name within App Suite UI.
 
 
 ### PIM Attachments
