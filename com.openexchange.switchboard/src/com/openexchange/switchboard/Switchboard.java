@@ -79,7 +79,6 @@ import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.switchboard.exception.ZoomExceptionCodes;
 import com.openexchange.switchboard.osgi.Services;
-import com.openexchange.tools.net.URITools;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeException;
 import net.jodah.failsafe.RetryPolicy;
@@ -122,9 +121,10 @@ public class Switchboard {
      * Sends a delete notification.
      *
      * @param conference The deleted conference
+     * @param original The original deleted event
      * @param timestamp The timestamp
      */
-    public void delete(Conference conference, long timestamp) {
+    public void delete(Conference conference, Event original, long timestamp) {
         try {
             post(serialize(DELETED, conference, null, timestamp));
             LOG.info("Successfully sent {} for conference {} to switchboard.", UPDATED, conference.getId());
@@ -139,17 +139,13 @@ public class Switchboard {
 
     private void post(JSONObject json) throws OXException {
         try {
-            Failsafe.with(new RetryPolicy()
-                .withMaxRetries(5).withBackoff(1000, 10000, TimeUnit.MILLISECONDS).withJitter(0.25f)
-                .retryOn(f -> OXException.class.isInstance(f) && ZoomExceptionCodes.SWITCHBOARD_SERVER_ERROR.equals((OXException) f)))
-                .onRetry(f -> LOG.info("Error posting event to Switchboard API, trying again.", f))
-            .run(() -> doPost(json));
+            Failsafe.with(new RetryPolicy().withMaxRetries(5).withBackoff(1000, 10000, TimeUnit.MILLISECONDS).withJitter(0.25f).retryOn(f -> OXException.class.isInstance(f) && ZoomExceptionCodes.SWITCHBOARD_SERVER_ERROR.equals((OXException) f))).onRetry(f -> LOG.info("Error posting event to Switchboard API, trying again.", f)).run(() -> doPost(json));
         } catch (FailsafeException e) {
             if (OXException.class.isInstance(e.getCause())) {
                 throw (OXException) e.getCause();
             }
             throw e;
-        }        
+        }
     }
 
     private void doPost(JSONObject json) throws OXException {
@@ -180,20 +176,14 @@ public class Switchboard {
         }
     }
 
-    private JSONObject serialize(String action, Conference conference, Event updatedEvent, long timestamp) throws OXException, JSONException {
+    private JSONObject serialize(String action, Conference conference, Event event, long timestamp) throws OXException, JSONException {
         JSONObject payload = new JSONObject();
         payload.putSafe("meetingId", getExtendedParameter(conference, ID_PROPERTY));
         payload.putSafe("owner", getExtendedParameter(conference, OWNER_PROPERTY));
         payload.putSafe("type", "zoom");
 
         if (action.equals(UPDATED)) {
-            ConversionService conversionService = Services.getService(ConversionService.class, true);
-            DataHandler handler = conversionService.getDataHandler(DataHandlers.EVENT2JSON);
-            if (null == handler) {
-                throw ServiceExceptionCode.absentService(DataHandler.class);
-            }
-            ConversionResult result = handler.processData(new SimpleData<Event>(updatedEvent, null), new DataArguments(), null);
-            JSONObject eventJson = (JSONObject) result.getData();
+            JSONObject eventJson = convertEvent(event);
             payload.putSafe("startDate", eventJson.getJSONObject("startDate"));
             payload.putSafe("endDate", eventJson.getJSONObject("endDate"));
             if (eventJson.hasAndNotNull("summary")) {
@@ -203,8 +193,24 @@ public class Switchboard {
                 payload.putSafe("description", eventJson.get("description"));
             }
             payload.putSafe("appointment", eventJson);
+        } else if (action.equals(DELETED)) {
+            if (event != null) {
+                JSONObject eventJson = convertEvent(event);
+                payload.putSafe("appointment", eventJson);
+            }
         }
         return new JSONObject(2).putSafe("event", action).putSafe("timestamp", timestamp).putSafe("payload", payload);
+    }
+
+    private JSONObject convertEvent(Event event) throws OXException {
+        ConversionService conversionService = Services.getService(ConversionService.class, true);
+        DataHandler handler = conversionService.getDataHandler(DataHandlers.EVENT2JSON);
+        if (null == handler) {
+            throw ServiceExceptionCode.absentService(DataHandler.class);
+        }
+        ConversionResult result = handler.processData(new SimpleData<Event>(event, null), new DataArguments(), null);
+        JSONObject eventJson = (JSONObject) result.getData();
+        return eventJson;
     }
 
     private String getExtendedParameter(Conference conference, String param) {
