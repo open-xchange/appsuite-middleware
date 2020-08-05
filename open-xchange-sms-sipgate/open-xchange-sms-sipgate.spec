@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -51,6 +51,10 @@ ox_update_permissions /opt/open-xchange/etc/sipgate.properties root:open-xchange
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/sipgate.properties
 
 %changelog
+* Tue Aug 04 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Fourth candidate for 7.10.4 release
+* Tue Aug 04 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Third candidate for 7.10.4 release
 * Fri Jul 31 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Second candidate for 7.10.4 release
 * Tue Jul 28 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>

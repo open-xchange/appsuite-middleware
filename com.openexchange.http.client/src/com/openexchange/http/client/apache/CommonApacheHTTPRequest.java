@@ -49,7 +49,6 @@
 
 package com.openexchange.http.client.apache;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -126,8 +125,7 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
             int timeout = 20000;
             RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).setConnectTimeout(timeout).setCookieSpec(CookieSpecs.DEFAULT).build();
             String encodedSite = verbatimURL ? url : new URI(url).toString();
-            final java.net.URL javaURL = new java.net.URL(encodedSite);
-            final HttpRequestBase m = createMethod(javaURL.getFile());
+            final HttpRequestBase m = createMethod(encodedSite);
             m.setConfig(config);
             for (Map.Entry<String, String> entry : headers.entrySet()) {
                 m.setHeader(entry.getKey(), entry.getValue());
@@ -139,8 +137,6 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
             return httpRequest;
         } catch (URISyntaxException x) {
             throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(x.getMessage(), x);
-        } catch (MalformedURLException e) {
-            throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(client);
         }

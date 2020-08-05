@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define         ox_release 4
+%define         ox_release 6
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -67,6 +67,10 @@ fi
 %doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Tue Aug 04 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.10.4 release
+* Tue Aug 04 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.10.4 release
 * Fri Jul 31 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.10.4 release
 * Tue Jul 28 2020 Marcus Klein <marcus.klein@open-xchange.com>

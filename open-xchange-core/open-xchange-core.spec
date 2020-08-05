@@ -11,7 +11,7 @@ BuildRequires: open-xchange-hazelcast
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -858,6 +858,10 @@ exit 0
 %doc com.openexchange.authentication.application.impl/doc/examples
 
 %changelog
+* Tue Aug 04 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.10.4 release
+* Tue Aug 04 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.10.4 release
 * Fri Jul 31 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.10.4 release
 * Tue Jul 28 2020 Marcus Klein <marcus.klein@open-xchange.com>
