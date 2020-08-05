@@ -56,7 +56,6 @@ import java.io.InputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
@@ -126,7 +125,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
 
     @Override
     protected boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) {
-        if (indicatesDownload(request) || indicatesRaw(request)) {
+        if (indicatesDownload(request)) {
             ShareTarget target = shareRequest.getTarget();
             return null == target || Module.INFOSTORE.getFolderConstant() == target.getModule() && null != target.getItem();
         }
@@ -196,13 +195,8 @@ public class DownloadHandler extends HttpAuthShareHandler {
             /*
              * render response via file response renderer
              */
-            if (indicatesRaw(resolvedShare.getRequest())) {
-                fileHolder.setDelivery("view");
-                fileHolder.setDisposition("inline");
-            } else {
-                fileHolder.setDelivery("download");
-                fileHolder.setDisposition("attachment");
-            }
+            fileHolder.setDelivery("download");
+            fileHolder.setDisposition("attachment");
             try {
                 renderer.write(request, result, resolvedShare.getRequest(), resolvedShare.getResponse());
             } catch (RateLimitedException e) {
@@ -235,10 +229,6 @@ public class DownloadHandler extends HttpAuthShareHandler {
             }
             return new BufferedInputStream(inputStream, 65536);
         };
-    }
-
-    private static boolean indicatesRaw(HttpServletRequest request) {
-        return "view".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) || isTrue(AJAXUtility.sanitizeParam(request.getParameter("raw")));
     }
 
     /**
