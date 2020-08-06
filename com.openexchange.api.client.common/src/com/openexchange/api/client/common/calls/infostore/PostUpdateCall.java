@@ -66,65 +66,71 @@ import com.openexchange.api.client.common.calls.AbstractPostCall;
 import com.openexchange.api.client.common.calls.infostore.mapping.DefaultFileMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.java.Strings;
 
 /**
- * {@link NewCall}
+ * {@link PostUpdateCall}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.2
+ * @since v7.10.5
  */
-public class NewCall extends AbstractPostCall<String> {
+public class PostUpdateCall extends AbstractPostCall<String> {
 
-    private final Boolean tryAddVersion;
-    private final String pushToken;
     private final DefaultFile file;
     private final InputStream data;
+    private final long timestamp;
+    private final int offset;
+    private final String pushToken;
+    private final int[] columns;
 
     /**
-     * Initializes a new {@link NewCall}.
+     * Initializes a new {@link PostUpdateCall}.
      *
-     * @param file The file meta data
-     * @param data THe file data
+     * @param file The file to update
+     * @param data The binary data to update
+     * @param timestamp The last known timestamp/sequencenumber
      */
-    public NewCall(DefaultFile file, InputStream data) {
-        this(file, data, null);
+    public PostUpdateCall(DefaultFile file, InputStream data, long timestamp) {
+        this(file, data, timestamp, -1, null, null);
     }
 
     /**
-     * Initializes a new {@link NewCall}.
+     * Initializes a new {@link PostUpdateCall}.
      *
-     * @param file The file meta data
-     * @param data THe file data
-     * @param tryAddVersion Add new file version if file name exists
+     * @param file The file to update
+     * @param data The binary data to update
+     * @param timestamp The last known timestamp/sequencenumber
+     * @param columns The column IDs of the file's fields to update
      */
-    public NewCall(DefaultFile file, InputStream data, Boolean tryAddVersion) {
-        this(file, data, tryAddVersion, null);
+    public PostUpdateCall(DefaultFile file, InputStream data, long timestamp, int[] columns) {
+        this(file, data, timestamp, -1, null, columns);
     }
 
     /**
-     * Initializes a new {@link NewCall}.
+     * Initializes a new {@link PostUpdateCall}.
      *
-     * @param file The file meta data
-     * @param data THe file data
-     * @param tryAddVersion Add new file version if file name exists
-     * @param pushToken The push token of the drive client
+     * @param file The file to update
+     * @param data The binary data to update
+     * @param timestamp The last known timestamp/sequencenumber
+     * @param offset The start offset in bytes where to append the data to the document, must be equal to the actual document's length. Only available if the underlying File storage account supports the "RANDOM_FILE_ACCESS" capability.
+     * @param pushToken The drive push token
+     * @param columns The columns to update or null in order to update
      */
-    public NewCall(DefaultFile file, InputStream data, Boolean tryAddVersion, String pushToken) {
+    public PostUpdateCall(DefaultFile file, InputStream data, long timestamp, int offset, String pushToken, int[] columns) {
+        super();
         this.file = Objects.requireNonNull(file, "file must not be null");
-        this.data = Objects.requireNonNull(data, "data must not be null");
-        this.tryAddVersion = tryAddVersion;
+        this.data = data;
+        this.timestamp = timestamp;
+        this.offset = offset;
         this.pushToken = pushToken;
+        this.columns = columns;
     }
 
     @Override
     @NonNull
-    public String getModule() {
+    public String getPath() {
         return "/infostore";
-    }
-
-    @Override
-    protected String getAction() {
-        return "new";
     }
 
     @Override
@@ -132,21 +138,11 @@ public class NewCall extends AbstractPostCall<String> {
     public HttpEntity getBody() throws OXException {
         try {
             DefaultFileMapper mapper = new DefaultFileMapper();
-            JSONObject json = mapper.serialize(file, mapper.getAssignedFields(file));
+            Field[] fields = columns != null ?  mapper.getMappedFields(columns) : mapper.getAssignedFields(file);;
+            JSONObject json = mapper.serialize(file, fields);
             return ApiClientUtils.createMultipartBody(json, data, file.getFileName(), file.getFileMIMEType());
         } catch (JSONException e) {
             throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    protected void fillParameters(Map<String, String> parameters) {
-        parameters.put("force_json_response", "true");
-        if (tryAddVersion != null) {
-            parameters.put("try_add_version", tryAddVersion.toString());
-        }
-        if (pushToken != null) {
-            parameters.put("pushToken", pushToken);
         }
     }
 
@@ -159,5 +155,23 @@ public class NewCall extends AbstractPostCall<String> {
                 return ApiClientUtils.parseDataString(response);
             }
         };
+    }
+
+    @Override
+    protected void fillParameters(Map<String, String> parameters) {
+        parameters.put("force_json_response", "true");
+        parameters.put("id", file.getId());
+        parameters.put("timestamp", String.valueOf(timestamp));
+        if (offset > -1) {
+            parameters.put("offset", String.valueOf(timestamp));
+        }
+        if (Strings.isNotEmpty(pushToken)) {
+            parameters.put("pushToken", pushToken);
+        }
+    }
+
+    @Override
+    protected String getAction() {
+        return "update";
     }
 }

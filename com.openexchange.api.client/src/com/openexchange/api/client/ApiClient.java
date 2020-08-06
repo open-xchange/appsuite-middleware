@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ApiClient} - A client for communicating to another Open Xchange server.
- * 
+ *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
@@ -130,7 +130,7 @@ public interface ApiClient {
      *
      * @param <T> The type of the return value
      * @param request The request to execute. The request will be closed by this method.
-     * @param parser The parser for the response
+     * @param parser The parser for the response, nor null if no parsing should be done
      * @return The parsed object
      * @throws OXException In case request can't be executed or parsing fails
      */

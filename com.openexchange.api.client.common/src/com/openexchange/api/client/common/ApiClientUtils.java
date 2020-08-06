@@ -73,6 +73,9 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.cookie.Cookie;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -484,6 +487,22 @@ public final class ApiClientUtils {
     }
 
     /**
+     * Parses the "data" field as String from the given JSON response body
+     *
+     * @param response The response containing the JSON body
+     * @return The data field parsed as string
+     * @throws OXException
+     */
+    public static String parseDataString(HttpResponse response) throws OXException {
+        try {
+            JSONObject json = parseJSONObject(response);
+            return json.getString("data");
+        } catch (JSONException e) {
+            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
      * Parses the response to a {@link JSONArray}
      *
      * @param response The response
@@ -599,7 +618,7 @@ public final class ApiClientUtils {
 
     /**
      * Receives the response and returns it as {@link String}
-     * 
+     *
      * @param response The response
      * @return The response body
      */
@@ -637,4 +656,43 @@ public final class ApiClientUtils {
         return null;
     }
 
+    /**
+     * Creates a common multipart/form-data body
+     *
+     * @param json The JSON part of the body, or null to omit the JSON part
+     * @param data The file/data part of the body, or null to omit the data part
+     * @param filename The name of of the file
+     * @param contentType The content type of the file
+     * @return
+     */
+    public static HttpEntity createMultipartBody(JSONObject json, InputStream data, String filename, String contentType) {
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        if (json != null) {
+            builder.addTextBody("json", json.toString(), ContentType.APPLICATION_JSON);
+        }
+        if (data != null) {
+            builder.addBinaryBody("file", data, ContentType.create(contentType), filename);
+        }
+        return builder.build();
+    }
+
+    /**
+     * Creates a JSON body
+     *
+     * @param json The JSON to use
+     * @return The JSON body
+     */
+    public static HttpEntity createJsonBody(JSONObject json) {
+        return new StringEntity(json.toString(), ContentType.APPLICATION_JSON);
+    }
+
+    /**
+     * Creates a JSON body
+     *
+     * @param json The JSON to use
+     * @return The JSON body
+     */
+    public static HttpEntity createJsonBody(JSONArray json) {
+        return new StringEntity(json.toString(), ContentType.APPLICATION_JSON);
+    }
 }
