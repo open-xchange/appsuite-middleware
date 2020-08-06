@@ -62,6 +62,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.apps.manifests.ManifestBuilder;
 import com.openexchange.apps.manifests.json.exception.ManifestsExceptionCodes;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.conversion.simple.SimpleConverter;
@@ -120,7 +121,8 @@ public class ConfigAction implements AJAXActionService {
         try {
 
             JSONObject jsonConfig = asJSON(filteredConfig);
-            jsonConfig.put("manifests", manifestBuilder.buildManifests(session));
+            String version = requestData.getParameter("version");
+            jsonConfig.put("manifests", manifestBuilder.buildManifests(session, version));
             return new AJAXRequestResult(jsonConfig, "json");
         } catch (JSONException je) {
             throw AjaxExceptionCodes.JSON_ERROR.create(je.getMessage());

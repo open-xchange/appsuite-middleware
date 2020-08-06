@@ -72,6 +72,8 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.AttendeePrivileges;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
@@ -185,11 +187,11 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
      * @param event2 The second event to compare
      * @param fields The event fields to compare
      * @return <code>true</code> if all fields are equal, <code>false</code>, otherwise
-     * @throws OXException
      */
-    public boolean equalsByFields(Event event1, Event event2, EventField... fields) throws OXException {
+    public boolean equalsByFields(Event event1, Event event2, EventField... fields) {
         for (EventField field : fields) {
-            if (false == get(field).equals(event1, event2)) {
+            Mapping<? extends Object, Event> mapping = opt(field);
+            if (null != mapping && false == mapping.equals(event1, event2)) {
                 return false;
             }
         }
@@ -1138,6 +1140,39 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeAlarms();
+            }
+        });
+        mappings.put(EventField.CONFERENCES, new DefaultMapping<List<Conference>, Event>() {
+
+            @Override
+            public boolean equals(Event event1, Event event2) {
+                return CalendarUtils.getConferenceUpdates(event1.getConferences(), event2.getConferences()).isEmpty();
+            }
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                List<Conference> value = get(from);
+                set(to, null == value ? null : ConferenceMapper.getInstance().copy(value, (ConferenceField[]) null));
+            }
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsConferences();
+            }
+
+            @Override
+            public void set(Event object, List<Conference> value) throws OXException {
+                object.setConferences(value);
+            }
+
+            @Override
+            public List<Conference> get(Event object) {
+                return object.getConferences();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeConferences();
             }
         });
         mappings.put(EventField.EXTENDED_PROPERTIES, new DefaultMapping<ExtendedProperties, Event>() {

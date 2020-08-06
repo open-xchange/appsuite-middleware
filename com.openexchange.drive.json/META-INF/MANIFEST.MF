@@ -2,8 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Drive JSON Bundle
 Bundle-SymbolicName: com.openexchange.drive.json
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.drive.json
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.drive.json.osgi.DriveJsonActivator
 Bundle-ClassPath: .
@@ -27,6 +28,8 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.tools,
  com.openexchange.ajax.writer,
  com.openexchange.authentication,
+ com.openexchange.authentication.application,
+ com.openexchange.authentication.application.ajax,
  com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.config.lean,
@@ -53,6 +56,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.mail.mime,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.serverconfig,
  com.openexchange.session,
  com.openexchange.share,
  com.openexchange.share.core,

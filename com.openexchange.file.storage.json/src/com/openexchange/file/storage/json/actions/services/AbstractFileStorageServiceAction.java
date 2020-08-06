@@ -53,9 +53,11 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.json.FileStorageAccountWriter;
+import com.openexchange.file.storage.json.actions.files.AbstractFileAction;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,6 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = AbstractFileAction.MODULE, type = RestrictedAction.Type.READ)
 public abstract class AbstractFileStorageServiceAction implements AJAXActionService {
 
     protected FileStorageServiceRegistry registry;

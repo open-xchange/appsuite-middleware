@@ -50,17 +50,23 @@
 package com.openexchange.chronos.provider.caching;
 
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesEvent;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.AlarmTrigger;
@@ -75,11 +81,15 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.common.UserConfigWrapper;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.caching.internal.response.SingleEventResponseGenerator;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.ItemUpdate;
+import com.openexchange.chronos.service.RecurrenceIterator;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -192,11 +202,21 @@ public class AlarmHelper {
 
             @Override
             protected Void call(CalendarStorage storage) throws OXException {
-                storage.getAlarmStorage().deleteAlarms(eventId, account.getUserId());
-                storage.getAlarmTriggerStorage().deleteTriggers(eventId);
+                deleteAlarms(storage, eventId);
                 return null;
             }
         }.executeUpdate();
+    }
+
+    /**
+     * Deletes stored alarm- and trigger data associated with a specific event of the calendar account.
+     *
+     * @param storage The underlying calendar storage
+     * @param eventId The identifier of the event to delete the alarms for
+     */
+    public void deleteAlarms(CalendarStorage storage, String eventId) throws OXException {
+        storage.getAlarmStorage().deleteAlarms(eventId, account.getUserId());
+        storage.getAlarmTriggerStorage().deleteTriggers(eventId);
     }
 
     /**
@@ -312,15 +332,86 @@ public class AlarmHelper {
         changeDefaultAlarms(storage, defaultAlarms, defaultDateAlarms, events);
     }
 
-    public List<AlarmTrigger> getAlarmTriggers(Date until, Set<String> actions) throws OXException {
-        List<AlarmTrigger> triggers = new OSGiCalendarStorageOperation<List<AlarmTrigger>>(services, context.getContextId(), account.getAccountId()) {
+    /**
+     * Loads alarm triggers for events in the underlying calendar account and filter them based on requested criteria. Supplementary event
+     * data is loaded from the storage using the default implementation as needed.
+     * <p/>
+     * If possible, triggers for past occurrences of event series are implicitly forwarded to a later event occurrence that falls into
+     * the requested time range.
+     *
+     * @param rangeFrom The lower (inclusive) boundary of the requested time range, or <code>null</code> if not limited
+     * @param rangeUntil The upper (exclusive) boundary of the requested time range, or <code>null</code> if not limited
+     * @param actions The alarm actions to include, or <code>null</code> to consider any alarm action
+     * @return The loaded alarm triggers, or an empty list if there are none
+     */
+    public List<AlarmTrigger> getAlarmTriggers(Date rangeFrom, Date rangeUntil, Set<String> actions) throws OXException {
+        return getAlarmTriggers(rangeFrom, rangeUntil, actions, (storage, trigger) -> {
+            try {
+                return SingleEventResponseGenerator.loadEvent(storage, account.getUserId(), trigger.getEventId(), trigger.getRecurrenceId(), null);
+            } catch (OXException e) {
+                LOG.warn("Error loading event {} referenced by alarm trigger", trigger.getEventId(), e);
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Loads alarm triggers for events in the underlying calendar account and filter them based on requested criteria.
+     * <p/>
+     * If possible, triggers for past occurrences of event series are implicitly forwarded to a later event occurrence that falls into
+     * the requested time range.
+     *
+     * @param rangeFrom The lower (inclusive) boundary of the requested time range, or <code>null</code> if not limited
+     * @param rangeUntil The upper (exclusive) boundary of the requested time range, or <code>null</code> if not limited
+     * @param actions The alarm actions to include, or <code>null</code> to consider any alarm action
+     * @param loadEventFunction A function to retrieve the event referenced by a specific alarm trigger
+     * @return The loaded alarm triggers, or an empty list if there are none
+     */
+    public List<AlarmTrigger> getAlarmTriggers(Date rangeFrom, Date rangeUntil, Set<String> actions, BiFunction<CalendarStorage, AlarmTrigger, Event> loadEventFunction) throws OXException {
+        return new OSGiCalendarStorageOperation<List<AlarmTrigger>>(services, context.getContextId(), account.getAccountId()) {
 
             @Override
             protected List<AlarmTrigger> call(CalendarStorage storage) throws OXException {
-                return storage.getAlarmTriggerStorage().loadTriggers(account.getUserId(), until);
+                /*
+                 * load trigger from storage & filter those that do not match the requested criteria
+                 */
+                List<AlarmTrigger> alarmTriggers = storage.getAlarmTriggerStorage().loadTriggers(account.getUserId(), rangeFrom, rangeUntil);
+                for (Iterator<AlarmTrigger> iterator = alarmTriggers.iterator(); iterator.hasNext();) {
+                    AlarmTrigger trigger = iterator.next();
+                    /*
+                     * skip triggers with other actions
+                     */
+                    if (null != actions && false == actions.contains(trigger.getAction())) {
+                        iterator.remove();
+                        continue;
+                    }
+                    /*
+                     * skip if referenced event is no longer accessible & cleanup alarm trigger
+                     */
+                    Event event = loadEventFunction.apply(storage, trigger);
+                    if (null == event) {
+                        try {
+                            storage.getAlarmStorage().deleteAlarms(trigger.getEventId(), account.getUserId());
+                            storage.getAlarmTriggerStorage().deleteTriggers(trigger.getEventId());
+                            LOG.info("Removed inaccessible alarm for event {} in account {}.", trigger.getEventId(), account);
+                        } catch (OXException e) {
+                            LOG.warn("Error removing inaccessible alarm for event {} in account {}", trigger.getEventId(), account, e);
+                        }
+                        iterator.remove();
+                        continue;
+                    }
+                    /*
+                     * try and shift the trigger to a more recent occurrence if trigger time is before requested range as needed &
+                     * finally remove triggers outside requested range
+                     */
+                    shiftIntoRange(storage, trigger, event, rangeFrom, rangeUntil);
+                    if (false == AlarmUtils.isInRange(trigger, rangeFrom, rangeUntil)) {
+                        iterator.remove();
+                    }
+                }
+                return alarmTriggers;
             }
         }.executeQuery();
-        return AlarmUtils.filter(triggers, actions.toArray(new String[actions.size()]));
     }
 
     /**
@@ -558,6 +649,41 @@ public class AlarmHelper {
         return count;
     }
 
+    /**
+     * Try and shift the trigger to a more recent occurrence if trigger time is before requested range as needed 
+     *
+     * @param storage The {@link CalendarStorage}
+     * @param trigger The {@link AlarmTrigger} to shift
+     * @param event The {@link Event}
+     * @param rangeFrom The lower (inclusive) boundary of the requested time range, or <code>null</code> if not limited
+     * @param rangeUntil The upper (exclusive) boundary of the requested time range, or <code>null</code> if not limited
+     */
+    void shiftIntoRange(CalendarStorage storage, AlarmTrigger trigger, Event event, Date rangeFrom, Date rangeUntil) {
+        Date triggerTime = new Date(l(trigger.getTime()));
+        if (null != rangeFrom && rangeFrom.after(triggerTime) && isSeriesEvent(event) && false == isSeriesException(event) && null != event.getRecurrenceRule()) {
+            try {
+                RecurrenceIterator<Event> recurrenceIterator = services.getService(RecurrenceService.class).iterateEventOccurrences(event, triggerTime, null);
+                if (recurrenceIterator.hasNext()) {
+                    Alarm alarm = storage.getAlarmStorage().loadAlarm(i(trigger.getAlarm()));
+                    if (null == alarm) {
+                        throw CalendarExceptionCodes.ALARM_NOT_FOUND.create(trigger.getAlarm(), trigger.getEventId());
+                    }
+                    AlarmUtils.shiftIntoRange(trigger, alarm, recurrenceIterator, rangeFrom, rangeUntil);
+                }
+            } catch (OXException e) {
+                LOG.info("Unexpected error shifting alarm trigger for {} to later occurrence.", event.getId(), e);
+            }
+        }
+    }
+
+    /**
+     * Prepares new alarms for the given default alarms
+     *
+     * @param storage The initialized {@link CalendarStorage} to use 
+     * @param defaultAlarms The default alarms
+     * @return A list of new {@link Alarm}s
+     * @throws OXException
+     */
     private static List<Alarm> prepareNewAlarms(CalendarStorage storage, List<Alarm> defaultAlarms) throws OXException {
         List<Alarm> newAlarms = new ArrayList<Alarm>(defaultAlarms.size());
         for (Alarm alarm : defaultAlarms) {

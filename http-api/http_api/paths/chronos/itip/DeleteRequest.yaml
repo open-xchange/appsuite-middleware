@@ -1,0 +1,38 @@
+/chronos/itip?action=delete:
+  put:
+    operationId: cancel
+    tags:
+      - Chronos
+    summary: Deletes an event that has been cancled via iTIP
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: message
+        description: The comment the attendee wants to transmit
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: dataSource
+        description: >-
+          The identifier of the data source. Currently only
+          "com.openexchange.mail.ical" is valid.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: descriptionFormat
+        description: The desired output fromat. Currently only "html" is valid.
+        required: true
+        schema:
+          type: string
+          default: html
+    responses:
+      '200':
+        description: An array of Events that were newly created or changed.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActionResponse'
+    requestBody:
+      $ref: '#/components/requestBodies/ConversionDataSource'

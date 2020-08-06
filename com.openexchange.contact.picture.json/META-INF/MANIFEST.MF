@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: The contact picture bundle
 Bundle-SymbolicName: com.openexchange.contact.picture.json
 Automatic-Module-Name: com.openexchange.contact.picture.json
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.contact.picture.json.osgi.ContactPictureJSONActivator
@@ -15,6 +15,7 @@ Import-Package: com.google.common.collect,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.oauth,
  com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.authentication.application.ajax,
  com.openexchange.contact.picture,
  com.openexchange.contacts.json,
  com.openexchange.dispatcher,

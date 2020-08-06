@@ -60,7 +60,7 @@ import java.util.Map;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.health.MWHealthCheck;
+import com.openexchange.health.AbstractCachingMWHealthCheck;
 import com.openexchange.health.MWHealthCheckResponse;
 import com.openexchange.health.impl.MWHealthCheckResponseImpl;
 import com.openexchange.server.ServiceLookup;
@@ -72,7 +72,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class ConfigDBCheck implements MWHealthCheck {
+public class ConfigDBCheck extends AbstractCachingMWHealthCheck {
 
     private final static String NAME = "configDB";
     private final static long TIMEOUT = 15000L;
@@ -80,7 +80,7 @@ public class ConfigDBCheck implements MWHealthCheck {
     private final ServiceLookup services;
 
     public ConfigDBCheck(ServiceLookup services) {
-        super();
+        super(5000);
         this.services = services;
     }
 
@@ -95,7 +95,7 @@ public class ConfigDBCheck implements MWHealthCheck {
     }
 
     @Override
-    public MWHealthCheckResponse call() {
+    protected MWHealthCheckResponse doCall() {
         DatabaseService dbService = services.getService(DatabaseService.class);
         boolean status = true;
         Map<String, Object> data = new HashMap<>();

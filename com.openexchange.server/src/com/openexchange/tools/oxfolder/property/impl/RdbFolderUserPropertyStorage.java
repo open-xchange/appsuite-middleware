@@ -77,6 +77,9 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(RdbFolderUserPropertyStorage.class);
 
+    private final static String DELETE_USER_PROPS      = "DELETE FROM " + TABLE_NAME + " WHERE cid=? AND userid=?";
+    private final static String DELETE_CONTEXT_PROPS      = "DELETE FROM " + TABLE_NAME + " WHERE cid=?";
+    private final static String DELETE_FOLDER_PROPS      = "DELETE FROM " + TABLE_NAME + " WHERE cid=? AND fuid=?";
     private final static String DELETE      = "DELETE FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=?";
     private final static String DELETE_PROP = "DELETE FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=? AND name=?";
     private final static String EXIST       = "SELECT EXISTS(SELECT 1 FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=? LIMIT 1)";
@@ -180,7 +183,7 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
     @Override
     public void deleteFolderProperty(int contextId, int folderId, int userId, String key, Connection connection) throws OXException {
         if (null != key) {
-            deleteFolderProperties(folderId, contextId, userId, Collections.singleton(key), connection);
+            deleteFolderProperties(contextId, folderId, userId, Collections.singleton(key), connection);
         }
     }
 
@@ -616,6 +619,88 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         return service;
+    }
+
+    /**
+     * Deletes all properties for the given folder
+     *
+     * @param contextId The context id
+     * @param folderId The folder id
+     * @throws OXException
+     */
+    public void deleteFolderProperties(int contextId, int folderId) throws OXException {
+        Connection connection = null;
+        DatabaseService dbService = null;
+        boolean modified = false;
+
+        // Acquire write connection
+        dbService = getDatabaseServiceService();
+        connection = dbService.getWritable(contextId);
+        PreparedStatement stmt = null;
+        try {
+            // Prepare statement
+            stmt = connection.prepareStatement(DELETE_FOLDER_PROPS);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, folderId);
+            // Execute
+            modified = stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+            if (modified) {
+                dbService.backWritable(contextId, connection);
+            } else {
+                dbService.backWritableAfterReading(contextId, connection);
+            }
+        }
+
+    }
+
+    /**
+     * Deletes all properties for the given context
+     *
+     * @param contextId The context id
+     * @param writeCon The write connection
+     * @throws OXException
+     */
+    public void deleteContextProperties(int contextId, Connection writeCon) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            // Prepare statement
+            stmt = writeCon.prepareStatement(DELETE_CONTEXT_PROPS);
+            stmt.setInt(1, contextId);
+            // Execute
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * Deletes all properties for the given user
+     *
+     * @param contextId The context id
+     * @param userId The user id
+     * @param writeCon The write {@link Connection} to use
+     * @throws OXException
+     */
+    public void deleteUserProperties(int contextId, int userId, Connection writeCon) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            // Prepare statement
+            stmt = writeCon.prepareStatement(DELETE_USER_PROPS);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            // Execute
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
     }
 
 }

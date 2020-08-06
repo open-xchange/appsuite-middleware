@@ -59,7 +59,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
@@ -549,7 +548,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
                 return new String[0];
             }
 
-            List<String> retval = new LinkedList<String>();
+            List<String> retval = new ArrayList<String>();
             do {
                 String schema = result.getString(1);
                 int count = result.getInt(2);

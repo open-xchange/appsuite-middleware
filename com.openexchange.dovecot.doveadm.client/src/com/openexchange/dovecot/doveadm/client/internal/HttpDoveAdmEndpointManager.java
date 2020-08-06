@@ -49,37 +49,24 @@
 
 package com.openexchange.dovecot.doveadm.client.internal;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.auth.AuthScheme;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.AuthState;
-import org.apache.http.auth.Credentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.protocol.ExecutionContext;
-import org.apache.http.protocol.HttpContext;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClientExceptionCodes;
-import com.openexchange.dovecot.doveadm.client.osgi.Services;
+import com.openexchange.dovecot.doveadm.client.http.DoveAdmHttpClientConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.endpointpool.Endpoint;
 import com.openexchange.rest.client.endpointpool.EndpointAvailableStrategy;
 import com.openexchange.rest.client.endpointpool.EndpointManager;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
-import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
-import com.openexchange.version.VersionService;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link HttpDoveAdmEndpointManager}
@@ -89,97 +76,18 @@ import com.openexchange.version.VersionService;
  */
 public class HttpDoveAdmEndpointManager {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpDoveAdmEndpointManager.class);
-
-    static class PreemptiveAuth implements HttpRequestInterceptor {
-
-        @Override
-        public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
-
-            final AuthState authState = (AuthState) context.getAttribute(ClientContext.TARGET_AUTH_STATE);
-
-            // If no auth scheme avaialble yet, try to initialize it preemptively
-            if (authState.getAuthScheme() == null) {
-                final AuthScheme authScheme = (AuthScheme) context.getAttribute("preemptive-auth");
-                final CredentialsProvider credsProvider = (CredentialsProvider) context.getAttribute(ClientContext.CREDS_PROVIDER);
-                final HttpHost targetHost = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
-                if (authScheme != null) {
-                    final Credentials creds = credsProvider.getCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()));
-                    if (creds == null) {
-                        throw new HttpException("No credentials for preemptive authentication");
-                    }
-                    authState.setAuthScheme(authScheme);
-                    authState.setCredentials(creds);
-                }
-            }
-        }
-    }
-
-    private static class EndpointListing {
-        final CloseableHttpClient httpClient;
-        final EndpointManager endpointManager;
-
-        EndpointListing(CloseableHttpClient httpClient, EndpointManager endpointManager) {
-            super();
-            this.httpClient = httpClient;
-            this.endpointManager = endpointManager;
-        }
-    }
-
-    private static CloseableHttpClient newHttpClient(HttpDoveAdmCall call, int totalConnections, int maxConnectionsPerRoute, int readTimeout, int connectTimeout) throws OXException {
-        String name = "doveadm";
-        if (call != HttpDoveAdmCall.DEFAULT) {
-            name = "doveadm-" + call.getName();
-        }
-        ClientConfig clientConfig = ClientConfig.newInstance(name)
-            .setUserAgent("OX Dovecot Http Client v" + Services.getService(VersionService.class).getVersionString())
-            .setMaxTotalConnections(totalConnections)
-            .setMaxConnectionsPerRoute(maxConnectionsPerRoute)
-            .setConnectionTimeout(connectTimeout)
-            .setSocketReadTimeout(readTimeout);
-
-        return HttpClients.getHttpClient(clientConfig);
-    }
-
-    private static EndpointListing listingFor(HttpDoveAdmCall call, String endPoints, EndpointManagerFactory factory, EndpointAvailableStrategy availableStrategy, StringBuilder propPrefix, ConfigurationService configService) throws OXException {
-        // Parse end-point list
-        List<String> l = Arrays.asList(Strings.splitByComma(endPoints.trim()));
-
-        // Read properties for HTTP connections/pooling
-        int resetLen = propPrefix.length();
-        int totalConnections = configService.getIntProperty(propPrefix.append("totalConnections").toString(), 100);
-        propPrefix.setLength(resetLen);
-        int maxConnectionsPerRoute = configService.getIntProperty(propPrefix.append("maxConnectionsPerRoute").toString(), 0);
-        if (maxConnectionsPerRoute <= 0) {
-            maxConnectionsPerRoute = totalConnections / l.size();
-        }
-        propPrefix.setLength(resetLen);
-        int readTimeout = configService.getIntProperty(propPrefix.append("readTimeout").toString(), 10000);
-        propPrefix.setLength(resetLen);
-        int connectTimeout = configService.getIntProperty(propPrefix.append("connectTimeout").toString(), 3000);
-        propPrefix.setLength(resetLen);
-        int checkInterval = configService.getIntProperty(propPrefix.append("checkInterval").toString(), 60000);
-
-        // Initialize HTTP client for the listing
-        CloseableHttpClient httpClient = newHttpClient(call, totalConnections, maxConnectionsPerRoute, readTimeout, connectTimeout);
-
-        // Setup end-point manager for the listing
-        EndpointManager endpointManager = factory.createEndpointManager(l, httpClient, availableStrategy, checkInterval, TimeUnit.MILLISECONDS);
-
-        // Return listing for bundled HTTP client & end-point manager
-        return new EndpointListing(httpClient, endpointManager);
-    }
+    public static final String DOVEADM_ENDPOINTS = "com.openexchange.dovecot.doveadm.endpoints";
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
-    private final AtomicReference<EnumMap<HttpDoveAdmCall, EndpointListing>> endpointsReference;
+    private final AtomicReference<EnumMap<HttpDoveAdmCall, ClientIdAndEndpointManager>> endpointsReference;
 
     /**
      * Initializes a new {@link HttpDoveAdmEndpointManager}.
      */
     public HttpDoveAdmEndpointManager() {
         super();
-        endpointsReference = new AtomicReference<EnumMap<HttpDoveAdmCall,EndpointListing>>(null);
+        endpointsReference = new AtomicReference<EnumMap<HttpDoveAdmCall, ClientIdAndEndpointManager>>(null);
     }
 
     /**
@@ -187,18 +95,23 @@ public class HttpDoveAdmEndpointManager {
      *
      * @param factory The end-point factory to use
      * @param availableStrategy The strategy to use for checking re-accessible end-points
-     * @param configService The configuration service to read properties from
-     * @return <code>true</code> if at least one valid end-point is specified; otherwise <code>false</code>
+     * @param services The service look-up
+     * @return The HTTP client configuration providers to register
      * @throws OXException If initialization fails
      */
-    public boolean init(EndpointManagerFactory factory, EndpointAvailableStrategy availableStrategy, ConfigurationService configService) throws OXException {
+    public List<SpecificHttpClientConfigProvider> init(EndpointManagerFactory factory, EndpointAvailableStrategy availableStrategy, ServiceLookup services) throws OXException {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(HttpDoveAdmEndpointManager.class);
 
-        EnumMap<HttpDoveAdmCall, EndpointListing> endpoints = new EnumMap<HttpDoveAdmCall, EndpointListing>(HttpDoveAdmCall.class);
+        // Get needed service
+        ConfigurationService configService = services.getServiceSafe(ConfigurationService.class);
 
-        String fallBackName = "com.openexchange.dovecot.doveadm.endpoints";
-        EndpointListing fallBackEntry = null;
-        for (HttpDoveAdmCall call : HttpDoveAdmCall.values()) {
+        HttpDoveAdmCall[] calls = HttpDoveAdmCall.values();
+        EnumMap<HttpDoveAdmCall, ClientIdAndEndpointManager> endpoints = new EnumMap<HttpDoveAdmCall, ClientIdAndEndpointManager>(HttpDoveAdmCall.class);
+        List<SpecificHttpClientConfigProvider> configProviders = new ArrayList<>(calls.length);
+
+        String fallBackName = DOVEADM_ENDPOINTS;
+        EndpointManager fallBackEntry = null;
+        for (HttpDoveAdmCall call : calls) {
             String propName = "com.openexchange.dovecot.doveadm.endpoints." + call.getName();
             String endPoints = configService.getProperty(propName);
             if (Strings.isEmpty(endPoints)) {
@@ -207,31 +120,61 @@ public class HttpDoveAdmEndpointManager {
                     if (Strings.isEmpty(endPoints)) {
                         // No end-point
                         logger.info("No Dovecot DoceAdm REST interface end-points defined via property {}", propName);
-                        return false;
+                        return Collections.emptyList();
                     }
 
-                    fallBackEntry = listingFor(call, endPoints, factory, availableStrategy, new StringBuilder(fallBackName.length() + 1).append(fallBackName).append('.'), configService);
+                    // Parse end-point list
+                    List<String> l = Arrays.asList(Strings.splitByComma(endPoints.trim()));
+
+                    configProviders.add(initConfigProviderFor("doveadm", l.size(), new StringBuilder(fallBackName).append('.'), configService, services));
+                    fallBackEntry = getEndpointManager(l, "doveadm", factory, availableStrategy, new StringBuilder(fallBackName).append('.'), configService);
                 }
-                endpoints.put(call, fallBackEntry);
+                endpoints.put(call, new ClientIdAndEndpointManager("doveadm", fallBackEntry));
             } else {
-                endpoints.put(call, listingFor(call, endPoints, factory, availableStrategy, new StringBuilder(propName.length() + 1).append(propName).append('.'), configService));
+                // Parse end-point list
+                List<String> l = Arrays.asList(Strings.splitByComma(endPoints.trim()));
+                String httpClientId = DoveAdmHttpClientConfig.generateClientId(call);
+
+                configProviders.add(initConfigProviderFor(httpClientId, l.size(), new StringBuilder(propName).append('.'), configService, services));
+                endpoints.put(call, new ClientIdAndEndpointManager(httpClientId, getEndpointManager(l, httpClientId, factory, availableStrategy, new StringBuilder(propName).append('.'), configService)));
             }
         }
 
         endpointsReference.set(endpoints);
-        return true;
+        return configProviders;
+    }
+
+    private static EndpointManager getEndpointManager(List<String> endPoints, String httpClientId, EndpointManagerFactory factory, EndpointAvailableStrategy availableStrategy, StringBuilder propPrefix, ConfigurationService configService) throws OXException {
+        // Read property for heartbeat interval
+        int checkInterval = configService.getIntProperty(propPrefix.append("checkInterval").toString(), 60000);
+
+        // Setup end-point manager for the listing
+        return factory.createEndpointManager(endPoints, httpClientId, availableStrategy, checkInterval, TimeUnit.MILLISECONDS);
+    }
+
+    private static SpecificHttpClientConfigProvider initConfigProviderFor(String httpClientId, int numberOfEndpoints, StringBuilder propPrefix, ConfigurationService configService, ServiceLookup services) {
+        // Read properties for HTTP connections/pooling
+        int resetLen = propPrefix.length();
+        int totalConnections = configService.getIntProperty(propPrefix.append("totalConnections").toString(), 100);
+        propPrefix.setLength(resetLen);
+        int maxConnectionsPerRoute = configService.getIntProperty(propPrefix.append("maxConnectionsPerRoute").toString(), 0);
+        if (maxConnectionsPerRoute <= 0) {
+            maxConnectionsPerRoute = totalConnections / numberOfEndpoints;
+        }
+        propPrefix.setLength(resetLen);
+        int readTimeout = configService.getIntProperty(propPrefix.append("readTimeout").toString(), 3000);
+        propPrefix.setLength(resetLen);
+        int connectTimeout = configService.getIntProperty(propPrefix.append("connectTimeout").toString(), 10000);
+
+        ClientConfig clientConfig = new ClientConfig(totalConnections, maxConnectionsPerRoute, readTimeout, connectTimeout);
+        return new DoveAdmHttpClientConfig(httpClientId, clientConfig, services);
     }
 
     /**
      * Shuts-down this instance.
      */
     public void shutDown() {
-        EnumMap<HttpDoveAdmCall, EndpointListing> endpoints = endpointsReference.getAndSet(null);
-        if (null != endpoints) {
-            for (EndpointListing entry : endpoints.values()) {
-                HttpClients.shutDown(entry.httpClient);
-            }
-        }
+        endpointsReference.getAndSet(null);
     }
 
     /**
@@ -246,21 +189,21 @@ public class HttpDoveAdmEndpointManager {
             return false;
         }
 
-        EnumMap<HttpDoveAdmCall, EndpointListing> endpoints = endpointsReference.get();
+        EnumMap<HttpDoveAdmCall, ClientIdAndEndpointManager> endpoints = endpointsReference.get();
         if (null == endpoints) {
             return false;
         }
 
-        EndpointListing entry = endpoints.get(call);
-        if (null == entry) {
+        ClientIdAndEndpointManager c = endpoints.get(call);
+        if (null == c) {
             return false;
         }
 
-        if (entry.endpointManager.getNumberOfEndpoints() <= 1) {
+        if (c.endpointManager.getNumberOfEndpoints() <= 1) {
             return false;
         }
 
-        entry.endpointManager.blacklist(endpoint);
+        c.endpointManager.blacklist(endpoint);
         return true;
     }
 
@@ -268,25 +211,26 @@ public class HttpDoveAdmEndpointManager {
      * Gets the HTTP client and (next available) base URI for specified call.
      *
      * @param call The call that is about to be invoked
-     * @return The HTTP client and base URI
+     * @return The base URI
      * @throws OXException If HTTP client and base URI cannot be returned
      */
-    public HttpClientAndEndpoint getHttpClientAndUri(HttpDoveAdmCall call) throws OXException {
+    public EndpointAndClientId getEndpoint(HttpDoveAdmCall call) throws OXException {
         if (null == call) {
             throw DoveAdmClientExceptionCodes.UNKNOWN_CALL.create("null");
         }
 
-        EnumMap<HttpDoveAdmCall, EndpointListing> endpoints = endpointsReference.get();
+        EnumMap<HttpDoveAdmCall, ClientIdAndEndpointManager> endpoints = endpointsReference.get();
         if (null == endpoints) {
             throw OXException.general("DoveAdm client not initialized.");
         }
 
-        EndpointListing entry = endpoints.get(call);
-        if (null == entry) {
+        ClientIdAndEndpointManager c = endpoints.get(call);
+        if (null == c) {
             throw DoveAdmClientExceptionCodes.UNKNOWN_CALL.create(call.toString());
         }
 
-        Endpoint endpoint = entry.endpointManager.get();
+
+        Endpoint endpoint = c.endpointManager.get();
         if (null == endpoint) {
             if (HttpDoveAdmCall.DEFAULT.equals(call)) {
                 throw DoveAdmClientExceptionCodes.DOVEADM_NOT_REACHABLE_GENERIC.create();
@@ -294,7 +238,19 @@ public class HttpDoveAdmEndpointManager {
             throw DoveAdmClientExceptionCodes.DOVEADM_NOT_REACHABLE.create(call.toString());
         }
 
-        return new HttpClientAndEndpoint(entry.httpClient, endpoint);
+        return new EndpointAndClientId(endpoint, c.httpClientId);
+    }
+
+    private static class ClientIdAndEndpointManager {
+
+        final EndpointManager endpointManager;
+        final String httpClientId;
+
+        ClientIdAndEndpointManager(String httpClientId, EndpointManager endpointManager) {
+            super();
+            this.httpClientId = httpClientId;
+            this.endpointManager = endpointManager;
+        }
     }
 
 }

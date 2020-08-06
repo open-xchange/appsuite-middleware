@@ -2,6 +2,7 @@
 title: removeoauthclient
 icon: far fa-circle
 tags: Administration, Command Line tools, OAuth
+package: open-xchange-admin-oauth-provider
 ---
 
 # NAME

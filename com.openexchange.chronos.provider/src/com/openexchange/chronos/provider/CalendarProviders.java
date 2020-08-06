@@ -100,6 +100,16 @@ public class CalendarProviders {
     }
 
     /**
+     * Gets the name of the property that is used to evaluate whether a calendar provider is enabled or not.
+     *
+     * @param provider The calendar provider id to generate the <i>enabled</i> property name for
+     * @return The <i>enabled</i> property name
+     */
+    public static String getEnabledPropertyName(String provider) {
+        return "com.openexchange.calendar." + provider + ".enabled";
+    }
+
+    /**
      * Gets the name of the property that is used to restrict the maximum number of accounts of a specific provider.
      *
      * @param provider The calendar provider to generate the <i>maxAccounts</i> property name for

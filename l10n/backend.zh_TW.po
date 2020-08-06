@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-10-21 00:18+0800\n"
+"PO-Revision-Date: 2020-07-09 12:16+0800\n"
 "Last-Translator: \n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
 "Language: zh_TW\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.2.4\n"
+"X-Generator: Poedit 2.3.1\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -57,6 +57,58 @@ msgid ""
 "The server configuration cannot be retrieved due to an internal server "
 "error. Please try again later."
 msgstr "因為伺服器發生內部錯誤，無法取得伺服器設定，請稍後再試。"
+
+#. The display name in context of the maximum allowed number of app-specific passwords a user may create.
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:63
+msgid "App-specific passwords"
+msgstr "應用程式密碼"
+
+#. The display name used for a Drive Sync App / id "drive"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:66
+msgid "Drive Sync App"
+msgstr "Drive Sync App"
+
+#. The display name used for a Calendar Client (CalDAV) / id "caldav"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:69
+msgid "Calendar Client (CalDAV)"
+msgstr "行事曆客戶端（CalDAV）"
+
+#. The display name used for a Addressbook Client (CardDAV) / id "carddav"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:72
+msgid "Addressbook Client (CardDAV)"
+msgstr "通訊錄客戶端（CardDAV）"
+
+#. The display name used for a WebDAV Client / id "webdav"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:75
+msgid "WebDAV Client"
+msgstr "WebDAV 客戶端"
+
+#. The account is not authorized to perform this action.  Displayed when a login without full permission tries to perform action requiring full priv
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:63
+msgid "This account isn't authorized to perform this action."
+msgstr "此帳號無權進行此操作。"
+
+#. The type of application isn't recognized
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:65
+msgid "Unknown application type $1%s"
+msgstr "未知的應用程式類型 $1%s"
+
+#. Unable to update application passwords during a password change action.
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:67
+msgid ""
+"Unable to update application passwords during password change. You may need "
+"to remove then recreate the application passwords."
+msgstr ""
+"無法在密碼變更期間更新應用程式密碼。您可能需要先移除再重新建立應用程式密碼。"
+
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:69
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+msgid "The operation could not be completed due to missing capabilities."
+msgstr "由於缺少權限，無法完成該操作。"
+
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:71
+msgid "This client cannot be used with an application-specific password."
+msgstr "此客戶端無法使用應用程式密碼。"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -184,39 +236,47 @@ msgid "Every week on %1$s"
 msgstr "於每週 %1$s"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:67
+msgid "Every week"
+msgstr "每週"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:69
 msgid "Every %1$s weeks on %2$s"
 msgstr "於每 %1$s 週的 %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:69
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:71
+msgid "Every %1$s weeks"
+msgstr "每 %1$s 週"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:73
 msgid "On %1$s. day every %2$s. month"
 msgstr "每 %2$s 月的 %1$s 日"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:71
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:75
 msgid "On %1$s %2$s every %3$s. month"
 msgstr "每 %3$s 個月的第 %1$s 個 %2$s"
 
 #. On %1$s %2$s in %3$s; e.g "On third Tuesday in April"
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:73
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:77
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:835
 msgid "On %1$s %2$s in %3$s"
 msgstr "%3$s 的第 %1$s 個 %2$s"
 
 #. E.g. "Every 2. February"
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:76
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:80
 msgid "Every %1$s. %2$s"
 msgstr "每 %2$s %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:78
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:82
 msgid "Work day"
 msgstr "工作天"
 
 #. Weekend day
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:80
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:84
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:918
 msgid "Weekend day"
 msgstr "週末"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:82
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:86
 msgid "Day"
 msgstr "日"
 
@@ -224,43 +284,43 @@ msgstr "日"
 #. * Weekdays
 #.
 #. Monday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:84
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:88
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:891
 msgid "Monday"
 msgstr "星期一"
 
 #. Tuesday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:86
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:90
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:894
 msgid "Tuesday"
 msgstr "星期二"
 
 #. Wednesday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:88
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:92
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:897
 msgid "Wednesday"
 msgstr "星期三"
 
 #. Thursday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:90
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:94
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:900
 msgid "Thursday"
 msgstr "星期四"
 
 #. Friday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:92
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:96
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:903
 msgid "Friday"
 msgstr "星期五"
 
 #. Saturday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:94
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:98
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:906
 msgid "Saturday"
 msgstr "星期六"
 
 #. Sunday
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:96
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:100
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:909
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:912
 msgid "Sunday"
@@ -270,73 +330,73 @@ msgstr "星期日"
 #. * Months
 #.
 #. January
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:98
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:102
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:851
 msgid "January"
 msgstr "一月"
 
 #. February
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:100
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:104
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:854
 msgid "February"
 msgstr "二月"
 
 #. March
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:102
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:106
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:857
 msgid "March"
 msgstr "三月"
 
 #. April
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:104
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:108
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:860
 msgid "April"
 msgstr "四月"
 
 #. May
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:106
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:110
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:863
 msgid "May"
 msgstr "五月"
 
 #. June
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:108
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:112
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:866
 msgid "June"
 msgstr "六月"
 
 #. July
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:110
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:114
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:869
 msgid "July"
 msgstr "七月"
 
 #. August
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:112
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:116
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:872
 msgid "August"
 msgstr "八月"
 
 #. September
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:114
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:118
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:875
 msgid "September"
 msgstr "九月"
 
 #. October
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:116
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:120
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:878
 msgid "October"
 msgstr "十月"
 
 #. November
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:118
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:122
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:881
 msgid "November"
 msgstr "十一月"
 
 #. December
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:120
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:124
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:884
 msgid "December"
 msgstr "十二月"
@@ -345,45 +405,45 @@ msgstr "十二月"
 #. * Monthly1 constants
 #.
 #. first
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:122
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:126
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:925
 msgid "first"
 msgstr "第一"
 
 #. second
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:124
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:128
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:928
 msgid "second"
 msgstr "第二"
 
 #. third
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:126
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:130
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:931
 msgid "third"
 msgstr "第三"
 
 #. fourth
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:128
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:132
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:934
 msgid "fourth"
 msgstr "第四"
 
 #. last
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:130
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:134
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:937
 msgid "last"
 msgstr "最後"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:132
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:136
 msgid "Occurs %1$s times"
 msgstr "發生 %1$s 次"
 
 #. E.g. "Until Wednesday, July 11, 2012"
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:135
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:139
 msgid "Until %1$s"
 msgstr "直到 %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:137
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:141
 msgid "No end"
 msgstr "無結束日期"
 
@@ -711,113 +771,121 @@ msgid "Participants"
 msgstr "參與者"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
+msgid "Meeting access"
+msgstr "會議存取"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:208
 msgid "Details"
 msgstr "詳細資訊"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:208
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
 msgid "Show as:"
 msgstr "顯示為:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
 msgid "Created:"
 msgstr "建立於:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
 msgid "Modified:"
 msgstr "修改於:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
 msgid ""
 "%1$s has deleted an appointment on behalf of %2$s, or you have been removed "
 "as a participant:"
 msgstr "%1$s 已用 %2$s 的名義刪除了某個約會，或您已自參與者名單當中被移除:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
 msgid ""
 "%1$s has deleted an appointment of the series %2$s on behalf of %3$s, or you "
 "have been removed as a participant:"
 msgstr ""
 "%1$s 以 %3$s 的身分，刪除了序列 %2$s 當中的約會，或將您從參與者身分移除："
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:220
 msgid "%1$s has deleted an appointment on your behalf:"
 msgstr "%1$s 已用您的名義刪除了某個約會:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:220
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
 msgid "%1$s has deleted an appointment of the series %2$s on your behalf:"
 msgstr "%1$s 以您的身分，刪除了序列 %2$s 當中的約會："
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:224
 msgid ""
 "%1$s has deleted an appointment, or you have been removed as a participant:"
 msgstr "%1$s 已刪除了某個約會，或您已自參與者名單當中被移除:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:224
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:226
 msgid ""
 "%1$s has deleted an appointment of the series %2$s, or you have been removed "
 "as a participant:"
 msgstr "%1$s 刪除了序列 %2$s 當中的約會，或將您從參與者身分移除："
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:226
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:228
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:230
 msgid "Change the subject to %1$s."
 msgstr "將主旨修改為 %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:230
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:232
 msgid "The appointment has a new subject: %1$s."
 msgstr "約會已有新的主旨: %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:232
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:234
 msgid "The appointment will now be shown as: \"%1$s\"."
 msgstr "約會將顯示為「%1$s」。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:234
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:236
 msgid "The appointment timezone was changed to: %1$s"
 msgstr "約會時區已修改為: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:236
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:238
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:240
 msgid "Change the location to %1$s."
 msgstr "將位置修改為 %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:240
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:242
 msgid "The appointment takes place in a new location: %1$s."
 msgstr "約會將於新位置舉行: %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:242
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:244
+msgid "The location of the appointment has been removed."
+msgstr "已刪除約會地點。"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:246
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:248
 msgid "Use the appointment description below."
 msgstr "使用下列約會註解。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:246
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:250
 msgid "The appointment description has changed."
 msgstr "已修改約會註解。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:248
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:252
 msgid "Please invite %1$s to the appointment."
 msgstr "請邀請 %1$s 參加約會。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:250
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:254
 msgid "Add %1$s to the appointment."
 msgstr "新增 %1$s 至約會當中。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:252
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:256
 msgid "%1$s has been invited to the appointment."
 msgstr "已邀請 %1$s 至約會當中。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:254
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:256
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:258
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:260
 msgid "Remove %1$s from the appointment."
 msgstr "自約會移除 %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:258
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:262
 msgid "%1$s has been removed from the appointment."
 msgstr "已自約會移除 %1$s。"
 
 #. *
 #. * Example: "UserXY has accepted the appointment."
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:263
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:267
 msgid "%1$s has %2$s the appointment."
 msgstr "%1$s 已 %2$s 約會。"
 
@@ -829,166 +897,160 @@ msgstr "%1$s 已 %2$s 約會。"
 #. * Confirmation statuses
 #.
 #. waiting
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:696
 msgid "waiting"
 msgstr "等待中"
 
 #.
 #. public static final String TENTATIVELY_ACCEPT = "tentatively accept";
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
 msgid "Invite the group %1$s to the appointment."
 msgstr "邀請 %1$s 群組參加約會。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
-msgid "The group %1$s has been invited to the appointment"
-msgstr "已邀請 %1$s 群組到約會當中"
-
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
+msgid "The group %1$s has been invited to the appointment."
+msgstr "已邀請群組 %1$s 參加約會。"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:285
 msgid "Remove the group %1$s from the appointment."
 msgstr "將 %1$s 群組自約會移除。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
-msgid "The group %1$s has been removed from the appointment"
-msgstr "已自約會移除 %1$s 群組"
-
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:285
-msgid "Reserve the resource %1$s for the appointment"
-msgstr "為約會保留 %1$s 資源"
-
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:287
+msgid "The group %1$s has been removed from the appointment."
+msgstr "已將群組 %1$s 自約會移除。"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:289
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
 msgid "Reserve the resource %1$s for the appointment."
 msgstr "為約會保留 %1$s 資源。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:289
-msgid "The resource %1$s has been reserved for the appointment"
-msgstr "資源 %1$s 已被保留用來於約會當中"
-
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
-msgid "Remove the resource %1$s from the appointment"
-msgstr "自約會移除 %1$s 資源"
-
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
+msgid "The resource %1$s has been reserved for the appointment."
+msgstr "已為約會保留資源 %1$s。"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:297
 msgid "Remove the resource %1$s from the appointment."
 msgstr "自約會移除 %1$s 資源。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
-msgid "The resource %1$s is no longer reserved for the appointment"
-msgstr "已不再為約會保留資源 %1$s"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:299
+msgid "The resource %1$s is no longer reserved for the appointment."
+msgstr "不再為約會保留資源 %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:297
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:301
 msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
 msgstr "約會時間已重新調整。原始日期: %1$s。新日期: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:299
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
 msgid ""
 "The timezone of the appointment was changed. Original timezone: %1$s. New "
 "timezone: %2$s"
 msgstr "約會的時區已有變更。原始時區: %1$s，新時區: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:301
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
 msgid ""
 "The timezone of the appointment's start date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr "約會的開始日期時區已變更。原時區：%1$s，新時區：%2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:307
 msgid ""
 "The timezone of the appointment's end date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr "約會的結束日期時區已變更。原時區：%1$s，新時區：%2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:309
 msgid "Reschedule the appointment. Original date: %1$s. New date: %2$s"
 msgstr "約會時間調整。原日期：%1$s，新日期：%2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:307
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:311
 msgid "The appointment series was updated, beginning at %1$s."
 msgstr "約會序列更新，自 %1$s 開始。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:309
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:313
 msgid "The appointment's recurrence rule has changed to: %1$s."
 msgstr "約會重複日期已變更至: %1$s。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:311
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
 msgid ""
 "Reschedule the appointment. Original date/time: %1$s. New date/time: %2$s"
 msgstr "約會時間調整。原日期/時間：%1$s，新日期/時間：%2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:313
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:317
 msgid "Resources"
 msgstr "資源"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:319
 msgid "The entire day"
 msgstr "全日"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:317
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:321
 msgid "New appointment: %1$s"
 msgstr "新約會: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:319
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:323
 msgid "Appointment changed: %1$s"
 msgstr "約會已更改: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:321
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:325
 msgid "Appointment canceled: %1$s"
 msgstr "約會已取消: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:323
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:327
 msgid "Proposed changes for appointment: %1$s"
 msgstr "已提議修改約會: %1$s"
 
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:326
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:330
 msgid "%1$s sets the status to 'none' for: %1$s"
 msgstr "%1$s 已因下列原因將狀態設定為「無」: %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:329
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:333
 msgid "%1$s %2$s the invitation: %3$s"
 msgstr "%1$s 已 %2$s 邀請: %3$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:331
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:335
 msgid "Resend the invitation for: %1$s"
 msgstr "重送邀請給: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:333
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:337
 msgid "Change not accepted for: %1$s"
 msgstr "更改未被接受: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:335
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:339
 msgid "All times will be shown in the timezone %1$s"
 msgstr "所有時刻以 %1$s 時區顯示"
 
 #. E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:338
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:342
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
 msgstr "%1$s 已經 %2$s 約會，但同時想提出一個反提案: "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:341
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:345
 msgid ""
 "You have received this E-Mail because you are the chair for this appointment."
 msgstr "因為您為此約會的主席所以收到這封信。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:343
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:347
 msgid ""
 "You have received this E-Mail because you are the organizer of this "
 "appointment."
 msgstr "因為您為此約會的發起人所以收到這封信。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:345
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:349
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
 msgstr "因為此約會的需要使用您所管理的資源 %1$s 所以收到這封信。"
 
 #. You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:348
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:352
 msgid ""
 "You have received an E-Mail containing a reply to an appointment that you "
 "didn't organize. Best ignore it."
@@ -997,17 +1059,37 @@ msgstr "您收到一封包含不是您主辦的約會的相關回復，最好忽
 #. *
 #. * The organizer of the appointment has changed. New organizer is: %1$s
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:353
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:357
 msgid "The organizer of the appointment has changed. New organizer is: %1$s"
 msgstr "約會主辦人已變更，新主辦人是: %1$s"
 
 #. *
 #. * The organizer of the appointment has changed. This operation is not allowed.
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:358
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:362
 msgid ""
 "The organizer of the appointment has changed. This operation is not allowed."
 msgstr "約會主辦人已變更，不允許此操作。"
+
+#. * Used when there are multiple changes in the appointment's conference properties
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:365
+msgid "The meeting access information was changed."
+msgstr "會議存取資訊已變更。"
+
+#. * Used when there is one particular conference property in the appointment with URI
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:368
+msgid "The meeting access information was changed: %1$s;"
+msgstr "會議存取資訊已變更：%1$s；"
+
+#. * Used when there is one particular conference property in the appointment with URI and additional label
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:371
+msgid "The meeting access information was changed. %1$s: %2$s"
+msgstr "會議存取資訊已變更。%1$s：%2$s"
+
+#. * Used when all conference properties in the appointment were removed
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:374
+msgid "The meeting access information was removed."
+msgstr "會議存取資訊已移除。"
 
 #. *
 #. * The event %s couldn't be deleted: %s
@@ -1043,7 +1125,7 @@ msgstr "內文部分的 content-id「%1$s」參照到不存在的附件。"
 #.
 #: com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:81
 msgid "The metadata of the attachment '%1$s' does not have a content-id."
-msgstr "附件「%1$s」的 metada 沒有 content-id。"
+msgstr "附件「%1$s」的 metadata 沒有 content-id。"
 
 #. *
 #. * The name of the contact birthdays calendar provider.
@@ -1263,25 +1345,30 @@ msgstr "重複"
 msgid "Description"
 msgstr "描述"
 
-#. * The displayed name for the {@link EventField#CLASSIFICATION} property of an event
+#. * The displayed name for the {@link EventField#CONFERENCES} property of an event
 #: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:90
+msgid "Conference"
+msgstr "會議"
+
+#. * The displayed name for the {@link EventField#CLASSIFICATION} property of an event
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:93
 msgid "Visibility"
 msgstr "可見度"
 
 #. * The displayed name for the {@link EventField#COLOR} property of an event
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:93
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:96
 msgid "Color"
 msgstr "色彩"
 
 #. * The displayed name for the {@link EventField#TRANSP} property of an event
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:96
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:99
 msgid "Show as"
 msgstr "顯示為"
 
 #. * The displayed name for the {@link EventField#ATTACHMENTS} property of an event
 #. Has attachment
 #. The module attachments
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:99
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:102
 #: com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
 #: com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
 msgid "Attachments"
@@ -1304,185 +1391,185 @@ msgid "The requested participant was not found."
 msgstr "找不到要求的參與者。"
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:70
+msgid "The requested alarm was not found."
+msgstr "找不到要求的鬧鈴。"
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:72
 msgid "The requested calendar account was not found."
 msgstr "找不到要求的行事曆帳號。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:72
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:74
 msgid "The calendar provider \"%1$s\" is not available."
 msgstr "無法使用行事曆提供者「%1$s」。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:74
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:76
 msgid ""
 "The calendar storage is temporarily not available. Please try again later."
 msgstr "行事曆儲存空間暫時無法使用，請稍候再試。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:76
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:78
 msgid ""
 "The requested calendar account is currently disabled. Please enable the "
 "account and try again."
 msgstr "要求的行事曆帳號目前已被停用。請啟用該帳號後再試一次。"
 
 #. An I/O error occurred: %1$s
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:78
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:80
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:74
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:77
 msgid "An I/O error occurred: %1$s"
-msgstr "出現一個 I/O 錯誤: %1$s"
+msgstr "發生 I/O 錯誤: %1$s"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:80
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:82
 msgid ""
 "The requested operation is not supported for calendar provider \"%1$s\"."
 msgstr "行事曆供應商「%1$s」不支援要求的操作。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:82
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:84
 msgid "The operation could not be completed due to insufficient permissions."
 msgstr "由於權限不足，無法完成該操作。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:84
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
 msgid ""
 "This modification can only be performed by the organizer of the appointment."
 msgstr "僅能由約會主辦人修改。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
 msgid "Organizer must also be an attendee."
 msgstr "主辦人也必須是參與者。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
 msgid "All appointments of a series must contain the same organizer."
 msgstr "序列約會的主辦人必須相同。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
-msgid "The operation could not be completed due to missing capabilities."
-msgstr "由於缺少權限，無法完成該操作。"
-
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
 msgstr "不支援指定的資料夾，請選擇有效的資料夾後再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
 msgid ""
 "The operation could not be completed due to a concurrent modification. "
 "Please reload the data and try again."
 msgstr "由於發生同時修改，無法完成此操作。請重新載入資料後再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
 msgid ""
 "The changes could not be applied because a newer version of the appointment "
 "already exists."
 msgstr "由於已有新版約會，無法套用變更。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
 msgid ""
 "The appointment could not be created due to another conflicting appointment "
 "with the same unique identifier."
 msgstr "由於有相同唯一識別符的衝突活動，無法建立該約會。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
 msgid "The appointment conflicts with one or more other appointments."
 msgstr "該約會與一或多個其他約會相衝突。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
 msgid ""
 "The field \"%1$s\" is mandatory. Please supply a valid value and try again."
 msgstr "欄位「%1$s」必填，請提供有效的值後再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
 msgid ""
 "The end date lies before the start date. Please correct the appointment "
 "times and try again."
 msgstr "結束日期在開始日期之前，請修正約會時間後再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
 msgid ""
 "Appointments in non-personal folders must not be classified as \"private\" "
 "or \"secret\"."
 msgstr "非個人資料夾中的約會不得分類為「私人」或「秘密」。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
 msgid "Appointments with resources must not be classified as \"secret\"."
 msgstr "含有資源的約會不得分類為「秘密」。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
 msgid ""
 "Appointments classified as \"private\" or \"secret\" cannot be moved to this "
 "type of folder."
 msgstr "分類為「私人」或「秘密」的約會不能被移動至此類資料夾。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
 msgid "Occurrences of appointment series must not be classified differently."
 msgstr "同一個約會的不同發生次數不得使用不同分類。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
 msgid ""
 "The supplied recurrence rule is invalid. Please correct the rule and try "
 "again."
 msgstr "指定的重複發生規則無效，請修正該規則後再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
 "The supplied reminder is invalid. Please correct the reminder and try again."
 msgstr "指定的提醒規則無效，請修正該規則後再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
 msgid ""
 "The supplied timezone is invalid. Please select a valid timezone and try "
 "again."
 msgstr "指定的時區無效，請選擇有效時區後再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
 msgid ""
 "The supplied geographical location is invalid. Please select valid "
 "coordinates and try again."
 msgstr "指定的地理位置無效，請選擇有效的地點後再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
 msgid ""
 "The supplied types of start and end date are incompatible. Please correct "
 "the appointment times and try again."
 msgstr "指定的開始與結束日期不正確，請修正約會時間後再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
 msgid ""
 "The supplied recurrence rule is not supported. Please use adjust the rule "
 "and try again."
 msgstr "不支援指定的重複發生規則，請調整規則後再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
 msgid ""
 "The targeted occurrence is not part of the appointment series. Please select "
 "a valid recurrence identifier and try again."
 msgstr "指定的發生次數不在約會序列中，請選擇有效的重複發生指示符後再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
 msgid ""
 "The split of the appointment series cannot be performed. Please select a "
 "valid split point and try again."
 msgstr "無法分割約會序列，請選擇有效的分割點後再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
 msgid "Moving an appointment series into another folder is not supported."
 msgstr "不支援將約會序列移動至其他資料夾。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
 msgid ""
 "Moving an occurrence of an appointment series into another folder is not "
 "supported."
 msgstr "不支援將約會序列當中的單次約會移動至其他資料夾。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
 msgid "The calendar user \"%1$s\" is invalid."
 msgstr "行事曆使用者「%1$s」無效。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
 msgid ""
 "The supplied configuration is invalid. Please correct the configuration and "
 "try again."
 msgstr "提供的設定無效，請修正設定後再試一次。"
 
 #. In order to accomplish the search, %1$d or more characters are required.
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:84
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
@@ -1492,7 +1579,7 @@ msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
 msgstr "要完成搜索，需要 %1$d 個或更多字元。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
 msgid ""
@@ -1501,7 +1588,7 @@ msgid ""
 msgstr ""
 "無法儲存欄位「%2$s」中的字元「%1$s」。請移除這個有問題的字元後再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$d, current: %3$d) and try again."
@@ -1509,57 +1596,61 @@ msgstr ""
 "某些輸入的資料超過欄位限制。請縮短「%1$s」的內容（限制: %2$d，目前: %3$d）後"
 "再試一次。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
 msgid "The maximum number of calendar subscriptions is exceeded."
 msgstr "已達行事曆訂閱數量的最大值。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
 msgid "The value for \"%2$s\" is invalid and wasn't applied."
 msgstr "「%2$s」的值無效，並未套用。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
 msgid "The value for \"%1$s\" is invalid and cannot be applied."
 msgstr "「%1$s」的值無效，無法套用。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
 msgid "The value for \"%2$s\" is not supported and wasn't applied."
 msgstr "不支援「%2$s」的值，並未套用。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
 msgid "The '%1$s' is either not an internal user or does not exist."
 msgstr "「%1$s」不是內部使用者，或是不存在。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
 msgid "Authentication failed."
 msgstr "驗證失敗。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:158
 msgid ""
 "Unable to create account. There have been issues with the provided "
 "authentication."
 msgstr "無法建立帳號，您提供的驗證資料可能有問題。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:158
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:160
 msgid "The quota for account '%1$s' in context '%2$s' exceeded the limit."
 msgstr "環境「%2$s」中的帳號「%1$s」配額已滿。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:160
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:162
 msgid "The requested attachment was not found."
 msgstr "找不到要求的附件。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:162
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:164
 msgid "Too many appointments are queried. Please choose a shorter timeframe."
 msgstr "找到太多約會，請縮短時間範圍。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:164
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:166
 msgid "The appointment contains too many participants."
 msgstr "此約會包含太多參與者。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:166
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:168
 msgid "The appointment contains too many reminders."
 msgstr "此約會包含太多提醒。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:168
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:170
+msgid "The appointment contains too many conferences."
+msgstr "約會當中包含太多會議。"
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:172
 msgid "The method \"%1$s\" is not supported."
 msgstr "不支援方法「%1$s」。"
 
@@ -1876,7 +1967,7 @@ msgstr "小孩數量"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:76
 msgid "Profession"
-msgstr "專業能力"
+msgstr "職業"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:77
 msgid "Nickname"
@@ -1932,7 +2023,7 @@ msgstr "國家（商務）"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:90
 msgid "Employee ID"
-msgstr "職員編號"
+msgstr "員工編號"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:91
 msgid "Sales volume"
@@ -2060,7 +2151,7 @@ msgstr "無線電電話"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:122
 msgid "Telex"
-msgstr "Telex"
+msgstr "電報"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:123
 msgid "TTY/TDD"
@@ -2662,6 +2753,10 @@ msgstr "「%2$s」當中已有名為「%1$s」的資料夾。"
 msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
 msgstr "使用者「%1$s」於環境「%1$s」的 long polling 推送已經停用"
 
+#: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
+msgid "No external account provider found for module '%1$s'."
+msgstr "找不到模組「%1$s」的外部帳號提供者。"
+
 #: com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61
@@ -2761,9 +2856,54 @@ msgstr "於收件者"
 msgid "in subject"
 msgstr "於主旨"
 
+#: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
+msgid "Enter login"
+msgstr "請輸入登入資訊"
+
+#: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
+msgid "Enter password"
+msgstr "請輸入密碼"
+
+#: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:65
+msgid "Enter url"
+msgstr "請輸入網址"
+
+#. Missing capability for file storage %1$s
+#: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:63
+msgid "Missing capability for file storage %1$s"
+msgstr "檔案儲存空間 %1$s 缺少能力資訊"
+
+#. Invalid config: %1$s
+#: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:66
+msgid "Invalid config: %1$s"
+msgstr "設定無效: %1$s"
+
+#. The document could not be updated because it was modified. Please try again.
+#: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:69
+#: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:110
+msgid ""
+"The document could not be updated because it was modified. Please try again."
+msgstr "無法更新文檔，因為它被修改。請重試。"
+
+#. The connection check failed
+#: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:72
+msgid "The connection check failed."
+msgstr "連線檢查失敗。"
+
+#. Cannot connect to URI: %1$s. Please change and try again.
+#: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:75
+msgid "Cannot connect to URI: %1$s. Please change and try again."
+msgstr "無法連線到網址：%1$s。請更正後再試一次。"
+
+#. The given URL is invalid. Please change it and try again.
+#: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:78
+msgid "The given URL is invalid. Please change it and try again."
+msgstr "指定的網址無效。請更正後再試一次。"
+
 #. The folder you requested does not exist.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:77
+#: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:143
 msgid "The folder you requested does not exist."
 msgstr "您請求的資料夾不存在。"
 
@@ -2916,87 +3056,93 @@ msgstr "缺少 %1$s 帳號的設定「%2$s」。"
 msgid "The provided %1$s resource does not exist: %2$s"
 msgstr "提供的 %1$s 資源不存在: %2$s"
 
-#. The file %1$s doesn't have any content.
+#. Authentication failed. Please check the provided credentials and try again.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:145
+msgid ""
+"Authentication failed. Please check the provided credentials and try again."
+msgstr "驗證失敗，請檢查提供的登入資訊後再試一次。"
+
+#. The file %1$s doesn't have any content.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
 msgid "The file %1$s doesn't have any content."
 msgstr "檔案 %1$s 當中沒有內容。"
 
 #. The associated %2$s account no longer exists.
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:151
 msgid "The associated %2$s account no longer exists."
 msgstr "關聯的 %2$s 帳號不再存在。"
 
 #. Individual permissions are not supported in account \"%1$s\".
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:151
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:154
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr "「%1$s」帳號不支援獨立權限。"
 
 #. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:154
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
 msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr "「%2$s」帳號不支援為「%1$s」檔案儲存註記。"
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
 msgid ""
 "Assigning categories to file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr "「%2$s」帳號不支援為「%1$s」檔案指派分類。"
 
 #. The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:163
 msgid ""
 "The file \"%1$s\" was not saved due to possible data loss. Please review the "
 "warnings for details."
 msgstr "因為可能已損失資料，並未儲存「%1$s」檔案。請參考警告中的詳細資訊。"
 
 #. Bad or expired access token. Need to re-authenticate user.
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:163
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:166
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
 msgid "Bad or expired access token. Need to re-authenticate user."
 msgstr "錯誤或已逾期的 token。需要重新驗證使用者。"
 
 #. Your rate limit has been exceeded and further access is not possible at the moment.
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:166
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:169
 msgid ""
 "Your rate limit has been exceeded and further access is not possible at the "
 "moment."
 msgstr "已達您的存取頻率限制，您將暫時無法使用。"
 
 #. You need to get sufficient permissions to perform the operation on the specified entity.
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:169
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:172
 msgid ""
 "You need to get sufficient permissions to perform the operation on the "
 "specified entity."
 msgstr "您需要取得足夠權限才能對指定的實體進行操作。"
 
 #. File name contains not allowed characters: \"%1$s\"
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:172
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:175
 msgid "File name contains illegal characters: \"%1$s\""
 msgstr "檔案名稱包含不允許的字元:「%1$s」"
 
 #. File name is a reserved name: \"%1$s\"
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:175
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:178
 msgid "File name is a reserved name: \"%1$s\""
 msgstr "檔案名稱為保留名稱:「%1$s」"
 
 #. File name must not be \".\" or \"..\".
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:178
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:181
 msgid "File name must not be \".\" or \"..\"."
 msgstr "檔案名稱不能為「.」或「..」。"
 
 #. File name must not end with a dot or whitespace.
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:181
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:184
 msgid "File name must not end with a dot or whitespace."
 msgstr "檔案名稱不能以點或空白結尾。"
 
 #. A file with that name already exists.
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:184
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:187
 msgid "A file with that name already exists."
 msgstr "使用該名稱的檔案已經存在。"
 
 #. Restore from trash is not supported.
 #. User tries to restore a folders from trash, but that functionality is not supported
-#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:187
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:190
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:107
 msgid "Restore from trash is not supported"
 msgstr "不支援從垃圾桶還原"
@@ -3180,19 +3326,16 @@ msgstr "無法於「%2$s」區域建立名稱為「%1$s」的 bucket"
 
 #. No such document: %1$s
 #: com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:63
-#: com.openexchange.filestore.swift/src/com/openexchange/filestore/swift/SwiftExceptionMessages.java:64
 msgid "No such document: %1$s"
 msgstr "無此文件: %1$s"
 
 #. No such chunk: %1$s
 #: com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:66
-#: com.openexchange.filestore.swift/src/com/openexchange/filestore/swift/SwiftExceptionMessages.java:67
 msgid "No such chunk: %1$s"
 msgstr "無此分塊: %1$s"
 
 #. No next chunk for chunk: %1$s
 #: com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:69
-#: com.openexchange.filestore.swift/src/com/openexchange/filestore/swift/SwiftExceptionMessages.java:70
 msgid "No next chunk for chunk: %1$s"
 msgstr "無此分塊的下一塊: %1$s"
 
@@ -3644,23 +3787,6 @@ msgstr "延遲"
 msgid "Single Task"
 msgstr "單一任務"
 
-#. The uwa widget with the id %1$s could not be found
-#: com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:63
-msgid "The uwa widget with the id %1$s could not be found"
-msgstr "找不到 id 為 %1$s 的 uwa 小工具"
-
-#. The widget with the id %1$s is protected and only positional information can be updated
-#: com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:66
-msgid ""
-"The widget with the id %1$s is protected and only positional information can "
-"be updated"
-msgstr "ID 為 %1$s 的小工具受到保護，只能更新其位置資訊"
-
-#. The string cannot be parsed to a valid URL.
-#: com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:69
-msgid "The string cannot be parsed to a valid URL."
-msgstr "字串無法剖析為網址。"
-
 #. The prefix for the diagnostics file
 #: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/DataExportStrings.java:70
 msgid "Diagnostics"
@@ -3724,44 +3850,11 @@ msgid ""
 "download recently."
 msgstr "您會收到這封郵件，是因為您最近要求下載個人資料。"
 
-#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:70
-#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportPropertyNames.java:70
-#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:70
-#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportPropertyNames.java:70
-msgid "enabled"
-msgstr "已啟用"
-
-#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:72
-#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportPropertyNames.java:72
-#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:72
-#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportPropertyNames.java:72
-msgid "includePublic"
-msgstr "includePublic"
-
-#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:74
-#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportPropertyNames.java:74
-#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:74
-#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportPropertyNames.java:74
-msgid "includeShared"
-msgstr "includeShared"
-
-#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:76
-msgid "includeUnsubscribed"
-msgstr "includeUnsubscribed"
-
 #. The path prefix within generated ZIP archive containing exported appointments
 #: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportStrings.java:71
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
 msgid "Calendar"
 msgstr "日曆"
-
-#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:76
-msgid "includeTrash"
-msgstr "includeTrash"
-
-#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:78
-msgid "includeAllVersions"
-msgstr "includeAllVersions"
 
 #. The path prefix within generated ZIP archive containing exported Drive files
 #: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportStrings.java:71
@@ -3998,7 +4091,7 @@ msgstr "客戶端送出的請求格式不正確"
 #.
 #: com.openexchange.global/src/com/openexchange/filemanagement/ManagedFileExceptionMessages.java:64
 msgid "File not found: %1$s"
-msgstr "找不到檔: %1$s"
+msgstr "找不到檔案：%1$s"
 
 #. *
 #. * No such managed file associated with ID: %1$s
@@ -4006,6 +4099,23 @@ msgstr "找不到檔: %1$s"
 #: com.openexchange.global/src/com/openexchange/filemanagement/ManagedFileExceptionMessages.java:69
 msgid "No such managed file associated with ID: %1$s"
 msgstr "沒有與此 ID 關聯的此類管理文件: %1$s"
+
+#: com.openexchange.global/src/com/openexchange/i18n/misc/Messages.java:69
+msgid "%1$s has mentioned you in a document \"%2$s\""
+msgstr "%1$s 在文件「%2$s」當中提到您"
+
+#. <Fullusername or empty><(or empty)<useremail><) or empty> has mentioned you in a comment in the following document:
+#: com.openexchange.global/src/com/openexchange/i18n/misc/Messages.java:72
+msgid "%1$s (%2$s) has mentioned you in a comment in the following document:"
+msgstr "%1$s（%2$s）在下列文件的註解中提到您："
+
+#: com.openexchange.global/src/com/openexchange/i18n/misc/Messages.java:74
+msgid "Please click the button below to open the document."
+msgstr "請點擊下方的按鈕開啟文件。"
+
+#: com.openexchange.global/src/com/openexchange/i18n/misc/Messages.java:76
+msgid "Go to comment"
+msgstr "前到註解。"
 
 #. *
 #. * The required service %1$s is temporary not available. Please try again later.
@@ -4880,7 +4990,7 @@ msgstr "位址格式錯誤: %1$s。"
 #. Unknown messaging content: %1$s.
 #: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:70
 msgid "Unknown messaging content: %1$s."
-msgstr "未知消息內容: %1$s。"
+msgstr "未知訊息內容: %1$s。"
 
 #. Invalid parameter: %1$s with value '%2$s'.
 #: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:73
@@ -4935,6 +5045,11 @@ msgstr "在文件夾 %2$s 中找不到郵件 %1$s。"
 #: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:100
 msgid "Invalid OAuth account specified."
 msgstr "指定了無效的 OAuth 帳號。"
+
+#. The account configuration is invalid.
+#: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:103
+msgid "The account configuration is invalid."
+msgstr "帳號設定無效。"
 
 #. An error has occurred on the remote Microsoft end-point. There is nothing we can do about it. Try again later.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphClientExceptionMessages.java:63
@@ -5468,6 +5583,13 @@ msgstr "提供者不支援節點 %1$s，或已被停用"
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:118
 msgid "'%1$s' OAuth service is not enabled for you."
 msgstr "「%1$s」OAuth 服務並未為您開啟。"
+
+#. Unable to update the account '%1$s', because a different service account has been used to create it.
+#: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:121
+msgid ""
+"Unable to update the account '%1$s', because a different service account has "
+"been used to create it."
+msgstr "由於使用了不同的服務帳號來建立帳號「%1$s」，無法更新該帳號資訊。"
 
 #: com.openexchange.password.mechanism/src/com/openexchange/password/mechanism/exceptions/PasswordMechMessages.java:63
 msgid ""
@@ -6053,52 +6175,6 @@ msgid ""
 "to store a new one."
 msgstr "簽名檔的儲存限制為 %1$s，請先刪除舊的簽名檔後再新增。"
 
-#. Could not send stanza to resource. Resource was offline: %1$s
-#: com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
-msgid "Could not send stanza to resource. Resource was offline: %1$s"
-msgstr "無法傳送 stanza 給資源。資源已離線: %1$s"
-
-#. Unknown channel %1$s
-#: com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:66
-msgid "Unknown channel %1$s"
-msgstr "未知頻道 %1$s"
-
-#. * "Obligatory key \"%1$s\" is missing from the Stanza"
-#: com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:63
-msgid "Obligatory key \"%1$s\" is missing from the Stanza"
-msgstr "Stanza 欠缺必要的「%1$s」鍵"
-
-#. * Malformed IQ Data
-#: com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:65
-msgid "Malformed IQ Data"
-msgstr "畸形的 IQ 資料"
-
-#. * Malformed IQ Element: \"%1$s\"
-#: com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:67
-msgid "Malformed IQ Element: \"%1$s\""
-msgstr "畸形 IQ 元素：「%1$s」"
-
-#. * No appropriate channel found for recipient %1$s with payload namespace %2$s
-#: com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:63
-msgid ""
-"No appropriate channel found for recipient %1$s with payload namespace %2$s"
-msgstr "沒有適合收件者「%1$s」使用負載命名空間「%2$s」的頻道"
-
-#. * The following needed service is missing: \"%1$s\"
-#: com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
-msgid "The following needed service is missing: \"%1$s\""
-msgstr "缺少下列必須服務:「%1$s」"
-
-#. Unexpected error: %1$s
-#: com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:69
-msgid "Unexpected error: %1$s"
-msgstr "意外錯誤: %1$s"
-
-#. * Invalid ID. Resource identifier is missing.
-#: com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:72
-msgid "Invalid ID. Resource identifier is missing."
-msgstr "無效 ID。缺少資源 ID。"
-
 #. The remote '%1$s' service is unavailable at the moment. There is nothing we can do about it. Please try again later.
 #: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:65
 msgid ""
@@ -6391,6 +6467,11 @@ msgstr "因為可能已損失資料，並未更新「%1$s」資料夾。請參�
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:104
 msgid "Folder name contains illegal characters: \"%1$s\""
 msgstr "資料夾名稱包含無效字元:「%1$s」"
+
+#. User selected one or more permissions that cannot be applied to target folder; e.g. selected guest permission for a mail folder.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:110
+msgid "The chosen permission(s) cannot be set"
+msgstr "無法設定選擇的權限"
 
 #. No group given.
 #: com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
@@ -8379,7 +8460,7 @@ msgstr "每週於%1$s"
 #. Each %1$s weeks on %2$s; e.g. "Each 2 weeks on Monday and Tuesday"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:817
 msgid "Each %1$s weeks on %2$s"
-msgstr "每 %1$s 周於 %2$s"
+msgstr "每 %1$s 週的 %2$s"
 
 #. On %1$s day every month; e.g. "On 1st day every month"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:820
@@ -8518,12 +8599,6 @@ msgid ""
 "In order to accomplish the search, %1$s or more characters are required."
 msgstr "要完成搜索，需要 %1$s 個或更多字元。"
 
-#. The document could not be updated because it was modified. Please try again.
-#: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:110
-msgid ""
-"The document could not be updated because it was modified. Please try again."
-msgstr "無法更新文檔，因為它被修改。請重試。"
-
 #. The file name must not contain slashes.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:113
 msgid "The file name must not contain slashes."
@@ -8583,6 +8658,13 @@ msgstr "發生同時寫入。請稍候先前的儲存操作完成。"
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:140
 msgid "Your search took too long in order to be accomplished."
 msgstr "您的搜尋花了太久才完成。"
+
+#. The file contains too many permissions. Please reduce the number or use groups instead.
+#: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:146
+msgid ""
+"The file contains too many permissions. Please reduce the number of "
+"permissions or use group permissions instead."
+msgstr "檔案當中包含太多權限。請減少權限數量，或改用群組權限。"
 
 #. A document's version comment
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:79
@@ -9532,11 +9614,11 @@ msgstr ""
 #. Thrown when a mail transport has been disabled. That is it exceeded the limit for failed authentication count.
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:258
 msgid ""
-"Your mail transport for  %2$s was disabled due to invalid credentials. "
-"Please edit the account and enter correct credentials to enable it again"
+"Your mail transport for %2$s was disabled due to invalid credentials. Please "
+"edit the account and enter correct credentials to enable it again"
 msgstr ""
-"因為帳號密碼無效，您 %2$s 帳號的郵件傳輸功能已被停用。請編輯帳號並輸入正確的"
-"帳號密碼以再次啟用"
+"由於帳號密碼無效，已停用 %2$s 帳號的郵件傳輸功能。請編輯帳號並輸入正確的帳號"
+"密碼以再次啟用"
 
 #. Thrown when an oauth-associated mail transport has been disabled. That is it exceeded the limit for failed authentication count.
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:261
@@ -9561,6 +9643,13 @@ msgstr "不支援對伺服器 %1$s 進行 OAuth 傳輸存取"
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:270
 msgid "Mail server %1$s denied connect attempt: %3$s"
 msgstr "郵件伺服器 %1$s 拒絕連線請求: %3$s"
+
+#. User tried to send an email, which has been composed as a reply or forward referencing a message, which no longer exists
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:273
+msgid ""
+"As the original email no longer exists, your email has been sent as a new "
+"one."
+msgstr "由於原始的郵件內容已經不存在，已將您的郵件作為新郵件寄出。"
 
 #. This error message is returned to the user in case he/she wants to apply a change to an in-compose message,
 #. which is only applicable in case a reply is generated, but in-compose message is not a reply
@@ -9621,6 +9710,11 @@ msgstr "輸入的「副本收件人」地址太長。"
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:102
 msgid "The entered \"bcc\" addresses are too long."
 msgstr "輸入的「密件副本收件人」地址太長。"
+
+#. The user entered a very long Reply-To address, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:105
+msgid "The entered \"Reply-To\" address is too long."
+msgstr "輸入的「回覆至」地址太長。"
 
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -9951,6 +10045,16 @@ msgstr "您已無法使用目前的密碼存取郵件伺服器。請取得新密
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:221
 msgid "Access to mail server is not permitted due to a lack of privacy."
 msgstr "由於缺少隱私，不允許您存取郵件伺服器。"
+
+#. Message was blocked by outgoing SMTP server; e.g. due to triggering a filter such as a URL in the message being found in a domain black list.
+#: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:224
+msgid "Message could not be sent because it has been rejected."
+msgstr "訊息被拒絕，無法傳送。"
+
+#. Message was blocked by outgoing SMTP server; e.g. due to triggering a filter such as a URL in the message being found in a domain black list.
+#: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:227
+msgid "Message could not be sent because it has been rejected (%1$s)."
+msgstr "訊息被拒絕，無法傳送（%1$s）。"
 
 #. The message advertising that everything is fine with checked account
 #: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:71
@@ -10444,6 +10548,13 @@ msgstr "您無法變更垃圾桶及其子資料夾的權限"
 msgid "There is already a folder named \"%1$s\". Please choose another name."
 msgstr "已經有名為「%1$s」的資料夾，請使用其他名稱。"
 
+#. The folder contains too many permissions. Please reduce the number or use groups instead.
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:138
+msgid ""
+"The folder contains too many permissions. Please reduce the number of "
+"permissions or use group permissions instead."
+msgstr "資料夾當中包含太多權限。請減少權限數量，或改用群組權限。"
+
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
 msgstr "不允許通過非安全連線進行請求的操作。"
@@ -10583,48 +10694,55 @@ msgid ""
 "to view it."
 msgstr "%1$s 已與您分享「%3$s」%2$s。請輸入共享密碼即可開啟檢視。"
 
-#. Login when opening a share protected with a password
+#. John Doe has shared the folder "Photos" with you. Please enter your password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
+msgid ""
+"%1$s has shared the %2$s \"%3$s\" with you. Please enter your password to "
+"view it."
+msgstr "%1$s 已與您分享「%3$s」%2$s。請輸入您的密碼即可開啟檢視。"
+
+#. Login when opening a share protected with a password
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:75
 msgid "Please enter your password to log into this account."
 msgstr "請輸入您的密碼，以登入此帳號。"
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:75
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
 msgid ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
 msgstr "我們已傳送訊息到 %1$s，當中包含如何設定新密碼的詳細資訊。"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:77
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
 msgid "Please set a new password to regain access."
 msgstr "請設定新密碼以恢復使用權限。"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:79
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
 msgid "The share you are looking for does not exist."
 msgstr "您正尋找的分享內容不存在。"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:81
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
 msgid "This share cannot be accessed with your Web Browser."
 msgstr "無法以網頁瀏覽器存取此分享。"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:83
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:86
 msgid "We were unable to process your request."
 msgstr "我們無法處理您的請求。"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:85
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
 msgid ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
 msgstr "您尋找的資料夾或物件已不再可用，請點擊「繼續」以檢視其他的分享項目。"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:87
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
 msgid ""
 "Your guest account is currently not protected with a password. Resetting "
 "password will be aborted."
 msgstr "您的訪客帳號目前並未以密碼保護，將中止密碼重設。"
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -10632,14 +10750,14 @@ msgstr ""
 "您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡檔案擁有者。"
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
 msgstr "您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。"
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -10648,7 +10766,7 @@ msgstr ""
 "者。"
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
@@ -10656,21 +10774,21 @@ msgstr ""
 "您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。"
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again."
 msgstr "您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡擁有者。"
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again."
 msgstr "您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。"
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -10680,7 +10798,7 @@ msgstr ""
 "要檢視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -10690,7 +10808,7 @@ msgstr ""
 "您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -10700,7 +10818,7 @@ msgstr ""
 "者。若要檢視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
@@ -10710,7 +10828,7 @@ msgstr ""
 "視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -10720,7 +10838,7 @@ msgstr ""
 "他分享的檔案，請點擊「繼續」。"
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -10730,7 +10848,7 @@ msgstr ""
 "分享的檔案，請點擊「繼續」。"
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -10740,7 +10858,7 @@ msgstr ""
 "要檢視您其他分享的檔案，請登入。"
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -10749,7 +10867,7 @@ msgstr ""
 "您其他分享的檔案，請登入。"
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -10759,7 +10877,7 @@ msgstr ""
 "者。若要檢視您其他分享的檔案，請登入。"
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
@@ -10769,7 +10887,7 @@ msgstr ""
 "視您其他分享的檔案，請登入。"
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:141
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -10779,7 +10897,7 @@ msgstr ""
 "他分享的檔案，請登入。"
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:141
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:144
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -11645,6 +11763,30 @@ msgid ""
 "cannot be copied."
 msgstr "來源環境 %2$s 的使用者 %1$s 使用統一配額，無法複製。"
 
+#. The provided feedback for '%s' is invalid.
+#: com.openexchange.userfeedback.nps/src/com/openexchange/userfeedback/nps/exception/NPSExceptionMessages.java:64
+msgid "The provided feedback for '%s' is invalid."
+msgstr "提供的意見回饋「%s」無效。"
+
+#. The provided feedback for key '%s' has an invalid type.
+#: com.openexchange.userfeedback.nps/src/com/openexchange/userfeedback/nps/exception/NPSExceptionMessages.java:67
+msgid "The provided feedback for key '%s' has an invalid type."
+msgstr "為鍵值「%s」提供的意見回饋類型無效。"
+
+#. The provided feedback does not contain required key '%s'.
+#. The provided feedback does not contain required key "score".
+#: com.openexchange.userfeedback.nps/src/com/openexchange/userfeedback/nps/exception/NPSExceptionMessages.java:70
+#: com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
+msgid "The provided feedback does not contain required key '%s'."
+msgstr "提供的意見回饋未包含必需的鍵值「%s」。"
+
+#. The provided feedback for key '%s' cannot be parsed.
+#. The provided feedback for key "score" cannot be parsed..
+#: com.openexchange.userfeedback.nps/src/com/openexchange/userfeedback/nps/exception/NPSExceptionMessages.java:73
+#: com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
+msgid "The provided feedback for key '%s' cannot be parsed."
+msgstr "無法剖析提供的鍵值「%s」的意見回饋。"
+
 #. The provided feedback score is invalid. Please choose a number > 0.
 #: com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:64
 msgid "The provided feedback score is invalid. Please choose a number > 0."
@@ -11654,16 +11796,6 @@ msgstr "提供的意見回饋評分無效，請選擇大於 0 的數字。"
 #: com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:67
 msgid "The provided feedback for key 'score' has an invalid type."
 msgstr "為鍵值「score」提供的意見回饋類型無效。"
-
-#. The provided feedback does not contain required key "score".
-#: com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key '%s'."
-msgstr "提供的意見回饋未包含必需的鍵值「%s」。"
-
-#. The provided feedback for key "score" cannot be parsed..
-#: com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key '%s' cannot be parsed."
-msgstr "無法剖析提供的鍵值「%s」的意見回饋。"
 
 #. The value given in the property %1$s is no integer value
 #: com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -13920,6 +14052,89 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "祖魯"
+
+#~ msgid "The group %1$s has been invited to the appointment"
+#~ msgstr "已邀請 %1$s 群組到約會當中"
+
+#~ msgid "The group %1$s has been removed from the appointment"
+#~ msgstr "已自約會移除 %1$s 群組"
+
+#~ msgid "Reserve the resource %1$s for the appointment"
+#~ msgstr "為約會保留 %1$s 資源"
+
+#~ msgid "The resource %1$s has been reserved for the appointment"
+#~ msgstr "資源 %1$s 已被保留用來於約會當中"
+
+#~ msgid "Remove the resource %1$s from the appointment"
+#~ msgstr "自約會移除 %1$s 資源"
+
+#~ msgid "The resource %1$s is no longer reserved for the appointment"
+#~ msgstr "已不再為約會保留資源 %1$s"
+
+#~ msgid "The uwa widget with the id %1$s could not be found"
+#~ msgstr "找不到 id 為 %1$s 的 uwa 小工具"
+
+#~ msgid ""
+#~ "The widget with the id %1$s is protected and only positional information "
+#~ "can be updated"
+#~ msgstr "ID 為 %1$s 的小工具受到保護，只能更新其位置資訊"
+
+#~ msgid "The string cannot be parsed to a valid URL."
+#~ msgstr "字串無法剖析為網址。"
+
+#~ msgid "enabled"
+#~ msgstr "已啟用"
+
+#~ msgid "includePublic"
+#~ msgstr "includePublic"
+
+#~ msgid "includeShared"
+#~ msgstr "includeShared"
+
+#~ msgid "includeUnsubscribed"
+#~ msgstr "includeUnsubscribed"
+
+#~ msgid "includeTrash"
+#~ msgstr "includeTrash"
+
+#~ msgid "includeAllVersions"
+#~ msgstr "includeAllVersions"
+
+#~ msgid "Could not send stanza to resource. Resource was offline: %1$s"
+#~ msgstr "無法傳送 stanza 給資源。資源已離線: %1$s"
+
+#~ msgid "Unknown channel %1$s"
+#~ msgstr "未知頻道 %1$s"
+
+#~ msgid "Obligatory key \"%1$s\" is missing from the Stanza"
+#~ msgstr "Stanza 欠缺必要的「%1$s」鍵"
+
+#~ msgid "Malformed IQ Data"
+#~ msgstr "畸形的 IQ 資料"
+
+#~ msgid "Malformed IQ Element: \"%1$s\""
+#~ msgstr "畸形 IQ 元素：「%1$s」"
+
+#~ msgid ""
+#~ "No appropriate channel found for recipient %1$s with payload namespace "
+#~ "%2$s"
+#~ msgstr "沒有適合收件者「%1$s」使用負載命名空間「%2$s」的頻道"
+
+#~ msgid "The following needed service is missing: \"%1$s\""
+#~ msgstr "缺少下列必須服務:「%1$s」"
+
+#~ msgid "Unexpected error: %1$s"
+#~ msgstr "意外錯誤: %1$s"
+
+#~ msgid "Invalid ID. Resource identifier is missing."
+#~ msgstr "無效 ID。缺少資源 ID。"
+
+#~ msgid ""
+#~ "Your mail transport for  %2$s was disabled due to invalid credentials. "
+#~ "Please edit the account and enter correct credentials to enable it again"
+#~ msgstr ""
+#~ "因為帳號密碼無效，您 %2$s 帳號的郵件傳輸功能已被停用。請編輯帳號並輸入正確"
+#~ "的帳號密碼以再次啟用"
 
 #~ msgid "Week"
 #~ msgstr "週"

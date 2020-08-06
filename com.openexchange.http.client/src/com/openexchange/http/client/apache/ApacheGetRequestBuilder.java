@@ -49,20 +49,20 @@
 
 package com.openexchange.http.client.apache;
 
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import com.openexchange.http.client.builder.HTTPGetRequestBuilder;
 
 public class ApacheGetRequestBuilder extends CommonApacheHTTPRequest<HTTPGetRequestBuilder> implements HTTPGetRequestBuilder {
 
-	
+
 	public ApacheGetRequestBuilder(ApacheClientRequestBuilder coreBuilder) {
 		super(coreBuilder);
 	}
 
 	@Override
-    protected HttpMethodBase createMethod(String site) {
-		return new GetMethod(site);
+    protected HttpRequestBase createMethod(String site) {
+		return new HttpGet(site);
 	}
 
 }

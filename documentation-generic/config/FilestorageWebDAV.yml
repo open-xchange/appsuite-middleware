@@ -1,0 +1,59 @@
+feature_name: Filestore WebDAV
+feature_description: |
+  These properties configure file storages based on WebDAV.
+properties:
+    - key: com.openexchange.capability.filestorage_webdav
+      description: |
+        Allows the user to integrate a WebDAV resource as filestorage.
+      defaultValue:  false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage.properties
+      packageName: open-xchange-file-storage-webdav 
+      tags: ["WebDAV"]
+    - key: com.openexchange.capability.filestorage_owncloud
+      description: |
+        Allows the user to integrate an OwnCloud account as filestorage.
+      defaultValue:  false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage.properties
+      packageName: open-xchange-file-storage-webdav 
+      tags: ["WebDAV", "OwnCloud"]
+    - key: com.openexchange.capability.filestorage_nextcloud
+      description: |
+        Allows the user to integrate an Nextcloud account as filestorage.
+      defaultValue:  false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage.properties
+      packageName: open-xchange-file-storage-webdav 
+      tags: ["WebDAV", "Nextcloud"]
+    - key: com.openexchange.file.storage.webdav.blacklistedHosts
+      description: |
+        Defines hosts that are blacklisted which means that they are not allowed to be accessed.
+      defaultValue: 127.0.0.1-127.255.255.255,localhost
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage.properties
+      packageName: open-xchange-file-storage-webdav 
+      tags: ["WebDAV", "Owncloud", "Nextcloud", "Black List"]
+    - key: com.openexchange.file.storage.webdav.allowedPorts
+      description: |
+        Defines a list of ports which are allowed to be accessed. An empty list means that all ports are allowed.
+      defaultValue:
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage.properties
+      packageName: open-xchange-file-storage-webdav 
+      tags: ["WebDAV", "Owncloud", "Nextcloud"]

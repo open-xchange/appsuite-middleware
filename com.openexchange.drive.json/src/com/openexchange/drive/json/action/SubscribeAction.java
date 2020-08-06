@@ -70,7 +70,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SubscribeAction extends AbstractDriveAction {
+public class SubscribeAction extends AbstractDriveWriteAction {
 
     @Override
     protected boolean requiresRootFolderID() {

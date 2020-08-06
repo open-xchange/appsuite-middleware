@@ -100,39 +100,4 @@ public abstract class AbstractArchiveMailAction extends AbstractMailAction {
      */
     protected abstract AJAXRequestResult performArchive(MailRequest req) throws OXException, JSONException;
 
-    /**
-     * A simple wrapper class for archive actions.
-     */
-    public static class ArchiveDataWrapper {
-
-        private final String id;
-        private final boolean created;
-
-        /**
-         * Initializes a new {@link ArchiveDataWrapper}.
-         */
-        public ArchiveDataWrapper(String id, boolean created) {
-            this.id = id;
-            this.created = created;
-        }
-
-        /**
-         * Gets the identifier of the (sub-)archive folder
-         *
-         * @return The identifier
-         */
-        public String getId() {
-            return id;
-        }
-
-        /**
-         * Signals whether that folder has been created or not
-         *
-         * @return <code>true</code> if created; otherwise <code>false</code>
-         */
-        public boolean isCreated() {
-            return created;
-        }
-    }
-
 }

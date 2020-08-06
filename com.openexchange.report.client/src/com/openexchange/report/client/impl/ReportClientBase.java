@@ -68,6 +68,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.admin.console.AbstractJMXTools;
@@ -856,6 +857,9 @@ public class ReportClientBase extends AbstractJMXTools {
                         System.out.println("  \"" + string + "\" : \"" + data.get(string) + "\"" + (endReached ? "" : ","));
                     } else if (data.get(string) instanceof Boolean) {
                         System.out.println("  \"" + string + "\" : " + data.get(string) + (endReached ? "" : ","));
+                    } else if (data.get(string) instanceof JSONArray) {
+                        JSONArray array = (JSONArray) data.get(string);
+                        System.out.println("  \"" + string + "\" : " + array.toString(2, 1) + (endReached ? "" : ","));
                     } else if (string.equals("macdetail") || string.equals("oxaas")) {
                         ReportPrinting.printStoredReportContentToConsole((String) report.get("storageFolderPath"), (String) report.get("uuid"));
                         System.out.println((endReached ? "" : ","));

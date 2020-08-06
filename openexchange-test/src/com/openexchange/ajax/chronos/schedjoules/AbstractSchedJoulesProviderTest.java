@@ -162,7 +162,6 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
 
         v = new JSONObject();
         v.put("value", "false");
-        extendedProperties.put(CalendarFolderExtendedProperty.USED_FOR_SYNC.getFieldName(), v);
         extendedProperties.put(CalendarFolderExtendedProperty.COLOR.getFieldName(), new JSONObject());
         extendedProperties.put(CalendarFolderExtendedProperty.DESCRIPTION.getFieldName(), new JSONObject());
         extendedProperties.put(CalendarFolderExtendedProperty.LAST_UPDATE.getFieldName(), new JSONObject());

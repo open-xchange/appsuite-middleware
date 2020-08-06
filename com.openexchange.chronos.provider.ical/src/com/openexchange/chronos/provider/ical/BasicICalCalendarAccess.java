@@ -77,7 +77,6 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -97,7 +96,6 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess implemen
     /**
      * Initializes a new {@link BasicICalCalendarAccess}.
      *
-     * @param services The {@link ServiceLookup} instance
      * @param session The calendar session
      * @param account The calendar account
      * @param parameters The calendar parameters
@@ -115,7 +113,6 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess implemen
 
         CalendarSettings settings = getCalendarSettings(getExtendedProperties());
         settings.setSubscribed(internalConfig.optBoolean("subscribed", true));
-
         return settings;
     }
 

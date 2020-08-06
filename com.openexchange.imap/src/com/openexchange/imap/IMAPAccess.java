@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.sun.mail.iap.ResponseCode.AUTHENTICATIONFAILED;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -88,6 +89,7 @@ import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.config.MailAccountIMAPProperties;
 import com.openexchange.imap.converters.IMAPFolderConverter;
+import com.openexchange.imap.debug.IMAPDebugLoggerGenerator;
 import com.openexchange.imap.entity2acl.Entity2ACLInit;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.Services;
@@ -134,6 +136,7 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.JavaIMAPStore;
 import com.sun.mail.imap.Rights;
+import com.sun.mail.util.PropUtil;
 
 /**
  * {@link IMAPAccess} - Establishes an IMAP access and provides access to storages.
@@ -498,7 +501,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         /*
          * Check for root folder
          */
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+        if (MailFolder.ROOT_FOLDER_ID.equals(fullname)) {
             return 0;
         }
         try {
@@ -568,15 +571,22 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             javax.mail.Session imapSession;
             {
-                boolean forceSecure = getIMAPConfig().isRequireTls();
+                boolean forceSecure = config.isRequireTls();
                 imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class, forceSecure, session.getUserId(), session.getContextId());
             }
             /*
              * Check if debug should be enabled
              */
+            String server = IDNA.toASCII(config.getServer());
+            int port = config.getPort();
             if (Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.err);
+            } else if (PropUtil.getBooleanProperty(imapSession.getProperties(), "mail.imap.debugLog.enabled", false)) {
+                /*
+                 * Debug logging is enabled for this IMAP session
+                 */
+                establishDebugLogger(imapSession, server, port);
             }
             IMAPStore imapStore = null;
             try {
@@ -585,7 +595,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Get connected store
                  */
-                imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), login, tmpPass, -1, preAuthStartTlsCap, true);
+                imapStore = newConnectedImapStore(imapSession, server, port, login, tmpPass, -1, preAuthStartTlsCap, true);
                 /*
                  * Add warning if non-secure
                  */
@@ -707,7 +717,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Remove proxy settings for whitelisted hosts
              */
             HostList nonProxyHosts = MailProxyConfig.getInstance().getImapNonProxyHostList();
-            if (nonProxyHosts.contains(getIMAPConfig().getImapServerAddress())) {
+            if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(config.getImapServerAddress())) {
                 imapProps.remove("mail.imap.proxy.host");
                 imapProps.remove("mail.imap.proxy.port");
                 imapProps.remove("mail.imaps.proxy.host");
@@ -719,16 +729,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             {
                 final Class<? extends IMAPStore> clazz = useIMAPStoreCache() ? IMAPStoreCache.getInstance().getStoreClass() : JavaIMAPStore.class;
-                boolean forceSecure = accountId > 0 && getIMAPConfig().isRequireTls();
+                boolean forceSecure = accountId > 0 && config.isRequireTls();
                 imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, forceSecure, session.getUserId(), session.getContextId());
-            }
-            /*
-             * Check if debug should be enabled
-             */
-            final boolean certainUser = false;
-            if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
-                imapSession.setDebug(true);
-                imapSession.setDebugOut(System.out);
             }
             /*
              * Check if client IP address should be propagated
@@ -748,11 +750,24 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             this.login = isProxyAuth ? proxyUser : user;
             this.password = tmpPassword;
             /*
+             * Check if debug should be enabled
+             */
+            final boolean certainUser = false;
+            if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
+                imapSession.setDebug(true);
+                imapSession.setDebugOut(System.out);
+            } else if (PropUtil.getBooleanProperty(imapSession.getProperties(), "mail.imap.debugLog.enabled", false)) {
+                /*
+                 * Debug logging is enabled for this IMAP session
+                 */
+                establishDebugLogger(imapSession, server, port);
+            }
+            /*
              * Check for already failed authentication
              */
             checkAuthFailed(this.login, this.password, imapConfProps);
             this.clientIp = clientIp;
-            int maxCount = getIMAPConfig().getIMAPProperties().getMaxNumConnection();
+            int maxCount = config.getIMAPProperties().getMaxNumConnection();
             try {
                 imapStore = connectIMAPStore(maxCount);
             } catch (AuthenticationFailedException e) {
@@ -865,6 +880,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, config, session);
+        }
+    }
+
+    private void establishDebugLogger(javax.mail.Session imapSession, String server, int port) {
+        String serverAndPort = server + ':' + port;
+        try {
+            IMAPDebugLoggerGenerator.getInstance().establishLoggerFor(imapSession, serverAndPort, session.getUserId(), session.getContextId());
+        } catch (Exception e) {
+            LOG.warn("Failed to establish IMAP debug logging for server {} with user {} in context {}", serverAndPort, I(session.getUserId()), I(session.getContextId()), e);
         }
     }
 
@@ -1316,6 +1340,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         if (config.getIMAPProperties().isAuditLogEnabled()) {
             imapProps.put("mail.imap.auditLog.enabled", "true");
+        }
+        /*
+         * Enable/disable debug log
+         */
+        if (config.getIMAPProperties().isDebugLogEnabled()) {
+            imapProps.put("mail.imap.debugLog.enabled", "true");
         }
         /*
          * Greeting listener (for primary IMAP)

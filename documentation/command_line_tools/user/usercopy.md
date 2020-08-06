@@ -2,6 +2,7 @@
 title: usercopy
 icon: far fa-circle
 tags: Administration, Command Line tools, User
+package: open-xchange-admin
 ---
 
 # NAME
@@ -15,6 +16,21 @@ usercopy - copies a user to another context
 # DESCRIPTION
 
 This command line tool copies a user from one context to another.
+
+The following informations will be copied:
+
+* Contacts
+* Calender entries
+* Folders
+* Infostore documents
+* Mail accounts
+* Messaging accounts
+* OAuth accounts
+* Reminder
+* Subscriptions
+* Tasks
+* UserCounts
+* UserSettings
 
 # OPTIONS
 

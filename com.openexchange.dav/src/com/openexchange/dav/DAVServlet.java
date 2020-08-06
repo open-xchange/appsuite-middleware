@@ -50,18 +50,22 @@
 package com.openexchange.dav;
 
 import java.io.IOException;
+import java.time.Duration;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import com.openexchange.ajax.Client;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContextHolder;
+import com.openexchange.java.util.HttpStatusFamily;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
+import com.openexchange.servlet.Constants;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
@@ -74,6 +78,8 @@ import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.tools.webdav.WebDAVRequestContext;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.WebdavMethod;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 
 /**
  * {@link DAVServlet}
@@ -86,6 +92,9 @@ public class DAVServlet extends OXServlet {
     private static final long serialVersionUID = 9124758398726588039L;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DAVServlet.class);
     private static final LoginCustomizer ALLOW_ASTERISK_LOGIN_CUSTOMIZER = new AllowAsteriskAsSeparatorCustomizer();
+
+    /** The required scope to access CalDAV/CardDAV related endpoints for restricted sessions (authenticated with app-specific passwords) */
+    private static final String RESTRICTED_SCOPE_DAV = "dav";
 
     protected final DAVPerformer performer;
     private final Interface interfaze;
@@ -106,7 +115,9 @@ public class DAVServlet extends OXServlet {
     protected LoginRequest parseLoginRequest(Credentials credentials, HttpServletRequest request) {
         String userAgent = request.getHeader("user-agent");
         DAVUserAgent davUserAgent = DAVUserAgent.parse(userAgent);
-        LoginRequest loginRequest = new LoginRequestImpl(request, credentials.getLogin(), credentials.getPassword(), getInterface(davUserAgent), davUserAgent.getReadableName(), null, userAgent);
+        Interface interfaze = getInterface(davUserAgent);
+        Client client = Interface.CARDDAV.equals(interfaze) ? Client.CARDDAV : Client.CALDAV;
+        LoginRequest loginRequest = new LoginRequestImpl(request, credentials.getLogin(), credentials.getPassword(), interfaze, client.getClientId(), null, userAgent);
         return ALLOW_ASTERISK_LOGIN_CUSTOMIZER.modifyLogin(loginRequest);
     }
 
@@ -149,6 +160,7 @@ public class DAVServlet extends OXServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        long start = System.currentTimeMillis();
         /*
          * ensure to have a HTTP session when using cookies
          */
@@ -165,6 +177,7 @@ public class DAVServlet extends OXServlet {
         incrementRequests();
         RequestContextHolder.set(new WebDAVRequestContext(request, session));
         LogProperties.putSessionProperties(session);
+        WebdavMethod method = null;
         try {
             /*
              * wrap into counting request to check rate limit
@@ -175,7 +188,7 @@ public class DAVServlet extends OXServlet {
                 // Mark optional HTTP session as rate-limited
                 HttpSession optionalHttpSession = request.getSession(false);
                 if (optionalHttpSession != null) {
-                    optionalHttpSession.setAttribute(com.openexchange.servlet.Constants.HTTP_SESSION_ATTR_RATE_LIMITED, Boolean.TRUE);
+                    optionalHttpSession.setAttribute(Constants.HTTP_SESSION_ATTR_RATE_LIMITED, Boolean.TRUE);
                 }
                 // Send error response
                 e.send(response);
@@ -184,7 +197,6 @@ public class DAVServlet extends OXServlet {
             /*
              * get targeted action
              */
-            WebdavMethod method;
             try {
                 method = WebdavMethod.valueOf(WebdavMethod.class, request.getMethod());
             } catch (IllegalArgumentException | NullPointerException e) {
@@ -209,7 +221,49 @@ public class DAVServlet extends OXServlet {
             LogProperties.removeSessionProperties();
             RequestContextHolder.reset();
             decrementRequests();
+            recordMetric(Duration.ofMillis(System.currentTimeMillis() - start), method == null ? "INVALID": method.name(), response.getStatus());
         }
+    }
+
+    /**
+     * Records the duration
+     *
+     * @param duration The duration to record
+     * @param method The used method
+     * @param statusCode The response status
+     */
+    private void recordMetric(Duration duration, String method, int statusCode) {
+        String res = performer.getURLPrefix();
+        if(res.startsWith("/")) {
+            res = res.substring(1);
+        }
+        if(res.endsWith("/")) {
+            res = res.substring(0, res.length() - 1);
+        }
+        String status = HttpStatusFamily.SUCCESSFUL.equals(HttpStatusFamily.of(statusCode)) ? "OK" : String.valueOf(statusCode);
+
+        // @formatter:off
+        Timer.builder("appsuite.webdav.requests")
+             .description("Records the timing of webdav requests")
+             .serviceLevelObjectives(
+                 Duration.ofMillis(50),
+                 Duration.ofMillis(100),
+                 Duration.ofMillis(150),
+                 Duration.ofMillis(200),
+                 Duration.ofMillis(250),
+                 Duration.ofMillis(300),
+                 Duration.ofMillis(400),
+                 Duration.ofMillis(500),
+                 Duration.ofMillis(750),
+                 Duration.ofSeconds(1),
+                 Duration.ofSeconds(2),
+                 Duration.ofSeconds(5),
+                 Duration.ofSeconds(10),
+                 Duration.ofSeconds(30),
+                 Duration.ofMinutes(1))
+             .tags("interface", interfaze.name(), "resource", res, "method", method, "status", status)
+             .register(Metrics.globalRegistry).record(duration);
+        // @formatter:on
     }
 
     private void doIt(HttpServletRequest request, HttpServletResponse response, WebdavMethod method, Session session) {
@@ -217,11 +271,14 @@ public class DAVServlet extends OXServlet {
         try {
             serverSession = ServerSessionAdapter.valueOf(session);
         } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
-        if (false == checkPermission(request, serverSession)) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        if (false == checkPermission(request, method, serverSession)) {
+            addUnauthorizedHeader(response);
+            removeSession(session.getSessionID());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
         performer.doIt(request, response, method, serverSession);
@@ -233,17 +290,30 @@ public class DAVServlet extends OXServlet {
      * Override if applicable.
      *
      * @param request the HTTP request
+     * @param method The derived WebDAV method for the request
      * @param session The session to check permissions for
      * @return <code>true</code> if permissions are sufficient, <code>false</code>, otherwise
      */
-    protected boolean checkPermission(HttpServletRequest request, ServerSession session) {
+    protected boolean checkPermission(HttpServletRequest request, WebdavMethod method, @SuppressWarnings("unused") ServerSession session) {
+        /*
+         * check that either "caldav" or "carddav" scope is available when authenticated through OAuth
+         */
         OAuthAccess oAuthAccess = (OAuthAccess) request.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
-        if (null == oAuthAccess) {
-            // basic authentication took place
-            return true;
+        if (null != oAuthAccess) {
+            Scope scope = oAuthAccess.getScope();
+            return scope.has(DAVOAuthScope.CALDAV.getScope()) || scope.has(DAVOAuthScope.CARDDAV.getScope());
         }
-        Scope scope = oAuthAccess.getScope();
-        return scope.has(DAVOAuthScope.CALDAV.getScope()) || scope.has(DAVOAuthScope.CARDDAV.getScope());
+        /*
+         * check that the general "dav" scope is available when session is restricted (authenticated through app-specific password)
+         */
+        String[] restrictedScopes = (String[]) session.getParameter(Session.PARAM_RESTRICTED);
+        if (null != restrictedScopes) {
+            return com.openexchange.tools.arrays.Arrays.contains(restrictedScopes, RESTRICTED_SCOPE_DAV);
+        }
+        /*
+         * assume regularly authenticated *DAV session, otherwise
+         */
+        return true;
     }
 
 }

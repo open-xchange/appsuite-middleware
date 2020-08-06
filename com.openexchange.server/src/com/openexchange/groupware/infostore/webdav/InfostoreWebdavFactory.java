@@ -59,6 +59,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBProviderUser;
 import com.openexchange.exception.OXException;
@@ -74,6 +77,8 @@ import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.session.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -95,6 +100,12 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 public class InfostoreWebdavFactory extends AbstractWebdavFactory implements BulkLoader {
 
     private static final Protocol PROTOCOL = new Protocol();
+
+    /**
+     * Defines if WebDAV resources should be moved to trash or deleted directly
+     */
+    private static final Property TRASH_USE_FOR_WEBDAV = DefaultProperty.valueOf("com.openexchange.infostore.trash.useForWebdav", Boolean.TRUE);
+
     private WebdavFolderAliases aliases;
 
 
@@ -110,6 +121,13 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
 
         public final TIntObjectMap<FolderCollection> collectionsById = new TIntObjectHashMap<FolderCollection>();
         public final TIntObjectMap<DocumentMetadataResource> resourcesById = new TIntObjectHashMap<DocumentMetadataResource>();
+
+        /**
+         * Initializes a new {@link State}.
+         */
+        public State() {
+            super();
+        }
 
         public void addResource(final OXWebdavResource res) {
             if (res.isCollection()) {
@@ -280,8 +298,6 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         }
     }
 
-
-
     private Set<TransactionAware> services(){
         return this.services;
     }
@@ -323,7 +339,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         }
     }
 
-    private FolderCollection loadCollection(final WebdavPath url, final int id, final State s) throws WebdavProtocolException {
+    private FolderCollection loadCollection(final WebdavPath url, final int id, final State s) {
         final FolderCollection collection = new FolderCollection(url, this);
         collection.setId(id);
         collection.setExists(true);
@@ -452,7 +468,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         return aliases;
     }
 
-    public Collection<? extends OXWebdavResource> getCollections(final List<Integer> subfolderIds) throws WebdavProtocolException {
+    public Collection<? extends OXWebdavResource> getCollections(final List<Integer> subfolderIds) {
         final State s = state.get();
         final Set<Integer> toLoad = new HashSet<Integer>(subfolderIds);
         final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>(subfolderIds.size());
@@ -467,20 +483,13 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         }
 
         for(final int id : toLoad) {
-            try {
-                retVal.add(loadCollection(null, id, s)); // FIXME 101 SELECT PROBLEM
-            } catch (WebdavProtocolException x) {
-                //System.out.println(x.getStatus());
-                if (x.getStatus() != HttpServletResponse.SC_FORBIDDEN) {
-                    throw x;
-                }
-            }
+            retVal.add(loadCollection(null, id, s)); // FIXME 101 SELECT PROBLEM
         }
 
         return retVal;
     }
 
-    public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException, IllegalAccessException {
+    public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException {
         if (folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
             return new ArrayList<OXWebdavResource>();
         }
@@ -593,6 +602,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         s.remove(resource);
     }
 
+    @Override
     public ServerSession getSession() throws OXException {
         try {
             return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject());
@@ -601,4 +611,15 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         }
     }
 
+    /**
+    * Returns if the trash folder should be considered when using WebDAV
+    *
+    * @param session The session
+    * @return True, if the trash folder for WeDAV should be used, false otherwise
+    * @throws OXException
+    */
+    public boolean isTrashEnabled(Session session) throws OXException {
+        LeanConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(LeanConfigurationService.class, true);
+        return configurationService.getBooleanProperty(session.getUserId(), session.getContextId(), TRASH_USE_FOR_WEBDAV);
+    }
 }

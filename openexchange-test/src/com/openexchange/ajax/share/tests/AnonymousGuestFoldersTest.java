@@ -77,11 +77,11 @@ import com.openexchange.share.ShareTarget;
  * @since v7.10.1
  */
 public class AnonymousGuestFoldersTest extends ShareTest {
-    
+
     private GuestClient guestClient;
     private FolderObject share;
     private FolderObject root;
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -97,7 +97,7 @@ public class AnonymousGuestFoldersTest extends ShareTest {
         updateFolder(EnumAPI.OX_NEW, root);
         FolderObject invisible = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, root.getObjectID(), "invisible" + randomUID());
         share = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, invisible.getObjectID(), "share" + randomUID());
-        
+
         /*
          * Get a link for the new drive subfolder
          */
@@ -114,19 +114,19 @@ public class AnonymousGuestFoldersTest extends ShareTest {
         guestClient.checkFolderAccessible(Integer.toString(share.getObjectID()), expectedPermission);
 
     }
-    
+
     /**
      * Checks if the full name of the shared folder is set to the root folder id
      */
     @Test
     public void testGetSharedSubfolder_correctParent() throws Exception {
-                
+
         final GetRequest request = new GetRequest(EnumAPI.OX_NEW, share.getObjectID(), true);
         final GetResponse response = guestClient.execute(request);
         FolderObject folder = response.getFolder();
-        assertEquals("Shared folder parent is not public folder id", folder.getFullName(), String.valueOf(root.getParentFolderID()));
+        assertEquals("Shared folder parent is not public folder id", folder.getParentFolderID(), root.getParentFolderID());
     }
-    
+
     /**
      * Checks if a list command on the root folder hides the invisible folder and only shows
      * the shared folder. The parent of the shared folder has also be adjusted to to the root folder

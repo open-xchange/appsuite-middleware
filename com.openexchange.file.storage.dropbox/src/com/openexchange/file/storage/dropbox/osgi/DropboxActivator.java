@@ -55,6 +55,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.dropbox.DropboxServices;
+import com.openexchange.file.storage.dropbox.http.DropboxHttpClientConfiguration;
 import com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -62,6 +63,8 @@ import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.version.VersionService;
@@ -84,12 +87,13 @@ public final class DropboxActivator extends AbstractCloudStorageActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, 
                                 TimerService.class, OAuthService.class, OAuthAccessRegistryService.class, SSLConfigurationService.class, ConfigViewFactory.class,
-                                VersionService.class };
+                                HttpClientService.class, VersionService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         DropboxServices.setServices(this);
+        registerService(SpecificHttpClientConfigProvider.class, new DropboxHttpClientConfiguration(getService(VersionService.class)));
         super.startBundle();
     }
 

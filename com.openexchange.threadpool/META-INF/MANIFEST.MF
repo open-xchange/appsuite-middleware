@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Thread Pool Bundle
 Bundle-SymbolicName: com.openexchange.threadpool
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.eaio.util.text,
@@ -13,13 +13,19 @@ Import-Package: com.eaio.util.text,
  com.openexchange.management,
  com.openexchange.management.osgi,
  com.openexchange.marker,
+ com.openexchange.metrics.micrometer,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,
  com.openexchange.startup,
+ io.micrometer.core.instrument,
+ io.micrometer.core.instrument.binder.jvm,
+ io.micrometer.core.instrument.composite,
+ io.micrometer.core.instrument.config,
  javax.management,
+ org.apache.commons.collections4,
  org.apache.commons.logging,
  org.cliffc.high_scale_lib,
  org.osgi.framework,

@@ -2,12 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Messaging RSS Bundle
 Bundle-SymbolicName: com.openexchange.messaging.rss
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Activator: com.openexchange.messaging.rss.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.config, 
- com.openexchange.datatypes.genericonf,
+Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.html,
@@ -18,10 +17,10 @@ Import-Package: com.openexchange.config,
  com.openexchange.messaging,
  com.openexchange.messaging.generic,
  com.openexchange.messaging.generic.internet,
- com.openexchange.net,
  com.openexchange.net.ssl,
  com.openexchange.osgi,
  com.openexchange.proxy,
+ com.openexchange.rss.utils,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.ssl,
@@ -48,9 +47,6 @@ Import-Package: com.openexchange.config,
  javax.xml.transform.sax,
  javax.xml.transform.stream,
  javax.xml.xpath,
- org.apache.commons.httpclient,
- org.apache.commons.httpclient.methods,
- org.apache.commons.httpclient.params,
  org.apache.commons.logging,
  org.apache.xerces.impl,
  org.apache.xerces.jaxp,

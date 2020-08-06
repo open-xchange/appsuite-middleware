@@ -1,42 +1,18 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Copyright (c) 2013, 2019 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, 2019 Jason Mehrens. All rights reserved.
  *
- * Copyright (c) 2013-2017 Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2013-2017 Jason Mehrens. All rights reserved.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0, which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
  *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common Development
- * and Distribution License("CDDL") (collectively, the "License").  You
- * may not use this file except in compliance with the License.  You can
- * obtain a copy of the License at
- * https://oss.oracle.com/licenses/CDDL+GPL-1.1
- * or LICENSE.txt.  See the License for the specific
- * language governing permissions and limitations under the License.
+ * This Source Code may also be made available under the following Secondary
+ * Licenses when the conditions for such availability set forth in the
+ * Eclipse Public License v. 2.0 are satisfied: GNU General Public License,
+ * version 2 with the GNU Classpath Exception, which is available at
+ * https://www.gnu.org/software/classpath/license.html.
  *
- * When distributing the software, include this License Header Notice in each
- * file and include the License file at LICENSE.txt.
- *
- * GPL Classpath Exception:
- * Oracle designates this particular file as subject to the "Classpath"
- * exception as provided by Oracle in the GPL Version 2 section of the License
- * file that accompanied this code.
- *
- * Modifications:
- * If applicable, add the following below the License Header, with the fields
- * enclosed by brackets [] replaced by your own identifying information:
- * "Portions Copyright [year] [name of copyright owner]"
- *
- * Contributor(s):
- * If you wish your version of this file to be governed by only the CDDL or
- * only the GPL Version 2, indicate your decision by adding "[Contributor]
- * elects to include this software in this distribution under the [CDDL or GPL
- * Version 2] license."  If you don't indicate a single choice of license, a
- * recipient has the option to distribute your version of this file under
- * either the CDDL, the GPL Version 2 or to extend the choice of license to
- * its licensees as provided above.  However, if you add GPL Version 2 code
- * and therefore, elected the GPL Version 2 license, then the option applies
- * only if the new code is made subject to such option by the copyright
- * holder.
+ * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
 package com.sun.mail.util.logging;
 
@@ -56,33 +32,35 @@ import java.util.logging.LogRecord;
  * delegated to the wrapped formatter.
  *
  * <p>
- * By default each <tt>CollectorFormatter</tt> is initialized using the
+ * By default each <code>CollectorFormatter</code> is initialized using the
  * following LogManager configuration properties where
- * <tt>&lt;formatter-name&gt;</tt> refers to the fully qualified class name or
- * the fully qualified derived class name of the formatter.  If properties are
- * not defined, or contain invalid values, then the specified default values are
- * used.
+ * <code>&lt;formatter-name&gt;</code> refers to the fully qualified class name
+ * or the fully qualified derived class name of the formatter.  If properties
+ * are not defined, or contain invalid values, then the specified default values
+ * are used.
  * <ul>
  * <li>&lt;formatter-name&gt;.comparator name of a
  * {@linkplain java.util.Comparator} class used to choose the collected
- * <tt>LogRecord</tt>. If a comparator is specified then the max
- * <tt>LogRecord</tt> is chosen. If comparator is set to the string literal
+ * <code>LogRecord</code>. If a comparator is specified then the max
+ * <code>LogRecord</code> is chosen. If comparator is set to the string literal
  * null, then the last record is chosen. (defaults to
  * {@linkplain SeverityComparator})
  *
  * <li>&lt;formatter-name&gt;.comparator.reverse a boolean
- * <tt>true</tt> to collect the min <tt>LogRecord</tt> or <tt>false</tt> to
- * collect the max <tt>LogRecord</tt>. (defaults to <tt>false</tt>)
+ * <code>true</code> to collect the min <code>LogRecord</code> or
+ * <code>false</code> to collect the max <code>LogRecord</code>.
+ * (defaults to <code>false</code>)
  *
  * <li>&lt;formatter-name&gt;.format the
  * {@linkplain java.text.MessageFormat MessageFormat} string used to format the
  * collected summary statistics. The arguments are explained in detail in the
  * {@linkplain #getTail(java.util.logging.Handler) getTail} documentation.
- * (defaults to <tt>{0}{1}{2}{4,choice,-1#|0#|0&lt;... {4,number,integer}
- * more}\n</tt>)
+ * (defaults to <code>{0}{1}{2}{4,choice,-1#|0#|0&lt;... {4,number,integer}
+ * more}\n</code>)
  *
- * <li>&lt;formatter-name&gt;.formatter name of a <tt>Formatter</tt> class used
- * to format the collected LogRecord. (defaults to {@linkplain CompactFormatter})
+ * <li>&lt;formatter-name&gt;.formatter name of a <code>Formatter</code> class
+ * used to format the collected LogRecord.
+ * (defaults to {@linkplain CompactFormatter})
  *
  * </ul>
  *
@@ -137,7 +115,7 @@ public class CollectorFormatter extends Formatter {
      * Creates the formatter using the LogManager defaults.
      *
      * @throws SecurityException if a security manager exists and the caller
-     * does not have <tt>LoggingPermission("control")</tt>.
+     * does not have <code>LoggingPermission("control")</code>.
      * @throws UndeclaredThrowableException if there are problems loading from
      * the LogManager.
      */
@@ -153,7 +131,7 @@ public class CollectorFormatter extends Formatter {
      *
      * @param format the message format or null to use the LogManager default.
      * @throws SecurityException if a security manager exists and the caller
-     * does not have <tt>LoggingPermission("control")</tt>.
+     * does not have <code>LoggingPermission("control")</code>.
      * @throws UndeclaredThrowableException if there are problems loading from
      * the LogManager.
      */
@@ -173,7 +151,7 @@ public class CollectorFormatter extends Formatter {
      * @param c the comparator used to determine which log record to format or
      * null to specify no comparator.
      * @throws SecurityException if a security manager exists and the caller
-     * does not have <tt>LoggingPermission("control")</tt>.
+     * does not have <code>LoggingPermission("control")</code>.
      * @throws UndeclaredThrowableException if there are problems loading from
      * the LogManager.
      */
@@ -218,8 +196,8 @@ public class CollectorFormatter extends Formatter {
     /**
      * Formats the collected LogRecord and summary statistics. The collected
      * results are reset after calling this method. The
-     * {@linkplain java.text.MessageFormat java.text} argument indexes are assigned
-     * to the following properties:
+     * {@linkplain java.text.MessageFormat java.text} argument indexes are
+     * assigned to the following properties:
      *
      * <ol start='0'>
      * <li>{@code head} the
@@ -255,19 +233,19 @@ public class CollectorFormatter extends Formatter {
      * {@linkplain #format consumed} by this formatter. If the count is zero
      * then this is set to the {@linkplain System#currentTimeMillis() current time}.
      * By default this parameter is defined as a number. The format type and
-     * format style rules from the {@linkplain java.text.MessageFormat} should be
-     * used to convert this from milliseconds to a date or time.
+     * format style rules from the {@linkplain java.text.MessageFormat} should
+     * be used to convert this from milliseconds to a date or time.
      * <li>{@code elapsed} the elapsed time in milliseconds between the
      * {@code maxMillis} and {@code minMillis}.
      * <li>{@code startTime} the approximate start time in milliseconds.  By
      * default this parameter is defined as a number. The format type and format
-     * style rules from the {@linkplain java.text.MessageFormat} should be used to
-     * convert this from milliseconds to a date or time.
+     * style rules from the {@linkplain java.text.MessageFormat} should be used
+     * to convert this from milliseconds to a date or time.
      * <li>{@code currentTime} the
      * {@linkplain System#currentTimeMillis() current time} in milliseconds.  By
      * default this parameter is defined as a number. The format type and format
-     * style rules from the {@linkplain java.text.MessageFormat} should be used to
-     * convert this from milliseconds to a date or time.
+     * style rules from the {@linkplain java.text.MessageFormat} should be used
+     * to convert this from milliseconds to a date or time.
      * <li>{@code uptime} the elapsed time in milliseconds between the
      * {@code currentTime} and {@code startTime}.
      * <li>{@code generation} the number times this method produced output with
@@ -339,7 +317,7 @@ public class CollectorFormatter extends Formatter {
         String result;
         try {
             result = formatRecord((Handler) null, false);
-        } catch (RuntimeException ignore) {
+        } catch (final RuntimeException ignore) {
             result = super.toString();
         }
         return result;
@@ -558,9 +536,9 @@ public class CollectorFormatter extends Formatter {
             if (!"null".equalsIgnoreCase(v)) {
                 try {
                     f = LogManagerProperties.newFormatter(v);
-                } catch (RuntimeException re) {
+                } catch (final RuntimeException re) {
                     throw re;
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw new UndeclaredThrowableException(e);
                 }
             } else {
@@ -615,9 +593,9 @@ public class CollectorFormatter extends Formatter {
                     c = Comparator.class.cast(SeverityComparator.getInstance());
                 }
             }
-        } catch (RuntimeException re) {
+        } catch (final RuntimeException re) {
             throw re; //Avoid catch all.
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new UndeclaredThrowableException(e);
         }
         return c;

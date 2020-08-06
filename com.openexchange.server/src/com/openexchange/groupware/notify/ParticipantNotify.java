@@ -868,7 +868,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 oldParticipants = oldObj.getParticipants();
             }
 
-            sortUserParticipants(oldUsers, newObj.getUsers(), participantSet, isUpdate, receivers, session, all);
+            sortUserParticipants(oldUsers, newObj.getUsers(), participantSet, isUpdate, receivers, session, all, state);
             sortExternalParticipantsAndResources(oldParticipants, newObj.getParticipants(), participantSet, resourceSet, isUpdate, receivers, session, all, newObj.getOrganizer(), state);
         }
         // Add task owner to receivers list to make him receive mails about changed participants states.
@@ -1089,8 +1089,12 @@ public class ParticipantNotify implements TaskEventInterface2 {
     }
 
     private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final String organizer, final State state) {
-        sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
-        sortOldExternalParticipantsAndResources(oldParticipants, participantSet, resourceSet, isUpdate, receivers, all, session, newParticipants, organizer, state);
+        if (state.getType().equals(Type.DELETED)) {
+            sortOldExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, isUpdate, receivers, all, session, new Participant[0], organizer, state);
+        } else {
+            sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
+            sortOldExternalParticipantsAndResources(oldParticipants, participantSet, resourceSet, isUpdate, receivers, all, session, newParticipants, organizer, state);
+        }
     }
 
     private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants, final String organizer, final State state) {
@@ -1419,7 +1423,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         return null;
     }
 
-    private void sortUserParticipants(final UserParticipant[] oldParticipants, final UserParticipant[] newParticipants, final Set<EmailableParticipant> participantSet, final boolean forUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all) {
+    private void sortUserParticipants(final UserParticipant[] oldParticipants, final UserParticipant[] newParticipants, final Set<EmailableParticipant> participantSet, final boolean forUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, State state) {
         if (newParticipants == null) {
             return;
         }
@@ -1427,7 +1431,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         for (final UserParticipant participant : newParticipants) {
             final EmailableParticipant p = getUserParticipant(participant, ctx);
             if (p != null) {
-                p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
+                p.state = state.getType().equals(State.Type.DELETED) ? EmailableParticipant.STATE_REMOVED : contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
                 addSingleParticipant(p, participantSet, null, receivers, all, false);
             }
         }

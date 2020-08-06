@@ -51,15 +51,16 @@ package com.openexchange.ajax.user;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.ajax.user.me.MeTest;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Test suite for all user interface tests.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @RunWith(ParallelSuite.class)
-@SuiteClasses({ GetTest.class, AllTest.class, ListTest.class, Bug13911Test.class, Bug17539Test.class, Bug26354Test.class, Bug26431Test.class })
+@SuiteClasses({ GetTest.class, AllTest.class, ListTest.class, Bug13911Test.class, Bug17539Test.class, Bug26354Test.class, Bug26431Test.class, MeTest.class })
 public final class UserAJAXSuite {
 
     private UserAJAXSuite() {

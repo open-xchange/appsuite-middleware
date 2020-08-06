@@ -13,7 +13,7 @@
           application/json:
             schema:
               type: object
-              title: deleteDataExportTaskReponse
+              title: deleteDataExportTaskResponse
               properties:
                 success:
                   type: boolean

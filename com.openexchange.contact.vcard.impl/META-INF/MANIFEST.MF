@@ -1,13 +1,17 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange default implementation of contact to/from vCard conversion
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .,
- lib/ez-vcard-0.9.10.jar
-Import-Package: com.google.common.annotations,
+ lib/ez-vcard-0.10.6.jar
+Import-Package: com.github.mangstadt.vinnie,
+ com.github.mangstadt.vinnie.codec,
+ com.github.mangstadt.vinnie.io,
+ com.github.mangstadt.vinnie.validate,
+ com.google.common.annotations,
  com.google.common.base,
  com.google.common.collect,
  com.google.common.io,

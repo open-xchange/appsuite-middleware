@@ -65,8 +65,12 @@ import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.openexchange.exception.OXException;
+import com.openexchange.nimbusds.oauth2.sdk.http.send.HTTPSender;
 import com.openexchange.oidc.OIDCBackend;
+import com.openexchange.oidc.http.outbound.OIDCHttpClientConfig;
+import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.session.Session;
 import com.openexchange.session.oauth.OAuthTokens;
 import com.openexchange.session.oauth.TokenRefreshResponse;
@@ -78,7 +82,6 @@ public class OIDCTokenRefresher implements TokenRefresher {
     private static final Logger LOG = LoggerFactory.getLogger(OIDCTokenRefresher.class);
 
     private final OIDCBackend backend;
-
     private final Session session;
 
     public OIDCTokenRefresher(OIDCBackend backend, Session session) {
@@ -105,7 +108,13 @@ public class OIDCTokenRefresher implements TokenRefresher {
 
         try {
             HTTPRequest httpRequest = backend.getHttpRequest(request.toHTTPRequest());
-            TokenResponse response = TokenResponse.parse(httpRequest.send());
+            TokenResponse response = TokenResponse.parse(HTTPSender.send(httpRequest, () -> {
+                HttpClientService httpClientService = Services.getOptionalService(HttpClientService.class);
+                if (httpClientService == null) {
+                    throw new IllegalStateException("Missing service " + HttpClientService.class.getName());
+                }
+                return httpClientService.getHttpClient(OIDCHttpClientConfig.getClientIdOidc());
+            }));
             return validateResponse(request, response);
         } catch (com.nimbusds.oauth2.sdk.ParseException | IOException | OXException e) {
             LOG.info("Unable to refresh access token for user {} in context {}. Session will be invalidated.",

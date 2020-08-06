@@ -63,6 +63,7 @@ public interface WebSocketListener {
      * Invoked when a new session-bound Web Socket gets connected
      *
      * @param socket The connected Web Socket
+     * @throws WebSocketConnectException to abort the client handshake with an HTTP error
      */
     void onWebSocketConnect(WebSocket socket);
 

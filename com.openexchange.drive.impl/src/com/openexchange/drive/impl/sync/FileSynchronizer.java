@@ -98,7 +98,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     private FileStoragePermission folderPermission;
     private Set<String> normalizedDirectoryNames;
 
-    public FileSynchronizer(SyncSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
+    public FileSynchronizer(SyncSession session, VersionMapper<FileVersion> mapper, String path) {
         super(session, mapper);
         this.path = path;
     }
@@ -109,12 +109,16 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
         uploadActions = new ArrayList<UploadFileAction>();
         IntermediateSyncResult<FileVersion> syncResult = super.sync();
         /*
-         * inject upload offsets if needed
+         * inject upload offsets if needed, disable chunked upload if no temporary upload files possible
          */
         if (0 < uploadActions.size()) {
+            boolean noChunks = false == mayCreate() && false == session.getTemp().supported();
             List<FileVersion> versionsToUpload = new ArrayList<FileVersion>(uploadActions.size());
             for (UploadFileAction uploadAction : uploadActions) {
                 versionsToUpload.add(uploadAction.getNewVersion());
+                if (noChunks) {
+                    uploadAction.getParameters().put(DriveAction.PARAMETER_NO_CHUNKS, Boolean.TRUE);
+                }
             }
             List<Long> uploadOffsets = new UploadHelper(session).getUploadOffsets(path, versionsToUpload);
             for (int i = 0; i < uploadOffsets.size(); i++) {

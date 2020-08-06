@@ -61,6 +61,7 @@ import com.openexchange.caldav.mixins.ScheduleInboxURL;
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.servlet.CalDAV;
 import com.openexchange.caldav.servlet.CaldavPerformer;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
@@ -68,6 +69,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -124,8 +126,8 @@ public class CaldavActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             ICalEmitter.class, ICalParser.class, FolderService.class, RecurrenceService.class, CalendarUtilities.class, IDBasedCalendarAccessFactory.class,
-            UserService.class, ConfigViewFactory.class, HttpService.class, JDOMParser.class, GroupService.class,
-            ContactService.class, ResourceService.class, DatabaseService.class, ICalService.class, CalendarService.class
+            UserService.class, ConfigViewFactory.class, HttpService.class, JDOMParser.class, GroupService.class, CapabilityService.class,
+            ContactService.class, ResourceService.class, DatabaseService.class, ICalService.class, CalendarService.class, LeanConfigurationService.class
         };
     }
 

@@ -70,13 +70,13 @@ public enum GroupProperty implements Property {
      * virtual group "Guests" always contains all existing guest users of a context but no users, and is mainly used as entity in
      * permissions of system folders.
      */
-    HIDE_ALL_GUESTS("hideAllGuests", Boolean.FALSE),
+    HIDE_ALL_GUESTS("hideAllGuests", Boolean.TRUE),
 
     /**
      * Configures whether the group "Standard group" should be hidden to clients when listing all groups or searching for groups in a
      * context. Every created user will be added to this non-virtual group automatically, but can be removed again later on.
      */
-    HIDE_STANDARD_GROUP("hideStandardGroup", Boolean.FALSE),
+    HIDE_STANDARD_GROUP("hideStandardGroup", Boolean.TRUE),
 
     ;
 

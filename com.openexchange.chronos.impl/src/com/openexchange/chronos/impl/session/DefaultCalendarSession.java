@@ -93,6 +93,7 @@ public class DefaultCalendarSession implements CalendarSession {
      *
      * @param session The underlying server session
      * @param calendarService A reference to the calendar service
+     * @throws OXException In case the user has no calendar access
      */
     public DefaultCalendarSession(Session session, CalendarService calendarService) throws OXException {
         this(session, calendarService, null);
@@ -103,7 +104,8 @@ public class DefaultCalendarSession implements CalendarSession {
      *
      * @param session The underlying server session
      * @param calendarService A reference to the calendar service
-     * @param Additional calendar parameters to use
+     * @param parameters calendar parameters to use
+     * @throws OXException In case the user has no calendar access
      */
     public DefaultCalendarSession(Session session, CalendarService calendarService, CalendarParameters parameters) throws OXException {
         super();

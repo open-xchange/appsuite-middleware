@@ -90,11 +90,26 @@ public abstract class AbstractSanitizing {
     }
 
     protected String trimLines(String str) {
-        String[] lines = Strings.splitByCRLF(str);
+        return trim(str, true, false);
+    }
+
+    protected String trimLinesAndDropLineBreaks(String str) {
+        return trim(str, true, true);
+    }
+
+    private String trim(String str, boolean trimLines, boolean dropLineBreaks) {
         StringBuilder sb = new StringBuilder(str.length());
-        for (String line : lines) {
-            sb.append(line.trim()).append('\n');
+        for (String line : Strings.splitByCRLF(str)) {
+            if (trimLines) {
+                line = line.trim();
+            }
+            if (line.length() > 0) {
+                sb.append(line);
+                if (!dropLineBreaks) {
+                    sb.append('\n');
+                }
+            }
         }
-        return sb.toString();
+        return sb.toString().trim();
     }
 }

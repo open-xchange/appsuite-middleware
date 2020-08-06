@@ -58,7 +58,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
@@ -77,15 +76,10 @@ import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.sproxyd.chunkstorage.RdbChunkStorage;
 import com.openexchange.filestore.sproxyd.impl.EndpointPool;
 import com.openexchange.filestore.sproxyd.impl.SproxydClient;
-import com.openexchange.filestore.sproxyd.impl.SproxydConfig;
 import com.openexchange.filestore.utils.DefaultDatabaseAccess;
 import com.openexchange.filestore.utils.PropertyNameBuilder;
 import com.openexchange.java.Strings;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link SproxydFileStorageFactory}
@@ -264,8 +258,7 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
      * @return The client
      */
     private SproxydClient initClient(String filestoreID, String prefix) throws OXException {
-        SproxydConfig sproxydConfig = initSproxydConfig(filestoreID);
-        return new SproxydClient(sproxydConfig, prefix);
+        return new SproxydClient(services, initSproxydConfig(filestoreID), prefix, filestoreID);
     }
 
     /**
@@ -275,7 +268,7 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
      * @return The configured items
      * @throws OXException
      */
-    private SproxydConfig initSproxydConfig(String filestoreID) throws OXException {
+    private EndpointPool initSproxydConfig(String filestoreID) throws OXException {
         ConfigurationService configService = services.getService(ConfigurationService.class);
         PropertyNameBuilder nameBuilder = new PropertyNameBuilder("com.openexchange.filestore.sproxyd.");
         // End-point configuration
@@ -283,11 +276,6 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
         String path = requireProperty(filestoreID, "path", nameBuilder, configService);
         String hosts = requireProperty(filestoreID, "hosts", nameBuilder, configService);
 
-        // HTTP client configuration
-        int maxConnections = optIntProperty(filestoreID, "maxConnections", 100, nameBuilder, configService);
-        int maxConnectionsPerHost = optIntProperty(filestoreID, "maxConnectionsPerHost", 100, nameBuilder, configService);
-        int connectionTimeout = optIntProperty(filestoreID, "connectionTimeout", 5000, nameBuilder, configService);
-        int socketReadTimeout = optIntProperty(filestoreID, "socketReadTimeout", 15000, nameBuilder, configService);
         int heartbeatInterval = optIntProperty(filestoreID, "heartbeatInterval", 60000, nameBuilder, configService);
 
         List<String> urls = new LinkedList<String>();
@@ -322,14 +310,7 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.sproxyd." + filestoreID + ".hosts': " + hosts);
         }
 
-        MetricService metrics = services.getServiceSafe(MetricService.class);
-        HttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance("sproxyd-" + filestoreID)
-            .setMaxTotalConnections(maxConnections)
-            .setMaxConnectionsPerRoute(maxConnectionsPerHost)
-            .setConnectionTimeout(connectionTimeout)
-            .setSocketReadTimeout(socketReadTimeout));
-        EndpointPool endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, services.getServiceSafe(TimerService.class), metrics);
-        return new SproxydConfig(httpClient, endpointPool);
+        return new EndpointPool(filestoreID, urls, heartbeatInterval, services);
     }
 
     /**

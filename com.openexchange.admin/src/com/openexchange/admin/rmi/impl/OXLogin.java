@@ -49,22 +49,24 @@
 
 package com.openexchange.admin.rmi.impl;
 
-import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import java.rmi.RemoteException;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
+import com.openexchange.exception.LogLevel;
 
 /**
  *
@@ -77,7 +79,31 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
     public OXLogin() {
         super();
-        LOGGER.info("Class loaded: {}", this.getClass().getName());
+        log(LogLevel.INFO, LOGGER, null, null, "Class loaded: {}", this.getClass().getName());
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials) {
+        logAndEnhanceException(t, credentials, (String) null);
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final Context ctx) {
+        logAndEnhanceException(t, credentials, null != ctx ? ctx.getIdAsString() : null);
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final String contextId) {
+        if (t instanceof AbstractAdminRmiException) {
+            logAndReturnException(LOGGER, ((AbstractAdminRmiException) t), credentials, contextId);
+        } else if (t instanceof RemoteException) {
+            RemoteException remoteException = (RemoteException) t;
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId);
+        } else if (t instanceof Exception) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException((Exception) t);
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId);
+        }
     }
 
     @Override
@@ -85,9 +111,9 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         try {
             BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
             triggerUpdateProcess(ctx);
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, auth, ctx);
+            throw e;
         }
     }
 
@@ -96,9 +122,9 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         try {
             doNullCheck(auth);
             BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(auth);
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, auth);
+            throw e;
         }
     }
 
@@ -106,9 +132,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
     public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         try {
             BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
-
             triggerUpdateProcess(ctx);
-
             int user_id;
             try {
                 user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
@@ -128,16 +152,16 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
                     for (final OXUserPluginInterface oxuserplugin : pluginInterfaces.getUserPlugins().getServiceList()) {
-                        LOGGER.debug("Calling getData for plugin: {}", oxuserplugin.getClass().getName());
+                        log(LogLevel.DEBUG, LOGGER, auth, ctx.getIdAsString(), null, "Calling getData for plugin: {}", oxuserplugin.getClass().getName());
                         retusers = oxuserplugin.getData(ctx, retusers, auth);
                     }
                 }
             }
 
             return retusers[0];
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, auth, ctx);
+            throw e;
         }
     }
 
@@ -149,7 +173,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
                 oxt.generateDatabaseUpdateException(ctx.getId().intValue());
             }
         } catch (StorageException e) {
-            LOGGER.error("Error running updateprocess", e);
+            log(LogLevel.ERROR, LOGGER, null, ctx.getIdAsString(), e, "Error running updateprocess");
             throw new DatabaseUpdateException(e.toString());
         }
     }

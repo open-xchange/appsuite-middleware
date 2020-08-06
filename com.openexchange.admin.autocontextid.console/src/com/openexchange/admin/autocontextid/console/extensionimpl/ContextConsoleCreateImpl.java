@@ -58,9 +58,11 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
 
+    private static final String CONTEXTID = "contextid";
+
     @Override
     public void addExtensionOptions(final AdminParser parser) {
-        parser.removeOption("c", "contextid");
+        parser.removeOption("c", CONTEXTID);
     }
 
     @Override
@@ -70,8 +72,24 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
 
     @Override
     public void processCSVConstants(final HashMap<String, CSVConstants> constantsMap) {
-        final CSVConstants csvConstants = constantsMap.get("contextid");
-        csvConstants.setRequired(false);
+        final CSVConstants csvConstants = constantsMap.get(CONTEXTID);
+        constantsMap.replace(CONTEXTID, new CSVConstants() {
+
+            @Override
+            public boolean isRequired() {
+                return false;
+            }
+
+            @Override
+            public String getString() {
+                return csvConstants.getString();
+            }
+
+            @Override
+            public int getIndex() {
+                return csvConstants.getIndex();
+            }
+        });
     }
 
     @Override

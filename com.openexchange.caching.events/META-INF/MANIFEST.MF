@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Cache Event Service
 Bundle-SymbolicName: com.openexchange.caching.events
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.config,
@@ -11,12 +11,12 @@ Import-Package: com.openexchange.config,
  com.openexchange.log,
  com.openexchange.management,
  com.openexchange.management.osgi,
- com.openexchange.metrics,
- com.openexchange.metrics.types,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.threadpool,
+ io.micrometer.core.instrument,
+ io.micrometer.core.instrument.composite,
  javax.management,
  org.apache.commons.logging,
  org.osgi.framework,

@@ -52,39 +52,43 @@ package com.openexchange.admin.rmi.exceptions;
  * @author choeger
  *
  */
-public class DatabaseUpdateException extends Exception {
+public class DatabaseUpdateException extends AbstractAdminRmiException {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -1714424944003619787L;
 
     /**
-     *
+     * Initializes a new {@link DatabaseUpdateException}.
      */
     public DatabaseUpdateException() {
+        super();
     }
 
     /**
-     * @param arg0
+     * Initializes a new {@link DatabaseUpdateException}.
+     *
+     * @param message The detail message
      */
-    public DatabaseUpdateException(String arg0) {
-        super(arg0);
+    public DatabaseUpdateException(String message) {
+        super(message);
     }
 
     /**
-     * @param arg0
+     * Initializes a new {@link DatabaseUpdateException}.
+     *
+     * @param cause The root cause
      */
-    public DatabaseUpdateException(Throwable arg0) {
-        super(arg0);
+    public DatabaseUpdateException(Throwable cause) {
+        super(cause);
     }
 
     /**
-     * @param arg0
-     * @param arg1
+     * Initializes a new {@link DatabaseUpdateException}.
+     *
+     * @param message The detail message
+     * @param cause The root cause
      */
-    public DatabaseUpdateException(String arg0, Throwable arg1) {
-        super(arg0, arg1);
+    public DatabaseUpdateException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

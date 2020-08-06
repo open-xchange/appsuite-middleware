@@ -104,6 +104,22 @@ public interface ICalParameters {
      * Wildcards are allowed in the names, e.g. <code>X-MOZ-SNOOZE-TIME*</code>.
      */
     String IGNORED_PROPERTIES = "IGNORED_PROPERTIES";
+    
+    /**
+     * {@link String[]}
+     * <p/>
+     * Optional string array denoting the names of specific property parameters to forcibly ignore during import or export.
+     * <p/>
+     * During export, the parameters are removed after mapping, prior serialization. During import, the parameters are removed after
+     * deserialization, before mapping.
+     * <p/>
+     * To identify the correct property to remove the parameter for, use the property as key, delimited with a colon and followed by the
+     * parameter name. E.g. <code>ATTENDEE:X-CALENDARSERVER-DTSTAMP</code>
+     * <p/>
+     * By default, the list contains <code>ATTENDEE:X-CALENDARSERVER-DTSTAMP</code> to not pollute the generated iCalendar files unless
+     * really needed.
+     */
+    String IGNORED_PROPERTY_PARAMETERS = "IGNORED_PROPERTY_PARAMETERS";
 
     /**
      * {@link Boolean}

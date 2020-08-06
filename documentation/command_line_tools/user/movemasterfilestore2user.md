@@ -2,6 +2,7 @@
 title: movemasterfilestore2user
 icon: far fa-circle
 tags: Administration, Command Line tools, User, Filestore
+package: open-xchange-admin
 ---
 
 # NAME

@@ -49,6 +49,7 @@
 package com.openexchange.admin.plugins;
 
 import java.io.Serializable;
+import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 
 /**
  * The exception which is thrown by any bundle/plugin. So that the exception is known
@@ -57,7 +58,7 @@ import java.io.Serializable;
  * @author d7
  *
  */
-public class PluginException extends Exception implements Serializable {
+public class PluginException extends AbstractAdminRmiException implements Serializable {
 
     /**
      * For serialization

@@ -54,6 +54,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
+import com.openexchange.tools.oxfolder.GABMode;
 import com.openexchange.tools.oxfolder.GABRestorerRMIService;
 
 /**
@@ -64,7 +65,7 @@ import com.openexchange.tools.oxfolder.GABRestorerRMIService;
  */
 public class GABRestorerCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "restoregabdefaults -c <contextId> " + BASIC_MASTER_ADMIN_USAGE;
+    private static final String SYNTAX = "restoregabdefaults -c <contextId> -g <gabMode> " + BASIC_MASTER_ADMIN_USAGE;
     private static final String FOOTER = "Restores the default permissions for the global address book (GAB).";
 
     /**
@@ -77,6 +78,7 @@ public class GABRestorerCLT extends AbstractRmiCLI<Void> {
     }
 
     private int contextId;
+    private String gabMode;
 
     /**
      * Initializes a new {@link GABRestorerCLT}.
@@ -93,12 +95,13 @@ public class GABRestorerCLT extends AbstractRmiCLI<Void> {
     @Override
     protected void addOptions(Options options) {
         options.addOption(createArgumentOption("c", "context", "contextId", "A valid context identifier contained in target schema", true));
+        options.addOption(createArgumentOption("g", "gabMode", "gabMode", "The optional modus the global address book shall operate on. Currently 'global' and 'individual' are known values.", false));
     }
 
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         GABRestorerRMIService rmiService = getRmiStub(optRmiHostName, GABRestorerRMIService.RMI_NAME);
-        rmiService.restoreDefaultPermissions(contextId);
+        rmiService.restoreDefaultPermissions(contextId, GABMode.of(gabMode));
         return null;
     }
 
@@ -109,6 +112,9 @@ public class GABRestorerCLT extends AbstractRmiCLI<Void> {
 
     @Override
     protected void checkOptions(CommandLine cmd) {
+        if (cmd.hasOption('g')) {
+            gabMode = cmd.getOptionValue('g');
+        }
         if (cmd.hasOption('c')) {
             final String optionValue = cmd.getOptionValue('c');
             try {

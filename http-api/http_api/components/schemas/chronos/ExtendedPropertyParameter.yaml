@@ -1,0 +1,8 @@
+type: object
+description: Extended parameters of the conference.
+properties:
+  key:
+    type: string
+    description: The name of the parameter
+additionalProperties:
+   type: string

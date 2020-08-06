@@ -1,0 +1,5 @@
+requests:
+  - AddPasswordRequest.yaml
+  - GetApplicationsRequest.yaml
+  - RemovePasswordRequest.yaml
+  - ListPasswordsRequest.yaml

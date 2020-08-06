@@ -1,98 +1,50 @@
-open-xchange-pns-mobile-api-facade (7.10.3-19) stable; urgency=medium
+open-xchange-pns-mobile-api-facade (7.10.4-7) stable; urgency=medium
 
-  * Build for patch 2020-07-27 (5821)
+  * Fifth candidate for 7.10.4 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 21 Jul 2020 10:09:26 +0000
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 05 Aug 2020 11:18:32 +0000
 
-open-xchange-pns-mobile-api-facade (7.10.3-18) stable; urgency=medium
+open-xchange-pns-mobile-api-facade (7.10.4-6) stable; urgency=medium
 
-  * Build for patch 2020-07-17 (5819)
+  * Fourth candidate for 7.10.4 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 15 Jul 2020 11:33:45 +0000
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 04 Aug 2020 14:08:07 +0000
 
-open-xchange-pns-mobile-api-facade (7.10.3-17) stable; urgency=medium
+open-xchange-pns-mobile-api-facade (7.10.4-5) stable; urgency=medium
 
-  * Build for patch  2020-07-13 (5804)
+  * Third candidate for 7.10.4 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 09 Jul 2020 10:16:16 +0000
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 04 Aug 2020 09:03:13 +0000
 
-open-xchange-pns-mobile-api-facade (7.10.3-16) stable; urgency=medium
+open-xchange-pns-mobile-api-facade (7.10.4-4) stable; urgency=medium
 
-  * Build for patch  2020-07-02 (5792)
+  * Second candidate for 7.10.4 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 26 Jun 2020 16:02:11 +0000
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 31 Jul 2020 17:27:39 +0000
 
-open-xchange-pns-mobile-api-facade (7.10.3-15) stable; urgency=medium
+open-xchange-pns-mobile-api-facade (7.10.4-3) stable; urgency=medium
 
-  * Build for patch 2020-06-30 (5781)
+  * First candidate for 7.10.4 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 24 Jun 2020 07:52:15 +0000
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 28 Jul 2020 10:24:53 +0000
 
-open-xchange-pns-mobile-api-facade (7.10.3-14) stable; urgency=medium
+open-xchange-pns-mobile-api-facade (7.10.4-2) stable; urgency=medium
 
-  * Build for patch 2020-06-15 (5765)
+  * Second preview of 7.10.4 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 15 Jun 2020 11:20:19 +0000
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 30 Jun 2020 11:18:40 +0000
 
-open-xchange-pns-mobile-api-facade (7.10.3-13) stable; urgency=medium
+open-xchange-pns-mobile-api-facade (7.10.4-1) stable; urgency=medium
 
-  * Build for patch 2020-05-26 (5742)
+  * First preview of 7.10.4 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 15 May 2020 14:15:09 +0000
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 20 May 2020 08:51:41 +0000
 
-open-xchange-pns-mobile-api-facade (7.10.3-12) stable; urgency=medium
+open-xchange-pns-mobile-api-facade (7.10.4-0) unstable; urgency=medium
 
-  * Build for patch 2020-05-11 (5720)
+  * prepare for 7.10.4 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 04 May 2020 14:54:59 +0000
-
-open-xchange-pns-mobile-api-facade (7.10.3-11) stable; urgency=medium
-
-  * Build for patch 2020-04-30 (5702)
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 23 Apr 2020 06:57:42 +0000
-
-open-xchange-pns-mobile-api-facade (7.10.3-10) stable; urgency=medium
-
-  * Build for patch 2020-04-02 (5692)
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 17 Apr 2020 08:58:01 +0000
-
-open-xchange-pns-mobile-api-facade (7.10.3-9) stable; urgency=medium
-
-  * Build for patch 2020-04-14 (5677)
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 06 Apr 2020 09:09:10 +0000
-
-open-xchange-pns-mobile-api-facade (7.10.3-8) stable; urgency=medium
-
-  * Build for patch 2020-03-23 (5653)
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 19 Mar 2020 14:51:18 +0000
-
-open-xchange-pns-mobile-api-facade (7.10.3-7) stable; urgency=medium
-
-  * Build for patch 2020-03-02 (5623)
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 28 Feb 2020 15:11:52 +0000
-
-open-xchange-pns-mobile-api-facade (7.10.3-6) stable; urgency=medium
-
-  * Build for patch 2020-02-19 (5588)
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 12 Feb 2020 16:41:58 +0000
-
-open-xchange-pns-mobile-api-facade (7.10.3-5) stable; urgency=medium
-
-  * Build for patch 2020-02-10 (5572)
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 12 Feb 2020 09:41:35 +0000
-
-open-xchange-pns-mobile-api-facade (7.10.3-4) stable; urgency=medium
-
-  * Build for patch 2020-01-20 (5547)
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 20 Jan 2020 16:38:46 +0100
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 16 Jan 2020 16:06:26 +0100
 
 open-xchange-pns-mobile-api-facade (7.10.3-3) stable; urgency=medium
 

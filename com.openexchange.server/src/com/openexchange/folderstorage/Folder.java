@@ -502,4 +502,22 @@ public interface Folder extends Serializable, Cloneable {
      */
     Object clone();
 
+    /**
+     * Whether the folder is used for sync or not. Defaults to {@link UsedForSync#DEFAULT}
+     *
+     * @return <code>true</code> if the folder is used for sync, <code>false</code> otherwise
+     */
+    default UsedForSync getUsedForSync() {
+        return UsedForSync.DEFAULT;
+    }
+
+    /**
+     * Sets the used for sync value. Defaults to no-op
+     *
+     * @param usedForSync The {@link UsedForSync} value
+     */
+    default void setUsedForSync(UsedForSync usedForSync) {
+        // empty
+    }
+
 }

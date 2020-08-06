@@ -502,6 +502,7 @@ public class DriveServiceImpl implements DriveService {
         settings.setMinUploadChunk(Long.valueOf(syncSession.getOptimisticSaveThreshold()));
         settings.setHasTrashFolder(storage.hasTrashFolder());
         settings.setPathToRoot(storage.getInternalPath(session.getRootFolderID()));
+        settings.setMaxConcurrentSyncFiles(DriveConfig.getInstance().getMaxConcurrentSyncFiles(serverSession.getContextId(), serverSession.getUserId()));
         /*
          * add any localized folder names (up to a certain depth after which no localized names are expected anymore)
          */
@@ -685,7 +686,8 @@ public class DriveServiceImpl implements DriveService {
         return Category.CATEGORY_TRY_AGAIN.equals(e.getCategory()) ||
             Category.CATEGORY_CONFLICT.equals(e.getCategory()) ||
             "FLD-0008".equals(e.getErrorCode()) || // 'Folder 123 does not exist in context 1'
-            "DRV-0007".equals(e.getErrorCode()) // The file "123.txt" with checksum "8fc1a2f5e9a2dbd1d5f4f9e330bd1563" was not found at "/"
+            "DRV-0007".equals(e.getErrorCode()) || // The file "123.txt" with checksum "8fc1a2f5e9a2dbd1d5f4f9e330bd1563" was not found at "/"
+            "DRV-0003".equals(e.getErrorCode())    // The file "123.txt" was not found at "/"
         ;
     }
 

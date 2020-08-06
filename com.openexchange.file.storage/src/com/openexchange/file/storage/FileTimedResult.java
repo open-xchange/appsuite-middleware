@@ -91,7 +91,7 @@ public class FileTimedResult extends AbstractTimedResult<File> {
 
     @Override
     protected long extractTimestamp(final File object) {
-        return 0;
+        return object.getSequenceNumber();
     }
 
 }

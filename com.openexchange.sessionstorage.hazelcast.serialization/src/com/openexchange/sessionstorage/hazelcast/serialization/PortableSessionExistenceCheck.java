@@ -56,7 +56,6 @@ import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
 
 /**
  * {@link PortableSessionExistenceCheck}
@@ -109,11 +108,7 @@ public class PortableSessionExistenceCheck extends AbstractCustomPortable implem
             return Boolean.FALSE;
         }
 
-        if (service instanceof SessiondServiceExtended) {
-            return Boolean.valueOf(((SessiondServiceExtended) service).getSession(id, false) != null);
-        }
-
-        return Boolean.valueOf(service.getSession(id) != null);
+        return Boolean.valueOf(service.peekSession(id, false) != null);
     }
 
     @Override

@@ -93,7 +93,7 @@ public class Bug58023Test extends AbstractAPIClientSession {
         super.setUp();
         tasksApi = new TasksApi(apiClient);
         foldersApi = new FoldersApi(apiClient);
-        privateTaskFolder = foldersApi.createFolder(getPrivateTaskFolder(), apiClient.getSession(), generateFolderBody(), "1", Module.TASK.getName(), null).getData();
+        privateTaskFolder = foldersApi.createFolder(getPrivateTaskFolder(), apiClient.getSession(), generateFolderBody(), "1", Module.TASK.getName(), null, null).getData();
     }
 
     public String getPrivateTaskFolder() throws ApiException {

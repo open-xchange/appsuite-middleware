@@ -63,6 +63,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.MessageRemovedException;
@@ -224,6 +225,73 @@ public final class MimeProcessingUtility {
             accountId = MailAccount.DEFAULT_ID;
         }
         return accountId;
+    }
+
+    /**
+     * Checks if the "From" address from given original message in specified account is a valid address for given user.
+     *
+     * @param origMsg The original message possibly providing "From" address
+     * @param accountId The account identifier
+     * @param session The session providing user data
+     * @param ctx The context in which the user resides
+     * @return The validated "From" address or empty
+     * @throws OXException If "From" address cannot be validated
+     */
+    public static Optional<InternetAddress> validateFrom(MailMessage origMsg, int accountId, Session session, Context ctx) throws OXException {
+        if (origMsg == null) {
+            return Optional.empty();
+        }
+
+        // Determine "From" address
+        InternetAddress from;
+        {
+            InternetAddress[] originalFrom = origMsg.getFrom();
+            if (originalFrom == null || originalFrom.length <= 0 || originalFrom[0] == null) {
+                return Optional.empty();
+            }
+            from = originalFrom[0];
+        }
+
+        int accountIdToCheck = accountId;
+        if (accountIdToCheck != MailAccount.DEFAULT_ID) {
+            // Check for Unified Mail account
+            UnifiedInboxManagement management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
+            if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
+                int realAccountId;
+                try {
+                    UnifiedInboxUID uid = new UnifiedInboxUID(origMsg.getMailId());
+                    realAccountId = uid.getAccountId();
+                } catch (OXException e) {
+                    // No Unified Mail identifier
+                    FullnameArgument fa = UnifiedInboxUID.parsePossibleNestedFullName(origMsg.getFolder());
+                    realAccountId = null == fa ? MailAccount.DEFAULT_ID : fa.getAccountId();
+                }
+                accountIdToCheck = realAccountId;
+            }
+        }
+
+        return validateFrom0(from, accountIdToCheck, session, ctx);
+    }
+
+    private static Optional<InternetAddress> validateFrom0(InternetAddress from, int accountId, Session session, Context ctx) throws OXException {
+        Set<InternetAddress> fromCandidates;
+        if (accountId == MailAccount.DEFAULT_ID) {
+            fromCandidates = new HashSet<InternetAddress>(8);
+            addUserAliases(fromCandidates, session, ctx);
+        } else {
+            MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            if (null == mass) {
+                fromCandidates = new HashSet<InternetAddress>(8);
+                addUserAliases(fromCandidates, session, ctx);
+            } else {
+                QuotedInternetAddress a = new QuotedInternetAddress();
+                a.setAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress());
+                fromCandidates = new HashSet<InternetAddress>(2);
+                fromCandidates.add(a);
+            }
+        }
+
+        return fromCandidates.contains(from) ? Optional.of(from) : Optional.empty();
     }
 
     /**
@@ -819,6 +887,10 @@ public final class MimeProcessingUtility {
             if (isHtml) {
                 contentType.setCharsetParameter("UTF-8");
                 replyText = MimeForward.replaceMetaEquiv(replyText, contentType);
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                if (htmlService != null) {
+                    replyText = htmlService.checkBaseTag(replyText, true);
+                }
             } else {
                 String cs = contentType.getCharsetParameter();
                 if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs) || MessageUtility.isSpecialCharset(cs)) {
@@ -898,6 +970,10 @@ public final class MimeProcessingUtility {
                 }
                 contentType.setCharsetParameter("UTF-8");
                 firstSeenText = MimeForward.replaceMetaEquiv(firstSeenText, contentType);
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                if (htmlService != null) {
+                    firstSeenText = htmlService.checkBaseTag(firstSeenText, true);
+                }
             }
             /*
              * Add appropriate text part prefixed with forward text

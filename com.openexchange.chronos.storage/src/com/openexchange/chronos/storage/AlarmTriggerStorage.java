@@ -132,14 +132,16 @@ public interface AlarmTriggerStorage {
     boolean deleteAllTriggers() throws OXException;
 
     /**
-     * Retrieves all not acknowledged alarm triggers for the given user with a trigger time earlier than the given limit.
+     * Retrieves all not acknowledged alarm triggers for the given user with a trigger time within the given limit.
      *
      * @param userId The user id
-     * @param until An optional upper limit
+     * @param rangeFrom The lower (inclusive) boundary of the requested time range, or <code>null</code> if not limited.
+     *            Ignored for triggers of recurring event series.
+     * @param rangeUntil The upper (exclusive) boundary of the requested time range, or <code>null</code> if not limited
      * @return A list of {@link AlarmTrigger}s
      * @throws OXException
      */
-    List<AlarmTrigger> loadTriggers(int userId, Date until) throws OXException;
+    List<AlarmTrigger> loadTriggers(int userId, Date rangeFrom, Date rangeUntil) throws OXException;
 
     /**
      * Retrieves the given trigger

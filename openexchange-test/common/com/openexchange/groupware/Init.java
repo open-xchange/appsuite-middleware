@@ -110,6 +110,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.JdbcProperties;
 import com.openexchange.database.internal.Configuration;
 import com.openexchange.database.internal.ConnectionReloaderImpl;
+import com.openexchange.database.internal.JdbcPropertiesImpl;
 import com.openexchange.databaseold.Database;
 import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
@@ -790,7 +791,8 @@ public final class Init {
             com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
             Configuration configuration = new Configuration();
             configuration.readConfiguration(configurationService);
-            JdbcProperties.getInstance().setJdbcProperties(configuration.getJdbcProps());
+            JdbcPropertiesImpl.getInstance().setJdbcProperties(configuration.getJdbcProps());
+            services.put(JdbcProperties.class, JdbcPropertiesImpl.getInstance());
             ConnectionReloaderImpl reloader = new ConnectionReloaderImpl(configuration);
             final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService, configViewFactory, null, ServiceListings.emptyList(), configuration, reloader);
             services.put(DatabaseService.class, dbService);
@@ -981,8 +983,7 @@ public final class Init {
             };
 
             ThreadPoolService threadPool = (ThreadPoolService) services.get(ThreadPoolService.class);
-            MetricService metricService = (MetricService) services.get(MetricService.class);
-            CacheEventMetricHandler metricHandler = new CacheEventMetricHandler(metricService);
+            CacheEventMetricHandler metricHandler = new CacheEventMetricHandler();
             CacheEventService cacheEventService = new CacheEventServiceImpl(config, threadPool, metricHandler);
             services.put(CacheEventService.class, cacheEventService);
             TestServiceRegistry.getInstance().addService(CacheEventService.class, cacheEventService);

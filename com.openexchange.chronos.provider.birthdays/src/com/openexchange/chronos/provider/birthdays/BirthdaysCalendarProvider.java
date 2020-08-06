@@ -59,7 +59,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,6 +77,7 @@ import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarProviders;
+import com.openexchange.chronos.provider.UsedForSync;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
@@ -186,6 +187,11 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
         if (settings.containsSubscribed()) {
             proposedSettings.setSubscribed(settings.isSubscribed());
         }
+        if (canBeUsedForSync(session) == false) {
+            proposedSettings.setUsedForSync(UsedForSync.DEACTIVATED);
+        } else if (settings.getUsedForSync().isPresent()) {
+            proposedSettings.setUsedForSync(settings.getUsedForSync().get());
+        }
         ExtendedProperties proposedExtendedProperties = new ExtendedProperties();
         Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
         if (null != colorValue && String.class.isInstance(colorValue)) {
@@ -218,6 +224,16 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
             internalConfig.putSafe("name", settings.getName());
         }
         internalConfig.putSafe("subscribed", B(settings.isSubscribed()));
+        Optional<UsedForSync> optUsedForSync = settings.getUsedForSync();
+        if (optUsedForSync.isPresent()) {
+            boolean usedForSync = optUsedForSync.get().isUsedForSync();
+            if (false == internalConfig.has(USED_FOR_SYNC_LITERAL) || usedForSync != internalConfig.optBoolean(USED_FOR_SYNC_LITERAL, false)) {
+                if (canBeUsedForSync(session) == false) {
+                    throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
+                }
+                internalConfig.putSafe(USED_FOR_SYNC_LITERAL, B(usedForSync));
+            }
+        }
         return internalConfig;
     }
 
@@ -241,16 +257,6 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
                 internalConfig.putSafe("color", colorValue);
                 changed = true;
             }
-            if (settings.getExtendedProperties().contains(USED_FOR_SYNC_LITERAL)) {
-                Boolean value = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
-                if (false == Objects.equals(value, internalConfig.opt(USED_FOR_SYNC_LITERAL))) {
-                    if (Boolean.TRUE.equals(value) && false == CachingCalendarUtils.canBeUsedForSync(BirthdaysCalendarProvider.PROVIDER_ID, session, true)) {
-                        throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
-                    }
-                    internalConfig.putSafe(USED_FOR_SYNC_LITERAL, value);
-                    changed = true;
-                }
-            }
         }
         if (settings.containsName() && Strings.isNotEmpty(settings.getName()) && false == settings.getName().equals(internalConfig.opt("name"))) {
             internalConfig.putSafe("name", settings.getName());
@@ -260,7 +266,27 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
             internalConfig.putSafe("subscribed", B(settings.isSubscribed()));
             changed = true;
         }
+        Optional<UsedForSync> optUsedForSync = settings.getUsedForSync();
+        if(optUsedForSync.isPresent()) {
+            boolean usedForSync = optUsedForSync.get().isUsedForSync();
+            if (!internalConfig.has(USED_FOR_SYNC_LITERAL) || usedForSync != internalConfig.optBoolean(USED_FOR_SYNC_LITERAL)) {
+                if (usedForSync && false == canBeUsedForSync(session)) {
+                    throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
+                }
+                internalConfig.putSafe(USED_FOR_SYNC_LITERAL, B(usedForSync));
+                changed = true;
+            }
+        }
         return changed ? internalConfig : null;
+    }
+
+    /**
+     * Checks if the provider can be used for sync
+     *
+     * @param session The users session
+     */
+    private boolean canBeUsedForSync(Session session) {
+        return CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session);
     }
 
     @Override

@@ -50,7 +50,6 @@
 package com.openexchange.folderstorage.database.getfolder;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,7 +61,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
 import com.openexchange.groupware.container.FolderObject;
@@ -88,8 +86,6 @@ import com.openexchange.user.User;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SystemSharedFolder {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SystemSharedFolder.class);
 
     /**
      * Initializes a new {@link SystemSharedFolder}.
@@ -130,19 +126,15 @@ public final class SystemSharedFolder {
          * Query database
          */
         final SearchIterator<FolderObject> searchIterator;
-        try {
-            searchIterator =
-                OXFolderIteratorSQL.getVisibleSubfoldersIterator(
-                    FolderObject.SYSTEM_SHARED_FOLDER_ID,
-                    user.getId(),
-                    user.getGroups(),
-                    ctx,
-                    userPerm,
-                    null,
-                    con);
-        } catch (SQLException e) {
-            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        }
+        searchIterator =
+            OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                FolderObject.SYSTEM_SHARED_FOLDER_ID,
+                user.getId(),
+                user.getGroups(),
+                ctx,
+                userPerm,
+                null,
+                con);
         try {
             /*
              * Set to null if a shared folder exists otherwise to empty array to indicate no subfolders
@@ -173,19 +165,14 @@ public final class SystemSharedFolder {
         final Map<String, Integer> displayNames;
         {
             final Queue<FolderObject> q;
-            try {
-                q =
-                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
-                        FolderObject.SYSTEM_SHARED_FOLDER_ID,
-                        user.getId(),
-                        user.getGroups(),
-                        ctx,
-                        userPerm,
-                        null,
-                        con)).asQueue();
-            } catch (SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            }
+            q = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                    FolderObject.SYSTEM_SHARED_FOLDER_ID,
+                    user.getId(),
+                    user.getGroups(),
+                    ctx,
+                    userPerm,
+                    null,
+                    con)).asQueue();
             /*
              * Gather all display names
              */

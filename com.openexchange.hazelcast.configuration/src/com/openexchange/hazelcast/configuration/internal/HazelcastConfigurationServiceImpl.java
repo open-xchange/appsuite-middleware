@@ -59,12 +59,13 @@ import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
@@ -91,6 +92,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.configuration.KnownNetworkJoin;
 import com.openexchange.hazelcast.configuration.osgi.Services;
+import com.openexchange.hazelcast.configuration.ssl.HazelcastSSLFactory;
 import com.openexchange.hazelcast.dns.HazelcastDnsResolver;
 import com.openexchange.hazelcast.dns.HazelcastDnsResolverConfig;
 import com.openexchange.hazelcast.dns.HazelcastDnsService;
@@ -433,9 +435,8 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
          */
         // Only one encryption method can be use. so start with strongest
         if (configService.getBoolProperty("com.openexchange.hazelcast.network.ssl", false)) {
-            HazelcastSSLFactory hazelcastSSLFactory = new HazelcastSSLFactory();
             config.getNetworkConfig().setSSLConfig(new SSLConfig().setEnabled(true)
-                .setFactoryImplementation(hazelcastSSLFactory)
+                .setFactoryImplementation(new HazelcastSSLFactory())
                 .setFactoryClassName(HazelcastSSLFactory.class.getName())
                 .setProperties(HazelcastSSLFactory.getPropertiesFromService(configService)));
         } else if (configService.getBoolProperty("com.openexchange.hazelcast.network.symmetricEncryption", false)) {
@@ -474,7 +475,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
          */
         Map<String, String> properties = configService.getProperties(new WildcardNamePropertyFilter("hazelcast.*"));
         if (null != properties && !properties.isEmpty()) {
-            for (Entry<String, String> entry : properties.entrySet()) {
+            for (Map.Entry<String, String> entry : properties.entrySet()) {
                 String value = entry.getValue();
                 if (Strings.isNotEmpty(value)) {
                     config.setProperty(entry.getKey(), value.trim());
@@ -508,61 +509,77 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
     }
 
     private static void applyDataStructures(Config config, File[] propertyFiles) throws OXException {
-        if (null != propertyFiles && 0 < propertyFiles.length) {
+        if (null != propertyFiles) {
             for (File file : propertyFiles) {
-                applyDataStructure(config, loadProperties(file));
+                applyDataStructure(config, loadProperties(file), file);
             }
         }
     }
 
-    private static void applyDataStructure(Config config, Properties properties) throws OXException {
-        if (null != properties && 0 < properties.size()) {
-            String propertyName = (String)properties.keys().nextElement();
-            if (propertyName.startsWith("com.openexchange.hazelcast.configuration.map")) {
-                MapConfig mapConfig = createDataConfig(properties, MapConfig.class);
-                String attributes = properties.getProperty("com.openexchange.hazelcast.configuration.map.indexes.attributes");
-                if (Strings.isNotEmpty(attributes)) {
-                    String[] attrs = attributes.split(" *, *");
-                    if (null != attrs && 0 < attrs.length) {
-                        for (String attribute : attrs) {
-                            mapConfig.addMapIndexConfig(new MapIndexConfig(attribute, false));
+    private static void applyDataStructure(Config config, Properties properties, File file) throws OXException {
+        if (null != properties) {
+            StringParser stringParser = Services.requireService(StringParser.class);
+
+            boolean mapConfigApplied = false;
+            boolean topicConfigApplied = false;
+            boolean queueConfigApplied = false;
+            boolean multiMapConfigApplied = false;
+            boolean semaphoreConfigApplied = false;
+
+            for (String propertyName : properties.stringPropertyNames()) {
+                if (propertyName.startsWith("com.openexchange.hazelcast.configuration.map")) {
+                    if (!mapConfigApplied) {
+                        mapConfigApplied = true;
+                        MapConfig mapConfig = createDataConfig(properties, new MapConfig(), stringParser);
+                        String attributes = properties.getProperty("com.openexchange.hazelcast.configuration.map.indexes.attributes");
+                        if (Strings.isNotEmpty(attributes)) {
+                            String[] attrs = Strings.splitByComma(attributes);
+                            if (null != attrs) {
+                                for (String attribute : attrs) {
+                                    mapConfig.addMapIndexConfig(new MapIndexConfig(attribute, false));
+                                }
+                            }
                         }
-                    }
-                }
-                String orderedAttributes = properties.getProperty(
-                    "com.openexchange.hazelcast.configuration.map.indexes.orderedAttributes");
-                if (Strings.isNotEmpty(orderedAttributes)) {
-                    String[] attrs = orderedAttributes.split(" *, *");
-                    if (null != attrs && 0 < attrs.length) {
-                        for (String attribute : attrs) {
-                            mapConfig.addMapIndexConfig(new MapIndexConfig(attribute, true));
+                        String orderedAttributes = properties.getProperty("com.openexchange.hazelcast.configuration.map.indexes.orderedAttributes");
+                        if (Strings.isNotEmpty(orderedAttributes)) {
+                            String[] attrs = Strings.splitByComma(orderedAttributes);
+                            if (null != attrs) {
+                                for (String attribute : attrs) {
+                                    mapConfig.addMapIndexConfig(new MapIndexConfig(attribute, true));
+                                }
+                            }
                         }
+                        config.addMapConfig(mapConfig);
                     }
+                } else if (propertyName.startsWith("com.openexchange.hazelcast.configuration.topic")) {
+                    if (!topicConfigApplied) {
+                        topicConfigApplied = true;
+                        config.addTopicConfig(createDataConfig(properties, new TopicConfig(), stringParser));
+                    }
+                } else if (propertyName.startsWith("com.openexchange.hazelcast.configuration.queue")) {
+                    if (!queueConfigApplied) {
+                        queueConfigApplied = true;
+                        config.addQueueConfig(createDataConfig(properties, new QueueConfig(), stringParser));
+                    }
+                } else if (propertyName.startsWith("com.openexchange.hazelcast.configuration.multimap")) {
+                    if (!multiMapConfigApplied) {
+                        multiMapConfigApplied = true;
+                        config.addMultiMapConfig(createDataConfig(properties, new MultiMapConfig(), stringParser));
+                    }
+                } else if (propertyName.startsWith("com.openexchange.hazelcast.configuration.semaphore")) {
+                    if (!semaphoreConfigApplied) {
+                        semaphoreConfigApplied = true;
+                        config.addSemaphoreConfig(createDataConfig(properties, new SemaphoreConfig(), stringParser));
+                    }
+                } else {
+                    LOG.warn("Illegal property ''{}'' in file {}", propertyName, file.getPath());
                 }
-                config.addMapConfig(mapConfig);
-            } else if (propertyName.startsWith("com.openexchange.hazelcast.configuration.topic")) {
-                config.addTopicConfig(createDataConfig(properties, TopicConfig.class));
-            } else if (propertyName.startsWith("com.openexchange.hazelcast.configuration.queue")) {
-                config.addQueueConfig(createDataConfig(properties, QueueConfig.class));
-            } else if (propertyName.startsWith("com.openexchange.hazelcast.configuration.multimap")) {
-                config.addMultiMapConfig(createDataConfig(properties, MultiMapConfig.class));
-            } else if (propertyName.startsWith("com.openexchange.hazelcast.configuration.semaphore")) {
-                config.addSemaphoreConfig(createDataConfig(properties, SemaphoreConfig.class));
             }
         }
     }
 
-    private static <T> T createDataConfig(Properties properties, Class<T> dataConfigType) throws OXException {
-        T dataConfig = null;
-        try {
-            dataConfig = dataConfigType.newInstance();
-        } catch (InstantiationException e) {
-            throw ConfigurationExceptionCodes.CLASS_NOT_FOUND.create(e, dataConfigType.toString());
-        } catch (IllegalAccessException e) {
-            throw ConfigurationExceptionCodes.CLASS_NOT_FOUND.create(e, dataConfigType.toString());
-        }
-        StringParser stringParser = Services.requireService(StringParser.class);
-        Field[] declaredFields = dataConfigType.getDeclaredFields();
+    private static <T> T createDataConfig(Properties properties, T dataConfig, StringParser stringParser) throws OXException {
+        Map<String, Field> declaredFields = getFieldsFrom(dataConfig);
         for (String propertyName : properties.stringPropertyNames()) {
             Field field = findMatching(declaredFields, propertyName);
             if (null != field) {
@@ -583,17 +600,22 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         return dataConfig;
     }
 
-    private static Field findMatching(Field[] declaredFields, String propertyName) {
-        if (null != declaredFields && 0 < declaredFields.length) {
-            int idx = propertyName.lastIndexOf('.');
-            String fieldName = -1 != idx && propertyName.length() > idx ? propertyName.substring(1 + idx) : propertyName;
-            for (Field field : declaredFields) {
-                if (field.getName().equalsIgnoreCase(fieldName)) {
-                    return field;
-                }
-            }
+    private static <T> Map<String, Field> getFieldsFrom(T dataConfig) throws OXException {
+        try {
+            return Arrays.stream(dataConfig.getClass().getDeclaredFields()).collect(Collectors.toMap(f -> Strings.asciiLowerCase(f.getName()), f -> f));
+        } catch (SecurityException e) {
+            throw OXException.general("Unable to get fields from " + dataConfig.getClass(), e);
         }
-        return null;
+    }
+
+    private static Field findMatching(Map<String, Field> declaredFields, String propertyName) {
+        if (null == declaredFields) {
+            return null;
+        }
+
+        int idx = propertyName.lastIndexOf('.');
+        String fieldName = idx >= 0 && propertyName.length() > idx ? propertyName.substring(1 + idx) : propertyName;
+        return declaredFields.get(Strings.asciiLowerCase(fieldName));
     }
 
     private static File[] listPropertyFiles() throws OXException {
@@ -611,11 +633,12 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
     }
 
     private static Properties loadProperties(File file) throws OXException {
-        Properties properties = new Properties();
         FileInputStream in = null;
         try {
             in = new FileInputStream(file);
+            Properties properties = new Properties();
             properties.load(in);
+            return properties;
         } catch (FileNotFoundException e) {
             throw ConfigurationExceptionCodes.READ_ERROR.create(file);
         } catch (IOException e) {
@@ -623,7 +646,6 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         } finally {
             Streams.close(in);
         }
-        return properties;
     }
 
     /**

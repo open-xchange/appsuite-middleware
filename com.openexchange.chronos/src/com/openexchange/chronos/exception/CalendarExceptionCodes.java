@@ -51,6 +51,7 @@ package com.openexchange.chronos.exception;
 
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ACCOUNT_DISABLED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ACCOUNT_NOT_FOUND_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.ALARM_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ATTACHMENT_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ATTENDEE_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.AUTH_FAILED_MSG;
@@ -90,6 +91,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.STORAGE_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ALARMS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ATTENDEES_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_CONFERENCES_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_EVENTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_FOLDER_MSG;
@@ -156,6 +158,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Event not found with sequence [id %1$s, sequence [id %2$d]</li>
      */
     EVENT_SEQUENCE_NOT_FOUND("Event not found with sequence [id %1$s, sequence [id %2$d]", EVENT_SEQUENCE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4048),
+    /**
+     * <li>The requested alarm was not found.</li>
+     * <li>Alarm not found [alarm %1$d, event %2$s]</li>
+     */
+    ALARM_NOT_FOUND("Alarm not found [alarm %1$d, event %2$s]", ALARM_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4049),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
      * <li>Insufficient read permissions in folder [folder %1$s]</li>
@@ -408,6 +415,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     TOO_MANY_ALARMS("The event contains too many alarms.", TOO_MANY_ALARMS_MSG, Category.CATEGORY_USER_INPUT, 5074),
     /**
+     * <li>The appointment contains too many conferences.</li>
+     * <li>Too many conferences [limit %1$d, current %2$d]</li>
+     */
+    TOO_MANY_CONFERENCES("Too many conferences [limit %1$d, current %2$d]", TOO_MANY_CONFERENCES_MSG, Category.CATEGORY_USER_INPUT, 5076),
+    /**
      * <li>The maximum number of calendar subscriptions is exceeded.</li>
      * <li>Maximum number of accounts exceeded [provider %1$s, limit %2$d, current %3$d]</li>
      */
@@ -446,7 +458,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The method %1$s is unsupported for the provider %2$s.</li>
      */
     UNSUPPORTED_METHOD("The method %1$s is unsupported for the provider %2$s.", UNSUPPORTED_METHOD_MSG, Category.CATEGORY_TRUNCATED, 1992),
-    
+
     ;
 
     public static final String PREFIX = "CAL".intern();

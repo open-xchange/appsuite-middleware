@@ -85,11 +85,15 @@ public final class TokenLogin implements LoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         try {
             doTokenLogin(req, resp);
+            if(requestContext.getMetricProvider().isStateUnknown()) {
+                requestContext.getMetricProvider().recordSuccess();
+            }
         } catch (OXException e) {
             LoginServlet.logAndSendException(resp, e);
+            requestContext.getMetricProvider().recordException(e);
         }
     }
 

@@ -75,6 +75,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.rss.osgi.Services;
+import com.openexchange.rss.utils.RssProperties;
 import com.openexchange.tools.stream.CountingInputStream;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.fetcher.FetcherEvent;
@@ -158,9 +159,15 @@ public class TimeoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Re
             throw new FetcherException("Missing redirect URL");
         }
 
+        // Acquire needed service
+        RssProperties rssProperties = Services.getService(RssProperties.class);
+        if (rssProperties == null) {
+            throw new FetcherException("Missing service: " + RssProperties.class.getName());
+        }
+
         // Examine redirect location
         try {
-            if (RssProperties.isDenied(redirectUrl)) {
+            if (rssProperties.isDenied(redirectUrl)) {
                 // Deny redirecting to a local address
                 throw new FetcherException(redirectUrl + " is not an allowed redirect URL");
             }

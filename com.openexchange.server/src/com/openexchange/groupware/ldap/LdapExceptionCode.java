@@ -62,94 +62,89 @@ import com.openexchange.exception.OXExceptionStrings;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum LdapExceptionCode implements DisplayableOXExceptionCode {
-    
-    /**
-     * A property from the ldap.properties file is missing.
-     */
-    PROPERTY_MISSING("Cannot find property %s.", null, Category.CATEGORY_CONFIGURATION, 1),
-    
+
     /**
      * A problem with distinguished names occurred.
      */
     DN_PROBLEM("Cannot build distinguished name from %s.", null, Category.CATEGORY_ERROR, 2),
-    
+
     /**
      * Class can not be found.
      */
     CLASS_NOT_FOUND("Class %s can not be loaded.", null, Category.CATEGORY_CONFIGURATION, 3),
-    
+
     /**
      * An implementation can not be instantiated.
      */
     INSTANTIATION_PROBLEM("Cannot instantiate class %s.", null, Category.CATEGORY_CONFIGURATION, 4),
-    
+
     /**
      * A database connection Cannot be obtained.
      */
     NO_CONNECTION("Cannot get database connection.", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 5),
-    
+
     /**
      * SQL Problem: "%s".
      */
     SQL_ERROR("SQL problem: \"%s\"", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 6),
-    
+
     /**
      * Problem putting an object into the cache.
      */
     CACHE_PROBLEM("Problem putting/removing an object into/from the cache.", LdapExceptionMessage.CACHE_PROBLEM_DISPLAY,
         Category.CATEGORY_ERROR, 7),
-        
+
     /**
      * Hash algorithm %s isn't found.
      */
     HASH_ALGORITHM("Hash algorithm %s could not be found.", LdapExceptionMessage.HASH_ALGORITHM_DISPLAY, Category.CATEGORY_ERROR, 8),
-    
+
     /**
      * Encoding %s cannot be used.
      */
     UNSUPPORTED_ENCODING("Encoding %s cannot be used.", LdapExceptionMessage.UNSUPPORTED_ENCODING_DISPLAY, Category.CATEGORY_ERROR, 9),
-    
+
     /**
      * Cannot find resource group with identifier %d.
      */
     RESOURCEGROUP_NOT_FOUND("Cannot find resource group with identifier %d.", LdapExceptionMessage.RESOURCEGROUP_NOT_FOUND_DISPLAY,
         Category.CATEGORY_ERROR, 10),
-    
+
     /**
      * Found resource groups with same identifier %d.
      */
     RESOURCEGROUP_CONFLICT("Found resource groups with same identifier %d.", LdapExceptionMessage.RESOURCEGROUP_CONFLICT_DISPLAY,
         Category.CATEGORY_ERROR, 11),
-        
+
     /**
      * Cannot find resource with identifier %d.
      */
     RESOURCE_NOT_FOUND("Cannot find resource with identifier %d.", LdapExceptionMessage.RESOURCE_NOT_FOUND_DISPLAY,
         Category.CATEGORY_ERROR, 12),
-        
+
     /**
      * Found resources with same identifier %d.
      */
     RESOURCE_CONFLICT("Found resources with same identifier %d.", LdapExceptionMessage.RESOURCE_CONFLICT_DISPLAY,
         Category.CATEGORY_ERROR, 13),
-        
+
     /**
      * Cannot find user with email %s.
      */
     NO_USER_BY_MAIL("Cannot find user with E-Mail %s.", LdapExceptionMessage.NO_USER_BY_MAIL_DISPLAY, Category.CATEGORY_ERROR, 14),
-    
+
     /**
      * Cannot find user with identifier %1$s in context %2$d.
      */
     USER_NOT_FOUND("Cannot find user with identifier %1$s in context %2$d.", LdapExceptionMessage.USER_NOT_FOUND_DISPLAY,
         Category.CATEGORY_ERROR, 15),
-    
+
     /**
      * Cannot find group with identifier %1$s in context %2$d.
      */
     GROUP_NOT_FOUND("Cannot find group with identifier %1$s in context %2$d.", LdapExceptionMessage.GROUP_NOT_FOUND_DISPLAY,
         Category.CATEGORY_ERROR, 17),
-    
+
     /**
      * Unexpected error: %1$s
      */
@@ -159,7 +154,7 @@ public enum LdapExceptionCode implements DisplayableOXExceptionCode {
      * Message of the exception.
      */
     private final String message;
-    
+
     /**
      * Message shown to the user
      */
@@ -208,7 +203,7 @@ public enum LdapExceptionCode implements DisplayableOXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

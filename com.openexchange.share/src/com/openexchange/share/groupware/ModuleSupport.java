@@ -220,7 +220,7 @@ public interface ModuleSupport {
     /**
      * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).
      *
-     * @param The target from the sharing users point of view
+     * @param target The target from the sharing users point of view
      * @param session The requesting users session
      * @param targetUserId The ID of the user to adjust the target for
      */
@@ -229,7 +229,7 @@ public interface ModuleSupport {
     /**
      * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).
      *
-     * @param The target from the sharing users point of view
+     * @param target The target from the sharing users point of view
      * @param contextId The context ID
      * @param requestUserId The requesting users ID
      * @param targetUserId The ID of the user to adjust the target for

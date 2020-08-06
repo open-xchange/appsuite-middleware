@@ -111,7 +111,7 @@ public abstract class AbstractMailDriveResourceAccess {
      * @return The root folder identifier
      */
     public String getRootFolderId() {
-        return MailFolder.DEFAULT_FOLDER_ID;
+        return MailFolder.ROOT_FOLDER_ID;
     }
 
     /**

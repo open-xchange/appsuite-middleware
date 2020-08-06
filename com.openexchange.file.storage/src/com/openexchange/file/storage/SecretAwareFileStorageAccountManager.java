@@ -86,7 +86,7 @@ public class SecretAwareFileStorageAccountManager implements FileStorageAccountM
     /**
      * Initializes a new {@link SecretAwareFileStorageAccountManager}.
      */
-    private SecretAwareFileStorageAccountManager(FileStorageAccountManager manager) {
+    protected SecretAwareFileStorageAccountManager(FileStorageAccountManager manager) {
         super();
         this.manager = manager;
     }

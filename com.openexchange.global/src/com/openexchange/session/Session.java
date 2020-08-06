@@ -292,6 +292,12 @@ public interface Session {
     public final static String MULTIFACTOR_LAST_VERIFIED = "multifactorSession";
 
     /**
+     * Parameter marking the session as having restricted capabilities, contains a string array
+     * of allowed restricted scopes.
+     */
+    public final static String PARAM_RESTRICTED = "restricted".intern();
+
+    /**
      * @return the context identifier.
      */
     int getContextId();

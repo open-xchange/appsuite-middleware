@@ -49,16 +49,21 @@
 
 package com.openexchange.rest.client.osgi;
 
+import static com.openexchange.osgi.Tools.generateServiceFilter;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.metrics.MetricService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
 import com.openexchange.rest.client.endpointpool.internal.EndpointManagerFactoryImpl;
-import com.openexchange.rest.client.httpclient.internal.WrappedClientsRegistry;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.internal.HttpClientServiceImpl;
 import com.openexchange.timer.TimerService;
-
+import com.openexchange.version.VersionService;
 
 /**
  * {@link RestClientActivator}
@@ -67,6 +72,8 @@ import com.openexchange.timer.TimerService;
  * @since v7.8.1
  */
 public class RestClientActivator extends HousekeepingActivator {
+
+    private HttpClientServiceImpl httpClientService;
 
     /**
      * Initializes a new {@link RestClientActivator}.
@@ -77,28 +84,46 @@ public class RestClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TimerService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, MetricService.class,
-            ConfigurationService.class };
+        return new Class<?>[] { TimerService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, ConfigurationService.class };
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        RestClientServices.setServices(this);
-        WrappedClientsRegistry.getInstance().setSSLServices(getService(SSLSocketFactoryProvider.class), getService(SSLConfigurationService.class));
-        registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { VersionService.class };
+    }
 
+    @Override
+    protected synchronized void startBundle() throws Exception {
+        RestClientServices.setServices(this);
+
+        HttpClientServiceImpl httpClientService = new HttpClientServiceImpl(context, this);
+        this.httpClientService = httpClientService;
+        track(generateServiceFilter(context, SpecificHttpClientConfigProvider.class, WildcardHttpClientConfigProvider.class), httpClientService);
+        trackService(LeanConfigurationService.class);
+        openTrackers();
+
+        registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(httpClientService, this));
+        registerService(HttpClientService.class, httpClientService);
+        registerService(ForcedReloadable.class, httpClientService);
         // Avoid annoying WARN logging
         //System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.client.protocol.ResponseProcessCookies", "fatal");
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         try {
-            // Clean-up
-            super.stopBundle();
             // Clear service registry
-            WrappedClientsRegistry.getInstance().setSSLServices(null, null);
             RestClientServices.setServices(null);
+            // Clean-up registered services and trackers
+            cleanUp();
+            // Shut-down service
+            HttpClientServiceImpl httpClientService = this.httpClientService;
+            if (null != httpClientService) {
+                this.httpClientService = null;
+                httpClientService.shutdown();
+            }
+            // Call to super...
+            super.stopBundle();
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(RestClientActivator.class).error("", e);
             throw e;

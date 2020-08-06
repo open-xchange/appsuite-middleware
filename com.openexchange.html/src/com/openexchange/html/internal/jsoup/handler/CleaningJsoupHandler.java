@@ -85,7 +85,6 @@ import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.css.CSSMatcher;
 import com.openexchange.html.internal.filtering.FilterMaps;
 import com.openexchange.html.internal.jsoup.JsoupHandler;
-import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.java.InterruptibleCharSequence;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
@@ -1006,7 +1005,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
             builder.setLength(restoreLen);
             builder.append(url);
         } catch (Exception e) {
-            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HTMLURLReplacerHandler.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CleaningJsoupHandler.class);
             log.warn("URL replacement failed.", e);
             builder.setLength(restoreLen);
             builder.append(url);

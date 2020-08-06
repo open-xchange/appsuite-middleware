@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Logging Configuration
 Bundle-SymbolicName: com.openexchange.logging
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Activator: com.openexchange.logging.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -32,6 +32,7 @@ Import-Package: ch.qos.logback.classic,
  com.openexchange.marker,
  com.openexchange.osgi.annotation,
  com.openexchange.server,
+ com.openexchange.session,
  javax.management,
  javax.management.loading,
  javax.management.modelmbean,

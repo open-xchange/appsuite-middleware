@@ -85,6 +85,7 @@ import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.servlet.Constants;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
@@ -120,7 +121,7 @@ public abstract class OXServlet extends WebDavServlet {
         private final String version;
 
         public LoginRequestImpl(final String login, final String pass, final Interface interfaze, final HttpServletRequest req) {
-            this(req, login, pass, interfaze, AJAXUtility.sanitizeParam(req.getParameter(LoginFields.CLIENT_PARAM)), 
+            this(req, login, pass, interfaze, AJAXUtility.sanitizeParam(req.getParameter(LoginFields.CLIENT_PARAM)),
                 AJAXUtility.sanitizeParam(req.getParameter(LoginFields.VERSION_PARAM)), AJAXUtility.sanitizeParam(req.getParameter("agent")));
         }
 
@@ -218,6 +219,17 @@ public abstract class OXServlet extends WebDavServlet {
         }
 
         @Override
+        public boolean markHttpSessionAuthenticated() {
+            HttpSession session = req.getSession(false);
+            if (session == null) {
+                return false;
+            }
+
+            session.setAttribute(Constants.HTTP_SESSION_ATTR_AUTHENTICATED, Boolean.TRUE);
+            return true;
+        }
+
+        @Override
         public String getClientToken() {
             return null;
         }
@@ -236,12 +248,12 @@ public abstract class OXServlet extends WebDavServlet {
         public boolean isStoreLanguage() {
             return LoginTools.parseStoreLanguage(req);
         }
-        
+
         @Override
         public String getLocale() {
             return LoginTools.parseLocale(req);
         }
-        
+
         @Override
         public boolean isStoreLocale() {
             return LoginTools.parseStoreLocale(req);
@@ -625,7 +637,7 @@ public abstract class OXServlet extends WebDavServlet {
     /**
      * @param sessionID
      */
-    private static void removeSession(final String sessionID) {
+    protected static void removeSession(final String sessionID) {
         try {
             ServerServiceRegistry.getInstance().getService(SessiondService.class, true).removeSession(sessionID);
         } catch (OXException e) {
@@ -638,7 +650,7 @@ public abstract class OXServlet extends WebDavServlet {
      *
      * @param resp the response to that the header should be added.
      */
-    private void addUnauthorizedHeader(final HttpServletResponse resp) {
+    protected void addUnauthorizedHeader(final HttpServletResponse resp) {
         if (useHttpAuth()) {
             resp.addHeader("WWW-Authenticate", "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
             if (allowOAuthAccess()) {

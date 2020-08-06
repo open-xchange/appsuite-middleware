@@ -49,12 +49,13 @@
 
 package com.openexchange.messaging.rss.osgi;
 
-import com.openexchange.config.ConfigurationService;
+import org.slf4j.Logger;
 import com.openexchange.html.HtmlService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.rss.RSSMessagingService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.proxy.ProxyRegistry;
+import com.openexchange.rss.utils.RssProperties;
 
 /**
  * {@link Activator}
@@ -70,7 +71,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { RssProperties.class };
     }
 
     @Override
@@ -81,11 +82,10 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
-        	Services.setServiceLookup(this);
             track(HtmlService.class, new HTMLRegistryCustomizer(context));
             track(ProxyRegistry.class, new ProxyRegistryCustomizer(context));
             openTrackers();
-            registerService(MessagingService.class, new RSSMessagingService(), null);
+            registerService(MessagingService.class, new RSSMessagingService(getService(RssProperties.class)), null);
         } catch (Exception x) {
             LoggerHolder.LOG.error("", x);
             throw x;

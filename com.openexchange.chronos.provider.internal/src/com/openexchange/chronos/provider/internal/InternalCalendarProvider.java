@@ -126,7 +126,7 @@ public class InternalCalendarProvider implements FolderCalendarProvider, AutoPro
     public FolderCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         CalendarService calendarService = services.getService(CalendarService.class);
         CalendarSession calendarSession = calendarService.init(session, parameters);
-        return new InternalCalendarAccess(calendarSession, account, services);
+        return new InternalCalendarAccess(calendarSession, services);
     }
 
     @Override

@@ -137,7 +137,7 @@ public abstract class AttendeesMapping<O> extends ListItemMapping<Attendee, O, J
     /**
      * Deserializes an attendee from the supplied json object.
      *
-     * @param jsonObject The json object to parse the attendee from
+     * @param from The json object to parse the attendee from
      * @return The parsed attendee
      */
     public static Attendee deserializeAttendee(JSONObject from) throws JSONException {

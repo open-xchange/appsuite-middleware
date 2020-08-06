@@ -49,15 +49,16 @@
 
 package com.openexchange.admin.rmi.impl;
 
-import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import java.rmi.RemoteException;
 import java.util.concurrent.ExecutionException;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.taskmanagement.ExtendedFutureTask;
@@ -66,6 +67,8 @@ import com.openexchange.admin.tools.AdminCache;
 
 public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXTaskMgmtImpl.class);
+
     private final AdminCache cache;
 
     public OXTaskMgmtImpl() {
@@ -73,9 +76,27 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
         this.cache = ClientAdminThread.cache;
     }
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXTaskMgmtImpl.class);
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final Context ctx, final int id) {
+        logAndEnhanceException(t, credentials, null != ctx ? ctx.getIdAsString() : null, Integer.toString(id));
+    }
 
-    private void doAuth(final Credentials creds, final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException {
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final String contextId, final String id) {
+        if (t instanceof AbstractAdminRmiException) {
+            logAndReturnException(log, ((AbstractAdminRmiException) t), credentials, contextId, id);
+        } else if (t instanceof RemoteException) {
+            RemoteException remoteException = (RemoteException) t;
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(log, remoteException, exceptionId, credentials, contextId, id);
+        } else if (t instanceof Exception) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException((Exception) t);
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(log, remoteException, exceptionId, credentials, contextId, id);
+        }
+    }
+
+    private void doAuth(final Credentials creds, final Context ctx) throws InvalidCredentialsException, StorageException {
         BasicAuthenticator basicAuth = BasicAuthenticator.createNonPluginAwareAuthenticator();
         if (cache.isMasterAdmin(creds)) {
             basicAuth.doAuthentication(creds);
@@ -98,21 +119,9 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 contextcheck(ctx);
                 TaskManager.getInstance().deleteJob(id, ctx.getId());
             }
-        } catch (InvalidCredentialsException e) {
-            log.error("", e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, cred, ctx, id);
             throw e;
-        } catch (StorageException e) {
-            log.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            log.error("", e);
-            throw e;
-        } catch (TaskManagerException e) {
-            log.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
         }
     }
 
@@ -126,21 +135,9 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 contextcheck(ctx);
                 TaskManager.getInstance().flush(ctx.getId());
             }
-        } catch (InvalidCredentialsException e) {
-            log.error("", e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, cred, ctx.getIdAsString(), null);
             throw e;
-        } catch (StorageException e) {
-            log.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            log.error("", e);
-            throw e;
-        } catch (TaskManagerException e) {
-            log.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
         }
     }
 
@@ -154,18 +151,9 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
 
             contextcheck(ctx);
             return TaskManager.getInstance().getJobList(ctx.getId());
-        } catch (InvalidCredentialsException e) {
-            log.error("", e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, cred, ctx.getIdAsString(), null);
             throw e;
-        } catch (StorageException e) {
-            log.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            log.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
         }
     }
 
@@ -179,24 +167,13 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
 
             contextcheck(ctx);
             return getTaskResults(id, ctx.getId());
-        } catch (InvalidCredentialsException e) {
-            log.error("", e);
-            throw e;
-        } catch (StorageException e) {
-            log.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            log.error("", e);
-            throw e;
-        } catch (InterruptedException e) {
-            log.error("", e);
-            throw e;
         } catch (TaskManagerException e) {
-            log.error("", e);
-            throw new InvalidDataException(e.getMessage());
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+            RemoteException remoteException = RemoteExceptionUtils.convertException(e);
+            logAndReturnException(log, remoteException, e.getExceptionId(), cred, ctx.getIdAsString(), String.valueOf(id));
+            throw remoteException;
+        } catch (Throwable e) {
+            logAndEnhanceException(e, cred, ctx, id);
+            throw e;
         }
     }
 

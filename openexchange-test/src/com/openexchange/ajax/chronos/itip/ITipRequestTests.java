@@ -129,9 +129,6 @@ public class ITipRequestTests extends AbstractITipTest {
     /** Attendee from context 1, user A */
     private Attendee attendee;
 
-    /** The event managed by the organizer */
-    private EventData organizerInstance;
-
     private String uniqueSummary;
 
     @Override
@@ -162,8 +159,8 @@ public class ITipRequestTests extends AbstractITipTest {
         uniqueSummary = summary + UUID.randomUUID().toString();
         event.setSummary(uniqueSummary);
 
-        organizerInstance = createEvent(apiClientC2, event, folderIdC2);
-        rememberForCleanup(apiClientC2, organizerInstance);
+        /* Create event as user B */
+        eventManagerC2.createEvent(event, true);
 
         mailData = receiveIMip(apiClient, organizer.getEmail(), uniqueSummary, 0, SchedulingMethod.REQUEST);
         rememberMail(mailData);
@@ -171,17 +168,17 @@ public class ITipRequestTests extends AbstractITipTest {
 
     @Test
     public void testAccept() throws Exception {
-        validate(accept(constructBody(mailData)), ParticipationStatus.ACCEPTED);
+        validate(accept(constructBody(mailData), null), ParticipationStatus.ACCEPTED);
     }
 
     @Test
     public void testTenative() throws Exception {
-        validate(tentative(constructBody(mailData)), ParticipationStatus.TENTATIVE);
+        validate(tentative(constructBody(mailData), null), ParticipationStatus.TENTATIVE);
     }
 
     @Test
     public void testDecline() throws Exception {
-        validate(decline(constructBody(mailData)), ParticipationStatus.DECLINED);
+        validate(decline(constructBody(mailData), null), ParticipationStatus.DECLINED);
     }
 
     private void validate(ActionResponse response, ParticipationStatus partStat) throws Exception {

@@ -51,7 +51,6 @@ package com.openexchange.push.impl;
 
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.openexchange.hazelcast.Hazelcasts;
@@ -71,8 +70,6 @@ import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRe
  * @since v7.8.0
  */
 public class SessionLookUpUtility {
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionLookUpUtility.class);
 
     private final ServiceLookup services;
     private final PushManagerRegistry registry;

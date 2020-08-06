@@ -81,10 +81,12 @@ public class Reflections {
     public static void makeModifiable(Field field) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
         field.setAccessible(true);
         int modifiers = field.getModifiers();
-        Field modifierField = field.getClass().getDeclaredField("modifiers");
-        modifiers = modifiers & ~Modifier.FINAL;
-        modifierField.setAccessible(true);
-        modifierField.setInt(field, modifiers);
+        if (Modifier.isFinal(modifiers)) {
+            Field modifierField = field.getClass().getDeclaredField("modifiers");
+            modifiers = modifiers & ~Modifier.FINAL;
+            modifierField.setAccessible(true);
+            modifierField.setInt(field, modifiers);
+        }
     }
 
 }

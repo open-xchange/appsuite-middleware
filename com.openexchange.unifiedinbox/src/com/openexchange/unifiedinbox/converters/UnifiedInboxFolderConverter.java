@@ -95,7 +95,7 @@ public final class UnifiedInboxFolderConverter {
         // Only the default folder contains subfolders
         tmp.setSubfolders(true);
         tmp.setSubscribedSubfolders(true);
-        tmp.setFullname(MailFolder.DEFAULT_FOLDER_ID);
+        tmp.setFullname(MailFolder.ROOT_FOLDER_ID);
         tmp.setParentFullname(null);
         tmp.setName(UnifiedInboxManagement.NAME_UNIFIED_INBOX);
         tmp.setHoldsFolders(true);
@@ -161,7 +161,7 @@ public final class UnifiedInboxFolderConverter {
         tmp.setExists(true);
         tmp.setSeparator('/');
         tmp.setFullname(fullname);
-        tmp.setParentFullname(MailFolder.DEFAULT_FOLDER_ID);
+        tmp.setParentFullname(MailFolder.ROOT_FOLDER_ID);
         tmp.setName(localizedName);
         tmp.setHoldsFolders(true);
         tmp.setHoldsMessages(true);
@@ -319,7 +319,7 @@ public final class UnifiedInboxFolderConverter {
             tmp.setExists(true);
             tmp.setSeparator('/');
             tmp.setFullname(fullname);
-            tmp.setParentFullname(MailFolder.DEFAULT_FOLDER_ID);
+            tmp.setParentFullname(MailFolder.ROOT_FOLDER_ID);
             tmp.setName(localizedNames[i]);
             tmp.setHoldsFolders(true);
             tmp.setHoldsMessages(true);

@@ -51,6 +51,8 @@ package com.openexchange.webdav.protocol.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -131,13 +133,6 @@ public final class DummyResourceManager implements WebdavFactory {
 		return (DummyCollection) resolveCollection(url.parent());
 	}
 
-	private String normalize(String url) {
-		while (url.contains("//")){
-			url = url.replaceAll("//","/");
-		}
-		return url;
-	}
-
 	@Override
     public Protocol getProtocol() {
 		return PROTOCOL;
@@ -165,5 +160,10 @@ public final class DummyResourceManager implements WebdavFactory {
 		// Nothing to do
 
 	}
+
+    @Override
+    public Session getSession() throws OXException {
+        return null;
+    }
 
 }

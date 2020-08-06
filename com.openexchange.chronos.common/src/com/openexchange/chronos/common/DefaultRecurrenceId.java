@@ -59,6 +59,8 @@ import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link DefaultRecurrenceId}
+ * <p/>
+ * <b>Note:</b> This class has a natural ordering that is inconsistent with equals.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
@@ -69,9 +71,29 @@ public class DefaultRecurrenceId implements RecurrenceId {
     protected final RecurrenceRange range;
 
     /**
-     * Initializes a new {@link DefaultRecurrenceId} for a specific date-time. If the date-time is neither <i>floating</i> nor in
-     * <code>UTC</code> format, the value's timezone is shifted to <code>UTC</code> implicitly.
+     * Initializes a new {@link DefaultRecurrenceId} for a specific date-time.
      *
+     * @param value The recurrence-id value
+     * @throws NullPointerException if the passed argument is <code>null</code>
+     */
+    public DefaultRecurrenceId(DateTime value) {
+        this(value, (RecurrenceRange) null);
+    }
+
+    /**
+     * Initializes a new {@link DefaultRecurrenceId} for a specific date-time.
+     * 
+     * @param value The recurrence-id value
+     * @param range The targeted range, or <code>null</code> if only this recurrence is targeted
+     * @throws NullPointerException if the passed value argument is <code>null</code>
+     */
+    public DefaultRecurrenceId(DateTime value, String range) {
+        this(value, Enums.parse(RecurrenceRange.class, range, null));
+    }
+
+    /**
+     * Initializes a new {@link DefaultRecurrenceId} for a specific date-time.
+     * 
      * @param value The recurrence-id value
      * @param range The targeted range, or <code>null</code> if only this recurrence is targeted
      * @throws NullPointerException if the passed value argument is <code>null</code>
@@ -81,23 +103,20 @@ public class DefaultRecurrenceId implements RecurrenceId {
         if (null == value) {
             throw new NullPointerException("value");
         }
-        if (null != value.getTimeZone() && false == DateTime.UTC.equals(value.getTimeZone())) {
-            this.value = value.shiftTimeZone(DateTime.UTC);
-        } else {
-            this.value = value;
-        }
+        this.value = value;
         this.range = range;
     }
 
     /**
-     * Initializes a new {@link DefaultRecurrenceId} for a specific date-time. If the date-time is neither <i>floating</i> nor in
-     * <code>UTC</code> format, the value's timezone is shifted to <code>UTC</code> implicitly.
+     * Initializes a new {@link DefaultRecurrenceId} from a RFC 5545 date-time string, either in <code>UTC</code> format (with trailing
+     * <code>Z</code>), or as <i>floating</i> date or date-time.
      *
-     * @param value The recurrence-id value
+     * @param value The recurrence-id value as RFC 5545 date-time string
      * @throws NullPointerException if the passed argument is <code>null</code>
+     * @throws IllegalArgumentException if the passed argument is not a valid date-time string
      */
-    public DefaultRecurrenceId(DateTime value) {
-        this(value, null);
+    public DefaultRecurrenceId(String value) {
+        this(value, null, null);
     }
 
     /**
@@ -110,19 +129,32 @@ public class DefaultRecurrenceId implements RecurrenceId {
      * @throws IllegalArgumentException if the passed value argument is not a valid date-time string, or the passed range argument is invalid
      */
     public DefaultRecurrenceId(String value, String range) {
-        this(DateTime.parse(value), Enums.parse(RecurrenceRange.class, range, null));
+        this(value, null, range);
     }
 
     /**
-     * Initializes a new {@link DefaultRecurrenceId} from a RFC 5545 date-time string, either in <code>UTC</code> format (with trailing
-     * <code>Z</code>), or as <i>floating</i> date or date-time.
+     * Initializes a new {@link DefaultRecurrenceId} from a RFC 5545 date-time string.
      *
      * @param value The recurrence-id value as RFC 5545 date-time string
-     * @throws NullPointerException if the passed argument is <code>null</code>
-     * @throws IllegalArgumentException if the passed argument is not a valid date-time string
+     * @param timeZone The time zone to apply, or <code>null</code> if <i>floating</i> or in <code>UTC</code> format
+     * @throws NullPointerException if the passed value argument is <code>null</code>
+     * @throws IllegalArgumentException if the passed value argument is not a valid date-time string, or the passed range argument is invalid
      */
-    public DefaultRecurrenceId(String value) {
-        this(DateTime.parse(value));
+    public DefaultRecurrenceId(String value, TimeZone timeZone) {
+        this(value, timeZone, null);
+    }
+
+    /**
+     * Initializes a new {@link DefaultRecurrenceId} from a RFC 5545 date-time string.
+     *
+     * @param value The recurrence-id value as RFC 5545 date-time string
+     * @param timeZone The time zone to apply, or <code>null</code> if <i>floating</i> or in <code>UTC</code> format
+     * @param range The targeted range, or <code>null</code> if only this recurrence is targeted
+     * @throws NullPointerException if the passed value argument is <code>null</code>
+     * @throws IllegalArgumentException if the passed value argument is not a valid date-time string, or the passed range argument is invalid
+     */
+    public DefaultRecurrenceId(String value, TimeZone timeZone, String range) {
+        this(DateTime.parse(timeZone, value), range);
     }
 
     @Override
@@ -146,6 +178,13 @@ public class DefaultRecurrenceId implements RecurrenceId {
     }
 
     @Override
+    public boolean matches(RecurrenceId other) {
+        return null != other && getValue().getTimestamp() == other.getValue().getTimestamp() && 
+            getValue().isFloating() == other.getValue().isFloating() &&
+            getValue().isAllDay() == other.getValue().isAllDay();
+    }
+
+    @Override
     public int hashCode() {
         int result = value.hashCode();
         if (null != range) {
@@ -165,7 +204,7 @@ public class DefaultRecurrenceId implements RecurrenceId {
 
     @Override
     public String toString() {
-        return value.toString();
+        return CalendarUtils.encode(getValue());
     }
 
 }

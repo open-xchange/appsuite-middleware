@@ -76,7 +76,9 @@ import com.openexchange.test.concurrent.ParallelSuite;
     BulkImportTest.class,
     AddressbookQueryTest.class,
     AddressbookQueryPartialRetrievalTest.class,
-    AddressbookMultigetPartialRetrievalTest.class, ImageURITest.class
+    AddressbookMultigetPartialRetrievalTest.class,
+    ImageURITest.class,
+    DistListTest.class,
 }) // @formatter:on
 public final class CardDAVTestSuite {
 

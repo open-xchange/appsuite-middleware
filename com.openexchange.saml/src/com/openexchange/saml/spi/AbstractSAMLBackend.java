@@ -50,15 +50,15 @@
 package com.openexchange.saml.spi;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.DecoderException;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.LogoutRequest;
-import org.opensaml.saml2.core.Response;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.LogoutRequest;
+import org.opensaml.saml.saml2.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.login.LoginConfiguration;
@@ -69,7 +69,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLExceptionCode;
-import com.openexchange.saml.impl.DefaultConfig;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.DefaultAuthnRequestInfo;
 import com.openexchange.saml.state.StateManagement;
@@ -224,7 +223,7 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
         try {
             LOG_ABSTRACT.debug("RelayState: {}", relayState);
             DefaultAuthnRequestInfo defaultAuthnRequestInfo = new DefaultAuthnRequestInfo();
-            String string = new String(Base64.decode(relayState.getBytes()));
+            String string = new String(Base64.decode(relayState.getBytes(StandardCharsets.ISO_8859_1)));
             LOG_ABSTRACT.debug("decoded RelayState: {}", string);
             String[] splitRelayState = string.split(":");
             for (String s : splitRelayState) {
@@ -253,12 +252,6 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
             // Whatever unexpected uncaught exception
             throw SAMLExceptionCode.INVALID_REQUEST.create(e, "Parsing the 'RelayState' parameter failed");
         }
-    }
-
-    @Override
-    public SAMLConfig getConfig() {
-        Optional<DefaultConfig> optionalDefaultConfig = DefaultConfig.getDefaultConfig();
-        return optionalDefaultConfig.orElseThrow(() -> new IllegalStateException("Default configuration not yet initialized"));
     }
 
     @Override

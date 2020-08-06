@@ -48,6 +48,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.exc.InputCoercionException;
 
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its external form is a string wrapped in curly braces with colons between
@@ -1707,11 +1708,11 @@ public class JSONObject extends AbstractJSONValue {
                 case VALUE_NUMBER_INT:
                     try {
                         jo.put(fieldName, jParser.getIntValue());
-                    } catch (JsonParseException e) {
+                    } catch (JsonParseException | InputCoercionException e) {
                         // Outside of range of Java int
                         try {
                             jo.put(fieldName, jParser.getLongValue());
-                        } catch (JsonParseException pe) {
+                        } catch (JsonParseException | InputCoercionException pe) {
                             // Outside of range of Java long
                             // Fallback: Treat number as double, so we don't lose
                             // too much precision (#44850)

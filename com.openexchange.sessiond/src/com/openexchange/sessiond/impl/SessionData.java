@@ -381,14 +381,17 @@ final class SessionData {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param matcher The matcher to satisfy
+     * @param ignoreShortTerm Whether short-term container should be considered or not
      * @param ignoreLongTerm Whether long-term container should be considered or not
      * @return The first matching session or <code>null</code>
      */
-    public Session findFirstSessionForUser(int userId, int contextId, SessionMatcher matcher, boolean ignoreLongTerm) {
-        for (SessionContainer container : sessionList) {
-            SessionControl control = container.getAnySessionByUser(userId, contextId);
-            if ((control != null) && matcher.accepts(control.getSession())) {
-                return control.getSession();
+    public Session findFirstSessionForUser(int userId, int contextId, SessionMatcher matcher, boolean ignoreShortTerm, boolean ignoreLongTerm) {
+        if (false == ignoreShortTerm) {
+            for (SessionContainer container : sessionList) {
+                SessionControl control = container.getAnySessionByUser(userId, contextId);
+                if ((control != null) && matcher.accepts(control.getSession())) {
+                    return control.getSession();
+                }
             }
         }
 
@@ -404,6 +407,7 @@ final class SessionData {
                 }
             }
         }
+
         return null;
     }
 
@@ -578,6 +582,15 @@ final class SessionData {
         }
     }
 
+    /**
+     * Gets the max. number of total sessions
+     *
+     * @return the max. number of total sessions
+     */
+    int getMaxSessions() {
+        return this.maxSessions;
+    }
+
     int countSessions() {
         // A read-only access to session list
         int count = 0;
@@ -738,27 +751,42 @@ final class SessionData {
 
     List<SessionControl> getShortTermSessions() {
         // A read-only access
-        final List<SessionControl> retval = new LinkedList<SessionControl>();
-        for (final SessionContainer container : sessionList) {
-            retval.addAll(container.getSessionControls());
+        Iterator<SessionContainer> it = sessionList.iterator();
+        if (!it.hasNext()) {
+            return Collections.emptyList();
+        }
+
+        List<SessionControl> retval = new ArrayList<SessionControl>(it.next().getSessionControls());
+        while (it.hasNext()) {
+            retval.addAll(it.next().getSessionControls());
         }
         return retval;
     }
 
     List<String> getShortTermSessionIDs() {
         // A read-only access
-        List<String> retval = new LinkedList<String>();
-        for (SessionContainer container : sessionList) {
-            retval.addAll(container.getSessionIDs());
+        Iterator<SessionContainer> it = sessionList.iterator();
+        if (!it.hasNext()) {
+            return Collections.emptyList();
+        }
+
+        List<String> retval = new ArrayList<String>(it.next().getSessionIDs());
+        while (it.hasNext()) {
+            retval.addAll(it.next().getSessionIDs());
         }
         return retval;
     }
 
     List<SessionControl> getLongTermSessions() {
         // A read-only access
-        List<SessionControl> retval = new LinkedList<SessionControl>();
-        for (final SessionMap longTermMap : longTermList) {
-            retval.addAll(longTermMap.values());
+        Iterator<SessionMap> it = longTermList.iterator();
+        if (!it.hasNext()) {
+            return Collections.emptyList();
+        }
+
+        List<SessionControl> retval = new ArrayList<SessionControl>(it.next().values());
+        while (it.hasNext()) {
+            retval.addAll(it.next().values());
         }
         return retval;
     }

@@ -68,7 +68,6 @@ import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link CachingCalendarAccountStorage}
  *
@@ -255,6 +254,16 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     public CalendarAccount loadAccount(int userId, String providerId) throws OXException {
         //TODO: from cache / put result in cache?
         return delegate.loadAccount(userId, providerId);
+    }
+
+    @Override
+    public List<CalendarAccount> loadAccounts(int userId, String... providerIds) throws OXException {
+        return delegate.loadAccounts(userId, providerIds);
+    }
+
+    @Override
+    public List<CalendarAccount> loadAccounts(String... providerIds) throws OXException {
+        return delegate.loadAccounts(providerIds);
     }
 
     @Override

@@ -54,7 +54,7 @@ import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
-import com.openexchange.messaging.rss.utils.RssProperties;
+import com.openexchange.rss.utils.RssProperties;
 import com.openexchange.session.Session;
 
 /**
@@ -65,13 +65,16 @@ import com.openexchange.session.Session;
  */
 public class ConfigurationCheckingAccountManager extends DefaultMessagingAccountManager {
 
+    private final RssProperties rssProperties;
+
     /**
      * Initializes a new {@link ConfigurationCheckingAccountManager}.
      *
      * @param service The {@link MessagingService}
      */
-    public ConfigurationCheckingAccountManager(MessagingService service) {
+    public ConfigurationCheckingAccountManager(MessagingService service, RssProperties rssProperties) {
         super(service);
+        this.rssProperties = rssProperties;
     }
 
     @Override
@@ -87,14 +90,14 @@ public class ConfigurationCheckingAccountManager extends DefaultMessagingAccount
     }
 
     /**
-     * Checks whether the account has a valid account url or not.
+     * Checks whether the account has a valid account URL or not.
      *
      * @param account The {@link MessagingAccount}
      * @throws OXException in case the account is invalid
      */
     private void checkAccount(MessagingAccount account) throws OXException {
         Object urlObj = account.getConfiguration().get(FormStrings.FORM_LABEL_URL);
-        if (urlObj == null || RssProperties.isDenied(urlObj.toString())) {
+        if (urlObj == null || rssProperties.isDenied(urlObj.toString())) {
             throw MessagingExceptionCodes.INVALID_ACCOUNT_CONFIGURATION.create("Invalid account url");
         }
     }

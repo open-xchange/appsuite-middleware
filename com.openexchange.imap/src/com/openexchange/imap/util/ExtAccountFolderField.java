@@ -54,6 +54,7 @@ import static com.openexchange.java.Strings.isEmpty;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.MessagingException;
 import org.json.JSONObject;
@@ -172,7 +173,12 @@ public class ExtAccountFolderField implements AdditionalFolderField {
             return JSONObject.NULL;
         }
 
-        FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(fullName);
+        Optional<FullnameArgument> optional = MailFolderUtility.optPrepareMailFolderParam(fullName);
+        if (!optional.isPresent()) {
+            return JSONObject.NULL;
+        }
+
+        FullnameArgument fa = optional.get();
         if (fa.getAccountId() != MailAccount.DEFAULT_ID) {
             return JSONObject.NULL;
         }
@@ -383,7 +389,10 @@ public class ExtAccountFolderField implements AdditionalFolderField {
         }
         // Read full name; decode the name (using RFC2060's modified UTF7)
         metadataResponse.skipSpaces();
-        final String fullName = BASE64MailboxDecoder.decode(metadataResponse.readAtomString());
+        String fullName = metadataResponse.readAtomString();
+        if (!metadataResponse.supportsUtf8()) {
+            fullName = BASE64MailboxDecoder.decode(metadataResponse.readAtomString());
+        }
 
         // Read until opening parenthesis or EOF
         byte b = 0;

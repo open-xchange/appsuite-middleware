@@ -72,6 +72,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -126,14 +127,14 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link NewAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@DispatcherNotes( preferStream = true, enqueueable = true )
-public final class NewAction extends AbstractMailAction implements EnqueuableAJAXActionService  {
+@DispatcherNotes(preferStream = true, enqueueable = true)
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
+public final class NewAction extends AbstractMailAction implements EnqueuableAJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
 
@@ -146,6 +147,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
 
     /**
      * Initializes a new {@link NewAction}.
+     * 
      * @param services
      */
     public NewAction(final ServiceLookup services) {
@@ -841,7 +843,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
                     String[] uidArr;
                     try {
                         mailAccess.connect();
-                        sentFullname = MailFolderUtility.prepareMailFolderParam(mailAccess.getFolderStorage().getSentFolder()).getFullname();
+                        sentFullname = MailFolderUtility.prepareMailFolderParamOrElseReturn(mailAccess.getFolderStorage().getSentFolder());
                         /*
                          * Append to default "sent" folder
                          */
@@ -862,11 +864,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
                          * Update cache
                          */
                         try {
-                            MailMessageCache.getInstance().removeFolderMessages(
-                                accountId,
-                                sentFullname,
-                                session.getUserId(),
-                                session.getContext().getContextId());
+                            MailMessageCache.getInstance().removeFolderMessages(accountId, sentFullname, session.getUserId(), session.getContext().getContextId());
                         } catch (OXException e) {
                             LOG.error("", e);
                         }

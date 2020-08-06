@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.database;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.b;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -65,6 +66,7 @@ import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
@@ -88,11 +90,14 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.Sessions;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import gnu.trove.set.TIntSet;
@@ -154,7 +159,12 @@ public class DatabaseFolder extends AbstractFolder {
         id = String.valueOf(objectId);
         name = folderObject.getFolderName();
         parent = String.valueOf(folderObject.getParentFolderID());
-        type = getType(folderObject.getType());
+        Type type = getType(folderObject.getType());
+        this.type = type;
+        if (cacheable && TrashType.getInstance().equals(type)) {
+            this.cacheable = false;
+        }
+
         contentType = getContentType(folderObject.getModule());
         if (contentType.getModule() == InfostoreContentType.getInstance().getModule()) {
             accountId = FileStorageAccounts.getQualifiedID(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID);
@@ -374,5 +384,71 @@ public class DatabaseFolder extends AbstractFolder {
             LOG.debug("Error checking visibility state of folder {}, assuming 'false'.", folderObject, e);
         }
         return false;
+    }
+
+    @Override
+    public UsedForSync getUsedForSync() {
+        try {
+            FolderSubscriptionHelper subscriptionHelper = ServerServiceRegistry.getInstance().getService(FolderSubscriptionHelper.class);
+            if (subscriptionHelper == null) {
+                throw ServiceExceptionCode.absentService(FolderSubscriptionHelper.class);
+            }
+
+            if (false == subscriptionHelper.isSubscribableModule(folderObject.getModule())) {
+                return UsedForSync.DEACTIVATED;
+            }
+
+            ServerSession session = getSession();
+            if (null != session) {
+                if (folderObject.isDefaultFolder() && FolderObject.PRIVATE == folderObject.getType(session.getUserId()) ) {
+                    return UsedForSync.FORCED_ACTIVE;
+                }
+                Boolean usedForSync = subscriptionHelper.isUsedForSync(
+                    Optional.empty(), session.getContextId(), session.getUserId(), folderObject.getObjectID(), folderObject.getModule()).orElse(Boolean.TRUE);
+                return UsedForSync.of(usedForSync.booleanValue());
+            }
+        } catch (OXException e) {
+            // Ignore
+            LOG.debug("Error checking used-for-sync state of folder {}, assuming 'deactivated'.", folderObject, e);
+        }
+        return UsedForSync.DEACTIVATED;
+    }
+
+    @Override
+    public void setUsedForSync(UsedForSync usedForSync) {
+        // ignore
+    }
+
+    @Override
+    public boolean isSubscribed() {
+        try {
+            FolderSubscriptionHelper subscriptionHelper = ServerServiceRegistry.getInstance().getService(FolderSubscriptionHelper.class);
+            if (subscriptionHelper == null) {
+                throw ServiceExceptionCode.absentService(FolderSubscriptionHelper.class);
+            }
+
+            if (false == subscriptionHelper.isSubscribableModule(folderObject.getModule())) {
+                return true;
+            }
+
+            ServerSession session = getSession();
+            if (null != session) {
+                if (folderObject.isDefaultFolder() && FolderObject.PRIVATE == folderObject.getType(session.getUserId()) ) {
+                    return true;
+                }
+                return b(subscriptionHelper.isSubscribed(
+                    Optional.empty(), session.getContextId(), session.getUserId(), folderObject.getObjectID(), folderObject.getModule()).orElse(Boolean.TRUE));
+            }
+        } catch (OXException e) {
+            // Ignore
+            LOG.debug("Error checking subscribed state of folder {}, assuming 'true'.", folderObject, e);
+        }
+        return true;
+    }
+
+
+    @Override
+    public void setSubscribed(boolean subscribed) {
+        // ignore
     }
 }

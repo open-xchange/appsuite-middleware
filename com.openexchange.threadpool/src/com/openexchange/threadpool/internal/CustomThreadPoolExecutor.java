@@ -95,6 +95,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.MDC;
 import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.startup.CloseableControlService;
 import com.openexchange.threadpool.AbstractTask;
@@ -454,23 +455,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (null != t) {
             // Log spawning of a new thread
             if (null != firstTask) {
-                final Object stringer = new Object() {
-
-                    @Override
-                    public String toString() {
-                        final Object task;
-                        if (firstTask instanceof CustomFutureTask) {
-                            final Task<?> tsk = ((CustomFutureTask<?>) firstTask).getTask();
-                            task = tsk instanceof TaskWrapper ? ((TaskWrapper) tsk).getWrapped() : tsk;
-                        } else if (firstTask instanceof ScheduledFutureTask) {
-                            task = ((ScheduledFutureTask<?>) firstTask).getWrapped();
-                        } else {
-                            task = firstTask;
-                        }
-                        return task.getClass().getName();
-                    }
-                };
-                LOG.debug("Spawned new thread for {}", stringer, new Throwable("Thread-Creation-Watcher"));
+                LOG.debug("Spawned new thread for {}", taskName(firstTask), new Throwable("Thread-Creation-Watcher"));
             }
             // Continue initialization worker
             w.thread = t;
@@ -533,7 +518,15 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (null == t) {
             return null;
         }
-        startThread(t);
+        try {
+            startThread(t);
+        } catch (OutOfMemoryError oome) {
+            if ("unable to create new native thread".equals(Strings.asciiLowerCase(oome.getMessage()))) {
+                // Treat "java.lang.OutOfMemoryError: unable to create new native thread" as rejected execution
+                return null;
+            }
+            throw oome;
+        }
         return next;
     }
 
@@ -1767,8 +1760,10 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     protected void beforeExecute(final Thread thread, final Runnable r) {
         activeCount.incrementAndGet();
         thread.setUncaughtExceptionHandler(CustomUncaughtExceptionhandler.getInstance());
+        String taskName = null;
         if (r instanceof CustomFutureTask<?>) {
             final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
+            taskName = getTaskName(customFutureTask);
             final Task<?> task = customFutureTask.getTask();
             task.setThreadName((ThreadRenamer) thread);
             task.beforeExecute(thread);
@@ -1791,7 +1786,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             }
         } else if (r instanceof ScheduledFutureTask<?>) {
             ((ThreadRenamer) thread).renamePrefix("OXTimer");
+            taskName = getTaskName((ScheduledFutureTask<?>) r);
         }
+        LOG.debug("About to execute task {} on thread {}", taskName == null ? taskName(r) : taskName, thread);
         super.beforeExecute(thread, r);
     }
 
@@ -2605,6 +2602,15 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             this.mdc = mdc;
         }
 
+        /**
+         * Gets the wrapped <code>Runnable</code> instance.
+         *
+         * @return The task
+         */
+        Runnable getTask() {
+            return delegate;
+        }
+
         @Override
         public Map<String, String> getMdc() {
             return mdc;
@@ -2636,6 +2642,48 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 path.delete();
             }
         }
+    }
+
+    private static Object taskName(Runnable runnable) {
+        return new Object() {
+
+            @Override
+            public String toString() {
+                return getTaskName(runnable);
+            }
+        };
+    }
+
+    static String getTaskName(Runnable runnable) {
+        if (runnable instanceof CustomFutureTask) {
+            return getTaskName((CustomFutureTask<?>) runnable);
+        }
+        if (runnable instanceof MDCProvidingRunnable) {
+            return getTaskName((MDCProvidingRunnable) runnable);
+        }
+        if (runnable instanceof ScheduledFutureTask) {
+            return getTaskName((ScheduledFutureTask<?>) runnable);
+        }
+        return getTaskNameFromPossiblyWrapped(runnable);
+    }
+
+    static String getTaskName(CustomFutureTask<?> runnable) {
+        Task<?> task = runnable.getTask();
+        return getTaskNameFromPossiblyWrapped(task);
+    }
+
+    static String getTaskName(MDCProvidingRunnable runnable) {
+        Runnable task = runnable.getTask();
+        return getTaskNameFromPossiblyWrapped(task);
+    }
+
+    static String getTaskName(ScheduledFutureTask<?> runnable) {
+        Object wrapped = runnable.getWrapped();
+        return getTaskNameFromPossiblyWrapped(wrapped);
+    }
+
+    static String getTaskNameFromPossiblyWrapped(Object task) {
+        return task instanceof TaskWrapper ? getTaskNameFromPossiblyWrapped(((TaskWrapper) task).getWrapped()) : task.getClass().getName();
     }
 
 }

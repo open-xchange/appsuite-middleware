@@ -182,6 +182,12 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             }
 
             @Override
+            public OAuthAccount getAccount(int contextId, int userId, int accountId) throws OXException {
+                // TODO Auto-generated method stub
+                return new DefaultOAuthAccount();
+            }
+
+            @Override
             public OAuthAccount findByUserIdentity(Session session, String userIdentity, String serviceId) throws OXException {
                 // TODO Auto-generated method stub
                 return new DefaultOAuthAccount();
@@ -194,8 +200,9 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             }
 
             @Override
-            public void deleteAccount(Session session, int accountId) throws OXException {
+            public boolean deleteAccount(Session session, int accountId) throws OXException {
                 // TODO Auto-generated method stub
+                return true;
 
             }
         };

@@ -1,0 +1,139 @@
+feature_name: Micrometer
+feature_description: |
+  Properties for the micrometer metrics framework
+properties:
+    - key: com.openexchange.metrics.micrometer.basicauth.login
+      description: |
+        The basic auth login of the prometheus /metrics endpoint. 
+        Note: 
+        Only if this and [[com.openexchange.metrics.micrometer.basicauth.password]] are configured is the endpoint basic auth protected.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.metrics.micrometer.basicauth.password
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.basicauth.password
+      description: |
+        The basic auth password of the prometheus /metrics endpoint.
+        Note: 
+        Only if this and [[com.openexchange.metrics.micrometer.basicauth.login]] are configured is the endpoint basic auth protected.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.metrics.micrometer.basicauth.login
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.enable.all
+      description: |
+        Enables/Disables publishing of all metrics.
+      defaultValue: true
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.enable.[METRIC_NAME]
+      description: |
+        Enables/Disables publishing of the specified metric.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.distribution.histogram.[METRIC_NAME]
+      description: |
+        Enables/Disables publishing of all percentile histograms of the specified metric.
+      defaultValue: false 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.distribution.percentiles.[METRIC_NAME]
+      description: |
+        Publishes concrete percentiles for the distribution. Comma-separated list of values between 0.0 and 1.0. Example: 0.5, 0.75, 0.95, 0.99, 0.999
+      defaultValue: true
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.distribution.slo.[METRIC_NAME]
+      description: |
+        Publishes specific service level objectives (SLOs) of the specified metric.
+        
+        Units are
+        
+           * `ms` for miliseconds
+           * `s` for seconds
+           * `m` for minutes
+           * `h` for hours
+           * `D` for days
+           * `W` for weeks
+      defaultValue: 50ms,100ms,150ms,200ms,250ms,300ms,400ms,500ms,750ms,1s,2s,5s,10s,30s,1m
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.distribution.minimum.[METRIC_NAME]
+      description: |
+        Defines the lower bound of percentile histogram buckets to publish for that specific metric. Example: 100ms
+        
+        Units are
+        
+           * `ms` for miliseconds
+           * `s` for seconds
+           * `m` for minutes
+           * `h` for hours
+           * `D` for days
+           * `W` for weeks
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.distribution.maximum.[METRIC_NAME]
+      description: |
+        Defines the upper bound of percentile histogram buckets to publish for that specific metric. Example: 60s
+        
+        Units are
+        
+           * `ms` for miliseconds
+           * `s` for seconds
+           * `m` for minutes
+           * `h` for hours
+           * `D` for days
+           * `W` for weeks
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.filter.[FILTER_NAME]
+      description: |
+        Defines a filter which can further narrow down all metrics by tags. The 'FILTER_NAME' is then used to access all 'enable' and 'distribution.*' properties (it replaces the '[METRIC_NAME]').
+        For example the filter <code>com.openexchange.metrics.micrometer.filter.read_connections=appsuite.mysql.connections.usage{type="write",class=~".*db",pool!~"-1|-2"}</code> would only publish all 
+        <code>appsuite.mysql.connections.usage</code> metrics that are of type <code>write</code> their class ends with <code>db</code> and their pools are neither <code>-1</code> nor <code>-2</code>.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]

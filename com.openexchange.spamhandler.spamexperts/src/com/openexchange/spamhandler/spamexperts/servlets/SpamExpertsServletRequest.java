@@ -17,7 +17,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -28,6 +27,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.ManagedHttpClient;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
 import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
@@ -101,7 +101,7 @@ public final class SpamExpertsServletRequest {
 	private final Session session;
 	private final User user;
     private final SpamExpertsConfig config;
-    private final CloseableHttpClient httpClient;
+    private final ManagedHttpClient httpClient;
 
 	/**
 	 * Initializes a new {@link SpamExpertsServletRequest}.
@@ -111,7 +111,7 @@ public final class SpamExpertsServletRequest {
 	 * @param httpClient The HTTP client to use
 	 * @throws OXException If initialization fails
 	 */
-	public SpamExpertsServletRequest(Session session, SpamExpertsConfig config, CloseableHttpClient httpClient) throws OXException {
+	public SpamExpertsServletRequest(Session session, SpamExpertsConfig config, ManagedHttpClient httpClient) throws OXException {
 		super();
 	    this.session = session;
         this.config = config;

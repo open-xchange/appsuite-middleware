@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.Header;
@@ -78,22 +79,20 @@ import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.threader.nntp.ThreadableImpl;
 import com.openexchange.imap.threadsort.ThreadSortNode;
-import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.java.Reference;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
-import com.sun.mail.iap.BadCommandException;
-import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
+import com.sun.mail.iap.ResponseInterceptor;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.ENVELOPE;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
-import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.UID;
@@ -282,75 +281,85 @@ public final class Threadables {
 
             @Override
             public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                // Compile command
+                final List<MailMessage> mails;
                 final String command;
-                final Response[] r;
                 {
                     StringBuilder sb = new StringBuilder(128).append("FETCH ");
                     if (1 == messageCount) {
                         sb.append("1");
+                        mails = new ArrayList<MailMessage>(1);
                     } else {
                         if (limit < 0 || limit >= messageCount) {
                             sb.append("1:*");
+                            mails = new ArrayList<MailMessage>(messageCount);
                         } else {
                             sb.append(messageCount - limit + 1).append(':').append('*');
+                            mails = new ArrayList<MailMessage>(limit);
                         }
                     }
                     sb.append(" (").append(getFetchCommand(protocol.isREV1(), fetchProfile, false, serverInfo, previewSupported)).append(')');
                     command = sb.toString();
-                    sb = null;
-                    final long start = System.currentTimeMillis();
-                    r = protocol.command(command, null);
-                    final long dur = System.currentTimeMillis() - start;
-                    log.debug("\"{}\" for \"{}\" ({}) took {}msec.", command, imapFolder.getFullName(), imapFolder.getStore(), Long.valueOf(dur));
-                    mailInterfaceMonitor.addUseTime(dur);
                 }
-                final int len = r.length - 1;
-                final Response response = r[len];
-                if (response.isOK()) {
-                    try {
-                        final List<MailMessage> mails = new ArrayList<MailMessage>(messageCount);
-                        final String fullName = imapFolder.getFullName();
-                        final String sFetch = "FETCH";
-                        final String sInReplyTo = "In-Reply-To";
-                        final String sReferences = "References";
-                        for (int j = 0; j < len; j++) {
-                            if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, serverInfo.getAccountId(), examineHasAttachmentUserFlags);
-                                final String references = message.getFirstHeader(sReferences);
-                                if (null == references) {
-                                    final String inReplyTo = message.getFirstHeader(sInReplyTo);
+
+                // Response interceptor
+                final String fullName = imapFolder.getFullName();
+                final String sInReplyTo = "In-Reply-To";
+                final String sReferences = "References";
+                final Reference<ProtocolException> exceptionRef = new Reference<>(null);
+                ResponseInterceptor interceptor = new ResponseInterceptor() {
+
+                    @Override
+                    public boolean intercept(Response r) {
+                        if (!(r instanceof FetchResponse)) {
+                            return false;
+                        }
+
+                        if (exceptionRef.hasNoValue()) {
+                            try {
+                                MailMessage message = handleFetchRespone((FetchResponse) r, fullName, serverInfo.getAccountId(), examineHasAttachmentUserFlags);
+                                if (null == message.getFirstHeader(sReferences)) {
+                                    String inReplyTo = message.getFirstHeader(sInReplyTo);
                                     if (null != inReplyTo) {
                                         message.setHeader(sReferences, inReplyTo);
                                     }
                                 }
                                 mails.add(message);
-                                r[j] = null;
+                            } catch (MessagingException e) {
+                                exceptionRef.setValue(new ProtocolException(e.getMessage(), e));
+                            } catch (OXException e) {
+                                exceptionRef.setValue(new ProtocolException(e.getMessage(), e));
                             }
                         }
-                        // Handle remaining responses
-                        protocol.notifyResponseHandlers(r);
-                        return mails;
-                    } catch (MessagingException e) {
-                        throw new ProtocolException(e.getMessage(), e);
-                    } catch (OXException e) {
-                        throw new ProtocolException(e.getMessage(), e);
+                        return true;
                     }
-                } else if (response.isBAD()) {
-                    if (ImapUtility.isInvalidMessageset(response)) {
-                        return null;
-                    }
-                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
-                    throw new BadCommandException(response);
-                } else if (response.isNO()) {
-                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
-                    throw new CommandFailedException(response);
-                } else {
-                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    protocol.handleResult(response);
+                };
+
+                // Execute command
+                Response[] r;
+                {
+                    long start = System.currentTimeMillis();
+                    r = protocol.command(command, null, Optional.of(interceptor));
+                    final long dur = System.currentTimeMillis() - start;
+                    log.debug("\"{}\" for \"{}\" ({}) took {}msec.", command, imapFolder.getFullName(), imapFolder.getStore(), Long.valueOf(dur));
+                    mailInterfaceMonitor.addUseTime(dur);
                 }
-                return null;
+
+                // Check for exception during interception
+                if (exceptionRef.hasValue()) {
+                    throw exceptionRef.getValue();
+                }
+
+                // Handle remaining responses
+                protocol.notifyResponseHandlers(r);
+
+                // Handle status response
+                LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
+                LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                protocol.handleResult(r[r.length - 1]);
+
+                // Return mails
+                return mails;
             }
 
         }));
@@ -400,17 +409,20 @@ public final class Threadables {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                final List<Threadable> threadables;
                 final String command;
-                final Response[] r;
                 {
                     StringBuilder sb = new StringBuilder(128).append("FETCH ");
                     if (1 == messageCount) {
                         sb.append("1");
+                        threadables = new ArrayList<>(1);
                     } else {
                         if (limit < 0 || limit >= messageCount) {
                             sb.append("1:*");
+                            threadables = new ArrayList<>(messageCount);
                         } else {
                             sb.append(messageCount - limit + 1).append(':').append(messageCount);
+                            threadables = new ArrayList<>(limit);
                         }
                     }
                     sb.append(" (");
@@ -433,71 +445,72 @@ public final class Threadables {
                     }
                     sb.append(')');
                     command = sb.toString();
-                    sb = null;
-                    final long start = System.currentTimeMillis();
-                    r = protocol.command(command, null);
+                }
+
+                String fullName = imapFolder.getFullName();
+                final Reference<ProtocolException> exceptionRef = new Reference<>(null);
+                ResponseInterceptor interceptor = new ResponseInterceptor() {
+
+                    @Override
+                    public boolean intercept(Response r) {
+                        if (!(r instanceof FetchResponse)) {
+                            return false;
+                        }
+
+                        if (exceptionRef.hasNoValue()) {
+                            try {
+                                if (fetchSingleFields) {
+                                    handleByFields(handlers, threadables, fullName, (FetchResponse) r);
+                                } else {
+                                    boolean includeReferences = includeReferences();
+                                    String sReferences = MessageHeaders.HDR_REFERENCES;
+                                    HeaderHandler refsHeaderHandler = handlers.get(sReferences);
+                                    handleByEnvelope(threadables, fullName, includeReferences, sReferences, refsHeaderHandler, (FetchResponse) r);
+                                }
+                            } catch (MessagingException e) {
+                                exceptionRef.setValue(new ProtocolException(e.getMessage(), e));
+                            }
+                        }
+                        return true;
+                    }
+                };
+
+                // Execute command
+                Response[] r;
+                {
+                    long start = System.currentTimeMillis();
+                    r = protocol.command(command, null, Optional.of(interceptor));
                     final long dur = System.currentTimeMillis() - start;
                     log.debug("\"{}\" for \"{}\" ({}) took {}msec.", command, imapFolder.getFullName(), imapFolder.getStore(), Long.valueOf(dur));
                     mailInterfaceMonitor.addUseTime(dur);
                 }
-                final int len = r.length - 1;
-                final Response response = r[len];
-                if (response.isOK()) {
-                    try {
-                        final List<Threadable> threadables = new ArrayList<Threadable>(messageCount);
-                        final String fullName = imapFolder.getFullName();
-                        final String sFetch = "FETCH";
-                        if (fetchSingleFields) {
-                            for (int j = 0; j < len; j++) {
-                                if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                    handleByFields(handlers, threadables, fullName, (FetchResponse) r[j]);
-                                    r[j] = null;
-                                }
-                            }
-                        } else {
-                            final boolean includeReferences = includeReferences();
-                            final String sReferences = MessageHeaders.HDR_REFERENCES;
-                            final HeaderHandler refsHeaderHandler = handlers.get(sReferences);
-                            for (int j = 0; j < len; j++) {
-                                if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                    handleByEnvelope(threadables, fullName, includeReferences, sReferences, refsHeaderHandler, (FetchResponse) r[j]);
-                                    r[j] = null;
-                                }
-                            }
-                        }
-                        // Handle remaining responses
-                        protocol.notifyResponseHandlers(r);
-                        final Threadable first = threadables.remove(0);
-                        {
-                            Threadable cur = first;
-                            for (final Threadable threadable : threadables) {
-                                cur.next = threadable;
-                                cur = threadable;
-                            }
-                        }
-                        return first;
-                    } catch (MessagingException e) {
-                        throw new ProtocolException(e.getMessage(), e);
-                    }
-                } else if (response.isBAD()) {
-                    if (ImapUtility.isInvalidMessageset(response)) {
-                        return null;
-                    }
-                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
-                    throw new BadCommandException(response);
-                } else if (response.isNO()) {
-                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
-                    throw new CommandFailedException(response);
-                } else {
-                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    protocol.handleResult(response);
+
+                // Check for exception during interception
+                if (exceptionRef.hasValue()) {
+                    throw exceptionRef.getValue();
                 }
-                return null;
+
+                // Handle remaining responses
+                protocol.notifyResponseHandlers(r);
+
+                // Handle status response
+                LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
+                LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                protocol.handleResult(r[r.length - 1]);
+
+                // Return
+                Threadable first = threadables.remove(0);
+                {
+                    Threadable cur = first;
+                    for (final Threadable threadable : threadables) {
+                        cur.next = threadable;
+                        cur = threadable;
+                    }
+                }
+                return first;
             }
 
-            private void handleByFields(final Map<String, HeaderHandler> handlers, final List<Threadable> threadables, final String fullName, final FetchResponse fetchResponse) throws MessagingException {
+            void handleByFields(final Map<String, HeaderHandler> handlers, final List<Threadable> threadables, final String fullName, final FetchResponse fetchResponse) throws MessagingException {
                 // Check for BODY / RFC822DATA
                 final InternetHeaders h;
                 {
@@ -540,7 +553,7 @@ public final class Threadables {
                 }
             }
 
-            private void handleByEnvelope(final List<Threadable> threadables, final String fullName, final boolean includeReferences, final String sReferences, final HeaderHandler refsHeaderHandler, final FetchResponse fetchResponse) throws MessagingException {
+            void handleByEnvelope(final List<Threadable> threadables, final String fullName, final boolean includeReferences, final String sReferences, final HeaderHandler refsHeaderHandler, final FetchResponse fetchResponse) throws MessagingException {
                 final ENVELOPE envelope = getItemOf(ENVELOPE.class, fetchResponse);
                 final Threadable t;
                 if (null == envelope) {

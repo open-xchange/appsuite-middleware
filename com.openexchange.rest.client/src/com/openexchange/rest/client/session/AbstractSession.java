@@ -49,12 +49,9 @@
 
 package com.openexchange.rest.client.session;
 
-import java.util.concurrent.atomic.AtomicReference;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.client.API;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.session.pair.AccessTokenPair;
@@ -79,24 +76,6 @@ public abstract class AbstractSession implements Session {
     private AccessTokenPair accessTokenPair;
 
     private volatile CommonsHttpOAuthConsumer signer = null;
-
-    protected final AtomicReference<HttpClient> client = new AtomicReference<HttpClient>();
-
-
-    /** The default timeout for client connections. */
-    private static final int DEFAULT_TIMEOUT_MILLIS = 30000;
-
-    /** How long connections are kept alive. */
-    private static final int KEEP_ALIVE_DURATION_SECS = 20;
-
-    /** How often the monitoring thread checks for connections to close. */
-    private static final int KEEP_ALIVE_MONITOR_INTERVAL_SECS = 5;
-
-    /** Maximum total connections available for the connection manager */
-    private static final int MAX_TOTAL_CONNECTIONS = 20;
-
-    /** Maximum connections per route */
-    private static final int MAX_CONNECTIONS_PER_ROUTE = 10;
 
     /**
      * Initializes a new {@link AbstractSession}. Creates a new session with the given app key and secret. The session will not be linked
@@ -184,21 +163,6 @@ public abstract class AbstractSession implements Session {
     @Override
     public synchronized ProxyInfo getProxyInfo() {
         return null;
-    }
-
-    @Override
-    public HttpClient getHttpClient() {
-        HttpClient client = this.client.get();
-        if (client == null) {
-            synchronized (this) {
-                client = this.client.get();
-                if (client == null) {
-                    client = HttpClients.getHttpClient(API.getUserAgent());
-                    this.client.set(client);
-                }
-            }
-        }
-        return client;
     }
 
     @Override

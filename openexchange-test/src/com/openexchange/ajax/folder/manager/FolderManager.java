@@ -88,15 +88,15 @@ public class FolderManager {
     public String createFolder(String parent, String name, String module) throws ApiException {
         NewFolderBody body = new NewFolderBody();
         body.setFolder(FolderFactory.getSimpleFolder(name, module));
-        FolderUpdateResponse createFolder = folderApi.getFoldersApi().createFolder(parent, getSession(), body, tree, null, null);
+        FolderUpdateResponse createFolder = folderApi.getFoldersApi().createFolder(parent, getSession(), body, tree, null, null, null);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
         rememberFolder(createFolder.getData());
         lastTimestamp = createFolder.getTimestamp();
         return createFolder.getData();
     }
 
-    public FoldersVisibilityData getAllFolders(String contentType, String columns) throws ApiException {
-        FoldersVisibilityResponse visibleFolders = folderApi.getFoldersApi().getVisibleFolders(getSession(), contentType, columns, tree, null);
+    public FoldersVisibilityData getAllFolders(String contentType, String columns, Boolean all) throws ApiException {
+        FoldersVisibilityResponse visibleFolders = folderApi.getFoldersApi().getVisibleFolders(getSession(), contentType, columns, tree, null, all);
         checkResponse(visibleFolders.getError(), visibleFolders.getErrorDesc(), visibleFolders.getData());
         return visibleFolders.getData();
     }
@@ -150,7 +150,7 @@ public class FolderManager {
         folder.setFolderId(newParent);
         folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse updateFolder = folderApi.getFoldersApi().updateFolder(getSession(), folderId, body, Boolean.FALSE, lastTimestamp, tree, null, Boolean.TRUE, null);
+        FolderUpdateResponse updateFolder = folderApi.getFoldersApi().updateFolder(getSession(), folderId, body, Boolean.FALSE, lastTimestamp, tree, null, Boolean.TRUE, null, null);
         checkResponse(updateFolder.getError(), updateFolder.getErrorDesc(), updateFolder.getData());
         lastTimestamp = updateFolder.getTimestamp();
     }

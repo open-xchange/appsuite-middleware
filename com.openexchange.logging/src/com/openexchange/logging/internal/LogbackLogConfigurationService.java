@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,6 +62,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.ajax.response.IncludeStackTraceService;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.Category.EnumType;
 import com.openexchange.java.util.Pair;
 import com.openexchange.log.LogProperties.Name;
 import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
@@ -232,9 +235,10 @@ public class LogbackLogConfigurationService implements LogConfigurationService {
 
     @Override
     public Set<String> listExceptionCategories() {
-        Set<String> categories = new HashSet<String>();
-        for (String category : ExceptionCategoryFilter.getCategories().split(",")) {
-            categories.add(category.trim());
+        Set<EnumType> cats = ExceptionCategoryFilter.getCategories();
+        Set<String> categories = new LinkedHashSet<String>(cats.size());
+        for (Category.EnumType category : cats) {
+            categories.add(category.getName());
         }
         return categories;
     }

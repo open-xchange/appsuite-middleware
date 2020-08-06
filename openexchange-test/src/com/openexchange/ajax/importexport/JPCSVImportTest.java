@@ -134,7 +134,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse createFolder = api.createFolder(parent, getSessionId(), body, "0", null, null);
+        FolderUpdateResponse createFolder = api.createFolder(parent, getSessionId(), body, "0", null, null, null);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
 
         String result = createFolder.getData();
@@ -164,7 +164,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
      */
     @SuppressWarnings("unchecked")
     private String getDefaultFolder(String session) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "contacts", "1,308", "0", null);
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "contacts", "1,308", "0", null, Boolean.TRUE);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }

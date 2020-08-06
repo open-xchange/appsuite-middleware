@@ -1,47 +1,24 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Copyright (c) 1997, 2020 Oracle and/or its affiliates. All rights reserved.
  *
- * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0, which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
  *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common Development
- * and Distribution License("CDDL") (collectively, the "License").  You
- * may not use this file except in compliance with the License.  You can
- * obtain a copy of the License at
- * https://oss.oracle.com/licenses/CDDL+GPL-1.1
- * or LICENSE.txt.  See the License for the specific
- * language governing permissions and limitations under the License.
+ * This Source Code may also be made available under the following Secondary
+ * Licenses when the conditions for such availability set forth in the
+ * Eclipse Public License v. 2.0 are satisfied: GNU General Public License,
+ * version 2 with the GNU Classpath Exception, which is available at
+ * https://www.gnu.org/software/classpath/license.html.
  *
- * When distributing the software, include this License Header Notice in each
- * file and include the License file at LICENSE.txt.
- *
- * GPL Classpath Exception:
- * Oracle designates this particular file as subject to the "Classpath"
- * exception as provided by Oracle in the GPL Version 2 section of the License
- * file that accompanied this code.
- *
- * Modifications:
- * If applicable, add the following below the License Header, with the fields
- * enclosed by brackets [] replaced by your own identifying information:
- * "Portions Copyright [year] [name of copyright owner]"
- *
- * Contributor(s):
- * If you wish your version of this file to be governed by only the CDDL or
- * only the GPL Version 2, indicate your decision by adding "[Contributor]
- * elects to include this software in this distribution under the [CDDL or GPL
- * Version 2] license."  If you don't indicate a single choice of license, a
- * recipient has the option to distribute your version of this file under
- * either the CDDL, the GPL Version 2 or to extend the choice of license to
- * its licensees as provided above.  However, if you add GPL Version 2 code
- * and therefore, elected the GPL Version 2 license, then the option applies
- * only if the new code is made subject to such option by the copyright
- * holder.
+ * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
 
 package com.sun.mail.pop3;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,8 +28,11 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -62,6 +42,10 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import javax.net.ssl.SSLSocket;
+import com.sun.mail.auth.Ntlm;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.BASE64DecoderStream;
+import com.sun.mail.util.BASE64EncoderStream;
 import com.sun.mail.util.LineInputStream;
 import com.sun.mail.util.MailLogger;
 import com.sun.mail.util.PropUtil;
@@ -72,6 +56,7 @@ import com.sun.mail.util.TraceOutputStream;
 
 class Response {
     boolean ok = false;		// true if "+OK"
+    boolean cont = false;   // true if "+ " continuation line
     String data = null;		// rest of line after "+OK" or "-ERR"
     InputStream bytes = null;	// all the bytes from a multi-line response
 }
@@ -100,6 +85,9 @@ class Protocol {
     private boolean pipelining;
     private boolean noauthdebug = true;	// hide auth info in debug output
     private boolean traceSuspended;	// temporarily suspend tracing
+    private Map<String, Authenticator> authenticators = new HashMap<>();
+    private String defaultAuthenticationMechanisms; // set in constructor
+    private String localHostName;
 
     private static final int POP3_PORT = 110; // standard POP3 port
     private static final String CRLF = "\r\n";
@@ -156,6 +144,21 @@ class Protocol {
 	    PropUtil.getBooleanProperty(props, prefix + ".pipelining", false);
 	if (pipelining)
 	    logger.config("PIPELINING enabled");
+
+    // created here, because they're inner classes that reference "this"
+    Authenticator[] a = new Authenticator[] {
+        new LoginAuthenticator(),
+        new PlainAuthenticator(),
+        //new DigestMD5Authenticator(),
+        new NtlmAuthenticator(),
+        new OAuth2Authenticator()
+    };
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < a.length; i++) {
+        authenticators.put(a[i].getMechanism(), a[i]);
+        sb.append(a[i].getMechanism()).append(' ');
+    }
+    defaultAuthenticationMechanisms = sb.toString();
     }
 
     private static IOException cleanupAndThrow(Socket socket, IOException ife) {
@@ -276,6 +279,84 @@ class Protocol {
     }
 
     /**
+     * Does this Protocol object support the named authentication mechanism?
+     *
+     * @since   Jakarta Mail 1.6.5
+     */
+    boolean supportsMechanism(String mech) {
+    return authenticators.containsKey(mech.toUpperCase(Locale.ENGLISH));
+    }
+
+    /**
+     * Return the whitespace separated string list of default authentication
+     * mechanisms.
+     *
+     * @since   Jakarta Mail 1.6.5
+     */
+    String getDefaultMechanisms() {
+    return defaultAuthenticationMechanisms;
+    }
+
+    /**
+     * Is the named authentication mechanism enabled?
+     *
+     * @since   Jakarta Mail 1.6.5
+     */
+    boolean isMechanismEnabled(String mech) {
+    Authenticator a = authenticators.get(mech.toUpperCase(Locale.ENGLISH));
+    return a != null && a.enabled();
+    }
+
+    /**
+     * Authenticate to the server using the named authentication mechanism
+     * and the supplied credentials.
+     *
+     * @since   Jakarta Mail 1.6.5
+     */
+    synchronized String authenticate(String mech,
+                String host, String authzid,
+                String user, String passwd) {
+    Authenticator a = authenticators.get(mech.toUpperCase(Locale.ENGLISH));
+    if (a == null)
+        return "No such authentication mechanism: " + mech;
+    try {
+        if (!a.authenticate(host, authzid, user, passwd))
+        return "login failed";
+        return null;
+    } catch (IOException ex) {
+        return ex.getMessage();
+    }
+    }
+
+    /**
+     * Does the server we're connected to support the specified
+     * authentication mechanism?  Uses the information
+     * returned by the server from the CAPA command.
+     *
+     * @param   auth    the authentication mechanism
+     * @return      true if the authentication mechanism is supported
+     *
+     * @since   Jakarta Mail 1.6.5
+     */
+    synchronized boolean supportsAuthentication(String auth) {
+    assert Thread.holdsLock(this);
+    if (auth.equals("LOGIN"))
+        return true;
+    if (capabilities == null)
+        return false;
+    String a = capabilities.get("SASL");
+    if (a == null)
+        return false;
+    StringTokenizer st = new StringTokenizer(a);
+    while (st.hasMoreTokens()) {
+        String tok = st.nextToken();
+        if (tok.equalsIgnoreCase(auth))
+        return true;
+    }
+    return false;
+    }
+
+    /**
      * Login to the server, using the USER and PASS commands.
      */
     synchronized String login(String user, String password)
@@ -356,6 +437,318 @@ class Protocol {
 	return toHex(digest);
     }
 
+    /**
+     * Abstract base class for POP3 authentication mechanism implementations.
+     *
+     * @since   Jakarta Mail 1.6.5
+     */
+    private abstract class Authenticator {
+    protected Response resp;    // the response, used by subclasses
+    private final String mech; // the mechanism name, set in the constructor
+    private final boolean enabled; // is this mechanism enabled by default?
+
+    Authenticator(String mech) {
+        this(mech, true);
+    }
+
+    Authenticator(String mech, boolean enabled) {
+        this.mech = mech.toUpperCase(Locale.ENGLISH);
+        this.enabled = enabled;
+    }
+
+    String getMechanism() {
+        return mech;
+    }
+
+    boolean enabled() {
+        return enabled;
+    }
+
+    /**
+     * Start the authentication handshake by issuing the AUTH command.
+     * Delegate to the doAuth method to do the mechanism-specific
+     * part of the handshake.
+     */
+    boolean authenticate(String host, String authzid,
+            String user, String passwd) throws IOException {
+        Throwable thrown = null;
+        try {
+        // use "initial response" capability, if supported
+        String ir = getInitialResponse(host, authzid, user, passwd);
+        if (noauthdebug && isTracing()) {
+            logger.fine("AUTH " + mech + " command trace suppressed");
+            suspendTracing();
+        }
+        if (ir != null)
+            resp = simpleCommand("AUTH " + mech + " " +
+                        (ir.length() == 0 ? "=" : ir));
+        else
+            resp = simpleCommand("AUTH " + mech);
+
+        if (resp.cont)
+            doAuth(host, authzid, user, passwd);
+        } catch (IOException ex) {  // should never happen, ignore
+        logger.log(Level.FINE, "AUTH " + mech + " failed", ex);
+        } catch (Throwable t) { // crypto can't be initialized?
+        logger.log(Level.FINE, "AUTH " + mech + " failed", t);
+        thrown = t;
+        } finally {
+        if (noauthdebug && isTracing())
+            logger.fine("AUTH " + mech + " " +
+                    (resp.ok ? "succeeded" : "failed"));
+        resumeTracing();
+        if (!resp.ok) {
+            close();
+            if (thrown != null) {
+            if (thrown instanceof Error)
+                throw (Error)thrown;
+            if (thrown instanceof Exception) {
+                EOFException ex = new EOFException(
+                    resp.data != null ?
+                    resp.data : "authentication failed");
+                ex.initCause(thrown);
+                throw ex;
+            }
+            assert false : "unknown Throwable"; // can't happen
+            }
+            throw new EOFException(resp.data != null ?
+                    resp.data : "authentication failed");
+        }
+        }
+        return true;
+    }
+
+    /**
+     * Provide the initial response to use in the AUTH command,
+     * or null if not supported.  Subclasses that support the
+     * initial response capability will override this method.
+     */
+    String getInitialResponse(String host, String authzid, String user,
+            String passwd) throws IOException {
+        return null;
+    }
+
+    abstract void doAuth(String host, String authzid, String user,
+            String passwd) throws IOException;
+    }
+
+    /**
+     * Perform the authentication handshake for LOGIN authentication.
+     *
+     * @since   Jakarta Mail 1.6.5
+     */
+    private class LoginAuthenticator extends Authenticator {
+    LoginAuthenticator() {
+        super("LOGIN");
+    }
+
+    @Override
+    boolean authenticate(String host, String authzid,
+            String user, String passwd) throws IOException {
+        String msg = null;
+        if ((msg = login(user, passwd)) != null) {
+        throw new EOFException(msg);
+        }
+        return true;
+    }
+
+    @Override
+    void doAuth(String host, String authzid, String user, String passwd)
+                    throws IOException {
+        // should never get here
+        throw new EOFException("LOGIN asked for more");
+    }
+    }
+
+    /**
+     * Perform the authentication handshake for PLAIN authentication.
+     *
+     * @since   Jakarta Mail 1.6.5
+     */
+    private class PlainAuthenticator extends Authenticator {
+    PlainAuthenticator() {
+        super("PLAIN");
+    }
+
+    @Override
+    String getInitialResponse(String host, String authzid, String user,
+            String passwd) throws IOException {
+        // return "authzid<NUL>user<NUL>passwd"
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        OutputStream b64os =
+            new BASE64EncoderStream(bos, Integer.MAX_VALUE);
+        if (authzid != null)
+        b64os.write(authzid.getBytes(StandardCharsets.UTF_8));
+        b64os.write(0);
+        b64os.write(user.getBytes(StandardCharsets.UTF_8));
+        b64os.write(0);
+        b64os.write(passwd.getBytes(StandardCharsets.UTF_8));
+        b64os.flush();  // complete the encoding
+
+        return ASCIIUtility.toString(bos.toByteArray());
+    }
+
+    @Override
+    void doAuth(String host, String authzid, String user, String passwd)
+                    throws IOException {
+        // should never get here
+        throw new EOFException("PLAIN asked for more");
+    }
+    }
+
+    /**
+     * Perform the authentication handshake for DIGEST-MD5 authentication.
+     *
+     * @since   Jakarta Mail 1.6.5
+     */
+    /*
+     * XXX - Need to move DigestMD5 class to com.sun.mail.auth
+     *
+    private class DigestMD5Authenticator extends Authenticator {
+    private DigestMD5 md5support;   // only create if needed
+
+    DigestMD5Authenticator() {
+        super("DIGEST-MD5");
+    }
+
+    private synchronized DigestMD5 getMD5() {
+        if (md5support == null)
+        md5support = new DigestMD5(logger);
+        return md5support;
+    }
+
+    @Override
+    void doAuth(Protocol p, String host, String authzid,
+                    String user, String passwd)
+                    throws IOException {
+        DigestMD5 md5 = getMD5();
+        assert md5 != null;
+
+        byte[] b = md5.authClient(host, user, passwd, getSASLRealm(),
+                    resp.data);
+        resp = p.simpleCommand(b);
+        if (resp.cont) { // client authenticated by server
+        if (!md5.authServer(resp.data)) {
+            // server NOT authenticated by client !!!
+            resp.ok = false;
+        } else {
+            // send null response
+            resp = simpleCommand(new byte[0]);
+        }
+        }
+    }
+    }
+     */
+
+    /**
+     * Perform the authentication handshake for NTLM authentication.
+     *
+     * @since   Jakarta Mail 1.6.5
+     */
+    private class NtlmAuthenticator extends Authenticator {
+    private Ntlm ntlm;
+
+    NtlmAuthenticator() {
+        super("NTLM");
+    }
+
+    @Override
+    String getInitialResponse(String host, String authzid, String user,
+        String passwd) throws IOException {
+        ntlm = new Ntlm(props.getProperty(prefix + ".auth.ntlm.domain"),
+                getLocalHost(), user, passwd, logger);
+
+        int flags = PropUtil.getIntProperty(
+            props, prefix + ".auth.ntlm.flags", 0);
+        boolean v2 = PropUtil.getBooleanProperty(
+            props, prefix + ".auth.ntlm.v2", true);
+
+        String type1 = ntlm.generateType1Msg(flags, v2);
+        return type1;
+    }
+
+    @Override
+    void doAuth(String host, String authzid, String user, String passwd)
+        throws IOException {
+        assert ntlm != null;
+        String type3 = ntlm.generateType3Msg(
+            resp.data.substring(4).trim());
+
+        resp = simpleCommand(type3);
+    }
+    }
+
+    /**
+     * Perform the authentication handshake for XOAUTH2 authentication.
+     *
+     * @since   Jakarta Mail 1.6.5
+     */
+    private class OAuth2Authenticator extends Authenticator {
+
+    OAuth2Authenticator() {
+        super("XOAUTH2", false);    // disabled by default
+    }
+
+    @Override
+    String getInitialResponse(String host, String authzid, String user,
+        String passwd) throws IOException {
+        String resp = "user=" + user + "\001auth=Bearer " +
+                passwd + "\001\001";
+        byte[] b = BASE64EncoderStream.encode(
+                    resp.getBytes(StandardCharsets.UTF_8));
+        return ASCIIUtility.toString(b);
+    }
+
+    @Override
+    void doAuth(String host, String authzid, String user, String passwd)
+                throws IOException {
+        // OAuth2 failure returns a JSON error code,
+        // which looks like a "please continue" to the authenticate()
+        // code, so we turn that into a clean failure here.
+        String err = "";
+        if (resp.data != null) {
+        byte[] b = resp.data.getBytes(StandardCharsets.UTF_8);
+        b = BASE64DecoderStream.decode(b);
+        err = new String(b, StandardCharsets.UTF_8);
+        }
+        throw new EOFException("OAUTH2 authentication failed: " + err);
+    }
+    }
+
+    /**
+     * Get the name of the local host.
+     *
+     * @return  the local host name
+     * @since   Jakarta Mail 1.6.5
+     */
+    private synchronized String getLocalHost() {
+    // get our hostname and cache it for future use
+    try {
+        if (localHostName == null || localHostName.length() == 0) {
+        InetAddress localHost = InetAddress.getLocalHost();
+        localHostName = localHost.getCanonicalHostName();
+        // if we can't get our name, use local address literal
+        if (localHostName == null)
+            // XXX - not correct for IPv6
+            localHostName = "[" + localHost.getHostAddress() + "]";
+        }
+    } catch (UnknownHostException uhex) {
+    }
+
+    // last chance, try to get our address from our socket
+    if (localHostName == null || localHostName.length() <= 0) {
+        if (socket != null && socket.isBound()) {
+        InetAddress localHost = socket.getLocalAddress();
+        localHostName = localHost.getCanonicalHostName();
+        // if we can't get our name, use local address literal
+        if (localHostName == null)
+            // XXX - not correct for IPv6
+            localHostName = "[" + localHost.getHostAddress() + "]";
+        }
+    }
+    return localHostName;
+    }
+
     private static char[] digits = {
 	'0', '1', '2', '3', '4', '5', '6', '7',
 	'8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
@@ -393,15 +786,16 @@ class Protocol {
      * Close the connection without sending any commands.
      */
     void close() {
-	try {
-	    socket.close();
-	} catch (IOException ex) {
-	    // ignore it
-	} finally {
-	    socket = null;
-	    input = null;
-	    output = null;
-	}
+    try {
+        if (socket != null)
+        socket.close();
+    } catch (IOException ex) {
+        // ignore it
+    } finally {
+        socket = null;
+        input = null;
+        output = null;
+    }
     }
 
     /**
@@ -796,7 +1190,10 @@ class Protocol {
 	Response r = new Response();
 	if (line.startsWith("+OK"))
 	    r.ok = true;
-	else if (line.startsWith("-ERR"))
+    else if (line.startsWith("+ ")) {
+        r.ok = true;
+        r.cont = true;
+    } else if (line.startsWith("-ERR"))
 	    r.ok = false;
 	else
 	    throw new IOException("Unexpected response: " + line);

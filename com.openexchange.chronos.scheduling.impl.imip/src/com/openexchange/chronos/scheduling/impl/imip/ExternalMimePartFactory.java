@@ -67,10 +67,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarObjectResource;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalService;
@@ -276,8 +282,38 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
      * @see <a href="https://tools.ietf.org/html/rfc5546#section-3.2.3">RFC 5546</a>
      */
     private Event adjustAttendees(Event event) {
-        event.setAttendees(Collections.singletonList(CalendarUtils.find(event.getAttendees(), message.getOriginator())));
+        CalendarUser originator = message.getOriginator();
+        Attendee attendee = CalendarUtils.find(event.getAttendees(), originator);
+        try {
+            attendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+            if (null != originator.getSentBy()) {
+                attendee.setSentBy(originator.getSentBy());
+            }
+        } catch (OXException e) {
+            LOGGER.warn("Unable to copy attendee and thus unable to set sent-by field", e);
+        }
+        addComment(event, attendee);
+        event.setAttendees(Collections.singletonList(attendee));
         return event;
+    }
+
+    /**
+     * Removes the comment from the attendee and adds it to the outgoing event
+     *
+     * @param event The outgoing event
+     * @param attendee The attendee with the optional comment
+     * @see <a href="hhttps://tools.ietf.org/html/rfc5546#section-3.2.3">RFC5546 - REPLY</a>
+     */
+    private void addComment(Event event, Attendee attendee) {
+        if (Strings.isNotEmpty(attendee.getComment())) {
+            ExtendedProperties props = event.getExtendedProperties();
+            if (null == props) {
+                props = new ExtendedProperties();
+            }
+            props.add(new ExtendedProperty("COMMENT", attendee.getComment()));
+            event.setExtendedProperties(props);
+        }
+        attendee.removeComment();
     }
 
     /**

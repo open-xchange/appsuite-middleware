@@ -107,12 +107,12 @@ public class ExportUserFeedback extends AbstractUserFeedback {
 
     @Override
     protected String getName() {
-        return "exportuserfeedback -U myUser:myPassword [OPTIONS] output_file";
+        return "exportuserfeedback -U <user:password> [OPTIONS] output_file";
     }
 
     @Override
     protected String getHeader() {
-        return "exportuserfeedback -U myUser:myPassword [-t type] [-g ctx_grp] [-s time] [-e time] [--delimiter ,] output_file\n" + "exportuserfeedback -s 1487348317 /tmp/feedback.csv";
+        return "exportuserfeedback -U <user:password> [-t type] [-g ctx_grp] [-s time] [-e time] [--delimiter ,] output_file\n" + "exportuserfeedback -s 1487348317 /tmp/feedback.csv";
     }
 
     @Override

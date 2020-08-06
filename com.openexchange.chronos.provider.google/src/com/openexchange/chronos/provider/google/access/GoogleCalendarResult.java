@@ -491,7 +491,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
         if (deleteExceptionDates == null) {
             deleteExceptionDates = new TreeSet<>();
             master.setDeleteExceptionDates(deleteExceptionDates);
-        } else if (deleteExceptionDates.contains(recurrenceId)) {
+        } else if (CalendarUtils.contains(deleteExceptionDates, recurrenceId)) {
             // Remove recurrence id in case its already exists (double cancel)
             deleteExceptionDates.remove(recurrenceId);
             return;

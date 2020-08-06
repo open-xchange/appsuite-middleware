@@ -488,7 +488,7 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
             }
             if (isPermissionDenied(e)) {
                 LOG.debug("Forbidden to export contacts from folder \"{}\" for user {} in context {}", folder.getName(), I(task.getUserId()), I(task.getContextId()), e);
-                sink.addToReport(Message.builder().appendToMessage("Insufficient permissions to export contacts from folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_CONTACTS).withTimeStamp(new Date()).build());
+                sink.addToReport(Message.builderWithPermissionDeniedType().appendToMessage("Insufficient permissions to export contacts from folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_CONTACTS).withTimeStamp(new Date()).build());
             } else {
                 LOG.warn("Failed to export contacts from folder \"{}\" for user {} in context {}", folder.getName(), I(task.getUserId()), I(task.getContextId()), e);
                 sink.addToReport(Message.builder().appendToMessage("Failed to export contacts from folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_CONTACTS).withTimeStamp(new Date()).build());

@@ -116,8 +116,6 @@ public final class HtmlProcessing {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HtmlProcessing.class);
 
-    private static final String CHARSET_US_ASCII = "US-ASCII";
-
     /**
      * Performs all the formatting for text content for a proper display according to specified user's mail settings.
      *
@@ -334,6 +332,8 @@ public final class HtmlProcessing {
                          */
                         retval.setContent(replaceBodyWithJericho(retval.getContent(), cssPrefix));
                     }
+
+                    // dumpToFile(retval.getContent(), "/Users/thorben/Desktop/dump.html");
                 }
             }
         } else {

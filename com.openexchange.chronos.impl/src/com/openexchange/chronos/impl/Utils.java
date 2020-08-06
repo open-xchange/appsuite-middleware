@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
@@ -81,13 +82,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import com.google.common.collect.ImmutableMap;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarObjectResource;
@@ -104,20 +108,28 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.impl.performer.AttendeeUsageTracker;
+import com.openexchange.chronos.impl.performer.ResolvePerformer;
 import com.openexchange.chronos.impl.session.DefaultEntityResolver;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.scheduling.ChangeNotification;
+import com.openexchange.chronos.scheduling.SchedulingBroker;
+import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarEvent;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
+import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -132,6 +144,7 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
@@ -143,8 +156,10 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
@@ -176,6 +191,17 @@ public class Utils {
      * leading to appropriate notifications and scheduling messages being sent out to the organizer.
      */
     private static final AttendeeField[] REPLY_FIELDS = { AttendeeField.PARTSTAT, AttendeeField.COMMENT };
+
+    /**
+     * Event fields that, when modified, indicate that a <i>re-scheduling</i> of the calendar object resource is assumed, usually leading
+     * to appropriate notifications and scheduling messages being sent out to the attendees.
+     * <p/>
+     * This does not contain {@link EventField#ATTENDEES}, as some more sophisticated logic to determine re-schedulings is required here.
+     */
+    private static final EventField[] RESCHEDULE_FIELDS = new EventField[] {
+        EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.ATTACHMENTS, EventField.GEO, EventField.CONFERENCES,
+        EventField.ORGANIZER, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_RULE
+    };
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utils.class);
 
@@ -357,7 +383,7 @@ public class Utils {
     public static boolean isCheckConflicts(CalendarParameters parameters) {
         return parameters.get(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.class, Boolean.FALSE).booleanValue();
     }
-    
+
     /**
      * Gets a value indicating whether the checks of (external) attendee URIs are disabled or not, considering both the calendar
      * parameters and general configuration.
@@ -404,6 +430,25 @@ public class Utils {
      */
     public static Date getUntil(CalendarParameters parameters) {
         return parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+    }
+
+    /**
+     * Gets a value indicating whether two email addresses share the same domain part.
+     *
+     * @param email1 The first email address to check
+     * @param email2 The second email address to check
+     * @return <code>true</code> if both addresses end with the same domain, <code>false</code>, otherwise
+     */
+    public static boolean isSameMailDomain(String email1, String email2) {
+        int idx1 = null != email1 ? email1.lastIndexOf('@') : -1;
+        if (0 > idx1) {
+            return false;
+        }
+        int idx2 = null != email2 ? email2.lastIndexOf('@') : -1;
+        if (0 > idx2) {
+            return false;
+        }
+        return Objects.equals(email1.substring(idx1), email2.substring(idx2));
     }
 
     /**
@@ -569,8 +614,23 @@ public class Utils {
         if (false == isClassifiedFor(event, session.getUserId())) {
             return event;
         }
+
+        return anonymize(event, session.getEntityResolver().getLocale(session.getUserId()));
+    }
+
+    /**
+     * <i>Anonymizes</i> an event.
+     * <p/>
+     * After anonymization, the event will only contain those properties defined in {@link #NON_CLASSIFIED_FIELDS}, as well as the
+     * generic summary "Private".
+     *
+     * @param event The event to anonymize
+     * @param locale The locale to translate the generic summary, or <code>null</code> to use the default locale
+     * @return The anonymized event
+     */
+    public static Event anonymize(Event event, Locale locale) throws OXException {
         Event anonymizedEvent = EventMapper.getInstance().copy(event, new Event(), NON_CLASSIFIED_FIELDS);
-        anonymizedEvent.setSummary(StringHelper.valueOf(session.getEntityResolver().getLocale(session.getUserId())).getString(CalendarStrings.SUMMARY_PRIVATE));
+        anonymizedEvent.setSummary(StringHelper.valueOf(locale).getString(CalendarStrings.SUMMARY_PRIVATE));
         return anonymizedEvent;
     }
 
@@ -624,6 +684,56 @@ public class Utils {
             return folder.getCreatedBy();
         }
         return folder.getSession().getUserId();
+    }
+
+    /**
+     * Resolves the event ID for the given UID and the given calendar user. In case the recurrence ID is unknown,
+     * the master event will be returned.
+     *
+     * @param session The session to use
+     * @param storage The storage to lookup the event from
+     * @param uid The event UID to load
+     * @param recurrenceId The recurrence identifier of the event, can be <code>null</code>
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The eventID The event ID of the resolved event, userized for the calendar user
+     * @throws OXException If the event can not be found
+     */
+    public static @NonNull EventID resolveEventId(CalendarSession session, CalendarStorage storage, String uid, RecurrenceId recurrenceId, int calendarUserId) throws OXException {
+        ResolvePerformer resolvePerformer = new ResolvePerformer(session, storage);
+        return resolveEventId(session, storage, uid, recurrenceId, calendarUserId, resolvePerformer);
+    }
+
+    private static @NonNull EventID resolveEventId(CalendarSession session, CalendarStorage storage, String uid, RecurrenceId recurrenceId, int calendarUserId, ResolvePerformer resolvePerformer) throws OXException {
+        EventID eventID = resolvePerformer.resolveByUid(uid, recurrenceId, calendarUserId);
+        if (null == eventID) {
+            if (null != recurrenceId) {
+                /*
+                 * Might be a new exception, try to resolve the master event instead
+                 */
+                return resolveEventId(session, storage, uid, null, calendarUserId, resolvePerformer);
+            }
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(uid);
+        }
+        return eventID;
+    }
+
+    /**
+     * Get the calendar folder to use based on the first event obtained from the scheduled resource provided by the message
+     *
+     * @param session The session to use
+     * @param storage The storage to lookup the event from
+     * @param uid The UID of the event to get the folder for
+     * @param recurrenceId The recurrence identifier of the event, can be <code>null</code>
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The {@link CalendarFolder}
+     * @throws OXException If folder can't be determined or is not visible for the user
+     */
+    public static CalendarFolder getCalendarFolder(CalendarSession session, CalendarStorage storage, String uid, RecurrenceId recurrenceId, int calendarUserId) throws OXException {
+        EventID eventID = resolveEventId(session, storage, uid, recurrenceId, calendarUserId);
+        if (Strings.isEmpty(eventID.getFolderID())) {
+            throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create();
+        }
+        return getFolder(session, eventID.getFolderID(), true);
     }
 
     /**
@@ -784,7 +894,7 @@ public class Utils {
 
     /**
      * Initializes a {@link DelegatingEvent} that overrides the participation status of the attendee matching a specific calendar user.
-     * 
+     *
      * @param event The event to override the participation status in
      * @param calendarUser The calendar user to override the participation status for
      * @param partStat The participation status to indicate for the matching attendee
@@ -818,7 +928,7 @@ public class Utils {
     /**
      * Initializes a calendar object resource based on {@link DelegatingEvent}s that override the participation status of the attendee
      * matching a specific calendar user.
-     * 
+     *
      * @param resource The resource to override the participation status in
      * @param calendarUser The calendar user to override the participation status for
      * @param partStat The participation status to indicate for the matching attendee
@@ -835,7 +945,7 @@ public class Utils {
     /**
      * Gets a valued indicating whether changed properties in an updated attendee represents a modification that needs to be reported as
      * <i>reply</i> to the of a group scheduled event organizer or not.
-     * 
+     *
      * @param originalAttendee The original attendee
      * @param updatedAttendee The updated attendee
      * @return <code>true</code> if the changed properties represent a reply, <code>false</code>, otherwise
@@ -855,7 +965,7 @@ public class Utils {
     /**
      * Gets a value indicating whether the applied changes represent an attendee reply of a specific calendar user for the associated
      * calendar object resource or not, depending on the modified attendee fields.
-     * 
+     *
      * @return <code>true</code> if the underlying calendar resource is replied to along with the update, <code>false</code>, otherwise
      */
     public static boolean isReply(CollectionUpdate<Attendee, AttendeeField> attendeeUpdates, CalendarUser calendarUser) {
@@ -868,8 +978,85 @@ public class Utils {
     }
 
     /**
+     * Gets a value indicating whether an event update represents a <i>re-scheduling</i> of the calendar object resource or not, depending
+     * on the modified event fields.
+     * <p/>
+     * Besides changes to the event's recurrence, start- or end-time, this also includes further important event properties, or changes
+     * in the attendee line-up.
+     *
+     * @param eventUpdate The event update to check
+     * @return <code>true</code> if the updated event is considered as re-scheduled, <code>false</code>, otherwise
+     * @see #RESCHEDULE_FIELDS
+     */
+    public static boolean isReschedule(EventUpdate eventUpdate) {
+        for (EventField updatedField : eventUpdate.getUpdatedFields()) {
+            if (isReschedule(eventUpdate.getOriginal(), eventUpdate.getUpdate(), updatedField)) {
+                return true; // field relevant for re-scheduling changed
+            }
+        }
+        if (0 < eventUpdate.getAttendeeUpdates().getAddedItems().size() || 0 < eventUpdate.getAttendeeUpdates().getRemovedItems().size()) {
+            return true; // attendee lineup changed
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether an event update represents a <i>re-scheduling</i> of the calendar object resource or not, depending
+     * on the modified event fields.
+     * <p/>
+     * Besides changes to the event's recurrence, start- or end-time, this also includes further important event properties, or changes
+     * in the attendee line-up.
+     *
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     * @return <code>true</code> if the updated event is considered as re-scheduled, <code>false</code>, otherwise
+     * @see #RESCHEDULE_FIELDS
+     */
+    public static boolean isReschedule(Event originalEvent, Event updatedEvent) {
+        /*
+         * re-scheduled if one of reschedule fields, or the attendee lineup changes
+         */
+        for (EventField rescheduleField : RESCHEDULE_FIELDS) {
+            if (isReschedule(originalEvent, updatedEvent, rescheduleField)) {
+                return true; // field relevant for re-scheduling changed
+            }
+        }
+        if (false == matches(originalEvent.getAttendees(), updatedEvent.getAttendees())) {
+            return true; // attendee lineup changed
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether a particular property of an event update represents a <i>re-scheduling</i> of the calendar object
+     * resource or not, based on the property's value in the original and updated event data.
+     *
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     * @param field The event field to check
+     * @return <code>true</code> if the property in the updated event makes it re-scheduled, <code>false</code>, otherwise
+     * @see #RESCHEDULE_FIELDS
+     */
+    private static boolean isReschedule(Event originalEvent, Event updatedEvent, EventField field) {
+        if (null == field || false == com.openexchange.tools.arrays.Arrays.contains(RESCHEDULE_FIELDS, field)) {
+            return false; // field not relevant
+        }
+        Mapping<? extends Object, Event> mapping = EventMapper.getInstance().opt(field);
+        if (null == mapping || mapping.equals(originalEvent, updatedEvent)) {
+            return false; // no change
+        }
+        Object originalValue = mapping.get(originalEvent);
+        Object updatedValue = mapping.get(updatedEvent);
+        if ((null == originalValue || String.class.isInstance(originalValue) && Strings.isEmpty((String) originalValue)) &&
+            (null == updatedValue || String.class.isInstance(updatedValue) && Strings.isEmpty((String) updatedValue))) {
+            return false; // no relevant change in textual field
+        }
+        return true; // relevant change, otherwise
+    }
+
+    /**
      * Extracts those event updates that represent a <i>reply</i> scheduling operation from a specific calendar user's point of view.
-     * 
+     *
      * @param eventUpdates The event updates to extract the replies from
      * @param calendarUser The calendar user to extract the replies for
      * @return The event updates representing <i>reply</i> scheduling operations, or an empty list if there are none
@@ -958,7 +1145,7 @@ public class Utils {
             userizedDeleteExceptions.addAll(seriesMaster.getDeleteExceptionDates());
         }
         for (RecurrenceId originalChangeExceptionDate : seriesMaster.getChangeExceptionDates()) {
-            if (false == userizedChangeExceptions.contains(originalChangeExceptionDate)) {
+            if (false == contains(userizedChangeExceptions, originalChangeExceptionDate)) {
                 userizedDeleteExceptions.add(originalChangeExceptionDate);
             }
         }
@@ -989,7 +1176,7 @@ public class Utils {
     /**
      * Replaces a change exception's recurrence identifier to piggyback the recurrence data of the corresponding event series. This aids the
      * <i>legacy</i> storage to calculate the correct recurrence positions properly.
-     * 
+     *
      * @param changeException The change exception event to edit the recurrence identifier in
      * @param recurrenceData The recurrence data to inject
      * @return The passed change exception event, with an replaced data-aware recurrence identifier
@@ -1006,7 +1193,7 @@ public class Utils {
     /**
      * Replaces the recurrence identifier in a list of change exceptions to piggyback the recurrence data of the corresponding event
      * series. This aids the <i>legacy</i> storage to calculate the correct recurrence positions properly.
-     * 
+     *
      * @param changeExceptions The change exception events to edit the recurrence identifier in
      * @param recurrenceData The recurrence data to inject
      * @return The passed change exception events, with an replaced data-aware recurrence identifier
@@ -1083,7 +1270,7 @@ public class Utils {
                 LOG.warn("Error getting effective user permission for folder {}; skipping.", I(folder.getObjectID()), e);
                 continue;
             }
-            if (ownPermission.getFolderPermission() >= requiredFolderPermission && 
+            if (ownPermission.getFolderPermission() >= requiredFolderPermission &&
                 ownPermission.getReadPermission() >= requiredReadPermission &&
                 ownPermission.getWritePermission() >= requiredWritePermission &&
                 ownPermission.getDeletePermission() >= requiredDeletePermission) {
@@ -1355,11 +1542,67 @@ public class Utils {
     }
 
     /**
-     * Gets the whitelist of identifiers of those entities that should be resolved automatically when data of the event is passed to the 
+     *
+     * Processes an {@link InternalCalendarResult}. Informs {@link CalendarHandler} and triggers the {@link SchedulingBroker} to send messages.
+     * <p>
+     * Does <b>NOT</b> track attendee usage as per {@link #trackAttendeeUsage(CalendarSession, CalendarEvent)}
+     *
+     * @param <T> The type of the {@link InternalCalendarResult}
+     * @param services The {@link ServiceLookup} to obtain the {@link CalendarEventNotificationService} and the {@link SchedulingBroker} from
+     * @param result The actual result
+     * @return The given result, unmodified.
+     */
+    public static <T extends InternalCalendarResult> T postProcess(ServiceLookup services, T result) {
+        return postProcess(services, result, false);
+    }
+
+    /**
+     * Processes an {@link InternalCalendarResult}. Tracks attendee usage, informs {@link CalendarHandler} and triggers
+     * the {@link SchedulingBroker} to send messages.
+     *
+     * @param <T> The type of the {@link InternalCalendarResult}
+     * @param services The {@link ServiceLookup} to obtain the {@link CalendarEventNotificationService} and the {@link SchedulingBroker} from
+     * @param result The actual result
+     * @param trackAttendeeUsage whether to track the attendee usage as per {@link #trackAttendeeUsage(CalendarSession, CalendarEvent)} or not.
+     * @return The given result, unmodified.
+     */
+    public static <T extends InternalCalendarResult> T postProcess(ServiceLookup services, T result, boolean trackAttendeeUsage) {
+        ThreadPools.submitElseExecute(ThreadPools.task(() -> {
+            /*
+             * track attendee usage as needed & notify registered calendar handlers
+             */
+            CalendarEvent calendarEvent = result.getCalendarEvent();
+            if (trackAttendeeUsage) {
+                trackAttendeeUsage(result.getSession(), calendarEvent);
+            }
+            CalendarEventNotificationService notificationService = services.getService(CalendarEventNotificationService.class);
+            if (null != notificationService) {
+                notificationService.notifyHandlers(calendarEvent, false);
+            }
+            /*
+             * handle pending scheduling messages
+             */
+            SchedulingBroker schedulingBroker = services.getService(SchedulingBroker.class);
+            if (null != schedulingBroker) {
+                List<SchedulingMessage> messages = result.getSchedulingMessages();
+                if (null != messages && 0 < messages.size()) {
+                    schedulingBroker.handleScheduling(result.getSession().getSession(), messages);
+                }
+                List<ChangeNotification> notifications = result.getChangeNotifications();
+                if (null != notifications && 0 < notifications.size()) {
+                    schedulingBroker.handleNotifications(result.getSession().getSession(), notifications);
+                }
+            }
+        }));
+        return result;
+    }
+
+    /**
+     * Gets the whitelist of identifiers of those entities that should be resolved automatically when data of the event is passed to the
      * entity resolver.
      * <p/>
      * For externally organized events, only the calendar user itself should be resolved, otherwise, there are no restrictions.
-     * 
+     *
      * @param session The calendar session
      * @param folder The parent folder of the event being processed
      * @param event The event being processed
@@ -1433,6 +1676,47 @@ public class Utils {
      */
     public static Connection optConnection(CalendarSession session) {
         return session.get(PARAMETER_CONNECTION(), Connection.class, null);
+    }
+
+    /**
+     * Extracts (and optionally removes) specific calendar parameters from the supplied parameter container.
+     *
+     * @param parameters The parameters to extract
+     * @param remove <code>true</code> to remove the extracted parameters from the original parameter container, <code>false</code> to
+     *            keep them
+     * @param parameterNames The names of the parameters to extract
+     * @return The extracted calendar parameters in a new parameter container
+     */
+    public static CalendarParameters extract(CalendarParameters parameters, boolean remove, String... parameterNames) {
+        DefaultCalendarParameters extractedParameters = new DefaultCalendarParameters();
+        if (null != parameterNames) {
+            for (String parameterName : parameterNames) {
+                Object value = parameters.get(parameterName, Object.class);
+                if (null != value) {
+                    extractedParameters.set(parameterName, value);
+                    if (remove) {
+                        parameters.set(parameterName, null);
+                    }
+                }
+            }
+        }
+        return extractedParameters;
+    }
+
+    /**
+     * Copies all calendar parameters from one parameter container into another one.
+     *
+     * @param from The calendar parameters to copy
+     * @param to The target calendar parameters to copy into
+     * @return The possibly modified target calendar parameters
+     */
+    public static CalendarParameters copy(CalendarParameters from, CalendarParameters to) {
+        if (null != to && null != from) {
+            for (Entry<String, Object> entry : from.entrySet()) {
+                to.set(entry.getKey(), entry.getValue());
+            }
+        }
+        return to;
     }
 
     private static DefaultEntityResolver getEntityResolver(CalendarSession session) throws OXException {

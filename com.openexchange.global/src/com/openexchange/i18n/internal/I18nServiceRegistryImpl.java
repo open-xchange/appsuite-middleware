@@ -146,14 +146,12 @@ public class I18nServiceRegistryImpl implements I18nServiceRegistry {
         }
 
         String bestFit = Locale2LanguageMapping.getLanguageForLocale(locale.toLanguageTag());
-        if (Strings.isEmpty(bestFit)) {
-            // No such language tag
-            return NOOP_I18N;
-        }
-        Locale bestFitLocale = Locale.forLanguageTag(bestFit);
-        service = services.get(bestFitLocale);
-        if (null != service) {
-            return service;
+        if (Strings.isNotEmpty(bestFit)) {
+            Locale bestFitLocale = Locale.forLanguageTag(bestFit);
+            service = services.get(bestFitLocale);
+            if (null != service) {
+                return service;
+            }
         }
 
         // Grab language identifier

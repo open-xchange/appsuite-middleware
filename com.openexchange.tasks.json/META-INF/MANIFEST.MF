@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Tasks JSON Bundle
 Bundle-SymbolicName: com.openexchange.tasks.json
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Activator: com.openexchange.tasks.json.osgi.TaskJSONActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -24,6 +24,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.writer,
  com.openexchange.api2,
+ com.openexchange.authentication.application.ajax,
  com.openexchange.capabilities,
  com.openexchange.conversion,
  com.openexchange.data.conversion.ical,

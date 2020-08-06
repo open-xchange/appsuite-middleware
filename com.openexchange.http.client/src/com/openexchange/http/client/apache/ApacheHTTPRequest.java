@@ -51,11 +51,10 @@ package com.openexchange.http.client.apache;
 
 import java.io.IOException;
 import java.util.Map;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.HttpState;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpRequestBase;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPRequest;
 import com.openexchange.http.client.builder.HTTPResponse;
@@ -66,15 +65,16 @@ public class ApacheHTTPRequest implements HTTPRequest {
 	private final Map<String, String> headers;
 	private final Map<String, String> parameters;
 
-	private final HttpMethodBase method;
+	private final HttpRequestBase method;
 	private final HttpClient client;
 	private final ApacheClientRequestBuilder coreBuilder;
     private final CommonApacheHTTPRequest<?> reqBuilder;
+    private final CookieStore cookieStore;
 
 
 
 	public ApacheHTTPRequest(Map<String, String> headers, Map<String, String> parameters,
-        HttpMethodBase method, HttpClient client, ApacheClientRequestBuilder coreBuilder, CommonApacheHTTPRequest<?> builder) {
+	    HttpRequestBase method, HttpClient client, ApacheClientRequestBuilder coreBuilder, CommonApacheHTTPRequest<?> builder, CookieStore cookieStore) {
 		super();
 		this.headers = headers;
 		this.parameters = parameters;
@@ -82,30 +82,14 @@ public class ApacheHTTPRequest implements HTTPRequest {
 		this.client = client;
 		this.coreBuilder = coreBuilder;
 		this.reqBuilder = builder;
+		this.cookieStore = cookieStore;
 	}
 
 	@Override
     public HTTPResponse execute() throws OXException {
 		try {
-			HttpState state = coreBuilder.getState();
-			if (state != null) {
-				client.setState(state);
-			} else {
-				coreBuilder.setState(client.getState());
-			}
-			int status = client.executeMethod(method);
-			if (status == 302) {
-                Header header = method.getResponseHeader("Location");
-                if (header == null) {
-                    throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create("Missing 'Location' header.");
-                }
-                String location = header.getValue();
-				reqBuilder.url(location);
-				return reqBuilder.build().execute();
-			}
-			return new ApacheHTTPResponse(method, client, coreBuilder, status);
-		} catch (HttpException e) {
-            throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
+			HttpResponse resp = client.execute(method);
+			return new ApacheHTTPResponse(resp, coreBuilder, cookieStore);
 		} catch (IOException e) {
             throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		} finally {

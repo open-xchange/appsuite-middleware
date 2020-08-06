@@ -14,6 +14,7 @@ requests:
   - GetRequest.yaml
   - ImportRequest.yaml
   - ListRequest.yaml
+  - MoveAllCopyRequest.yaml
   - NewRequest.yaml
   - Receipt_ackRequest.yaml
   - ReplyRequest.yaml

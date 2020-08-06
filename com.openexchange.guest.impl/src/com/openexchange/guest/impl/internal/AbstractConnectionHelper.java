@@ -70,6 +70,12 @@ public abstract class AbstractConnectionHelper {
     protected boolean committed;
     protected final boolean writableConnection;
 
+    /**
+     * Initializes a new {@link AbstractConnectionHelper}.
+     * 
+     * @param services The service lookup
+     * @param needsWritable <code>true</code> if connections used by this helper needs to be writable, <code>false</code> for read only
+     */
     public AbstractConnectionHelper(ServiceLookup services, boolean needsWritable) {
         this.services = services;
         this.writableConnection = needsWritable;
@@ -88,7 +94,7 @@ public abstract class AbstractConnectionHelper {
     /**
      * Starts the transaction on the underlying connection in case the connection is owned by this instance.
      *
-     * @throws OXException
+     * @throws OXException In case of an SQL error
      */
     public void start() throws OXException {
         acquireConnection();
@@ -103,7 +109,7 @@ public abstract class AbstractConnectionHelper {
     /**
      * Commits the transaction on the underlying connection in case the connection is owned by this instance.
      *
-     * @throws OXException
+     * @throws OXException In case of an SQL error
      */
     public void commit() throws OXException {
         try {
@@ -115,13 +121,23 @@ public abstract class AbstractConnectionHelper {
     }
 
     /**
+     * Gets a value indicating whether this connection has been committed or not
+     *
+     * @return <code>true</code> if the connection has been committed, <code>false</code> otherwise
+     */
+    public boolean isCommitted() {
+        return committed;
+    }
+
+    /**
      * Handles finishing the transaction and returning connections for the given implementation
      */
     public abstract void finish();
 
     /**
+     * Acquires a connection.
      *
-     * @throws OXException
+     * @throws OXException In case connection can't be acquired 
      */
     public abstract void acquireConnection() throws OXException;
 }

@@ -140,9 +140,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         }
 
         private final int accountId;
-
         private final String serviceId;
-
         private final int hash;
 
         private Key(final int accountId, final String serviceId) {

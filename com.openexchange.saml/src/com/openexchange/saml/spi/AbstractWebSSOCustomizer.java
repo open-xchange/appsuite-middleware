@@ -50,11 +50,11 @@
 package com.openexchange.saml.spi;
 
 import javax.servlet.http.HttpServletRequest;
-import org.opensaml.saml2.core.AuthnRequest;
-import org.opensaml.saml2.core.LogoutRequest;
-import org.opensaml.saml2.core.LogoutResponse;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.LogoutRequest;
+import org.opensaml.saml.saml2.core.LogoutResponse;
+import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.state.AuthnRequestInfo;

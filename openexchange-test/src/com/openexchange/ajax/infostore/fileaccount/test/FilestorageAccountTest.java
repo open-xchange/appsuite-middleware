@@ -70,6 +70,8 @@ import com.openexchange.testing.httpclient.modules.FilestorageApi;
  */
 public final class FilestorageAccountTest extends AbstractAPIClientSession {
 
+    private static final Boolean CONNECTION_CHECK = Boolean.TRUE;
+    private static final Boolean NO_CONNECTION_CHECK = Boolean.FALSE;
     private static final String[] POSSIBLE_CAPABILITIES;
     static {
         FileStorageCapability[] allCapabilities = FileStorageCapability.values();
@@ -117,7 +119,7 @@ public final class FilestorageAccountTest extends AbstractAPIClientSession {
 
     @Test
     public void testGetAllFilestorageAccountCapabilities() throws Throwable {
-        FileAccountsResponse response = api.getAllFileAccounts(getApiClient().getSession(), null);
+        FileAccountsResponse response = api.getAllFileAccounts(getApiClient().getSession(), null, NO_CONNECTION_CHECK);
         assertNull(response.getError());
         assertNotNull("Response is empty!", response.getData());
         List<FileAccountData> accounts = response.getData();
@@ -136,4 +138,15 @@ public final class FilestorageAccountTest extends AbstractAPIClientSession {
         }
     }
 
+    @Test
+    public void testGetAllFilestorageAccountsWithConnectionCheck() throws Throwable {
+        FileAccountsResponse response = api.getAllFileAccounts(getApiClient().getSession(), null, CONNECTION_CHECK);
+        assertNull(response.getError());
+        assertNotNull("Response is empty!", response.getData());
+        List<FileAccountData> accounts = response.getData();
+        assertFalse(accounts.isEmpty());
+        for(FileAccountData account : accounts) {
+            assertNull(account.getHasError()); //Error flag is not present if no error occurred
+        }
+    }
 }

@@ -104,7 +104,7 @@ public class BasicAuthenticator extends OXCommonImpl {
      *
      * @param context The bundle context; needed to mark the authenticator as plugIn-aware
      * @throws StorageException If instantiation fails
-     * @deprecated Use {@link #createPluginAwareAuthenticator(BundleContext)}
+     * @deprecated Use {@link #createPluginAwareAuthenticator()}
      */
     @Deprecated
     public BasicAuthenticator(BundleContext context) throws StorageException {
@@ -231,7 +231,7 @@ public class BasicAuthenticator extends OXCommonImpl {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public void doAuthentication(final Credentials authdata,final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
+    public void doAuthentication(final Credentials authdata,final Context ctx) throws InvalidCredentialsException, StorageException {
         contextcheck(ctx);
 
         boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
@@ -273,7 +273,7 @@ public class BasicAuthenticator extends OXCommonImpl {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public void doUserAuthentication(final Credentials authdata,final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
+    public void doUserAuthentication(final Credentials authdata,final Context ctx) throws InvalidCredentialsException, StorageException {
         contextcheck(ctx);
 
         boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);

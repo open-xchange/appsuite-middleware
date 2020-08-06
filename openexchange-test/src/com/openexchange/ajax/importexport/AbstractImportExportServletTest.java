@@ -126,7 +126,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXSessio
     public Map<String, String> VCARD_ELEMENTS = new HashMap<String, String>(){{
         //put("PRODID", "-//Open-Xchange//7.8.0-Rev0//EN");
         put("FN", "Prinz\\, Tobias");
-        put("N", "Prinz;Tobias;;;");
+        put("N", "Prinz;Tobias");
         put("BDAY", "1981-05-01");
         put("ADR;TYPE=work", ";;;Meinerzhagen;NRW;58540;DE");
         put("TEL;TYPE=home,voice", "+49 2358 7192");
@@ -138,7 +138,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXSessio
     public Map<String, String> VCARD_ELEMENTS_2 = new HashMap<String, String>(){{
         //put("PRODID", "-//Open-Xchange//7.8.0-Rev0//EN");
         put("FN", "Mustermann\\, Max");
-        put("N", "Mustermann;Max;;;");
+        put("N", "Mustermann;Max");
         put("BDAY", "1966-07-30");
         put("ADR;TYPE=work", ";;;Musterstadt;NRW;12345;DE");
         put("TEL;TYPE=home,voice", "+491234567890");

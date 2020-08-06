@@ -209,7 +209,18 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         oxusr.changeModuleAccessGlobal(filterString, add, remove, auth);
     }
 
-    private void parse(AdminParser parser, String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException, RemoteException {
+    /**
+     * Parses the given arguments
+     *
+     * @param parser The {@link AdminParser} to use
+     * @param args The arguments to parse
+     * @throws CLIParseException
+     * @throws CLIIllegalOptionValueException
+     * @throws CLIUnknownOptionException
+     * @throws MissingOptionException
+     * @throws InvalidCredentialsException
+     */
+    private void parse(AdminParser parser, String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidCredentialsException {
         parser.ownparse(args);
         auth = credentialsparsing(parser);
 

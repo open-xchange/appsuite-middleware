@@ -62,17 +62,17 @@ import com.openexchange.html.AbstractSanitizing;
 public class Bug21532Test extends AbstractSanitizing {
      @Test
      public void testConvertConditionalCommentsWihoutWhitespaces() throws Exception {
-        String content = getHtmlService().getConformHTML("</head><body><![if !supportLists]><p>You should see this</p><![endif]></body></html>", "UTF-8");
+        String content = trimLines(getHtmlService().getConformHTML("</head><body><![if !supportLists]><p>You should see this</p><![endif]></body></html>", "UTF-8"));
 
         String expected = "<!doctype html>\n" +
             "<html>\n"
-            + "<head>\n" +
+          + "<head>\n" +
             "<meta charset=\"UTF-8\">\n" +
             "</head>\n"
             + "<body>\n"
             + "<p>You should see this</p>\n"
             + "</body>\n"
-            + "</html>\n";
+            + "</html>";
 
         assertEquals("Unexpected return value", expected, trimLines(content));
     }

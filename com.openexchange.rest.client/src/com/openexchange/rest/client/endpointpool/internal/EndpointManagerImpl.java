@@ -62,6 +62,7 @@ import com.openexchange.rest.client.endpointpool.Endpoint;
 import com.openexchange.rest.client.endpointpool.EndpointAvailableStrategy;
 import com.openexchange.rest.client.endpointpool.EndpointAvailableStrategy.AvailableResult;
 import com.openexchange.rest.client.endpointpool.EndpointManager;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -73,6 +74,7 @@ import com.openexchange.timer.TimerService;
  */
 public class EndpointManagerImpl implements EndpointManager {
 
+    private final HttpClientService httpClientService;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final List<Endpoint> available;
     private final List<Endpoint> blacklist;
@@ -85,8 +87,9 @@ public class EndpointManagerImpl implements EndpointManager {
      *
      * @throws IllegalArgumentException If initialization fails
      */
-    public EndpointManagerImpl(List<URI> endpointUris, HttpClient httpClient, EndpointAvailableStrategy availableStrategy, long heartbeatIntervalMillis, TimerService timerService) {
+    public EndpointManagerImpl(List<URI> endpointUris, String httpClientId, EndpointAvailableStrategy availableStrategy, long heartbeatIntervalMillis, TimerService timerService, HttpClientService httpClientService) {
         super();
+        this.httpClientService = httpClientService;
         if (null == endpointUris) {
             throw new IllegalArgumentException("End-points must not be null");
         }
@@ -103,7 +106,7 @@ public class EndpointManagerImpl implements EndpointManager {
         }
         blacklist = new ArrayList<Endpoint>(size);
         counter = new AtomicInteger(size);
-        heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(httpClient, availableStrategy), heartbeatIntervalMillis, heartbeatIntervalMillis);
+        heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(httpClientService.getHttpClient(httpClientId), availableStrategy), heartbeatIntervalMillis, heartbeatIntervalMillis);
     }
 
     @Override

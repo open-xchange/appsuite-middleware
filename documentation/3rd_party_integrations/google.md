@@ -155,8 +155,7 @@ The APIs can be enabled via the [Google Developers Console](https://console.deve
 
 The following Google APIs are required to enable Google DriveThen you will have to enable the Google Drive integration:
 
-  * [Drive API](https://developers.google.com/identity/protocols/googlescopes#drivev3)
-  * Drive SDK
+  * [Google Drive API](https://developers.google.com/identity/protocols/googlescopes#drivev3)
   * Google Cloud SQL
   * Google Cloud Storage
   * Google Cloud Storage JSON API

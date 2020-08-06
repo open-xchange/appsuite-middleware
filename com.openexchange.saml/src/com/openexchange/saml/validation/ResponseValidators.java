@@ -51,13 +51,13 @@ package com.openexchange.saml.validation;
 
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-import org.opensaml.saml2.core.Issuer;
-import org.opensaml.saml2.core.NameIDType;
-import org.opensaml.saml2.core.Status;
-import org.opensaml.saml2.core.StatusCode;
-import org.opensaml.saml2.core.StatusMessage;
-import org.opensaml.saml2.core.StatusResponseType;
-import org.opensaml.xml.security.credential.Credential;
+import org.opensaml.saml.saml2.core.Issuer;
+import org.opensaml.saml.saml2.core.NameIDType;
+import org.opensaml.saml.saml2.core.Status;
+import org.opensaml.saml.saml2.core.StatusCode;
+import org.opensaml.saml.saml2.core.StatusMessage;
+import org.opensaml.saml.saml2.core.StatusResponseType;
+import org.opensaml.security.credential.Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.saml.tools.SignatureHelper;
@@ -237,7 +237,7 @@ public class ResponseValidators {
             }
 
             String statusCodeValue = status.getStatusCode().getValue();
-            if (StatusCode.SUCCESS_URI.equals(statusCodeValue)) {
+            if (StatusCode.SUCCESS.equals(statusCodeValue)) {
                 LOG.debug("Response status is 'Success'");
             } else {
                 String statusMessage = "none";

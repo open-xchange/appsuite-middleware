@@ -2,6 +2,7 @@
 title: listmultifactordevice
 icon: far fa-circle
 tags: Administration, Command Line tools, Security
+package: open-xchange-multifactor
 ---
 
 # NAME

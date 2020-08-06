@@ -54,6 +54,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.itip.ContextSensitiveMessages;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ParticipantHelper}
@@ -89,6 +90,13 @@ public class ParticipantHelper {
             return new StringBuilder(24).append(participant.getDisplayName()).append(" (").append(sConfirmStatus).append(')').toString();
         }
         return new StringBuilder(24).append(participant.getDisplayName()).append(" (").append(sConfirmStatus).append(") (\"").append(comment).append("\")").toString();
+    }
+
+    public String conferenceLine(NotificationConference conference) {
+        if (Strings.isEmpty(conference.getLabel())) {
+            return conference.getUri();
+        }
+        return conference.getLabel() + ": " + conference.getUri();
     }
 
 }

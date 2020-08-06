@@ -9,7 +9,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @Suite.SuiteClasses({
     UploadActionTest.class,
     RestoreTest.class,
-    Bug40142Test.class
+    Bug40142Test.class,
+    PermissionLimitTest.class
 })
 public class InfostoreApiClientSuite  {
     // empty

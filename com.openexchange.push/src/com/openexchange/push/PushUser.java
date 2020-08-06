@@ -49,6 +49,8 @@
 
 package com.openexchange.push;
 
+import java.util.Optional;
+
 /**
  * {@link PushUser}
  *
@@ -60,6 +62,7 @@ public class PushUser implements Comparable<PushUser> {
     private final int userId;
     private final int contextId;
     private final int hash;
+    private final String optSessionId;
 
     /**
      * Initializes a new {@link PushUser}.
@@ -68,9 +71,21 @@ public class PushUser implements Comparable<PushUser> {
      * @param contextId The context identifier
      */
     public PushUser(int userId, int contextId) {
+        this(userId, contextId, Optional.empty());
+    }
+
+    /**
+     * Initializes a new {@link PushUser}.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param idOfIssuingSession The optional identifier of the session that issues an operation for this push user
+     */
+    public PushUser(int userId, int contextId, Optional<String> idOfIssuingSession) {
         super();
         this.userId = userId;
         this.contextId = contextId;
+        this.optSessionId = idOfIssuingSession.orElse(null);
 
         int prime = 31;
         int result = prime * 1 + contextId;
@@ -105,6 +120,15 @@ public class PushUser implements Comparable<PushUser> {
      */
     public int getContextId() {
         return contextId;
+    }
+
+    /**
+     * Gets the optional identifier of the session that issues an operation for this push user.
+     *
+     * @return The session identifier or empty
+     */
+    public Optional<String> getIdOfIssuingSession() {
+        return Optional.ofNullable(optSessionId);
     }
 
     @Override

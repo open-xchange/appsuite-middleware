@@ -89,7 +89,7 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
             // change configuration to new values
             ChangePropertiesRequest req = new ChangePropertiesRequest(map, getScope(), getReloadables());
             ChangePropertiesResponse response = getClient().execute(req);
-            if (oldData != null) {
+            if (oldData == null) {
                 oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
             }
         }

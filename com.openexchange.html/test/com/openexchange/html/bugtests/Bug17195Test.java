@@ -76,7 +76,7 @@ public class Bug17195Test extends AbstractSanitizing {
             "<body>\n" +
             "https://ox6.local.com/ox6/#m=3Dinfostore&amp;f=485D112&amp;i=4D89719\n" +
             "</body>\n" +
-            "</html>\n";
+            "</html>";
 
         String result = trimLines(htmlService.getConformHTML(url, "UTF-8"));
 

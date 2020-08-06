@@ -66,38 +66,38 @@ public final class Utility {
     }
 
     /**
-     * Prepends specified path to given virtual fullname.<br>
+     * Prepends specified path to given virtual full name.<br>
      * <code>
      * &quot;<b>Trash</b>&quot;&nbsp;=&gt;&nbsp;&quot;INBOX/path/to/pop3account/<b>Trash</b>&quot;
      * </code>
      *
      * @param path The path to prepend; e.g. "INBOX/My POP3 account"
      * @param separator The separator character
-     * @param virtualFullname The virtual fullname; e.g. "INBOX"
-     * @return The real fullname
+     * @param virtualFullname The virtual full name; e.g. "INBOX"
+     * @return The real full name
      */
     public static String prependPath2Fullname(final String path, final char separator, final String virtualFullname) {
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(virtualFullname)) {
+        if (MailFolder.ROOT_FOLDER_ID.equals(virtualFullname)) {
             return path;
         }
         return new StringBuilder(path.length() + virtualFullname.length() + 1).append(path).append(separator).append(virtualFullname).toString();
     }
 
     /**
-     * Strips possibly prepended path from specified real fullname.<br>
+     * Strips possibly prepended path from specified real full name.<br>
      * <code>
      * &quot;INBOX/path/to/pop3account/<b>Trash</b>&quot;&nbsp;=&gt;&nbsp;&quot;<b>Trash</b>&quot;
      * </code>
      *
      * @param path The path to strip
-     * @param realFullname The real fullname
-     * @return The virtual fullname
+     * @param realFullname The real full name
+     * @return The virtual full name
      */
     public static String stripPathFromFullname(final String path, final String realFullname) {
         if (null == realFullname) {
             return realFullname;
         } else if (path.equals(realFullname)) {
-            return MailFolder.DEFAULT_FOLDER_ID;
+            return MailFolder.ROOT_FOLDER_ID;
         } else if (!realFullname.startsWith(path)) {
             return realFullname;
         }

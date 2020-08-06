@@ -49,47 +49,29 @@
 
 package com.openexchange.ipcheck.countrycode.mbean;
 
-import com.openexchange.metrics.MetricType;
-
 /**
  * {@link IPCheckMetric}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum IPCheckMetric {
-    totalIPChanges(MetricType.METER),
-    acceptedIPChanges(MetricType.METER),
-    deniedIPChanges(MetricType.METER),
-    acceptedPrivateIP(MetricType.METER),
-    acceptedWhiteListed(MetricType.METER),
-    acceptedEligibleIPChanges(MetricType.METER),
-    deniedException(MetricType.METER),
-    deniedCountryChanged(MetricType.METER);
+    totalIPChanges,
+    acceptedIPChanges,
+    deniedIPChanges,
+    acceptedPrivateIP,
+    acceptedWhiteListed,
+    acceptedEligibleIPChanges,
+    deniedException,
+    deniedCountryChanged;
 
-    private final MetricType metricType;
-
-    /**
-     * Initialises a new {@link IPCheckMetric}.
-     */
-    private IPCheckMetric(MetricType metricType) {
-        this.metricType = metricType;
-    }
-
-    /**
-     * Gets the metricType
-     *
-     * @return The metricType
-     */
-    public MetricType getMetricType() {
-        return metricType;
-    }
+    public static final String COMPONENT_NAME = "appsuite.ipcheck.";
 
     /**
      * Returns the metric's name
-     * 
+     *
      * @return the metric's name
      */
     public String getMetricName() {
-        return metricType.name().toLowerCase() + "." + name();
+        return COMPONENT_NAME + name();
     }
 }

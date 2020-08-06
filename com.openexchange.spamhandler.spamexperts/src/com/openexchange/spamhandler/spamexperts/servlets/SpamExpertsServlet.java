@@ -53,19 +53,17 @@ package com.openexchange.spamhandler.spamexperts.servlets;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.version.VersionService;
 
 /**
  *
@@ -85,25 +83,19 @@ public final class SpamExpertsServlet extends DataServlet {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamExpertsServlet.class);
 
     private final transient SpamExpertsConfig config;
-    private final transient CloseableHttpClient httpClient;
+
+    private transient ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link SpamExpertsServlet}.
      *
      * @param config The configuration to use
+     * @param serviceLookup The {@link ServiceLookup}
      */
-    public SpamExpertsServlet(SpamExpertsConfig config, VersionService versionService) {
+    public SpamExpertsServlet(SpamExpertsConfig config, ServiceLookup serviceLookup) {
         super();
         this.config = config;
-
-        String versionString = versionService.getVersionString();
-        httpClient = HttpClients.getHttpClient(ClientConfig.newInstance("spamexperts")
-            .setUserAgent("OX Spam Experts Client v" + versionString)
-            .setMaxTotalConnections(32)
-            .setMaxConnectionsPerRoute(32)
-            .setConnectionTimeout(5000)
-            .setSocketReadTimeout(30000)
-        );
+        this.serviceLookup = serviceLookup;
     }
 
     @Override
@@ -129,7 +121,7 @@ public final class SpamExpertsServlet extends DataServlet {
                 return;
             }
 
-            SpamExpertsServletRequest proRequest = new SpamExpertsServletRequest(session, config, httpClient);
+            SpamExpertsServletRequest proRequest = new SpamExpertsServletRequest(session, config, serviceLookup.getServiceSafe(HttpClientService.class).getHttpClient("spamexperts"));
             Object responseObj = proRequest.action(action, jsonObj);
             response.setData(responseObj);
         } catch (OXException e) {
@@ -139,16 +131,4 @@ public final class SpamExpertsServlet extends DataServlet {
 
         writeResponse(response, resp, session);
     }
-
-    /**
-     * Shuts-down this servlet instance.
-     */
-    public void shutDown() {
-        try {
-            httpClient.close();
-        } catch (Exception e) {
-            // Ignore
-        }
-    }
-
 }

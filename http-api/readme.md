@@ -6,6 +6,39 @@ description of a REST API in one YAML or JSON file using the [Swagger Specificat
 The descriptions of the OX APIs take place in several YAML files that are translated into one JSON file.
 This makes it possible to separate the whole documentation in smaller parts each representing one HTTP request.
 
+
+## What's my job here?
+
+As a developer you will typically change or add API docs during feature development. Details on what and how to change are described below in detail. After making your changes, you are supposed to perform a sanity check that your changes compile and that HTML and Java clients can be successfully generated and contain your changes. Last but not least, check in your changes. For example after changing HTTP API docs, execute:
+
+```
+cd http_api/
+./gradlew clean resolve http_api_client:build rest_api_client:build copyClients
+```
+
+After editing and successful build, you'll find a few modified files in your workspace (in this example we have touched `http_api/components/schemas/userme/CurrentUserData.yaml`):
+
+```
+% git status
+On branch develop
+Your branch is up to date with 'origin/develop'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   http_api/components/schemas/userme/CurrentUserData.yaml
+	modified:   drive_api/openAPI.json
+	modified:   http_api/openAPI.json
+	modified:   ../openexchange-test/lib/http_api_client-1.0-SNAPSHOT.jar
+	modified:   ../openexchange-test/lib/rest_api_client-1.0-SNAPSHOT.jar
+	modified:   ../openexchange-test/lib/source/http_api_client-1.0-SNAPSHOT-sources.jar
+	modified:   ../openexchange-test/lib/source/rest_api_client-1.0-SNAPSHOT-sources.jar
+```
+
+Beware, the build might have touched more files than you wanted. You probably want to check in JSON and JAR files selectively, based on what you actually touched. Then discard other changes.
+
+
 ### File Structure
 Instead of using one big file, each request and parts that belong to it, are placed in single YAML files. 
 The YAML files that belong together can be grouped in folders. 

@@ -53,21 +53,27 @@ import static com.openexchange.java.Autoboxing.L;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import javax.xml.bind.DatatypeConverter;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.MD5Digest;
+import org.bouncycastle.crypto.io.DigestInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
+import com.openexchange.drive.impl.comparison.ServerFileVersion;
 import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.drive.impl.sync.RenameTools;
 import com.openexchange.exception.OXException;
@@ -77,6 +83,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -96,6 +103,8 @@ import com.openexchange.tools.iterator.SearchIterators;
  */
 public class UploadHelper {
 
+    private static final String KEY_CHECKSUM_STATE = "com.openexchange.drive.checksumState";
+
     private final SyncSession session;
 
     /**
@@ -107,18 +116,21 @@ public class UploadHelper {
         super();
         this.session = session;
     }
-
+    
     public File perform(final String path, final FileVersion originalVersion, final FileVersion newVersion, final InputStream uploadStream,
         final String contentType, final long offset, final long totalLength, final Date created, final Date modified) throws OXException {
         /*
-         * Try to save directly if applicable (no upload resume, no replace, total length is known and smaller than threshold)
+         * Try to save directly if applicable or required
          */
-        if (null == originalVersion && 0 >= offset && 0 < totalLength && session.getOptimisticSaveThreshold() >= totalLength) {
-
+        if (false == useSeparateUpload(path, originalVersion, newVersion, offset, totalLength)) {
             Entry<File, String> uploadEntry = session.getStorage().wrapInTransaction(new StorageOperation<Entry<File, String>>() {
 
                 @Override
                 public Entry<File, String> call() throws OXException {
+                    if (null != originalVersion) {
+                        File originalFile = ServerFileVersion.valueOf(originalVersion, path, session).getFile();
+                        return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified, originalFile.getId(), originalFile.getSequenceNumber());
+                    }
                     return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified);
                 }
             });
@@ -179,6 +191,13 @@ public class UploadHelper {
         uploadFile.setFileMD5Sum(checksum);
         final String md5 = checksum;
         SyncSession session = this.session;
+        /*
+         * remove checksum state from file meta data
+         */
+        Map<String, Object> meta = uploadFile.getMeta();
+        if (meta != null && meta.containsKey(KEY_CHECKSUM_STATE)) {
+            meta.remove(KEY_CHECKSUM_STATE);
+        }
         return session.getStorage().wrapInTransaction(new StorageOperation<File>() {
 
             @Override
@@ -197,6 +216,8 @@ public class UploadHelper {
                 fields.add(Field.FILE_SIZE);
                 file.setFileMD5Sum(md5);
                 fields.add(Field.FILE_MD5SUM);
+                file.setMeta(meta);
+                fields.add(Field.META);
                 if (null != contentType) {
                     file.setFileMIMEType(contentType);
                     fields.add(Field.FILE_MIMETYPE);
@@ -262,8 +283,16 @@ public class UploadHelper {
     }
 
     private Entry<File, String> saveOptimistically(String path, FileVersion newVersion, InputStream uploadStream, String contentType, Date created, Date modified) throws OXException {
+        return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified, FileStorageFileAccess.NEW, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+    }
+
+    private Entry<File, String> saveOptimistically(String path, FileVersion newVersion, InputStream uploadStream, String contentType, Date created, Date modified, String existingFileId, long sequenceNumber) throws OXException {
         File file = new DefaultFile();
         List<Field> fields = new ArrayList<File.Field>();
+        if (null != existingFileId) {
+            file.setId(existingFileId);
+            fields.add(Field.ID);
+        }
         file.setFolderId(session.getStorage().getFolderID(path, true));
         fields.add(Field.FOLDER_ID);
         file.setFileName(newVersion.getName());
@@ -290,7 +319,7 @@ public class UploadHelper {
             }
             session.trace(session.getStorage().toString() + ">> " + fullPath);
         }
-        String checksum = saveDocumentAndChecksum(file, uploadStream, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, fields, false);
+        String checksum = saveDocumentAndChecksum(file, uploadStream, sequenceNumber, fields, false).getKey();
         return new AbstractMap.SimpleEntry<File, String>(file, checksum);
     }
 
@@ -341,19 +370,27 @@ public class UploadHelper {
             /*
              * write initial file data, setting the first version number
              */
-            checksum = saveDocumentAndChecksum(uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, false);
+            Entry<String, byte[]> entry = saveDocumentAndChecksum(uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, false);
+            checksum = entry.getKey();
+            if (entry.getValue() != null && -1 != totalLength && uploadFile.getFileSize() < totalLength) {
+                rememberChecksumState(uploadFile, entry.getValue());
+            }
         } else if (session.getStorage().supports(new FolderID(uploadFile.getFolderId()), FileStorageCapability.RANDOM_FILE_ACCESS)) {
             /*
              * append file data via random file access (not incrementing the version number)
              */
-            fileAccess.saveDocument(uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, offset);
+            Entry<String, byte[]> entry = saveDocumentAndUpdateChecksum(uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, offset);
+            checksum = entry.getKey();
+            if (entry.getValue() != null && -1 != totalLength && uploadFile.getFileSize() < totalLength) {
+                rememberChecksumState(uploadFile, entry.getValue());
+            }
         } else {
             /*
              * work around filestore limitation and append file data via temporary managed file
              */
             checksum = appendViaTemporaryFile(uploadFile, uploadStream);
         }
-        uploadFile = fileAccess.getFileMetadata(uploadFile.getId(), uploadFile.getVersion()); //TODO: always necessary?
+        uploadFile = fileAccess.getFileMetadata(uploadFile.getId(), uploadFile.getVersion());
         return new AbstractMap.SimpleEntry<File, String>(uploadFile, checksum);
     }
 
@@ -369,7 +406,7 @@ public class UploadHelper {
             }
             List<Field> modifiedFields = Arrays.asList(File.Field.FILE_SIZE);
             uploadFile.setFileSize(managedFile.getFile().length());
-            return saveDocumentAndChecksum(uploadFile, managedFile.getInputStream(), uploadFile.getSequenceNumber(), modifiedFields, true);
+            return saveDocumentAndChecksum(uploadFile, managedFile.getInputStream(), uploadFile.getSequenceNumber(), modifiedFields, true).getKey();
         } finally {
             if (null != managedFile) {
                 DriveServiceLookup.getService(ManagedFileManagement.class, true).removeByID(managedFile.getID());
@@ -377,23 +414,126 @@ public class UploadHelper {
         }
     }
 
-    private String saveDocumentAndChecksum(File file, InputStream inputStream, long sequenceNumber, List<Field> modifiedFields, boolean ignoreVersion) throws OXException {
+    private Entry<String, byte[]> saveDocumentAndChecksum(File file, InputStream inputStream, long sequenceNumber, List<Field> modifiedFields, boolean ignoreVersion) throws OXException {
         DigestInputStream digestStream = null;
         try {
-            digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
+            digestStream = new DigestInputStream(inputStream, new MD5Digest());
             IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
             if (ignoreVersion && session.getStorage().supports(new FolderID(file.getFolderId()), FileStorageCapability.IGNORABLE_VERSION)) {
                 fileAccess.saveDocument(file, digestStream, sequenceNumber, modifiedFields, true);
             } else {
                 fileAccess.saveDocument(file, digestStream, sequenceNumber, modifiedFields);
             }
-            byte[] digest = digestStream.getMessageDigest().digest();
-            return jonelo.jacksum.util.Service.format(digest);
-        } catch (NoSuchAlgorithmException e) {
-            throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            MD5Digest messageDigest = (MD5Digest) digestStream.getDigest();
+            byte[] checksumStateEntry = messageDigest.getEncodedState();
+            String checksum = getChecksum(messageDigest);
+            Map.Entry<String, byte[]> entry = new AbstractMap.SimpleEntry<String, byte[]>(checksum, checksumStateEntry);
+
+            return entry;
         } finally {
             Streams.close(digestStream);
         }
+    }
+
+    private Entry<String, byte[]> saveDocumentAndUpdateChecksum(File file, InputStream inputStream, long sequenceNumber, List<Field> modifiedFields, long offset) throws OXException {
+        IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
+        byte[] checksumState = extractChecksumState(file);
+        if (checksumState != null) {
+            MD5Digest messageDigest = new MD5Digest(checksumState);
+
+            DigestInputStream digestStream = null;
+            try {
+                digestStream = new DigestInputStream(inputStream, messageDigest);
+                fileAccess.saveDocument(file, digestStream, sequenceNumber, modifiedFields, offset);
+                Digest md = digestStream.getDigest();
+                messageDigest = (MD5Digest) md;
+            } finally {
+                Streams.close(digestStream);
+            }
+
+            byte[] checksumStateEntry = messageDigest.getEncodedState();
+            String checksum = getChecksum(messageDigest);
+            Map.Entry<String, byte[]> entry = new AbstractMap.SimpleEntry<String, byte[]>(checksum, checksumStateEntry);
+
+            return entry;
+        }
+        /*
+         * fallback to checksum calculation for the entire file
+         */
+        session.trace("Unable to load checksum state from drivepart file; checksum will be calculated from entire file");
+        fileAccess.saveDocument(file, inputStream, sequenceNumber, modifiedFields, offset);
+        return new AbstractMap.SimpleEntry<String, byte[]>(null, null);
+
+    }
+
+    private String getChecksum(MD5Digest messageDigest) {
+        byte[] digest = new byte[messageDigest.getDigestSize()];
+        messageDigest.doFinal(digest, 0);
+        return jonelo.jacksum.util.Service.format(digest);
+    }
+
+    private boolean rememberChecksumState(File file, byte[] state) throws OXException {
+        if (file == null) {
+            session.trace("No file given for remembering the checksum state.");
+            return false;
+        }
+        IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
+
+        DefaultFile updateFile = new DefaultFile();
+        updateFile.setId(file.getId());
+        updateFile.setFolderId(file.getFolderId());
+        List<Field> modifiedColumns = Arrays.asList(Field.META);
+        Map<String, Object> meta = file.getMeta();
+        if (meta == null) {
+            meta = new HashMap<String, Object>();
+        }
+
+        if (state == null) {
+            /*
+             * clear checksum state
+             */
+            if (meta.containsKey(KEY_CHECKSUM_STATE)) {
+                meta.remove(KEY_CHECKSUM_STATE);
+            }
+        } else {
+            String checksumStateBinary;
+            try {
+                checksumStateBinary = DatatypeConverter.printHexBinary(state);
+            } catch (IllegalArgumentException e) {
+                session.trace("Unable to save checksum state in drivepart file: " + e.getMessage());
+                return false;
+            }
+            meta.put(KEY_CHECKSUM_STATE, checksumStateBinary);
+        }
+        updateFile.setMeta(meta);
+        fileAccess.saveFileMetadata(updateFile, file.getSequenceNumber(), modifiedColumns);
+        return true;
+
+    }
+
+    private byte[] extractChecksumState(File file) {
+
+        if (file == null) {
+            session.trace("No file given for reading the checksum state.");
+            return null;
+        }
+
+        Map<String, Object> fileMetaData = file.getMeta();
+
+        if (fileMetaData != null && fileMetaData.get(KEY_CHECKSUM_STATE) != null) {
+            String mapChecksumState = fileMetaData.get(KEY_CHECKSUM_STATE).toString();
+            try {
+                byte[] checksumState = DatatypeConverter.parseHexBinary(mapChecksumState);
+                session.trace("Loaded checksum state from drivepart file");
+                return checksumState;
+            } catch (IllegalStateException e) {
+                Logger logger = LoggerFactory.getLogger(UploadHelper.class);
+                logger.debug("Parsing checksum state of partial uploaded file from hex binary to byte array is not possible: " + e.getMessage());
+            }
+        }
+        session.trace("Unable to load checksum state from drivepart file");
+        return null;
+
     }
 
     private File getUploadFile(String path, String checksum) throws OXException {
@@ -427,10 +567,13 @@ public class UploadHelper {
                 session.trace("Upload file created: [" + uploadFile.getId() + ']');
             }
         } else if (session.isTraceEnabled()) {
+            byte[] checksumState = extractChecksumState(uploadFile);
             session.trace("Using existing upload file at " + DriveUtils.combine(uploadPath, uploadFileName) +
                 " [" + uploadFile.getId() + "], current size: " + uploadFile.getFileSize() +
                 ", last modified: " + (null != uploadFile.getLastModified() ?
-                    DriveConstants.LOG_DATE_FORMAT.get().format(uploadFile.getLastModified()) : "(unknown)"));
+                    DriveConstants.LOG_DATE_FORMAT.get().format(uploadFile.getLastModified()) : "(unknown)") + 
+                ", checksum state: " + (null != checksumState ? Arrays.toString(checksumState) : "(unknown)"));
+
         }
         return new DefaultFile(uploadFile);
     }
@@ -546,6 +689,51 @@ public class UploadHelper {
     }
 
     /**
+     * Gets a value indicating whether the upload should be stored in a separate temporary upload file or not, depending on the target 
+     * folder and indicated file. 
+     *
+     * @param path The path of the destination directory
+     * @param originalVersion The original file version being replaced, or <code>null</code> for new file versions
+     * @param newVersion The new file version
+     * @param offset The offset as indicated by the client
+     * @param totalLength The total length as indicated by the client
+     * @return <code>true</code> if a separate upload file should be used, <code>false</code>, otherwise
+     */
+    private boolean useSeparateUpload(String path, FileVersion originalVersion, FileVersion newVersion, long offset, long totalLength) throws OXException {
+        /*
+         * use separate file when appending to an existing file
+         */
+        if (0 < offset) {
+            return true;
+        }
+        /*
+         * do save directly, if no permissions in folder and no alternative upload location available          
+         */
+        FileStoragePermission permission = session.getStorage().getFolder(path, true).getOwnPermission();
+        if ((FileStoragePermission.CREATE_OBJECTS_IN_FOLDER > permission.getFolderPermission() ||
+            FileStoragePermission.WRITE_OWN_OBJECTS > permission.getWritePermission()) && 
+            false == session.getTemp().supported()) {
+            return false;
+        }
+        /*
+         * use separate file when replacing an existing file
+         */
+        if (null != originalVersion) {
+            return true;
+        }
+        /*
+         * do save directly, if total length is known and smaller than configured threshold
+         */
+        if (0 < totalLength && session.getOptimisticSaveThreshold() >= totalLength) {
+            return false;
+        }
+        /*
+         * upload to spearate file, otherwise
+         */
+        return true;
+    }
+
+    /**
      * Constructs a search term to match any partial upload files for the supplied file versions.
      *
      * @param filesToUpload The files to construct the search term for
@@ -604,5 +792,4 @@ public class UploadHelper {
         }
         return managedFile;
     }
-
 }

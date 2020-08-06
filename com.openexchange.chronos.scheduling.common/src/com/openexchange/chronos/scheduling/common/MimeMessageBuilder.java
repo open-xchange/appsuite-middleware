@@ -83,6 +83,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.scheduling.changes.ChangeAction;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
@@ -199,7 +200,10 @@ public class MimeMessageBuilder {
      * @throws MessagingException If setting fails
      */
     public MimeMessageBuilder setReadReceiptHeader(CalendarUser originator) throws MessagingException {
-        mime.setHeader(HEADER_DISPNOTTO, originator.getEMail());
+        String email = CalendarUtils.optEMailAddress(originator.getUri());
+        if (null != email) {
+            mime.setHeader(HEADER_DISPNOTTO, email);
+        }
         return this;
     }
 
@@ -369,18 +373,22 @@ public class MimeMessageBuilder {
      * @param calendarUser The calendar user to generate the address for
      * @return The address as {@link String}
      */
-    private String getQuotedAddress(CalendarUser calendarUser) {
+    private String getQuotedAddress(CalendarUser calendarUser) throws OXException {
         String displayName = calendarUser.getCn();
+        String email = CalendarUtils.optEMailAddress(calendarUser.getUri());
+        if (Strings.isEmpty(email)) {
+            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(calendarUser.getUri(), I(calendarUser.getEntity()), "");
+        }
         if (displayName != null) {
             try {
-                return new QuotedInternetAddress(calendarUser.getEMail(), displayName, "UTF-8").toUnicodeString();
+                return new QuotedInternetAddress(email, displayName, "UTF-8").toUnicodeString();
             } catch (AddressException | UnsupportedEncodingException e) {
                 LOGGER.warn("Interned address could not be generated. Returning fall-back instead.", e);
-                return "\"" + displayName + "\"" + " <" + calendarUser.getEMail() + ">";
+                return "\"" + displayName + "\"" + " <" + email + ">";
             }
         }
         // Without personal part
-        return calendarUser.getEMail();
+        return email;
     }
 
     /**

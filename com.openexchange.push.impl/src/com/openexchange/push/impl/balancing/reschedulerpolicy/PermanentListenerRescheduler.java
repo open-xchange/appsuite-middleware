@@ -56,7 +56,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,6 +67,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
+import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
@@ -82,12 +82,8 @@ import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
 import com.hazelcast.instance.EndpointQualifier;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.context.PoolAndSchema;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.UpdateStatus;
-import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.UpdaterEventConstants;
 import com.openexchange.java.BufferingQueue;
 import com.openexchange.push.PushManagerExtendedService;
@@ -370,14 +366,6 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                 // No such users at all
                 return;
             }
-
-            // Filter out such users residing in a context, which is currently updating or requires an update
-            allPushUsers = filterUsers(allPushUsers);
-
-            // Check again if any user left...
-            if (allPushUsers.isEmpty()) {
-                return;
-            }
         } catch (Exception e) {
             LOG.warn("Failed to distribute permanent listeners among cluster nodes", e);
             return;
@@ -396,43 +384,6 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
             // Submit task to thread pool
             threadPool.submit(new ReschedulerTask(allMembers, allPushUsers, hzInstance, pushManagerRegistry, policy, remotePlan));
         }
-    }
-
-    private List<PushUser> filterUsers(List<PushUser> allPushUsers) throws OXException {
-        int size = allPushUsers.size();
-
-        // Get schema associations for involved contexts
-        Map<PoolAndSchema, List<Integer>> schemaAssociations;
-        {
-            Set<Integer> distinctContextIds = new HashSet<>(size);
-            for (PushUser pushUser : allPushUsers) {
-                distinctContextIds.add(Integer.valueOf(pushUser.getContextId()));
-            }
-            schemaAssociations = Services.requireService(ContextService.class).getSchemaAssociationsFor(new ArrayList<Integer>(distinctContextIds));
-        }
-
-        // Identify "dirty" contexts.
-        Set<Integer> dirtyContextIds = new HashSet<>(size);
-        for (Map.Entry<PoolAndSchema, List<Integer>> entry : schemaAssociations.entrySet()) {
-            PoolAndSchema poolAndSchema = entry.getKey();
-            UpdateStatus status = Updater.getInstance().getStatus(poolAndSchema.getSchema(), poolAndSchema.getPoolId());
-            if (status.blockingUpdatesRunning() || status.needsBlockingUpdates()) {
-                dirtyContextIds.addAll(entry.getValue());
-            }
-        }
-        if (dirtyContextIds.isEmpty()) {
-            // No "dirty" ones...
-            return allPushUsers;
-        }
-
-        // Drop such users residing in a "dirty" context. Use a new ArrayList instance to avoid steady System.arraycopy() calls
-        List<PushUser> filteredPushUsers = new ArrayList<PushUser>(size);
-        for (PushUser pushUser : allPushUsers) {
-            if (false == dirtyContextIds.contains(Integer.valueOf(pushUser.getContextId()))) {
-                filteredPushUsers.add(pushUser);
-            }
-        }
-        return filteredPushUsers;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------
@@ -512,36 +463,38 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                 // Determine other cluster members
                 Set<Member> otherMembersInCluster = getOtherMembers(allMembers, localMember);
 
-                if (otherMembersInCluster.isEmpty()) {
+                int numberOfOtherMembersInCluster = otherMembersInCluster.size();
+                if (numberOfOtherMembersInCluster <= 0) {
                     // No other cluster members - assign all available permanent listeners to this node
                     LOG.info("Going to apply all push users to local member (no other members available): {}", localMember);
-                    List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(allPushUsers, 0L);
+                    List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(allPushUsers, true, 0L);
                     LOG.info("{} now runs permanent listeners for {} users", localMember, I(startedOnes.size()));
                     return null;
                 }
 
                 // Identify those members having at least one "PushManagerExtendedService" instance
-                List<Member> capableMembers = new LinkedList<Member>();
+                List<Member> capableMembers = new ArrayList<Member>(numberOfOtherMembersInCluster + 1);
                 capableMembers.add(localMember);
-                boolean memberAdded = false;
+                boolean allUsersStarted = false;
                 {
                     IExecutorService executor = hzInstance.getExecutorService("default");
-                    Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableCheckForExtendedServiceCallable(localMember.getUuid()), otherMembersInCluster);
-                    for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
+                    Map<Member, Future<String>> futureMap = executor.submitToMembers(new PortableCheckForExtendedServiceCallable(localMember.getUuid(), localMember.getVersion().toString()), otherMembersInCluster);
+                    for (Map.Entry<Member, Future<String>> entry : futureMap.entrySet()) {
                         Member member = entry.getKey();
-                        Future<Boolean> future = entry.getValue();
+                        Future<String> future = entry.getValue();
                         // Check Future's return value
                         int retryCount = 3;
-                        while (retryCount-- > 0) {
+                        NextTry: while (retryCount-- > 0) {
                             try {
-                                boolean isCapable = future.get().booleanValue();
+                                JSONObject jNodeInfo = new JSONObject(future.get());
                                 retryCount = 0;
+                                allUsersStarted |= jNodeInfo.getBoolean(PortableCheckForExtendedServiceCallable.NODE_INFO_ALL_USERS_STARTED);
+                                boolean isCapable = jNodeInfo.getBoolean(PortableCheckForExtendedServiceCallable.NODE_INFO_PERMANENT_PUSH_ALLOWED);
                                 if (isCapable) {
                                     capableMembers.add(member);
-                                    memberAdded = true;
-                                    LOG.info("Cluster member \"{}\" also runs a {}, hence considered as companion.", member, PushManagerExtendedService.class.getSimpleName());
+                                    LOG.info("Cluster member \"{}\" also runs a resource-acquiring {}, hence considered as companion.", member, PushManagerExtendedService.class.getSimpleName());
                                 } else {
-                                    LOG.info("Cluster member \"{}\" does not run a {}, hence ignored.", member, PushManagerExtendedService.class.getSimpleName());
+                                    LOG.info("Cluster member \"{}\" does not run a resource-acquiring {}, hence ignored.", member, PushManagerExtendedService.class.getSimpleName());
                                 }
                             } catch (InterruptedException e) {
                                 // Interrupted - Keep interrupted state
@@ -557,6 +510,13 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
                                 // Check for Hazelcast timeout
                                 if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                                    if (cause instanceof com.hazelcast.core.MemberLeftException) {
+                                        // Target member left cluster
+                                        retryCount = 0;
+                                        LOG.info("Member \"{}\" has left cluster, hence ignored for rescheduling computation.", member);
+                                        cancelFutureSafe(future);
+                                        continue NextTry;
+                                    }
                                     if (cause instanceof IOException) {
                                         throw ((IOException) cause);
                                     }
@@ -583,10 +543,10 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                 }
 
                 // Check capable members
-                if (!memberAdded) {
+                if (capableMembers.isEmpty() && !allUsersStarted) {
                     // No other cluster members - assign all available permanent listeners to this node
                     LOG.info("Going to apply all push users to local member (no other capable member available): {}", localMember);
-                    List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(allPushUsers, 0L);
+                    List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(allPushUsers, true, 0L);
                     LOG.info("{} now runs permanent listeners for {} users", localMember, I(startedOnes.size()));
                     return null;
                 }
@@ -606,7 +566,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                 });
 
                 if (false == remotePlan) { // <-- Called from remote node to perform a new reschedule; see PortablePlanRescheduleCallable
-                    // Determine the position of this cluster node
+                    // Determine the position of this cluster node (ReschedulePolicy.PER_NODE.equals(policy)
                     int pos = 0;
                     while (!localMember.getUuid().equals(capableMembers.get(pos).getUuid())) {
                         pos = pos + 1;
@@ -623,7 +583,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                     }
 
                     // Apply newly calculated initial permanent listeners
-                    List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(ps, TimeUnit.NANOSECONDS.convert(2L, TimeUnit.SECONDS));
+                    List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(ps, false, TimeUnit.NANOSECONDS.convert(2L, TimeUnit.SECONDS));
                     int numberOfStartedOnes = startedOnes.size();
 
                     LOG.info("{} now runs permanent listeners for {} users", localMember, I(numberOfStartedOnes));
@@ -663,7 +623,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                     }
 
                     // Apply newly calculated initial permanent listeners
-                    List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(ps, _2secNanos);
+                    List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(ps, false, _2secNanos);
                     LOG.info("{} now runs permanent listeners for {} users", localMember, I(startedOnes.size()));
                 } else {
                     Member master = capableMembers.get(0);
@@ -676,7 +636,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                         Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableDropAllPermanentListenerCallable(master.getUuid()), capableMembers);
 
                         // Stop all on local node, too
-                        PushManagerRegistry.getInstance().stopAllPermanentListener(false); // No reconnect since we are going to restart them in cluster
+                        PushManagerRegistry.getInstance().stopAllPermanentListenerForReschedule(); // No reconnect since we are going to restart them in cluster
 
                         // Await remote nodes to stop permanent listeners
                         for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
@@ -752,7 +712,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                         }
 
                         // Apply newly calculated initial permanent listeners
-                        List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(null == myList ? Collections.<PushUser>emptyList() : myList, _2secNanos);
+                        List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(null == myList ? Collections.<PushUser>emptyList() : myList, false, _2secNanos);
                         LOG.info("This cluster member \"{}\" now runs permanent listeners for {} users", localMember, Integer.valueOf(startedOnes.size()));
                     } else {
                         LOG.info("Awaiting the permanent listeners to start as dictated by master \"{}\"", master);
@@ -851,7 +811,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
     } // End of class DropPushUserTask
 
-    static void cancelFutureSafe(Future<Boolean> future) {
+    static <T> void cancelFutureSafe(Future<T> future) {
         if (null != future) {
             try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
         }

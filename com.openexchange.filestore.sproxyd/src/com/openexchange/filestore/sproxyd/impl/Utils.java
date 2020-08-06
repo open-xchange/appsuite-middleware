@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.util.EntityUtils;
@@ -84,6 +85,13 @@ class Utils {
                     EntityUtils.consume(entity);
                 } catch (Exception e) {
                     LOG.debug("Error consuming HTTP response entity", e);
+                }
+            }
+            if (response instanceof CloseableHttpResponse) {
+                try {
+                    ((CloseableHttpResponse) response).close();
+                } catch (Exception e) {
+                    LOG.debug("Error closing HTTP response", e);
                 }
             }
         }

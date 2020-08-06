@@ -53,11 +53,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
 import com.openexchange.file.storage.json.FileStorageAccountConstants;
+import com.openexchange.file.storage.json.actions.files.AbstractFileAction;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -69,6 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = AbstractFileAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class UpdateAction extends AbstractFileStorageAccountAction {
 
     public UpdateAction(final FileStorageServiceRegistry registry) {
@@ -82,12 +85,26 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
         if (!data.has(FileStorageAccountConstants.ID)) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(FileStorageAccountConstants.ID);
         }
+
         final FileStorageAccount account = parser.parse(data);
-        if (account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
-            //test connection
-            ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
-        }
+        final boolean doConnectionCheck = account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension;
+
+        //load existing account for resetting if the connection check failed
+        FileStorageAccount existingAccount = doConnectionCheck ? account.getFileStorageService().getAccountManager().getAccount(account.getId(), session) : null;
+
+        //perform update
         account.getFileStorageService().getAccountManager().updateAccount(account, session);
+
+        if (doConnectionCheck) {
+            try {
+                //test connection
+                ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
+            } catch (OXException e) {
+                //reset
+                account.getFileStorageService().getAccountManager().updateAccount(existingAccount, session);
+                throw e;
+            }
+        }
         return new AJAXRequestResult(Integer.valueOf(1));
     }
 

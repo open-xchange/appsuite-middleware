@@ -70,6 +70,7 @@ import com.openexchange.mail.compose.old.OldCompositionSpace;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -78,6 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@OAuthAction(OAuthAction.WRITE_MAIL)
 public final class GetReplyAction extends AbstractMailAction {
 
     /**
@@ -159,7 +161,8 @@ public final class GetReplyAction extends AbstractMailAction {
                 boolean setFrom = AJAXRequestDataTools.parseBoolParameter(req.getParameter("setFrom"));
                 if (setFrom) {
                     Dispatcher ox = getService(Dispatcher.class);
-                    AJAXRequestData requestData = request().session(session).module(com.openexchange.mailaccount.Constants.getModule()).action(com.openexchange.mailaccount.json.actions.ResolveFolderAction.ACTION).params(AJAXServlet.PARAMETER_FOLDERID, folderPath).format("json").build(req.getRequest());
+                    AJAXRequestData requestData = request().session(session).module(com.openexchange.mailaccount.Constants.getModule()).action(com.openexchange.mailaccount.json.actions.ResolveFolderAction.ACTION)
+                        .params(AJAXServlet.PARAMETER_FOLDERID, folderPath).format("json").build(req.getRequest());
                     AJAXRequestResult requestResult = perform(requestData, ox, session);
                     JSONObject jResult = ((JSONObject) requestResult.getResultObject());
                     if (null != jResult && jResult.hasAndNotNull("from")) {

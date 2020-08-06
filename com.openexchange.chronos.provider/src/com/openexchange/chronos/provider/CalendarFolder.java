@@ -82,7 +82,14 @@ public interface CalendarFolder {
      *
      * @return <code>true</code> if the folder is subscribed, <code>false</code>, otherwise
      */
-    boolean isSubscribed();
+    Boolean isSubscribed();
+
+    /**
+     * Gets a value indicating whether the folder is used for sync or not.
+     *
+     * @return the {@link UsedForSync} value
+     */
+    UsedForSync getUsedForSync();
 
     /**
      * Gets the last modification date of the calendar.

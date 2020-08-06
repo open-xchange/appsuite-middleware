@@ -70,10 +70,10 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.impl.InternalAttendeeUpdates;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.InternalAttendeeUpdates;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -136,7 +136,11 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Check.quotaNotExceeded(storage, session);
         Check.noConflicts(storage, session, newEvent, newEvent.getAttendees());
         /*
-         * insert event, attendees & attachments
+         * trigger calendar interceptors
+         */
+        interceptorRegistry.triggerInterceptorsOnBeforeCreate(newEvent);
+        /*
+         * insert event, attendees, attachments & conferences
          */
         storage.getEventStorage().insertEvent(newEvent);
         if (false == isNullOrEmpty(newEvent.getAttendees())) {
@@ -144,6 +148,9 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         }
         if (false == isNullOrEmpty(newEvent.getAttachments())) {
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newEvent.getId(), newEvent.getAttachments());
+        }
+        if (false == isNullOrEmpty(newEvent.getConferences())) {
+            storage.getConferenceStorage().insertConferences(newEvent.getId(), newEvent.getConferences());
         }
         /*
          * reload created event for further processing
@@ -198,10 +205,11 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Consistency.adjustAllDayDates(event);
         Consistency.adjustTimeZones(session, calendarUserId, event, null);
         /*
-         * attendees, attachments
+         * attendees, attachments, conferences
          */
-        event.setAttendees(Check.maxAttendees(getSelfProtection(), InternalAttendeeUpdates.onNewEvent(session, folder, eventData).getAddedItems()));
+        event.setAttendees(Check.maxAttendees(getSelfProtection(), InternalAttendeeUpdates.onNewEvent(session, folder, eventData, timestamp).getAddedItems()));
         event.setAttachments(Check.attachmentsAreVisible(session, storage, eventData.getAttachments()));
+        event.setConferences(prepareConferences(Check.maxConferences(getSelfProtection(), eventData.getConferences())));
         /*
          * classification, transparency, color, geo
          */
@@ -225,6 +233,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             event.setSeriesId(event.getId());
             event.setRecurrenceDates(eventData.getRecurrenceDates());
             event.setDeleteExceptionDates(Check.recurrenceIdsExist(session.getRecurrenceService(), event, eventData.getDeleteExceptionDates()));
+            Consistency.normalizeRecurrenceIDs(event.getStartDate(), event);
         }
         /*
          * copy over further (unchecked) event fields

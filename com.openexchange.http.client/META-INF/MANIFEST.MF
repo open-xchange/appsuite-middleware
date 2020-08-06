@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: HTTP Client Helpers
 Bundle-SymbolicName: com.openexchange.http.client
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Activator: com.openexchange.http.client.osgi.HTTPClientActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -17,14 +17,18 @@ Import-Package: com.openexchange.exception,
  com.openexchange.tools.ssl,
  javax.net,
  javax.net.ssl,
- org.apache.commons.httpclient,
- org.apache.commons.httpclient.auth,
- org.apache.commons.httpclient.cookie,
- org.apache.commons.httpclient.methods,
- org.apache.commons.httpclient.methods.multipart,
- org.apache.commons.httpclient.params,
- org.apache.commons.httpclient.protocol,
- org.apache.commons.httpclient.util,
+ org.apache.http,
+ org.apache.http.client,
+ org.apache.http.client.config,
+ org.apache.http.client.methods,
+ org.apache.http.client.utils,
+ org.apache.http.cookie,
+ org.apache.http.entity,
+ org.apache.http.entity.mime,
+ org.apache.http.entity.mime.content,
+ org.apache.http.impl.client,
+ org.apache.http.message,
+ org.apache.http.util,
  org.osgi.framework
 Export-Package: com.openexchange.http.client,
  com.openexchange.http.client.apache,

@@ -88,7 +88,6 @@ import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.tools.servlet.http.AuthCookie;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
@@ -158,7 +157,7 @@ public class SessionProvider {
                 Object attribute = httpRequest.getAttribute(OAUTH_SESSION_KEY);
                 if (attribute == null) {
                     // Session identifier fetched from cache; validate it through fetching the session from SessionD
-                    session = sessiondService instanceof SessiondServiceExtended ? ((SessiondServiceExtended) sessiondService).getSession(sessionId, false) : sessiondService.getSession(sessionId);
+                    session = sessiondService.getSession(sessionId, false);
                     if (session == null) {
                         LOG.debug("OAuth 2.0 session with ID {} was invalidated since last request", sessionId);
                         sessionCache.asMap().remove(accessToken, sessionId);
@@ -216,10 +215,6 @@ public class SessionProvider {
         Cookie[] cookies = getCookies(httpRequest);
         Map<String, List<String>> headers = getHeaders(httpRequest);
         HttpSession session = httpRequest.getSession(false);
-        String route = null;
-        if (session != null) {
-            route = com.openexchange.tools.servlet.http.Tools.getRoute(session.getId());
-        }
         LoginRequestImpl req = new LoginRequestImpl(
             user.getLoginInfo(),
             null,                                   /* password */
@@ -236,7 +231,7 @@ public class SessionProvider {
             forceHTTPS,
             httpRequest.getServerName(),
             httpRequest.getServerPort(),
-            route);
+            session);
         req.setTransient(true);
 
         return req;

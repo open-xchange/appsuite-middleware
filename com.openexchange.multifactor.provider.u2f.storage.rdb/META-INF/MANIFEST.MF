@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RDB storage for totp multifactor devices
 Bundle-SymbolicName: com.openexchange.multifactor.provider.u2f.storage.rdb
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.multifactor.provider.u2f.storage.rdb
 Bundle-Activator: com.openexchange.multifactor.provider.u2f.storage.rdb.osgi.RdbU2FMultifactorStorageActivator

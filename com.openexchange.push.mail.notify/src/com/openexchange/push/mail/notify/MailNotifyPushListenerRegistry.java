@@ -479,7 +479,7 @@ public final class MailNotifyPushListenerRegistry {
 
                     @Override
                     public Set<Flag> flags() {
-                        return SessionMatcher.ALL_FLAGS;
+                        return SessionMatcher.ONLY_SHORT_TERM;
                     }
 
                     @Override

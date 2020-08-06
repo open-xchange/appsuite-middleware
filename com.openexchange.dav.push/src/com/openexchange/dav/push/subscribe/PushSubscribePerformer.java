@@ -52,13 +52,13 @@ package com.openexchange.dav.push.subscribe;
 import java.util.EnumMap;
 import java.util.Map;
 import com.openexchange.dav.DAVPerformer;
+import com.openexchange.dav.actions.OPTIONSAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.action.WebdavExistsAction;
 import com.openexchange.webdav.action.WebdavHeadAction;
 import com.openexchange.webdav.action.WebdavIfAction;
 import com.openexchange.webdav.action.WebdavIfMatchAction;
-import com.openexchange.webdav.action.WebdavOptionsAction;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavMethod;
@@ -89,7 +89,7 @@ public class PushSubscribePerformer extends DAVPerformer {
 
     private EnumMap<WebdavMethod, WebdavAction> initActions() {
         EnumMap<WebdavMethod, WebdavAction> actions = new EnumMap<WebdavMethod, WebdavAction>(WebdavMethod.class);
-        actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.OPTIONS, prepare(new OPTIONSAction(factory), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.POST, prepare(new PushSubscribeAction(factory), true, true, new WebdavIfMatchAction()));
         actions.put(WebdavMethod.GET, prepare(new PushSubscribeAction(factory), true, true, false, null, new WebdavExistsAction()));
         actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, null, new WebdavExistsAction()));

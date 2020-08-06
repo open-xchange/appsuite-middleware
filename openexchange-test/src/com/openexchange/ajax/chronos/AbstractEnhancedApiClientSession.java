@@ -108,7 +108,7 @@ public abstract class AbstractEnhancedApiClientSession extends AbstractConfigAwa
         try {
             newClient = new EnhancedApiClient();
             setBasePath(newClient);
-            newClient.setUserAgent("ox-test-client");
+            newClient.setUserAgent("HTTP API Testing Agent");
             newClient.login(user.getLogin(), user.getPassword());
         } catch (Exception e) {
             LOG.error("Could not generate new client for user {} in context {} ", user.getUser(), user.getContext());

@@ -79,17 +79,21 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter extends AbstractConvertUtf
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractLiquibaseUtf8mb4Adapter.class);
 
         Connection con = ((JdbcConnection) databaseConnection).getUnderlyingConnection();
+        String schemaName = null;
         try {
-            String schemaName = getSchemaName(con, database);
+            schemaName = getSchemaName(con, database);
+            if (Strings.isEmpty(schemaName)) {
+                throw new CustomChangeException("Unable to determine schema name");
+            }
 
             before(con, schemaName);
             innerPerform(con, schemaName);
             after(con, schemaName);
         } catch (SQLException e) {
-            logger.error("Failed to convert schema to utf8mb4", e);
+            logger.error("Failed to convert tables in schema {} to utf8mb4", schemaName, e);
             throw new CustomChangeException("SQL error", e);
         } catch (RuntimeException e) {
-            logger.error("Failed to convert schema to utf8mb4", e);
+            logger.error("Failed to convert tables in schema {} to utf8mb4", schemaName, e);
             throw new CustomChangeException("Runtime error", e);
         }
     }

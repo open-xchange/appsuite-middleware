@@ -143,7 +143,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         folder.setModule("mail");
         folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse createFolder = foldersApi.createFolder(FOLDER, getApiClient().getSession(), body, "0", null, null);
+        FolderUpdateResponse createFolder = foldersApi.createFolder(FOLDER, getApiClient().getSession(), body, "0", null, null, null);
         folderId = createFolder.getData();
 
         MailImportResponse response = mailApi.importMail(getApiClient().getSession(), folderId, mailWithAttachmentFile, null, Boolean.TRUE);

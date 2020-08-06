@@ -56,7 +56,7 @@ package com.openexchange.admin.rmi.exceptions;
  * @author d7
  *
  */
-public class NoSuchResourceException extends Exception {
+public class NoSuchResourceException extends AbstractAdminRmiException {
 
     /**
      *

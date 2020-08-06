@@ -467,13 +467,18 @@ public abstract class MailConfig {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The appropriate mail server URL or <code>null</code>
+     * @throws OXException If URL information cannot be returned
      */
-    public static final UrlInfo getMailServerURL(MailAccount mailAccount, int userId, int contextId) {
+    public static final UrlInfo getMailServerURL(MailAccount mailAccount, int userId, int contextId) throws OXException {
         if (!mailAccount.isDefaultAccount()) {
             return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
         }
         if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuestAccount(mailAccount)))) {
-            return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
+            ConfiguredServer server = MailProperties.getInstance().getMailServer(userId, contextId);
+            if (server == null) {
+                throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + userId + " in context " + contextId);
+            }
+            return new UrlInfo(server.getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
         }
         return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
     }
@@ -491,7 +496,11 @@ public abstract class MailConfig {
         int contextId = session.getContextId();
         if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuest(session)))) {
             if (!Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-                return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
+                ConfiguredServer server = MailProperties.getInstance().getMailServer(userId, contextId);
+                if (server == null) {
+                    throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + userId + " in context " + contextId);
+                }
+                return new UrlInfo(server.getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
             }
         }
 
@@ -647,6 +656,9 @@ public abstract class MailConfig {
                     case GLOBAL:
                         {
                             ConfiguredServer server = MailProperties.getInstance().getMailServer(iUserId, ctx.getContextId());
+                            if (server == null) {
+                                throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + iUserId + " in context " + ctx.getContextId());
+                            }
                             shouldMatch = toSocketAddrString(server.getHostName(), server.getPort());
                         }
                         break;
@@ -851,40 +863,36 @@ public abstract class MailConfig {
                 // Apparently, OAuth is supposed to be used
                 Object obj = session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
                 if (obj == null) {
-                    if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-                        obj = "";
-                    } else {
+                    if (!Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
                         throw MailExceptionCode.MISSING_CONNECT_PARAM.create("The session contains no OAuth token.");
                     }
+                    obj = "";
                 }
                 mailConfig.password = obj.toString();
                 mailConfig.authType = configuredAuthType;
             } else {
                 // Common handling based on configuration
-                PasswordSource cur = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
-                if (PasswordSource.GLOBAL.equals(cur)) {
+                PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
+                if (PasswordSource.GLOBAL.equals(passwordSource)) {
                     String masterPw = MailProperties.getInstance().getMasterPassword(session.getUserId(), session.getContextId());
                     if (masterPw == null) {
-                        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-                            masterPw = "";
-                        } else {
+                        if (!Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
                             throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
                         }
+                        masterPw = "";
                     }
                     mailConfig.password = masterPw;
                 } else {
                     String sessionPassword = session.getPassword();
                     if (null == sessionPassword) {
-                        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-                            sessionPassword = "";
-                        } else {
+                        if (!Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
                             throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
                         }
+                        sessionPassword = "";
                     }
                     mailConfig.password = sessionPassword;
                 }
             }
-
         } else {
             CredentialsProviderService credentialsProvider = CredentialsProviderRegistry.getInstance().optCredentialsProviderFor(forMailAccess, account.getId(), session);
             if (null == credentialsProvider) {
@@ -1140,7 +1148,11 @@ public abstract class MailConfig {
         if (!force && Strings.isEmpty(value)) {
             return;
         }
-        arr[index] = null == value ? null : MailFolderUtility.prepareMailFolderParam(value).getFullname();
+        if (null == value) {
+            arr[index] = null;
+        } else {
+            arr[index] = MailFolderUtility.prepareMailFolderParamOrElseReturn(value);
+        }
     }
 
     @Override

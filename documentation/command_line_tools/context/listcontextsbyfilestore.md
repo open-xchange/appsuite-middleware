@@ -2,6 +2,7 @@
 title: listcontextsbyfilestore
 icon: far fa-circle
 tags: Administration, Command Line tools, Context, Filestore
+package: open-xchange-admin
 ---
 
 # NAME

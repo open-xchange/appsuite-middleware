@@ -58,14 +58,14 @@ import com.openexchange.proxy.Header;
  */
 public final class HeaderImpl implements Header {
 
-    private final org.apache.commons.httpclient.Header header;
+    private final org.apache.http.Header header;
 
     /**
      * Initializes a new {@link HeaderImpl}.
      *
      * @param header The delegatee
      */
-    public HeaderImpl(final org.apache.commons.httpclient.Header header) {
+    public HeaderImpl(final org.apache.http.Header header) {
         super();
         this.header = header;
     }

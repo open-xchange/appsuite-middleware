@@ -1,9 +1,11 @@
+
 package com.openexchange.saml;
 
 import static org.hamcrest.Matchers.containsString;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,67 +33,62 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.joda.time.DateTime;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.opensaml.DefaultBootstrap;
-import org.opensaml.common.SAMLObject;
-import org.opensaml.common.SAMLVersion;
-import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.binding.decoding.HTTPRedirectDeflateDecoder;
-import org.opensaml.saml2.binding.encoding.HTTPRedirectDeflateEncoder;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Attribute;
-import org.opensaml.saml2.core.AttributeStatement;
-import org.opensaml.saml2.core.AttributeValue;
-import org.opensaml.saml2.core.Audience;
-import org.opensaml.saml2.core.AudienceRestriction;
-import org.opensaml.saml2.core.AuthnContext;
-import org.opensaml.saml2.core.AuthnContextClassRef;
-import org.opensaml.saml2.core.AuthnRequest;
-import org.opensaml.saml2.core.AuthnStatement;
-import org.opensaml.saml2.core.Conditions;
-import org.opensaml.saml2.core.EncryptedAssertion;
-import org.opensaml.saml2.core.Issuer;
-import org.opensaml.saml2.core.LogoutRequest;
-import org.opensaml.saml2.core.LogoutResponse;
-import org.opensaml.saml2.core.NameID;
-import org.opensaml.saml2.core.NameIDType;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.saml2.core.SessionIndex;
-import org.opensaml.saml2.core.Status;
-import org.opensaml.saml2.core.StatusCode;
-import org.opensaml.saml2.core.StatusResponseType;
-import org.opensaml.saml2.core.Subject;
-import org.opensaml.saml2.core.SubjectConfirmation;
-import org.opensaml.saml2.core.SubjectConfirmationData;
-import org.opensaml.saml2.encryption.Encrypter;
-import org.opensaml.saml2.encryption.Encrypter.KeyPlacement;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.SingleLogoutService;
-import org.opensaml.ws.transport.OutputStreamOutTransportAdapter;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
-import org.opensaml.xml.encryption.EncryptionConstants;
-import org.opensaml.xml.encryption.EncryptionParameters;
-import org.opensaml.xml.encryption.KeyEncryptionParameters;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.schema.XSString;
-import org.opensaml.xml.security.SecurityHelper;
-import org.opensaml.xml.security.SigningUtil;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.keyinfo.KeyInfoGeneratorFactory;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.Signer;
-import org.opensaml.xml.util.Base64;
-import org.opensaml.xml.util.XMLHelper;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.opensaml.core.config.InitializationService;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.core.xml.schema.XSString;
+import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.saml.common.SAMLObject;
+import org.opensaml.saml.common.SAMLVersion;
+import org.opensaml.saml.common.binding.SAMLBindingSupport;
+import org.opensaml.saml.common.messaging.context.SAMLEndpointContext;
+import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.binding.decoding.impl.HTTPRedirectDeflateDecoder;
+import org.opensaml.saml.saml2.binding.encoding.impl.HTTPRedirectDeflateEncoder;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.AttributeStatement;
+import org.opensaml.saml.saml2.core.AttributeValue;
+import org.opensaml.saml.saml2.core.Audience;
+import org.opensaml.saml.saml2.core.AudienceRestriction;
+import org.opensaml.saml.saml2.core.AuthnContext;
+import org.opensaml.saml.saml2.core.AuthnContextClassRef;
+import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.AuthnStatement;
+import org.opensaml.saml.saml2.core.Conditions;
+import org.opensaml.saml.saml2.core.EncryptedAssertion;
+import org.opensaml.saml.saml2.core.Issuer;
+import org.opensaml.saml.saml2.core.LogoutRequest;
+import org.opensaml.saml.saml2.core.LogoutResponse;
+import org.opensaml.saml.saml2.core.NameID;
+import org.opensaml.saml.saml2.core.NameIDType;
+import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.saml.saml2.core.SessionIndex;
+import org.opensaml.saml.saml2.core.Status;
+import org.opensaml.saml.saml2.core.StatusCode;
+import org.opensaml.saml.saml2.core.StatusResponseType;
+import org.opensaml.saml.saml2.core.Subject;
+import org.opensaml.saml.saml2.core.SubjectConfirmation;
+import org.opensaml.saml.saml2.core.SubjectConfirmationData;
+import org.opensaml.saml.saml2.encryption.Encrypter;
+import org.opensaml.saml.saml2.encryption.Encrypter.KeyPlacement;
+import org.opensaml.saml.saml2.metadata.SingleLogoutService;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.crypto.SigningUtil;
+import org.opensaml.xmlsec.SignatureSigningParameters;
+import org.opensaml.xmlsec.algorithm.AlgorithmSupport;
+import org.opensaml.xmlsec.context.SecurityParametersContext;
+import org.opensaml.xmlsec.encryption.support.DataEncryptionParameters;
+import org.opensaml.xmlsec.encryption.support.EncryptionConstants;
+import org.opensaml.xmlsec.encryption.support.KeyEncryptionParameters;
+import org.opensaml.xmlsec.keyinfo.KeyInfoGenerator;
+import org.opensaml.xmlsec.keyinfo.KeyInfoSupport;
+import org.opensaml.xmlsec.keyinfo.NamedKeyInfoGeneratorManager;
+import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.support.Signer;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.login.HashCalculator;
@@ -110,15 +107,18 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.http.InitService;
+import com.openexchange.saml.impl.AlgorithmUtils;
 import com.openexchange.saml.impl.LoginConfigurationLookup;
 import com.openexchange.saml.impl.WebSSOProviderImpl;
 import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
+import com.openexchange.saml.oauth.service.SimOAuthAccessTokenService;
 import com.openexchange.saml.spi.CredentialProvider;
 import com.openexchange.saml.spi.DefaultExceptionHandler;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.saml.state.SimStateManagement;
 import com.openexchange.saml.tools.SAMLLoginTools;
 import com.openexchange.saml.tools.SignatureHelper;
+import com.openexchange.saml.utils.SecurityHelperUtils;
 import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Origin;
@@ -130,6 +130,9 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SimSessiondService;
 import com.openexchange.user.SimUserService;
 import com.openexchange.user.UserService;
+import net.shibboleth.utilities.java.support.codec.Base64Support;
+import net.shibboleth.utilities.java.support.xml.ParserPool;
+import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 
 /*
  *
@@ -186,9 +189,6 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({OAuthAccessTokenService.class, ServerServiceRegistry.class, ConfigurationService.class})
-@PowerMockIgnore({"javax.net.*","javax.security.*","javax.crypto.*"})
 public class SAMLWebSSOProviderTest {
 
     private static SAMLWebSSOProvider provider;
@@ -201,12 +201,12 @@ public class SAMLWebSSOProviderTest {
     private static SimSessiondService sessiondService;
     private static SimpleServiceLookup services;
     private static SimUserService userService;
-    @Mock
-    private ServerServiceRegistry serverServiceRegistry;
+    private static ParserPool parserPool;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        DefaultBootstrap.bootstrap();
+        InitializationService.initialize();
+        parserPool = XMLObjectProviderRegistrySupport.getParserPool();
         testCredentials = new TestCredentials();
         credentialProvider = testCredentials.getSPCredentialProvider();
 
@@ -220,6 +220,7 @@ public class SAMLWebSSOProviderTest {
         sessionReservationService = new SimSessionReservationService();
         services.add(SessionReservationService.class, sessionReservationService);
         services.add(DispatcherPrefixService.class, new DispatcherPrefixService() {
+
             @Override
             public String getPrefix() {
                 return "/appsuite/api/";
@@ -231,30 +232,24 @@ public class SAMLWebSSOProviderTest {
         services.add(SessiondService.class, sessiondService);
         userService = new SimUserService();
         services.add(UserService.class, userService);
-        OAuthAccessTokenService mock = PowerMockito.mock(OAuthAccessTokenService.class);
-        PowerMockito.when(mock, "isConfigured", 1,1).thenReturn(false);
-        services.add(OAuthAccessTokenService.class,mock);
         userService.addUser(new SimUser(1), 1);
+        services.add(OAuthAccessTokenService.class, new SimOAuthAccessTokenService());
         stateManagement = new SimStateManagement();
         provider = new WebSSOProviderImpl(config, openSAML, stateManagement, services, samlBackend);
+
+        // static dependency of c.o.ajax.SessionUtility
+        SimConfigurationService simConfigurationService = new SimConfigurationService();
+        ServerServiceRegistry.getInstance().addService(ConfigurationService.class, simConfigurationService);
     }
 
-    @Before
-    public void setUp() {
-        PowerMockito.mockStatic(ServerServiceRegistry.class);
-        PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
-        final SimConfigurationService simConfigurationService = new SimConfigurationService();
-        PowerMockito.when(serverServiceRegistry.getService(ConfigurationService.class)).thenReturn(simConfigurationService);
-    }
-
-     @Test
-     public void testMetadata() throws Exception {
+    @Test
+    public void testMetadata() throws Exception {
         String metadataXML = provider.getMetadataXML();
         Assert.assertNotNull(metadataXML);
     }
 
-     @Test
-     public void testLoginRoundtrip() throws Exception {
+    @Test
+    public void testLoginRoundtrip() throws Exception {
         /*
          * Trigger AuthnRequest
          */
@@ -284,11 +279,11 @@ public class SAMLWebSSOProviderTest {
          */
         Response response = buildResponse(authnRequest);
         String marshall = marshall(response);
+
         SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
-            .setParameter("SAMLResponse", Base64.encodeBytes(marshall.getBytes()))
+            .setParameter("SAMLResponse", Base64Support.encode(marshall.getBytes(), false))
             .setParameter("RelayState", relayState)
             .build());
-
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
         provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
         assertCachingDisabledHeaders(httpResponse);
@@ -310,8 +305,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-     @Test
-     public void testLoginRoundtrip_auth_bypass_vul() throws Exception {
+    @Test
+    public void testLoginRoundtrip_auth_bypass_vul() throws Exception {
         /*
          * Trigger AuthnRequest
          */
@@ -343,10 +338,9 @@ public class SAMLWebSSOProviderTest {
         String marshall = marshall(response).replace("oxuser1", "ox<!-- this is a comment -->user1");
         Assert.assertThat(marshall, containsString("<!-- this is a comment -->"));
         SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
-            .setParameter("SAMLResponse", Base64.encodeBytes(marshall.getBytes()))
+            .setParameter("SAMLResponse", Base64Support.encode(marshall.getBytes(), false))
             .setParameter("RelayState", relayState)
             .build());
-
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
         provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
         assertCachingDisabledHeaders(httpResponse);
@@ -368,8 +362,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-     @Test
-     public void testAutoLogin() throws Exception {
+    @Test
+    public void testAutoLogin() throws Exception {
         /*
          * Fake SAML cookie and try auto login
          */
@@ -377,6 +371,7 @@ public class SAMLWebSSOProviderTest {
         InitService initService = new InitService(config, provider, new DefaultExceptionHandler(), loginConfigurationLookup, services);
         final String samlCookieValue = UUIDs.getUnformattedString(UUID.randomUUID());
         Session session = sessiondService.addSession(buildAddSessionParameter(new SessionEnhancement() {
+
             @Override
             public void enhanceSession(Session session) {
                 session.setParameter(SAMLSessionParameters.SESSION_INDEX, UUIDs.getUnformattedString(UUID.randomUUID()));
@@ -384,7 +379,6 @@ public class SAMLWebSSOProviderTest {
                 session.setParameter(SAMLSessionParameters.SESSION_COOKIE, samlCookieValue);
             }
         }));
-
         SimHttpServletRequest autoLoginHTTPRequest = prepareHTTPRequest("GET", new URIBuilder()
             .setScheme("https")
             .setHost("webmail.example.com")
@@ -411,8 +405,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertEquals(session.getSessionID(), sessionMatcher.group(1));
     }
 
-     @Test
-     public void testSPInitiatedLogoutRoundtripPOST() throws Exception {
+    @Test
+    public void testSPInitiatedLogoutRoundtripPOST() throws Exception {
         /*
          * Create sim session
          */
@@ -422,6 +416,7 @@ public class SAMLWebSSOProviderTest {
         nameID.setValue("test.user@example.com");
         final String marshalledNameID = openSAML.marshall(nameID);
         Session session = sessiondService.addSession(buildAddSessionParameter(new SessionEnhancement() {
+
             @Override
             public void enhanceSession(Session session) {
                 session.setParameter(SAMLSessionParameters.SESSION_INDEX, sessionIndex);
@@ -459,7 +454,7 @@ public class SAMLWebSSOProviderTest {
          */
         LogoutResponse logoutResponse = buildLogoutResponse(logoutRequest);
         SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(config.getSingleLogoutServiceURL())
-            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(logoutResponse).getBytes()))
+            .setParameter("SAMLResponse", Base64Support.encode(marshall(logoutResponse).getBytes(), false))
             .setParameter("RelayState", relayState)
             .build());
 
@@ -480,8 +475,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertEquals(session.getSessionID(), redirectParams.get("session"));
     }
 
-     @Test
-     public void testSPInitiatedLogoutRoundtripREDIRECT() throws Exception {
+    @Test
+    public void testSPInitiatedLogoutRoundtripREDIRECT() throws Exception {
         /*
          * Create sim session
          */
@@ -491,6 +486,7 @@ public class SAMLWebSSOProviderTest {
         nameID.setValue("test.user@example.com");
         final String marshalledNameID = openSAML.marshall(nameID);
         Session session = sessiondService.addSession(buildAddSessionParameter(new SessionEnhancement() {
+
             @Override
             public void enhanceSession(Session session) {
                 session.setParameter(SAMLSessionParameters.SESSION_INDEX, sessionIndex);
@@ -532,7 +528,7 @@ public class SAMLWebSSOProviderTest {
         DeflaterOutputStream deflaterStream = new DeflaterOutputStream(bytesOut, deflater);
         deflaterStream.write(marshall(logoutResponse).getBytes(Charsets.UTF_8));
         deflaterStream.finish();
-        String encoded = Base64.encodeBytes(bytesOut.toByteArray(), Base64.DONT_BREAK_LINES);
+        String encoded = Base64Support.encode(bytesOut.toByteArray(), false);
         URIBuilder redirectLocationBuilder = new URIBuilder()
             .setScheme("https")
             .setHost(requestHost)
@@ -540,11 +536,11 @@ public class SAMLWebSSOProviderTest {
             .setParameter("SAMLResponse", encoded)
             .setParameter("RelayState", relayState);
         Credential signingCredential = testCredentials.getIDPSigningCredential();
-        String sigAlg = openSAML.getGlobalSecurityConfiguration().getSignatureAlgorithmURI(signingCredential.getPrivateKey().getAlgorithm());
-        redirectLocationBuilder.setParameter("SigAlg", sigAlg);
+        redirectLocationBuilder.setParameter("SigAlg", AlgorithmUtils.getAlgorithmURI(signingCredential));
         String rawQuery = redirectLocationBuilder.build().getRawQuery();
-        byte[] rawSignature = SigningUtil.signWithURI(signingCredential, sigAlg, rawQuery.getBytes(Charsets.UTF_8));
-        String signature = Base64.encodeBytes(rawSignature, Base64.DONT_BREAK_LINES);
+        String sigAlg = signingCredential.getPrivateKey().getAlgorithm();
+        byte[] rawSignature = SigningUtil.sign(signingCredential, sigAlg, AlgorithmSupport.isHMAC(sigAlg), rawQuery.getBytes(Charsets.UTF_8));
+        String signature = Base64Support.encode(rawSignature, false);
         redirectLocationBuilder.setParameter("Signature", signature);
 
         SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("GET", redirectLocationBuilder.build());
@@ -565,8 +561,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertEquals(session.getSessionID(), redirectParams.get("session"));
     }
 
-     @Test
-     public void testIdPInitiatedLogout() throws Exception {
+    @Test
+    public void testIdPInitiatedLogout() throws Exception {
         /*
          * Create sim session
          */
@@ -576,6 +572,7 @@ public class SAMLWebSSOProviderTest {
         nameID.setValue("test.user@example.com");
         final String marshalledNameID = openSAML.marshall(nameID);
         Session session = sessiondService.addSession(buildAddSessionParameter(new SessionEnhancement() {
+
             @Override
             public void enhanceSession(Session session) {
                 session.setParameter(SAMLSessionParameters.SESSION_INDEX, sessionIndex);
@@ -589,24 +586,26 @@ public class SAMLWebSSOProviderTest {
          */
         String relayState = UUIDs.getUnformattedString(UUID.randomUUID());
         LogoutRequest logoutRequest = buildIdPLogoutRequest(sessionIndex, nameID);
-        BasicSAMLMessageContext<SAMLObject, LogoutRequest, SAMLObject> context = new BasicSAMLMessageContext<>();
-        context.setCommunicationProfileId("urn:oasis:names:tc:SAML:2.0:profiles:SSO:browser");
-        context.setOutboundSAMLMessage(logoutRequest);
+
+        MessageContext<SAMLObject> context = new MessageContext<>();
+        SAMLBindingSupport.setRelayState(context, relayState);
         SimHttpServletResponse logoutHTTPRedirect = new SimHttpServletResponse();
-        context.setOutboundMessageTransport(new HttpServletResponseAdapter(logoutHTTPRedirect, true));
-        context.setOutboundSAMLProtocol(SAMLConstants.SAML20P_NS);
-        context.setLocalEntityId(config.getIdentityProviderEntityID());
-        context.setPeerEntityId(config.getEntityID());
         SingleLogoutService peerEndpoint = openSAML.buildSAMLObject(SingleLogoutService.class);
         peerEndpoint.setBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
         peerEndpoint.setLocation(config.getSingleLogoutServiceURL());
-        context.setPeerEntityEndpoint(peerEndpoint);
-        context.setPeerEntityRole(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
-        context.setRelayState(relayState);
-        context.setOutboundSAMLMessageSigningCredential(testCredentials.getIDPSigningCredential());
-        HTTPRedirectDeflateEncoder encoder = new HTTPRedirectDeflateEncoder();
-        encoder.encode(context);
+        context.setMessage(logoutRequest);
+        context.getSubcontext(SAMLPeerEntityContext.class, true).getSubcontext(SAMLEndpointContext.class, true).setEndpoint(peerEndpoint);
 
+        final SignatureSigningParameters signingParameters = new SignatureSigningParameters();
+        signingParameters.setSigningCredential(testCredentials.getIDPSigningCredential());
+        signingParameters.setSignatureAlgorithm(AlgorithmUtils.getAlgorithmURI(testCredentials.getIDPSigningCredential()));
+        context.getSubcontext(SecurityParametersContext.class, true).setSignatureSigningParameters(signingParameters);
+
+        HTTPRedirectDeflateEncoder encoder = new HTTPRedirectDeflateEncoder();
+        encoder.setHttpServletResponse(logoutHTTPRedirect);
+        encoder.setMessageContext(context);
+        encoder.initialize();
+        encoder.encode();
         /*
          * Handle logout request
          */
@@ -636,8 +635,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNull(sessiondService.getSession(session.getSessionID()));
     }
 
-     @Test
-     public void testIdPInitiatedLogin() throws Exception {
+    @Test
+    public void testIdPInitiatedLogin() throws Exception {
         AuthnRequest authnRequest = prepareAuthnRequest();
 
         /*
@@ -645,7 +644,7 @@ public class SAMLWebSSOProviderTest {
          */
         Response response = buildResponseWithoutInResponseTo();
         SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
-            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes()))
+            .setParameter("SAMLResponse", Base64Support.encode(marshall(response).getBytes(), false))
             .build());
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
@@ -667,8 +666,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-     @Test
-     public void testIdPInitiatedLoginWithRelayState() throws Exception {
+    @Test
+    public void testIdPInitiatedLoginWithRelayState() throws Exception {
         AuthnRequest authnRequest = prepareAuthnRequest();
 
         String requestHost = "webmail2.example.com";
@@ -680,14 +679,14 @@ public class SAMLWebSSOProviderTest {
         relayStateBuilder.append("domain=").append(requestHost).append(split);
         relayStateBuilder.append("loginpath=").append(requestedLoginPath).append(split);
         relayStateBuilder.append("client=").append(requestClient);
-        String encodedRelayState = Base64.encodeBytes(relayStateBuilder.toString().getBytes());
+        String encodedRelayState = Base64Support.encode(relayStateBuilder.toString().getBytes(), false);
 
         /*
          * Build response and process it
          */
         Response response = buildResponseWithoutInResponseTo();
         SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
-            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes()))
+            .setParameter("SAMLResponse", Base64Support.encode(marshall(response).getBytes(), false))
             .setParameter("RelayState", encodedRelayState)
             .build());
 
@@ -713,8 +712,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-     @Test
-     public void testIdPInitiatedLoginWithPartlyRelayState() throws Exception {
+    @Test
+    public void testIdPInitiatedLoginWithPartlyRelayState() throws Exception {
         AuthnRequest authnRequest = prepareAuthnRequest();
 
         String requestHost = "webmail2.example.com";
@@ -722,14 +721,14 @@ public class SAMLWebSSOProviderTest {
 
         StringBuilder relayStateBuilder = new StringBuilder();
         relayStateBuilder.append("domain=").append(requestHost).append(split);
-        String encodedRelayState = Base64.encodeBytes(relayStateBuilder.toString().getBytes());
+        String encodedRelayState = Base64Support.encode(relayStateBuilder.toString().getBytes(), false);
 
         /*
          * Build response and process it
          */
         Response response = buildResponseWithoutInResponseTo();
         SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
-            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes()))
+            .setParameter("SAMLResponse", Base64Support.encode(marshall(response).getBytes(), false))
             .setParameter("RelayState", encodedRelayState)
             .build());
 
@@ -761,14 +760,14 @@ public class SAMLWebSSOProviderTest {
 
         StringBuilder relayStateBuilder = new StringBuilder();
         relayStateBuilder.append("domain=").append(requestHost).append(split);
-        String encodedRelayState = Base64.encodeBytes(relayStateBuilder.toString().getBytes());
+        String encodedRelayState = Base64Support.encode(relayStateBuilder.toString().getBytes(), false);
 
         /*
          * Build response and process it
          */
         Response response = buildResponseWithoutInResponseTo();
         SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
-            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes()))
+            .setParameter("SAMLResponse", Base64Support.encode(marshall(response).getBytes(), false))
             .setParameter("RelayState", encodedRelayState)
             .build());
 
@@ -788,8 +787,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertEquals("default", redirectParams.get(SAMLLoginTools.PARAM_SHARD));
     }
 
-     @Test
-     public void testCachingHeadersOnInit() throws Exception {
+    @Test
+    public void testCachingHeadersOnInit() throws Exception {
         InitService initService = new InitService(config, provider, new DefaultExceptionHandler(), new TestLoginConfigurationLookup(), services);
         /*
          * login
@@ -825,6 +824,7 @@ public class SAMLWebSSOProviderTest {
          * logout
          */
         Session session = sessiondService.addSession(buildAddSessionParameter(new SessionEnhancement() {
+
             @Override
             public void enhanceSession(Session session) {}
         }));
@@ -874,7 +874,7 @@ public class SAMLWebSSOProviderTest {
         Response response = buildResponse(authnRequest);
         String marshall = marshall(response);
         SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
-            .setParameter("SAMLResponse", Base64.encodeBytes(marshall.getBytes()))
+            .setParameter("SAMLResponse", Base64Support.encode(marshall.getBytes(), false))
             .setParameter("RelayState", relayState)
             .build());
 
@@ -924,20 +924,13 @@ public class SAMLWebSSOProviderTest {
     }
 
     private LogoutResponse parseLogoutResponse(SimHttpServletRequest logoutResponseHTTPRequest) throws Exception {
-        HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(logoutResponseHTTPRequest);
-        BasicSAMLMessageContext<LogoutResponse, LogoutResponse, SAMLObject> context = new BasicSAMLMessageContext<>();
-        context.setCommunicationProfileId("urn:oasis:names:tc:SAML:2.0:profiles:SSO:browser");
-        context.setInboundMessageTransport(inTransport);
-        context.setInboundSAMLProtocol(SAMLConstants.SAML20P_NS);
-        context.setPeerEntityRole(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
-
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        context.setOutboundMessageTransport(new OutputStreamOutTransportAdapter(output));
-        context.setOutboundSAMLProtocol(SAMLConstants.SAML20P_NS);
-
         HTTPRedirectDeflateDecoder decoder = new HTTPRedirectDeflateDecoder();
-        decoder.decode(context);
-        return context.getInboundSAMLMessage();
+        decoder.setParserPool(parserPool);
+        decoder.setHttpServletRequest(logoutResponseHTTPRequest);
+        decoder.initialize();
+        decoder.decode();
+
+        return (LogoutResponse) decoder.getMessageContext().getMessage();
     }
 
     private LogoutRequest buildIdPLogoutRequest(String sessionIndex, NameID nameID) throws Exception {
@@ -974,14 +967,14 @@ public class SAMLWebSSOProviderTest {
 
         Status status = openSAML.buildSAMLObject(Status.class);
         StatusCode statusCode = openSAML.buildSAMLObject(StatusCode.class);
-        statusCode.setValue(StatusCode.SUCCESS_URI);
+        statusCode.setValue(StatusCode.SUCCESS);
         status.setStatusCode(statusCode);
         response.setStatus(status);
 
         Credential signingCredential = testCredentials.getIDPSigningCredential();
         Signature responseSignature = openSAML.buildSAMLObject(Signature.class);
         responseSignature.setSigningCredential(signingCredential);
-        SecurityHelper.prepareSignatureParams(responseSignature, signingCredential, null, null);
+        SecurityHelperUtils.prepareSignatureParams(responseSignature, signingCredential);
         response.setSignature(responseSignature);
         openSAML.marshall(response); // marshalling is necessary for subsequent signing
         Signer.signObject(responseSignature);
@@ -1003,7 +996,7 @@ public class SAMLWebSSOProviderTest {
 
         Status status = openSAML.buildSAMLObject(Status.class);
         StatusCode statusCode = openSAML.buildSAMLObject(StatusCode.class);
-        statusCode.setValue(StatusCode.SUCCESS_URI);
+        statusCode.setValue(StatusCode.SUCCESS);
         status.setStatusCode(statusCode);
         response.setStatus(status);
 
@@ -1012,6 +1005,7 @@ public class SAMLWebSSOProviderTest {
 
     private AddSessionParameter buildAddSessionParameter(final SessionEnhancement enhancement) {
         return new AddSessionParameter() {
+
             @Override
             public boolean isTransient() {
                 return false;
@@ -1090,20 +1084,13 @@ public class SAMLWebSSOProviderTest {
     }
 
     private AuthnRequest parseAuthnRequest(HttpServletRequest httpRequest) throws Exception {
-        HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(httpRequest);
-        BasicSAMLMessageContext<SAMLObject, AuthnRequest, SAMLObject> context = new BasicSAMLMessageContext<>();
-        context.setCommunicationProfileId("urn:oasis:names:tc:SAML:2.0:profiles:SSO:browser");
-        context.setInboundMessageTransport(inTransport);
-        context.setInboundSAMLProtocol(SAMLConstants.SAML20P_NS);
-        context.setPeerEntityRole(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
-
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        context.setOutboundMessageTransport(new OutputStreamOutTransportAdapter(output));
-        context.setOutboundSAMLProtocol(SAMLConstants.SAML20P_NS);
-
         HTTPRedirectDeflateDecoder decoder = new HTTPRedirectDeflateDecoder();
-        decoder.decode(context);
-        return (AuthnRequest) context.getInboundSAMLMessage();
+        decoder.setParserPool(parserPool);
+        decoder.setHttpServletRequest(httpRequest);
+        decoder.initialize();
+        decoder.decode();
+
+        return (AuthnRequest) decoder.getMessageContext().getMessage();
     }
 
     private AuthnRequest prepareAuthnRequest() {
@@ -1130,20 +1117,13 @@ public class SAMLWebSSOProviderTest {
     }
 
     private LogoutRequest parseLogoutRequest(HttpServletRequest httpRequest) throws Exception {
-        HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(httpRequest);
-        BasicSAMLMessageContext<SAMLObject, LogoutRequest, SAMLObject> context = new BasicSAMLMessageContext<>();
-        context.setCommunicationProfileId("urn:oasis:names:tc:SAML:2.0:profiles:SSO:browser");
-        context.setInboundMessageTransport(inTransport);
-        context.setInboundSAMLProtocol(SAMLConstants.SAML20P_NS);
-        context.setPeerEntityRole(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
-
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        context.setOutboundMessageTransport(new OutputStreamOutTransportAdapter(output));
-        context.setOutboundSAMLProtocol(SAMLConstants.SAML20P_NS);
-
         HTTPRedirectDeflateDecoder decoder = new HTTPRedirectDeflateDecoder();
-        decoder.decode(context);
-        return (LogoutRequest) context.getInboundSAMLMessage();
+        decoder.setParserPool(parserPool);
+        decoder.setHttpServletRequest(httpRequest);
+        decoder.initialize();
+        decoder.decode();
+
+        return (LogoutRequest) decoder.getMessageContext().getMessage();
     }
 
     private static SimHttpServletRequest prepareHTTPRequest(String method, URI location) {
@@ -1155,7 +1135,7 @@ public class SAMLWebSSOProviderTest {
         request.setSecure("https".equals(location.getScheme()));
         request.setServerName(location.getHost());
         request.setQueryString(location.getRawQuery());
-        request.setCookies(Collections.<Cookie>emptyList());
+        request.setCookies(Collections.<Cookie> emptyList());
         request.setRemoteAddr("127.0.0.1");
         Map<String, String> params = parseURIQuery(location);
         for (String name : params.keySet()) {
@@ -1166,7 +1146,7 @@ public class SAMLWebSSOProviderTest {
 
     private static Map<String, String> parseURIQuery(URI uri) {
         Map<String, String> map = new HashMap<>();
-        List<NameValuePair> pairs = URLEncodedUtils.parse(uri, "UTF-8");
+        List<NameValuePair> pairs = URLEncodedUtils.parse(uri, Charset.forName("UTF-8"));
         for (NameValuePair pair : pairs) {
             map.put(pair.getName(), pair.getValue());
         }
@@ -1192,7 +1172,7 @@ public class SAMLWebSSOProviderTest {
 
         Status status = openSAML.buildSAMLObject(Status.class);
         StatusCode statusCode = openSAML.buildSAMLObject(StatusCode.class);
-        statusCode.setValue(StatusCode.SUCCESS_URI);
+        statusCode.setValue(StatusCode.SUCCESS);
         status.setStatusCode(statusCode);
         response.setStatus(status);
 
@@ -1215,7 +1195,7 @@ public class SAMLWebSSOProviderTest {
         SubjectConfirmationData subjectConfirmationData = openSAML.buildSAMLObject(SubjectConfirmationData.class);
         subjectConfirmationData.setAddress("10.20.30.1");
         subjectConfirmationData.setInResponseTo(requestID);
-        subjectConfirmationData.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 *60 * 1000));
+        subjectConfirmationData.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 * 60 * 1000));
         subjectConfirmationData.setRecipient(config.getAssertionConsumerServiceURL());
         subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
         subject.getSubjectConfirmations().add(subjectConfirmation);
@@ -1223,7 +1203,7 @@ public class SAMLWebSSOProviderTest {
 
         Conditions conditions = openSAML.buildSAMLObject(Conditions.class);
         conditions.setNotBefore(new DateTime(System.currentTimeMillis() - 60 * 1000));
-        conditions.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 *60 * 1000));
+        conditions.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 * 60 * 1000));
         AudienceRestriction audienceRestriction = openSAML.buildSAMLObject(AudienceRestriction.class);
         Audience audience = openSAML.buildSAMLObject(Audience.class);
         audience.setAudienceURI(config.getEntityID());
@@ -1254,7 +1234,7 @@ public class SAMLWebSSOProviderTest {
         Credential signingCredential = testCredentials.getIDPSigningCredential();
         Signature assertionSignature = openSAML.buildSAMLObject(Signature.class);
         assertionSignature.setSigningCredential(signingCredential);
-        SecurityHelper.prepareSignatureParams(assertionSignature, signingCredential, null, null);
+        SecurityHelperUtils.prepareSignatureParams(assertionSignature, signingCredential);
         assertion.setSignature(assertionSignature);
         openSAML.marshall(assertion); // marshalling is necessary for subsequent signing
         Signer.signObject(assertionSignature);
@@ -1268,7 +1248,7 @@ public class SAMLWebSSOProviderTest {
 
         Signature responseSignature = openSAML.buildSAMLObject(Signature.class);
         responseSignature.setSigningCredential(signingCredential);
-        SecurityHelper.prepareSignatureParams(responseSignature, signingCredential, null, null);
+        SecurityHelperUtils.prepareSignatureParams(responseSignature, signingCredential);
         response.setSignature(responseSignature);
         openSAML.marshall(response); // marshalling is necessary for subsequent signing
         Signer.signObject(responseSignature);
@@ -1277,7 +1257,6 @@ public class SAMLWebSSOProviderTest {
     }
 
     private Response buildResponseWithoutInResponseTo() throws Exception {
-//        String requestID = request.getID();
         Response response = openSAML.buildSAMLObject(Response.class);
         response.setDestination(config.getAssertionConsumerServiceURL());
         response.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
@@ -1290,7 +1269,7 @@ public class SAMLWebSSOProviderTest {
 
         Status status = openSAML.buildSAMLObject(Status.class);
         StatusCode statusCode = openSAML.buildSAMLObject(StatusCode.class);
-        statusCode.setValue(StatusCode.SUCCESS_URI);
+        statusCode.setValue(StatusCode.SUCCESS);
         status.setStatusCode(statusCode);
         response.setStatus(status);
 
@@ -1312,7 +1291,7 @@ public class SAMLWebSSOProviderTest {
         subjectConfirmation.setMethod("urn:oasis:names:tc:SAML:2.0:cm:bearer");
         SubjectConfirmationData subjectConfirmationData = openSAML.buildSAMLObject(SubjectConfirmationData.class);
         subjectConfirmationData.setAddress("10.20.30.1");
-        subjectConfirmationData.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 *60 * 1000));
+        subjectConfirmationData.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 * 60 * 1000));
         subjectConfirmationData.setRecipient(config.getAssertionConsumerServiceURL());
         subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
         subject.getSubjectConfirmations().add(subjectConfirmation);
@@ -1320,7 +1299,7 @@ public class SAMLWebSSOProviderTest {
 
         Conditions conditions = openSAML.buildSAMLObject(Conditions.class);
         conditions.setNotBefore(new DateTime(System.currentTimeMillis() - 60 * 1000));
-        conditions.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 *60 * 1000));
+        conditions.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 * 60 * 1000));
         AudienceRestriction audienceRestriction = openSAML.buildSAMLObject(AudienceRestriction.class);
         Audience audience = openSAML.buildSAMLObject(Audience.class);
         audience.setAudienceURI(config.getEntityID());
@@ -1351,7 +1330,7 @@ public class SAMLWebSSOProviderTest {
         Credential signingCredential = testCredentials.getIDPSigningCredential();
         Signature assertionSignature = openSAML.buildSAMLObject(Signature.class);
         assertionSignature.setSigningCredential(signingCredential);
-        SecurityHelper.prepareSignatureParams(assertionSignature, signingCredential, null, null);
+        SecurityHelperUtils.prepareSignatureParams(assertionSignature, signingCredential);
         assertion.setSignature(assertionSignature);
         openSAML.marshall(assertion); // marshalling is necessary for subsequent signing
         Signer.signObject(assertionSignature);
@@ -1361,7 +1340,7 @@ public class SAMLWebSSOProviderTest {
 
         Signature responseSignature = openSAML.buildSAMLObject(Signature.class);
         responseSignature.setSigningCredential(signingCredential);
-        SecurityHelper.prepareSignatureParams(responseSignature, signingCredential, null, null);
+        SecurityHelperUtils.prepareSignatureParams(responseSignature, signingCredential);
         response.setSignature(responseSignature);
         openSAML.marshall(response); // marshalling is necessary for subsequent signing
         Signer.signObject(responseSignature);
@@ -1371,21 +1350,21 @@ public class SAMLWebSSOProviderTest {
 
     private String marshall(StatusResponseType response) throws MarshallingException {
         // Never ever use the prettyPrint method! The resulting XML will differ slightly and signature validation will fail!
-        return XMLHelper.nodeToString(openSAML.getMarshallerFactory().getMarshaller(response).marshall(response));
+        return SerializeSupport.nodeToString(openSAML.getMarshallerFactory().getMarshaller(response).marshall(response));
     }
 
     private Encrypter getEncrypter() throws Exception {
         // https://wiki.shibboleth.net/confluence/display/OpenSAML/OSTwoUserManJavaXMLEncryption
         Credential keyEncryptionCredential = testCredentials.getEncryptionCredential();
 
-        EncryptionParameters encParams = new EncryptionParameters();
+        DataEncryptionParameters encParams = new DataEncryptionParameters();
         encParams.setAlgorithm(EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES128);
 
         KeyEncryptionParameters kekParams = new KeyEncryptionParameters();
         kekParams.setEncryptionCredential(keyEncryptionCredential);
         kekParams.setAlgorithm(EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP);
-        KeyInfoGeneratorFactory kigf = openSAML.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager().getDefaultManager().getFactory(keyEncryptionCredential);
-        kekParams.setKeyInfoGenerator(kigf.newInstance());
+        KeyInfoGenerator keyInfoGenerator = KeyInfoSupport.getKeyInfoGenerator(keyEncryptionCredential, new NamedKeyInfoGeneratorManager(), null);
+        kekParams.setKeyInfoGenerator(keyInfoGenerator);
 
         Encrypter samlEncrypter = new Encrypter(encParams, kekParams);
         samlEncrypter.setKeyPlacement(KeyPlacement.PEER);
@@ -1429,6 +1408,7 @@ public class SAMLWebSSOProviderTest {
     private static final class TestLoginConfigurationLookup implements LoginConfigurationLookup {
 
         private final LoginConfiguration conf;
+
 
         private TestLoginConfigurationLookup() {
             super();

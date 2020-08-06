@@ -1,98 +1,50 @@
-open-xchange-mobile-config (7.10.3-19) stable; urgency=medium
+open-xchange-mobile-config (7.10.4-7) stable; urgency=medium
 
-  * Build for patch 2020-07-27 (5821)
+  * Fifth candidate for 7.10.4 release
 
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 21 Jul 2020 10:09:17 +0000
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 05 Aug 2020 11:18:22 +0000
 
-open-xchange-mobile-config (7.10.3-18) stable; urgency=medium
+open-xchange-mobile-config (7.10.4-6) stable; urgency=medium
 
-  * Build for patch 2020-07-17 (5819)
+  * Fourth candidate for 7.10.4 release
 
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 15 Jul 2020 11:33:34 +0000
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 04 Aug 2020 14:07:56 +0000
 
-open-xchange-mobile-config (7.10.3-17) stable; urgency=medium
+open-xchange-mobile-config (7.10.4-5) stable; urgency=medium
 
-  * Build for patch  2020-07-13 (5804)
+  * Third candidate for 7.10.4 release
 
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Thu, 09 Jul 2020 10:16:06 +0000
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 04 Aug 2020 09:03:02 +0000
 
-open-xchange-mobile-config (7.10.3-16) stable; urgency=medium
+open-xchange-mobile-config (7.10.4-4) stable; urgency=medium
 
-  * Build for patch  2020-07-02 (5792)
+  * Second candidate for 7.10.4 release
 
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 26 Jun 2020 16:02:00 +0000
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 31 Jul 2020 17:27:29 +0000
 
-open-xchange-mobile-config (7.10.3-15) stable; urgency=medium
+open-xchange-mobile-config (7.10.4-3) stable; urgency=medium
 
-  * Build for patch 2020-06-30 (5781)
+  * First candidate for 7.10.4 release
 
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 24 Jun 2020 07:52:05 +0000
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 28 Jul 2020 10:24:42 +0000
 
-open-xchange-mobile-config (7.10.3-14) stable; urgency=medium
+open-xchange-mobile-config (7.10.4-2) stable; urgency=medium
 
-  * Build for patch 2020-06-15 (5765)
+  * Second preview of 7.10.4 release
 
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 15 Jun 2020 11:20:08 +0000
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 30 Jun 2020 11:18:29 +0000
 
-open-xchange-mobile-config (7.10.3-13) stable; urgency=medium
+open-xchange-mobile-config (7.10.4-1) stable; urgency=medium
 
-  * Build for patch 2020-05-26 (5742)
+  * First preview of 7.10.4 release
 
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 15 May 2020 14:14:57 +0000
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 20 May 2020 08:51:31 +0000
 
-open-xchange-mobile-config (7.10.3-12) stable; urgency=medium
+open-xchange-mobile-config (7.10.4-0) unstable; urgency=medium
 
-  * Build for patch 2020-05-11 (5720)
+  * prepare for 7.10.4 release
 
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 04 May 2020 14:54:43 +0000
-
-open-xchange-mobile-config (7.10.3-11) stable; urgency=medium
-
-  * Build for patch 2020-04-30 (5702)
-
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Thu, 23 Apr 2020 06:57:32 +0000
-
-open-xchange-mobile-config (7.10.3-10) stable; urgency=medium
-
-  * Build for patch 2020-04-02 (5692)
-
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 17 Apr 2020 08:57:52 +0000
-
-open-xchange-mobile-config (7.10.3-9) stable; urgency=medium
-
-  * Build for patch 2020-04-14 (5677)
-
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 06 Apr 2020 09:08:59 +0000
-
-open-xchange-mobile-config (7.10.3-8) stable; urgency=medium
-
-  * Build for patch 2020-03-23 (5653)
-
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Thu, 19 Mar 2020 14:51:07 +0000
-
-open-xchange-mobile-config (7.10.3-7) stable; urgency=medium
-
-  * Build for patch 2020-03-02 (5623)
-
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 28 Feb 2020 15:11:43 +0000
-
-open-xchange-mobile-config (7.10.3-6) stable; urgency=medium
-
-  * Build for patch 2020-02-19 (5588)
-
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 12 Feb 2020 16:41:49 +0000
-
-open-xchange-mobile-config (7.10.3-5) stable; urgency=medium
-
-  * Build for patch 2020-02-10 (5572)
-
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 12 Feb 2020 09:41:26 +0000
-
-open-xchange-mobile-config (7.10.3-4) stable; urgency=medium
-
-  * Build for patch 2020-01-20 (5547)
-
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 20 Jan 2020 16:38:30 +0100
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Thu, 16 Jan 2020 16:06:21 +0100
 
 open-xchange-mobile-config (7.10.3-3) stable; urgency=medium
 

@@ -169,6 +169,10 @@ public abstract class CalDAVTest extends WebDAVTest {
         getManager().delete(appointment);
     }
 
+    protected void delete(Task task) {
+        ttm.deleteTaskOnServer(task);
+    }
+
     @Override
     protected String fetchSyncToken(String folderID) throws Exception {
         return super.fetchSyncToken(Config.getPathPrefix() + "/caldav/" + encodeFolderID(folderID));
@@ -403,12 +407,19 @@ public abstract class CalDAVTest extends WebDAVTest {
     }
 
     protected int putICalUpdate(String folderID, String resourceName, String iCal, String ifMatchEtag) throws Exception {
+    	return putICalUpdate(folderID, resourceName, iCal, ifMatchEtag, null);
+    }
+
+    protected int putICalUpdate(String folderID, String resourceName, String iCal, String ifMatchEtag, String ifMatchScheduleTag) throws Exception {
         PutMethod put = null;
         try {
             String href = Config.getPathPrefix() + "/caldav/" + encodeFolderID(folderID) + "/" + urlEncode(resourceName) + ".ics";
             put = new PutMethod(getBaseUri() + href);
             if (null != ifMatchEtag) {
                 put.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
+            }
+            if (null != ifMatchScheduleTag) {
+                put.addRequestHeader("If-Schedule-Tag-Match", ifMatchScheduleTag);
             }
             put.setRequestEntity(new StringRequestEntity(iCal, "text/calendar", null));
             return getWebDAVClient().executeMethod(put);
@@ -501,6 +512,15 @@ public abstract class CalDAVTest extends WebDAVTest {
         appointment.setEndDate(end);
         appointment.setUid(uid);
         return appointment;
+    }
+
+    protected static Task generateTask(Date start, Date end, String uid, String summary) {
+        Task task = new Task();
+        task.setStartDate(start);
+        task.setEndDate(end);
+        task.setUid(uid);
+        task.setTitle(summary);
+        return task;
     }
 
     protected static String generateICal(Date start, Date end, String uid, String summary, String location) {
@@ -601,9 +621,16 @@ public abstract class CalDAVTest extends WebDAVTest {
     public static ICalResource assertContains(String uid, Collection<ICalResource> iCalResources) {
         ICalResource match = null;
         for (ICalResource iCalResource : iCalResources) {
-            if (uid.equals(iCalResource.getVEvent().getUID())) {
-                assertNull("duplicate match for UID '" + uid + "'", match);
-                match = iCalResource;
+            if (null != iCalResource.getVEvent()) {
+                if (uid.equals(iCalResource.getVEvent().getUID())) {
+                    assertNull("duplicate match for UID '" + uid + "'", match);
+                    match = iCalResource;
+                }
+            } else if (null != iCalResource.getVTodo()) {
+                if (uid.equals(iCalResource.getVTodo().getUID())) {
+                    assertNull("duplicate match for UID '" + uid + "'", match);
+                    match = iCalResource;
+                }
             }
         }
         assertNotNull("no iCal resource with UID '" + uid + "' found", match);
@@ -618,6 +645,15 @@ public abstract class CalDAVTest extends WebDAVTest {
         appointment.setParentFolderID(parse(folderID));
         appointment.setIgnoreConflicts(true);
         return getManager().insert(appointment);
+    }
+
+    protected Task create(String folderID, Task task) {
+        task.setParentFolderID(parse(folderID));
+        return ttm.insertTaskOnServer(task);
+    }
+
+    protected Task update(Task task) {
+        return ttm.updateTaskOnServer(task);
     }
 
     protected Appointment update(Appointment appointment) {

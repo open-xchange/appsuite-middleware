@@ -84,16 +84,17 @@ public class Login extends AbstractLoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         // Look-up necessary credentials
         try {
-            doLogin(req, resp);
+            doLogin(req, resp, requestContext);
         } catch (OXException e) {
             LoginServlet.logAndSendException(resp, e);
+            requestContext.getMetricProvider().recordException(e);
         }
     }
 
-    private void doLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
+    private void doLogin(final HttpServletRequest req, final HttpServletResponse resp, LoginRequestContext requestContext) throws IOException, OXException {
         loginOperation(req, resp, new LoginClosure() {
 
             @Override
@@ -108,6 +109,6 @@ public class Login extends AbstractLoginRequestHandler {
                     false);
                 return LoginPerformer.getInstance().doLogin(request);
             }
-        }, conf);
+        }, conf, requestContext);
     }
 }

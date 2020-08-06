@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.scheduling.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -56,13 +57,22 @@ import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.scheduling.ChangeNotification;
+import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.ScheduleStatus;
 import com.openexchange.chronos.scheduling.SchedulingBroker;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
+import com.openexchange.chronos.scheduling.SchedulingSource;
 import com.openexchange.chronos.scheduling.TransportProvider;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.SchedulingUtilities;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -75,14 +85,22 @@ import com.openexchange.session.Session;
 public class SchedulingBrokerImpl extends RankingAwareNearRegistryServiceTracker<TransportProvider> implements SchedulingBroker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedulingBrokerImpl.class);
+    private final ServiceLookup services;
+
+    /**
+     * Defined {@link ScheduleStatus} in which sending can be considered a success.
+     */
+    private static final EnumSet<ScheduleStatus> SUCCESS = EnumSet.of(ScheduleStatus.SENT, ScheduleStatus.DELIVERED);
 
     /**
      * Initializes a new {@link SchedulingBrokerImpl}.
      * 
      * @param context The {@link BundleContext}
+     * @param services The {@link ServiceLookup}
      */
-    public SchedulingBrokerImpl(BundleContext context) {
+    public SchedulingBrokerImpl(BundleContext context, ServiceLookup services) {
         super(context, TransportProvider.class);
+        this.services = services;
     }
 
     @Override
@@ -101,11 +119,6 @@ public class SchedulingBrokerImpl extends RankingAwareNearRegistryServiceTracker
         }
         return result;
     }
-
-    /**
-     * Defined {@link ScheduleStatus} in which sending can be considered a success.
-     */
-    private static final EnumSet<ScheduleStatus> SUCCESS = EnumSet.of(ScheduleStatus.SENT, ScheduleStatus.DELIVERED);
 
     private ScheduleStatus handle(Session session, SchedulingMessage message) {
         if (null != message && null != session) {
@@ -154,6 +167,23 @@ public class SchedulingBrokerImpl extends RankingAwareNearRegistryServiceTracker
             }
         }
         return ScheduleStatus.NO_TRANSPORT;
+    }
+
+    @Override
+    public CalendarResult handleIncomingScheduling(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message) throws OXException {
+        SchedulingUtilities utilities = services.getServiceSafe(CalendarService.class).getSchedulingUtilities();
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("An message for user {} in context {} with the method {} will be processed.", I(session.getUserId()), I(session.getContextId()), message.getMethod());
+        }
+
+        switch (message.getMethod()) {
+            case CANCEL:
+                return utilities.processCancel(session, source, message);
+            case REPLY:
+                return utilities.processReply(session, source, message);
+            default:
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Unable to handle {} method", message.getMethod());
+        }
     }
 
 }

@@ -100,7 +100,7 @@ public class Bug15008Test extends VCardTest {
         Assert.assertEquals("+498954750108", contact.getTelephoneBusiness1());
         Assert.assertEquals("+49 (4952) 610430", contact.getTelephoneHome1());
         Assert.assertEquals("+49 (151) 50104436", contact.getCellularTelephone1());
-        Assert.assertEquals("Alerich-Ebelings-Weg 38a", contact.getStreetBusiness());
+        Assert.assertEquals("Alerich-Ebelings-Weg 38a\n", contact.getStreetBusiness());
         Assert.assertEquals("Rhauderfehn", contact.getCityBusiness());
         Assert.assertEquals("26817", contact.getPostalCodeBusiness());
         Assert.assertEquals("Deutschland", contact.getCountryBusiness());

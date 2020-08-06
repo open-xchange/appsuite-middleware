@@ -206,7 +206,7 @@ public class DefaultOAuthAuthenticationConfig implements OAuthAuthenticationConf
     private String requireValue(OAuthPropery property) {
         String value = configService.getProperty(property);
         if (Strings.isEmpty(value)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("No such value for property: " + property.getFQPropertyName());
         }
 
         return value;

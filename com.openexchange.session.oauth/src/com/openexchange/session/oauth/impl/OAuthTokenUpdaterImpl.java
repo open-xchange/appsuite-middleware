@@ -142,7 +142,6 @@ public class OAuthTokenUpdaterImpl {
                 TokenRefreshResponse response = refresher.execute(tokens);
                 if (response.isSuccess()) {
                     return handleSuccess(response.getTokens());
-
                 }
 
                 return handleError(oldTokens, response.getError());

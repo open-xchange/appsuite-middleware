@@ -414,7 +414,7 @@ public final class PGPKeysUtil {
      */
     public static PGPPublicKey addUID(PGPPublicKey publicKey, PGPPrivateKey privateKey, String userId) throws PGPException {
         PGPSignatureGenerator generator = new PGPSignatureGenerator(
-            new BcPGPContentSignerBuilder(PGPPublicKey.RSA_GENERAL, org.bouncycastle.openpgp.PGPUtil.SHA1));
+            new BcPGPContentSignerBuilder(publicKey.getAlgorithm(), org.bouncycastle.openpgp.PGPUtil.SHA1));
         generator.init(PGPSignature.POSITIVE_CERTIFICATION, privateKey);
         PGPSignatureSubpacketGenerator signhashgen = createSignatureGeneratorFromPrior (publicKey, L(privateKey.getKeyID()));
         generator.setHashedSubpackets(signhashgen.generate());

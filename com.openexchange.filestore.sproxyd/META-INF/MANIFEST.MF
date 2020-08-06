@@ -2,13 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Sproxyd file storage
 Bundle-SymbolicName: com.openexchange.filestore.sproxyd
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax.container,
+ com.openexchange.annotation,
  com.openexchange.auth,
  com.openexchange.cache.dynamic,
  com.openexchange.config,
+ com.openexchange.config.lean,
  com.openexchange.configuration,
  com.openexchange.context,
  com.openexchange.database,
@@ -23,9 +25,7 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
- com.openexchange.metrics,
- com.openexchange.metrics.noop,
- com.openexchange.metrics.types,
+ com.openexchange.metrics.micrometer,
  com.openexchange.osgi,
  com.openexchange.rest.client.httpclient,
  com.openexchange.server,
@@ -54,6 +54,8 @@ Import-Package: com.openexchange.ajax.container,
  gnu.trove.stack,
  gnu.trove.stack.array,
  gnu.trove.strategy,
+ io.micrometer.core.instrument,
+ io.micrometer.core.instrument.composite,
  javax.annotation.concurrent,
  javax.servlet.http,
  org.apache.commons.logging,

@@ -51,6 +51,7 @@ package com.openexchange.database.internal;
 
 import java.util.Properties;
 import java.util.function.Function;
+import com.openexchange.database.ConnectionType;
 import com.openexchange.database.internal.ConfigurationListener.ConfigDBListener;
 import com.openexchange.pooling.PoolConfig;
 
@@ -68,24 +69,18 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
     ConfigDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, ConnectionReloaderImpl reloader) {
         super();
 
-        configDBWrite = new ConfigPoolAdapter(Constants.CONFIGDB_WRITE_ID, configuration, (Configuration c) -> {
-            return c.getWriteUrl();
-        }, (Configuration c) -> {
-            return c.getConfigDbWriteProps();
-        }, (Configuration c) -> {
-            return c.getPoolConfig();
-        });
+        configDBWrite = new ConfigPoolAdapter(Constants.CONFIGDB_WRITE_ID, new ConnectionTypeAwareConfigurationWrapper(ConnectionType.WRITABLE, configuration),
+            (c) -> c.getConfig().getWriteUrl(),
+            (c) -> c.getConfig().getConfigDbWriteProps(),
+            (c) -> c.getConfig().getPoolConfig());
         timer.addTask(configDBWrite.getCleanerTask());
         management.addPool(Constants.CONFIGDB_WRITE_ID, configDBWrite);
         reloader.setConfigurationListener(configDBWrite);
 
-        configDBRead = new ConfigPoolAdapter(Constants.CONFIGDB_READ_ID, configuration, (Configuration c) -> {
-            return c.getReadUrl();
-        }, (Configuration c) -> {
-            return c.getConfigDbReadProps();
-        }, (Configuration c) -> {
-            return c.getPoolConfig();
-        });
+        configDBRead = new ConfigPoolAdapter(Constants.CONFIGDB_READ_ID, new ConnectionTypeAwareConfigurationWrapper(ConnectionType.READONLY, configuration),
+            (c) -> c.getConfig().getReadUrl(),
+            (c) -> c.getConfig().getConfigDbReadProps(),
+            (c) -> c.getConfig().getPoolConfig());
         timer.addTask(configDBRead.getCleanerTask());
         management.addPool(Constants.CONFIGDB_READ_ID, configDBRead);
         reloader.setConfigurationListener(configDBRead);
@@ -109,20 +104,38 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
         return poolId == Constants.CONFIGDB_WRITE_ID || poolId == Constants.CONFIGDB_READ_ID;
     }
 
-    private static class ConfigPoolAdapter extends AbstractConfigurationListener<Configuration> implements ConfigDBListener {
+    /**
+     * {@link ConfigPoolAdapter}
+     *
+     */
+    private static class ConfigPoolAdapter extends AbstractMetricAwarePool<ConnectionTypeAwareConfigurationWrapper> implements ConfigDBListener {
 
-        ConfigPoolAdapter(int poolId, Configuration configuration, Function<Configuration, String> toUrl, Function<Configuration, Properties> toConnectionArguments, Function<Configuration, PoolConfig> toConf) {
-            super(poolId, configuration, toUrl, toConnectionArguments, toConf);
+        /**
+         * Initializes a new {@link ConfigPoolAdapter}.
+         *
+         * @param poolId The pool id
+         * @param configuration A {@link ConnectionTypeAwareConfigurationWrapper} containing the configuration and the {@link ConnectionType}
+         * @param toUrl A function for getting the url
+         * @param toConnectionArguments A function for getting the connection arguments
+         * @param toPoolConf A function for getting the {@link PoolConfig}
+         */
+        ConfigPoolAdapter(int poolId, ConnectionTypeAwareConfigurationWrapper configuration, Function<ConnectionTypeAwareConfigurationWrapper, String> toUrl, Function<ConnectionTypeAwareConfigurationWrapper, Properties> toConnectionArguments, Function<ConnectionTypeAwareConfigurationWrapper, PoolConfig> toPoolConf) {
+            super(poolId, configuration, toUrl, toConnectionArguments, toPoolConf);
         }
 
         @Override
         public void notify(Configuration configuration) {
-            update(configuration);
+            update(new ConnectionTypeAwareConfigurationWrapper(getType(), configuration));
         }
 
         @Override
         public int getPriority() {
             return 1;
+        }
+
+        @Override
+        protected String getPoolClass() {
+            return "configdb";
         }
     }
 }

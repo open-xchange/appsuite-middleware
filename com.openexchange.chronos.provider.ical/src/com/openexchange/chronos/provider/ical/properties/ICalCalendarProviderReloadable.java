@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.provider.ical.properties;
 
-import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
@@ -66,7 +65,6 @@ public class ICalCalendarProviderReloadable implements Reloadable {
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        ICalFeedClient.reset();
         ICalCalendarProviderProperties.reset();
     }
 

@@ -50,6 +50,7 @@
 package com.openexchange.saml.spi;
 
 import java.security.Key;
+import java.security.KeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -58,9 +59,10 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Collections;
 import java.util.List;
-import org.opensaml.xml.security.credential.BasicCredential;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.UsageType;
+import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.UsageType;
+import org.opensaml.security.crypto.KeySupport;
 
 
 /**
@@ -131,22 +133,25 @@ public class KeySpecCredentialProvider extends AbstractCredentialProvider {
      *
      * @param idpPublicSpec The container holding the IDPs public key for signature verification.
      * @param signingKeySpec The container holding the SPs private key and optionally the according public key to sign request objects.
-     *                       Can be <code>null</code> if request objects shall not be signed.
+     *                       Can be <code>null</code> if request objects shall not be signed. In case the key is not DSA or RSA, the according
+     *                       <strong>public key spec must be contained</strong>.
      * @param decryptionKeySpec The container holding the SPs private key and optionally the according public key to decrypt encrypted
      *                          response data or encryption keys. Can be <code>null</code> if request objects will not be encrypted.
+     *                          In case the key is not DSA or RSA, the according <strong>public key spec must be contained</strong>.
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
+     * @throws KeyException If in case of a given signing or decryption key spec without according public key spec deriving the public key
+     *                      fails.
      */
-    public static KeySpecCredentialProvider newInstance(SpecContainer idpPublicSpec, SpecContainer signingKeySpec, SpecContainer decryptionKeySpec) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static KeySpecCredentialProvider newInstance(SpecContainer idpPublicSpec, SpecContainer signingKeySpec, SpecContainer decryptionKeySpec) throws NoSuchAlgorithmException, InvalidKeySpecException, KeyException {
         BasicCredential idpPublicKeyCredential = null;
         BasicCredential signingPrivateKeyCredential = null;
         BasicCredential decryptionPrivateKeyCredential = null;
         if (idpPublicSpec != null) {
             KeyFactory keyFactory = KeyFactory.getInstance(idpPublicSpec.getAlgorithm().name());
             PublicKey idpPublicKey = keyFactory.generatePublic(idpPublicSpec.getPublicKeySpec());
-            idpPublicKeyCredential = new BasicCredential();
+            idpPublicKeyCredential = new BasicCredential(idpPublicKey);
             idpPublicKeyCredential.setUsageType(UsageType.SIGNING);
-            idpPublicKeyCredential.setPublicKey(idpPublicKey);
         }
 
         if (signingKeySpec != null) {
@@ -155,11 +160,11 @@ public class KeySpecCredentialProvider extends AbstractCredentialProvider {
             PublicKey verificationKey = null;
             if (signingKeySpec.getPublicKeySpec() != null) {
                 verificationKey = keyFactory.generatePublic(signingKeySpec.getPublicKeySpec());
+            } else {
+                verificationKey = KeySupport.derivePublicKey(signingKey);
             }
-            signingPrivateKeyCredential = new BasicCredential();
+            signingPrivateKeyCredential = new BasicCredential(verificationKey, signingKey);
             signingPrivateKeyCredential.setUsageType(UsageType.SIGNING);
-            signingPrivateKeyCredential.setPrivateKey(signingKey);
-            signingPrivateKeyCredential.setPublicKey(verificationKey);
         }
 
         if (decryptionKeySpec != null) {
@@ -167,12 +172,12 @@ public class KeySpecCredentialProvider extends AbstractCredentialProvider {
             PrivateKey decryptionKey = keyFactory.generatePrivate(decryptionKeySpec.getPrivateKeySpec());
             PublicKey encryptionKey = null;
             if (decryptionKeySpec.getPublicKeySpec() != null) {
-                keyFactory.generatePublic(decryptionKeySpec.getPublicKeySpec());
+                encryptionKey = keyFactory.generatePublic(decryptionKeySpec.getPublicKeySpec());
+            } else {
+                encryptionKey = KeySupport.derivePublicKey(decryptionKey);
             }
-            decryptionPrivateKeyCredential = new BasicCredential();
+            decryptionPrivateKeyCredential = new BasicCredential(encryptionKey, decryptionKey);
             decryptionPrivateKeyCredential.setUsageType(UsageType.ENCRYPTION);
-            decryptionPrivateKeyCredential.setPrivateKey(decryptionKey);
-            decryptionPrivateKeyCredential.setPublicKey(encryptionKey);
         }
 
         return new KeySpecCredentialProvider(Collections.singletonList(idpPublicKeyCredential), signingPrivateKeyCredential, decryptionPrivateKeyCredential);

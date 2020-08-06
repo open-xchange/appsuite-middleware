@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.parser.ParsedFolder;
@@ -87,6 +88,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @OAuthAction(OAuthAction.CUSTOM)
 @DispatcherNotes(enqueueable = true)
+@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class UpdateAction extends AbstractFolderAction implements EnqueuableAJAXActionService {
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;
@@ -193,7 +195,7 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
         FolderServiceDecorator decorator = new FolderServiceDecorator()
             .put("permissions", request.getParameter("permissions"))
             .put("altNames", request.getParameter("altNames"))
-            .put("autorename", request.getParameter("autorename"))
+            .put(PARAM_AUTORENAME, request.getParameter(PARAM_AUTORENAME))
             .put("suppressUnifiedMail", isSuppressUnifiedMail(session))
             .put("cascadePermissions", Boolean.valueOf(cascadePermissions))
             .put("ignoreWarnings", Boolean.valueOf(ignoreWarnings))

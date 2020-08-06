@@ -104,7 +104,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
      * @param session The sync session
      * @param folder The folder to create the metadata for
      */
-    public JsonDirectoryMetadata(SyncSession session, FileStorageFolder folder) throws OXException {
+    public JsonDirectoryMetadata(SyncSession session, FileStorageFolder folder) {
         super(session);
         this.folder = folder;
         this.folderID = folder.getId();

@@ -722,10 +722,10 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.AddMediaFieldsForInfostoreDocumentTable());
         list.add(new com.openexchange.groupware.update.tasks.AddMediaFieldsForInfostoreDocumentTableV2());
         list.add(new com.openexchange.groupware.update.tasks.AddMediaFieldsForInfostoreDocumentTableV3());
-        
+
         // Add principal table update task
         list.add(new CreatePrincipalUseCountTableTask());
-        
+
         list.add(new UnsupportedSubscriptionsRemoverTask());
 
         // +++++++++++++++++++++++++++++++++ Version 7.10.3 starts here. +++++++++++++++++++++++++++++++++
@@ -736,6 +736,16 @@ public final class InternalList {
         // Add 'checksum' column to attachment tablesm see MW-1235
         list.add(new com.openexchange.groupware.update.tasks.AddChecksumColumnToAttachmentsTablesUpdateTask());
 
+        // +++++++++++++++++++++++++++++++++ Version 7.10.4 starts here. +++++++++++++++++++++++++++++++++
+        // Remove readable DAV user agent names from table user_attribute see MWB-58
+        list.add(new com.openexchange.groupware.update.tasks.RemoveDAVUserAgentNamesForMWB58());
+
+        // Reassign guests whose user who created them has been deleted see MWB-257
+        list.add(new com.openexchange.groupware.update.tasks.ReassignGuestsWithDeletedUserToAdminUpdateTask());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.12.0 starts here. +++++++++++++++++++++++++++++++++
+        // list.add(new com.openexchange.groupware.update.tasks.DropUWAWidgetsTask());
+        // list.add(new com.openexchange.groupware.update.tasks.DropSwiftFilestoreTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

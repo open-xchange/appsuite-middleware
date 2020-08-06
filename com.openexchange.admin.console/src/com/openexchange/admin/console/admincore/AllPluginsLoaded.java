@@ -49,15 +49,13 @@
 
 package com.openexchange.admin.console.admincore;
 
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.pluginsloaded.mbean.PluginsLoadedMBean;
+import com.openexchange.admin.rmi.OXAdminCoreInterface;
+import com.openexchange.auth.rmi.RemoteAuthenticator;
+import com.openexchange.cli.AbstractRmiCLI;
 
-public class AllPluginsLoaded extends AbstractMBeanCLI<Void> {
+public class AllPluginsLoaded extends AbstractRmiCLI<Void> {
 
     /**
      * The main method invoked on CLT execution.
@@ -93,11 +91,6 @@ public class AllPluginsLoaded extends AbstractMBeanCLI<Void> {
     }
 
     @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
-    }
-
-    @Override
     protected String getFooter() {
         return "Checks whether all bundles are loaded and active.";
     }
@@ -113,13 +106,18 @@ public class AllPluginsLoaded extends AbstractMBeanCLI<Void> {
     }
 
     @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        PluginsLoadedMBean pluginsLoadedMBean = getMBean(mbsc, PluginsLoadedMBean.class, PluginsLoadedMBean.DOMAIN);
-        if (pluginsLoadedMBean.allPluginsLoaded()) {
+    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
+        OXAdminCoreInterface pluginsLoaded = getRmiStub(optRmiHostName, OXAdminCoreInterface.RMI_NAME);
+        if (pluginsLoaded.allPluginsLoaded()) {
             System.exit(0);
         } else {
             System.exit(1);
         }
         return null;
+    }
+
+    @Override
+    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws Exception {
+        authenticator.doAuthentication(login, password);
     }
 }

@@ -544,9 +544,7 @@ public class UserModuleAccess {
      * @param value
      *            allowed object is
      *            {@link Boolean }
-     * @deprecated Publication has been removed with v7.10.2
      */
-    @Deprecated
     public void setPublicFolderEditable(Boolean value) {
         this.publicFolderEditable = value;
     }

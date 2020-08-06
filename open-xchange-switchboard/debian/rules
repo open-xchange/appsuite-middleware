@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpkg/default.mk
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+DEB_DESTDIR=$(CURDIR)/debian/$(DEB_SOURCE)/
+
+%:
+	dh $@
+
+override_dh_clean:
+	ant -f build/build.xml clean
+	dh_clean
+
+override_dh_install:
+	ant -DdestDir=$(DEB_DESTDIR) -DpackageName=$(DEB_SOURCE) -f build/build.xml build
+	dh_install
+
+override_dh_strip_nondeterminism:
+	dh_strip_nondeterminism --exclude=.jar

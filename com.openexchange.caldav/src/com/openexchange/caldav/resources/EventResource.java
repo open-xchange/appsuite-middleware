@@ -524,6 +524,7 @@ public class EventResource extends DAVObjectResource<Event> {
                         LOG.warn("{}: No exception created.", getUrl());
                         throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
                     }
+                    clientTimestamp = result.getTimestamp();
                 }
                 return createdEvent;
             }
@@ -544,6 +545,8 @@ public class EventResource extends DAVObjectResource<Event> {
             case "CAL-4092":
                 LOG.info("{}: PUT operation failed due to non-ignorable conflicts.", getUrl());
                 return new PreconditionException(e, DAVProtocol.CAL_NS.getURI(), "allowed-organizer-scheduling-object-change", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            case "CAL-4120":
+                return DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_PRECONDITION_FAILED);
             case "ICAL-0003":
             case "ICAL-0004":
             case "CAL-4221":

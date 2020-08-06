@@ -66,13 +66,6 @@ import com.openexchange.admin.rmi.factory.UserFactory;
 
 public class OXResellerUserTest extends AbstractOXResellerTest {
 
-    /**
-     * Initialises a new {@link OXResellerUserTest}.
-     */
-    public OXResellerUserTest() {
-        super();
-    }
-
     @Test
     public void testCreateTooManyOverallUser() throws Exception {
         ResellerAdmin adm = ResellerAdminFactory.createRandomResellerAdmin();

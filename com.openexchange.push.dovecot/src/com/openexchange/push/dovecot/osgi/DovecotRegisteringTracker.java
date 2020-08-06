@@ -64,14 +64,19 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.mail.MailProviderRegistration;
 import com.openexchange.mail.Protocol;
 import com.openexchange.osgi.Tools;
 import com.openexchange.push.PushManagerService;
+import com.openexchange.push.dovecot.AbstractDovecotPushManagerService;
 import com.openexchange.push.dovecot.DovecotPushConfiguration;
-import com.openexchange.push.dovecot.DovecotPushManagerService;
+import com.openexchange.push.dovecot.DovecotPushDeleteListener;
+import com.openexchange.push.dovecot.locking.DovecotPushClusterLock.Type;
 import com.openexchange.push.dovecot.locking.HzDovecotPushClusterLock;
+import com.openexchange.push.dovecot.stateful.ClusterLockProvider;
+import com.openexchange.push.dovecot.stateful.DovecotPushManagerService;
 
 /**
  * {@link DovecotRegisteringTracker}
@@ -79,29 +84,34 @@ import com.openexchange.push.dovecot.locking.HzDovecotPushClusterLock;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class DovecotRegisteringTracker implements ServiceTrackerCustomizer<Object, Object> {
+public class DovecotRegisteringTracker implements ServiceTrackerCustomizer<Object, Object>, DovecotPushManagerLifecycle {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DovecotRegisteringTracker.class);
 
+    private final DovecotPushConfiguration config;
     private final BundleContext context;
     private final DovecotPushActivator activator;
-    private final DovecotPushConfiguration configuration;
+    private final ClusterLockProvider lockProvider;
     private final Lock lock = new ReentrantLock();
     private final boolean hazelcastRequired;
     private ServiceRegistration<PushManagerService> reg;
+    private ServiceRegistration<DeleteListener> deLiReg;
     private HazelcastInstance hzInstance;
     private MailProviderRegistration imapRegistration;
     private HazelcastConfigurationService hzConfigService;
+    private DovecotPushManagerService pushManager;
+
 
     /**
      * Initializes a new {@link DovecotRegisteringTracker}.
      */
-    public DovecotRegisteringTracker(boolean hazelcastRequired, DovecotPushConfiguration configuration, DovecotPushActivator activator, BundleContext context) {
+    public DovecotRegisteringTracker(DovecotPushConfiguration config,ClusterLockProvider lockProvider, DovecotPushActivator activator) {
         super();
-        this.context = context;
-        this.configuration = configuration;
+        this.config = config;
+        this.context = activator.getBundleContext();
+        this.lockProvider = lockProvider;
         this.activator = activator;
-        this.hazelcastRequired = hazelcastRequired;
+        this.hazelcastRequired = lockProvider.getLockType() == Type.HAZELCAST;
     }
 
     /**
@@ -228,25 +238,35 @@ public class DovecotRegisteringTracker implements ServiceTrackerCustomizer<Objec
                 }
 
                 String mapName = discoverMapName(hzInstance.getConfig());
-                ((HzDovecotPushClusterLock) configuration.getClusterLock()).setMapName(mapName);
-                activator.addService(HazelcastInstance.class, hzInstance);
+                ((HzDovecotPushClusterLock) lockProvider.getClusterLock()).setMapName(mapName);
             }
 
-            reg = context.registerService(PushManagerService.class, DovecotPushManagerService.newInstance(configuration.getClusterLock(), activator), null);
+            DovecotPushManagerService pushManager = DovecotPushManagerService.newInstance(config, lockProvider.getClusterLock(), activator);
+            this.pushManager = pushManager;
+            deLiReg = context.registerService(DeleteListener.class, new DovecotPushDeleteListener(pushManager), null);
+            reg = context.registerService(PushManagerService.class, pushManager, null);
         } catch (Exception e) {
             LOG.warn("Failed start-up for {}", context.getBundle().getSymbolicName(), e);
         }
 
     }
 
-    private void stop() {
-        if (null == reg) {
-            // Already unregistered
-            return;
+    public void stop() {
+        if (deLiReg != null) {
+            deLiReg.unregister();
+            deLiReg = null;
         }
 
-        reg.unregister();
-        reg = null;
+        if (reg != null) {
+            ((DovecotPushManagerService) context.getService(reg.getReference())).stop();
+            reg.unregister();
+            reg = null;
+        }
+
+        if (pushManager != null) {
+            pushManager.stop();
+            pushManager = null;
+        }
     }
 
     /**
@@ -268,6 +288,26 @@ public class DovecotRegisteringTracker implements ServiceTrackerCustomizer<Objec
         }
         String msg = "No distributed Dovecot Push map found in Hazelcast configuration";
         throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
+    }
+
+    @Override
+    public boolean isActive() {
+        return pushManager != null;
+    }
+
+    @Override
+    public AbstractDovecotPushManagerService getActiveInstance() {
+        return pushManager;
+    }
+
+    @Override
+    public void shutDown() {
+        lock.lock();
+        try {
+            stop();
+        } finally {
+            lock.unlock();
+        }
     }
 
 }

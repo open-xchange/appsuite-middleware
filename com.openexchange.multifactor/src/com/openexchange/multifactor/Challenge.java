@@ -71,5 +71,5 @@ public interface Challenge {
     @SuppressWarnings("unused")
     default public Map<String, Object> getChallenge() throws OXException {
         return Collections.emptyMap();
-    };
+    }
 }

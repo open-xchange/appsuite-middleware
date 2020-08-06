@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.rmi;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -56,6 +58,7 @@ import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -193,9 +196,8 @@ public abstract class AbstractRMITest {
      * @return the context admin's {@link Credentials}
      */
     private static Credentials getContextAdminCredentials() {
-        String oxadmin = AJAXConfig.getProperty(Property.OXADMIN, "oxadmin");
-        String contextPassword = AJAXConfig.getProperty(Property.PASSWORD, "secret");
-        return new Credentials(oxadmin, contextPassword);
+        User oxadmin = UserFactory.createContextAdmin();
+        return new Credentials(oxadmin.getName(), oxadmin.getPassword());
     }
 
     /**
@@ -362,5 +364,16 @@ public abstract class AbstractRMITest {
      */
     protected static TaskManagementManager getTaskManagementManager() {
         return TaskManagementManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    private Pattern exceptionIdPattern = Pattern.compile("; exceptionId -?\\d.*-\\d.*");
+
+    /**
+     * Checks if exception message contains an UUID as identifier
+     */
+    protected void checkException(Exception e) {
+        assertNotNull(e);
+        String message = e.getMessage();
+        assertTrue(exceptionIdPattern.matcher(message).find());
     }
 }

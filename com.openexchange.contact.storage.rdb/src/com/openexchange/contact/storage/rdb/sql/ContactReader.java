@@ -49,26 +49,33 @@
 
 package com.openexchange.contact.storage.rdb.sql;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
+import com.openexchange.java.Reference;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.user.User;
 
 /**
  * {@link ContactReader}
@@ -111,9 +118,19 @@ public class ContactReader {
     public List<Contact> readContacts(ContactField[] fields, boolean withObjectUseCount) throws SQLException, OXException {
         List<Contact> contacts = new ArrayList<Contact>();
         while (resultSet.next()) {
-            contacts.add(patch(Mappers.CONTACT.fromResultSet(resultSet, fields), withObjectUseCount));
+            Contact contact = Mappers.CONTACT.fromResultSet(resultSet, fields);
+
+            if (withObjectUseCount) {
+                try {
+                    contact.setUseCount(resultSet.getInt("value"));
+                } catch (SQLException e) {
+                    String query = Databases.getSqlStatement(resultSet.getStatement(), null);
+                    LOGGER.warn("Failed to determine use-count information from {}", null == query ? "<unknown>" : query, e);
+                }
+            }
+            contacts.add(contact);
         }
-        return contacts;
+        return patchMailAddress(contacts);
     }
 
     /**
@@ -129,18 +146,79 @@ public class ContactReader {
         return resultSet.next() ? patch(Mappers.CONTACT.fromResultSet(resultSet, fields), withObjectUseCount) : null;
     }
 
+    private static final int GUEST_CONTACT_FOLDER_ID = FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID;
+
+    /**
+     * Patches the default sender address into contacts of internal users.
+     *
+     * @param contacts The contacts
+     * @return The contacts with the email address added
+     * @throws OXException in case of errors
+     */
+    private List<Contact> patchMailAddress(List<Contact> contacts) throws OXException {
+        List<Contact> internal = contacts.stream().filter((c) -> (c != null && c.getInternalUserId() > 0 && c.containsEmail1())).collect(Collectors.toList());
+        if (internal.isEmpty()) {
+            return contacts;
+        }
+
+        String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+        if (senderSource.equalsIgnoreCase("defaultSenderAddress")) {
+            Reference<List<Contact>> guestContactFolderRef = new Reference<>(null);
+            Reference<List<Contact>> notGuestContactFolderRef = new Reference<>(null);
+            internal.forEach((c) -> {
+                Reference<List<Contact>> ref = c.getParentFolderID() == GUEST_CONTACT_FOLDER_ID ? guestContactFolderRef : notGuestContactFolderRef;
+                List<Contact> l = ref.getValue();
+                if (l == null) {
+                    l = new ArrayList<Contact>();
+                    ref.setValue(l);
+                }
+                l.add(c);
+            });
+
+            // for contacts not in (virtual) guest contact folder (id 16)
+            if (notGuestContactFolderRef.hasValue()) {
+                List<Contact> notGuestContactFolder = notGuestContactFolderRef.getValue();
+                Map<Integer, Contact> map = new HashMap<>(notGuestContactFolder.size());
+                for (Contact c : notGuestContactFolder) {
+                    map.put(I(c.getInternalUserId()), c);
+                }
+                Map<Integer, String> addresses = UserSettingMailStorage.getInstance().getSenderAddresses(map.keySet(), getContext(), connection);
+                addresses.entrySet().forEach((entry) -> {
+                    String address = entry.getValue();
+                    if (Strings.isNotEmpty(address)) {
+                        map.get(entry.getKey()).setEmail1(address);
+                    }
+                });
+            }
+
+            // for contacts in (virtual) guest contact folder (id 16)
+            if (guestContactFolderRef.hasValue()) {
+                Map<Integer, Contact> map = guestContactFolderRef.getValue().stream().collect(Collectors.toMap(c -> I(c.getInternalUserId()), c -> c));
+                User[] users = UserStorage.getInstance().getUser(getContext(), map.keySet().stream().mapToInt(i -> i(i)).toArray(), connection);
+                for (User u : users) {
+                    map.get(I(u.getId())).setEmail1(u.getMail());
+                }
+            }
+        } else {
+            Map<Integer, Contact> map = internal.stream().collect(Collectors.toMap(c -> I(c.getInternalUserId()), c -> c));
+            User[] users = UserStorage.getInstance().getUser(getContext(), map.keySet().stream().mapToInt(i -> i(i)).toArray(), connection);
+            for (User u : users) {
+                map.get(I(u.getId())).setEmail1(u.getMail());
+            }
+        }
+
+        return contacts;
+    }
+
     private Contact patch(Contact contact, boolean withObjectUseCount) throws SQLException, OXException {
         if (null != contact) {
-            if (0 < contact.getInternalUserId() && contact.containsEmail1()) {
+            if (contact.getInternalUserId() > 0 && contact.containsEmail1()) {
                 String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
 
                 //TODO: Guests do not have mail settings
-                if (contact.getParentFolderID() != 16 && senderSource.equalsIgnoreCase("defaultSenderAddress")) {
-                    UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(contact.getInternalUserId(), getContext(), connection);
-                    if (userSettingMail == null) {
-                        throw ContactExceptionCodes.UNEXPECTED_ERROR.create("Unable to load mail settings.");
-                    }
-                    String defaultSendAddress = userSettingMail.getSendAddr();
+                if (contact.getParentFolderID() != GUEST_CONTACT_FOLDER_ID && senderSource.equalsIgnoreCase("defaultSenderAddress")) {
+                    Optional<String> optionalAddress = UserSettingMailStorage.getInstance().getSenderAddress(contact.getInternalUserId(), getContext(), connection);
+                    String defaultSendAddress = optionalAddress.orElse(null);
                     if (Strings.isNotEmpty(defaultSendAddress)) {
                         contact.setEmail1(defaultSendAddress);
                     }

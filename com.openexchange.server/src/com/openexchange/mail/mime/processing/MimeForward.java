@@ -410,6 +410,10 @@ public final class MimeForward extends AbstractMimeProcessing {
                     contentIds = MimeMessageUtility.getContentIDs(firstSeenText);
                     contentType.setCharsetParameter("UTF-8");
                     firstSeenText = replaceMetaEquiv(firstSeenText, contentType);
+                    HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                    if (htmlService != null) {
+                        firstSeenText = htmlService.checkBaseTag(firstSeenText, true);
+                    }
                 }
                 contentType.setParameter("nature", "virtual");
                 /*
@@ -473,6 +477,10 @@ public final class MimeForward extends AbstractMimeProcessing {
             if (originalContentType.startsWith(TEXT_HTM)) {
                 originalContentType.setCharsetParameter("UTF-8");
                 content = replaceMetaEquiv(content, originalContentType);
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                if (htmlService != null) {
+                    content = htmlService.checkBaseTag(content, true);
+                }
             }
             final String txt = usm.isDropReplyForwardPrefix() ? (content == null ? "" : content) : generateForwardText(
                 content == null ? "" : content,

@@ -73,44 +73,47 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.client.utils.URIBuilder;
 import org.joda.time.DateTime;
-import org.opensaml.common.SAMLObject;
-import org.opensaml.common.SAMLVersion;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.AuthnRequest;
-import org.opensaml.saml2.core.AuthnStatement;
-import org.opensaml.saml2.core.BaseID;
-import org.opensaml.saml2.core.EncryptedID;
-import org.opensaml.saml2.core.Issuer;
-import org.opensaml.saml2.core.LogoutRequest;
-import org.opensaml.saml2.core.LogoutResponse;
-import org.opensaml.saml2.core.NameID;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.saml2.core.SessionIndex;
-import org.opensaml.saml2.core.Status;
-import org.opensaml.saml2.core.StatusCode;
-import org.opensaml.saml2.core.StatusMessage;
-import org.opensaml.saml2.core.Subject;
-import org.opensaml.saml2.encryption.Decrypter;
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.KeyDescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.SingleLogoutService;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.encryption.DecryptionException;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.opensaml.xml.parse.XMLParserException;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.SigningUtil;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.security.keyinfo.KeyInfoGenerator;
-import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.util.XMLHelper;
-import org.opensaml.xml.util.XMLObjectHelper;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.core.xml.util.XMLObjectSupport;
+import org.opensaml.core.xml.util.XMLObjectSupport.CloneOutputOption;
+import org.opensaml.saml.common.SAMLObject;
+import org.opensaml.saml.common.SAMLVersion;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.AuthnStatement;
+import org.opensaml.saml.saml2.core.BaseID;
+import org.opensaml.saml.saml2.core.EncryptedID;
+import org.opensaml.saml.saml2.core.Issuer;
+import org.opensaml.saml.saml2.core.LogoutRequest;
+import org.opensaml.saml.saml2.core.LogoutResponse;
+import org.opensaml.saml.saml2.core.NameID;
+import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.saml.saml2.core.SessionIndex;
+import org.opensaml.saml.saml2.core.Status;
+import org.opensaml.saml.saml2.core.StatusCode;
+import org.opensaml.saml.saml2.core.StatusMessage;
+import org.opensaml.saml.saml2.core.Subject;
+import org.opensaml.saml.saml2.encryption.Decrypter;
+import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.KeyDescriptor;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.SingleLogoutService;
+import org.opensaml.security.SecurityException;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.UsageType;
+import org.opensaml.xmlsec.EncryptionConfiguration;
+import org.opensaml.xmlsec.SecurityConfigurationSupport;
+import org.opensaml.xmlsec.crypto.XMLSigningUtil;
+import org.opensaml.xmlsec.encryption.support.DecryptionException;
+import org.opensaml.xmlsec.keyinfo.KeyInfoGenerator;
+import org.opensaml.xmlsec.keyinfo.KeyInfoGeneratorFactory;
+import org.opensaml.xmlsec.keyinfo.KeyInfoGeneratorManager;
+import org.opensaml.xmlsec.keyinfo.NamedKeyInfoGeneratorManager;
+import org.opensaml.xmlsec.signature.KeyInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -158,6 +161,8 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.Tools;
+import net.shibboleth.utilities.java.support.xml.SerializeSupport;
+import net.shibboleth.utilities.java.support.xml.XMLParserException;
 
 /**
  * Provides the functionality for supported SAML profiles.
@@ -182,7 +187,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
     /**
      * The number of milliseconds for which an authentication response ID is remembered (2 hours).
      */
-    private static final long AUTHN_RESPONSE_TIMEOUT = 120 * 60 *1000l;
+    private static final long AUTHN_RESPONSE_TIMEOUT = 120 * 60 * 1000l;
 
     private final SAMLConfig config;
 
@@ -221,9 +226,10 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         try {
             String authnRequestXML = openSAML.marshall(authnRequest);
             LOG.debug("Prepared AuthnRequest:\n{}", new Object() {
+
                 @Override
                 public String toString() {
-                    return XMLHelper.prettyPrintXML(authnRequest.getDOM());
+                    return SerializeSupport.prettyPrintXML(authnRequest.getDOM());
                 }
             });
             return compileAuthnRequestRedirectURI(authnRequestXML, relayState);
@@ -334,7 +340,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
                     // use DefaultAuthnRequestInfo if no RelayState is set
                     String domainName = getDomainName(httpRequest);
                     requestInfo = new DefaultAuthnRequestInfo();
-                    ((DefaultAuthnRequestInfo)requestInfo).setDomainName(domainName);
+                    ((DefaultAuthnRequestInfo) requestInfo).setDomainName(domainName);
                 } else {
                     requestInfo = backend.parseRelayState(response, relayState);
                 }
@@ -376,7 +382,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
     private void tryExchangeAssertionForOAuthToken(Assertion assertion, AuthenticationInfo authInfo) throws OXException {
         try {
             OAuthAccessTokenService service = services.getService(OAuthAccessTokenService.class);
-            if (service==null){
+            if (service == null) {
                 LOG.debug("OAuthAccessTokenService is missing. Unable to exchange the assertion {} for an oauth token pair.", assertion.getID());
                 return;
             }
@@ -385,13 +391,13 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
                 return;
             }
 
-            Assertion clonedAssertion = XMLObjectHelper.cloneXMLObject(assertion, true);
+            Assertion clonedAssertion = XMLObjectSupport.cloneXMLObject(assertion, CloneOutputOption.RootDOMInNewDocument);
             String xmlAssertion = openSAML.marshall(clonedAssertion);
-            String b64Assertion = Base64.encodeBase64URLSafeString(xmlAssertion.getBytes());
+            String b64Assertion = Base64.encodeBase64URLSafeString(xmlAssertion.getBytes(StandardCharsets.UTF_8));
             LOG.debug("Trying to exchange the assertion {} for an oauth token pair...", assertion.getID());
             OAuthAccessToken token = service.getAccessToken(OAuthGrantType.SAML, b64Assertion, authInfo.getUserId(), authInfo.getContextId(), null);
             authInfo.getProperties().put(SAMLSessionParameters.ACCESS_TOKEN, token.getAccessToken());
-            if (token.getRefreshToken()!=null){
+            if (token.getRefreshToken() != null) {
                 authInfo.getProperties().put(SAMLSessionParameters.REFRESH_TOKEN, token.getRefreshToken());
                 LOG.debug("Successfully exchanged the assertion {} for an oauth access and refresh token.", assertion.getID());
             } else {
@@ -415,9 +421,10 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         try {
             String logoutRequestXML = openSAML.marshall(logoutRequest);
             LOG.debug("Prepared LogoutRequest:\n{}", new Object() {
+
                 @Override
                 public String toString() {
-                    return XMLHelper.prettyPrintXML(logoutRequest.getDOM());
+                    return SerializeSupport.prettyPrintXML(logoutRequest.getDOM());
                 }
             });
             return compileLogoutRequestRedirectURI(logoutRequestXML, relayState);
@@ -473,12 +480,12 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             LOG.debug("LogoutRequest is considered valid, starting to terminate sessions based on {}", logoutInfo);
             terminateSessions(logoutRequest, logoutInfo);
             StatusCode statusCode = openSAML.buildSAMLObject(StatusCode.class);
-            statusCode.setValue(StatusCode.SUCCESS_URI);
+            statusCode.setValue(StatusCode.SUCCESS);
             status = openSAML.buildSAMLObject(Status.class);
             status.setStatusCode(statusCode);
         } catch (ValidationException e) {
             StatusCode statusCode = openSAML.buildSAMLObject(StatusCode.class);
-            statusCode.setValue(StatusCode.REQUESTER_URI);
+            statusCode.setValue(StatusCode.REQUESTER);
             StatusMessage statusMessage = openSAML.buildSAMLObject(StatusMessage.class);
             statusMessage.setMessage(e.getReason().getMessage() + " (" + e.getMessage() + ")");
             status = openSAML.buildSAMLObject(Status.class);
@@ -486,7 +493,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             status.setStatusMessage(statusMessage);
         } catch (OXException e) {
             StatusCode statusCode = openSAML.buildSAMLObject(StatusCode.class);
-            statusCode.setValue(StatusCode.REQUESTER_URI);
+            statusCode.setValue(StatusCode.REQUESTER);
             StatusMessage statusMessage = openSAML.buildSAMLObject(StatusMessage.class);
             statusMessage.setMessage(e.getMessage());
             status = openSAML.buildSAMLObject(Status.class);
@@ -499,9 +506,10 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             final LogoutResponse logoutResponse = customizeLogoutResponse(prepareLogoutResponse(status, logoutRequest == null ? null : logoutRequest.getID()), httpRequest, httpResponse);
             String responseXML = openSAML.marshall(logoutResponse);
             LOG.debug("Marshalled LogoutResponse:\n{}", new Object() {
+
                 @Override
                 public String toString() {
-                    return XMLHelper.prettyPrintXML(logoutResponse.getDOM());
+                    return SerializeSupport.prettyPrintXML(logoutResponse.getDOM());
                 }
             });
             Binding responseBinding = config.getLogoutResponseBinding();
@@ -555,10 +563,13 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         }
 
         try {
-            X509KeyInfoGeneratorFactory keyInfoGeneratorFactory = new X509KeyInfoGeneratorFactory();
-            keyInfoGeneratorFactory.setEmitEntityCertificate(true);
-            KeyInfoGenerator keyInfoGenerator = keyInfoGeneratorFactory.newInstance();
             CredentialProvider credentialProvider = backend.getCredentialProvider();
+            EncryptionConfiguration secConfiguration = SecurityConfigurationSupport.getGlobalEncryptionConfiguration();
+            NamedKeyInfoGeneratorManager namedKeyInfoGeneratorManager = secConfiguration.getDataKeyInfoGeneratorManager();
+            KeyInfoGeneratorManager keyInfoGeneratorManager = namedKeyInfoGeneratorManager.getDefaultManager();
+            KeyInfoGeneratorFactory keyInfoGeneratorFactory = keyInfoGeneratorManager.getFactory(credentialProvider.getSigningCredential());
+            KeyInfoGenerator keyInfoGenerator = keyInfoGeneratorFactory.newInstance();
+
             if (credentialProvider.hasSigningCredential()) {
                 KeyDescriptor signKeyDescriptor = openSAML.buildSAMLObject(KeyDescriptor.class);
                 signKeyDescriptor.setUse(UsageType.SIGNING);
@@ -604,7 +615,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderLogoutURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", relayState);
             trySignRedirectHeader(redirectLocationBuilder);
             String redirectLocation = redirectLocationBuilder.build().toString();
-            LOG.debug("Redirect URI for LogoutRequest: {}", redirectLocation );
+            LOG.debug("Redirect URI for LogoutRequest: {}", redirectLocation);
             return redirectLocation;
         } catch (URISyntaxException e) {
             throw SAMLExceptionCode.ENCODING_ERROR.create(e, "Could not construct redirect location");
@@ -799,7 +810,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         Assertion clonedAssertion;
         try {
             // Using a cloned object because the opensaml.marshal method changes the assertion object
-            clonedAssertion = XMLObjectHelper.cloneXMLObject(bearerAssertion, true);
+            clonedAssertion = XMLObjectSupport.cloneXMLObject(bearerAssertion, CloneOutputOption.RootDOMInNewDocument);
         } catch (MarshallingException e) {
             LOG.warn("Could not clone the assertion {}. Single logout for this session will probably fail.", bearerAssertion.getID(), e);
             return;
@@ -883,7 +894,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderAuthnURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", relayState);
             trySignRedirectHeader(redirectLocationBuilder);
             String redirectLocation = redirectLocationBuilder.build().toString();
-            LOG.debug("Redirect URI for AuthnRequest: {}", redirectLocation );
+            LOG.debug("Redirect URI for AuthnRequest: {}", redirectLocation);
             return redirectLocation;
         } catch (URISyntaxException e) {
             throw SAMLExceptionCode.ENCODING_ERROR.create(e, "Could not construct redirect location");
@@ -907,15 +918,15 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         CredentialProvider credentialProvider = backend.getCredentialProvider();
         if (credentialProvider.hasSigningCredential()) {
             Credential signingCredential = credentialProvider.getSigningCredential();
-            String sigAlg = openSAML.getGlobalSecurityConfiguration().getSignatureAlgorithmURI(signingCredential.getPrivateKey().getAlgorithm());
-            redirectLocationBuilder.setParameter("SigAlg", sigAlg);
+            String algorithmUri = AlgorithmUtils.getAlgorithmURI(signingCredential);
+            redirectLocationBuilder.setParameter("SigAlg", algorithmUri);
             String rawQuery = null;
             try {
                 rawQuery = redirectLocationBuilder.build().getRawQuery();
-                byte[] rawSignature = SigningUtil.signWithURI(signingCredential, sigAlg, rawQuery.getBytes(Charsets.UTF_8));
+                byte[] rawSignature = XMLSigningUtil.signWithURI(signingCredential, algorithmUri, rawQuery.getBytes(Charsets.UTF_8));
                 String signature = Base64.encodeBase64String(rawSignature);
                 redirectLocationBuilder.setParameter("Signature", signature);
-                LOG.debug("Redirect header was signed with algorithm {}", sigAlg);
+                LOG.debug("Redirect header was signed with algorithm {}", algorithmUri);
             } catch (URISyntaxException e) {
                 throw SAMLExceptionCode.ENCODING_ERROR.create(e, "Could not construct redirect location");
             } catch (SecurityException e) {
@@ -991,9 +1002,10 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
 
             final LogoutResponse logoutResponse = (LogoutResponse) unmarshalled;
             LOG.debug("Received SAMLResponse:\n{}", new Object() {
+
                 @Override
                 public String toString() {
-                    return XMLHelper.prettyPrintXML(logoutResponse.getDOM());
+                    return SerializeSupport.prettyPrintXML(logoutResponse.getDOM());
                 }
             });
             return logoutResponse;
@@ -1042,9 +1054,10 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
 
             final LogoutRequest logoutRequest = (LogoutRequest) unmarshalled;
             LOG.debug("Received SAMLRequest:\n{}", new Object() {
+
                 @Override
                 public String toString() {
-                    return XMLHelper.prettyPrintXML(logoutRequest.getDOM());
+                    return SerializeSupport.prettyPrintXML(logoutRequest.getDOM());
                 }
             });
             return logoutRequest;
@@ -1109,9 +1122,10 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
 
             final Response response = (Response) unmarshalledResponse;
             LOG.debug("Received SAMLResponse:\n{}", new Object() {
+
                 @Override
                 public String toString() {
-                    return XMLHelper.prettyPrintXML(response.getDOM());
+                    return SerializeSupport.prettyPrintXML(response.getDOM());
                 }
             });
             return response;

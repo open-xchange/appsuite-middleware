@@ -53,7 +53,7 @@ package com.openexchange.admin.rmi.exceptions;
  * @author choeger
  *
  */
-public class EnforceableDataObjectException extends Exception {
+public class EnforceableDataObjectException extends AbstractAdminRmiException {
 
     /**
      *

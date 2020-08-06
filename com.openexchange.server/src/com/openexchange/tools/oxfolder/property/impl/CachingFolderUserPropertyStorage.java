@@ -75,7 +75,7 @@ import gnu.trove.list.array.TIntArrayList;
 public class CachingFolderUserPropertyStorage implements FolderUserPropertyStorage {
 
     private static final ImmutableMap<Object, Object> EMPTY_IMMUTABLE_MAP = ImmutableMap.of();
-    
+
     private static final String REGION_NAME = "FolderUserProperty";
 
     /**

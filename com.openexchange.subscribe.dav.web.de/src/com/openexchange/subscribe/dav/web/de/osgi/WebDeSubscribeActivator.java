@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.dav.web.de.osgi;
 
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.dav.web.de.WebDeSubscribeService;
 
@@ -70,7 +71,7 @@ public class WebDeSubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class[] { HttpClientService.class };
     }
 
     @Override

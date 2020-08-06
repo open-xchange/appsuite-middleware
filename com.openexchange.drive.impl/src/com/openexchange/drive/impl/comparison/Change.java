@@ -124,7 +124,7 @@ public enum Change {
         if (null == v1) {
             return null == v2;
         } else if (null == v2) {
-            return null == v1;
+            return false;
         } else {
             return null == v1.getChecksum() ? null == v2.getChecksum() : v1.getChecksum().equalsIgnoreCase(v2.getChecksum());
         }

@@ -320,7 +320,7 @@ public class ContextTest extends AbstractRMITest {
             getContextManager().create(ctx2, contextAdminCredentials);
             fail("Could add Context");
         } catch (Exception x) {
-            assertEquals("Cannot map 'foo' to the newly created context. This mapping is already in use.", x.getMessage());
+            assertTrue(x.getMessage().startsWith("Cannot map 'foo' to the newly created context. This mapping is already in use."));
         }
     }
 

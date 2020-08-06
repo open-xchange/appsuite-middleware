@@ -50,12 +50,12 @@
 package com.openexchange.chronos.provider.google.migration;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +90,7 @@ import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.AdministrativeSubscriptionStorage;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionStorage;
-import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
+import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.user.UserService;
 
 /**
@@ -194,7 +194,7 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
             GroupService groupService = Services.getService(GroupService.class);
             UserService userService = Services.getService(UserService.class);
             FolderService folderService = Services.getService(FolderService.class);
-            FolderUserPropertyStorage storage = Services.getService(FolderUserPropertyStorage.class);
+            FolderSubscriptionHelper subscriptionHelper = Services.getService(FolderSubscriptionHelper.class);
             for (Subscription sub : subscriptions) {
                 subscriptionStorage.forgetSubscription(sub);
 
@@ -202,14 +202,9 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
                 try {
                     UserizedFolder folder = folderService.getFolder("0", sub.getFolderId(), userService.getUser(sub.getUserId(), ctx), ctx, new FolderServiceDecorator());
                     Set<Integer> userFromPermissions = getUserFromPermissions(folder.getPermissions(), groupService, ctx);
-                    int folderId = Integer.valueOf(sub.getFolderId()).intValue();
+                    int folderId = Integer.parseInt(sub.getFolderId(), 10);
                     for (Integer user : userFromPermissions) {
-                        String folderProperty = storage.getFolderProperty(ctxId, folderId, i(user), "cal/subscribed");
-                        if (folderProperty == null) {
-                            storage.insertFolderProperty(ctxId, folderId, i(user), "cal/subscribed", Boolean.FALSE.toString(), writeCon);
-                        } else if (Boolean.valueOf(folderProperty).booleanValue() == true) {
-                            storage.updateFolderProperty(ctxId, folderId, i(user), "cal/subscribed", Boolean.FALSE.toString(), writeCon);
-                        }
+                        subscriptionHelper.setSubscribed(Optional.of(writeCon), ctxId, user.intValue(), folderId, folder.getContentType().getModule(), false);
                     }
                 } catch (OXException e) {
                     if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
@@ -246,13 +241,13 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { 
-            "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask", 
-            "com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask", 
-            "com.openexchange.groupware.update.tasks.AddTypeToFolderPermissionTableUpdateTask", 
-            "com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables", 
-            "com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTask", 
-            "com.openexchange.groupware.update.tasks.AddUserSaltColumnTask" 
+        return new String[] {
+            "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask",
+            "com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask",
+            "com.openexchange.groupware.update.tasks.AddTypeToFolderPermissionTableUpdateTask",
+            "com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables",
+            "com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTask",
+            "com.openexchange.groupware.update.tasks.AddUserSaltColumnTask"
         };
     }
 

@@ -579,8 +579,14 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         if (null == uids) {
             return null;
         }
-        final long[] retval = new long[uids.length];
-        for (int i = 0; i < retval.length; i++) {
+
+        int len = uids.length;
+        if (len <= 0) {
+            return new long[0];
+        }
+
+        long[] retval = new long[len];
+        for (int i = len; i-- > 0;) {
             retval[i] = parseUnsignedLong(uids[i]);
         }
         return retval;
@@ -605,7 +611,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         }
 
         String[] retval = new String[len];
-        for (int i = 0; i < len; i++) {
+        for (int i = len; i-- > 0;) {
             long l = longs[i];
             retval[i] = (l < 0) ? null : Long.toString(l, RADIX);
         }

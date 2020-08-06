@@ -60,23 +60,49 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class SupportedReportSet extends SingleXMLPropertyMixin {
 
+    public static final String CALENDAR_MULTIGET = "<CAL:calendar-multiget/>";
+    public static final String CALENDAR_QUERY = "<CAL:calendar-query/>";
+    public static final String ACL_PRINCIPAL_PROP_SET = "<D:acl-principal-prop-set/>";
+    public static final String PRINCIPAL_MATCH = "<D:principal-match/>";
+    public static final String PRINCIPAL_PROPERTY_SEARCH = "<D:principal-property-search/>";
+    public static final String EXPAND_PROPERTY = "<D:expand-property/>";
+    public static final String CALENDARSERVER_PRINCIPAL_SEARCH = "<CS:calendarserver-principal-search/>";
+    public static final String SYNC_COLLECTION = "<D:sync-collection/>";
+
+    public static final String[] ALL_SUPPORTED = new String[] { 
+        CALENDAR_MULTIGET, CALENDAR_QUERY, ACL_PRINCIPAL_PROP_SET, PRINCIPAL_MATCH, PRINCIPAL_PROPERTY_SEARCH, EXPAND_PROPERTY, CALENDARSERVER_PRINCIPAL_SEARCH, SYNC_COLLECTION
+    };
+
     private static final String NAME = "supported-report-set";
 
+    private final String[] supportedReports;
+
+    /**
+     * Initializes a new {@link SupportedReportSet} with all supported reports.
+     */
     public SupportedReportSet() {
+        this(ALL_SUPPORTED);
+    }
+
+    /**
+     * Initializes a new {@link SupportedReportSet} with sepcific supported reports.
+     *
+     * @param supportedReports The supported reports
+     */
+    public SupportedReportSet(String... supportedReports) {
         super(Protocol.DAV_NS.getURI(), NAME);
+        this.supportedReports = supportedReports;
     }
 
     @Override
     protected String getValue() {
-        return "<D:supported-report><D:report><CAL:calendar-multiget/></D:report></D:supported-report>" +
-            "<D:supported-report><D:report><CAL:calendar-query/></D:report></D:supported-report>" +
-            "<D:supported-report><D:report><D:acl-principal-prop-set/></D:report></D:supported-report>" +
-            "<D:supported-report><D:report><D:principal-match/></D:report></D:supported-report>" +
-            "<D:supported-report><D:report><D:principal-property-search/></D:report></D:supported-report>" +
-            "<D:supported-report><D:report><D:expand-property/></D:report></D:supported-report>" +
-            "<D:supported-report><D:report><CS:calendarserver-principal-search/></D:report></D:supported-report>" +
-            "<D:supported-report><D:report><D:sync-collection/></D:report></D:supported-report>"
-        ;
+        StringBuilder stringBuilder = new StringBuilder(1024);
+        if (null != supportedReports) {
+            for (String supportedReport : supportedReports) {
+                stringBuilder.append("<D:supported-report><D:report>").append(supportedReport).append("</D:report></D:supported-report>");
+            }
+        }
+        return stringBuilder.toString();
     }
 
 }

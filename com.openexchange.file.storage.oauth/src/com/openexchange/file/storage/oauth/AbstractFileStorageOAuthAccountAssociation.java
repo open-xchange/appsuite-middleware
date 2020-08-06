@@ -66,13 +66,14 @@ public abstract class AbstractFileStorageOAuthAccountAssociation extends Abstrac
     private final FileStorageAccount fileStorageAccount;
 
     /**
-     * Initialises a new {@link AbstractFileStorageOAuthAccountAssociation}.
-     * 
-     * @param accountId
-     * @param userId
-     * @param contextId
+     * Initializes a new {@link AbstractFileStorageOAuthAccountAssociation}.
+     *
+     * @param accountId The identifier of the OAuth account
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param fileStorageAccount The file storage account
      */
-    public AbstractFileStorageOAuthAccountAssociation(int accountId, int userId, int contextId, FileStorageAccount fileStorageAccount) {
+    protected AbstractFileStorageOAuthAccountAssociation(int accountId, int userId, int contextId, FileStorageAccount fileStorageAccount) {
         super(accountId, userId, contextId);
         this.fileStorageAccount = fileStorageAccount;
     }
@@ -99,7 +100,7 @@ public abstract class AbstractFileStorageOAuthAccountAssociation extends Abstrac
 
     /**
      * Returns the {@link FileStorageAccount}
-     * 
+     *
      * @return the {@link FileStorageAccount}
      */
     protected FileStorageAccount getFileStorageAccount() {

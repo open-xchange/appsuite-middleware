@@ -52,7 +52,9 @@ package com.openexchange.authentication.imap.impl;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
 import static com.openexchange.authentication.LoginExceptionCodes.UNKNOWN;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.mail.AuthenticationFailedException;
@@ -79,6 +81,7 @@ import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
@@ -150,24 +153,33 @@ public class IMAPAuthentication implements AuthenticationService {
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
 
-            if (props.get(PropertyNames.IMAPAUTHENC.name) != null) {
-                String authenc = (String) props.get(PropertyNames.IMAPAUTHENC.name);
-                try {
-                    password = new String(password.getBytes(authenc), CHARENC_ISO8859);
-                } catch (UnsupportedEncodingException e) {
-                    LOG.error("", e);
-                    throw LoginExceptionCodes.COMMUNICATION.create(e);
+            {
+                Object value = props.get(PropertyNames.IMAPAUTHENC.name);
+                if (value != null) {
+                    String authenc = (String) value;
+                    try {
+                        password = new String(password.getBytes(authenc), CHARENC_ISO8859);
+                    } catch (UnsupportedEncodingException e) {
+                        LOG.error("", e);
+                        throw LoginExceptionCodes.COMMUNICATION.create(e);
+                    }
                 }
             }
 
             String imaptimeout = "4000";
-            if (props.get(PropertyNames.IMAP_TIMEOUT.name) != null) {
-                imaptimeout = (String) props.get(PropertyNames.IMAP_TIMEOUT.name);
+            {
+                Object value = props.get(PropertyNames.IMAP_TIMEOUT.name);
+                if (value != null) {
+                    imaptimeout = (String) value;
+                }
             }
 
             String connectiontimeout = "4000";
-            if (props.get(PropertyNames.IMAP_CONNECTIONTIMEOUT.name) != null) {
-                connectiontimeout = (String) props.get(PropertyNames.IMAP_CONNECTIONTIMEOUT.name);
+            {
+                Object value = props.get(PropertyNames.IMAP_CONNECTIONTIMEOUT.name);
+                if (value != null) {
+                    connectiontimeout = (String) value;
+                }
             }
 
             final Properties imapprops = new Properties();
@@ -175,39 +187,52 @@ public class IMAPAuthentication implements AuthenticationService {
             imapprops.put("mail.imap.timeout", imaptimeout);
 
             boolean useFullLogin = true;
-            if (props.get(PropertyNames.USE_FULL_LOGIN_INFO.name) != null) {
-                useFullLogin = Boolean.parseBoolean(((String) props.get(PropertyNames.USE_FULL_LOGIN_INFO.name)).trim());
+            {
+                Object value = props.get(PropertyNames.USE_FULL_LOGIN_INFO.name);
+                if (value != null) {
+                    useFullLogin = Boolean.parseBoolean(value.toString().trim());
+                }
             }
 
             boolean useFullLoginForUserLookup = false;
-            if (props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP.name) != null) {
-                useFullLoginForUserLookup = Boolean.parseBoolean(((String) props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP.name)).trim());
+            {
+                Object value = props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP.name);
+                if (value != null) {
+                    useFullLoginForUserLookup = Boolean.parseBoolean(value.toString().trim());
+                }
             }
 
             boolean useFullLoginForContextLookup = false;
-            if (props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP.name) != null) {
-                useFullLoginForContextLookup = Boolean.parseBoolean(((String) props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP.name)).trim());
+            {
+                Object value = props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP.name);
+                if (value != null) {
+                    useFullLoginForContextLookup = Boolean.parseBoolean(value.toString().trim());
+                }
             }
 
             boolean lowerCaseForContextUserLookup = false;
-            if (props.get(PropertyNames.LOWERCASE_FOR_CONTEXT_USER_LOOKUP.name) != null) {
-                lowerCaseForContextUserLookup = Boolean.parseBoolean(((String) props.get(PropertyNames.LOWERCASE_FOR_CONTEXT_USER_LOOKUP.name)).trim());
+            {
+                Object value = props.get(PropertyNames.LOWERCASE_FOR_CONTEXT_USER_LOOKUP.name);
+                if (value != null) {
+                    lowerCaseForContextUserLookup = Boolean.parseBoolean(value.toString().trim());
+                }
             }
 
             String host = "localhost";
-            if (props.get(PropertyNames.IMAP_SERVER.name) != null) {
-                host = IDNA.toASCII((String) props.get(PropertyNames.IMAP_SERVER.name));
+            {
+                Object value = props.get(PropertyNames.IMAP_SERVER.name);
+                if (value != null) {
+                    host = IDNA.toASCII(value.toString());
+                }
             }
 
             Integer port = Integer.valueOf(143);
-            if (props.get(PropertyNames.IMAP_PORT.name) != null) {
-                port = Integer.valueOf((String) props.get(PropertyNames.IMAP_PORT.name));
+            {
+                Object value = props.get(PropertyNames.IMAP_PORT.name);
+                if (value != null) {
+                    port = Integer.valueOf(value.toString());
+                }
             }
-
-            LOG.debug("Using imap server: {}", host);
-            LOG.debug("Using imap port: {}", port);
-            LOG.debug("Using full login info: {}", Boolean.valueOf(useFullLogin));
-            LOG.debug("Using full login info for user look-up: {}", Boolean.valueOf(useFullLoginForUserLookup));
 
             // Set IMAP login
             String imapLogin = useFullLogin ? splitResult.fullLoginInfo : localPart;
@@ -222,44 +247,26 @@ public class IMAPAuthentication implements AuthenticationService {
             }
 
             // Support for multiple IMAP servers
+            boolean isPrimary = false;
             boolean secure = false;
             if ("true".equalsIgnoreCase(props.getProperty(PropertyNames.USE_MULTIPLE.name))) {
-                int ctxId;
-                Context ctx;
-                {
-                    ContextService contextService = services.getService(ContextService.class);
-                    ctxId = contextService.getContextId(contextInfo);
-                    if (ContextStorage.NOT_FOUND == ctxId) {
-                        throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(contextInfo);
-                    }
-                    ctx = contextService.getContext(ctxId);
-                }
+                // Resolve user/context
+                Context ctx = optContext(contextInfo).get();
+                int userId = optUser(userInfo, loginInfo, ctx).get().intValue();
 
-	            int userId;
-	            {
-	                UserService userService = services.getService(UserService.class);
-	                try {
-	                    userId = userService.getUserId(userInfo, ctx);
-	                } catch (OXException e) {
-	                    throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(loginInfo.getUsername());
-	                }
-	            }
-
-	            /*
-	             * Load primary account and check its protocol to be IMAP
-	             */
-	            MailAccount defaultMailAccount = services.getService(MailAccountStorageService.class).getDefaultMailAccount(userId, ctxId);
+	            // Load primary account and check its protocol to be IMAP
+	            MailAccount defaultMailAccount = optMailAccount(userId, ctx.getContextId()).get();
 	            String mailProtocol = defaultMailAccount.getMailProtocol();
 	            if (!mailProtocol.toLowerCase().startsWith("imap")) {
 	                throw UNKNOWN.create(new StringBuilder(128).append(
 	                    "IMAP authentication failed: Primary account's protocol is not IMAP but ").append(mailProtocol).append(
-	                    " for user ").append(userId).append(" in context ").append(ctxId).toString());
+	                    " for user ").append(userId).append(" in context ").append(ctx.getContextId()).toString());
 	            }
 
 	            /*
 	             * Set user according to configured login source if different from LoginSource.USER_NAME
 	             */
-	            final LoginSource loginSource = MailProperties.getInstance().getLoginSource(userId, ctxId);
+	            final LoginSource loginSource = MailProperties.getInstance().getLoginSource(userId, ctx.getContextId());
 	            if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
 	                imapLogin = defaultMailAccount.getLogin();
 	            }
@@ -270,17 +277,28 @@ public class IMAPAuthentication implements AuthenticationService {
 	            /*
 	             * Get IMAP server from primary account
 	             */
+	            isPrimary = true;
 	            host = IDNA.toASCII(defaultMailAccount.getMailServer());
 	            port = Integer.valueOf(defaultMailAccount.getMailPort());
 	            secure = defaultMailAccount.isMailSecure();
-	            LOG.debug("Parsed IMAP Infos: {} {} {}  ({}@{})", (secure ? "imaps" : "imap"), host, port, Integer.valueOf(userId), Integer.valueOf(ctxId));
-
-
+	            LOG.debug("Parsed IMAP Infos: {} {} {}  ({}@{})", (secure ? "imaps" : "imap"), host, port, Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             } else {
-                // ## ssl feature for single defined imap server
-                // added by cutmasta
+                // SSL feature for single defined IMAP server
                 if ("true".equalsIgnoreCase(props.getProperty(PropertyNames.IMAP_USE_SECURE.name))) {
                     secure = true;
+                }
+
+                // Check if configured IMAP server is the primary IMAP server of the user
+                Optional<Context> optionalContext = optContext(contextInfo).opt();
+                if (optionalContext.isPresent()) {
+                    Context ctx = optionalContext.get();
+                    Optional<Integer> optionalUserId = optUser(userInfo, loginInfo, ctx).opt();
+                    if (optionalUserId.isPresent()) {
+                        Optional<MailAccount> optionalDefaultMailAccount = optMailAccount(optionalUserId.get().intValue(), ctx.getContextId()).opt();
+                        if (optionalDefaultMailAccount.isPresent() && MailAccounts.isEqualImapAccount(optionalDefaultMailAccount.get(), host, port.intValue())) {
+                            isPrimary = true;
+                        }
+                    }
                 }
             }
 
@@ -291,6 +309,11 @@ public class IMAPAuthentication implements AuthenticationService {
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create(authenticationFailed);
                 }
             }
+
+            LOG.debug("Using imap server: {}", host);
+            LOG.debug("Using imap port: {}", port);
+            LOG.debug("Using full login info: {}", Boolean.valueOf(useFullLogin));
+            LOG.debug("Using full login info for user look-up: {}", Boolean.valueOf(useFullLoginForUserLookup));
 
             ConfigurationService configuration = services.getService(ConfigurationService.class);
             SSLSocketFactoryProvider factoryProvider = services.getService(SSLSocketFactoryProvider.class);
@@ -345,6 +368,10 @@ public class IMAPAuthentication implements AuthenticationService {
                  * Needed for JavaMail >= 1.4
                  */
                 // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+            }
+
+            if (isPrimary) {
+                imapprops.put("mail.imap.primary", "true");
             }
 
             Store imapconnection = null;
@@ -430,6 +457,37 @@ public class IMAPAuthentication implements AuthenticationService {
         cipherSuites = configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", "").trim();
         if (Strings.isNotEmpty(cipherSuites)) {
             imapprops.put("mail.imap.ssl.ciphersuites", cipherSuites);
+        }
+    }
+
+    private Result<Context> optContext(String contextInfo) {
+        try {
+            ContextService contextService = services.getService(ContextService.class);
+            int ctxId = contextService.getContextId(contextInfo);
+            if (ContextStorage.NOT_FOUND == ctxId) {
+                throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(contextInfo);
+            }
+            return new Result<Context>(contextService.getContext(ctxId));
+        } catch (OXException e) {
+            return new Result<Context>(e);
+        }
+    }
+
+    private Result<Integer> optUser(String userInfo, LoginInfo loginInfo, Context ctx) {
+        UserService userService = services.getService(UserService.class);
+        try {
+            return new Result<Integer>(I(userService.getUserId(userInfo, ctx)));
+        } catch (OXException e) {
+            return new Result<Integer>(INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(loginInfo.getUsername()));
+        }
+    }
+
+    private Result<MailAccount> optMailAccount(int userId, int contextId) {
+        try {
+            MailAccountStorageService storageService = services.getServiceSafe(MailAccountStorageService.class);
+            return new Result<MailAccount>(storageService.getDefaultMailAccount(userId, contextId));
+        } catch (OXException e) {
+            return new Result<MailAccount>(e);
         }
     }
 
@@ -563,6 +621,35 @@ public class IMAPAuthentication implements AuthenticationService {
         @Override
         public String getUserInfo() {
             return userInfo;
+        }
+    }
+
+    private static final class Result<T> {
+
+        private final T result;
+        private final OXException error;
+
+        Result(T result) {
+            super();
+            this.result = result;
+            this.error = null;
+        }
+
+        Result(OXException error) {
+            super();
+            this.result = null;
+            this.error = error;
+        }
+
+        T get() throws OXException {
+            if (error != null) {
+                throw error;
+            }
+            return result;
+        }
+
+        Optional<T> opt() {
+            return Optional.ofNullable(result);
         }
     }
 

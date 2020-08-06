@@ -64,7 +64,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.interception.OXExceptionInterceptor;
 import com.openexchange.exception.interception.internal.OXExceptionInterceptorRegistration;
 import com.openexchange.exception.interception.internal.OXExceptionInterceptorTracker;
-import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.internal.I18nServiceRegistryImpl;
@@ -116,7 +115,6 @@ public final class GlobalActivator implements BundleActivator {
 
             final List<ServiceTracker<?, ?>> trackers = new ArrayList<ServiceTracker<?, ?>>(4);
             this.trackers = trackers;
-            trackers.add(new ServiceTracker<I18nService, I18nService>(context, I18nService.class, new I18nCustomizer(context)));
 
             OXExceptionInterceptorRegistration.initInstance();
             trackers.add(new ServiceTracker<OXExceptionInterceptor, OXExceptionInterceptor>(context, OXExceptionInterceptor.class, new OXExceptionInterceptorTracker(context)));

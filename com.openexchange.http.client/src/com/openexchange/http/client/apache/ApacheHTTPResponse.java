@@ -50,11 +50,12 @@
 package com.openexchange.http.client.apache;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import org.apache.commons.httpclient.Cookie;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.CookieStore;
+import org.apache.http.cookie.Cookie;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPResponse;
 
@@ -66,31 +67,36 @@ import com.openexchange.http.client.builder.HTTPResponse;
  */
 public class ApacheHTTPResponse implements HTTPResponse {
 
-    private final HttpMethodBase method;
-    private final HttpClient client;
+    private final HttpResponse resp;
     private final ApacheClientRequestBuilder coreBuilder;
-    private final int status;
+    private final CookieStore cookieStore;
 
-    public ApacheHTTPResponse(HttpMethodBase method, HttpClient client, ApacheClientRequestBuilder coreBuilder, int status) {
-        this.method = method;
-        this.client = client;
+    /**
+     * Initializes a new {@link ApacheHTTPResponse}.
+     *
+     * @param resp The {@link HttpResponse}
+     * @param coreBuilder The {@link ApacheClientRequestBuilder}
+     * @param cookieStore The {@link CookieStore} of the client used
+     */
+    public ApacheHTTPResponse(HttpResponse resp, ApacheClientRequestBuilder coreBuilder, CookieStore cookieStore) {
+        this.resp = resp;
         this.coreBuilder = coreBuilder;
-        this.status = status;
+        this.cookieStore = cookieStore;
     }
 
     @Override
     public int getStatus() {
-        return status;
+        return resp.getStatusLine().getStatusCode();
     }
 
     @Override
     public <R> R getPayload(Class<R> type) throws OXException {
-        return coreBuilder.extractPayload(method, type);
+        return coreBuilder.extractPayload(resp, type);
     }
 
     @Override
     public Map<String, String> getHeaders() {
-        Header[] responseHeaders = method.getResponseHeaders();
+        Header[] responseHeaders = resp.getAllHeaders();
         Map<String, String> headers = new HashMap<String, String>();
         for (Header header : responseHeaders) {
             headers.put(header.getName(), header.getValue());
@@ -100,7 +106,7 @@ public class ApacheHTTPResponse implements HTTPResponse {
 
     @Override
     public Map<String, String> getCookies() {
-        Cookie[] cookies = client.getState().getCookies();
+        List<Cookie> cookies = cookieStore.getCookies();
         Map<String, String> r = new HashMap<String, String>();
         for (Cookie cookie : cookies) {
             r.put(cookie.getName(), cookie.getValue());

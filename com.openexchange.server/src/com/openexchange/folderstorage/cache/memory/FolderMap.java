@@ -439,12 +439,10 @@ public final class FolderMap {
     private static final class Key {
 
         private final String treeId;
-
         private final String folderId;
-
         private final int hash;
 
-        public Key(final String folderId, final String treeId) {
+        Key(final String folderId, final String treeId) {
             super();
             this.folderId = folderId;
             this.treeId = treeId;

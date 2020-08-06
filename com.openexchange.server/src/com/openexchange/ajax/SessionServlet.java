@@ -59,6 +59,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.Dispatchers;
@@ -71,6 +72,7 @@ import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.servlet.Constants;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
@@ -166,6 +168,12 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
                 for (SessionServletInterceptor interceptor : SessionServletInterceptorRegistry.getInstance().getInterceptors()) {
                     interceptor.intercept(session, req, resp);
+                }
+
+                // Mark HTTP session as authenticated
+                HttpSession httpSession = req.getSession(true);
+                if (httpSession.getAttribute(Constants.HTTP_SESSION_ATTR_AUTHENTICATED) == null) {
+                    httpSession.setAttribute(Constants.HTTP_SESSION_ATTR_AUTHENTICATED, Boolean.TRUE);
                 }
             }
 

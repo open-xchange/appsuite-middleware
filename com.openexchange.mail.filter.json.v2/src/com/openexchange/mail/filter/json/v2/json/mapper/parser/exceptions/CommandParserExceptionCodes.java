@@ -77,6 +77,10 @@ public enum CommandParserExceptionCodes implements DisplayableOXExceptionCode {
      * No simplified rule found for the specified key '%1$s'
      */
     UNKOWN_SIMPLIFIED_RULE("No simplified rule found for the specified key '%1$s'", CATEGORY_ERROR, 4),
+    /**
+     * The filter action '%1$s' is not allowed
+     */
+    NOT_ALLOWED("This filter action is not allowed: '%1$s'", CATEGORY_USER_INPUT, 5)
 
     ;
 

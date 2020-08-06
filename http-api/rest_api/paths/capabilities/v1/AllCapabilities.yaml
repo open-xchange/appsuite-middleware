@@ -1,0 +1,44 @@
+/preliminary/capabilities/v1/all/{context}/{user}:
+  get:
+    operationId: getAllCapabilities
+    tags:
+      - Preliminary
+      - Admin
+    summary: Gets all capabilities of a single user
+    parameters:
+      - name: context
+        description: The context id
+        in: path
+        required: true
+        schema: 
+          type: integer
+          format: int64
+      - name: user
+        description: The user id
+        in: path
+        required: true
+        schema: 
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: |
+          A JSON array containing the capabilities for the user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Capabilities'
+      '401':
+        description: Not authorized
+      '500':
+        description: >-
+          In case of internal server error that might have
+          multiple reasons. Response contains error message.
+        content:
+          application/json:
+            schema:
+              type: string
+    x-ox-examples:
+      - Example:
+        description: Get capabilities
+        example: 'GET http://localhost:8009/preliminary/capabilities/v1/all/1/3'

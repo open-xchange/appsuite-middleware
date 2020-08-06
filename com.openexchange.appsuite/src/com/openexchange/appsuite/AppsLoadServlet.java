@@ -54,22 +54,21 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpStatus;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.SessionServlet;
-import com.openexchange.exception.OXException;
+import com.openexchange.appsuite.DefaultFileCache.Filter;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AppsLoadServlet} - Provides App Suite data for loading applications.
@@ -91,18 +90,18 @@ public class AppsLoadServlet extends SessionServlet {
 
     // ----------------------------------------------------------------------------------------------------------------------
 
-    private volatile FileCache appCache;
-    private volatile FileCache tzCache;
-    private final AtomicReference<FileContributor> fileContributorReference;
+    private volatile DefaultFileCache appCache;
+    private volatile DefaultFileCache tzCache;
+    private final RankingAwareNearRegistryServiceTracker<FileCacheProvider> fileCacheProviderTracker;
 
     /**
      * Initializes a new {@link AppsLoadServlet}.
      *
      * @param contributor The (composite) file contributor.
      */
-    public AppsLoadServlet(FileContributor contributor) {
+    public AppsLoadServlet(RankingAwareNearRegistryServiceTracker<FileCacheProvider> fileCacheProviderTracker) {
         super();
-        fileContributorReference = new AtomicReference<FileContributor>(contributor);
+        this.fileCacheProviderTracker = fileCacheProviderTracker;
     }
 
     /**
@@ -113,10 +112,16 @@ public class AppsLoadServlet extends SessionServlet {
      * @throws IOException If canonical path names of given files cannot be determined
      */
     public synchronized void reinitialize(File[] roots, File zoneinfo) throws IOException {
-        appCache = new FileCache(roots);
-        tzCache = new FileCache(zoneinfo);
+        appCache = new DefaultFileCache(roots);
+        tzCache = new DefaultFileCache(zoneinfo);
     }
 
+    /**
+     * Escapes the given name
+     *
+     * @param name The name to escape
+     * @return The escaped name
+     */
     private String escapeName(String name) {
         String nameToEscape = name;
         if (nameToEscape.length() > 256) {
@@ -200,7 +205,7 @@ public class AppsLoadServlet extends SessionServlet {
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
 			throws ServletException, IOException {
-	    if(req.getRequestURL().length() > UI_URI_LIMIT) {
+	    if (req.getRequestURL().length() > UI_URI_LIMIT) {
 	        LOG.error("Url length exceeds maximum allowed characters.");
 	        writeErrorPage(HttpStatus.SC_REQUEST_URI_TOO_LONG, "The request is too long", resp);
 	        return;
@@ -222,6 +227,7 @@ public class AppsLoadServlet extends SessionServlet {
 		if (length < 2) {
 			return; // no actual files requested
 		}
+		String version = modules[0]; // modules 0 contains the version string
 		resp.setContentType("text/javascript;charset=UTF-8");
 		ErrorWriter ew = new ErrorWriter(resp, length);
 		for (int i = 1; i < length; i++) {
@@ -236,77 +242,104 @@ public class AppsLoadServlet extends SessionServlet {
 				continue;
 			}
 
-            // Map module name to file name
-            final String format = m.group(1);
-            String name = m.group(2);
-            boolean isTZ = name.startsWith(ZONEINFO);
-            final String resolved = isTZ ? name.substring(ZONEINFO.length()) : name;
-
-            FileCache cache = isTZ ? tzCache : appCache;
-            byte[] data = cache.get(module, new FileCache.Filter() {
-
-                @Override
-                public String resolve(String path) {
-                    return resolved;
-                }
-
-                @Override
-                @SuppressWarnings("deprecation")
-                public byte[] filter(ByteArrayOutputStream baos) {
-                    if (format == null) {
-                        return baos.toByteArray();
-                    }
-
-                    // Special cases for JavaScript-friendly reading of raw files:
-                    // /text;* returns the file as a UTF-8 string
-                    // /raw;* maps every byte to [u+0000..u+00ff]
-                    final StringBuffer sb = new StringBuffer();
-                    sb.append("define('").append(module).append("','");
-                    try {
-                        escape("raw".equals(format) ? baos.toString(0) : baos.toString(Charsets.UTF_8_NAME), sb);
-                    } catch (@SuppressWarnings("unused") UnsupportedEncodingException e) {
-                        // everybody should have UTF-8
-                    }
-                    sb.append("');\n");
-                    return sb.toString().getBytes(Charsets.UTF_8);
-                }
-            });
-
-            if (data != null) {
-                ew.write(data);
-            } else {
-                // Try external sources
-                String options = "{}";
-                FileContributor contributors = fileContributorReference.get();
-                if (contributors != null) {
-                    try {
-                        FileContribution contribution = contributors.getData(ServerSessionAdapter.valueOf(session), module);
-                        if (contribution != null) {
-                            data = contribution.getData();
-                            JSONObject optionsO = new JSONObject();
-                            try {
-                                optionsO.put("cache", !contribution.isCachingDisabled());
-                                options = optionsO.toString();
-                            } catch (@SuppressWarnings("unused") JSONException e) {
-                                // Doesn't happen
-                            }
-                        }
-                    } catch (OXException e) {
-                        LOG.debug("Error loading data for module '{}'", escapeName(module), e);
-                        writeErrorResponse(ew, format, module);
-                    }
-                }
-                if (data != null) {
-                    ew.write(data, options);
-                } else {
-                    LOG.debug("Could not read data for module '{}'", escapeName(module));
-                    writeErrorResponse(ew, format, module);
+			// Map module name to file name
+			final String format = m.group(1);
+			String name = m.group(2);
+			boolean isTZ = name.startsWith(ZONEINFO);
+			final String resolved = isTZ ? name.substring(ZONEINFO.length()) : name;
+			byte[] data = null;
+            if (Strings.isNotEmpty(version)) {
+                Optional<FileCache> optCache = getExternalCache(session, version, module);
+                if (optCache.isPresent()) {
+                    // Getting data from external cache
+                    data = optCache.get().get(module, getFilter(resolved, format, module));
                 }
             }
-        }
-        ew.done();
+			if (data != null) {
+				ew.write(data);
+			} else {
+				// Fallback to normal cache
+				FileCache cache = isTZ ? tzCache : appCache;
+				data = cache.get(module, getFilter(resolved, format, module));
+				if (data != null) {
+					ew.write(data);
+				} else {
+					LOG.debug("Error loading data for module '{}'", escapeName(module));
+					writeErrorResponse(ew, format, module);
+				}
+			}
+		}
+		ew.done();
+	}
+
+    /**
+     * Gets a filter for the {@link FileCache}
+     *
+     * @param resolved The resolved name of the file
+     * @param format The requested format
+     * @param module The requested module
+     * @return
+     */
+    private Filter getFilter(String resolved, String format, String module) {
+    	return new DefaultFileCache.Filter() {
+
+            @Override
+            public String resolve(String path) {
+                return resolved;
+            }
+
+            @Override
+            @SuppressWarnings("deprecation")
+            public byte[] filter(ByteArrayOutputStream baos) {
+                if (format == null) {
+                    return baos.toByteArray();
+                }
+
+                // Special cases for JavaScript-friendly reading of raw files:
+                // /text;* returns the file as a UTF-8 string
+                // /raw;* maps every byte to [u+0000..u+00ff]
+                final StringBuffer sb = new StringBuffer();
+                sb.append("define('").append(module).append("','");
+                try {
+                    escape("raw".equals(format) ? baos.toString(0) : baos.toString(Charsets.UTF_8_NAME), sb);
+                } catch (UnsupportedEncodingException e) {
+                    // everybody should have UTF-8
+                }
+                sb.append("');\n");
+                return sb.toString().getBytes(Charsets.UTF_8);
+            }
+        };
     }
 
+    /**
+     * Gets the external {@link FileCache} which is applicable for the given values
+     *
+     * @param session The user session
+     * @param version The requested version
+     * @param path The requested path
+     * @return An {@link Optional} {@link FileCache}
+     */
+    private Optional<FileCache> getExternalCache(Session session, String version, String path) {
+    	if (fileCacheProviderTracker != null) {
+	    	for(FileCacheProvider provider: fileCacheProviderTracker.getServiceList()) {
+	    		if (provider.isApplicable(session, version, path)) {
+	    			return Optional.of(provider.getData());
+	    		}
+	    	}
+    	}
+    	return Optional.empty();
+
+    }
+
+    /**
+     * Writes the error response code
+     *
+     * @param ew The {@link ErrorWriter}
+     * @param format The requested format
+     * @param module The requested module
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     */
     private void writeErrorResponse(ErrorWriter ew, String format, String module) throws UnsupportedEncodingException, IOException {
         LOG.debug("Could not read data for module '{}'", escapeName(module));
         int len = module.length() - 3;
@@ -351,11 +384,17 @@ public class AppsLoadServlet extends SessionServlet {
     static {
         try {
             SUFFIX = "\n/*:oxsep:*/\n".getBytes(Charsets.UTF_8_NAME);
-        } catch (@SuppressWarnings("unused") UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             SUFFIX = "\n/*:oxsep:*/\n".getBytes();
         }
     }
 
+    /**
+     * Escapes the given {@link CharSequence}
+     *
+     * @param s The string to escape
+     * @param sb The target {@link StringBuffer}
+     */
     static void escape(final CharSequence s, final StringBuffer sb) {
         final Matcher e = escapeRE.matcher(s);
         while (e.find()) {

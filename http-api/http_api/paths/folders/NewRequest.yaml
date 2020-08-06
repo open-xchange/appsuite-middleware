@@ -20,6 +20,7 @@
         required: false
         schema:
           type: string
+      - $ref: '#/components/parameters/QueryParamFolderAutoRename'
     responses:
       '200':
         description: >-

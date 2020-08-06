@@ -51,9 +51,6 @@ package com.openexchange.groupware.ldap;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Properties;
 import javax.naming.Context;
 import javax.naming.InvalidNameException;
 import javax.naming.Name;
@@ -61,10 +58,6 @@ import javax.naming.NamingException;
 import javax.naming.ldap.LdapContext;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.configuration.DirectoryService;
-import com.openexchange.tools.file.TagFiller;
-import com.openexchange.tools.file.TagFillerAdapter;
-import com.openexchange.tools.tag.LineParserUtility;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein </a>
@@ -75,11 +68,6 @@ public final class LdapUtility {
      * Logger.
      */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapUtility.class);
-
-    /**
-     * Empty map.
-     */
-    private static final Map<String, String> EMPTY_MAP = Collections.emptyMap();
 
     /**
      * Private constructor prevents instantiation.
@@ -120,30 +108,6 @@ public final class LdapUtility {
         }
         context.removeFromEnvironment(Context.SECURITY_PRINCIPAL);
         context.removeFromEnvironment(Context.SECURITY_CREDENTIALS);
-    }
-
-    /**
-     * Returns the base distinguished name under that a search will take place.
-     * This method should only be used if a search base dn for users is needed.
-     * @param propname name of the property containing the search base dn.
-     * @param cred credentials for ldap authentication.
-     * @return the appropriate base dn for the search.
-     * @throws OXException if the property can't be found.
-     */
-    static String getSearchBaseDN(final String propname, final Credentials cred)
-        throws OXException {
-        String retval = findProperty(propname, true);
-        if (retval.length() > 0 && retval.charAt(0) == '['
-            && retval.charAt(retval.length() - 1) == ']') {
-            if (retval.indexOf('[', 1) == -1) {
-                retval = cred.getValue(retval.substring(1,
-                    retval.length() - 1));
-            } else {
-                retval = LineParserUtility.parseLine(retval, FILLER,
-                    new TagFillerData(cred, EMPTY_MAP));
-            }
-        }
-        return retval;
     }
 
     /**
@@ -189,132 +153,6 @@ public final class LdapUtility {
             modifiedPattern.append('%');
         }
         return modifiedPattern.toString();
-    }
-
-    /**
-     * This class is a container for the temporary data for the TagFiller.
-     */
-    private static class TagFillerData {
-
-        /**
-         * Constructor to create a data object for the TagFiller.
-         * @param values user specific values to read the correct data from the
-         * ldap.
-         * @param datamap dynamically replaced content.
-         */
-        public TagFillerData(final Credentials values,
-            final Map<String, String> datamap) {
-            this.values = values;
-            this.datamap = datamap;
-        }
-
-        /**
-         * User specific values to read the correct data from the ldap.
-         */
-        final Credentials values;
-
-        /**
-         * Dynamically replaced content.
-         */
-        final Map<String, String> datamap;
-    }
-
-    /**
-     * This TagFiller will be used to replace the dynamic content of the
-     * customization.
-     */
-    private static final TagFiller FILLER = new TagFillerAdapter() {
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-		public String replace(final String tag, final Object data) {
-            final TagFillerData temp = (TagFillerData) data;
-            String retval = tag;
-            if (temp.datamap != null && temp.datamap.containsKey(tag)) {
-                retval = temp.datamap.get(tag);
-            } else if (temp.values != null && tag.endsWith("BaseDN")) {
-                try {
-                    retval = LdapUtility.getSearchBaseDN(tag, temp.values);
-                } catch (OXException e) {
-                    retval = e.getMessage();
-                }
-            } else {
-                try {
-                    final String property = LdapUtility.findProperty(tag,
-                        false);
-                    if (null != property && !property.equals('[' + tag + ']')) {
-                        retval = LineParserUtility.parseLine(property, this,
-                            data);
-                    }
-                } catch (OXException e) {
-                    LOG.error("", e);
-                    retval = tag;
-                }
-            }
-            return retval;
-        }
-    };
-
-   /**
-    * This method searches a the value of a property in the properties. The
-    * property to search will only be preceded by the package name to find it.
-    * This method can't be used to find class specific properties.
-    * @param propname name of the property to search
-    * @param mustExist <code>true</code> causes this method to throw a
-    *        NamingException if the property can't be found.
-    * @return the value of the property or <code>null</code> if the property
-    * can't be found and <code>mustExist</code> is false.
-    * @throws OXException if the property can't be found and the parameter
-    * <code>mustExist</code> is <code>true</code>.
-    */
-   static String findProperty(final String propname, final boolean mustExist)
-       throws OXException {
-       final String retval = getCustomization().getProperty(propname);
-       if (retval == null && mustExist) {
-           throw LdapExceptionCode.PROPERTY_MISSING.create(propname).setPrefix(EnumComponent.LDAP.getAbbreviation());
-       }
-       return retval;
-   }
-
-    /**
-     * This method searches a the value of a property in the properties. The
-     * property to search will only be preceded by the package name to find it.
-     * @param propname name of the property to search
-     * @return the value of the property and never <code>null</code>.
-     * @throws OXException if the property can't be found.
-     */
-    static String findProperty(final String propname) throws OXException {
-        return findProperty(propname, true);
-    }
-
-    /**
-     * Mutex for customization.
-     */
-    private static Object mutex = new Object();
-
-    /**
-     * Proxy attribute to store the customization properties.
-     */
-    private static volatile Properties customization;
-
-    /**
-     * Returns the properties for the customization of the ldap interface.
-     * @return the properties for the customization of the ldap interface.
-     */
-    private static Properties getCustomization() {
-        Properties customs = customization;
-        if (null == customs) {
-            synchronized (mutex) {
-                customs = customization;
-                if (null == customs) {
-                    customs = DirectoryService.getCustomization();
-                    customization = customs;
-                }
-            }
-        }
-        return customs;
     }
 
     /**

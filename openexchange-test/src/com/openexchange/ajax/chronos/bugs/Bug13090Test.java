@@ -78,7 +78,7 @@ public class Bug13090Test extends AbstractChronosTest {
     @Test
     public void testSeriesMove() throws Exception {
         EventData series = EventFactory.createSeriesEvent(getCalendaruser(), "Bug13090Test", 4, folderId);
-        EventData createEvent = eventManager.createEvent(series);
+        EventData createEvent = eventManager.createEvent(series, true);
         try {
             ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().moveEvent(getSessionId(), folderId, createEvent.getId(), L(eventManager.getLastTimeStamp()), defaultFolderId, Boolean.FALSE, null, null, Boolean.FALSE, null, null, null, null, Boolean.FALSE);
             eventManager.handleUpdate(response, true);

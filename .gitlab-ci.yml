@@ -10,6 +10,7 @@ build documentation:
   script:
     - echo $CI_COMMIT_REF_NAME
     - echo $CI_REPOSITORY_URL
+    - rm -R -f middleware
     - git clone --depth 1 --no-checkout --branch $CI_COMMIT_REF_NAME $CI_REPOSITORY_URL middleware
     - cd middleware
     - git config core.sparsecheckout true
@@ -17,7 +18,13 @@ build documentation:
     - echo "documentation/*" > .git/info/sparse-checkout
     - echo "com.openexchange.version/META-INF/MANIFEST.MF" >> .git/info/sparse-checkout
     - git read-tree -mu HEAD
-    - export VERSION=`grep 'OXVersion:' com.openexchange.version/META-INF/MANIFEST.MF | cut -d' ' -f2`
+    - VERSION=develop
+    - if [ "$CI_COMMIT_REF_NAME" != "develop" ]; then
+        echo "Not develop";
+        VERSION=`grep 'OXVersion:' com.openexchange.version/META-INF/MANIFEST.MF | cut -d' ' -f2`;
+      fi
+    - export VERSION=$VERSION
+    - echo $VERSION
     - ln -s $CI_PROJECT_DIR/middleware/documentation /documentation/jekyll/_middleware
     - cd /documentation
     - bundle exec jekyll b --baseurl /$VERSION --config _config.yml
@@ -58,4 +65,3 @@ deploy documentation:
     - master
     - /^master-.*$/
     - /^release-.*$/
-

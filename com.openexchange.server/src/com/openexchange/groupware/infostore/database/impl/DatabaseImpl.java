@@ -59,6 +59,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -730,7 +731,7 @@ public class DatabaseImpl extends DBService {
         ResultSet result = null;
         try {
             // Determine users with a specific file storage set
-            stmt = con.prepareStatement("SELECT DISTINCT user.id FROM user WHERE user.cid=? AND user.filestore_id>0");
+            stmt = con.prepareStatement("SELECT 1 FROM user WHERE user.cid=? AND user.filestore_id>0");
             stmt.setInt(1, contextId);
             result = stmt.executeQuery();
             boolean hasUserFileStores = result.next();
@@ -738,16 +739,11 @@ public class DatabaseImpl extends DBService {
             result = null;
             stmt = null;
 
-            SortedSet<String> fileStorageLocations;
+            // Query for associated file store locations
             if (false == hasUserFileStores) {
                 // There are no users in this context with a specific file storage. Just grab all from "infostore_document" table for given context.
                 stmt = con.prepareStatement("SELECT file_store_location FROM infostore_document WHERE infostore_document.cid=? AND file_store_location IS NOT NULL");
                 stmt.setInt(1, contextId);
-                result = stmt.executeQuery();
-                fileStorageLocations = new TreeSet<String>();
-                while (result.next()) {
-                    fileStorageLocations.add(result.getString(1));
-                }
             } else {
                 // All in context w/o user-association
                 stmt = con.prepareStatement("SELECT d.file_store_location FROM infostore_document AS d JOIN infostore AS i ON d.cid=i.cid AND d.infostore_id=i.id WHERE d.cid=? AND d.file_store_location IS NOT NULL AND i.folder_id NOT IN (SELECT t.fuid FROM oxfolder_tree AS t WHERE t.cid=? AND t.module=? AND t.created_from IN (SELECT DISTINCT user.id FROM user WHERE user.cid=? AND user.filestore_id>0))");
@@ -755,16 +751,19 @@ public class DatabaseImpl extends DBService {
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, FolderObject.INFOSTORE);
                 stmt.setInt(4, contextId);
-                result = stmt.executeQuery();
-                fileStorageLocations = new TreeSet<String>();
-                while (result.next()) {
-                    fileStorageLocations.add(result.getString(1));
-                }
-                close(stmt, result);
-                result = null;
-                stmt = null;
+            }
+            result = stmt.executeQuery();
+
+            if (!result.next()) {
+                // No such results
+                return Collections.emptySortedSet();
             }
 
+            // Collect file store locations
+            SortedSet<String> fileStorageLocations = new TreeSet<String>();
+            do {
+                fileStorageLocations.add(result.getString(1));
+            } while (result.next());
             return fileStorageLocations;
         } catch (SQLException e) {
             LOG.error("", e);
@@ -805,20 +804,21 @@ public class DatabaseImpl extends DBService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            SortedSet<String> fileStorageLocations = new TreeSet<String>();
             stmt = connection.prepareStatement("SELECT d.file_store_location FROM infostore_document AS d JOIN infostore AS i ON d.cid=i.cid AND d.infostore_id=i.id WHERE d.cid=? AND d.file_store_location IS NOT NULL AND i.folder_id IN (SELECT t.fuid FROM oxfolder_tree AS t WHERE t.cid=? AND t.module=? AND t.created_from=?)");
             stmt.setInt(1, contextId);
             stmt.setInt(2, contextId);
             stmt.setInt(3, FolderObject.INFOSTORE);
             stmt.setInt(4, usr.getId());
             result = stmt.executeQuery();
-            while (result.next()) {
-                fileStorageLocations.add(result.getString(1));
+            if (!result.next()) {
+                // No such results
+                return Collections.emptySortedSet();
             }
-            close(stmt, result);
-            result = null;
-            stmt = null;
 
+            SortedSet<String> fileStorageLocations = new TreeSet<String>();
+            do {
+                fileStorageLocations.add(result.getString(1));
+            } while (result.next());
             return fileStorageLocations;
         } catch (SQLException e) {
             LOG.error("", e);
@@ -1390,8 +1390,6 @@ public class DatabaseImpl extends DBService {
             }
         } catch (SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, (query != null) ? query.toString() : "");
-        } catch (OXException e) {
-            throw e;
         } finally {
             if (stmt != null) {
                 try {

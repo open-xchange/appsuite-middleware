@@ -1,0 +1,73 @@
+/servlet/webdav.freebusy:
+  get:
+    operationId: getFreeBusy
+    tags:
+      - InternetFreeBusy
+    summary: Gets the free busy data in iCalendar format.
+    parameters:
+      - name: contextId
+        in: query
+        description: >-
+          The context id of the context in which the requested user is located.
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: userName
+        in: query
+        description: The name of the user. Typically the local part of the email address.
+        required: true
+        schema:
+          type: string
+      - name: server
+        in: query
+        description: The name of the server. Typically the domain part of the email address.
+        required: true
+        schema:
+          type: string
+      - name: weeksIntoPast
+        in: query
+        description: >-
+          The requested time range into the past in weeks.
+          If this value is greater than the configured maximum, the free busy times are only requested to configured maximum.
+          Default value is 1 week into the past.
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: weeksIntoFuture
+        in: query
+        description: >-
+          The requested time range into the future in weeks.
+          If this value is greater than the configured maximum, the free busy times are only requested to configured maximum.
+          Default value is 4 week into the past.
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: simple
+        in: query
+        description: >-
+          true, if the VFREEBUSY data should not contain free busy type and free information, false otherwise.
+          Default value is false.
+        required: false
+        schema:
+          type: boolean
+    responses:
+      '200':
+        description: |
+          An iCalendar text containing the requested free busy data.
+        content:
+          text/calendar:
+            schema:
+              type: string
+      '400':
+        description: >-
+          In case one parameter is invalid.
+      '404':
+        description: >-
+          In case the servlet is not enabled, if no existing user with the requested user name, server and context id is found
+          or if this user has not published his free busy data.
+      '500':
+        description: >-
+          In case an internal server error occurs.

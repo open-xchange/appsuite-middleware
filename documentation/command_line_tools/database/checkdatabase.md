@@ -2,6 +2,7 @@
 title: checkdatabase
 icon: far fa-circle
 tags: Administration, Command Line tools, Database
+package: open-xchange-admin
 ---
 
 # NAME

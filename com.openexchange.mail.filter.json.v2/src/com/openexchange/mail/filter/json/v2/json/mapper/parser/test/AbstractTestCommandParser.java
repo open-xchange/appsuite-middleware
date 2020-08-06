@@ -53,7 +53,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
-import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.commands.test.ITestCommand;
 import com.openexchange.jsieve.registry.CommandRegistry;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
@@ -72,8 +71,11 @@ public abstract class AbstractTestCommandParser extends AbstractCommandParser<IT
 
     /**
      * Initializes a new {@link AbstractTestCommandParser}.
+     *
+     * @param services The service lookup
+     * @param testCommand The {@link ITestCommand}
      */
-    protected AbstractTestCommandParser(ServiceLookup services, Commands testCommand) {
+    protected AbstractTestCommandParser(ServiceLookup services, ITestCommand testCommand) {
         super(services, testCommand);
     }
 

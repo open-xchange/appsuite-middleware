@@ -66,10 +66,10 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.opensaml.xml.security.credential.BasicCredential;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.security.x509.BasicX509Credential;
+import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.UsageType;
+import org.opensaml.security.x509.BasicX509Credential;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.saml.SAMLExceptionCode;
@@ -145,9 +145,8 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
             Certificate certificate = keyStore.getCertificate(alias);
             if (certificate != null) {
                 retval = true;
-                idpCertificateCredential = new BasicCredential();
+                idpCertificateCredential = new BasicCredential(certificate.getPublicKey());
                 idpCertificateCredential.setUsageType(UsageType.SIGNING);
-                idpCertificateCredential.setPublicKey(certificate.getPublicKey());
                 idpCertificateCredentials.add(idpCertificateCredential);
             }
         }
@@ -177,19 +176,14 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
         Certificate certificate = pke.getCertificate();
         if (certificate instanceof X509Certificate) {
             // An X.509 certificate
-            BasicX509Credential x509credential = new BasicX509Credential();
+            BasicX509Credential x509credential = new BasicX509Credential((X509Certificate) certificate, pke.getPrivateKey());
             x509credential.setUsageType(type);
-            x509credential.setEntityCertificate((X509Certificate) certificate);
-            x509credential.setPrivateKey(pke.getPrivateKey());
-            x509credential.setPublicKey(pke.getCertificate().getPublicKey());
             return x509credential;
         }
 
         // Default one...
-        BasicCredential credential = new BasicCredential();
+        BasicCredential credential = new BasicCredential(certificate.getPublicKey(), pke.getPrivateKey());
         credential.setUsageType(type);
-        credential.setPublicKey(certificate.getPublicKey());
-        credential.setPrivateKey(pke.getPrivateKey());
         return credential;
     }
 

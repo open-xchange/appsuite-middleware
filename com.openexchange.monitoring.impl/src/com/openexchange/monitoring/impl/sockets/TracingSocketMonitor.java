@@ -264,7 +264,7 @@ public class TracingSocketMonitor implements SocketMonitor {
         int[] filterPorts = config.getFilterPorts();
         if (null == filterPorts || Arrays.binarySearch(filterPorts, socket.getPort()) >= 0) {
             HostList filter = config.getFilter();
-            return null == filter || filter.contains(socket.getInetAddress());
+            return null == filter || (!filter.isEmpty() && filter.contains(socket.getInetAddress()));
         }
 
         return false;

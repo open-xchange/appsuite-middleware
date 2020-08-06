@@ -65,7 +65,6 @@ import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.oauth.scope.OXScope;
-import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 
 /**
@@ -80,21 +79,9 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
     /**
      * Initializes a new {@link DropboxOAuth2Access}.
      */
-    public DropboxOAuth2Access(FileStorageAccount fsAccount, Session session) throws OXException {
+    public DropboxOAuth2Access(FileStorageAccount fsAccount, Session session) {
         super(session);
         this.fsAccount = fsAccount;
-    }
-
-    @Override
-    public void dispose() {
-        OAuthClient<DropboxClient> oAuthClient = this.<DropboxClient> getOAuthClient();
-        if (null != oAuthClient) {
-            HttpRequestor httpRequestor = oAuthClient.client.httpRequestor;
-            if (httpRequestor instanceof ApacheHttpClientHttpRequestor) {
-                HttpClients.shutDown(((ApacheHttpClientHttpRequestor) httpRequestor).getHttpClient());
-            }
-        }
-        super.dispose();
     }
 
     @Override
@@ -103,7 +90,7 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
         try {
             final OAuthAccount oauthAccount = oAuthService.getAccount(getSession(), getAccountId());
             verifyAccount(oauthAccount, oAuthService, OXScope.drive);
-            HttpRequestor httpRequestor = new ApacheHttpClientHttpRequestor(ApacheHttpClientHttpRequestor.defaultApacheHttpClient());
+            HttpRequestor httpRequestor = new ApacheHttpClientHttpRequestor();
             DbxRequestConfig config = DbxRequestConfig.newBuilder(DropboxConfiguration.getInstance().getProductName()).withHttpRequestor(httpRequestor).build();
             String accessToken = oauthAccount.getToken();
             DbxClientV2 dbxClient = new DbxClientV2(config, accessToken);

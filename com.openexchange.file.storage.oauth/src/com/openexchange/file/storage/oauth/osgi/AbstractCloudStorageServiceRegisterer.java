@@ -56,6 +56,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageAccountDeleteListener;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
@@ -80,6 +81,7 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
     private AbstractOAuthFileStorageService service;
     private ServiceRegistration<FileStorageService> serviceRegistration;
     private ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration;
+    private ServiceRegistration<FileStorageAccountDeleteListener> fsAccountListenerRegistration;
     private ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration; // guarded by synchronized
 
     /**
@@ -105,6 +107,7 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
                 // Try to create the service
                 service = getCloudFileStorageService();
                 this.serviceRegistration = getContext().registerService(FileStorageService.class, service, null);
+                this.fsAccountListenerRegistration = getContext().registerService(FileStorageAccountDeleteListener.class, service, null);
                 this.listenerRegistration = getContext().registerService(OAuthAccountDeleteListener.class, service, null);
                 this.associationProviderRegistration = getContext().registerService(OAuthAccountAssociationProvider.class, getOAuthAccountAssociationProvider(service), null);
                 this.service = service;
@@ -118,6 +121,7 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
                     unregisterService(null);
                     service = getCloudFileStorageService(compositeProvider);
                     this.serviceRegistration = getContext().registerService(FileStorageService.class, service, null);
+                    this.fsAccountListenerRegistration = getContext().registerService(FileStorageAccountDeleteListener.class, service, null);
                     this.listenerRegistration = getContext().registerService(OAuthAccountDeleteListener.class, service, null);
                     this.associationProviderRegistration = getContext().registerService(OAuthAccountAssociationProvider.class, getOAuthAccountAssociationProvider(service), null);
                     this.service = service;
@@ -193,6 +197,12 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
         if (null != serviceRegistration) {
             this.serviceRegistration = null;
             serviceRegistration.unregister();
+        }
+
+        ServiceRegistration<FileStorageAccountDeleteListener> fsAccountListenerRegistration = this.fsAccountListenerRegistration;
+        if (null != fsAccountListenerRegistration) {
+            this.fsAccountListenerRegistration = null;
+            fsAccountListenerRegistration.unregister();
         }
 
         ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration = this.listenerRegistration;

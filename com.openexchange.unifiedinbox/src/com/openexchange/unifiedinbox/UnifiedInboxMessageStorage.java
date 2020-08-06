@@ -51,7 +51,7 @@ package com.openexchange.unifiedinbox;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
+import static com.openexchange.mail.dataobjects.MailFolder.ROOT_FOLDER_ID;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -284,7 +284,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 return mails;
             }
         }
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -539,7 +539,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         if (Strings.isEmpty(contentId)) {
             return null;
         }
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -578,7 +578,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public MailPart getAttachment(String fullName, String mailId, String sequenceId) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -631,7 +631,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     private static MailMessage getMessage(final String fullName, String mailId, boolean markSeen, Session session, final UnifiedInboxAccess access) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -712,7 +712,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, boolean cache, IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFieldz, final String[] headerNames, final SearchTerm<?> searchTerm) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -1107,7 +1107,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, boolean cache, IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFieldz, final SearchTerm<?> searchTerm) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -1502,7 +1502,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public MailMessage[] getThreadSortedMessages(final String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, final SearchTerm<?> searchTerm, MailField[] fieldz) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -1669,7 +1669,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public int getUnreadCount(final String folder, final SearchTerm<?> searchTerm) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(folder)) {
+        if (ROOT_FOLDER_ID.equals(folder)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(folder);
         }
         int unifiedMailAccountId = Services.getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
@@ -1776,7 +1776,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     private MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, MailField[] fieldz, final String[] headerNames, Session session, boolean onlyEnabled, int unifiedMailAccountId, final Locale locale) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         final MailSortField effectiveSortField = determineSortFieldForSearch(fullName, sortField);
@@ -2192,7 +2192,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public MailMessage[] getUnreadMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fieldz, final int limit) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -2305,7 +2305,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public void deleteMessages(String fullName, String[] mailIds, final boolean hardDelete) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -2406,7 +2406,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public void updateMessageFlags(String fullName, String[] mailIds, final int flags, final String[] userFlags, final boolean set) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -2472,7 +2472,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public void updateMessageUserFlags(String fullName, String[] mailIds, final String[] flags, final boolean set) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -2538,7 +2538,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public void updateMessageColorLabel(String fullName, String[] mailIds, final int colorLabel) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {

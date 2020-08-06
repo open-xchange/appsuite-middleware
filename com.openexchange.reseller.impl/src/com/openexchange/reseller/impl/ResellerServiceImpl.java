@@ -49,6 +49,8 @@
 
 package com.openexchange.reseller.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -111,18 +113,22 @@ public class ResellerServiceImpl implements ResellerService {
             if (!rs.next()) {
                 throw ResellerExceptionCodes.NO_RESELLER_FOUND_FOR_CTX.create(Integer.valueOf(cid));
             }
-            return getData(new ResellerAdmin[] { ResellerAdmin.builder().id(rs.getInt(1)).build() })[0];
+            return getData(new ResellerAdmin[] { ResellerAdmin.builder().id(I(rs.getInt(1))).build() }, con)[0];
         } catch (SQLException e) {
             LOG.error("", e);
-            throw new OXException(e);
+            throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(rs, prep);
             dbService.backReadOnly(con);
         }
     }
 
-    private ResellerAdmin[] getData(final ResellerAdmin[] admins) throws SQLException, OXException {
-        Connection con = dbService.getReadOnly();
+    private ResellerAdmin[] getData(final ResellerAdmin[] admins, Connection con) throws SQLException, OXException {
+        boolean connectionInit = false;
+        if (con == null) {
+            con = dbService.getReadOnly();
+            connectionInit = true;
+        }
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
@@ -161,7 +167,9 @@ public class ResellerServiceImpl implements ResellerService {
             return ret.toArray(new ResellerAdmin[ret.size()]);
         } finally {
             Databases.closeSQLStuff(rs, prep);
-            dbService.backReadOnly(con);
+            if (connectionInit) {
+                dbService.backReadOnly(con);
+            }
         }
     }
 
@@ -170,13 +178,13 @@ public class ResellerServiceImpl implements ResellerService {
         ResultSet rs = null;
         try {
             prep = con.prepareStatement("SELECT subadmin_restrictions.rid,sid,name,value FROM subadmin_restrictions INNER JOIN restrictions ON subadmin_restrictions.rid=restrictions.rid WHERE sid=?");
-            prep.setInt(1, parentId > 0 ? parentId : id);
+            prep.setInt(1, i(i(parentId) > 0 ? parentId : id));
             rs = prep.executeQuery();
 
             Set<Restriction> res = new HashSet<>();
             while (rs.next()) {
                 final Restriction r = new Restriction(Integer.valueOf(rs.getInt(DATABASE_COLUMN_ID)), rs.getString(DATABASE_COLUMN_NAME), rs.getString(DATABASE_COLUMN_VALUE));
-                if (parentId > 0 && Restriction.SUBADMIN_CAN_CREATE_SUBADMINS.equals(r.getName())) {
+                if (i(parentId) > 0 && Restriction.SUBADMIN_CAN_CREATE_SUBADMINS.equals(r.getName())) {
                     continue;
                 }
                 res.add(r);

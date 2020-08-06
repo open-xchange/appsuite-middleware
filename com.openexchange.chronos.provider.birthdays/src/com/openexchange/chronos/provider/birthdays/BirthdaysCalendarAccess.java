@@ -53,8 +53,6 @@ import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
@@ -62,7 +60,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -86,8 +83,10 @@ import com.openexchange.chronos.common.DefaultCalendarEvent;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.UsedForSync;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.caching.AlarmHelper;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.extensions.BasicCTagAware;
@@ -230,13 +229,13 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
         extendedProperties.add(DESCRIPTION(stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_DESCRIPTION), true));
-        if (CachingCalendarUtils.canBeUsedForSync(BirthdaysCalendarProvider.PROVIDER_ID, session, true)) {
-            extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean("usedForSync", false)), false));
-        } else {
-            extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
-        }
         extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
         settings.setExtendedProperties(extendedProperties);
+        if (CachingCalendarUtils.canBeUsedForSync(BirthdaysCalendarProvider.PROVIDER_ID, session, true)) {
+            settings.setUsedForSync(UsedForSync.of(internalConfig.optBoolean(CommonCalendarConfigurationFields.USED_FOR_SYNC, true)));
+        } else {
+            settings.setUsedForSync(UsedForSync.DEACTIVATED);
+        }
         return settings;
     }
 
@@ -283,8 +282,17 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
 
     @Override
     public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
-        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return removeInaccessible(getAlarmHelper().getAlarmTriggers(until, actions));
+        Date rangeUntil = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        Date rangeFrom = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        return getAlarmHelper().getAlarmTriggers(rangeFrom, rangeUntil, actions, (storage, trigger) -> {
+            try {
+                Contact contact = getBirthdayContact(trigger.getEventId());
+                return null == trigger.getRecurrenceId() ? eventConverter.getSeriesMaster(contact) : eventConverter.getOccurrence(contact, trigger.getRecurrenceId());
+            } catch (OXException e) {
+                LOG.warn("Error getting birthday event {} referenced by alarm trigger", trigger.getEventId(), e);
+                return null;
+            }
+        });
     }
 
     @Override
@@ -293,7 +301,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), eventID.getRecurrenceID());
         }
         Event originalEvent = eventConverter.getSeriesMaster(getBirthdayContact(eventID.getObjectID()));
-        AlarmPreparator.getInstance().prepareEMailAlarms(session, services.getOptionalService(CalendarUtilities.class), alarms);
+        AlarmPreparator.getInstance().prepareEMailAlarms(session, services.getServiceSafe(CalendarUtilities.class), alarms);
         UpdateResult updateResult = getAlarmHelper().updateAlarms(originalEvent, alarms, false);
         DefaultCalendarResult result = new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
         return notifyHandlers(result);
@@ -499,46 +507,6 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             SearchIterators.close(searchIterator);
         }
         return contacts;
-    }
-
-    /**
-     * Removes those alarm triggers from the supplied collection where the targeted birthday event no longer exists, to ensure that the
-     * triggers are still valid.
-     * <p/>
-     * In case an inaccessible birthday event is referenced, the corresponding trigger, and any configured alarms for that birthday event
-     * are cleaned up implicitly.
-     *
-     * @param alarmTriggers The alarm triggers to remove inaccessible ones from
-     * @return The passed collection, with the inaccessible triggers removed
-     */
-    private List<AlarmTrigger> removeInaccessible(List<AlarmTrigger> alarmTriggers) {
-        if (null == alarmTriggers || alarmTriggers.isEmpty()) {
-            return alarmTriggers;
-        }
-        List<EventID> eventIds = new ArrayList<EventID>(alarmTriggers.size());
-        for (AlarmTrigger alarmTrigger : alarmTriggers) {
-            eventIds.add(new EventID(alarmTrigger.getFolder(), alarmTrigger.getEventId()));
-        }
-        Set<String> accessibleEventIds;
-        try {
-            accessibleEventIds = getBirthdayContacts(eventIds).keySet();
-        } catch (OXException e) {
-            LOG.warn("Error checking for inaccessible alarm triggers", e);
-            return alarmTriggers;
-        }
-        for (Iterator<AlarmTrigger> iterator = alarmTriggers.iterator(); iterator.hasNext();) {
-            String eventId = iterator.next().getEventId();
-            try {
-                if (false == accessibleEventIds.contains(eventId)) {
-                    getAlarmHelper().deleteAlarms(eventId);
-                    iterator.remove();
-                    LOG.info("Removed inaccessible alarm for event {} in account {}.", eventId, account);
-                }
-            } catch (OXException e) {
-                LOG.warn("Error removing inaccessible alarm for event {} in account {}", eventId, account);
-            }
-        }
-        return alarmTriggers;
     }
 
     private AlarmHelper getAlarmHelper() {

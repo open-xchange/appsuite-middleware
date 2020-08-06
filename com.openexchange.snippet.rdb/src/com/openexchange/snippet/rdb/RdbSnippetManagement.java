@@ -70,6 +70,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -619,6 +620,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         if (null == identifier) {
             return identifier;
         }
+
         int id = Integer.parseInt(identifier);
         DatabaseService databaseService = getDatabaseService();
         int contextId = this.contextId;
@@ -1148,6 +1150,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         private final PreparedStatement stmt;
         private final ResultSet rs;
         private final DatabaseService databaseService;
+        private boolean closed;
 
         /**
          * Initializes a new {@link RdbSnippetManagement.ClosingInputStream}.
@@ -1159,15 +1162,22 @@ public final class RdbSnippetManagement implements SnippetManagement {
             this.con = con;
             this.contextId = contextId;
             this.databaseService = databaseService;
+            closed = false;
         }
 
         @Override
-        public void close() throws IOException {
+        public synchronized void close() throws IOException {
+            if (closed) {
+                // Already closed
+                return;
+            }
+
             super.close();
             Databases.closeSQLStuff(rs, stmt);
             if (null != con) {
                 databaseService.backReadOnly(contextId, con);
             }
+            closed = true;
         }
     }
 
@@ -1177,6 +1187,17 @@ public final class RdbSnippetManagement implements SnippetManagement {
         }
         final String ct = SnippetUtils.parseContentTypeFromMisc(misc);
         return Strings.asciiLowerCase(new ContentType(ct).getSubType());
+    }
+
+    private static Optional<String> optionalContentSubtype(final Object misc) throws OXException {
+        if (misc == null) {
+            return Optional.empty();
+        }
+        Optional<String> optionalContentType = SnippetUtils.parseOptionalContentTypeFromMisc(misc);
+        if (!optionalContentType.isPresent()) {
+            return Optional.empty();
+        }
+        return Optional.of(Strings.asciiLowerCase(new ContentType(optionalContentType.get()).getSubType()));
     }
 
 }

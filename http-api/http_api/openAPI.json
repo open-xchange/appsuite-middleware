@@ -8,7 +8,7 @@
       "email" : "info@open-xchange.com",
       "url" : "https://www.open-xchange.com/"
     },
-    "version" : "7.10.3"
+    "version" : "7.10.4"
   },
   "servers" : [ {
     "url" : "https://api.example.com/v1"
@@ -905,6 +905,28 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/SearchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/appPasswords?action=getApps" : {
+      "get" : {
+        "operationId" : "getApplications",
+        "tags" : [ "AppPassword" ],
+        "summary" : "Lists the existing application available",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the list of available applications.\nIn case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AppPasswordGetAppsResponse"
                 }
               }
             }
@@ -2359,7 +2381,7 @@
               "application/json" : {
                 "schema" : {
                   "type" : "object",
-                  "title" : "deleteDataExportTaskReponse",
+                  "title" : "deleteDataExportTaskResponse",
                   "properties" : {
                     "success" : {
                       "type" : "boolean",
@@ -3751,7 +3773,7 @@
               "application/json" : {
                 "schema" : {
                   "type" : "object",
-                  "title" : "deleteMailComposeByIdReponse",
+                  "title" : "deleteMailComposeByIdResponse",
                   "properties" : {
                     "success" : {
                       "type" : "boolean",
@@ -4783,6 +4805,39 @@
         }
       }
     },
+    "/mail?action=move_all" : {
+      "put" : {
+        "operationId" : "moveAllMails",
+        "tags" : [ "Mail" ],
+        "summary" : "Moves all mails from a given source to a specified target folder.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an entry for each affected folder. Each entry in turn references a JSON object providing \"total\" and \"unread\" fields, which given the total number of mails and the number of unread mails in the folder.\nIn case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MailMoveAllBody"
+              }
+            }
+          },
+          "description" : "A JSON object providing the identifiers of the source and target folder.",
+          "required" : true
+        }
+      }
+    },
     "/calendar?action=confirm" : {
       "put" : {
         "operationId" : "confirmAppointment",
@@ -5314,6 +5369,48 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/EventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/appPasswords?action=add" : {
+      "post" : {
+        "operationId" : "addApplicationPassword",
+        "tags" : [ "AppPassword" ],
+        "summary" : "Adds a new application password to the users account",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the username and password to use in login.\nIn case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AppPasswordRegistrationResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "type" : "object",
+                "title" : "Application Data",
+                "properties" : {
+                  "appScope" : {
+                    "description" : "The scope name of the application",
+                    "type" : "string"
+                  },
+                  "appName" : {
+                    "description" : "The user chosen name for the application password",
+                    "type" : "string"
+                  }
                 }
               }
             }
@@ -6689,37 +6786,6 @@
         }
       }
     },
-    "/mailfilter/v2?action=getscript" : {
-      "put" : {
-        "operationId" : "getScript_v2",
-        "tags" : [ "Mailfilter" ],
-        "summary" : "Gets the whole mail filter script.",
-        "description" : "This call is only used as workaround for parsing errors in the backend, so that the user is able to get the plaintext of a complete script.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "username",
-          "description" : "Must contain the user name for **admin mode**. So the normal credentials are taken for authentication but the mail filter of the user with this username is being changed.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object with the text of the complete sieve script. In case of errors the responsible fields\nin the response are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailFilterScriptResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/mailfilter/v2?action=update" : {
       "put" : {
         "operationId" : "updateRule_v2",
@@ -6758,6 +6824,37 @@
           },
           "description" : "A JSON object describing the rule with the `id` set (which identifies the rule to change). Only modified fields are present.",
           "required" : true
+        }
+      }
+    },
+    "/mailfilter/v2?action=getscript" : {
+      "put" : {
+        "operationId" : "getScript_v2",
+        "tags" : [ "Mailfilter" ],
+        "summary" : "Gets the whole mail filter script.",
+        "description" : "This call is only used as workaround for parsing errors in the backend, so that the user is able to get the plaintext of a complete script.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "username",
+          "description" : "Must contain the user name for **admin mode**. So the normal credentials are taken for authentication but the mail filter of the user with this username is being changed.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object with the text of the complete sieve script. In case of errors the responsible fields\nin the response are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MailFilterScriptResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -7296,6 +7393,44 @@
         }
       }
     },
+    "/appPasswords?action=remove" : {
+      "post" : {
+        "operationId" : "removeApplicationPassword",
+        "tags" : [ "AppPassword" ],
+        "summary" : "Removes an application password",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the result, which should be OK, otherwise error.\nIn case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AppPasswordRemovalResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "type" : "object",
+                "title" : "Application Data",
+                "properties" : {
+                  "uuid" : {
+                    "description" : "Type uuid of the password to remove",
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/jslob?action=set" : {
       "put" : {
         "operationId" : "setJSlob",
@@ -7517,7 +7652,7 @@
       "get" : {
         "operationId" : "clear",
         "tags" : [ "sessionmanagement" ],
-        "summary" : "Removes all user's session expect given and blacklisted",
+        "summary" : "Removes all user's session except given and blacklisted",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
         } ],
@@ -8359,6 +8494,8 @@
           "schema" : {
             "type" : "string"
           }
+        }, {
+          "$ref" : "#/components/parameters/QueryParamFolderAutoRename"
         } ],
         "responses" : {
           "200" : {
@@ -8435,64 +8572,6 @@
               }
             }
           }
-        }
-      }
-    },
-    "/infostore?action=saveAs" : {
-      "put" : {
-        "operationId" : "importAttachment",
-        "tags" : [ "Infostore" ],
-        "summary" : "Saves an attachment in the infostore.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamAttached"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamAttachmentsFolder"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamAttachmentsModule"
-        }, {
-          "in" : "query",
-          "name" : "attachment",
-          "description" : "The ID of the attachment to save.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "pushToken",
-          "description" : "The client's push token to restrict the generated drive event",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InfoItemUpdateResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/components/schemas/InfoItemBody"
-                }
-              }
-            }
-          },
-          "description" : "A JSON object describing the attachment's infoitem. The field `id`is not included. The fields in\nthis infoitem object override values from the attachment. The folder_id must be given. It is possible to\nlet added object permission entities be notified about newly shared files. In that case add a \"notification\" object.\n",
-          "required" : true
         }
       }
     },
@@ -8577,6 +8656,64 @@
               }
             }
           }
+        }
+      }
+    },
+    "/infostore?action=saveAs" : {
+      "put" : {
+        "operationId" : "importAttachment",
+        "tags" : [ "Infostore" ],
+        "summary" : "Saves an attachment in the infostore.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamAttached"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamAttachmentsFolder"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamAttachmentsModule"
+        }, {
+          "in" : "query",
+          "name" : "attachment",
+          "description" : "The ID of the attachment to save.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "pushToken",
+          "description" : "The client's push token to restrict the generated drive event",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InfoItemUpdateResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/components/schemas/InfoItemBody"
+                }
+              }
+            }
+          },
+          "description" : "A JSON object describing the attachment's infoitem. The field `id`is not included. The fields in\nthis infoitem object override values from the attachment. The folder_id must be given. It is possible to\nlet added object permission entities be notified about newly shared files. In that case add a \"notification\" object.\n",
+          "required" : true
         }
       }
     },
@@ -8839,7 +8976,7 @@
               "application/json" : {
                 "schema" : {
                   "type" : "object",
-                  "title" : "cancelDataExportTaskReponse",
+                  "title" : "cancelDataExportTaskResponse",
                   "properties" : {
                     "success" : {
                       "type" : "boolean",
@@ -8880,7 +9017,7 @@
               "application/json" : {
                 "schema" : {
                   "type" : "object",
-                  "title" : "submitDataExportTaskReponse",
+                  "title" : "submitDataExportTaskResponse",
                   "properties" : {
                     "success" : {
                       "type" : "boolean",
@@ -9890,6 +10027,15 @@
           "$ref" : "#/components/parameters/gblQueryParamFolderColumns"
         }, {
           "$ref" : "#/components/parameters/gblQueryParamLanguage"
+        }, {
+          "in" : "query",
+          "name" : "all",
+          "description" : "Whether or not to include subscribed folders.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
         } ],
         "responses" : {
           "200" : {
@@ -10011,6 +10157,14 @@
         "summary" : "Accepts an itip invitation.",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "message",
+          "description" : "The comment the attendee wants to transmit",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
         }, {
           "in" : "query",
           "name" : "dataSource",
@@ -10262,6 +10416,14 @@
           "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
           "in" : "query",
+          "name" : "message",
+          "description" : "The comment the attendee wants to transmit",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
           "name" : "dataSource",
           "description" : "The identifier of the data source. Currently only \"com.openexchange.mail.ical\" is valid.",
           "required" : true,
@@ -10462,8 +10624,16 @@
           "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
           "in" : "query",
+          "name" : "rangeStart",
+          "description" : "Lower inclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. \"20170708T220000Z\". Only alarms that should trigger on or after this date are returned.\n",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
           "name" : "rangeEnd",
-          "description" : "Upper exclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. \"20170708T220000Z\". Only events which should trigger before this date are returned.\n",
+          "description" : "Upper exclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. \"20170708T220000Z\". Only alarms that should trigger on or after this date are returned.\n",
           "required" : true,
           "schema" : {
             "type" : "string"
@@ -10480,7 +10650,7 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "An array of alarm trigger objects. In case of errors the\nresponsible fields in the response are filled (see [Error handling](#error-handling)).\n",
+            "description" : "An array of alarm trigger objects. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).\n",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -12657,6 +12827,28 @@
         }
       }
     },
+    "/appPasswords?action=list" : {
+      "get" : {
+        "operationId" : "listApplicationPassword",
+        "tags" : [ "AppPassword" ],
+        "summary" : "Lists the existing application passwords for the user",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the existing password list.\nIn case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AppPasswordListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tasks?action=updates" : {
       "get" : {
         "operationId" : "getTaskUpdates",
@@ -13490,6 +13682,30 @@
         }
       }
     },
+    "/account?action=all" : {
+      "get" : {
+        "operationId" : "getAllAccounts",
+        "tags" : [ "Mailaccount" ],
+        "summary" : "Gets all mail accounts.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamAccountColumns"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array with data for all mail accounts. Each array element describes one account and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MailAccountsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/account?action=new" : {
       "put" : {
         "operationId" : "createAccount",
@@ -13520,30 +13736,6 @@
           },
           "description" : "A JSON object describing the new account to create.",
           "required" : true
-        }
-      }
-    },
-    "/account?action=all" : {
-      "get" : {
-        "operationId" : "getAllAccounts",
-        "tags" : [ "Mailaccount" ],
-        "summary" : "Gets all mail accounts.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamAccountColumns"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array with data for all mail accounts. Each array element describes one account and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailAccountsResponse"
-                }
-              }
-            }
-          }
         }
       }
     },
@@ -13610,6 +13802,56 @@
           },
           "description" : "JSON object providing the JSON array `entities`, which holds the entity ID(s) of the users or groups that\nshould be notified. To send a custom message to the recipients, an additional JSON object `notification` may\nbe included, inside of which an optional message can be passed (otherwise, some default message is used).\n(Example: {\"entities\":[\"2332\"]} or {\"entities\":[\"2332\"],\"notification\":{\"transport\":\"mail\",\"message\":\"The message\"}})\n",
           "required" : true
+        }
+      }
+    },
+    "/chronos/itip?action=delete" : {
+      "put" : {
+        "operationId" : "cancel",
+        "tags" : [ "Chronos" ],
+        "summary" : "Deletes an event that has been cancled via iTIP",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "message",
+          "description" : "The comment the attendee wants to transmit",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "dataSource",
+          "description" : "The identifier of the data source. Currently only \"com.openexchange.mail.ical\" is valid.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "descriptionFormat",
+          "description" : "The desired output fromat. Currently only \"html\" is valid.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "default" : "html"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of Events that were newly created or changed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ActionResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/ConversionDataSource"
         }
       }
     },
@@ -14496,6 +14738,8 @@
           "schema" : {
             "type" : "string"
           }
+        }, {
+          "$ref" : "#/components/parameters/QueryParamFolderAutoRename"
         } ],
         "responses" : {
           "200" : {
@@ -14700,6 +14944,14 @@
         "summary" : "Declines an itip invitation.",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "message",
+          "description" : "The comment the attendee wants to transmit",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
         }, {
           "in" : "query",
           "name" : "dataSource",
@@ -15182,6 +15434,22 @@
           "schema" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "harddelete",
+          "description" : "Flag to hard delete the messages, meaning not to create a backup copy of each message in default trash if set to `true`.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "returnAffectedFolders",
+          "description" : "Flag to generate an JSON response as described below. If set to `false` just an empty JSON Array is returned.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
           }
         } ],
         "responses" : {
@@ -15893,6 +16161,14 @@
         "summary" : "Tentatively accepts an itip invitation.",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "message",
+          "description" : "The comment the attendee wants to transmit",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
         }, {
           "in" : "query",
           "name" : "dataSource",
@@ -16922,6 +17198,14 @@
           "schema" : {
             "type" : "string"
           }
+        }, {
+          "in" : "query",
+          "name" : "connectionCheck",
+          "description" : "If set to true, a connection check is performed for each queried file storage account. In case the connection check failed, the hasError flag is set to true in the returned response object, and also an error object describing the cause of the failure is included.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
         } ],
         "responses" : {
           "200" : {
@@ -17032,6 +17316,10 @@
           "locale" : {
             "type" : "string",
             "description" : "The users locale (e.g. \"en_US\")."
+          },
+          "requires_multifactor" : {
+            "type" : "boolean",
+            "description" : "True if multifactor login required"
           },
           "rampup" : {
             "type" : "object",
@@ -17601,6 +17889,10 @@
             "format" : "int64",
             "description" : "The optionally set expiry date for \"anonymous\" entities."
           },
+          "includeSubfolders" : {
+            "type" : "boolean",
+            "description" : "The optionally set \"include subfolders\" option for \"anonymous\" entities."
+          },
           "isInherited" : {
             "type" : "boolean",
             "description" : "A flag indicating whether the permissions is inherited from the parent folder or not. The client must not allow the user to delete or update inherited permissions."
@@ -17856,6 +18148,20 @@
           "com.openexchange.calendar.provider" : {
             "type" : "string",
             "description" : "Denotes the identifier of the underlying calendar provider."
+          },
+          "used_for_sync" : {
+            "type" : "object",
+            "description" : "Indicates whether this folder should used for sync or not. Standard folders cannot be changed.",
+            "properties" : {
+              "value" : {
+                "type" : "string",
+                "description" : "The actual used_for_sync value. Either 'true' or 'false'."
+              },
+              "protected" : {
+                "type" : "string",
+                "description" : "Whether this value is protected and can't be changed by the client or not. Either 'true' or 'false'"
+              }
+            }
           }
         }
       },
@@ -18094,6 +18400,20 @@
               "com.openexchange.calendar.provider" : {
                 "type" : "string",
                 "description" : "Denotes the identifier of the underlying calendar provider."
+              },
+              "used_for_sync" : {
+                "type" : "object",
+                "description" : "Indicates whether this folder should used for sync or not. Standard folders cannot be changed.",
+                "properties" : {
+                  "value" : {
+                    "type" : "string",
+                    "description" : "The actual used_for_sync value. Either 'true' or 'false'."
+                  },
+                  "protected" : {
+                    "type" : "string",
+                    "description" : "Whether this value is protected and can't be changed by the client or not. Either 'true' or 'false'"
+                  }
+                }
               }
             }
           },
@@ -21797,6 +22117,58 @@
           }
         }
       },
+      "Conference" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "The internal identifier of the conference."
+          },
+          "uri" : {
+            "type" : "string",
+            "description" : "The URI to access the conference."
+          },
+          "label" : {
+            "type" : "string",
+            "description" : "The label used to convey additional details on the use of the URI."
+          },
+          "features" : {
+            "type" : "array",
+            "description" : "The features describing the key capabilities of the conference system.",
+            "items" : {
+              "type" : "string",
+              "description" : "A feature."
+            }
+          },
+          "extendedParameters" : {
+            "type" : "object",
+            "description" : "Extended parameters of the conference.",
+            "properties" : {
+              "key" : {
+                "type" : "string",
+                "description" : "The name of the parameter"
+              }
+            },
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "ExtendedPropertyParameter" : {
+        "type" : "object",
+        "description" : "Extended parameters of the conference.",
+        "properties" : {
+          "key" : {
+            "type" : "string",
+            "description" : "The name of the parameter"
+          }
+        },
+        "additionalProperties" : {
+          "type" : "string"
+        }
+      },
       "Alarm" : {
         "type" : "object",
         "properties" : {
@@ -22013,7 +22385,7 @@
             "description" : "An array of changed recurrences.",
             "items" : {
               "type" : "string",
-              "description" : "The recurrence id of a changed recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+              "description" : "The recurrence id of a changed recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
             }
           },
           "deleteExceptionDates" : {
@@ -22021,12 +22393,12 @@
             "description" : "An array of deleted recurrences.",
             "items" : {
               "type" : "string",
-              "description" : "The recurrence id of a deleted recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+              "description" : "The recurrence id of a deleted recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
             }
           },
           "recurrenceId" : {
             "type" : "string",
-            "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+            "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time (e.g. \"20170708T220000\"),\na date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See RFC 5545 chapter 3.3.5. for more information.\n"
           },
           "calendarUser" : {
             "$ref" : "#/components/schemas/CalendarUser",
@@ -22108,12 +22480,19 @@
             "items" : {
               "type" : "string",
               "enum" : [ "attachments", "alarms", "scheduled", "organizer", "organizer_on_behalf", "attendee", "attendee_on_behalf", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ],
-              "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
+              "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `conferences` - The event contains at least one conference. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
             }
           },
           "relatedTo" : {
             "type" : "string",
             "description" : "The relationship between this and other events."
+          },
+          "conferences" : {
+            "type" : "array",
+            "description" : "The conferences of the event.",
+            "items" : {
+              "$ref" : "#/components/schemas/Conference"
+            }
           }
         }
       },
@@ -22463,7 +22842,7 @@
                       "description" : "An array of changed recurrences.",
                       "items" : {
                         "type" : "string",
-                        "description" : "The recurrence id of a changed recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                        "description" : "The recurrence id of a changed recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
                       }
                     },
                     "deleteExceptionDates" : {
@@ -22471,12 +22850,12 @@
                       "description" : "An array of deleted recurrences.",
                       "items" : {
                         "type" : "string",
-                        "description" : "The recurrence id of a deleted recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                        "description" : "The recurrence id of a deleted recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
                       }
                     },
                     "recurrenceId" : {
                       "type" : "string",
-                      "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                      "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time (e.g. \"20170708T220000\"),\na date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See RFC 5545 chapter 3.3.5. for more information.\n"
                     },
                     "calendarUser" : {
                       "$ref" : "#/components/schemas/CalendarUser",
@@ -22558,12 +22937,19 @@
                       "items" : {
                         "type" : "string",
                         "enum" : [ "attachments", "alarms", "scheduled", "organizer", "organizer_on_behalf", "attendee", "attendee_on_behalf", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ],
-                        "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
+                        "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `conferences` - The event contains at least one conference. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
                       }
                     },
                     "relatedTo" : {
                       "type" : "string",
                       "description" : "The relationship between this and other events."
+                    },
+                    "conferences" : {
+                      "type" : "array",
+                      "description" : "The conferences of the event.",
+                      "items" : {
+                        "$ref" : "#/components/schemas/Conference"
+                      }
                     }
                   }
                 }
@@ -23426,7 +23812,7 @@
                               "description" : "An array of changed recurrences.",
                               "items" : {
                                 "type" : "string",
-                                "description" : "The recurrence id of a changed recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                                "description" : "The recurrence id of a changed recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
                               }
                             },
                             "deleteExceptionDates" : {
@@ -23434,12 +23820,12 @@
                               "description" : "An array of deleted recurrences.",
                               "items" : {
                                 "type" : "string",
-                                "description" : "The recurrence id of a deleted recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                                "description" : "The recurrence id of a deleted recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
                               }
                             },
                             "recurrenceId" : {
                               "type" : "string",
-                              "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                              "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time (e.g. \"20170708T220000\"),\na date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See RFC 5545 chapter 3.3.5. for more information.\n"
                             },
                             "calendarUser" : {
                               "$ref" : "#/components/schemas/CalendarUser",
@@ -23521,12 +23907,19 @@
                               "items" : {
                                 "type" : "string",
                                 "enum" : [ "attachments", "alarms", "scheduled", "organizer", "organizer_on_behalf", "attendee", "attendee_on_behalf", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ],
-                                "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
+                                "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `conferences` - The event contains at least one conference. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
                               }
                             },
                             "relatedTo" : {
                               "type" : "string",
                               "description" : "The relationship between this and other events."
+                            },
+                            "conferences" : {
+                              "type" : "array",
+                              "description" : "The conferences of the event.",
+                              "items" : {
+                                "$ref" : "#/components/schemas/Conference"
+                              }
                             }
                           }
                         }
@@ -23717,7 +24110,7 @@
                 "description" : "An array of changed recurrences.",
                 "items" : {
                   "type" : "string",
-                  "description" : "The recurrence id of a changed recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                  "description" : "The recurrence id of a changed recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
                 }
               },
               "deleteExceptionDates" : {
@@ -23725,12 +24118,12 @@
                 "description" : "An array of deleted recurrences.",
                 "items" : {
                   "type" : "string",
-                  "description" : "The recurrence id of a deleted recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                  "description" : "The recurrence id of a deleted recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
                 }
               },
               "recurrenceId" : {
                 "type" : "string",
-                "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time (e.g. \"20170708T220000\"),\na date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See RFC 5545 chapter 3.3.5. for more information.\n"
               },
               "calendarUser" : {
                 "$ref" : "#/components/schemas/CalendarUser",
@@ -23812,12 +24205,19 @@
                 "items" : {
                   "type" : "string",
                   "enum" : [ "attachments", "alarms", "scheduled", "organizer", "organizer_on_behalf", "attendee", "attendee_on_behalf", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ],
-                  "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
+                  "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `conferences` - The event contains at least one conference. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
                 }
               },
               "relatedTo" : {
                 "type" : "string",
                 "description" : "The relationship between this and other events."
+              },
+              "conferences" : {
+                "type" : "array",
+                "description" : "The conferences of the event.",
+                "items" : {
+                  "$ref" : "#/components/schemas/Conference"
+                }
               }
             }
           },
@@ -23929,7 +24329,7 @@
                 "description" : "An array of changed recurrences.",
                 "items" : {
                   "type" : "string",
-                  "description" : "The recurrence id of a changed recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                  "description" : "The recurrence id of a changed recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
                 }
               },
               "deleteExceptionDates" : {
@@ -23937,12 +24337,12 @@
                 "description" : "An array of deleted recurrences.",
                 "items" : {
                   "type" : "string",
-                  "description" : "The recurrence id of a deleted recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                  "description" : "The recurrence id of a deleted recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
                 }
               },
               "recurrenceId" : {
                 "type" : "string",
-                "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time (e.g. \"20170708T220000\"),\na date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See RFC 5545 chapter 3.3.5. for more information.\n"
               },
               "calendarUser" : {
                 "$ref" : "#/components/schemas/CalendarUser",
@@ -24024,12 +24424,19 @@
                 "items" : {
                   "type" : "string",
                   "enum" : [ "attachments", "alarms", "scheduled", "organizer", "organizer_on_behalf", "attendee", "attendee_on_behalf", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ],
-                  "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
+                  "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `conferences` - The event contains at least one conference. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
                 }
               },
               "relatedTo" : {
                 "type" : "string",
                 "description" : "The relationship between this and other events."
+              },
+              "conferences" : {
+                "type" : "array",
+                "description" : "The conferences of the event.",
+                "items" : {
+                  "$ref" : "#/components/schemas/Conference"
+                }
               }
             }
           },
@@ -24141,7 +24548,7 @@
                 "description" : "An array of changed recurrences.",
                 "items" : {
                   "type" : "string",
-                  "description" : "The recurrence id of a changed recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                  "description" : "The recurrence id of a changed recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
                 }
               },
               "deleteExceptionDates" : {
@@ -24149,12 +24556,12 @@
                 "description" : "An array of deleted recurrences.",
                 "items" : {
                   "type" : "string",
-                  "description" : "The recurrence id of a deleted recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                  "description" : "The recurrence id of a deleted recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
                 }
               },
               "recurrenceId" : {
                 "type" : "string",
-                "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time (e.g. \"20170708T220000\"),\na date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See RFC 5545 chapter 3.3.5. for more information.\n"
               },
               "calendarUser" : {
                 "$ref" : "#/components/schemas/CalendarUser",
@@ -24236,12 +24643,19 @@
                 "items" : {
                   "type" : "string",
                   "enum" : [ "attachments", "alarms", "scheduled", "organizer", "organizer_on_behalf", "attendee", "attendee_on_behalf", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ],
-                  "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
+                  "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `conferences` - The event contains at least one conference. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
                 }
               },
               "relatedTo" : {
                 "type" : "string",
                 "description" : "The relationship between this and other events."
+              },
+              "conferences" : {
+                "type" : "array",
+                "description" : "The conferences of the event.",
+                "items" : {
+                  "$ref" : "#/components/schemas/Conference"
+                }
               }
             }
           },
@@ -24353,7 +24767,7 @@
                 "description" : "An array of changed recurrences.",
                 "items" : {
                   "type" : "string",
-                  "description" : "The recurrence id of a changed recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                  "description" : "The recurrence id of a changed recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
                 }
               },
               "deleteExceptionDates" : {
@@ -24361,12 +24775,12 @@
                 "description" : "An array of deleted recurrences.",
                 "items" : {
                   "type" : "string",
-                  "description" : "The recurrence id of a deleted recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                  "description" : "The recurrence id of a deleted recurrence. The values are either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time \n(e.g. \"20170708T220000\"), a date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See \nRFC 5545 chapter 3.3.5. for more information.\n"
                 }
               },
               "recurrenceId" : {
                 "type" : "string",
-                "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+                "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (e.g. \"20170708T220000Z\"), a floating date-time (e.g. \"20170708T220000\"),\na date (e.g. \"20170708\"), or a local time with timezone reference (e.g. \"Europe/Berlin:20170708T220000\"). See RFC 5545 chapter 3.3.5. for more information.\n"
               },
               "calendarUser" : {
                 "$ref" : "#/components/schemas/CalendarUser",
@@ -24448,12 +24862,19 @@
                 "items" : {
                   "type" : "string",
                   "enum" : [ "attachments", "alarms", "scheduled", "organizer", "organizer_on_behalf", "attendee", "attendee_on_behalf", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ],
-                  "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
+                  "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `conferences` - The event contains at least one conference. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
                 }
               },
               "relatedTo" : {
                 "type" : "string",
                 "description" : "The relationship between this and other events."
+              },
+              "conferences" : {
+                "type" : "array",
+                "description" : "The conferences of the event.",
+                "items" : {
+                  "$ref" : "#/components/schemas/Conference"
+                }
               }
             }
           },
@@ -25964,6 +26385,19 @@
           }
         }
       },
+      "MailMoveAllBody" : {
+        "type" : "object",
+        "properties" : {
+          "source" : {
+            "type" : "string",
+            "description" : "The identifier of the source folder."
+          },
+          "target" : {
+            "type" : "string",
+            "description" : "The identifier of the target folder."
+          }
+        }
+      },
       "MailUpdateBody" : {
         "type" : "object",
         "properties" : {
@@ -26487,7 +26921,7 @@
         "properties" : {
           "data" : {
             "type" : "array",
-            "description" : "An array with IDs of objects that could not be processed.",
+            "description" : "Not IMAP: An array with object IDs of mails which were modified after the specified timestamp and were therefore not deleted.",
             "items" : {
               "type" : "string"
             }
@@ -29456,6 +29890,286 @@
           "signatureData" : {
             "type" : "string",
             "description" : "(U2F provider only) The signed U2F challenge."
+          }
+        }
+      },
+      "AppPassword" : {
+        "type" : "object",
+        "properties" : {
+          "UUID" : {
+            "type" : "string",
+            "description" : "The id of the password"
+          },
+          "Scope" : {
+            "type" : "string",
+            "description" : "The application type that defines the scope"
+          },
+          "Name" : {
+            "type" : "string",
+            "description" : "The user defined name of the password"
+          },
+          "LastDevice" : {
+            "type" : "string",
+            "description" : "The last device that logged in using the password"
+          },
+          "LastLogin" : {
+            "type" : "string",
+            "description" : "The last date and time the password was used for login"
+          },
+          "IP" : {
+            "type" : "string",
+            "description" : "The IP address of the device used to login"
+          }
+        }
+      },
+      "AppPasswordApplication" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the scope"
+          },
+          "displayName" : {
+            "type" : "string",
+            "description" : "The display name of the scope to be shown to user"
+          },
+          "sort" : {
+            "type" : "integer",
+            "description" : "Optional sort order"
+          }
+        }
+      },
+      "AppPasswordGetAppsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "type" : "array",
+            "description" : "Array of application type available.",
+            "items" : {
+              "$ref" : "#/components/schemas/AppPasswordApplication"
+            }
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "Empty JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+          }
+        }
+      },
+      "AppPasswordListResponse" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "type" : "array",
+            "description" : "Array of application specific passwords.",
+            "items" : {
+              "$ref" : "#/components/schemas/AppPassword"
+            }
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "Empty JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+          }
+        }
+      },
+      "AppPasswordRegistrationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "type" : "object",
+            "description" : "Registration response data",
+            "properties" : {
+              "password" : {
+                "type" : "string",
+                "description" : "Password to use for the application login"
+              },
+              "login" : {
+                "type" : "string",
+                "description" : "The username to use for login"
+              },
+              "newLogin" : {
+                "type" : "boolean",
+                "description" : "Login may not be same as used by the user to login to appsuite."
+              }
+            }
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "Empty JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+          }
+        }
+      },
+      "AppPasswordRemovalResponse" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "type" : "object",
+            "description" : "Registration response data",
+            "properties" : {
+              "result" : {
+                "type" : "string",
+                "description" : "Result of the operation"
+              }
+            }
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "Empty JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
           }
         }
       },
@@ -33338,7 +34052,7 @@
           },
           "context_admin" : {
             "type" : "integer",
-            "description" : "The ID of the context's administrator user."
+            "description" : "The ID of the context administrator user."
           },
           "login_name" : {
             "type" : "string",
@@ -33347,6 +34061,21 @@
           "display_name" : {
             "type" : "string",
             "description" : "The display name of the user."
+          },
+          "mail_login" : {
+            "type" : "string",
+            "description" : "The username used to authenticate at the primary mail server. Can be absent in temporary error situations."
+          },
+          "email_address" : {
+            "type" : "string",
+            "description" : "The users' primary email address"
+          },
+          "email_aliases" : {
+            "type" : "array",
+            "description" : "All email aliases of the user",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },
@@ -35963,6 +36692,48 @@
             "type" : "boolean",
             "description" : "Indicates whether this account is the user's default account. Exactly one account will have this flag set to `true`."
           },
+          "hasError" : {
+            "type" : "boolean",
+            "description" : "Indicates whether an error occurred during the connection check for this account. If set to true, the other error related information in this response object are set as well."
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors during the connection check."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "Exception parameters",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this connection check error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
           "capabilities" : {
             "type" : "array",
             "description" : "An array of capability names. Possible values are: FILE_VERSIONS, EXTENDED_METADATA, RANDOM_FILE_ACCESS, and LOCKS.",
@@ -37817,6 +38588,16 @@
         "schema" : {
           "type" : "integer",
           "format" : "int32"
+        }
+      },
+      "QueryParamFolderAutoRename" : {
+        "name" : "autorename",
+        "in" : "query",
+        "description" : "Whether to automatically rename the folder in case an folder with the same name already exists.",
+        "required" : false,
+        "schema" : {
+          "type" : "boolean",
+          "default" : false
         }
       },
       "QueryParamChronosFolder" : {

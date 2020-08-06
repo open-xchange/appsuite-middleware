@@ -30,12 +30,9 @@ import com.openexchange.admin.soap.util.dataobjects.Server;
  *
  */
 
-@javax.jws.WebService(
-                      serviceName = "OXUtilService",
-                      portName = "OXUtilServiceHttpSoap12Endpoint",
-                      targetNamespace = "http://soap.admin.openexchange.com",
-                      // wsdlLocation = "null",
-                      endpointInterface = "com.openexchange.admin.soap.util.soap.OXUtilServicePortType")
+@javax.jws.WebService(serviceName = "OXUtilService", portName = "OXUtilServiceHttpSoap12Endpoint", targetNamespace = "http://soap.admin.openexchange.com",
+    // wsdlLocation = "null",
+    endpointInterface = "com.openexchange.admin.soap.util.soap.OXUtilServicePortType")
 
 public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
 
@@ -44,13 +41,13 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     private static OXUtilInterface getUtilInterface() throws RemoteException_Exception {
         final OXUtilInterface utilInterface = RMI_REFERENCE.get();
         if (null == utilInterface) {
-            throw new RemoteException_Exception("Missing "+OXUtilInterface.class.getName() + " instance.");
+            throw new RemoteException_Exception("Missing " + OXUtilInterface.class.getName() + " instance.");
         }
         return utilInterface;
     }
 
     @Override
-    public Server registerServer(final Server srv,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public Server registerServer(final Server srv, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             return server2Soap(utilInterface.registerServer(soap2Server(srv), soap2Credentials(auth)));
@@ -79,7 +76,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public void changeDatabase(final ChangeDatabase parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public void changeDatabase(final ChangeDatabase parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             utilInterface.changeDatabase(soap2Database(parameters.db), soap2Credentials(parameters.auth));
@@ -108,7 +105,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public java.util.List<Database> listAllDatabase(final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public java.util.List<Database> listAllDatabase(final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.Database[] databases = utilInterface.listAllDatabase(soap2Credentials(auth));
@@ -118,7 +115,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             final int length = databases.length;
             final List<Database> list = new ArrayList<Database>(length);
             for (int i = 0; i < length; i++) {
-               list.add(database2Soap(databases[i]));
+                list.add(database2Soap(databases[i]));
             }
             return list;
         } catch (RemoteException e) {
@@ -146,7 +143,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public void deleteMaintenanceReason(final DeleteMaintenanceReason parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public void deleteMaintenanceReason(final DeleteMaintenanceReason parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             final List<MaintenanceReason> list = parameters.reasons;
@@ -180,7 +177,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public java.util.List<Server> listAllServer(final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public java.util.List<Server> listAllServer(final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.Server[] servers = utilInterface.listAllServer(soap2Credentials(auth));
@@ -190,7 +187,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             final int length = servers.length;
             final List<Server> list = new ArrayList<Server>(length);
             for (int i = 0; i < length; i++) {
-               list.add(server2Soap(servers[i]));
+                list.add(server2Soap(servers[i]));
             }
             return list;
         } catch (RemoteException e) {
@@ -218,7 +215,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public java.util.List<MaintenanceReason> listMaintenanceReason(final java.lang.String searchPattern,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public java.util.List<MaintenanceReason> listMaintenanceReason(final java.lang.String searchPattern, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.MaintenanceReason[] reasons = utilInterface.listMaintenanceReason(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
@@ -228,7 +225,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             final int length = reasons.length;
             final List<MaintenanceReason> list = new ArrayList<MaintenanceReason>(length);
             for (int i = 0; i < length; i++) {
-               list.add(reason2Soap(reasons[i]));
+                list.add(reason2Soap(reasons[i]));
             }
             return list;
         } catch (RemoteException e) {
@@ -256,7 +253,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public void unregisterServer(final UnregisterServer parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public void unregisterServer(final UnregisterServer parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             utilInterface.unregisterServer(soap2Server(parameters.serv), soap2Credentials(parameters.auth));
@@ -285,7 +282,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public java.util.List<Server> listServer(final java.lang.String searchPattern,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public java.util.List<Server> listServer(final java.lang.String searchPattern, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.Server[] servers = utilInterface.listServer(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
@@ -295,7 +292,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             final int length = servers.length;
             final List<Server> list = new ArrayList<Server>(length);
             for (int i = 0; i < length; i++) {
-               list.add(server2Soap(servers[i]));
+                list.add(server2Soap(servers[i]));
             }
             return list;
         } catch (RemoteException e) {
@@ -323,7 +320,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public java.util.List<Database> listDatabase(final java.lang.String searchPattern,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public java.util.List<Database> listDatabase(final java.lang.String searchPattern, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.Database[] databases = utilInterface.listDatabase(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
@@ -333,7 +330,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             final int length = databases.length;
             final List<Database> list = new ArrayList<Database>(length);
             for (int i = 0; i < length; i++) {
-               list.add(database2Soap(databases[i]));
+                list.add(database2Soap(databases[i]));
             }
             return list;
         } catch (RemoteException e) {
@@ -435,7 +432,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             final int length = databases.length;
             final List<Database> list = new ArrayList<Database>(length);
             for (int i = 0; i < length; i++) {
-               list.add(database2Soap(databases[i]));
+                list.add(database2Soap(databases[i]));
             }
             return list;
         } catch (RemoteException e) {
@@ -468,7 +465,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public MaintenanceReason createMaintenanceReason(final MaintenanceReason reason,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public MaintenanceReason createMaintenanceReason(final MaintenanceReason reason, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             return reason2Soap(utilInterface.createMaintenanceReason(soap2Reason(reason), soap2Credentials(auth)));
@@ -497,7 +494,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public Database registerDatabase(final Database db, final Boolean createSchemas, final Integer optNumberOfSchemas, final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public Database registerDatabase(final Database db, final Boolean createSchemas, final Integer optNumberOfSchemas, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             return database2Soap(utilInterface.registerDatabase(soap2Database(db), createSchemas, optNumberOfSchemas, soap2Credentials(auth)));
@@ -526,7 +523,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public java.util.List<MaintenanceReason> listAllMaintenanceReason(final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public java.util.List<MaintenanceReason> listAllMaintenanceReason(final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.MaintenanceReason[] reasons = utilInterface.listAllMaintenanceReason(soap2Credentials(auth));
@@ -536,7 +533,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             final int length = reasons.length;
             final List<MaintenanceReason> list = new ArrayList<MaintenanceReason>(length);
             for (int i = 0; i < length; i++) {
-               list.add(reason2Soap(reasons[i]));
+                list.add(reason2Soap(reasons[i]));
             }
             return list;
         } catch (RemoteException e) {
@@ -564,7 +561,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public Filestore registerFilestore(final Filestore fstore,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public Filestore registerFilestore(final Filestore fstore, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             return filestore2Soap(utilInterface.registerFilestore(soap2Filestore(fstore), soap2Credentials(auth)));
@@ -593,7 +590,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public void unregisterFilestore(final UnregisterFilestore parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public void unregisterFilestore(final UnregisterFilestore parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             utilInterface.unregisterFilestore(soap2Filestore(parameters.store), soap2Credentials(parameters.auth));
@@ -622,7 +619,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public java.util.List<Filestore> listFilestore(final java.lang.String searchPattern,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public java.util.List<Filestore> listFilestore(final java.lang.String searchPattern, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.Filestore[] filestores = utilInterface.listFilestore(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
@@ -632,7 +629,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             final int length = filestores.length;
             final List<Filestore> list = new ArrayList<Filestore>(length);
             for (int i = 0; i < length; i++) {
-               list.add(filestore2Soap(filestores[i]));
+                list.add(filestore2Soap(filestores[i]));
             }
             return list;
         } catch (RemoteException e) {
@@ -660,7 +657,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public void changeFilestore(final ChangeFilestore parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public void changeFilestore(final ChangeFilestore parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             utilInterface.changeFilestore(soap2Filestore(parameters.fstore), soap2Credentials(parameters.auth));
@@ -689,7 +686,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public java.util.List<Filestore> listAllFilestore(final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public java.util.List<Filestore> listAllFilestore(final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.Filestore[] filestores = utilInterface.listAllFilestore(soap2Credentials(auth));
@@ -699,7 +696,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             final int length = filestores.length;
             final List<Filestore> list = new ArrayList<Filestore>(length);
             for (int i = 0; i < length; i++) {
-               list.add(filestore2Soap(filestores[i]));
+                list.add(filestore2Soap(filestores[i]));
             }
             return list;
         } catch (RemoteException e) {
@@ -727,7 +724,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public void unregisterDatabase(final UnregisterDatabase parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public void unregisterDatabase(final UnregisterDatabase parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             utilInterface.unregisterDatabase(soap2Database(parameters.dbhandle), soap2Credentials(parameters.auth));
@@ -1012,4 +1009,27 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             throw new StorageException_Exception(e.getMessage(), fd, e);
         }
     }
+
+    @Override
+    public void checkCountsConsistency(CheckCountsConsistency parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, RemoteException_Exception {
+        final OXUtilInterface utilInterface = getUtilInterface();
+        try {
+            utilInterface.checkCountsConsistency(parameters.isCheckDatabaseCounts(), parameters.isCheckFilestoreCounts(), soap2Credentials(parameters.auth));
+        } catch (RemoteException e) {
+            com.openexchange.admin.soap.util.soap.RemoteException faultDetail = new com.openexchange.admin.soap.util.soap.RemoteException();
+            com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
+        } catch (InvalidCredentialsException e) {
+            com.openexchange.admin.soap.util.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException());
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
+        } catch (StorageException e) {
+            com.openexchange.admin.soap.util.soap.StorageException faultDetail = new com.openexchange.admin.soap.util.soap.StorageException();
+            faultDetail.setStorageException(new com.openexchange.admin.soap.util.exceptions.StorageException());
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
+        }
+    }
+
 }

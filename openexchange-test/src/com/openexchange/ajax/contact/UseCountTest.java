@@ -102,8 +102,10 @@ public class UseCountTest extends ContactTest {
         client.execute(req);
 
         address = c2.getEmail1();
-        // If an exception occurred while sending the mail might be null 
+        // If an exception occurred while sending the mail might be null
+        mtm.setFailOnError(true);
         assertNotNull("Mail could not be send", mtm.send(new TestMail(client.getValues().getDefaultAddress(), address, "Test", "text/plain", "Test")));
+        mtm.setFailOnError(false);
     }
 
     @Test
@@ -128,10 +130,10 @@ public class UseCountTest extends ContactTest {
         assertNotNull("Missing contact", firstResult);
         assertEquals(address, firstResult.getEmail1());
     }
-    
+
     /**
      * Modify given mail address to create new unique address
-     * 
+     *
      * @param mailAdress The original mail address
      * @return unique mail address
      */
@@ -139,7 +141,7 @@ public class UseCountTest extends ContactTest {
         StringBuilder sb = new StringBuilder();
         int at;
 
-        // Check if given mail address is 'valid'  
+        // Check if given mail address is 'valid'
         if ((at = mailAddress.indexOf('@')) < 0) {
             return mailAddress;
         }

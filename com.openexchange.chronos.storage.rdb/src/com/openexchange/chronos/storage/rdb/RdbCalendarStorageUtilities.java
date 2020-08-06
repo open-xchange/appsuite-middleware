@@ -60,6 +60,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.Conference;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
@@ -87,7 +88,8 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
 
     /** The attendee fields that are preserved for reference in <i>tombstone</i> attendees */
     private static final AttendeeField[] ATTENDEE_TOMBSTONE_FIELDS = {
-        AttendeeField.CU_TYPE, AttendeeField.ENTITY, AttendeeField.FOLDER_ID, AttendeeField.MEMBER, AttendeeField.PARTSTAT, AttendeeField.URI
+        AttendeeField.CU_TYPE, AttendeeField.ENTITY, AttendeeField.FOLDER_ID, AttendeeField.MEMBER, AttendeeField.PARTSTAT,
+        AttendeeField.URI, AttendeeField.TIMESTAMP
     };
 
     private final CalendarStorage storage;
@@ -140,6 +142,9 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
                 // attachment storage not supported in account, skip
             }
         }
+        if (null != event && (null == fields || contains(fields, EventField.CONFERENCES))) {
+            event.setConferences(storage.getConferenceStorage().loadConferences(event.getId()));
+        }
         if (null != event && 0 < userId && (null == fields || contains(fields, EventField.ALARMS))) {
             event.setAlarms(storage.getAlarmStorage().loadAlarms(event, userId));
         }
@@ -148,8 +153,8 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
 
     @Override
     public List<Event> loadAdditionalEventData(int userId, List<Event> events, EventField[] fields) throws OXException {
-        if (null != events && 0 < events.size() && (null == fields ||
-            contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS) || contains(fields, EventField.ALARMS))) {
+        if (null != events && 0 < events.size() && (null == fields || contains(fields, EventField.ATTENDEES) || 
+            contains(fields, EventField.ATTACHMENTS) || contains(fields, EventField.CONFERENCES) || contains(fields, EventField.ALARMS))) {
             String[] objectIDs = getObjectIDs(events);
             if (null == fields || contains(fields, EventField.ATTENDEES)) {
                 Map<String, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(objectIDs);
@@ -165,6 +170,12 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
                     }
                 } catch (UnsupportedOperationException e) {
                     // attachment storage not supported in account, skip
+                }
+            }
+            if (null == fields || contains(fields, EventField.CONFERENCES)) {
+                Map<String, List<Conference>> conferencesById = storage.getConferenceStorage().loadConferences(objectIDs);
+                for (Event event : events) {
+                    event.setConferences(conferencesById.get(event.getId()));
                 }
             }
             if (0 < userId && (null == fields || contains(fields, EventField.ALARMS))) {
@@ -194,6 +205,7 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
         storage.getAlarmStorage().deleteAllAlarms();
         storage.getAlarmTriggerStorage().deleteAllTriggers();
         storage.getAttendeeStorage().deleteAllAttendees();
+        storage.getConferenceStorage().deleteAllConferences();
     }
 
 }

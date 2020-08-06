@@ -52,7 +52,6 @@ package com.openexchange.admin.osgi;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.BasicAuthenticator;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -74,7 +73,7 @@ import com.openexchange.exception.OXException;
  */
 public final class AuthenticatorImpl implements Authenticator, Reloadable {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuthenticatorImpl.class);
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AuthenticatorImpl.class);
 
     /**
      * Initializes a new {@link AuthenticatorImpl}.
@@ -141,10 +140,6 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;
-        } catch (InvalidDataException e) {
-            final OXException oxe = OXException.general(e.getMessage());
-            oxe.setStackTrace(e.getStackTrace());
-            throw oxe;
         }
     }
 
@@ -160,10 +155,6 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;
-        } catch (InvalidDataException e) {
-            final OXException oxe = OXException.general(e.getMessage());
-            oxe.setStackTrace(e.getStackTrace());
-            throw oxe;
         }
     }
 
@@ -174,7 +165,7 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
             cache.reloadMasterCredentials(configService);
             cache.reinitAccessCombinations();
         } catch (Exception e) {
-            log.error("Error reloading admin configuration", e);
+            LOGGER.error("Error reloading admin configuration", e);
         }
     }
 

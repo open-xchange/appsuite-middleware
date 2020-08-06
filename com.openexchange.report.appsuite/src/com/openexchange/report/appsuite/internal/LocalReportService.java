@@ -220,7 +220,7 @@ public class LocalReportService extends AbstractReportService {
         stoppedPendingReports.put(reportType, stoppedReport);
         failedReportCache.asMap().put(REPORTS_ERROR_KEY + reportType, stoppedPendingReports);
 
-        if (!EXECUTOR_SERVICE_REF.get().isShutdown()) {
+        if (EXECUTOR_SERVICE_REF.get() != null && !EXECUTOR_SERVICE_REF.get().isShutdown()) {
             EXECUTOR_SERVICE_REF.get().shutdownNow();
         }
 
@@ -265,6 +265,51 @@ public class LocalReportService extends AbstractReportService {
         report.setNumberOfTasks(allContextIds.size());
         pendingReports.put(uuid, report);
         reportCache.asMap().put(PENDING_REPORTS_PRE_KEY + reportConfig.getType(), pendingReports);
+
+        // Abort report, if no contexts given
+        if (allContextIds.isEmpty()) {
+            abortGeneration(uuid, reportConfig.getType(), "No contexts to process.");
+        }
+
+        try {
+            report.setOperatingSystemName(System.getProperty("os.name"));
+        } catch (SecurityException e) {
+            LOG.warn("Operating system name cannot be read for report: {}", e.getMessage());
+        }
+        try {
+            report.setOperatingSystemVersion(System.getProperty("os.version"));
+        } catch (SecurityException e) {
+            LOG.warn("Operating system version cannot be read for report: {}", e.getMessage());
+        }
+        try {
+            report.setJavaVersion(System.getProperty("java.version"));
+        } catch (SecurityException e) {
+            LOG.warn("Java version cannot be read for report: {}", e.getMessage());
+        }
+        try {
+            report.setJavaVendor(System.getProperty("java.vendor"));
+        } catch (SecurityException e) {
+            LOG.warn("Java vendor cannot be read for report: {}", e.getMessage());
+        }
+
+        report.setDistribution(ReportInformation.getDistributionName());
+
+        report.setDatabaseVersion(ReportInformation.getDatabaseVersion());
+
+        List<String> installedPackages = ReportInformation.getInstalledPackages();
+            for (String pkg : installedPackages) {
+                report.addInstalledOXPackage(pkg);
+            }
+
+        List<ThirdPartyAPI> configuredAPIsOAuth = ReportInformation.getConfiguredThirdPartyAPIsViaOAuth();
+            for (ThirdPartyAPI api : configuredAPIsOAuth) {
+                report.addConfiguredThirdPartyAPIOAuth(api.getDisplayName());
+            }
+
+        List<ThirdPartyAPI> configuredAPIsOthers = ReportInformation.getConfiguredThirdPartyAPIsNotOAuth();
+            for (ThirdPartyAPI api : configuredAPIsOthers) {
+                report.addConfiguredThirdPartyAPIOthers(api.getDisplayName());
+            }
 
         setUpContextAnalyzer(allContextIds, report);
         return uuid;

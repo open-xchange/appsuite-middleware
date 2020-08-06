@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.impl;
 
+import static com.openexchange.filestore.FileStorages.indicatesConnectionClosed;
 import static com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaUtils.isUnifiedQuotaEnabledFor;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
@@ -72,8 +73,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.commons.fileupload.FileUploadBase.FileSizeLimitExceededException;
+import org.apache.commons.fileupload.FileUploadBase.FileUploadIOException;
+import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
 import org.apache.commons.io.FileUtils;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -93,6 +96,8 @@ import com.openexchange.filestore.unified.KnownContributor;
 import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.filestore.unified.UsageResult;
 import com.openexchange.filestore.utils.TempFileHelper;
+import com.openexchange.groupware.upload.impl.UploadFileSizeExceededException;
+import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
@@ -555,47 +560,52 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
 
     @Override
     public Set<String> deleteFiles(String[] identifiers) throws OXException {
-        if (null == identifiers || identifiers.length == 0) {
-            return Collections.emptySet();
-        }
+        try {
+            if (null == identifiers || identifiers.length == 0) {
+                return Collections.emptySet();
+            }
 
-        Map<String, Long> fileSizes = new HashMap<String, Long>();
-        SortedSet<String> notDeletedIds = new TreeSet<String>();
-        for (String identifier : newLinkedHashSetFor(identifiers)) {
-            boolean deleted;
-            try {
-                // Get size before attempting delete. File is not found afterwards
-                Long size = L(getFileSize(identifier));
-                deleted = fileStorage.deleteFile(identifier);
-                fileSizes.put(identifier, size);
-            } catch (OXException e) {
-                if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
-                    throw e;
+            Map<String, Long> fileSizes = new HashMap<String, Long>();
+            SortedSet<String> notDeletedIds = new TreeSet<String>();
+            for (String identifier : newLinkedHashSetFor(identifiers)) {
+                boolean deleted;
+                try {
+                    // Get size before attempting delete. File is not found afterwards
+                    Long size = L(getFileSize(identifier));
+                    deleted = fileStorage.deleteFile(identifier);
+                    fileSizes.put(identifier, size);
+                } catch (OXException e) {
+                    if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                        throw e;
+                    }
+                    deleted = false;
                 }
-                deleted = false;
+                if (!deleted) {
+                    notDeletedIds.add(identifier);
+                }
             }
-            if (!deleted) {
-                notDeletedIds.add(identifier);
+            fileSizes.keySet().removeAll(notDeletedIds);
+            long sum = 0L;
+            for (Long fileSize : fileSizes.values()) {
+                sum += fileSize.longValue();
             }
-        }
-        fileSizes.keySet().removeAll(notDeletedIds);
-        long sum = 0L;
-        for (Long fileSize : fileSizes.values()) {
-            sum += fileSize.longValue();
-        }
-        decUsage(Arrays.asList(identifiers), sum);
+            decUsage(Arrays.asList(identifiers), sum);
 
-        // Notify storage listeners
-        String[] deletedIds = fileSizes.keySet().toArray(new String[fileSizes.size()]);
-        for (FileStorageListener storageListener : storageListeners) {
-            try {
-                storageListener.onFilesDeleted(deletedIds, fileStorage);
-            } catch (Exception e) {
-                LOGGER.warn("", e);
+            // Notify storage listeners
+            String[] deletedIds = fileSizes.keySet().toArray(new String[fileSizes.size()]);
+            for (FileStorageListener storageListener : storageListeners) {
+                try {
+                    storageListener.onFilesDeleted(deletedIds, fileStorage);
+                } catch (Exception e) {
+                    LOGGER.warn("", e);
+                }
             }
-        }
 
-        return notDeletedIds;
+            return notDeletedIds;
+        } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            throw e;
+        }
     }
 
     private static LinkedHashSet<String> newLinkedHashSetFor(String[] identifiers) {
@@ -610,21 +620,26 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
 
     @Override
     public long getUsage() throws OXException {
-        UnifiedQuotaService unifiedQuotaService = getHighestRankedBackendService(effectiveUserId, contextId);
-        if (unifiedQuotaService != null) {
-            UsageResult usage = unifiedQuotaService.getUsage(effectiveUserId, contextId);
-            if (usage.hasUsageFor(SERVICE_ID_APPSUITE_DRIVE)) {
-                return usage.getTotal();
+        try {
+            UnifiedQuotaService unifiedQuotaService = getHighestRankedBackendService(effectiveUserId, contextId);
+            if (unifiedQuotaService != null) {
+                UsageResult usage = unifiedQuotaService.getUsage(effectiveUserId, contextId);
+                if (usage.hasUsageFor(SERVICE_ID_APPSUITE_DRIVE)) {
+                    return usage.getTotal();
+                }
+
+                // Set & return
+                long fsUsage = getUsage0();
+                unifiedQuotaService.setUsage(fsUsage, SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
+                return usage.getTotal() + fsUsage;
             }
 
-            // Set & return
-            long fsUsage = getUsage0();
-            unifiedQuotaService.setUsage(fsUsage, SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
-            return usage.getTotal() + fsUsage;
+            // Otherwise grab the usage from database
+            return getUsage0();
+        } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            throw e;
         }
-
-        // Otherwise grab the usage from database
-        return getUsage0();
     }
 
     private long getUsage0() throws OXException {
@@ -722,9 +737,28 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
             String retval = file;
             file = null;
             return retval;
+        } catch (FileUploadIOException e) {
+            // Might wrap a size-limit-exceeded error
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            Throwable cause = e.getCause();
+            if (cause instanceof FileSizeLimitExceededException) {
+                FileSizeLimitExceededException exc = (FileSizeLimitExceededException) cause;
+                throw UploadFileSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+            }
+            if (cause instanceof SizeLimitExceededException) {
+                SizeLimitExceededException exc = (SizeLimitExceededException) cause;
+                throw UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+            }
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (IOException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            if (indicatesConnectionClosed(e)) {
+                // End of stream has been reached unexpectedly during reading input
+                throw FileStorageCodes.CONNECTION_CLOSED.create(e.getCause(), new Object[0]);
+            }
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
             Throwable cause = e.getCause();
             if (cause instanceof StorageFullIOException) {
                 long required = ((StorageFullIOException) cause).getActualSize();
@@ -732,12 +766,35 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
                 notifyOnQuotaExceeded(null, quota, required, usage + required, usage);
                 throw QuotaFileStorageExceptionCodes.STORE_FULL.create(e, new Object[0]);
             }
+            if (cause instanceof FileUploadIOException) {
+                // Might wrap a size-limit-exceeded error
+                Throwable thr = cause.getCause();
+                if (thr instanceof FileSizeLimitExceededException) {
+                    FileSizeLimitExceededException exc = (FileSizeLimitExceededException) thr;
+                    throw UploadFileSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+                }
+                if (thr instanceof SizeLimitExceededException) {
+                    SizeLimitExceededException exc = (SizeLimitExceededException) thr;
+                    throw UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+                }
+            }
+            if (cause instanceof IOException) {
+                if (indicatesConnectionClosed(cause)) {
+                    // End of stream has been reached unexpectedly during reading input
+                    throw FileStorageCodes.CONNECTION_CLOSED.create(e.getCause(), new Object[0]);
+                }
+            }
             throw e;
         } finally {
             Streams.close(is);
             FileUtils.deleteQuietly(tmpFile);
             if (file != null) {
-                fileStorage.deleteFile(file);
+                try {
+                    fileStorage.deleteFile(file);
+                } catch (OXException e) {
+                    LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+                    LOGGER.warn("Error rolling back 'save' operation for file {}", file, e);
+                }
             }
         }
     }
@@ -805,15 +862,52 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
                     LOGGER.warn("", e);
                 }
             }
+        } catch (FileUploadIOException e) {
+            // Might wrap a size-limit-exceeded error
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            Throwable cause = e.getCause();
+            if (cause instanceof FileSizeLimitExceededException) {
+                FileSizeLimitExceededException exc = (FileSizeLimitExceededException) cause;
+                throw UploadFileSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+            }
+            if (cause instanceof SizeLimitExceededException) {
+                SizeLimitExceededException exc = (SizeLimitExceededException) cause;
+                throw UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+            }
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (IOException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            if (indicatesConnectionClosed(e)) {
+                // End of stream has been reached unexpectedly during reading input
+                throw FileStorageCodes.CONNECTION_CLOSED.create(e.getCause(), new Object[0]);
+            }
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
             Throwable cause = e.getCause();
             if (cause instanceof StorageFullIOException) {
                 long required = ((StorageFullIOException) cause).getActualSize();
                 long usage = getUsage();
                 notifyOnQuotaExceeded(name, quota, required, usage + required, usage);
                 throw QuotaFileStorageExceptionCodes.STORE_FULL.create(e, new Object[0]);
+            }
+            if (cause instanceof FileUploadIOException) {
+                // Might wrap a size-limit-exceeded error
+                Throwable thr = cause.getCause();
+                if (thr instanceof FileSizeLimitExceededException) {
+                    FileSizeLimitExceededException exc = (FileSizeLimitExceededException) thr;
+                    throw UploadFileSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+                }
+                if (thr instanceof SizeLimitExceededException) {
+                    SizeLimitExceededException exc = (SizeLimitExceededException) thr;
+                    throw UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+                }
+            }
+            if (cause instanceof IOException) {
+                if (indicatesConnectionClosed(cause)) {
+                    // End of stream has been reached unexpectedly during reading input
+                    throw FileStorageCodes.CONNECTION_CLOSED.create(e.getCause(), new Object[0]);
+                }
             }
             if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                 notFoundError = true;
@@ -826,7 +920,8 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
                 try {
                     fileStorage.setFileLength(offset, name);
                 } catch (OXException e) {
-                    LOGGER.warn("Error rolling back 'append' operation", e);
+                    LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+                    LOGGER.warn("Error rolling back 'append' operation for file {}", name, e);
                 }
             }
         }
@@ -844,150 +939,200 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
 
     @Override
     public void recalculateUsage(Set<String> filesToIgnore) throws OXException {
-        int ownerId = ownerInfo.getOwnerId();
-        if (ownerId > 0) {
-            LOGGER.info("Recalculating usage for owner {} in context {}", I(ownerId), I(contextId));
-        } else {
-            LOGGER.info("Recalculating usage for context {}", I(contextId));
-        }
-
-        SortedSet<String> filenames = fileStorage.getFileList();
-        long entireFileSize = 0;
-        for (String filename : filenames) {
-            if (null == filesToIgnore || !filesToIgnore.contains(filename)) {
-                try {
-                    entireFileSize += fileStorage.getFileSize(filename);
-                } catch (OXException e) {
-                    if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
-                        throw e;
-                    }
-                }
-            }
-        }
-
-        UnifiedQuotaService unifiedQuotaService = null;
-        Long toRestore = null;
-
-        DatabaseService db = getDatabaseService();
-        Connection con = db.getWritable(contextId);
-        PreparedStatement stmt = null;
-        int rollback = 0;
         try {
-            con.setAutoCommit(false);
-            rollback = 1;
-
-            unifiedQuotaService = getHighestRankedBackendService(effectiveUserId, contextId);
-            if (unifiedQuotaService != null) {
-                long effectiveOldUsage = unifiedQuotaService.getUsage(effectiveUserId, contextId).getTotal();
-                unifiedQuotaService.setUsage(entireFileSize, SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
-                toRestore = Long.valueOf(effectiveOldUsage);
+            int ownerId = ownerInfo.getOwnerId();
+            if (ownerId > 0) {
+                LOGGER.info("Recalculating usage for owner {} in context {}", I(ownerId), I(contextId));
+            } else {
+                LOGGER.info("Recalculating usage for context {}", I(contextId));
             }
 
-            stmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
-            stmt.setLong(1, entireFileSize);
-            stmt.setInt(2, contextId);
-            stmt.setInt(3, ownerId);
-            final int rows = stmt.executeUpdate();
-            if (1 != rows) {
-                if (ownerId > 0) {
-                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(ownerId), I(contextId));
-                }
-                throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
-            }
-
-            con.commit();
-            rollback = 2;
-        } catch (SQLException s) {
-            throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(s);
-        } catch (RuntimeException s) {
-            throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(s);
-        } finally {
-            Databases.closeSQLStuff(stmt);
-            if (rollback > 0) {
-                if (rollback==1) {
-                    Databases.rollback(con);
-
-                    if (null != unifiedQuotaService && null != toRestore) {
-                        unifiedQuotaService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
+            SortedSet<String> filenames = fileStorage.getFileList();
+            long entireFileSize = 0;
+            for (String filename : filenames) {
+                if (null == filesToIgnore || !filesToIgnore.contains(filename)) {
+                    try {
+                        entireFileSize += fileStorage.getFileSize(filename);
+                    } catch (OXException e) {
+                        if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                            throw e;
+                        }
                     }
                 }
-                Databases.autocommit(con);
             }
-            db.backWritable(contextId, con);
+
+            UnifiedQuotaService unifiedQuotaService = null;
+            Long toRestore = null;
+
+            DatabaseService db = getDatabaseService();
+            Connection con = db.getWritable(contextId);
+            PreparedStatement stmt = null;
+            int rollback = 0;
+            try {
+                con.setAutoCommit(false);
+                rollback = 1;
+
+                unifiedQuotaService = getHighestRankedBackendService(effectiveUserId, contextId);
+                if (unifiedQuotaService != null) {
+                    long effectiveOldUsage = unifiedQuotaService.getUsage(effectiveUserId, contextId).getTotal();
+                    unifiedQuotaService.setUsage(entireFileSize, SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
+                    toRestore = Long.valueOf(effectiveOldUsage);
+                }
+
+                stmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
+                stmt.setLong(1, entireFileSize);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, ownerId);
+                final int rows = stmt.executeUpdate();
+                if (1 != rows) {
+                    if (ownerId > 0) {
+                        throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(ownerId), I(contextId));
+                    }
+                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
+                }
+
+                con.commit();
+                rollback = 2;
+            } catch (SQLException s) {
+                throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(s);
+            } catch (RuntimeException s) {
+                throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(s);
+            } finally {
+                Databases.closeSQLStuff(stmt);
+                if (rollback > 0) {
+                    if (rollback==1) {
+                        Databases.rollback(con);
+
+                        if (null != unifiedQuotaService && null != toRestore) {
+                            unifiedQuotaService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
+                        }
+                    }
+                    Databases.autocommit(con);
+                }
+                db.backWritable(contextId, con);
+            }
+        } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            throw e;
         }
     }
 
     @Override
     public SortedSet<String> getFileList() throws OXException {
-        return fileStorage.getFileList();
+        try {
+            return fileStorage.getFileList();
+        } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            throw e;
+        }
     }
 
     @Override
     public InputStream getFile(String file) throws OXException {
-        return fileStorage.getFile(file);
+        try {
+            return fileStorage.getFile(file);
+        } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            throw e;
+        }
     }
 
     @Override
     public long getFileSize(String name) throws OXException {
-        return fileStorage.getFileSize(name);
+        try {
+            return fileStorage.getFileSize(name);
+        } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            throw e;
+        }
     }
 
     @Override
     public String getMimeType(String name) throws OXException {
-        return fileStorage.getMimeType(name);
+        try {
+            return fileStorage.getMimeType(name);
+        } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            throw e;
+        }
     }
 
     @Override
     public void remove() throws OXException {
-        fileStorage.remove();
+        try {
+            fileStorage.remove();
+        } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            throw e;
+        }
     }
 
     @Override
     public void recreateStateFile() throws OXException {
-        fileStorage.recreateStateFile();
+        try {
+            fileStorage.recreateStateFile();
+        } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            throw e;
+        }
     }
 
     @Override
     public boolean stateFileIsCorrect() throws OXException {
-        return fileStorage.stateFileIsCorrect();
+        try {
+            return fileStorage.stateFileIsCorrect();
+        } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            throw e;
+        }
     }
 
     @Override
     public void setFileLength(long length, String name) throws OXException {
-        // First, remember old length
-        long oldLength = fileStorage.getFileSize(name);
-        if (length == oldLength) {
-            // Nothing to do
-            return;
-        }
-
-        // Adjust file length
-        fileStorage.setFileLength(length, name);
-
-        // Adjust usage accordingly
-        if (length > oldLength) {
-            // Increment usage
-            if (incUsage(name, length - oldLength)) {
-                throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
+        try {
+            // First, remember old length
+            long oldLength = fileStorage.getFileSize(name);
+            if (length == oldLength) {
+                // Nothing to do
+                return;
             }
-        } else {
-            // Decrement usage
-            decUsage(name, oldLength - length);
-        }
 
-        // Notify storage listeners
-        for (FileStorageListener storageListener : storageListeners) {
-            try {
-                storageListener.onFileModified(name, fileStorage);
-            } catch (Exception e) {
-                LOGGER.warn("", e);
+            // Adjust file length
+            fileStorage.setFileLength(length, name);
+
+            // Adjust usage accordingly
+            if (length > oldLength) {
+                // Increment usage
+                if (incUsage(name, length - oldLength)) {
+                    throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
+                }
+            } else {
+                // Decrement usage
+                decUsage(name, oldLength - length);
             }
+
+            // Notify storage listeners
+            for (FileStorageListener storageListener : storageListeners) {
+                try {
+                    storageListener.onFileModified(name, fileStorage);
+                } catch (Exception e) {
+                    LOGGER.warn("", e);
+                }
+            }
+        } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            throw e;
         }
     }
 
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
-        return fileStorage.getFile(name, offset, length);
+        try {
+            return fileStorage.getFile(name, offset, length);
+        } catch (OXException e) {
+            LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
+            throw e;
+        }
     }
 
     private void notifyOnQuotaExceeded(String id, long quota, long required, long newUsage, long oldUsage) {

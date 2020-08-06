@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.reseller.rmi.impl;
 
+import org.slf4j.Logger;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
@@ -59,6 +60,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXCommonImpl;
 import com.openexchange.admin.tools.GenericChecks;
+import com.openexchange.java.Strings;
 
 /**
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
@@ -66,28 +68,41 @@ import com.openexchange.admin.tools.GenericChecks;
  */
 public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPluginInterface {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ResellerAuth.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ResellerAuth.class);
+    }
 
+    /**
+     * Initializes a new {@link ResellerAuth}.
+     */
+    public ResellerAuth() {
+        super();
+    }
 
     @Override
-    public void doAuthentication(Credentials authdata) throws InvalidCredentialsException {
+    public void doAuthentication(Credentials creds) throws InvalidCredentialsException {
         try {
-            doNullCheck(authdata);
+            doNullCheck(creds);
         } catch (InvalidDataException e) {
-            log.error("authdata is null", e);
+            LoggerHolder.LOG.error("authdata is null", e);
+            throw new InvalidCredentialsException("authentication failed");
+        }
+        if (Strings.isEmpty(creds.getLogin())) {
+            LoggerHolder.LOG.error("authdata has empty login");
             throw new InvalidCredentialsException("authentication failed");
         }
         try {
             OXResellerStorageInterface oxresell = OXResellerStorageInterface.getInstance();
-            ResellerAdmin adm = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(authdata.getLogin())})[0];
-            if ( ! GenericChecks.authByMech(adm.getPassword(), authdata.getPassword(), adm.getPasswordMech(), adm.getSalt()) ) {
+            ResellerAdmin adm = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin()) })[0];
+            if (!GenericChecks.authByMech(adm.getPassword(), creds.getPassword(), adm.getPasswordMech(), adm.getSalt())) {
                 throw new InvalidCredentialsException("authentication failed");
             }
         } catch (StorageException e) {
-            log.error("",e);
+            LoggerHolder.LOG.error("", e);
             throw new InvalidCredentialsException("authentication failed");
         } catch (InvalidCredentialsException e) {
-            log.error("",e);
+            LoggerHolder.LOG.error("", e);
             throw e;
         }
     }
@@ -96,14 +111,24 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
     @Override
     public boolean isMasterOfContext(Credentials creds, Context ctx) throws InvalidCredentialsException {
         try {
+            doNullCheck(creds);
+        } catch (InvalidDataException e) {
+            LoggerHolder.LOG.error("authdata is null", e);
+            throw new InvalidCredentialsException("authentication failed");
+        }
+        if (Strings.isEmpty(creds.getLogin())) {
+            LoggerHolder.LOG.error("authdata has empty login");
+            throw new InvalidCredentialsException("authentication failed");
+        }
+        try {
             OXResellerStorageInterface oxresell = OXResellerStorageInterface.getInstance();
-            if ( ! oxresell.existsAdmin(new ResellerAdmin(creds.getLogin()) ) ) {
+            if (!oxresell.existsAdmin(new ResellerAdmin(creds.getLogin()))) {
                 return false;
             }
-            ResellerAdmin adm = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(creds.getLogin())})[0];
+            ResellerAdmin adm = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin()) })[0];
             return oxresell.ownsContextOrIsPidOfOwner(ctx, adm.getId().intValue());
         } catch (StorageException e) {
-            log.error("",e);
+            LoggerHolder.LOG.error("", e);
             throw new InvalidCredentialsException("authentication failed");
         }
     }

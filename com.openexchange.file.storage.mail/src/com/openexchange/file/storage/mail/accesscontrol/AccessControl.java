@@ -60,6 +60,7 @@ import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.session.Session;
+import com.openexchange.session.UserAndContext;
 
 /**
  * {@link AccessControl}
@@ -81,7 +82,7 @@ public class AccessControl implements AutoCloseable {
         return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.file.storage.mail.maxAccessesPerUser", DEFAULT_MAX_ACCESSES_PER_USER, view);
     }
 
-    private static final ConcurrentMap<Key, AccessControl> CONTROLS = new ConcurrentHashMap<>(512);
+    private static final ConcurrentMap<UserAndContext, AccessControl> CONTROLS = new ConcurrentHashMap<>(512);
 
     /**
      * Gets the associated access control for given session
@@ -95,7 +96,7 @@ public class AccessControl implements AutoCloseable {
             return null;
         }
 
-        Key key = Key.newKey(session);
+        UserAndContext key = UserAndContext.newInstance(session);
         Integer maxAccessesPerUser = null;
 
         AccessControl accessControl = null;
@@ -126,7 +127,7 @@ public class AccessControl implements AutoCloseable {
     // -------------------------------------------------------------------------------------------------------------
 
     private final Condition accessible;
-    private final Key key;
+    private final UserAndContext key;
     private final Lock lock;
     private final int maxAccess;
     private int inUse;
@@ -135,7 +136,7 @@ public class AccessControl implements AutoCloseable {
     /**
      * Initializes a new {@link AccessControl}.
      */
-    private AccessControl(int maxAccess, Key key) {
+    private AccessControl(int maxAccess, UserAndContext key) {
         super();
         this.maxAccess = maxAccess;
         this.key = key;
@@ -222,65 +223,4 @@ public class AccessControl implements AutoCloseable {
         release();
     }
 
-    // -------------------------------------------------------------------------------------------------------------
-
-    private static final class Key {
-
-        static Key newKey(Session session) {
-            return new Key(session);
-        }
-
-        private final int contextId;
-        private final int userId;
-        private final int hash;
-
-        /**
-         * Initializes a new {@link Key}.
-         *
-         * @param session The associated session
-         */
-        Key(Session session) {
-            this(session.getUserId(), session.getContextId());
-        }
-
-        /**
-         * Initializes a new {@link Key}.
-         *
-         * @param userId The user identifier
-         * @param contextId The context identifier
-         */
-        Key(int userId, int contextId) {
-            super();
-            this.userId = userId;
-            this.contextId = contextId;
-
-            int prime = 31;
-            int result = prime * 1 + contextId;
-            result = prime * result + userId;
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            Key other = (Key) obj;
-            if (contextId != other.contextId) {
-                return false;
-            }
-            if (userId != other.userId) {
-                return false;
-            }
-            return true;
-        }
-    }
 }

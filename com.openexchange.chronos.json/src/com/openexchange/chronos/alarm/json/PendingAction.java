@@ -71,8 +71,8 @@ import com.openexchange.server.ServiceLookup;
 public class PendingAction extends ChronosAction {
 
     private static final String ACTIONS_PARAM = "actions";
-    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet("rangeEnd");
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(ACTIONS_PARAM);
+    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAM_RANGE_END);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, ACTIONS_PARAM);
 
     private static final Set<String> DEFAULT_ACTIONS = unmodifiableSet("DISPLAY", "AUDIO");
 

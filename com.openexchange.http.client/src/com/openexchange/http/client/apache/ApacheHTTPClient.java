@@ -53,9 +53,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.ContentType;
+import org.apache.http.util.EntityUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.http.client.AbstractHTTPClient;
@@ -72,37 +75,38 @@ public class ApacheHTTPClient extends AbstractHTTPClient implements HTTPClient {
 		this.fileManager = fileManager;
 	}
 
-	public String extractString(HttpMethodBase method) throws OXException {
+	public String extractString(HttpResponse resp) throws OXException {
 		try {
-			return method.getResponseBodyAsString();
+			return EntityUtils.toString(resp.getEntity());
 		} catch (IOException e) {
             throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		}
 	}
 
-	public InputStream extractStream(HttpMethodBase method) throws OXException {
+	public InputStream extractStream(HttpResponse resp) throws OXException {
 		try {
-			return method.getResponseBodyAsStream();
+		    return resp.getEntity().getContent();
 		} catch (IOException e) {
             throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		}
 	}
 
-	public Reader extractReader(HttpMethodBase method) throws OXException {
+	public Reader extractReader(HttpResponse resp) throws OXException {
 		try {
-			return new InputStreamReader(method.getResponseBodyAsStream(), method.getResponseCharSet());
+            ContentType contentType = ContentType.getOrDefault(resp.getEntity());
+            return new InputStreamReader(resp.getEntity().getContent(), contentType.getCharset() == null ? Charset.defaultCharset() : contentType.getCharset());
 		} catch (IOException e) {
             throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		}
 	}
 
-	public <R> R extractPayload(HttpMethodBase method, Class<R> responseType) throws OXException {
+	public <R> R extractPayload(HttpResponse resp, Class<R> responseType) throws OXException {
 		if (responseType == String.class) {
-			return (R) extractString(method);
+			return (R) extractString(resp);
 		} else if (responseType == InputStream.class) {
-			return (R) extractStream(method);
+			return (R) extractStream(resp);
 		} else if (responseType == Reader.class) {
-			return (R) extractReader(method);
+			return (R) extractReader(resp);
 		}
 
 		for(Class inputType: Arrays.asList(InputStream.class, Reader.class, String.class)) {
@@ -110,7 +114,7 @@ public class ApacheHTTPClient extends AbstractHTTPClient implements HTTPClient {
 			if (null != procList){
 				for (HTTPResponseProcessor processor : procList) {
 					if (processor.getTypes()[1] == responseType) {
-						return (R) processor.process(extractPayload(method, inputType));
+						return (R) processor.process(extractPayload(resp, inputType));
 					}
 				}
 			}

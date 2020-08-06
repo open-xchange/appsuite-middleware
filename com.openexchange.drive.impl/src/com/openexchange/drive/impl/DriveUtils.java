@@ -204,7 +204,7 @@ public class DriveUtils {
      * @return <code>true</code> if the filename is considered to be ignored, <code>false</code>, otherwise
      * @throws OXException
      */
-    public static boolean isIgnoredFileName(DriveSession session, String path, String fileName) throws OXException {
+    public static boolean isIgnoredFileName(DriveSession session, String path, String fileName) {
         if (isIgnoredFileName(fileName, session.getServerSession())) {
             return true;
         }

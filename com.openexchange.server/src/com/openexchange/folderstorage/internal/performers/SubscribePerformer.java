@@ -132,7 +132,7 @@ public final class SubscribePerformer extends AbstractPerformer {
     /**
      * The prepared fullname.
      */
-    private static final String PREPARED_FULLNAME_DEFAULT = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
+    private static final String PREPARED_FULLNAME_DEFAULT = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.ROOT_FOLDER_ID);
 
     private static boolean isSystemFolder(final String folderId) {
         if (null == folderId) {

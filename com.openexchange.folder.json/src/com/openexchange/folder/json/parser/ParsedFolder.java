@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.UsedForSync;
 
 /**
  * {@link ParsedFolder} - A parsed folder.
@@ -130,6 +131,10 @@ public final class ParsedFolder implements SetterAwareFolder, ParameterizedFolde
     protected Map<FolderField, FolderProperty> properties;
 
     protected FolderPath originPath;
+    
+    UsedForSync usedForSync;
+    
+    protected boolean containsUsedForSync = false;
 
     /**
      * Initializes an empty {@link ParsedFolder}.
@@ -510,4 +515,20 @@ public final class ParsedFolder implements SetterAwareFolder, ParameterizedFolde
         this.originPath = originPath;
     }
 
+    @Override
+    public UsedForSync getUsedForSync() {
+        return usedForSync == null ? UsedForSync.DEFAULT : usedForSync;
+    }
+    
+    @Override
+    public void setUsedForSync(UsedForSync usedForSync) {
+        this.usedForSync = usedForSync;
+        this.containsUsedForSync = true;
+    }
+
+    @Override
+    public boolean containsUsedForSync() {
+        return containsUsedForSync;
+    }
+    
 }

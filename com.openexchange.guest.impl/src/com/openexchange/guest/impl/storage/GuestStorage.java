@@ -108,9 +108,9 @@ public abstract class GuestStorage {
      *
      * @param mailAddress - mail address of the guest to add
      * @param groupId - the group the context is assigned to
-     * @param Connection - existing connection that should be used to add the guest.
+     * @param connection - existing connection that should be used to add the guest.
      * @return the internal id of the guest
-     * @throws OXException
+     * @throws OXException In case of SQL error
      */
     public abstract long addGuest(String mailAddress, String groupId, Connection connection) throws OXException;
 
@@ -118,8 +118,8 @@ public abstract class GuestStorage {
      * Adds a new assignment for an already existing guest.
      *
      * @param assignment - the assignment to add
-     * @param Connection - existing connection that should be used to create the guest assignment.
-     * @throws OXException
+     * @param connection - existing connection that should be used to create the guest assignment.
+     * @throws OXException In case of SQL error
      */
     public abstract void addGuestAssignment(GuestAssignment assignment, Connection connection) throws OXException;
 
@@ -127,8 +127,8 @@ public abstract class GuestStorage {
      * Removes the guest with the given internal id
      *
      * @param guestId - the internal id of the guest (e. g. retrieved via com.openexchange.guest.impl.impl.storage.GuestStorage.getGuestId(String))
-     * @param Connection - existing connection that should be used to remove the guest.
-     * @throws OXException
+     * @param connection - existing connection that should be used to remove the guest.
+     * @throws OXException In case of SQL error
      */
     public abstract void removeGuest(long guestId, Connection connection) throws OXException;
 
@@ -136,8 +136,8 @@ public abstract class GuestStorage {
      * Removes the guests with the given groupId
      *
      * @param groupId - the group the guests should be removed for
-     * @param Connection - existing connection that should be used to remove the guest.
-     * @throws OXException
+     * @param connection - existing connection that should be used to remove the guest.
+     * @throws OXException In case of SQL error
      */
     public abstract void removeGuests(String groupId, Connection connection) throws OXException;
 
@@ -145,9 +145,9 @@ public abstract class GuestStorage {
      * Removes the guests assignments for the given context
      *
      * @param contextId - id of the context to get the guest ids for.
-     * @param Connection - existing connection that should be used to remove the guests.
+     * @param connection - existing connection that should be used to remove the guests.
      * @return long - number of assignments that have been removed
-     * @throws OXException
+     * @throws OXException In case of SQL error
      */
     public abstract long removeGuestAssignments(int contextId, Connection connection) throws OXException;
 
@@ -155,9 +155,9 @@ public abstract class GuestStorage {
      * Returns the internal guest ids that currently have assignments for the given context.
      *
      * @param contextId - id of the context to get the guest ids for.
-     * @param Connection - existing connection that should be used to remove the guests.
+     * @param connection - existing connection that should be used to remove the guests.
      * @return List with Long containing internal guest ids to be able to check if there still are assignments existing or if the guest should be removed.
-     * @throws OXException
+     * @throws OXException In case of SQL error
      */
     public abstract List<Long> resolveGuestAssignments(int contextId, Connection connection) throws OXException;
 
@@ -165,9 +165,9 @@ public abstract class GuestStorage {
      * Returns the internal guest ids that currently have assignments for the given groupId.
      *
      * @param guestIds - List with the ids of the guest to remove assignments for
-     * @param Connection - existing connection that should be used to remove the guests.
+     * @param connection - existing connection that should be used to remove the guests.
      * @return List with Long containing internal guest ids to be able to check if there still are assignments existing or if the guest should be removed.
-     * @throws OXException
+     * @throws OXException In case of SQL error
      *
      * TODO remove this and all caller methods (as just designed to delete based on group) if the CLT removes all data
      */
@@ -179,8 +179,8 @@ public abstract class GuestStorage {
      * @param guestId - the internal id of the guest to remove an assignment for (e. g. retrieved via com.openexchange.guest.impl.impl.storage.GuestStorage.getGuestId(String))
      * @param contextId - the context the guest is assigned to
      * @param userId - the id of the guest within the provided context
-     * @param Connection - existing connection that should be used to remove the guest assignment.
-     * @throws OXException
+     * @param connection - existing connection that should be used to remove the guest assignment.
+     * @throws OXException In case of SQL error
      */
     public abstract void removeGuestAssignment(long guestId, int contextId, int userId, Connection connection) throws OXException;
 
@@ -188,9 +188,9 @@ public abstract class GuestStorage {
      * Returns the {@link GuestAssignment}s the guest (with the given mail address) is currently registered for.
      *
      * @param guestId - internal guest id of the user
-     * @param Connection - existing connection that should be used to get the guest assignments.
+     * @param connection - existing connection that should be used to get the guest assignments.
      * @return List with {@link GuestAssignment}s
-     * @throws OXException
+     * @throws OXException In case of SQL error
      */
     public abstract List<GuestAssignment> getGuestAssignments(final long guestId, Connection connection) throws OXException;
 
@@ -200,8 +200,9 @@ public abstract class GuestStorage {
      * @param guestId - the internal id of the guest to remove an assignment for (e. g. retrieved via com.openexchange.guest.impl.impl.storage.GuestStorage.getGuestId(String))
      * @param contextId - the context the guest is assigned to
      * @param userId - the id of the guest within the provided context
-     * @param Connection - existing connection that should be used to remove the guest assignment.
-     * @throws OXException
+     * @param connection - existing connection that should be used to remove the guest assignment.
+     * @return A {@link GuestAssignment} for the guest
+     * @throws OXException In case of SQL error
      */
     public abstract GuestAssignment getGuestAssignment(long guestId, int contextId, int userId, Connection connection) throws OXException;
 
@@ -211,9 +212,9 @@ public abstract class GuestStorage {
      * @param guestId - internal guest id of the user
      * @param contextId - the context to check for
      * @param userId - the id of the guest user to check for
-     * @param Connection - existing connection that should be used to evaluate if assignment is existing.
+     * @param connection - existing connection that should be used to evaluate if assignment is existing.
      * @return <code>true</code> if existing, otherwise <code>false</code>
-     * @throws OXException
+     * @throws OXException In case of SQL error
      */
     public abstract boolean isAssignmentExisting(long guestId, int contextId, int userId, Connection connection) throws OXException;
 
@@ -221,9 +222,9 @@ public abstract class GuestStorage {
      * Returns the number of currently available context/user assignments to the given internal guest id.
      *
      * @param guestId - internal guest id of the user
-     * @param Connection - existing connection that should be used to number of guest assignments.
+     * @param connection - existing connection that should be used to number of guest assignments.
      * @return int with the number of assignments
-     * @throws OXException
+     * @throws OXException In case of SQL error
      */
     public abstract long getNumberOfAssignments(long guestId, Connection connection) throws OXException;
 
@@ -232,9 +233,9 @@ public abstract class GuestStorage {
      *
      * @param mailAddress - mail address of the guest to get its internal id for
      * @param groupId - the group the context is assigned to
-     * @param Connection - existing connection that should be used to get the guest id.
+     * @param connection - existing connection that should be used to get the guest id.
      * @return int with the internal guest id or -1 if the guest does currently not exist
-     * @throws OXException
+     * @throws OXException In case of SQL error
      */
     public abstract long getGuestId(String mailAddress, String groupId, Connection connection) throws OXException;
 
@@ -244,7 +245,7 @@ public abstract class GuestStorage {
      * @param groupId - id of the context group to return guest ids for
      * @param connection - the {@link Connection} to get ids with
      * @return {@link List} of {@link Long} with the ids that are assigned to the given group
-     * @throws OXException
+     * @throws OXException In case of SQL error
      */
     public abstract List<Long> getGuestIds(String groupId, Connection connection) throws OXException;
 
@@ -253,7 +254,7 @@ public abstract class GuestStorage {
      *
      * @param assignment - {@link GuestAssignment} with the user to update and the new values for password/passwordMech
      * @param connection - the {@link Connection} to update with
-     * @throws OXException
+     * @throws OXException In case of SQL error
      */
     public abstract void updateGuestAssignment(GuestAssignment assignment, Connection connection) throws OXException;
 

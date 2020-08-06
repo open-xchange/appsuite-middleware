@@ -51,6 +51,7 @@ package com.openexchange.tools.session;
 
 import java.util.Set;
 import org.apache.commons.lang.Validate;
+import com.drew.lang.annotations.NotNull;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.context.ContextService;
@@ -147,7 +148,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @return The synthetic server session
      * @throws OXException If creation of server session fails
      */
-    public static ServerSession valueOf(int userId, int contextId) throws OXException {
+    public static @NotNull ServerSession valueOf(int userId, int contextId) throws OXException {
         return new ServerSessionAdapter(userId, contextId);
     }
 

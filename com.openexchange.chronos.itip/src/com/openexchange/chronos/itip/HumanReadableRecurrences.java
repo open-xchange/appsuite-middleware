@@ -158,10 +158,19 @@ public class HumanReadableRecurrences {
     }
 
     private String weekly() {
-        if (rrule.getInterval() == 1) {
-            return format(locale, HRRStrings.WEEKLY_EACH, parseDays(locale));
+        List<WeekdayNum> byDayPart = rrule.getByDayPart();
+        if (byDayPart != null) {
+            String parsedDay = parseDays(locale);
+            if (rrule.getInterval() == 1) {
+                return format(locale, HRRStrings.WEEKLY_EACH_1, parsedDay);
+            }
+            return format(locale, HRRStrings.WEEKLY_1, Autoboxing.I(rrule.getInterval()), parsedDay);
         }
-        return format(locale, HRRStrings.WEEKLY, Autoboxing.I(rrule.getInterval()), parseDays(locale));
+        // Describe without day
+        if (rrule.getInterval() == 1) {
+            return format(locale, HRRStrings.WEEKLY_EACH_2);
+        }
+        return format(locale, HRRStrings.WEEKLY_2, Autoboxing.I(rrule.getInterval()));
     }
 
     private String daily() {

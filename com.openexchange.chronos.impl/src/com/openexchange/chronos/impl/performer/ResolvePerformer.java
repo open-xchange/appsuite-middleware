@@ -49,11 +49,15 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
 import static com.openexchange.chronos.common.CalendarUtils.filterByUid;
+import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
+import static com.openexchange.chronos.common.CalendarUtils.isExternalUser;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
@@ -62,33 +66,41 @@ import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
+import static com.openexchange.chronos.impl.Utils.isSameMailDomain;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.i;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultEventsResult;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
@@ -104,6 +116,8 @@ import com.openexchange.search.internal.operands.ColumnFieldOperand;
  * @since v7.10.0
  */
 public class ResolvePerformer extends AbstractQueryPerformer {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResolvePerformer.class);
 
     /**
      * Initializes a new {@link ResolvePerformer}.
@@ -123,6 +137,19 @@ public class ResolvePerformer extends AbstractQueryPerformer {
      * @return The resolved event, or <code>null</code> if not found
      */
     public Event resolveById(String eventId, Integer sequence) throws OXException {
+        return resolveById(eventId, sequence, session.getUserId());
+    }
+
+    /**
+     * Performs the resolve by id operation.
+     *
+     * @param eventId The identifier of the event to resolve
+     * @param sequence The expected sequence number to match, or <code>null</code> to resolve independently of the event's sequence number
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The resolved event, or <code>null</code> if not found
+     * @throws OXException In case permissions are missing
+     */
+    public Event resolveById(String eventId, Integer sequence, int calendarUserId) throws OXException {
         /*
          * load event data, check permissions & apply folder identifier
          */
@@ -130,7 +157,6 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         if (null == event || null != sequence && i(sequence) != event.getSequence()) {
             return null;
         }
-        int calendarUserId = session.getUserId();
         event = storage.getUtilities().loadAdditionalEventData(calendarUserId, event, null);
         String folderId = CalendarUtils.getFolderView(event, calendarUserId);
         CalendarFolder folder = getFolder(session, folderId, false);
@@ -195,11 +221,14 @@ public class ResolvePerformer extends AbstractQueryPerformer {
      * @return The identifier of the resolved event, or <code>null</code> if not found
      */
     public EventID resolveByUid(String uid, RecurrenceId recurrenceId, int calendarUserId) throws OXException {
+        if (Strings.isEmpty(uid)) {
+            return null;
+        }
         /*
          * construct search term & lookup matching events in storage
          */
         CompositeSearchTerm searchTerm;
-        if (null == recurrenceId) {            
+        if (null == recurrenceId) {
             searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
                 .addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid))
                 .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
@@ -213,7 +242,7 @@ public class ResolvePerformer extends AbstractQueryPerformer {
                     .addSearchTerm(new CompositeSearchTerm(CompositeOperation.NOT).addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL)))
                     .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
                 );
-        }        
+        }
         EventField[] fields = { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.FOLDER_ID, EventField.UID, EventField.CALENDAR_USER };
         List<Event> events = filterByUid(storage.getEventStorage().searchEvents(searchTerm, null, fields), uid);
         /*
@@ -225,7 +254,7 @@ public class ResolvePerformer extends AbstractQueryPerformer {
             /*
              * match recurrence if specified
              */
-            if (null != recurrenceId && false == recurrenceId.equals(event.getRecurrenceId()) || null == recurrenceId && isSeriesException(event)) {
+            if (null != recurrenceId && false == recurrenceId.matches(event.getRecurrenceId()) || null == recurrenceId && isSeriesException(event)) {
                 continue;
             }
             if (null != event.getFolderId()) {
@@ -384,6 +413,121 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         } catch (OXException e) {
             return new DefaultEventsResult(e);
         }
+    }
+
+    /**
+     * Looks up and injects attendee from copies of the same group-scheduled event located in calendar folders of other internal users.
+     * <p/>
+     * Matching is attempted for other attendees in externally organized events, based on the event's UID, recurrence-identifier and
+     * same sequence number.
+     *
+     * @param event The event to inject data for known internal attendees in
+     * @param folder The calendar folder representing the current view on the event
+     * @return <code>true</code> if the event was enriched successfully, <code>false</code>, otherwise
+     * @see CalendarConfig#isLookupPeerAttendeesForSameMailDomainOnly()
+     */
+    public boolean injectKnownAttendeeData(Event event, CalendarFolder folder) {
+        if (null == event.getAttendees() || null == event.getOrganizer() || PublicType.getInstance().equals(folder.getType()) ||
+            isInternal(event.getOrganizer(), CalendarUserType.INDIVIDUAL)) {
+            return false;
+        }
+        Attendee calendarUserAttendee = find(event.getAttendees(), folder.getCalendarUserId());
+        if (null == calendarUserAttendee) {
+            return false;
+        }
+        boolean modified = false;
+        for (ListIterator<Attendee> iterator = event.getAttendees().listIterator(); iterator.hasNext();) {
+            Attendee attendee = iterator.next();
+            /*
+             * try and resolve external user attendee to internal user entity
+             */
+            if (false == isExternalUser(attendee) || matches(event.getOrganizer(), attendee)) {
+                continue; // already internal user, or external organizer
+            }
+            if (session.getConfig().isLookupPeerAttendeesForSameMailDomainOnly() &&
+                false == isSameMailDomain(extractEMailAddress(attendee.getUri()), extractEMailAddress(calendarUserAttendee.getUri()))) {
+                continue;
+            }
+            try {
+                Attendee resolvedAttendee = session.getEntityResolver().prepare(
+                    AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null), CalendarUserType.INDIVIDUAL);
+                if (isInternal(resolvedAttendee)) {
+                    /*
+                     * take over attendee data from corresponding calendar user's event copy if available
+                     */
+                    Attendee matchingAttendeeCopy = resolveFromAttendeeCopy(event, resolvedAttendee.getEntity());
+                    if (null != matchingAttendeeCopy) {
+                        LOG.debug("Injecting known attendee data {} from calendar {} for {} in {}", matchingAttendeeCopy, matchingAttendeeCopy.getFolderId(), attendee, event);
+                        iterator.set(matchingAttendeeCopy);
+                    }
+                }
+            } catch (OXException e) {
+                LOG.warn("Error injecting known participation status for {} in {}", attendee, event, e);
+            }
+        }
+        return modified;
+    }
+
+    /**
+     * Looks up attendee data from copies of the same group-scheduled event located in calendar folders of other internal users.
+     * <p/>
+     * Matching is attempted for other attendees in externally organized events, based on the event's UID, recurrence-identifier and
+     * same sequence number.
+     *
+     * @param event The event to inject data for known internal attendees in
+     * @param folder The calendar folder representing the current view on the event
+     * @return A new list of the event's attendees, with possibly injected data from other event copies, or the original attendee list if not applicable
+     * @see CalendarConfig#isLookupPeerAttendeesForSameMailDomainOnly()
+     */
+    public List<Attendee> resolveFromAttendeeCopies(Event event, CalendarFolder folder) throws OXException {
+        if (null == event.getAttendees()) {
+            return null;
+        }
+        List<Attendee> attendees = new ArrayList<Attendee>(event.getAttendees());
+        Event delegate = new DelegatingEvent(event) {
+
+            @Override
+            public List<Attendee> getAttendees() {
+                return attendees;
+            }
+        };
+        return injectKnownAttendeeData(delegate, folder) ? attendees : event.getAttendees();
+    }
+
+    /**
+     * Looks up and loads attendee data from a possible copy of a group-scheduled event located in this attendee's personal calendar
+     * folder, for the given event data.
+     * <p/>
+     * Matching is performed based on the event's UID, recurrence-identifier and same sequence number.
+     *
+     * @param event The event to resolve the attendee data for
+     * @param calendarUserId The identifier of the user to resolve the event for
+     * @return The attendee data, or <code>null</code> if no matching event copy was found for the calendar user
+     * @see #resolveByUid(String, RecurrenceId, int)
+     * @see CalendarConfig#isLookupPeerAttendeesForSameMailDomainOnly()
+     */
+    public Attendee resolveFromAttendeeCopy(Event event, int calendarUserId) throws OXException {
+        /*
+         * resolve by event uid / recurrence id
+         */
+        EventID eventId = resolveByUid(event.getUid(), event.getRecurrenceId(), calendarUserId);
+        if (null == eventId) {
+            return null; // no event copy found for this attendee
+        }
+        /*
+         * cross-check identifying properties of attendee's copy of the group-scheduled event
+         */
+        String objectId = eventId.getObjectID();
+        Event attendeeCopy = storage.getEventStorage().loadEvent(objectId, new EventField[] { EventField.UID, EventField.RECURRENCE_ID, EventField.SEQUENCE, EventField.ORGANIZER });
+        if (null == attendeeCopy || false == event.getUid().equals(attendeeCopy.getUid()) || false == matches(event.getRecurrenceId(), attendeeCopy.getRecurrenceId()) ||
+            event.getSequence() != attendeeCopy.getSequence() || false == matches(event.getOrganizer(), attendeeCopy.getOrganizer())) {
+            return null; // different revision of event
+        }
+        /*
+         * load data for this attendee's event copy
+         */
+        Attendee userAttendee = session.getEntityResolver().prepareUserAttendee(calendarUserId);
+        return storage.getAttendeeStorage().loadAttendee(new String[] { objectId }, userAttendee, (AttendeeField[]) null).get(objectId);
     }
 
 }

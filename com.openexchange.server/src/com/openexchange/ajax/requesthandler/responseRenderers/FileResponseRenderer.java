@@ -59,7 +59,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.DelegateFileHolder;
@@ -241,7 +241,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         } catch (FileResponseRendererActionException ex) {
             // Respond with an error
             try {
-                resp.sendError(ex.statusCode, ex.message == null ? HttpStatus.getStatusText(ex.statusCode) : ex.message);
+                resp.sendError(ex.statusCode, ex.message == null ? EnglishReasonPhraseCatalog.INSTANCE.getReason(ex.statusCode, null) : ex.message);
             } catch (IOException e) {
                 LOG.error("", e);
             }

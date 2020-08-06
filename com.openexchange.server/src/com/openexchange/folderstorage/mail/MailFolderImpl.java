@@ -51,7 +51,6 @@ package com.openexchange.folderstorage.mail;
 
 import static com.openexchange.folderstorage.mail.MailFolderStorage.closeMailAccess;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.Serializable;
 import java.util.EnumSet;
 import java.util.Locale;
@@ -233,7 +232,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     public MailFolderImpl(MailFolder mailFolder, int accountId, MailConfig mailConfig, User user, Locale locale, int contextId, DefaultFolderFullnameProvider fullnameProvider, MailAccess<?, ?> mailAccess, MailAccount mailAccount, boolean translatePrimaryAccountDefaultFolders) throws OXException {
         super();
         this.mailAccountId = accountId;
-        this.accountId = MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
+        this.accountId = MailFolderUtility.prepareFullname(accountId, MailFolder.ROOT_FOLDER_ID);
         userId = user.getId();
         this.contextId = contextId;
         fullName = mailFolder.getFullname();
@@ -420,7 +419,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             return MailFolderUtility.prepareFullname(accountId, fullName.substring(0, index));
         }
 
-        return MailFolder.DEFAULT_FOLDER_ID.equals(fullName) ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
+        return MailFolder.ROOT_FOLDER_ID.equals(fullName) ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(accountId, MailFolder.ROOT_FOLDER_ID);
     }
 
     private LocalizedNameProvider getLocalizedNameProviderForPrimaryStandard(String key, boolean translatePrimaryAccountDefaultFolders, String folderName) {
@@ -534,7 +533,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
      */
     private static final int MAX_PERMISSION = 64;
 
-    private static final TIntIntHashMap MAPPING = new TIntIntHashMap(6); 
+    private static final TIntIntHashMap MAPPING = new TIntIntHashMap(6);
     { //Unnamed Block.
         MAPPING.put(Permission.MAX_PERMISSION, MAX_PERMISSION);
         MAPPING.put(MAX_PERMISSION, MAX_PERMISSION);
@@ -707,7 +706,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     }
 
     private static String ensureFullName(final String fullName) {
-        return prepareMailFolderParam(fullName).getFullname();
+        return MailFolderUtility.prepareMailFolderParamOrElseReturn(fullName);
     }
 
     @Override

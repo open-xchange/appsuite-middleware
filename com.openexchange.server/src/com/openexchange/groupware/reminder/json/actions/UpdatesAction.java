@@ -63,6 +63,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
@@ -83,13 +84,13 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link UpdatesAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @OAuthAction(ReminderActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = AbstractReminderAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class UpdatesAction extends AbstractReminderAction {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesAction.class);

@@ -92,7 +92,7 @@ public class UnregistrationCommand implements ProtocolCommand {
         Response[] r = IMAPCommandsCollection.performCommand(protocol, command);
         Response response = r[r.length - 1];
         if (response.isOK()) {
-            LOGGER.info("Unregistered push notification for {} using: {}", imapFolder.getStore(), command);
+            LOGGER.info("Unregistered push notifications for {} using: {}", imapFolder.getStore(), command);
             return Boolean.TRUE;
         } else if (response.isBAD()) {
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
@@ -110,6 +110,7 @@ public class UnregistrationCommand implements ProtocolCommand {
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
             protocol.handleResult(response);
         }
+        LOGGER.warn("Failed to unregister push notifications for {} using: {}", imapFolder.getStore(), command);
         return Boolean.FALSE;
     }
 }

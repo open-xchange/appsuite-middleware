@@ -116,11 +116,13 @@ public class EventPostProcessor {
     private final Map<String, RecurrenceData> knownRecurrenceData;
     private final SelfProtection selfProtection;
 
-    private long maximumTimestamp;
     private Set<String> eventIdsWithAttachment;
+    private Set<String> eventIdsWithConference;
     private Set<String> alarmTriggersPerEventId;
     private Map<String, Integer> attendeeCountsPerEventId;
     private Map<String, Attendee> userAttendeePerEventId;
+
+    private long maximumTimestamp;
     private List<Event> events;
 
     /**
@@ -135,14 +137,14 @@ public class EventPostProcessor {
         this.session = session;
         this.storage = storage;
         this.selfProtection = selfProtection;
-        this.events = new ArrayList<Event>();
         this.requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         this.knownRecurrenceData = new HashMap<String, RecurrenceData>();
+        reset();
     }
 
     /**
      * Sets a map holding additional hints to assign the {@link EventFlag#ATTACHMENTS} when processing the events.
-     * 
+     *
      * @param eventIdsWithAttachment A set holding the identifiers of those events where at least one attachment stored
      * @return A self reference
      */
@@ -152,8 +154,19 @@ public class EventPostProcessor {
     }
 
     /**
-     * Sets a map holding additional hints to assign the {@link EventFlag#ALARMS} when processing the events.
-     * 
+     * Sets additional hints to assign the {@link EventFlag#CONFERENCES} when processing the events.
+     *
+     * @param eventIdsWithAttachment A set holding the identifiers of those events where at least one conference stored
+     * @return A self reference
+     */
+    EventPostProcessor setConferencesFlagInfo(Set<String> eventIdsWithConference) {
+        this.eventIdsWithConference = eventIdsWithConference;
+        return this;
+    }
+
+    /**
+     * Sets additional hints to assign the {@link EventFlag#ALARMS} when processing the events.
+     *
      * @param alarmTriggersPerEventId A set holding the identifiers of those events where at least one alarm trigger is stored for the user
      * @return A self reference
      */
@@ -164,7 +177,7 @@ public class EventPostProcessor {
 
     /**
      * Sets a map holding additional hints to assign the {@link EventFlag#SCHEDULED} when processing the events.
-     * 
+     *
      * @param attendeeCountsPerEventId The number of attendees, mapped to the identifiers of the corresponding events
      * @return A self reference
      */
@@ -175,7 +188,7 @@ public class EventPostProcessor {
 
     /**
      * Sets a map holding essential information about the calendar user attendee when processing the events.
-     * 
+     *
      * @param userAttendeePerEventId The calendar user attendees, mapped to the identifiers of the corresponding events
      * @return A self reference
      */
@@ -327,7 +340,7 @@ public class EventPostProcessor {
 
     /**
      * Gets the first event of the previously processed events.
-     * 
+     *
      * @return The first event, or <code>null</code> if there is none
      */
     public Event getFirstEvent() throws OXException {
@@ -339,10 +352,10 @@ public class EventPostProcessor {
     }
 
     /**
-     * Clears the collection of processed events and resets the maximum timestamp.
+     * Resets the internal list of resulting events and the maximun timestamp.
      */
-    public void clear() {
-        events.clear();
+    public void reset() {
+        events = new ArrayList<Event>();
         maximumTimestamp = 0L;
     }
 
@@ -354,15 +367,6 @@ public class EventPostProcessor {
     public long getMaximumTimestamp() {
         return maximumTimestamp;
     }
-
-    /**
-     * Resets the internal list of resulting events and the maximun timestamp.
-     */
-    public void reset() {
-        events = new ArrayList<Event>();
-        maximumTimestamp = 0L;
-    }
-
 
     private boolean doProcess(Event event, CalendarFolder folder) throws OXException {
         if (Classification.PRIVATE.equals(event.getClassification()) && isClassifiedFor(event, session.getUserId())) {
@@ -381,6 +385,12 @@ public class EventPostProcessor {
         }
         if (isSeriesMaster(event)) {
             knownRecurrenceData.put(event.getSeriesId(), new DefaultRecurrenceData(event));
+        }
+        if (null == requestedFields || Arrays.contains(requestedFields, EventField.ATTENDEES)) {
+            /*
+             * inject known data from other attendee copies of the same event
+             */
+            new ResolvePerformer(session, storage).injectKnownAttendeeData(event, folder);
         }
         event.setFolderId(folder.getId());
         if (null == requestedFields || Arrays.contains(requestedFields, EventField.FLAGS)) {
@@ -418,7 +428,7 @@ public class EventPostProcessor {
              * apply 'userized' exception dates to series master as requested
              */
             maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
-            if (null == requestedFields || Arrays.contains(requestedFields, EventField.CHANGE_EXCEPTION_DATES) || 
+            if (null == requestedFields || Arrays.contains(requestedFields, EventField.CHANGE_EXCEPTION_DATES) ||
                 Arrays.contains(requestedFields, EventField.DELETE_EXCEPTION_DATES)) {
                 try {
                     return events.add(applyExceptionDates(storage, event, folder.getCalendarUserId()));
@@ -488,6 +498,9 @@ public class EventPostProcessor {
         if (null != eventIdsWithAttachment && eventIdsWithAttachment.contains(event.getId())) {
             flags.add(EventFlag.ATTACHMENTS);
         }
+        if (null != eventIdsWithConference && eventIdsWithConference.contains(event.getId())) {
+            flags.add(EventFlag.CONFERENCES);
+        }
         if (null != alarmTriggersPerEventId && alarmTriggersPerEventId.contains(event.getId())) {
             flags.add(EventFlag.ALARMS);
         }
@@ -548,7 +561,7 @@ public class EventPostProcessor {
 
     /**
      * Injects essential information about the calendar user attendee prior processing the event, in case it is available.
-     * 
+     *
      * @param event The event to enrich with essential information about the calendar user attendee
      * @return The event, enriched with data about the calendar user attendee if available
      */

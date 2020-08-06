@@ -1,41 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Copyright (c) 1997, 2019 Oracle and/or its affiliates. All rights reserved.
  *
- * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0, which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
  *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common Development
- * and Distribution License("CDDL") (collectively, the "License").  You
- * may not use this file except in compliance with the License.  You can
- * obtain a copy of the License at
- * https://oss.oracle.com/licenses/CDDL+GPL-1.1
- * or LICENSE.txt.  See the License for the specific
- * language governing permissions and limitations under the License.
+ * This Source Code may also be made available under the following Secondary
+ * Licenses when the conditions for such availability set forth in the
+ * Eclipse Public License v. 2.0 are satisfied: GNU General Public License,
+ * version 2 with the GNU Classpath Exception, which is available at
+ * https://www.gnu.org/software/classpath/license.html.
  *
- * When distributing the software, include this License Header Notice in each
- * file and include the License file at LICENSE.txt.
- *
- * GPL Classpath Exception:
- * Oracle designates this particular file as subject to the "Classpath"
- * exception as provided by Oracle in the GPL Version 2 section of the License
- * file that accompanied this code.
- *
- * Modifications:
- * If applicable, add the following below the License Header, with the fields
- * enclosed by brackets [] replaced by your own identifying information:
- * "Portions Copyright [year] [name of copyright owner]"
- *
- * Contributor(s):
- * If you wish your version of this file to be governed by only the CDDL or
- * only the GPL Version 2, indicate your decision by adding "[Contributor]
- * elects to include this software in this distribution under the [CDDL or GPL
- * Version 2] license."  If you don't indicate a single choice of license, a
- * recipient has the option to distribute your version of this file under
- * either the CDDL, the GPL Version 2 or to extend the choice of license to
- * its licensees as provided above.  However, if you add GPL Version 2 code
- * and therefore, elected the GPL Version 2 license, then the option applies
- * only if the new code is made subject to such option by the copyright
- * holder.
+ * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
 
 package com.sun.mail.iap;
@@ -49,12 +25,12 @@ import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -66,6 +42,7 @@ import org.slf4j.MDC;
 import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.ProtocolAccess;
 import com.sun.mail.imap.ProtocolListener;
 import com.sun.mail.imap.ProtocolListenerCollection;
 import com.sun.mail.imap.ResponseEvent;
@@ -151,6 +128,14 @@ public class Protocol {
 	    this.logger = logger;
 	    traceLogger = logger.getSubLogger("protocol", null);
 
+	    if (props != null) {
+	        ProtocolAccess protocolAccess = ProtocolAccess.instanceFor(user, host, port, props);
+	        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(protocolAccess);
+	        if (optionalCommandExecutor.isPresent()) {	            
+	            props.put(prefix + ".protocol.info", protocolAccess);
+	            props.put(prefix + ".protocol.connector", optionalCommandExecutor.get());
+	        }
+	    }
 	    socket = SocketFetcher.getSocket(host, port, props, prefix, isSSL);
 	    quote = PropUtil.getBooleanProperty(props,
 					"mail.debug.quote", false);
@@ -159,9 +144,10 @@ public class Protocol {
 
 	    // Read server greeting
 	    {
-	        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(this);
+	        ProtocolAccess protocolAccess = ProtocolAccess.instanceFor(this);
+            Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(protocolAccess);
 	        if (optionalCommandExecutor.isPresent()) {
-	            processGreeting(optionalCommandExecutor.get().readResponse(this));
+	            processGreeting(optionalCommandExecutor.get().readResponse(protocolAccess));
 	        } else {
 	            processGreeting(readResponse());
 	        }
@@ -440,10 +426,11 @@ public class Protocol {
      */
     public synchronized Response[] command(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor) {
         // Determine suitable executor
-        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(this);
+        ProtocolAccess protocolAccess = ProtocolAccess.instanceFor(this);
+        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(protocolAccess);
         if (optionalCommandExecutor.isPresent()) {            
             // Issue command using matching executor
-            return optionalCommandExecutor.get().executeCommand(command, args, optionalInterceptor, this);
+            return optionalCommandExecutor.get().executeCommand(command, args, optionalInterceptor, protocolAccess);
         }
 
         // No matching executor available
@@ -488,73 +475,71 @@ public class Protocol {
 	    v = new java.util.ArrayList<Response>(32);
 	} catch (LiteralException lex) {
 	    Response lexResponse = lex.getResponse();
-	    intercept(lexResponse, interceptor);
+	    isInterceptedAndConsumed(lexResponse, interceptor);
         v = new java.util.ArrayList<Response>(1);
         v.add(lexResponse);
 	    done = true;
 	} catch (Exception ex) {
 	    // Convert this into a BYE response
 	    Response byeResponse = Response.byeResponse(ex);
-	    intercept(byeResponse, interceptor);
+	    isInterceptedAndConsumed(byeResponse, interceptor);
         v = new java.util.ArrayList<Response>(1);
         v.add(byeResponse);
 	    done = true;
 	}
 
-    Response r = null;
+    boolean discardResponses = "true".equals(MDC.get("mail.imap.discardresponses"));
+    String lowerCaseCommand = null;
+
     Response taggedResp = null;
-    if (!done) {
-	boolean discardResponses = "true".equals(MDC.get("mail.imap.discardresponses"));
-	String lowerCaseCommand = null;
+    Response byeResp = null;
+    while (!done) {
+        Response r = null;
+        try {
+        r = readResponse();
+        } catch (IOException ioex) {
+        if (byeResp == null)    // convert this into a BYE response
+            byeResp = Response.byeResponse(ioex);
+        // else, connection closed after BYE was sent
+        break;
+        } catch (ProtocolException pex) {
+        logger.log(Level.FINE, "ignoring bad response", pex);
+        continue; // skip this response
+        }
 
-	Response byeResp = null;
-	do {
-	    try {
-		r = readResponse();
-	    } catch (IOException ioex) {
-		if (byeResp != null)	// connection closed after BYE was sent
-		    break;
-		// convert this into a BYE response
-		r = Response.byeResponse(ioex);
-	    } catch (ProtocolException pex) {
-            logger.log(java.util.logging.Level.FINE, "Failed to read IMAP response", pex);
-		    continue; // skip this response
-	    }
+        if (r.isBYE()) {
+        byeResp = r;
+        continue;
+        }
 
-	    if (r.isBYE()) {
-		byeResp = r;
-		continue;
-	    }
-
-	    // If this is a matching command completion response, we are done
-	    boolean tagged = r.isTagged();
+        // If this is a matching command completion response, we are done
+        boolean tagged = r.isTagged();
         if (tagged && r.getTag().equals(tag)) {
-            intercept(r, interceptor);
+            taggedResp = r;
+            isInterceptedAndConsumed(r, interceptor);
             v.add(r);
-	        done = true;
-	        taggedResp = r;
-	    } else {
-	        if (!intercept(r, interceptor)) {
-	            if (discardResponses && !tagged && !r.isSynthetic() && (r instanceof IMAPResponse)) {
-	                IMAPResponse imapResponse = (IMAPResponse) r;
-	                if (lowerCaseCommand == null) {
-	                    lowerCaseCommand = asciiLowerCase(command);
-	                }
-	                String key = asciiLowerCase(imapResponse.getKey());
-	                if ((key == null) || (lowerCaseCommand.indexOf(key) < 0)) {
-	                    v.add(r);
-	                }
-	            } else {
-	                v.add(r);
-	            }
+            done = true;
+        } else {
+            if (!isInterceptedAndConsumed(r, interceptor)) {
+                if (discardResponses && !tagged && !r.isSynthetic() && (r instanceof IMAPResponse)) {
+                    IMAPResponse imapResponse = (IMAPResponse) r;
+                    if (lowerCaseCommand == null) {
+                        lowerCaseCommand = asciiLowerCase(command);
+                    }
+                    String key = asciiLowerCase(imapResponse.getKey());
+                    if ((key == null) || (lowerCaseCommand.indexOf(key) < 0)) {
+                        v.add(r);
+                    }
+                } else {
+                    v.add(r);
+                }
             }
-	    }
-	} while (!done);
+        }
+    }
 
-	if (byeResp != null) {
-	    intercept(byeResp, interceptor);
-	    v.add(byeResp);	// must be last
-	}
+    if (byeResp != null) {
+        isInterceptedAndConsumed(byeResp, interceptor);
+        v.add(byeResp); // must be last
     }
 
 	Response[] responses = v.toArray(new Response[v.size()]);
@@ -563,7 +548,7 @@ public class Protocol {
         timestamp = end;
 	commandEnd();
 
-	if (measure) {	    
+	if (measure) {
 	    long executionMillis = end - start;
 	    if (auditLogEnabled) {
             com.sun.mail.imap.AuditLog.LOG.info("command='{}' time={} timestamp={} taggedResponse='{}'", (null == args ? command : command + " " + args.toString()), Long.valueOf(executionMillis), Long.valueOf(end), null == taggedResp ? "<none>" : taggedResp.toString());
@@ -598,7 +583,7 @@ public class Protocol {
 	return responses;
     }
 
-    private boolean intercept(Response response, ResponseInterceptor interceptor) {
+    private boolean isInterceptedAndConsumed(Response response, ResponseInterceptor interceptor) {
         try {
             return interceptor.intercept(response);
         } catch (Exception e) {
@@ -762,6 +747,17 @@ public class Protocol {
 	    }
 	}
 	return ret;
+    }
+
+    /**
+     * Return the local SocketAddress (host and port) for this
+     * end of the connection.
+     *
+     * @return  the SocketAddress
+     * @since   JavaMail 1.6.4
+     */
+    public SocketAddress getLocalSocketAddress() {
+    return socket.getLocalSocketAddress();
     }
 
     /**

@@ -20,7 +20,7 @@ import com.openexchange.testing.httpclient.modules.LoginApi;
 
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.filter.LoggingFilter;
+import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -82,6 +82,21 @@ public class ApiClient {
   private Integer userId;
 
   private HashMap<String, Object> cookies = new HashMap<String, Object>();
+  
+  /**
+   * A value of {@code true} declares that the client will try to set
+   * unsupported HTTP method to {@link java.net.HttpURLConnection} via
+   * reflection.
+   * <p>
+   * NOTE: Enabling this property may cause security related warnings/errors
+   * and it may break when other JDK implementation is used. <b>Use only
+   * when you know what you are doing.</b>
+   * </p>
+   * <p>The value MUST be an instance of {@link java.lang.Boolean}.</p>
+   * <p>The default value is {@code false}.</p>
+   * <p>The name of the configuration property is <tt>{@value}</tt>.</p>
+   */
+  private static final String SET_METHOD_WORKAROUND = "jersey.config.client.httpUrlConnection.setMethodWorkaround";
 
   public ApiClient() {
     json = new JSON();
@@ -657,6 +672,10 @@ public class ApiClient {
       response = invocationBuilder.put(entity);
     } else if ("DELETE".equals(method)) {
       response = invocationBuilder.delete();
+    } else if ("PATCH".equals(method)) {
+      invocationBuilder.property(SET_METHOD_WORKAROUND, true);
+      response = invocationBuilder.method("PATCH", entity);
+      invocationBuilder.property(SET_METHOD_WORKAROUND, false);
     } else {
       throw new ApiException(500, "unknown method type " + method);
     }
@@ -739,7 +758,7 @@ public class ApiClient {
     clientConfig.register(json);
     clientConfig.register(JacksonFeature.class);
     if (debugging) {
-      clientConfig.register(LoggingFilter.class);
+      clientConfig.register(LoggingFeature.class);
     }
     return clientBuilder.withConfig(clientConfig).build();
   }

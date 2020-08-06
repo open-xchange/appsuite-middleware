@@ -105,7 +105,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
         folder.setTitle(this.getClass().getSimpleName() + "_" + new UID().toString());
         folder.setModule("mail");
         body.setFolder(folder);
-        FolderUpdateResponse createFolder = folderApi.createFolder(FOLDER, getApiClient().getSession(), body, "1", null, null);
+        FolderUpdateResponse createFolder = folderApi.createFolder(FOLDER, getApiClient().getSession(), body, "1", null, null, null);
         Assert.assertNull(createFolder.getError());
         Assert.assertNotNull(createFolder.getData());
 

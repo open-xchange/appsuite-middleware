@@ -108,6 +108,7 @@ public class FolderExceptionMessages implements LocalizableStrings {
 
     // User selected one or more permissions that cannot be applied to target folder; e.g. selected guest permission for a mail folder.
     public static final String INVALID_PERMISSIONS_MSG = "The chosen permission(s) cannot be set";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

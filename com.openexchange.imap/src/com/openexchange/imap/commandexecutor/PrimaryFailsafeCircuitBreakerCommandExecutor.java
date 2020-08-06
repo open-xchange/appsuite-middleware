@@ -51,8 +51,8 @@ package com.openexchange.imap.commandexecutor;
 
 import java.net.InetAddress;
 import java.util.Optional;
-import org.slf4j.Logger;
-import com.sun.mail.iap.Protocol;
+import com.sun.mail.imap.ProtocolAccess;
+import com.sun.mail.util.ProtocolInfo;
 import net.jodah.failsafe.util.Ratio;
 
 /**
@@ -63,12 +63,7 @@ import net.jodah.failsafe.util.Ratio;
  */
 public class PrimaryFailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircuitBreakerCommandExecutor {
 
-    /** The logger constant */
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PrimaryFailsafeCircuitBreakerCommandExecutor.class);
-
-    private static final String PROP_PRIMARY_ACCOUNT = "mail.imap.primary";
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
+    private final boolean applyPerEndpoint;
 
     /**
      * Initializes a new {@link PrimaryFailsafeCircuitBreakerCommandExecutor}.
@@ -76,59 +71,28 @@ public class PrimaryFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
      * @param failureThreshold The ratio of successive failures that must occur in order to open the circuit
      * @param successThreshold The ratio of successive successful executions that must occur when in a half-open state in order to close the circuit
      * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
+     * @param applyPerEndpoint Whether the circuit breaker shall be applied per end-point (IP/port combination). Otherwise it applies per primary account host name.
+     * @param delegate The delegate executor
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
-    public PrimaryFailsafeCircuitBreakerCommandExecutor(Ratio failureThreshold, Ratio successThreshold, long delayMillis) {
-        super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 100);
+    public PrimaryFailsafeCircuitBreakerCommandExecutor(Ratio failureThreshold, Ratio successThreshold, long delayMillis, boolean applyPerEndpoint, MonitoringCommandExecutor delegate) {
+        super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 100, delegate);
+        this.applyPerEndpoint = applyPerEndpoint;
     }
 
     @Override
-    protected CircuitBreakerInfo circuitBreakerFor(Protocol protocol) {
-        InetAddress key = protocol.getInetAddress();
-        CircuitBreakerInfo breakerInfo = circuitBreakers.get(key);
-        if (breakerInfo == null) {
-            String id = stringFor(key);
-            CircuitBreakerInfo newBreakerInfo = createCircuitBreaker(id);
-            breakerInfo = circuitBreakers.putIfAbsent(key, newBreakerInfo);
-            if (breakerInfo == null) {
-                breakerInfo = newBreakerInfo;
-                initMetricsFor(id, newBreakerInfo, metricServiceReference.get(), metricDescriptors.get());
-            }
+    protected Key getKey(ProtocolInfo protocolInfo) {
+        if (applyPerEndpoint) {
+            InetAddress inetAddress = protocolInfo.getInetAddress();
+            return Key.of("primary", inetAddress.getHostAddress() + ':' + protocolInfo.getPort(), true);
         }
-        return breakerInfo;
-    }
 
-    private static String stringFor(InetAddress inetAddress) {
-        String s = inetAddress.toString();
-        if (s.startsWith("/")) {
-            s = s.substring(1);
-        }
-        return s;
+        return Key.of("primary", protocolInfo.getHost(), false);
     }
 
     @Override
-    protected void onClose(CircuitBreakerInfo breakerInfo) throws Exception {
-        LOG.info("Primary IMAP circuit breaker closed for end-point {}", breakerInfo.getKey());
-    }
-
-    @Override
-    protected void onHalfOpen(CircuitBreakerInfo breakerInfo) throws Exception {
-        LOG.info("Primary IMAP circuit breaker half-opened for end-point {}", breakerInfo.getKey());
-    }
-
-    @Override
-    protected void onOpen(CircuitBreakerInfo breakerInfo) throws Exception {
-        LOG.info("Primary IMAP circuit breaker opened for end-point {}", breakerInfo.getKey());
-    }
-
-    @Override
-    public String getDescription() {
-        return "primary";
-    }
-
-    @Override
-    public boolean isApplicable(Protocol protocol) {
-        return "true".equals(protocol.getProps().getProperty(PROP_PRIMARY_ACCOUNT));
+    public boolean isApplicable(ProtocolAccess protocolAccess) {
+        return "true".equals(protocolAccess.getProps().getProperty(PROP_PRIMARY_ACCOUNT));
     }
 
 }

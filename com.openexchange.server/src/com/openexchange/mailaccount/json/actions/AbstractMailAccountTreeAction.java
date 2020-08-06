@@ -87,7 +87,7 @@ public abstract class AbstractMailAccountTreeAction extends AbstractValidateMail
             // Recursive call
             addSubfolders(
                 root,
-                mailAccess.getFolderStorage().getSubfolders(MailFolder.DEFAULT_FOLDER_ID, true),
+                mailAccess.getFolderStorage().getSubfolders(MailFolder.ROOT_FOLDER_ID, true),
                 mailAccess,
                 mailAccess.getMailConfig(),
                 session);

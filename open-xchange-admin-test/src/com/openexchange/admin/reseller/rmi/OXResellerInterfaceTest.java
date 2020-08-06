@@ -54,7 +54,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Stack;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -80,17 +79,16 @@ public class OXResellerInterfaceTest extends AbstractOXResellerTest {
         super();
     }
 
-    @After
+    @Override
     public final void tearDown() throws Exception {
-        final ResellerAdmin[] adms = getResellerManager().search("test*");
-        for (final ResellerAdmin adm : adms) {
-            getResellerManager().delete(adm);
+        try {
+            final ResellerAdmin[] adms = getResellerManager().search("test*");
+            for (final ResellerAdmin adm : adms) {
+                getResellerManager().delete(adm);
+            }
+        } finally {
+            super.tearDown();
         }
-    }
-
-    @Test
-    public void testUpdateModuleAccessRestrictions() throws Exception {
-        getResellerManager().updateDatabaseModuleAccessRestrictions();
     }
 
     @Test

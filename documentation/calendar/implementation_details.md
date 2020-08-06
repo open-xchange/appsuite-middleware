@@ -337,7 +337,7 @@ Therefore, some information might currently get lost when converting a recurrenc
 
 # Reset of Participation Status
 
-Whenever an existing event with attendees is *rescheduled*, each attendee's participation status is reset to ``NEEDS-ACTION``. A reschedule occurs, when any ``DTSTART``, ``DTEND``, ``DURATION``, ``RRULE``, ``RDATE``, or ``EXDATE`` property changes such that existing recurrence instances are impacted by the changes (RFC 6638, 3.2.8) - i.e., whenever the period of an event changes. 
+Whenever an existing event with attendees is *rescheduled*, each attendee's participation status is reset to ``NEEDS-ACTION``. The optional comment, however, is persisted if present. A reschedule occurs, when any ``DTSTART``, ``DTEND``, ``DURATION``, ``RRULE``, ``RDATE``, or ``EXDATE`` property changes such that existing recurrence instances are impacted by the changes (RFC 6638, 3.2.8) - i.e., whenever the period of an event changes. 
 
 ## Internal Handling
 
@@ -414,7 +414,23 @@ To avoid possible ambiguities, only certain changes considered, where the change
 - For all *simple* changed event fields, it is checked if the modified property is equal in the original series master event and in the change exception. Simple event fields are (preliminary): ``CLASSIFICATION``, ``TRANSP``, ``SUMMARY``, ``LOCATION``, ``DESCRIPTION``, ``CATEGORIES``, ``COLOR``, ``URL``, ``GEO``, ``TRANSP``, ``STATUS``. If not, leave the property in the change exception as-is (i.e. do not propagate this change). If yes, also apply the change in the change exception.
 - Newly added attendees are also added in existing change exception events, unless they're not already attending there.
 - Removed attendees are also removed from change exceptions, in case they previously attended there, too.
+- Changes within the series event's conferences are also reflected in overridden instances, unless they were modified compared to the master event  
 - For changes to an event's start- and/or enddate, the same change is only propagated if both properties are equal to the original value in the change exception, i.e. the change exception's timeslot is still matching the recurrence.
+
+## Propagate Participation Status to Exceptions
+
+Especially for event series with many attendees, chances are quite high that there are many change exceptions in the series after a while. Main reason is here that users change their participation status for individual occurrences to indicate that they cannot attend an event due to vacation or conflicting appointments at the same time. Or, they apply an individual reminder to an occurrence.
+
+While these are all change exception events from a technical point of view, users do not see them as such, which previously caused some quirks when they want to change their participation status of the whole series, or get hints in the notification area that there are multiple events of the same series they need to reply to.
+
+So, similarly as updates of the event data may get propagated, also an updated participation status of an attendee in the series master event may get applied to existing change exceptions under certain circumstances, which are: 
+
+- The original participation status of a change exception must be equal to the original participation status of the series master event
+- The change exception must not be a *real* exception from the series, i.e. it must not be considered as *re-scheduled* compared to the original occurrence. In particular, the following event fields are considered to distinguish between *real* and *synthetic* change exceptions: ``SUMMARY``, ``LOCATION``, ``DESCRIPTION``, ``ATTACHMENTS``, ``GEO``, ``ORGANIZER``, ``START_DATE``, ``END_DATE``, ``TRANSP``, ``RECURRENCE_RULE``. On top, any change in the attendee line-up (in terms of added or removed participants) qualifies an overridden instance as *real* exception.  
+
+If these preconditions are met, the updated participation status in the series master event is taken over in overridden instances, too. In the participation status update comes along with a certain comment, this attendee comment is also updated in overridden instances, if its value has been equal to the series master event before, too.
+
+Due to the fact that the participation status is also propagated to overriden instances, the notification area will only show those events the user really has to reply to and leave out those technical exceptions matching the circumstances mentioned above.
 
 ***
 
@@ -584,7 +600,7 @@ In the first case, where an internal calendar user is the organizer, a single ev
 
 Group-scheduled meetings with an external organizer usually arrive via iMIP at the inbox of an internal recipient. When replying, the event data is taken over into their personal calendar folder, representing the so-called *attendee copy* of the event - the organizer's master copy resides on a foreign calendaring system in this scenario. The same handling also applies for events that arrive via iMIP, but contain an organizer whose email address refers to another internal user (e.g. when a calendar client is used by the organizer that is not connected to the server). In contrast to an internally organized event where the server has control over the master copy, the attendee copy is stored for each invited user individually in that case. So, even if multiple internal users from the same context attend in an externally organized event, each of them will have an own attendee copy, whose lifecycle is completely decoupled from other attendee copies of the same event. This is necessary, as meeting requests from external scheduling systems may be different for different recipients, so that a single copy cannot be maintained. For example, the organizer's calendar system might hide the attendees in the guest list from each other, or, when attendees are removed, the cancel message may only be sent to the deleted attendees, while no updated meeting request is forwarded to the other ones.
 
-Technically, in such events where the organizer copy is not located on the server, only the attendee representing the actual calendar user gets resolved into an internal entity, while all other attendees as well as the organizer are still treated as external calendar users. So, even if one attendee copy changes locally (due to one user changing its participation status), this is not reflected in the other one as long as an update by the organizer is received. 
+Technically, in such events where the organizer copy is not located on the server, only the attendee representing the actual calendar user gets resolved into an internal entity, while all other attendees as well as the organizer are still treated as external calendar users. So, even if one attendee copy changes locally (due to one user changing its participation status), this is not persisted in the other one as long as an update by the organizer is received. However, when the event data is read from one copy, the server will still try to lookup and inject data for other internal attendees from the copies found on their calendars if possible. Doing so, a scheduling reply performed by one internal attendee is immediately visible for peer attendees, too, without the need of receiving an updated iMIP request from the organizer first.
 
 ***
 
@@ -609,6 +625,7 @@ Therefore, a new, virtual *read-only* property for events was introduced: event 
 Via this property, events will get decorated with different aspects that are relevant for the client, e.g. "has attachments", "is recurring", "has alarm(s)", "is organizer", and so on. In particular, the following event flags are supported:
  
 - ``attachment``: The event contains at least one attachment. 
+- ``conferences``: The event contains at least one conference. 
 - ``alarms``: The calendar user has at least one alarm associated with the event.
 - ``scheduled``: Event is a *group-scheduled* meeting with an organizer.
 - ``organizer``: The calendar user is the *organizer* of the meeting.
@@ -792,4 +809,6 @@ Lets consider the case that the event is organized by another entity than the us
 
 
 ## Export
-The export will only touch so called 'pseudo group scheduled' events. Events that are only attended by the organizer herself are considered 'pseudo group scheduled'. Those events will be exported without the organizer and the attendee information as those are only persisted to legacy reasons (see [Group-scheduled Events](#group-scheduled-events)). 
+The export will touch so called 'pseudo group scheduled' events. Events that are only attended by the organizer herself are considered 'pseudo group scheduled'. Those events will be exported without the organizer and the attendee information as those are only persisted to legacy reasons (see [Group-scheduled Events](#group-scheduled-events)). 
+When exporting events the event flags as per [Event Flags](#event-flags) will be ignored, as they represent internal state.
+Besides this, alarms will be removed on exported events. The motivation behind this is that alarms are bound to a user and not to the exported event. Additionally some alarms that will trigger mails which might be imported as-is on other systems, generating unwanted mails.

@@ -531,6 +531,15 @@ glbQueryParamsImageTransformationCropY:
   schema:
     type: integer
     format: int32
+QueryParamFolderAutoRename:
+  name: autorename
+  in: query
+  description: >-
+    Whether to automatically rename the folder in case an folder with the same name already exists.
+  required: false
+  schema:
+    type: boolean
+    default: false
 QueryParamChronosFolder:
   name: folder
   in: query

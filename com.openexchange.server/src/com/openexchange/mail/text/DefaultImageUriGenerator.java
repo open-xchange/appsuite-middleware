@@ -97,7 +97,7 @@ public class DefaultImageUriGenerator implements ImageUriGenerator {
             int unifiedINBOXAccountID = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
             if (unifiedINBOXAccountID < 0 || mailPath.getAccountId() != unifiedINBOXAccountID) {
                 String tmp = AJAXUtility.decodeUrl(mailId, null);
-                if (tmp.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+                if (tmp.startsWith(MailFolder.MAIL_PREFIX)) {
                     // Expect mail path; e.g. "default0/INBOX/123"
                     try {
                         mailId = new MailPath(tmp).getMailID();
@@ -126,7 +126,7 @@ public class DefaultImageUriGenerator implements ImageUriGenerator {
             int unifiedINBOXAccountID = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
             if (unifiedINBOXAccountID < 0 || mailPath.getAccountId() != unifiedINBOXAccountID) {
                 String tmp = AJAXUtility.decodeUrl(mailId, null);
-                if (tmp.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+                if (tmp.startsWith(MailFolder.MAIL_PREFIX)) {
                     // Expect mail path; e.g. "default0/INBOX/123"
                     try {
                         mailId = new MailPath(tmp).getMailID();

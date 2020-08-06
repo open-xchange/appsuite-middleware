@@ -80,6 +80,8 @@ import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.threadpool.ThreadPools;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Metrics;
 
 /**
  * {@link HazelcastSessionStorageService} - The {@link SessionStorageService} backed by {@link HazelcastInstance}.
@@ -149,6 +151,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         this.unregisterer = unregisterer;
         inactive = new AtomicBoolean(false);
         synchronizer = new ConcurrentHashMap<String, AcquiredLatch>(256);
+        initMetrics();
     }
 
     private AcquiredLatch acquireFor(String sessionId) {
@@ -940,6 +943,52 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         }
 
         return isInterruptedException0(t.getCause());
+    }
+
+    private void initMetrics() {
+        Gauge.builder("appsuite.sessionstorage.sessions.total", () -> {
+                try {
+                    return sessions().getLocalMapStats().getOwnedEntryCount();
+                } catch (OXException e) {
+                    return Double.NaN;
+                }
+            })
+            .description("Total number of stored sessions (owned or backups) held by this node.")
+            .tag("type", "owned")
+            .register(Metrics.globalRegistry);
+
+        Gauge.builder("appsuite.sessionstorage.memory.bytes", () -> {
+                try {
+                    return sessions().getLocalMapStats().getOwnedEntryMemoryCost();
+                } catch (OXException e) {
+                    return Double.NaN;
+                }
+            })
+            .description("Consumed memory of stored sessions (owned or backups) held by this node in.")
+            .tag("type", "owned")
+            .register(Metrics.globalRegistry);
+
+        Gauge.builder("appsuite.sessionstorage.sessions.total", () -> {
+                try {
+                    return sessions().getLocalMapStats().getBackupEntryCount();
+                } catch (OXException e) {
+                    return Double.NaN;
+                }
+            })
+            .description("Total number of stored sessions (owned or backups) held by this node.")
+            .tag("type", "backup")
+            .register(Metrics.globalRegistry);
+
+        Gauge.builder("appsuite.sessionstorage.memory.bytes", () -> {
+                try {
+                    return sessions().getLocalMapStats().getBackupEntryMemoryCost();
+                } catch (OXException e) {
+                    return Double.NaN;
+                }
+            })
+            .description("Consumed memory of stored sessions (owned or backups) held by this node.")
+            .tag("type", "backup")
+            .register(Metrics.globalRegistry);
     }
 
 }

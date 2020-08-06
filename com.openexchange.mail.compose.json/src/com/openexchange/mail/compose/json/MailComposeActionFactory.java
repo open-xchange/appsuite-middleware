@@ -78,7 +78,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class MailComposeActionFactory implements AJAXActionServiceFactory {
 
-    private static final String MODULE = "mailcompose";
+    public static final String MODULE = "mailcompose";
 
     /**
      * Gets the <code>"mailcompose"</code> module identifier for mail compose action factory.

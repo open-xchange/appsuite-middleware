@@ -53,6 +53,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.apps.manifests.ManifestBuilder;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -74,7 +75,8 @@ public class AllAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        return new AJAXRequestResult(manifestBuilder.buildManifests(session), "json");
+        String version = requestData.getParameter("version");
+        return new AJAXRequestResult(manifestBuilder.buildManifests(session, version), "json");
     }
 
 }

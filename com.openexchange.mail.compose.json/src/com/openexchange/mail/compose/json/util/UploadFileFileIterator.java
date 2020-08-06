@@ -101,6 +101,11 @@ public class UploadFileFileIterator implements StreamedUploadFileIterator {
         }
 
         @Override
+        public long getSize() {
+            return uploadFile.getSize();
+        }
+
+        @Override
         public String getPreparedFileName() {
             return uploadFile.getPreparedFileName();
         }
@@ -123,11 +128,6 @@ public class UploadFileFileIterator implements StreamedUploadFileIterator {
         @Override
         public String getContentId() {
             return uploadFile.getContentId();
-        }
-
-        @Override
-        public long getSize() {
-            return uploadFile.getSize();
         }
 
         @Override

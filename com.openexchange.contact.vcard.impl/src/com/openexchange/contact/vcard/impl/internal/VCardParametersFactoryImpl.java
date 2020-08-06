@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.internal;
 import java.awt.Dimension;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.contact.vcard.DistributionListMode;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.VCardParametersFactory;
 import com.openexchange.contact.vcard.VCardVersion;
@@ -133,7 +134,7 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
         parameters.setMaxVCardSize(defaultMaxVCardSize);
         parameters.setKeepOriginalVCard(defaultKeepOriginalVCard);
         parameters.setRemoveImageFromKeptVCard(defaultRemoveImageFromKeptVCard);
-        parameters.setEnforceUtf8(enforceUtf8);
+        parameters.setDistributionListMode(DistributionListMode.V4_IN_V3_EXPORT);
         return parameters;
     }
 

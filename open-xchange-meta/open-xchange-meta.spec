@@ -3,7 +3,7 @@
 Name:           open-xchange-meta
 BuildArch:      noarch
 Version:        @OXVERSION@
-%define         ox_release 19
+%define         ox_release 7
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -460,38 +460,22 @@ Authors:
 %doc README.TXT
 
 %changelog
-* Tue Jul 21 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-07-27 (5821)
-* Wed Jul 15 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-07-17 (5819)
-* Thu Jul 09 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-07-13 (5804)
-* Fri Jun 26 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-07-02 (5792)
-* Wed Jun 24 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-06-30 (5781)
-* Mon Jun 15 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-06-15 (5765)
-* Fri May 15 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-05-26 (5742)
-* Mon May 04 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-05-11 (5720)
-* Thu Apr 23 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-04-30 (5702)
-* Fri Apr 17 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-04-02 (5692)
-* Mon Apr 06 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-04-14 (5677)
-* Thu Mar 19 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-03-23 (5653)
-* Fri Feb 28 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-03-02 (5623)
-* Wed Feb 12 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-02-19 (5588)
-* Wed Feb 12 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-02-10 (5572)
-* Mon Jan 20 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-01-20 (5547)
+* Wed Aug 05 2020 Carsten Hoeger <choeger@open-xchange.com>
+Fifth candidate for 7.10.4 release
+* Tue Aug 04 2020 Carsten Hoeger <choeger@open-xchange.com>
+Fourth candidate for 7.10.4 release
+* Tue Aug 04 2020 Carsten Hoeger <choeger@open-xchange.com>
+Third candidate for 7.10.4 release
+* Fri Jul 31 2020 Carsten Hoeger <choeger@open-xchange.com>
+Second candidate for 7.10.4 release
+* Tue Jul 28 2020 Carsten Hoeger <choeger@open-xchange.com>
+First candidate for 7.10.4 release
+* Tue Jun 30 2020 Carsten Hoeger <choeger@open-xchange.com>
+Second preview of 7.10.4 release
+* Wed May 20 2020 Carsten Hoeger <choeger@open-xchange.com>
+First preview of 7.10.4 release
+* Thu Jan 16 2020 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.10.4 release
 * Thu Nov 28 2019 Carsten Hoeger <choeger@open-xchange.com>
 Second candidate for 7.10.3 release
 * Thu Nov 21 2019 Carsten Hoeger <choeger@open-xchange.com>

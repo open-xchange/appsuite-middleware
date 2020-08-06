@@ -73,6 +73,7 @@ import com.openexchange.chronos.CalendarStrings;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.Conference;
 import com.openexchange.chronos.DefaultAttendeePrivileges;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -211,6 +212,25 @@ public class Check extends com.openexchange.chronos.common.Check {
             throw CalendarExceptionCodes.OUT_OF_SEQUENCE.create(originalEvent.getId(), I(eventUpdate.getSequence()), I(originalEvent.getSequence()));
         }
         return eventUpdate;
+    }
+
+    /**
+     * Checks that the incoming update does not contain outdated participant status
+     * <p>
+     * Note: Due the fact that some clients will receive the timestamp in DateTime format <code>ISO.8601.2004</code>,
+     * see {@link <a href="https://tools.ietf.org/html/rfc5545#section-3.3.5">RFC 5545 Section 3.3.5</a>}, the timestamp
+     * can only be evaluated in seconds.
+     *
+     * @param original The original attendee from the DB
+     * @param updated The updated attendee
+     * @throws OXException {@link CalendarExceptionCodes#CONCURRENT_MODIFICATION}
+     */
+    public static void requireUpToDateTimestamp(Attendee original, Attendee updated) throws OXException {
+        if (original.getTimestamp() > 0 && updated.getTimestamp() > 0
+            && original.getTimestamp() > updated.getTimestamp()
+            && original.getTimestamp() - updated.getTimestamp() >= 1000) {
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(I(original.getEntity()), L(original.getTimestamp()), L(updated.getTimestamp()));
+        }
     }
 
     /**
@@ -378,7 +398,7 @@ public class Check extends com.openexchange.chronos.common.Check {
      * Checks that the supplied event's unique identifier (UID) is not already used for another event within the scope of a specific
      * calendar user, i.e. the unique identifier is resolved to events residing in the user's <i>personal</i>, as well as <i>public</i>
      * calendar folders.
-     * 
+     *
      * @param session The calendar session
      * @param storage A reference to the calendar storage
      * @param event The event to check
@@ -482,7 +502,7 @@ public class Check extends com.openexchange.chronos.common.Check {
 
     /**
      * Checks that all attachments referenced by the supplied attachment collection are visible for the current session owner.
-     * 
+     *
      * @param session The calendar session
      * @param storage The calendar storage
      * @param attachments The attachments to check
@@ -513,7 +533,7 @@ public class Check extends com.openexchange.chronos.common.Check {
 
     /**
      * Checks that a specific attachment is contained in one of the supplied events, based on the attachment's managed identifier.
-     * 
+     *
      * @param events The events to search
      * @param managedId The managed identifier to lookup
      * @return The matching attachment
@@ -534,7 +554,7 @@ public class Check extends com.openexchange.chronos.common.Check {
      * @param event The event to check
      * @param attendee The attendee to lookup
      * @return The successfully looked up attendee
-     * @see CalendarUtils#find(List, Attendee)
+     * @see CalendarUtils#find(Collection, CalendarUser)
      * @throws OXException {@link CalendarExceptionCodes#ATTENDEE_NOT_FOUND}
      */
     public static Attendee attendeeExists(Event event, Attendee attendee) throws OXException {
@@ -549,7 +569,7 @@ public class Check extends com.openexchange.chronos.common.Check {
      * Checks that the event's organizer is also contained in the list of attendees, in case it is an <i>internal</i> user.
      *
      * @param event The event to check
-     * @param folder 
+     * @param folder
      * @throws OXException {@link CalendarExceptionCodes#MISSING_ORGANIZER}
      */
     public static void internalOrganizerIsAttendee(Event event, CalendarFolder folder) throws OXException {
@@ -606,6 +626,22 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
+     * Checks that the maximum number of conferences is not exceeded prior inserting or updating the conference collection of an event.
+     *
+     * @param selfProtection A reference to the self-protection helper
+     * @param conferences The conferences to check
+     * @return The passed conferences, after they were checked
+     * @throws OXException {@link CalendarExceptionCodes#TOO_MANY_CONFERENCES}
+     * @see <a href="https://tools.ietf.org/html/rfc4791#section-5.2.9">RFC 4791, section 5.2.9</a>
+     */
+    public static List<Conference> maxConferences(SelfProtection selfProtection, List<Conference> conferences) throws OXException {
+        if (null != conferences) {
+            selfProtection.checkConferenceCollection(conferences);
+        }
+        return conferences;
+    }
+
+    /**
      * Checks that the maximum number of alarms is not exceeded prior inserting or updating the alarm collection of an event for a user.
      *
      * @param selfProtection A reference to the self-protection helper
@@ -657,7 +693,7 @@ public class Check extends com.openexchange.chronos.common.Check {
 
     /**
      * Checks that a specific resource identifier exists.
-     * 
+     *
      * @param entityResolver The entity resolver to use for checking
      * @param resourceId The resource identifier to check
      * @return The resource identifier, after it was checked for existence
@@ -677,7 +713,7 @@ public class Check extends com.openexchange.chronos.common.Check {
     /**
      * Checks that a calendar user address URI matches a specific user, i.e. it either matches the user's resource identifier, or
      * references one of the user's e-mail addresses.
-     * 
+     *
      * @param uri The calendar user address string to check
      * @param contextId The context identifier
      * @param user The internal user to match against
@@ -717,7 +753,7 @@ public class Check extends com.openexchange.chronos.common.Check {
     /**
      * Checks that a calendar user address URI matches a specific resource, i.e. it either matches the resource's resource identifier, or
      * references the resource's e-mail addresses.
-     * 
+     *
      * @param uri The calendar user address string to check
      * @param contextId The context identifier
      * @param resource The internal resource to match against

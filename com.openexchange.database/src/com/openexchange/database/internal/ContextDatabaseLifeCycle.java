@@ -57,11 +57,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.ConfigDatabaseService;
+import com.openexchange.database.ConnectionType;
 import com.openexchange.database.DBPoolingExceptionCodes;
-import com.openexchange.database.JdbcProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.pooling.ExhaustedActions;
 import com.openexchange.pooling.PoolConfig;
@@ -73,7 +75,9 @@ import com.openexchange.pooling.PoolConfig;
  */
 public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
-    private static final String SELECT = "SELECT url,driver,login,password,hardlimit,max,initial FROM db_pool WHERE db_pool_id=?";
+    private static final String SELECT = "SELECT p.url,p.driver,p.login,p.password,p.hardlimit,p.max,p.initial,c.write_db_pool_id "
+                                       + "FROM db_pool AS p join db_cluster as c on p.db_pool_id = c.read_db_pool_id or p.db_pool_id = c.write_db_pool_id "
+                                       + "WHERE p.db_pool_id=?";
 
     private final Management management;
 
@@ -89,7 +93,19 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private final Properties jdbcProperties;
 
-    public ContextDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, ConnectionReloaderImpl reloader, final ConfigDatabaseService configDatabaseService) {
+    final ConfigurationService configurationService;
+
+    /**
+     * Initializes a new {@link ContextDatabaseLifeCycle}.
+     *
+     * @param configuration
+     * @param management
+     * @param timer
+     * @param reloader
+     * @param configDatabaseService
+     * @param configurationService
+     */
+    public ContextDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, ConnectionReloaderImpl reloader, final ConfigDatabaseService configDatabaseService, final ConfigurationService configurationService) {
         super();
         this.management = management;
         this.timer = timer;
@@ -97,6 +113,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         this.configDatabaseService = configDatabaseService;
         this.defaultPoolConfig = configuration.getPoolConfig();
         this.jdbcProperties = configuration.getJdbcProps();
+        this.configurationService = configurationService;
     }
 
     @Override
@@ -174,16 +191,17 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
             Properties defaults = new Properties();
 
             // Apply arguments read from database
-            String url = result.getString(1);
-            conDataBuilder.withDriverClass(result.getString(2));
-            defaults.put("user", result.getString(3));
-            defaults.put("password", result.getString(4));
-            conDataBuilder.withBlock(result.getBoolean(5));
-            conDataBuilder.withMax(result.getInt(6));
-            conDataBuilder.withMin(result.getInt(7));
-
+            int index = 1;
+            String url = result.getString(index++);
+            conDataBuilder.withDriverClass(result.getString(index++));
+            defaults.put("user", result.getString(index++));
+            defaults.put("password", result.getString(index++));
+            conDataBuilder.withBlock(result.getBoolean(index++));
+            conDataBuilder.withMax(result.getInt(index++));
+            conDataBuilder.withMin(result.getInt(index++));
+            conDataBuilder.withType(ConnectionType.get(poolId == result.getInt(index++)));
             // Apply JDBC properties (and drop any parameters from JDBC URL)
-            url = JdbcProperties.removeParametersFromJdbcUrl(url);
+            url = JdbcPropertiesImpl.doRemoveParametersFromJdbcUrl(url);
             conDataBuilder.withUrl(url);
 
             defaults.putAll(jdbcProperties);
@@ -197,7 +215,9 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         }
     }
 
-    private class ContextPoolAdapter extends AbstractConfigurationListener<ConnectionData> {
+    private class ContextPoolAdapter extends AbstractMetricAwarePool<ConnectionData> {
+
+        private volatile Set<Integer> globalDBPoolIds;
 
         ContextPoolAdapter(int poolId, ConnectionData data, Function<ConnectionData, String> toURL, Function<ConnectionData, Properties> toConnectionArguments, Function<ConnectionData, PoolConfig> toConfig) {
             super(poolId, data, toURL, toConnectionArguments, toConfig);
@@ -210,6 +230,8 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
                 data = loadPoolData(getPoolId(), configuration.getJdbcProps());
                 Class.forName(data.driverClass);
                 update(data);
+                globalDBPoolIds = GlobalDbInit.getGlobalDBPoolIds(configurationService);
+                initMetrics();
             } catch (OXException oxe) {
                 LOG.error("Unable to load pool data.", oxe);
             } catch (ClassNotFoundException e) {
@@ -217,5 +239,21 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
                 LOG.error("Unable to reload configuration", exception);
             }
         }
+
+        @Override
+        protected String getPoolClass() {
+            Set<Integer> globalDBPoolIds = this.globalDBPoolIds;
+            if (globalDBPoolIds == null) {
+                synchronized (this) {
+                    globalDBPoolIds = this.globalDBPoolIds;
+                    if (globalDBPoolIds == null) {
+                        globalDBPoolIds = GlobalDbInit.getGlobalDBPoolIds(configurationService);
+                        this.globalDBPoolIds = globalDBPoolIds;
+                    }
+                }
+            }
+            return globalDBPoolIds != null && globalDBPoolIds.contains(I(getPoolId())) ? "globaldb" : "userdb";
+        }
     }
+
 }

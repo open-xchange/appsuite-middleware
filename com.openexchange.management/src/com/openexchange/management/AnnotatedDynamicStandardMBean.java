@@ -74,7 +74,7 @@ public abstract class AnnotatedDynamicStandardMBean extends AnnotatedStandardMBe
 
     /**
      * Initialises a new {@link AnnotatedDynamicStandardMBean}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      * @param description The description of this MBean
      * @param mbeanInterface The Class
@@ -117,11 +117,11 @@ public abstract class AnnotatedDynamicStandardMBean extends AnnotatedStandardMBe
 
     /**
      * Get the specified service
-     * 
+     *
      * @param clazz The service
-     * @return The service
+     * @return The service or <code>null</code>
      */
     protected <S> S getService(Class<? extends S> clazz) {
-        return services.getService(clazz);
+        return services.getOptionalService(clazz);
     }
 }

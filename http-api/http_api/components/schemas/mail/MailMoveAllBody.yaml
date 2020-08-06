@@ -1,0 +1,8 @@
+type: object
+properties:
+  source:
+    type: string
+    description: The identifier of the source folder.
+  target:
+    type: string
+    description: The identifier of the target folder.

@@ -68,6 +68,7 @@ public class Attendee extends CalendarUser {
     private Boolean rsvp;
     private String folderId;
     private boolean hidden;
+    private long timestamp;
     private List<String> member;
     private Transp transp;
     private List<ExtendedPropertyParameter> extendedParameters;
@@ -350,6 +351,43 @@ public class Attendee extends CalendarUser {
      */
     public boolean containsPartStat() {
         return isSet(AttendeeField.PARTSTAT);
+    }
+    
+    /**
+     * Gets the timestamp the attendee's participation status was last changed.
+     *
+     * @return The timestamp of the last participant status change
+     */
+    public long getTimestamp() {
+        return timestamp;
+    }
+    
+    /**
+     * Sets the timestamp the attendee's participation status was last changed.
+     *
+     * @param value The timestamp of the last participant status change to set
+     */
+    public void setTimestamp(long value) {
+        timestamp = value;
+        setFields.add(AttendeeField.TIMESTAMP);
+    }
+    
+    /**
+     * Removes the timestamp of the last participant status change
+     */
+    public void removeTimestamp() {
+        timestamp = -1;
+        setFields.remove(AttendeeField.TIMESTAMP);
+    }
+    
+    /**
+     * Gets a value indicating whether the timestamp of the last participant status change
+     * was set or not
+     *
+     * @return <code>true</code> if the timestamp is set, <code>false</code>, otherwise
+     */
+    public boolean containsTimestamp() {
+        return isSet(AttendeeField.TIMESTAMP);
     }
 
     /**
@@ -653,7 +691,7 @@ public class Attendee extends CalendarUser {
 
     @Override
     public String toString() {
-        return "Attendee [cuType=" + cuType + ", partStat=" + partStat + ", uri=" + uri + ", entity=" + entity + "]";
+        return "Attendee [cuType=" + cuType + ", partStat=" + partStat + ", uri=" + uri + ", entity=" + entity +  ", timestamp=" + timestamp + "]";
     }
 
 }

@@ -51,6 +51,7 @@ package com.openexchange.mailaccount;
 
 import java.sql.Connection;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
@@ -244,6 +245,15 @@ public interface MailAccountStorageService {
      * @throws OXException If the mail accounts cannot be returned
      */
     MailAccount[] getUserMailAccounts(int userId, int contextId) throws OXException;
+
+    /**
+     * Gets the mail accounts in the given context.
+     *
+     * @param contextId The context identifier
+     * @return All mail accounts in the specified context
+     * @throws OXException If the mail accounts cannot be returned
+     */
+    List<MailAccount> getUserMailAccounts(int contextId) throws OXException;
 
     /**
      * Gets the mail accounts belonging to specified user in given context.
@@ -443,9 +453,20 @@ public interface MailAccountStorageService {
      * @param properties Optional properties for delete event (passed to {@link MailAccountDeleteListener} instances)
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws OXException If the mail account cannot be deleted
      */
-    void deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId) throws OXException;
+    boolean deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId) throws OXException;
+
+    /**
+     * Deletes all mail accounts (except the default one) of the specified user
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param connection The writeable connection
+     * @throws OXException if the mail accounts cannot be deleted
+     */
+    void deleteAllMailAccounts(int userId, int contextId, Connection connection) throws OXException;
 
     /**
      * Deletes the transport account identified by specified identifier.
@@ -476,9 +497,10 @@ public interface MailAccountStorageService {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param deletePrimary <code>true</code> to delete also the primary mail account if the user is deleted.
+     * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws OXException If the mail account cannot be deleted
      */
-    void deleteMailAccount(int id, Map<String, Object> properties, int userId, int cid, boolean deletePrimary) throws OXException;
+    boolean deleteMailAccount(int id, Map<String, Object> properties, int userId, int cid, boolean deletePrimary) throws OXException;
 
     /**
      * Deletes the mail account identified by specified identifier.
@@ -489,9 +511,10 @@ public interface MailAccountStorageService {
      * @param contextId The context identifier
      * @param deletePrimary <code>true</code> to delete also the primary mail account if the user is deleted.
      * @param con The connection to use
+     * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws OXException If the mail account cannot be deleted
      */
-    void deleteMailAccount(int id, Map<String, Object> properties, int userId, int cid, boolean deletePrimary, Connection con) throws OXException;
+    boolean deleteMailAccount(int id, Map<String, Object> properties, int userId, int cid, boolean deletePrimary, Connection con) throws OXException;
 
     /**
      * Gets the mail accounts of the users whose login matches specified login.

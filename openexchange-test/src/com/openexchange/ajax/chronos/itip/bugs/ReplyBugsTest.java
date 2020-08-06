@@ -89,13 +89,13 @@ public class ReplyBugsTest extends AbstractITipAnalyzeTest {
         String summary = "Test for bug 59220 " + UUID.randomUUID().toString();
         EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, summary);
         Attendee replyingAttendee = prepareCommonAttendees(eventToCreate);
-        createdEvent = createEvent(eventToCreate);
-        
+        createdEvent = eventManager.createEvent(eventToCreate);
+
         /*
          * Receive mail as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
-        rememberMail(iMip);
+        rememberMail(apiClientC2, iMip);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, iMip)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
@@ -104,10 +104,10 @@ public class ReplyBugsTest extends AbstractITipAnalyzeTest {
         /*
          * reply with "accepted"
          */
-        EventData eventData = assertSingleEvent(accept(apiClientC2, constructBody(iMip)), createdEvent.getUid());
+        EventData eventData = assertSingleEvent(accept(apiClientC2, constructBody(iMip), null), createdEvent.getUid());
         assertAttendeePartStat(eventData.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.getStatus());
         rememberForCleanup(apiClientC2, eventData);
-        
+
         /*
          * Receive mail as organizer and download
          */
@@ -135,7 +135,6 @@ public class ReplyBugsTest extends AbstractITipAnalyzeTest {
         analyze(destinationData.getId(), CustomConsumers.EMPTY);
     }
 
-    
     /**
      * Uploads a mail to the INBOX
      *

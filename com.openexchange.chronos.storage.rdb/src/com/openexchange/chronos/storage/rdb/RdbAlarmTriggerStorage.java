@@ -178,13 +178,16 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
     }
 
-    private List<AlarmTrigger> getAlarmTriggers(int user, Long until, Connection con) throws OXException {
+    private List<AlarmTrigger> getAlarmTriggers(int user, Date from, Date until, Connection con) throws OXException {
         try {
             AlarmTriggerField[] mappedFields = MAPPER.getMappedFields();
             StringBuilder stringBuilder = new StringBuilder().append("SELECT account,cid,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger").append(" WHERE cid=? AND account=? AND user=?");
 
             if (until != null) {
                 stringBuilder.append(" AND triggerDate<?");
+            }
+            if (null != from) {
+                stringBuilder.append(" AND (recurrence IS NOT NULL OR triggerDate>=?)");
             }
             stringBuilder.append(" ORDER BY triggerDate");
 
@@ -196,7 +199,10 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 stmt.setInt(parameterIndex++, user);
 
                 if (until != null) {
-                    stmt.setLong(parameterIndex++, l(until));
+                    stmt.setLong(parameterIndex++, until.getTime());
+                }
+                if (null != from) {
+                    stmt.setLong(parameterIndex++, from.getTime());
                 }
 
                 try (ResultSet resultSet = logExecuteQuery(stmt)) {
@@ -459,10 +465,10 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
-    public List<AlarmTrigger> loadTriggers(int userId, Date until) throws OXException {
+    public List<AlarmTrigger> loadTriggers(int userId, Date from, Date until) throws OXException {
         Connection con = dbProvider.getReadConnection(context);
         try {
-            return getAlarmTriggers(userId, until == null ? null : L(until.getTime()), con);
+            return getAlarmTriggers(userId, from, until, con);
         } finally {
             dbProvider.releaseReadConnection(context, con);
         }
@@ -628,15 +634,12 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 return null;
             }
         }
-        TimeZone tz = UTC;
-        if (trigger.containsTimezone()) {
-            tz = trigger.getTimezone();
-        }
-
+        TimeZone tz = trigger.containsTimezone() ? trigger.getTimezone() : UTC;
+        Date now = new Date();
         if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
-            Event nextTriggerEvent = AlarmUtils.getNextTriggerEvent(event, alarm, new Date(), tz, recurrenceService);
+            Event nextTriggerEvent = AlarmUtils.getNextTriggerEvent(event, alarm, now, tz, recurrenceService);
             Date triggerTime = nextTriggerEvent == null ? null : AlarmUtils.getTriggerTime(alarm.getTrigger(), nextTriggerEvent, tz);
-            if (nextTriggerEvent == null || triggerTime == null || triggerTime.before(new Date())) {
+            if (nextTriggerEvent == null || triggerTime == null || triggerTime.before(now)) {
                 return null;
             }
             addRelatedDate(alarm, event, trigger);
@@ -644,7 +647,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             trigger.setTime(L(triggerTime.getTime()));
         } else {
             Date triggerTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz);
-            if (triggerTime == null || triggerTime.before(new Date()) || (alarm.containsAcknowledged() && !alarm.getAcknowledged().before(triggerTime))) {
+            if (triggerTime == null || triggerTime.before(now) || (alarm.containsAcknowledged() && !alarm.getAcknowledged().before(triggerTime))) {
                 return null;
             }
             trigger.setTime(L(triggerTime.getTime()));

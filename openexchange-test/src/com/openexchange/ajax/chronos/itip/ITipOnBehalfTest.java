@@ -54,12 +54,14 @@ import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleChang
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
+import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveNotification;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
@@ -69,6 +71,7 @@ import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
@@ -76,6 +79,7 @@ import com.openexchange.testing.httpclient.models.MailData;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 import com.openexchange.testing.httpclient.models.UserResponse;
+import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.UserApi;
 
 /**
@@ -110,9 +114,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
          * Get another user of context 1
          */
         testUserC1_2 = testContext.acquireUser();
-        addTearDownOperation(() -> {
-            context2.backUser(testUserC1_2);
-        });
+        addTearDownOperation(() -> context2.backUser(testUserC1_2));
         apiClientC1_2 = generateApiClient(testUserC1_2);
         rememberClient(apiClientC1_2);
 
@@ -133,7 +135,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         permissions.add(permission);
         folder.setPermissions(permissions);
         folder.setModule("event");
-        folder.setTitle("Shared for " + this.getClass().getSimpleName());
+        folder.setTitle(this.getClass().getSimpleName() + UUID.randomUUID().toString());
         folder.setSubscribed(Boolean.TRUE);
         body.setFolder(folder);
         sharedFolder = folderManager.createFolder(body);
@@ -159,7 +161,11 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         String summary = this.getClass().getSimpleName() + ".testOnBehalfOfInvitation";
         EventData data = EventFactory.createSingleTwoHourEvent(getUserId(), summary, defaultFolderId);
         Attendee replyingAttendee = prepareAttendees(data);
-        EventData secretaryEvent = createEvent(apiClientC1_2, data, sharedFolder);
+        ChronosCalendarResultResponse response = new ChronosApi(apiClientC1_2).createEvent(apiClientC1_2.getSession(), sharedFolder, data, Boolean.FALSE, null, Boolean.TRUE, null, null, null, Boolean.FALSE, null);
+        assertNotNull(response);
+        assertNull(response.getError());
+        EventData secretaryEvent = response.getData().getCreated().get(0);
+        rememberForCleanup(apiClientC1_2, secretaryEvent);
 
         /*
          * Check event within folder of organizer
@@ -173,7 +179,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
          * Check notification mail within organizers inbox
          * 
          */
-        rememberMail(receiveIMip(apiClient, testUser.getLogin(), summary, 0, null));
+        rememberMail(receiveNotification(apiClient, testUser.getLogin(), summary));
 
         /*
          * Receive iMIP as attendee
@@ -186,7 +192,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         assertAttendeePartStat(newEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.NEEDS_ACTION);
         analyze(analyzeResponse, CustomConsumers.ACTIONS);
 
-        EventData attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip)), createdEvent.getUid());
+        EventData attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip), null), createdEvent.getUid());
         rememberForCleanup(apiClientC2, attendeeEvent);
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED);
 

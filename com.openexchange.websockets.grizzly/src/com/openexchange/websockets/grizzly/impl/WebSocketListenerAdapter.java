@@ -50,9 +50,13 @@
 package com.openexchange.websockets.grizzly.impl;
 
 import org.glassfish.grizzly.websockets.DataFrame;
+import org.glassfish.grizzly.websockets.HandshakeException;
 import org.glassfish.grizzly.websockets.WebSocket;
+import org.glassfish.grizzly.websockets.WebSocketException;
 import com.openexchange.websockets.IndividualWebSocketListener;
+import com.openexchange.websockets.WebSocketConnectException;
 import com.openexchange.websockets.WebSocketListener;
+import com.openexchange.websockets.WebSocketRuntimeException;
 
 /**
  * {@link WebSocketListenerAdapter}
@@ -80,15 +84,43 @@ public class WebSocketListenerAdapter implements org.glassfish.grizzly.websocket
 
     // ------------------------------------------------------------------
 
-    /** The Web Socket listener */
     protected final WebSocketListener webSocketListener;
+    protected final IndividualWebSocketListenerAdapter individualWebSocketListenerAdapter;
 
     /**
      * Initializes a new {@link WebSocketListenerAdapter}.
      */
     protected WebSocketListenerAdapter(WebSocketListener webSocketListener) {
+        this(webSocketListener, null);
+    }
+
+    /**
+     * Initializes a new {@link WebSocketListenerAdapter}.
+     * @param newInstance
+     * @param individualWebSocketListenerAdapter
+     */
+    protected WebSocketListenerAdapter(WebSocketListener webSocketListener, IndividualWebSocketListenerAdapter individualWebSocketListenerAdapter) {
         super();
         this.webSocketListener = webSocketListener;
+        this.individualWebSocketListenerAdapter = individualWebSocketListenerAdapter;
+    }
+
+    /**
+     * Gets whether this adapter instance was created by an {@link IndividualWebSocketListenerAdapter}.
+     *
+     * @return <code>true</code> if so, <code>false</code> if it is a non-individual instance
+     */
+    public boolean isIndividualInstance() {
+        return individualWebSocketListenerAdapter != null;
+    }
+
+    /**
+     * Gets the {@link IndividualWebSocketListenerAdapter} that created this instance, if applicable.
+     *
+     * @return The individual adapter or <code>null</code>
+     */
+    public IndividualWebSocketListenerAdapter getIndividualAdapter() {
+        return individualWebSocketListenerAdapter;
     }
 
     @Override
@@ -125,7 +157,15 @@ public class WebSocketListenerAdapter implements org.glassfish.grizzly.websocket
     @Override
     public void onConnect(WebSocket socket) {
         if (socket instanceof DefaultSessionBoundWebSocket) {
-            webSocketListener.onWebSocketConnect((DefaultSessionBoundWebSocket) socket);
+            try {
+                webSocketListener.onWebSocketConnect((DefaultSessionBoundWebSocket) socket);
+            } catch (WebSocketConnectException e) {
+                HandshakeException hsEx = new HandshakeException(e.getCode(), e.getMessage());
+                hsEx.initCause(e);
+                throw hsEx;
+            } catch (WebSocketRuntimeException e) {
+                throw new WebSocketException(e);
+            }
         }
     }
 

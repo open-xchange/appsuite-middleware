@@ -74,6 +74,7 @@ public interface GuestService {
      * Authenticates the given password against the given user object.
      *
      * @param user user that password is compared with given one.
+     * @param contextId The context identifier
      * @param password password to check.
      * @return <code>true</code> if the password matches.
      * @throws OXException If password check mechanism has problems.

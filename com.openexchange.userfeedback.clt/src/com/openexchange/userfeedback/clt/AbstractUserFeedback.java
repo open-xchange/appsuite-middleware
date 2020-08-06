@@ -67,6 +67,7 @@ public abstract class AbstractUserFeedback extends AbstractRestCLI<Void> {
     protected static final String START_LONG = "start-time";
     protected static final String START_SHORT = "s";
 
+
     protected static final String CONTEXT_GROUP_LONG = "context-group";
     protected static final String CONTEXT_GROUP_SHORT = "g";
     protected static final String CONTEXT_GROUP_DEFAULT = "default";
@@ -78,11 +79,16 @@ public abstract class AbstractUserFeedback extends AbstractRestCLI<Void> {
     protected static final String ENDPOINT_LONG = "api-root";
     protected static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/";
 
+    /**
+     * Adds generic options to the given {@link Options}
+     *
+     * @param options The {@link Options} object
+     */
     protected void addGenericOptions(Options options) {
-        options.addOption(TYPE_SHORT, TYPE_LONG, true, "The feedback type to delete. Default: 'star-rating-v1'.");
+        options.addOption(TYPE_SHORT, TYPE_LONG, true, "The feedback type. Default: 'star-rating-v1'. Alternative value: 'nps-v1'.");
         options.addOption(CONTEXT_GROUP_SHORT, CONTEXT_GROUP_LONG, true, "The context group identifying the global DB where the feedback is stored. Default: 'default'.");
-        options.addOption(START_SHORT, START_LONG, true, "Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is deleted. If not set, all feedback up to -e is deleted.");
-        options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is deleted. If not set, all feedback since -s is deleted.");
+        options.addOption(START_SHORT, START_LONG, true, "Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is considered. If not set, all feedback up to -e is considered.");
+        options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is considered. If not set, all feedback since -s is considered.");
     }
 
     @Override
@@ -92,7 +98,7 @@ public abstract class AbstractUserFeedback extends AbstractRestCLI<Void> {
 
     /**
      * Adds desired path to the given endpoint if not yet available.
-     * 
+     *
      * @param endpoint The customizable endpoint
      * @param path The path to suffix
      * @return the enhanced path

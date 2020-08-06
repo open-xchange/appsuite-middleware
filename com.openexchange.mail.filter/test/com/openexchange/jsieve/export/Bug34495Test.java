@@ -80,7 +80,7 @@ public class Bug34495Test extends SieveHandler {
     private static final String DELIMS = "\"\\\r\n ";
 
     public Bug34495Test() {
-        super(null, null, null, null, 0, null, null, Optional.empty(), Optional.empty(), -1, -1);
+        super(null, null, null, "localhost", 0, null, null, Optional.empty(), -1, -1);
     }
 
 

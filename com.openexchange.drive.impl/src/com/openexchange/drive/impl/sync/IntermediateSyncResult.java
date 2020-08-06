@@ -195,7 +195,7 @@ public class IntermediateSyncResult<T extends DriveVersion> {
         if (!(obj instanceof IntermediateSyncResult)) {
             return false;
         }
-        IntermediateSyncResult other = (IntermediateSyncResult) obj;
+        IntermediateSyncResult<?> other = (IntermediateSyncResult<?>) obj;
         if (actionsForClient == null) {
             if (other.actionsForClient != null) {
                 return false;

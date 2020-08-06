@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Common *DAV logic
 Bundle-SymbolicName: com.openexchange.dav
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
@@ -16,6 +16,7 @@ Import-Package: com.google.common.annotations,
  com.openexchange.ajax.requesthandler.oauth,
  com.openexchange.annotation,
  com.openexchange.authentication,
+ com.openexchange.capabilities,
  com.openexchange.chronos,
  com.openexchange.chronos.common,
  com.openexchange.chronos.provider,
@@ -43,6 +44,7 @@ Import-Package: com.google.common.annotations,
  com.openexchange.groupware.results,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.java,
+ com.openexchange.java.util,
  com.openexchange.log,
  com.openexchange.login,
  com.openexchange.login.internal,
@@ -58,6 +60,7 @@ Import-Package: com.google.common.annotations,
  com.openexchange.servlet,
  com.openexchange.session,
  com.openexchange.sessiond.impl,
+ com.openexchange.tools.arrays,
  com.openexchange.tools.io,
  com.openexchange.tools.iterator,
  com.openexchange.tools.service,
@@ -79,6 +82,8 @@ Import-Package: com.google.common.annotations,
  com.openexchange.webdav.protocol.util,
  com.openexchange.webdav.xml.resources,
  gnu.trove.map,
+ io.micrometer.core.instrument,
+ io.micrometer.core.instrument.composite,
  javax.mail.internet,
  javax.mail.internet.idn,
  javax.servlet,

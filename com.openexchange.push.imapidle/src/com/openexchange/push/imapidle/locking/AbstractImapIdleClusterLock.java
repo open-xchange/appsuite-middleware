@@ -60,7 +60,6 @@ import com.hazelcast.core.Member;
 import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck;
 
 /**
@@ -235,9 +234,9 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
         {
             SessiondService sessiondService = services.getService(SessiondService.class);
             if (null != sessiondService) {
-                if (tranzient && (sessiondService instanceof SessiondServiceExtended)) {
+                if (tranzient) {
                     // Can only "live" node-local; either on this node or a remote one. Thus checking session storage makes no sense.
-                    if (((SessiondServiceExtended) sessiondService).getSession(sessionId, false) != null) {
+                    if (sessiondService.peekSession(sessionId, false) != null) {
                         // On this node
                         return true;
                     }

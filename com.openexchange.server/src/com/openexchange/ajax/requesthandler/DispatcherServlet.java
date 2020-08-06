@@ -55,7 +55,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -82,14 +81,13 @@ import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionConstants;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.upload.impl.UploadException;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.LogProperties.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -130,8 +128,6 @@ public class DispatcherServlet extends SessionServlet {
     /*-
      * /!\ These must be static for our servlet container to work properly. /!\
      */
-
-    private static final EnumSet<Name> PROPS_TO_IGNORE = EnumSet.of(LogProperties.Name.SESSION_CONTEXT_ID);
 
     /** The reference to the <code>Dispatcher</code> instance */
     private static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
@@ -399,7 +395,8 @@ public class DispatcherServlet extends SessionServlet {
             SessionExceptionCodes.SESSION_EXPIRED,
             UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED,
             UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED,
-            AjaxExceptionCodes.CONNECTION_RESET
+            AjaxExceptionCodes.CONNECTION_RESET,
+            FileStorageCodes.CONNECTION_CLOSED
         );
 
     /**
@@ -799,19 +796,6 @@ public class DispatcherServlet extends SessionServlet {
         }
         // None found
         throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
-    }
-
-    private void flushSafe(HttpServletResponse httpResponse) {
-        try {
-            try {
-                Streams.flush(httpResponse.getWriter());
-            } catch (IllegalStateException e) {
-                // getOutputStream has already been called
-                Streams.flush(httpResponse.getOutputStream());
-            }
-        } catch (Exception e) {
-            // Ignore
-        }
     }
 
     // ---------------------------------------------------------------------------------------------------------------------- //

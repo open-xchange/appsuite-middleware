@@ -78,11 +78,18 @@ public class VCardResource {
     private final String eTag;
     private final String href;
     private final VCard vCard;
+    private final String vCardString;
 
     public VCardResource(final String vCardString, final String href, final String eTag) throws IOException, VCardParseException {
+        super();
+        this.vCardString = vCardString;
         this.vCard = PARSER.parse(vCardString);
         this.href = href;
         this.eTag = eTag;
+    }
+
+    public String getVCardString() {
+        return vCardString;
     }
 
     public String getUID() {

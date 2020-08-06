@@ -49,12 +49,12 @@
 
 package com.openexchange.mail.autoconfig.sources;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.mail.autoconfig.tools.Utils.OX_CONTEXT_ID;
+import static com.openexchange.mail.autoconfig.tools.Utils.OX_USER_ID;
+import static com.openexchange.rest.client.httpclient.util.HttpContextUtils.addCookieStore;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -65,32 +65,6 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added google-common cache
  */
 public abstract class AbstractProxyAwareConfigSource extends AbstractConfigSource {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractProxyAwareConfigSource.class);
-
-    private static final String PROPERTY_ISPDB_PROXY = "com.openexchange.mail.autoconfig.http.proxy";
-    private static final String PROPERTY_ISPDB_PROXY_LOGIN = "com.openexchange.mail.autoconfig.http.proxy.login";
-    private static final String PROPERTY_ISPDB_PROXY_PASSWORD = "com.openexchange.mail.autoconfig.http.proxy.password";
-
-    public static final class ProxyInfo {
-        final URI proxyUrl;
-        final String proxyLogin;
-        final String proxyPassword;
-
-        ProxyInfo(URI proxyUrl, String proxyLogin, String proxyPassword) {
-            super();
-            this.proxyUrl = proxyUrl;
-            this.proxyLogin = proxyLogin;
-            this.proxyPassword = proxyPassword;
-        }
-
-        @Override
-        public String toString() {
-            return proxyUrl.toString();
-        }
-    }
-
-    // -------------------------------------------------------------------------------------------------- //
 
     /** The OSGi service look-up */
     protected final ServiceLookup services;
@@ -106,64 +80,25 @@ public abstract class AbstractProxyAwareConfigSource extends AbstractConfigSourc
     }
 
     /**
-     * Gets the HTTP proxy if configured
+     * Generated a {@link HttpContext} in which user and context identifiers
+     * are set.
      *
-     * @param view The config view
-     * @return The HTTP proxy or <code>null</code>
-     * @throws OXException If proxy cannot be returned
+     * @param context The context to set with identifier {@link #OX_CONTEXT_ID}
+     * @param user The user to set with identifier {@link #OX_USER_ID}
+     * @return A {@link HttpContext}
      */
-    protected ProxyInfo getHttpProxyIfEnabled(ConfigView view) throws OXException {
-        ComposedConfigProperty<String> property = view.property(PROPERTY_ISPDB_PROXY, String.class);
-        if (!property.isDefined()) {
-            return null;
-        }
-
-        // Get & check proxy setting
-        String proxy = property.get();
-        if (false != Strings.isEmpty(proxy)) {
-            return null;
-        }
-
-        // Parse & apply proxy settings
-        try {
-            URI proxyUrl;
-            {
-                String sProxyUrl = Strings.asciiLowerCase(proxy.trim());
-                if (sProxyUrl.startsWith("://")) {
-                    sProxyUrl = new StringBuilder(sProxyUrl.length() + 4).append("http").append(sProxyUrl).toString();
-                } else if (false == sProxyUrl.startsWith("http://") && false == sProxyUrl.startsWith("https://")) {
-                    sProxyUrl = new StringBuilder(sProxyUrl.length() + 7).append("http://").append(sProxyUrl).toString();
-                }
-                proxyUrl = new URI(sProxyUrl);
-            }
-
-            String proxyLogin = null;
-            String proxyPassword = null;
-
-            ComposedConfigProperty<String> propLogin = view.property(PROPERTY_ISPDB_PROXY_LOGIN, String.class);
-            if (propLogin.isDefined()) {
-                ComposedConfigProperty<String> propPassword = view.property(PROPERTY_ISPDB_PROXY_PASSWORD, String.class);
-                if (propPassword.isDefined()) {
-                    proxyLogin = propLogin.get();
-                    proxyPassword = propPassword.get();
-                    if (Strings.isNotEmpty(proxyLogin) && Strings.isNotEmpty(proxyPassword)) {
-                        proxyLogin = proxyLogin.trim();
-                        proxyPassword = proxyPassword.trim();
-                    }
-                }
-            }
-
-            return new ProxyInfo(proxyUrl, proxyLogin, proxyPassword);
-        } catch (URISyntaxException e) {
-            LOG.warn("Unable to parse proxy URL: {}", proxy, e);
-            return null;
-        } catch (NumberFormatException e) {
-            LOG.warn("Invalid proxy setting: {}", proxy, e);
-            return null;
-        } catch (RuntimeException e) {
-            LOG.warn("Could not apply proxy: {}", proxy, e);
-            return null;
-        }
+    protected HttpContext httpContextFor(int context, int user) {
+        BasicHttpContext httpContext = new BasicHttpContext();
+        httpContext.setAttribute(OX_CONTEXT_ID, I(context));
+        httpContext.setAttribute(OX_USER_ID, I(user));
+        addCookieStore(httpContext, context, user, getAccountId());
+        return httpContext;
     }
 
+    /**
+     * Gets the account identifier used in the HTTP context
+     *
+     * @return The identifier
+     */
+    protected abstract String getAccountId();
 }

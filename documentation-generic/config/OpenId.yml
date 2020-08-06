@@ -114,8 +114,9 @@ properties:
       
     - key: com.openexchange.oidc.scope
       description: |
-        The used scope
-      defaultValue: OpenID
+        The scope to request during OIDC authorization flow. This is a space-separated list of scope values, e.g. `openid offline`.
+        Scope values are case-sensitive!
+      defaultValue: openid
       version: 7.10.0
       reloadable: true
       configcascadeAware: false
@@ -286,14 +287,16 @@ properties:
       
     - key: com.openexchange.oidc.oauthRefreshTime
       description: |
-        Time in milliseconds determines how long before the expiration of the
-        OAuth AccessToken a new AccessToken should be requested. "refresh_token"
-        grant type must be registered for this client.
+        Time in milliseconds determining how long before the expiration of an
+        OAuth access token a new access token should be requested, usually by
+        exchanging a refresh token. In case refresh tokens are not issued,
+        this value should be 0 to align max. allowed session use time to
+        access token expiry.
       defaultValue: 60000
       version: 7.10.0
       reloadable: true
       configcascadeAware: false
-      related: 
+      related:
       file: openid.properties 
       packageName: open-xchange-oidc
       tags: ["OpenID"]
@@ -417,3 +420,67 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
 
+    - key: com.openenexchange.httpclient.oidc.totalConnections
+      description: |
+        The max. number of concurrent HTTP connections that may be established. If you have specified more
+        than one hosts, this setting should be configured so that  
+        connectionsPerRoute < totalConnections <= n * connectionsPerRoute.
+      defaultValue: 100
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: openid.properties
+      packageName: open-xchange-oidc
+      tags: ["OpenID", "Limit"]
+      
+    - key: com.openenexchange.httpclient.oidc.connectionsPerRoute
+      description: |
+        The max. number of concurrent HTTP connections that may be established with a certain endpoint.
+      defaultValue: 100
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: openid.properties
+      packageName: open-xchange-oidc
+      tags: ["OpenID", "Limit"]
+      
+    - key: com.openenexchange.httpclient.oidc.connectTimeout
+      description: |
+        The connection timeout in milliseconds. If establishing a new HTTP connection to a certain
+        host exceeds this value, a timeout exception is thrown.
+      defaultValue: 5000
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: openid.properties
+      packageName: open-xchange-oidc
+      tags: ["OpenID", "Timeout"]
+      
+    - key: com.openenexchange.httpclient.oidc.readTimeout
+      description: |
+        The socket read timeout in milliseconds. If waiting for the next expected TCP packet exceeds
+        this value, a timeout exception is thrown.
+      defaultValue: 15000
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: openid.properties
+      packageName: open-xchange-oidc
+      tags: ["OpenID", "Timeout"]
+
+    - key: com.openenexchange.httpclient.oidc.connectionRequestTimeout
+      description: |
+        The pool timeout in milliseconds. If waiting for the next available HTTP connection from pool exceeds
+        this value, a timeout exception is thrown.
+      defaultValue: 15000
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: openid.properties
+      packageName: open-xchange-oidc
+      tags: ["OpenID", "Timeout"]

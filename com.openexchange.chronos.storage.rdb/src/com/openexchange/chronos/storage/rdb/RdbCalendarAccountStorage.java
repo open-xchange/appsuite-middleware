@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.database.Databases.getPlaceholders;
 import static com.openexchange.database.Databases.isPrimaryKeyConflictInMySQL;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
@@ -72,7 +73,6 @@ import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
-import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -277,36 +277,35 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
 
     @Override
     public List<CalendarAccount> loadAccounts(int userId) throws OXException {
-        Connection connection = null;
-        try {
-            connection = dbProvider.getReadConnection(context);
-            return selectAccounts(connection, context.getContextId(), userId);
-        } catch (SQLException e) {
-            throw asOXException(e);
-        } finally {
-            dbProvider.releaseReadConnection(context, connection);
-        }
+        return loadAccounts(userId, (String[]) null);
     }
 
     @Override
     public List<CalendarAccount> loadAccounts(int[] userIds, String providerId) throws OXException {
-        Connection connection = null;
-        try {
-            connection = dbProvider.getReadConnection(context);
-            return selectAccounts(connection, context.getContextId(), providerId, userIds);
-        } catch (SQLException e) {
-            throw asOXException(e);
-        } finally {
-            dbProvider.releaseReadConnection(context, connection);
-        }
+        return loadAccounts(userIds, new String[] { providerId });
     }
 
     @Override
     public CalendarAccount loadAccount(int userId, String providerId) throws OXException {
+        List<CalendarAccount> accounts = loadAccounts(new int[] { userId }, providerId);
+        return 0 < accounts.size() ? accounts.get(0) : null;
+    }
+
+    @Override
+    public List<CalendarAccount> loadAccounts(int userId, String... providerIds) throws OXException {
+        return loadAccounts(new int[] { userId }, providerIds);
+    }
+
+    @Override
+    public List<CalendarAccount> loadAccounts(String... providerIds) throws OXException {
+        return loadAccounts(null, providerIds);
+    }
+
+    List<CalendarAccount> loadAccounts(int[] userIds, String[] providerIds) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectAccount(connection, context.getContextId(), userId, providerId);
+            return selectAccounts(connection, context.getContextId(), userIds, providerIds);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -424,33 +423,29 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         }
     }
 
-    private static List<CalendarAccount> selectAccounts(Connection connection, int cid, int user) throws SQLException {
-        List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
-        String sql = "SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND user=?;";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, cid);
-            stmt.setInt(2, user);
-            try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                while (resultSet.next()) {
-                    accounts.add(readAccount(resultSet));
-                }
-            }
+    private static List<CalendarAccount> selectAccounts(Connection connection, int cid, int[] userIds, String[] providerIds) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=?");
+        if (null != userIds && 0 < userIds.length) {
+            stringBuilder.append(" AND user").append(getPlaceholders(userIds.length));
         }
-        return accounts;
-    }
-
-    private static List<CalendarAccount> selectAccounts(Connection connection, int cid, String provider, int[] userIds) throws SQLException {
-        String sql = new StringBuilder()
-            .append("SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND provider=? AND user")
-            .append(Databases.getPlaceholders(userIds.length)).append(';')
-        .toString();
+        if (null != providerIds && 0 < providerIds.length) {
+            stringBuilder.append(" AND provider").append(getPlaceholders(providerIds.length));
+        }
+        String sql = stringBuilder.append(';').toString();
         List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, cid);
-            stmt.setString(parameterIndex++, provider);
-            for (int userId : userIds) {
-                stmt.setInt(parameterIndex++, userId);
+            if (null != userIds) {
+                for (int userId : userIds) {
+                    stmt.setInt(parameterIndex++, userId);
+                }
+            }
+            if (null != providerIds) {
+                for (String providerId : providerIds) {
+                    stmt.setString(parameterIndex++, providerId);
+                }
             }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
@@ -467,18 +462,6 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
             stmt.setInt(1, cid);
             stmt.setInt(2, id);
             stmt.setInt(3, user);
-            try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                return resultSet.next() ? readAccount(resultSet) : null;
-            }
-        }
-    }
-
-    private static CalendarAccount selectAccount(Connection connection, int cid, int user, String provider) throws SQLException {
-        String sql = "SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND user=? AND provider=?;";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, cid);
-            stmt.setInt(2, user);
-            stmt.setString(3, provider);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 return resultSet.next() ? readAccount(resultSet) : null;
             }

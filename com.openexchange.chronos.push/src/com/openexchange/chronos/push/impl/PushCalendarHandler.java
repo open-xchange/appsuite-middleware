@@ -72,8 +72,8 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -104,7 +104,7 @@ public class PushCalendarHandler implements CalendarHandler {
 
     /**
      * Initializes a new {@link PushCalendarHandler}.
-     * 
+     *
      * @param pushNotificationService A reference to the push notification service
      */
     public PushCalendarHandler(PushNotificationService pushNotificationService) {
@@ -158,7 +158,7 @@ public class PushCalendarHandler implements CalendarHandler {
 
     /**
      * Gets the (unique) identifiers of all affected folders mapped to the corresponding user identifier.
-     * 
+     *
      * @param event The event to extract the affected folders data for
      * @return The (unique) identifiers of the affected folders for each user
      */
@@ -179,7 +179,7 @@ public class PushCalendarHandler implements CalendarHandler {
     /**
      * Gets a value indicating whether at least one of the supplied update results denotes <i>significant</i> changes, i.e. changes that
      * would directly be visible in the client. Currently, this is only the case whenever the event's sequence number is bumped.
-     * 
+     *
      * @param updates The update results as indicated by the calendar event
      * @param userId The user to indicate the changes for
      * @param folderIds The affected folder identifiers visible to the user to indicate the changes for
@@ -187,31 +187,8 @@ public class PushCalendarHandler implements CalendarHandler {
      */
     private static boolean containsSignificantChanges(List<UpdateResult> updates, int userId, List<String> folderIds) {
         for (UpdateResult update : updates) {
-            if (update.getUpdatedFields().contains(EventField.SEQUENCE)) {
-                /*
-                 * sequence number has changed, so assume a "significant" change implicitly
-                 */
+            if (CalendarUtils.isSignificantChange(update, userId, folderIds)) {
                 return true;
-            }
-            if (update.getUpdatedFields().contains(EventField.ATTENDEE_PRIVILEGES)) {
-                /*
-                 * permission-related update, assume "significant" change
-                 */
-                return true;
-            }
-            for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : update.getAttendeeUpdates().getUpdatedItems()) {
-                if (attendeeUpdate.getOriginal().getEntity() == userId) {
-                    /*
-                     * user's own attendee modified, assume "significant" change
-                     */
-                    return true;
-                }
-                if (folderIds.contains(attendeeUpdate.getOriginal().getFolderId()) || folderIds.contains(attendeeUpdate.getUpdate().getFolderId())) {
-                    /*
-                     * attendee modified whose folder view is visible to user, assume "significant" change
-                     */
-                    return true;
-                }
             }
         }
         return false;
@@ -220,7 +197,7 @@ public class PushCalendarHandler implements CalendarHandler {
     /**
      * Gets the (unique) full identifiers of all events where the participation status of the mapped user is newly set to
      * {@link ParticipationStatus#NEEDS_ACTION}.
-     * 
+     *
      * @param event The event to extract the needs action data for
      * @return The (unique) full identifiers of all events needing action per user identifier
      */
@@ -253,7 +230,7 @@ public class PushCalendarHandler implements CalendarHandler {
              * collect all updated internal user attendees whose participation status was (re-) set to 'needs action' for updated events
              */
             for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : attendeeUpdates.getUpdatedItems()) {
-                if (isInternal(attendeeUpdate.getUpdate(), CalendarUserType.INDIVIDUAL) && 
+                if (isInternal(attendeeUpdate.getUpdate(), CalendarUserType.INDIVIDUAL) &&
                     attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT) &&
                     ParticipationStatus.NEEDS_ACTION.matches(attendeeUpdate.getUpdate().getPartStat())) {
                     EventID eventID = getUniqueEventID(update.getUpdate(), event.getAccountId(), attendeeUpdate.getUpdate().getEntity());

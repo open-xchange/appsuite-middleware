@@ -49,6 +49,8 @@
 
 package com.openexchange.drive.json.action;
 
+import static com.openexchange.configuration.ServerConfig.Property.FORCE_HTTPS;
+import static com.openexchange.login.ConfigurationProperty.HTTP_AUTH_CLIENT;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -63,17 +65,19 @@ import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.authentication.Cookie;
+import com.openexchange.authentication.application.AppPasswordUtils;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveService;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
+import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.Interface;
-import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.serverconfig.ServerConfig;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.AuthCookie;
 
@@ -84,6 +88,8 @@ import com.openexchange.tools.servlet.http.AuthCookie;
  * @since v7.8.0
  */
 public class JumpAction extends AbstractDriveAction {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JumpAction.class);
 
     public JumpAction() {
         super();
@@ -121,30 +127,57 @@ public class JumpAction extends AbstractDriveAction {
              */
             String link = driveService.getJumpRedirectUrl(session, path, name, method);
             /*
-             * perform token based login & obtain corresponding server token
+             * attempt to perform token based login & obtain corresponding server token if applicable
              */
-            HttpServletRequest request = requestData.optHttpServletRequest();
-            if (null == request) {
-                throw DriveExceptionCodes.IO_ERROR.create("Request must not be null");
+            String serverToken = null;
+            if (attemptTokenLogin(session)) {
+                HttpServletRequest request = requestData.optHttpServletRequest();
+                if (null == request) {
+                    throw DriveExceptionCodes.IO_ERROR.create("Request must not be null");
+                }
+                Cookie[] cookies = getCookies(request);
+                Map<String, List<String>> headers = getHeaders(request);
+                String client = getClient();
+                String hash = HashCalculator.getInstance().getHash(request, requestData.getUserAgent(), client);
+                boolean forceHTTPS = com.openexchange.tools.servlet.http.Tools.considerSecure(request, forceHTTPS());
+                LoginRequestImpl req = new LoginRequestImpl(session.getServerSession().getLogin(), session.getServerSession().getPassword(), session.getServerSession().getLocalIp(), userAgent, authId, client, "Drive Jump", hash, Interface.HTTP_JSON, headers, request.getParameterMap(), cookies, forceHTTPS, request.getServerName(), request.getServerPort(), request.getSession(false));
+                req.setClientToken(clientToken);
+                try {
+                    serverToken = LoginPerformer.getInstance().doLogin(req).getServerToken();
+                } catch (OXException e) {
+                    LOG.debug("Unable to spawn jump session for {}, falling back to plain direct link.", session, e);
+                }
             }
-            Cookie[] cookies = getCookies(request);
-            Map<String, List<String>> headers = getHeaders(request);
-            String client = getClient();
-            String hash = HashCalculator.getInstance().getHash(request, requestData.getUserAgent(), client);
-            boolean forceHTTPS = com.openexchange.tools.servlet.http.Tools.considerSecure(request, forceHTTPS());
-            LoginRequestImpl req = new LoginRequestImpl(session.getServerSession().getLogin(), session.getServerSession().getPassword(), session.getServerSession().getLocalIp(), userAgent, authId, client, "Drive Jump", hash, Interface.HTTP_JSON, headers, request.getParameterMap(), cookies, forceHTTPS, request.getServerName(), request.getServerPort(), requestData.getRoute());
-            req.setClientToken(clientToken);
-            LoginResult res = LoginPerformer.getInstance().doLogin(req);
-            String serverToken = res.getServerToken();
             /*
-             * return jump response holding the redirect URL as JSON
+             * return jump response holding the redirect URL or just the link as JSON
              */
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("redirectUrl", new StringBuilder(link).append("&serverToken=").append(serverToken).toString());
+            if (Strings.isEmpty(serverToken)) {
+                jsonObject.put("redirectUrl", link);
+                jsonObject.put("appendClientToken", false);
+            } else {
+                jsonObject.put("redirectUrl", new StringBuilder(link).append("&serverToken=").append(serverToken).toString());
+                jsonObject.put("appendClientToken", true);
+            }
             return new AJAXRequestResult(jsonObject, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static boolean attemptTokenLogin(DriveSession session) throws OXException {
+        if (Strings.isEmpty(session.getServerSession().getPassword()) || AppPasswordUtils.isRestricted(session.getServerSession())) {
+            return false;
+        }
+        ServerConfigService serverConfigService = Services.getService(ServerConfigService.class);
+        if (null != serverConfigService) {
+            ServerConfig serverConfig = serverConfigService.getServerConfig(session.getHostData().getHost(), session.getServerSession());
+            Map<String, Object> clientConfig = serverConfig.forClient();
+            if (Boolean.TRUE.equals(clientConfig.get("oidcLogin")) || Boolean.TRUE.equals(clientConfig.get("samlLogin"))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static Cookie[] getCookies(HttpServletRequest req) {
@@ -182,11 +215,11 @@ public class JumpAction extends AbstractDriveAction {
 
     private String getClient() throws OXException {
         ConfigurationService configService = getConfigService();
-        return configService.getProperty(ConfigurationProperty.HTTP_AUTH_CLIENT.getPropertyName(), ConfigurationProperty.HTTP_AUTH_CLIENT.getDefaultValue());
+        return configService.getProperty(HTTP_AUTH_CLIENT.getPropertyName(), HTTP_AUTH_CLIENT.getDefaultValue());
     }
 
     private boolean forceHTTPS() throws OXException {
         ConfigurationService configService = getConfigService();
-        return Boolean.parseBoolean(configService.getProperty(Property.FORCE_HTTPS.getPropertyName(), Property.FORCE_HTTPS.getDefaultValue()));
+        return Boolean.parseBoolean(configService.getProperty(FORCE_HTTPS.getPropertyName(), FORCE_HTTPS.getDefaultValue()));
     }
 }

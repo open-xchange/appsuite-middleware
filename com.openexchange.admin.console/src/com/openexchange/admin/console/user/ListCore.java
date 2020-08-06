@@ -130,7 +130,7 @@ public abstract class ListCore extends UserAbstraction {
     /**
      * This methods collects the information from the user object and calls the
      * general cvs output method
-     * 
+     *
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
@@ -183,6 +183,7 @@ public abstract class ListCore extends UserAbstraction {
             columnnames.add(UserAbstraction.OPT_ACCESS_COLLECT_EMAIL_ADDRESSES);
             columnnames.add(UserAbstraction.OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS);
             columnnames.add(UserAbstraction.OPT_ACCESS_SUBSCRIPTION);
+            columnnames.add(UserAbstraction.OPT_ACCESS_PUBLICATION);
             columnnames.add(UserAbstraction.OPT_ACCESS_ACTIVE_SYNC);
             columnnames.add(UserAbstraction.OPT_ACCESS_USM);
             columnnames.add(UserAbstraction.OPT_ACCESS_OLOX20);
@@ -245,6 +246,7 @@ public abstract class ListCore extends UserAbstraction {
             datarow.add(String.valueOf(access.isCollectEmailAddresses()));
             datarow.add(String.valueOf(access.isMultipleMailAccounts()));
             datarow.add(String.valueOf(access.isSubscription()));
+            datarow.add(String.valueOf(access.isPublication()));
             datarow.add(String.valueOf(access.isActiveSync()));
             datarow.add(String.valueOf(access.isUSM()));
             datarow.add(String.valueOf(access.isOLOX20()));

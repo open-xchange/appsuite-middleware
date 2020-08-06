@@ -87,7 +87,7 @@ public class RegistrationContext {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @param doveAdmClient The DoveAdm client
+     * @param doveAdmClientProvider The DoveAdm client provider
      * @return The DoveAdm client context
      */
     public static RegistrationContext createDoveAdmClientContext(int userId, int contextId, DoveAdmClientProvider doveAdmClientProvider) {
@@ -188,6 +188,7 @@ public class RegistrationContext {
     }
 
     private boolean hasWebMailAndIsActive(Session session) throws OXException {
+        // com.openexchange.user.UserExceptionCode.USER_NOT_FOUND
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         if (false == serverSession.getUserPermissionBits().hasWebMail()) {
             return false;

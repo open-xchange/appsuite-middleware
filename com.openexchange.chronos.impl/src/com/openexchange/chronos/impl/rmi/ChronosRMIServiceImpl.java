@@ -73,7 +73,9 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 
@@ -121,12 +123,14 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
             backAfterRead = false;
             checkPreConditions(event, userId, context);
 
+            int defFolder = OXFolderSQL.getUserDefaultFolder(userId, FolderObject.CALENDAR, FolderObject.PRIVATE, dbProvider.getReadConnection(context), context);
+            
             if (CalendarUtils.isSeriesMaster(event)) {
-                handleMaster(event.getId(), userId, storage, entityResolver);
+                handleMaster(event.getId(), userId, storage, entityResolver, String.valueOf(defFolder));
             } else if (CalendarUtils.isSeriesException(event)) {
-                handleMaster(event.getSeriesId(), userId, storage, entityResolver);
+                handleMaster(event.getSeriesId(), userId, storage, entityResolver, String.valueOf(defFolder));
             } else {
-                handleSingle(event, userId, storage, entityResolver);
+                handleSingle(event, userId, storage, entityResolver, String.valueOf(defFolder));
             }
             txPolicy.commit(writeCon);
             txPolicy.setAutoCommit(writeCon, true);
@@ -169,17 +173,17 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
      * @param entityResolver The entity resolver
      * @throws OXException if an error occurs
      */
-    private void handleMaster(String seriesId, int userId, CalendarStorage storage, EntityResolver entityResolver) throws OXException {
+    private void handleMaster(String seriesId, int userId, CalendarStorage storage, EntityResolver entityResolver, String defFolder) throws OXException {
         List<Event> exceptions = storage.getEventStorage().loadExceptions(seriesId, null);
         for (Event exception : exceptions) {
             exception.setAttendees(storage.getAttendeeStorage().loadAttendees(exception.getId()));
-            handleSingle(exception, userId, storage, entityResolver);
+            handleSingle(exception, userId, storage, entityResolver, defFolder);
         }
 
         Event master = storage.getEventStorage().loadEvent(seriesId, null);
         if (master != null) {
             master.setAttendees(storage.getAttendeeStorage().loadAttendees(master.getId()));
-            handleSingle(master, userId, storage, entityResolver);
+            handleSingle(master, userId, storage, entityResolver, defFolder);
         }
     }
 
@@ -192,8 +196,8 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
      * @param entityResolver The entity resolver
      * @throws OXException if an error occurs
      */
-    private void handleSingle(Event event, int userId, CalendarStorage storage, EntityResolver entityResolver) throws OXException {
-        Attendee newOrganizerAttendee = modifyEventObject(event, userId, entityResolver);
+    private void handleSingle(Event event, int userId, CalendarStorage storage, EntityResolver entityResolver, String defFolder) throws OXException {
+        Attendee newOrganizerAttendee = modifyEventObject(event, userId, entityResolver, defFolder);
         storage.getEventStorage().updateEvent(event);
         if (newOrganizerAttendee != null) {
             storage.getAttendeeStorage().insertAttendees(event.getId(), Collections.singletonList(newOrganizerAttendee));
@@ -209,7 +213,7 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
      * @return An attendee if adding is necessary
      * @throws OXException if an error occurs
      */
-    private Attendee modifyEventObject(Event event, int newOrganizer, EntityResolver entityResolver) throws OXException {
+    private Attendee modifyEventObject(Event event, int newOrganizer, EntityResolver entityResolver, String defFolder) throws OXException {
         Attendee newOrganizerAttendee = null;
         if (!CalendarUtils.isOrganizer(event, newOrganizer)) {
             event.setOrganizer(entityResolver.applyEntityData(new Organizer(), newOrganizer));
@@ -217,6 +221,8 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
         }
         if (event.getAttendees().stream().noneMatch(a -> a.getEntity() == newOrganizer)) {
             Attendee organizer = entityResolver.applyEntityData(new Attendee(), newOrganizer);
+            organizer.setFolderId(defFolder);
+            
             event.getAttendees().add(organizer);
             newOrganizerAttendee = organizer;
             LOG.info("Added organizer {} to attendees for event {}.", organizer.toString(), event.getId());

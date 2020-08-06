@@ -143,6 +143,17 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar","Limit"]
+    - key: com.openexchange.calendar.maxConferencesPerEvent
+      description: |
+        Defines a maximum number of conferences per event. The intention of this limit is to prevent out of memory situations.
+      defaultValue: 100
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit"]
     - key: com.openexchange.calendar.provider.google.refreshInterval
       description: |
         Defines the refresh interval in minutes for the google calendar provider.
@@ -202,17 +213,6 @@ properties:
       reloadable: true
       configcascadeAware: false
       related: com.openexchange.calendar.migration.batchSize
-      file: calendar.properties
-      packageName: open-xchange-core
-      tags: ["Calendar","Database"]
-    - key: com.openexchange.calendar.replayToLegacyStorage
-      description: |
-        Enables or disables the 'replaying' mode for the calendar storage.
-      defaultValue: false
-      version: 7.10.0
-      reloadable: true
-      configcascadeAware: false
-      related: 
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar","Database"]
@@ -506,11 +506,34 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar", "Notification"]
+    - key: com.openexchange.calendar.preferNoReplyForNotifications
+      description: |
+        If set to 'true' then internal notifications are sent via the no-reply mail account.
+      defaultValue: false
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: calendar.properties
+      packageName: open-xchange-core
+      related: com.openexchange.noreply.address
+      tags: ["Calendar", "Notification", "No-Reply"]
     - key: com.openexchange.calendar.allowOrganizerPartStatChanges
       description: |
         Configures whether organizer changes of the participation status property of other attendees are allowed beyond the recommended 
         restrictions mentioned in RFC 6638, section 3.2.1. Otherwise, only transitions to NEEDS-ACTION are possible. 
       defaultValue: false
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar"]
+    - key: com.openexchange.calendar.lookupPeerAttendeesForSameMailDomainOnly
+      description: |
+        Attendee data from copies of a group-scheduled event organized by an external calendar user is dynamically looked up in calendar
+        folders of other internal users. This flag indicates whether the lookup is only attempted for attendees that share the same mail domain
+        as the current calendar user, or if the lookup is always performed.
+      defaultValue: true
       version: 7.10.4
       reloadable: true
       configcascadeAware: true

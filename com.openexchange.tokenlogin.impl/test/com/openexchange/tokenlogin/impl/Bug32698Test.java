@@ -221,6 +221,7 @@ public class Bug32698Test {
     @Test
     public void testTokenIsDifferentAfterUsingItOnOtherOx() throws Exception {
         PowerMockito.when(this.sessiondService.getSession(ArgumentMatchers.anyString())).thenReturn(this.session);
+        PowerMockito.when(this.sessiondService.peekSession(ArgumentMatchers.anyString())).thenReturn(this.session);
         PowerMockito.when(this.sessiondService.addSession((AddSessionParameter) Mockito.anyObject())).thenReturn(this.session);
         PowerMockito.when(Services.getService(SessiondService.class)).thenReturn(this.sessiondService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);

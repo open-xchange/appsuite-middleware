@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Database Connection Pooling
 Bundle-SymbolicName: com.openexchange.database
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.base,
@@ -38,6 +38,8 @@ Import-Package: com.google.common.base,
  gnu.trove.map.hash,
  gnu.trove.set,
  gnu.trove.set.hash,
+ io.micrometer.core.instrument,
+ io.micrometer.core.instrument.composite,
  javax.management,
  javax.management.openmbean,
  javax.management.remote,

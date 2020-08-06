@@ -51,8 +51,10 @@ package com.openexchange.chronos.common.mapping;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -291,6 +293,28 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
             @Override
             public void remove(Attendee object) {
                 object.removePartStat();
+            }
+        });
+        mappings.put(AttendeeField.TIMESTAMP, new DefaultMapping<Long, Attendee>(){
+
+            @Override
+            public boolean isSet(Attendee object) {
+                return object.containsTimestamp();
+            }
+
+            @Override
+            public void set(Attendee object, Long value) throws OXException {
+                object.setTimestamp(null == value ? 0 : l(value));
+            }
+
+            @Override
+            public Long get(Attendee object) {
+                return L(object.getTimestamp());
+            }
+
+            @Override
+            public void remove(Attendee object) {
+                object.removeTimestamp();
             }
         });
         mappings.put(AttendeeField.COMMENT, new DefaultMapping<String, Attendee>() {

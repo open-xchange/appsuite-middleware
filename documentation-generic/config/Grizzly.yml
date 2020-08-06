@@ -263,3 +263,36 @@ properties:
       file: grizzly.properties
       packageName: open-xchange-grizzly
       tags: ["Grizzly"]
+    - key: com.openexchange.http.grizzly.sessionUnjoinedThreshold
+      description: |
+        Specifies the threshold in seconds when a new (see paragraph below) HTTP session is considered as subject for being removed since
+        unjoined for a sufficient time range.
+        
+        An HTTP session is considered as new (or unjoined) if the client does not yet know about the session or if the client chooses not
+        to join the session. For example, if the server used only cookie-based sessions, and the client had disabled the use of cookies,
+        then a session would be new on each request.
+        
+        A value of equal to or less than 0 (zero) disables this check; meaning HTTP sessions are not removed based on new/unjoined status
+        during clean-up run.
+      defaultValue: 120
+      version: 7.10.4
+      reloadable: false
+      configcascadeAware: false
+      related: ["com.openexchange.http.grizzly.sessionExpiryCheckInterval"]
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly"]
+    - key: com.openexchange.http.grizzly.removeNonAuthenticatedSessions
+      description: |
+        A boolean setting that defines whether a non-authenticated (see paragraph below) HTTP session is considered as subject for being
+        removed during clean-up run.
+        
+        An HTTP session is considered as non-authenticated if there is no valid Open-Xchange session associated with session-owning client.
+      defaultValue: true
+      version: 7.10.4
+      reloadable: false
+      configcascadeAware: false
+      related: ["com.openexchange.http.grizzly.sessionExpiryCheckInterval"]
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly"]

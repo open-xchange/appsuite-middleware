@@ -1,0 +1,66 @@
+/preliminary/http-notify/v1/notify:
+  put:
+    operationId: notify
+    tags:
+      - Preliminary
+      - Push
+    summary: Used by the dovecot mail server to push messages to the server
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            title: PushMessage
+            properties:
+              event:
+                type: string
+                description: The event type.
+                enum:
+                  - messageNew
+              user:
+                type: string
+                description: The user identifier in the format <userId>@<contextId>. E.g. 3@1
+              folder:
+                type: string
+                description: The folder id
+              imap-uid: 
+                type: string
+                description: The mail uid
+              from:
+                type: string
+                description: The from header of the mail
+              subject:
+                type: string
+                description: The subject of the mail
+              unseen:
+                type: integer
+                format: int32
+                description: The number of unseen mails
+              snippet:
+                type: string
+                description: A mail teaser
+      description: >-
+        JSONObject containing the push message
+      required: true
+    responses:
+      '200':
+        description: |
+          A JSON object with a success field set to 'true'.
+        content:
+          application/json:
+            schema:
+              type: object
+              title: SuccessResponse
+              properties:
+                success:
+                  type: boolean
+      '401':
+        description: Not authorized
+      '500':
+        description: >-
+          In case of internal server error that might have
+          multiple reasons. Response contains error message.
+        content:
+          application/json:
+            schema:
+              type: string

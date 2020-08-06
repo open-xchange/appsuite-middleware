@@ -73,7 +73,7 @@ public class GetMailInboxTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link GetMailInboxTest}.
-     * 
+     *
      * @param name name of the test.
      */
     public GetMailInboxTest() {
@@ -86,7 +86,7 @@ public class GetMailInboxTest extends AbstractAJAXSession {
         ListResponse response = getClient().execute(request);
         Iterator<FolderObject> iter = response.getFolder();
         FolderObject defaultIMAPFolder = null;
-        String primaryMailFolder = MailFolderUtility.prepareFullname(0, MailFolder.DEFAULT_FOLDER_ID);
+        String primaryMailFolder = MailFolderUtility.prepareFullname(0, MailFolder.ROOT_FOLDER_ID);
         while (iter.hasNext()) {
             final FolderObject fo = iter.next();
             if (fo.containsFullName() && primaryMailFolder.equals(fo.getFullName())) {

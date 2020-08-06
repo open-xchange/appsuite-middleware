@@ -51,6 +51,7 @@ package com.openexchange.chronos.common;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -73,6 +74,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -81,6 +83,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
 import org.dmfs.rfc5545.DateTime;
@@ -96,6 +99,8 @@ import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
@@ -111,6 +116,7 @@ import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AbstractEventUpdates;
 import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.common.mapping.ConferenceMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -118,6 +124,7 @@ import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -196,13 +203,76 @@ public class CalendarUtils {
 
     /**
      * Gets a value indicating whether a specific recurrence id is present in a collection of recurrence identifiers, based on its value.
+     * The lookup is performed based on {@link RecurrenceId#matches(RecurrenceId)}.
      *
      * @param recurrenceIds The recurrence id's to search
      * @param recurrenceId The recurrence id to lookup
      * @return <code>true</code> if a matching recurrence identifier is contained in the collection, <code>false</code>, otherwise
+     * @see RecurrenceId#matches(RecurrenceId)
      */
     public static boolean contains(Collection<RecurrenceId> recurrenceIds, RecurrenceId recurrenceId) {
-        return null != recurrenceIds && recurrenceIds.contains(recurrenceId);
+        return null != find(recurrenceIds, recurrenceId);
+    }
+
+    /**
+     * Removes all recurrence identifiers from a collection that are not present in a defined list of possible recurrence identifiers.
+     * I.e., only those recurrence identifiers are preserved that are present in the defined set of possible recurrence ids.
+     * <p/>
+     * Lookups are performed based on {@link RecurrenceId#matches(RecurrenceId)}.
+     *
+     * @param recurrenceIds The recurrence identifiers to remove non-matching ones from
+     * @param possibleRecurrenceIds The collection of possible recurrence identifiers
+     * @return <code>true</code> if the collection was modified, <code>false</code>, otherwise
+     * @see RecurrenceId#matches(RecurrenceId)
+     */
+    public static boolean removeNonMatching(Collection<RecurrenceId> recurrenceIds, Collection<RecurrenceId> possibleRecurrenceIds) {
+        if (isNullOrEmpty(recurrenceIds)) {
+            return false;
+        }
+        if (isNullOrEmpty(possibleRecurrenceIds)) {
+            recurrenceIds.clear();
+            return true;
+        }
+        boolean modified = false;
+        for (Iterator<RecurrenceId> iterator = recurrenceIds.iterator(); iterator.hasNext();) {
+            if (false == contains(possibleRecurrenceIds, iterator.next())) {
+                iterator.remove();
+                modified = true;
+            }
+        }
+        return modified;
+    }
+
+    /**
+     * Looks up a specific recurrence identifier within a collection of recurrence identifiers, based on its value. The lookup is
+     * performed based on {@link RecurrenceId#matches(RecurrenceId)}.
+     *
+     * @param recurrenceIds The recurrence id's to search
+     * @param recurrenceId The recurrence id to lookup
+     * @return The matching recurrence identifier, or <code>null</code> if not found
+     * @see RecurrenceId#matches(RecurrenceId)
+     */
+    public static RecurrenceId find(Collection<RecurrenceId> recurrenceIds, RecurrenceId recurrenceId) {
+        if (null != recurrenceIds) {
+            for (RecurrenceId id : recurrenceIds) {
+                if (recurrenceId.matches(id)) {
+                    return id;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets a value indicating whether the value of one recurrence identifier matches another one, based on
+     * {@link RecurrenceId#matches(RecurrenceId)}.
+     *
+     * @param recurrenceId1 The first recurrence identifier to match, or <code>null</code>
+     * @param recurrenceId2 The second recurrence identifier to match, or <code>null</code>
+     * @return <code>true</code> if both recurrence identifiers are <code>null</code> or their values matches, <code>false</code>, otherwise
+     */
+    public static boolean matches(RecurrenceId recurrenceId1, RecurrenceId recurrenceId2) {
+        return null == recurrenceId1 ? null == recurrenceId2 : recurrenceId1.matches(recurrenceId2);
     }
 
     /**
@@ -275,18 +345,20 @@ public class CalendarUtils {
     }
 
     /**
-     * Finds a specific event identified by its object-identifier and an optional recurrence identifier in a collection.
+     * Finds a specific event identified by its object-identifier and an optional recurrence identifier in a collection. The lookup is
+     * performed based on {@link RecurrenceId#matches(RecurrenceId)}.
      *
      * @param events The events to search in
      * @param objectID The object identifier of the event to search
      * @param recurrenceID The rcurrence identifier of the event to search
      * @return The event, or <code>null</code> if not found
+     * @see RecurrenceId#matches(RecurrenceId)
      */
     public static Event find(Collection<Event> events, String objectID, RecurrenceId recurrenceID) {
         if (null != events) {
             for (Event event : events) {
                 if (objectID.equals(event.getId())) {
-                    if (null == recurrenceID || recurrenceID.equals(event.getRecurrenceId())) {
+                    if (null == recurrenceID || recurrenceID.matches(event.getRecurrenceId())) {
                         return event;
                     }
                 }
@@ -315,6 +387,43 @@ public class CalendarUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets a value indicating whether a collection of calendar users matches another one, i.e. both collections contain the same elements,
+     * comparing the entity identifier for internal calendar users, or trying to match the calendar user's URI for external ones.
+     *
+     * @param collection1 The first collection to check
+     * @param collection2 The second collection to check
+     * @return <code>true</code> if the collections <i>match</i>, i.e. their elememts are targeting the same calendar users, <code>false</code>, otherwise
+     */
+    public static <T extends CalendarUser> boolean matches(Collection<T> collection1, Collection<T> collection2) {
+        return matches(collection1, collection2, (item1, item2) -> matches(item1, item2));
+    }
+
+    /**
+     * Gets a value indicating whether a collection <i>matches</i> another one, i.e. both collections contain the same elements, based on
+     * the supplied match function.
+     *
+     * @param collection1 The first collection to check
+     * @param collection2 The second collection to check
+     * @param matchFunction The function to use to check if one item matches another one
+     * @return <code>true</code> if the collections <i>match</i>, i.e. both contain the same elements (ignoring order), <code>false</code>, otherwise
+     */
+    public static <T> boolean matches(Collection<T> collection1, Collection<T> collection2, BiFunction<T, T, Boolean> matchFunction) {
+        if (null == collection1 || collection1.isEmpty()) {
+            return null == collection2 || collection2.isEmpty();
+        }
+        if (null == collection2 || collection1.size() != collection2.size()) {
+            return false;
+        }
+        return new AbstractSimpleCollectionUpdate<T>(collection1, collection2) {
+
+            @Override
+            protected boolean matches(T item1, T item2) {
+                return b(matchFunction.apply(item1, item2));
+            }
+        }.isEmpty();
     }
 
     /**
@@ -381,6 +490,77 @@ public class CalendarUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Gets a value indicating whether one conference matches another, by comparing their internal identifiers or trying to match the
+     * conference's URI.
+     *
+     * @param conference1 The first conference to check
+     * @param conference2 The second conference to check
+     * @return <code>true</code> if the objects <i>match</i>, i.e. are targeting the same conference, <code>false</code>, otherwise
+     */
+    public static boolean matches(Conference conference1, Conference conference2) {
+        if (null == conference1) {
+            return null == conference2;
+        } else if (null != conference2) {
+            if (0 < conference1.getId() && conference1.getId() == conference2.getId()) {
+                return true;
+            }
+            if (null != conference1.getUri() && conference1.getUri().equalsIgnoreCase(conference2.getUri())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Looks up a specific conference in a collection of conferences, utilizing the {@link CalendarUtils#matches} routine.
+     *
+     * @param conferences The conferences to search
+     * @param conference The conference to lookup
+     * @return The matching conference, or <code>null</code> if not found
+     * @see CalendarUtils#matches
+     */
+    public static Conference find(Collection<Conference> conferences, Conference conference) {
+        if (null != conferences && 0 < conferences.size()) {
+            for (Conference candidateConference : conferences) {
+                if (matches(conference, candidateConference)) {
+                    return candidateConference;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets a value indicating whether a specific conference is present in a collection of conferences, utilizing the
+     * {@link CalendarUtils#matches} routine.
+     *
+     * @param conferences The conferences to search
+     * @param conference The conference to lookup
+     * @return <code>true</code> if the conference is contained in the collection of conferences, <code>false</code>, otherwise
+     * @see CalendarUtils#matches
+     */
+    public static boolean contains(Collection<Conference> conferences, Conference conference) {
+        return null != find(conferences, conference);
+    }
+
+    /**
+     * Gets an array of the internal identifiers of the passed conferences.
+     *
+     * @param conferences The conferences to get the identifiers from
+     * @return The identifiers
+     */
+    public static int[] getConferenceIds(List<Conference> conferences) {
+        if (null == conferences) {
+            return new int[0];
+        }
+        int[] ids = new int[conferences.size()];
+        for (int i = 0; i < ids.length; i++) {
+            ids[i] = conferences.get(i).getId();
+        }
+        return ids;
     }
 
     /**
@@ -547,7 +727,7 @@ public class CalendarUtils {
     /**
      * Encodes a date-time instance to its <a href="https://tools.ietf.org/html/rfc5545#section-3.3.5">RFC 5545</a> date-time
      * string representation, along with an optional timezone identifier as prefix.
-     * 
+     *
      * @param dateTime The date-time to encode
      * @return The encoded date-time string
      */
@@ -579,7 +759,7 @@ public class CalendarUtils {
      * <li><code>UTC</code>, e.g. <code>20191206T102800Z</code></li>
      * <li>date-time with timezone reference, e.g. <code>Europe/Berlin:20191206T102800</code></li>
      * </ul>
-     * 
+     *
      * @param value The value to decode
      * @return The decoded date-time instance
      * @throws IllegalArgumentException If the value cannot be parsed
@@ -603,20 +783,6 @@ public class CalendarUtils {
             throw new IllegalArgumentException("Unknown timezone: " + value);
         }
         return DateTime.parse(timeZone, value.substring(idx + 1));
-    }
-
-    /**
-     * Shifts the timezone of a specific date-time with timezone reference to <code>UTC</code>, keeping the absolute time constant.
-     * Invoking this method on floating dates has no effect.
-     *
-     * @param dateTime The date-time to shift the timezone in
-     * @return The date-time with the timezone shifted to <code>UTC</code>, or the value as-is if not applicable
-     */
-    public static DateTime shiftToUTC(DateTime dateTime) {
-        if (null != dateTime && null != dateTime.getTimeZone() && false == "UTC".equals(dateTime.getTimeZone().getID())) {
-            return dateTime.shiftTimeZone(TimeZones.UTC);
-        }
-        return dateTime;
     }
 
     /**
@@ -800,14 +966,14 @@ public class CalendarUtils {
     public static boolean isSeriesException(Event event) {
         return isSeriesEvent(event) && false == event.getSeriesId().equals(event.getId());
     }
-    
+
     /**
-     * Gets a value indicating whether the supplied event is an element of a recurring series or not, based on 
-     * the property {@link EventField#SERIES_ID}. 
+     * Gets a value indicating whether the supplied event is an element of a recurring series or not, based on
+     * the property {@link EventField#SERIES_ID}.
      *
      * @param event The event to check
      * @return <code>true</code> if the event is part of an recurring series, <code>false</code> otherwise
-     * @see #isSeriesMaster(Event) 
+     * @see #isSeriesMaster(Event)
      * @see #isSeriesException(Event)
      */
     public static boolean isSeriesEvent(Event event) {
@@ -1226,7 +1392,8 @@ public class CalendarUtils {
          * both 'non-floating', apply relative offset & return a fixed recurrence id
          */
         long offset = updatedSeriesStart.getTimestamp() - originalSeriesStart.getTimestamp();
-        return new DefaultRecurrenceId(new DateTime(originalRecurrenceId.getValue().getTimestamp() + offset));
+        long timestamp = originalRecurrenceId.getValue().getTimestamp() + offset;
+        return new DefaultRecurrenceId(new DateTime(originalRecurrenceId.getValue().getTimeZone(), timestamp));
     }
 
     /**
@@ -1255,7 +1422,7 @@ public class CalendarUtils {
          */
         DefaultRecurrenceData plainRecurrenceData = new DefaultRecurrenceData(recurrenceData.getRecurrenceRule(), recurrenceData.getSeriesStart());
         RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(plainRecurrenceData);
-        return iterator.hasNext() && iterator.next().equals(recurrenceId);
+        return iterator.hasNext() && iterator.next().matches(recurrenceId);
     }
 
     /**
@@ -1297,12 +1464,12 @@ public class CalendarUtils {
                 break;
             }
         }
-        return null != lastRecurrenceId && lastRecurrenceId.equals(recurrenceId);
+        return null != lastRecurrenceId && lastRecurrenceId.matches(recurrenceId);
     }
 
     /**
      * Filters out those recurrence identifiers that are not produced by the recurrence set generated from the supplied recurrence data.
-     * 
+     *
      * @param recurrenceIds The recurrence identifiers to filter the invalid ones
      * @param recurrenceData The recurrence data to check against
      * @param recurrenceService A reference to the recurrence service
@@ -1348,6 +1515,89 @@ public class CalendarUtils {
             }
         }
         return validRecurrenceIds;
+    }
+
+    /**
+     * Normalizes all recurrence identifiers within the supplied set so that all values share the same date type and timezone. If the
+     * recurrence identifiers denote different timezones, the underlying date-times are shifted to the timezone of the <i>first</i>
+     * recurrence identifier.
+     *
+     * @param recurrenceIds The recurrence identifiers to normalize
+     * @return A new sorted set holding the normalized recurrence ids
+     */
+    public static SortedSet<RecurrenceId> normalizeRecurrenceIDs(Collection<RecurrenceId> recurrenceIds) {
+        if (null == recurrenceIds) {
+            return null;
+        }
+        Iterator<RecurrenceId> iterator = recurrenceIds.iterator();
+        if (false == iterator.hasNext()) {
+            return Collections.emptySortedSet();
+        }
+        RecurrenceId firstRecurrenceId = iterator.next();
+        return normalizeRecurrenceIDs(firstRecurrenceId.getValue(), recurrenceIds);
+    }
+
+    /**
+     * Gets a value indicating whether all recurrence identifiers within the supplied set can be considered as <i>normalized</i>, i.e. all
+     * their values share the same date type and timezone.
+     *
+     * @param recurrenceIds The recurrence identifiers to check
+     * @return <code>true</code> if all recurrence identifiers are normalized, <code>false</code> otherwise
+     */
+    public static boolean areNormalized(Collection<RecurrenceId> recurrenceIds) {
+        if (null != recurrenceIds && 1 < recurrenceIds.size()) {
+            Iterator<RecurrenceId> iterator = recurrenceIds.iterator();
+            DateTime referenceDate = iterator.next().getValue();
+            while (iterator.hasNext()) {
+                if (false == matchesTypeAndTimeZone(referenceDate, iterator.next().getValue())) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Normalizes all recurrence identifiers within the supplied set so that all values share the same date type and timezone of a
+     * specific reference date. If a recurrence identifier denotes a different timezone, the underlying date-time is shifted to the
+     * timezone of this reference date.
+     *
+     * @param referenceDate The reference date to derive the date type and timezone from
+     * @param recurrenceIds The recurrence identifiers to normalize
+     * @return A new sorted set holding the normalized recurrence ids
+     */
+    public static SortedSet<RecurrenceId> normalizeRecurrenceIDs(DateTime referenceDate, Collection<RecurrenceId> recurrenceIds) {
+        if (null == recurrenceIds) {
+            return null;
+        }
+        SortedSet<RecurrenceId> normalizedRecurrenceIds = new TreeSet<RecurrenceId>();
+        for (RecurrenceId recurrenceId : recurrenceIds) {
+            normalizedRecurrenceIds.add(normalizeRecurrenceID(referenceDate, recurrenceId));
+        }
+        return normalizedRecurrenceIds;
+    }
+
+    /**
+     * Normalizes a recurrence identifier so that its value shares the same date type and timezone of a specific reference date. If the
+     * recurrence identifier denotes a different timezone, the underlying date-time is shifted to the timezone of this reference date.
+     *
+     * @param referenceDate The reference date to derive the date type and timezone from
+     * @param recurrenceId The recurrence identifier to normalize
+     * @return The normalized recurrence identifier
+     */
+    public static RecurrenceId normalizeRecurrenceID(DateTime referenceDate, RecurrenceId recurrenceId) {
+        if (null == recurrenceId || null == referenceDate) {
+            return null;
+        }
+        DateTime value = recurrenceId.getValue();
+        if (matchesTypeAndTimeZone(referenceDate, value)) {
+            return recurrenceId;
+        }
+        return new DefaultRecurrenceId(value.shiftTimeZone(referenceDate.getTimeZone()), recurrenceId.getRange());
+    }
+
+    private static boolean matchesTypeAndTimeZone(DateTime dateTime1, DateTime dateTime2) {
+        return dateTime1.isAllDay() == dateTime2.isAllDay() && Objects.equals(dateTime1.getTimeZone(), dateTime2.getTimeZone());
     }
 
     /**
@@ -1696,7 +1946,7 @@ public class CalendarUtils {
         RecurrenceIterator<Event> iterator = recurrenceService.iterateEventOccurrences(seriesMaster, new Date(recurrenceTimestamp), null);
         while (iterator.hasNext()) {
             Event occurrence = iterator.next();
-            if (recurrenceId.equals(occurrence.getRecurrenceId())) {
+            if (recurrenceId.matches(occurrence.getRecurrenceId())) {
                 return occurrence;
             }
             if (occurrence.getRecurrenceId().getValue().getTimestamp() > recurrenceTimestamp) {
@@ -1927,7 +2177,7 @@ public class CalendarUtils {
 
     /**
      * Gets a value indicating whether a specific attendee privilege is set in an event or not.
-     * 
+     *
      * @param event The event to check
      * @param privilege The privilege to check
      * @return <code>true</code> if the privilege is set, <code>false</code>, otherwise
@@ -2155,7 +2405,7 @@ public class CalendarUtils {
             @Override
             protected boolean matches(RecurrenceId item1, RecurrenceId item2) {
                 if (null != item1 && null != item2) {
-                    return item1.equals(item2);
+                    return item1.matches(item2);
                 }
                 return false;
             }
@@ -2211,6 +2461,23 @@ public class CalendarUtils {
     }
 
     /**
+     * Initializes a new conference collection update based on the supplied original and updated conference lists.
+     *
+     * @param originalConferences The original conferences
+     * @param updatedConferences The updated conferences
+     * @return The collection update
+     */
+    public static AbstractCollectionUpdate<Conference, ConferenceField> getConferenceUpdates(List<Conference> originalConferences, List<Conference> updatedConferences) {
+        return new AbstractCollectionUpdate<Conference, ConferenceField>(ConferenceMapper.getInstance(), originalConferences, updatedConferences) {
+
+            @Override
+            protected boolean matches(Conference item1, Conference item2) {
+                return CalendarUtils.matches(item1, item2);
+            }
+        };
+    }
+
+    /**
      * Initializes a new event updates collection based on the supplied original and updated event lists.
      * <p/>
      * Event matching is performed on one or more event fields.
@@ -2243,18 +2510,14 @@ public class CalendarUtils {
 
             @Override
             protected boolean matches(Event item1, Event item2) {
-                try {
-                    return EventMapper.getInstance().equalsByFields(item1, item2, fieldsToMatch);
-                } catch (OXException e) {
-                    throw new UnsupportedOperationException(e);
-                }
+                return EventMapper.getInstance().equalsByFields(item1, item2, fieldsToMatch);
             }
         };
     }
 
     /**
      * Constructs a calendar object resource consisting of the <i>updated</i> events from the supplied event update collection.
-     * 
+     *
      * @param eventUpdates The event updates to build the calendar object resource from
      * @return The calendar object resource
      */
@@ -2264,6 +2527,54 @@ public class CalendarUtils {
             events.add(eventUpdate.getUpdate());
         }
         return new DefaultCalendarObjectResource(events);
+    }
+
+    /**
+     * Gets a value indicating whether the supplied event update denotes <i>significant</i> changes from the perspective of a certain
+     * user, i.e. changes that would directly be visible in his client. This aids deciding whether a change would justify a push
+     * notification to the client or not.
+     * <p/>
+     * An update is considered as <i>significant</i>,
+     * <ul>
+     * <li>whenever the event's sequence number is bumped,</li>
+     * <li>if attendee privileges were updated,</li>
+     * <li>if user's own attendee was modified,</li>
+     * <li>or if an attendee was modified whose folder view is visible to the user</li>
+     * </ul>
+     *
+     * @param update The event update to check
+     * @param userId The user to determine the relevance of the update for
+     * @param visibleFolderIds The affected folder identifiers visible to this calendar user
+     * @return <code>true</code> if there are significant changes, <code>false</code>, otherwise
+     */
+    public static boolean isSignificantChange(EventUpdate update, int userId, Collection<String> visibleFolderIds) {
+        if (update.getUpdatedFields().contains(EventField.SEQUENCE)) {
+            /*
+             * sequence number has changed, so assume a "significant" change implicitly
+             */
+            return true;
+        }
+        if (update.getUpdatedFields().contains(EventField.ATTENDEE_PRIVILEGES) || update.getUpdatedFields().contains(EventField.CLASSIFICATION)) {
+            /*
+             * permission-related update, assume "significant" change
+             */
+            return true;
+        }
+        for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : update.getAttendeeUpdates().getUpdatedItems()) {
+            if (attendeeUpdate.getOriginal().getEntity() == userId) {
+                /*
+                 * user's own attendee modified, assume "significant" change
+                 */
+                return true;
+            }
+            if (visibleFolderIds.contains(attendeeUpdate.getOriginal().getFolderId()) || visibleFolderIds.contains(attendeeUpdate.getUpdate().getFolderId())) {
+                /*
+                 * attendee modified whose folder view is visible to user, assume "significant" change
+                 */
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -2527,13 +2838,16 @@ public class CalendarUtils {
      * @param event The event to get the flags for
      * @param calendarUser The identifier of the calendar user to get flags for
      * @param user The identifier of the current user, in case he is different from the calendar user
-     * @param publicFolder <code>true</code> to apply special handling for group scheduled events in <i>public</i> folder, <code>false</code>, otherwise 
+     * @param publicFolder <code>true</code> to apply special handling for group scheduled events in <i>public</i> folder, <code>false</code>, otherwise
      * @return The event flags
      */
     public static EnumSet<EventFlag> getFlags(Event event, int calendarUser, int user, boolean publicFolder) {
         EnumSet<EventFlag> flags = EnumSet.noneOf(EventFlag.class);
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             flags.add(EventFlag.ATTACHMENTS);
+        }
+        if (null != event.getConferences() && 0 < event.getConferences().size()) {
+            flags.add(EventFlag.CONFERENCES);
         }
         if (null != event.getAlarms() && 0 < event.getAlarms().size()) {
             flags.add(EventFlag.ALARMS);

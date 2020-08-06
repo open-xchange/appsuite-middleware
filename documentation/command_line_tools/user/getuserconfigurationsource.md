@@ -2,6 +2,7 @@
 title: getuserconfigurationsource
 icon: fa-book
 tags: Administration, Command Line tools, User, Capabilities
+package: open-xchange-admin
 ---
 
 # NAME

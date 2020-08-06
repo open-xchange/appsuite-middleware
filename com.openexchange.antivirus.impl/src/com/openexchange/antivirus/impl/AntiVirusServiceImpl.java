@@ -55,15 +55,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.UnknownHostException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
-import org.joda.time.Duration;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -105,7 +103,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
     private final ServiceLookup services;
     private final ICAPResponseParser parser;
     private final Cache<String, AntiVirusResult> cachedResults;
-    private final MetricHandler metricHandler;
+    private final MetricHandler metrics;
 
     /**
      * Initialises a new {@link AntiVirusServiceImpl}.
@@ -117,7 +115,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
         this.cachedResults = CacheBuilder.newBuilder().initialCapacity(1000).maximumSize(10000).expireAfterAccess(365, TimeUnit.DAYS).build(); //Yup, never expire, we invalidate manually
         this.services = services;
         this.parser = new ICAPResponseParser();
-        this.metricHandler = new MetricHandler(services);
+        this.metrics = new MetricHandler(cachedResults);
     }
 
     @Override
@@ -215,10 +213,8 @@ public class AntiVirusServiceImpl implements AntiVirusService {
 
         AntiVirusResult result = cachedResults.getIfPresent(uniqueId);
         if (result != null && result.getISTag().equals(options.getIsTag())) {
-            metricHandler.incrementCacheHits();
             return result;
         }
-        metricHandler.incrementCacheMisses();
 
         LockService lockService = services.getService(LockService.class);
         Lock lock = lockService == null ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(uniqueId);
@@ -226,16 +222,11 @@ public class AntiVirusServiceImpl implements AntiVirusService {
         try {
             // Check again to ensure nothing was changed in the meanwhile
             if (result != null && result.getISTag().equals(options.getIsTag())) {
-                metricHandler.incrementCacheHits();
                 return result;
-            }
-            if (result == null) {
-                metricHandler.incrementCacheMisses();
-            } else {
+            } else if (result != null) {
                 // The ISTag is different, we scan again
                 LOG.debug("The ISTag '{}' of the cached result of the file with uniqueId '{}' differs from the server's ISTag '{}'. Scanning again.", result.getISTag(), uniqueId, options.getIsTag());
                 cachedResults.invalidate(uniqueId);
-                metricHandler.incrementCacheInvalidations();
             }
 
             result = scan(stream, contentLength, server, port, service, mode, client, options);
@@ -263,18 +254,13 @@ public class AntiVirusServiceImpl implements AntiVirusService {
      */
     private AntiVirusResult scan(InputStreamClosure stream, long contentLength, String server, int port, String service, OperationMode mode, ICAPClient client, ICAPOptions options) {
         try (InputStream inputStream = stream.newStream()) {
-            long start = System.currentTimeMillis();
-            ICAPResponse response = client.execute(createBuilder(options, server, port, service, mode, inputStream, contentLength).build());
-            logTraceInformation(start, System.currentTimeMillis(), contentLength);
+            ICAPResponse response = logAndMonitorExecution(client, createBuilder(options, server, port, service, mode, inputStream, contentLength).build(), contentLength);
             return parser.parse(response);
         } catch (UnknownHostException e) {
-            LOG.error("", e);
             return AntiVirusResultImpl.builder().withError(AntiVirusServiceExceptionCodes.UNKNOWN_HOST.create(e, e.getMessage())).build();
         } catch (IOException e) {
-            LOG.error("", e);
             return AntiVirusResultImpl.builder().withError(AntiVirusServiceExceptionCodes.IO_ERROR.create(e, e.getMessage())).build();
         } catch (OXException e) {
-            LOG.error("", e);
             return AntiVirusResultImpl.builder().withError(e).build();
         }
     }
@@ -321,26 +307,32 @@ public class AntiVirusServiceImpl implements AntiVirusService {
     }
 
     /**
-     * Logs the runtime information
+     * Wraps ICAP request execution by logging and monitoring
      *
-     * @param start The start time
-     * @param end The end time
+     * @param client The {@link ICAPClient} to use
+     * @param request The {@link ICAPRequest} to execute
      * @param contentLength The content length
+     * @return The {@link ICAPResponse}
+     * @throws IOException
      */
-    private void logTraceInformation(long start, long end, long contentLength) {
-        if (false == LOG.isTraceEnabled()) {
-            return;
+    private ICAPResponse logAndMonitorExecution(ICAPClient client, ICAPRequest request, long contentLength) throws IOException {
+        Instant start = Instant.now();
+        ICAPResponse response = null;
+        try {
+            response = client.execute(request);
+            return response;
+        } catch (IOException e) {
+            Duration duration = Duration.between(start, Instant.now());
+            metrics.recordScanIOError(duration);
+            LOG.error("", e);
+            throw e;
+        } finally {
+            Duration duration = Duration.between(start, Instant.now());
+            if (response != null) {
+                metrics.recordScanResult(response.getStatusCode(), duration, contentLength);
+            }
+            long transferRate = duration.getSeconds() == 0 ? contentLength : (contentLength / duration.getSeconds());
+            LOG.trace("Completed scanning of {} in {} - average rate {}/sec.", Strings.humanReadableByteCount(contentLength, true), duration, Strings.humanReadableByteCount(transferRate, true));
         }
-        Duration duration = new Duration(start, end);
-        PeriodFormatter formatter = new PeriodFormatterBuilder().appendMinutes().appendSuffix("m ").appendSeconds().appendSuffix("s ").appendMillis().appendSuffix("ms ").toFormatter();
-        String formatted = formatter.print(duration.toPeriod());
-        long transferRate = (long) (contentLength / (duration.getMillis() / 1000.0));
-
-        MDC.clear();
-        LOG.trace("Completed scanning of {} in {}-- average rate {}/sec.", Strings.humanReadableByteCount(contentLength, true), formatted, Strings.humanReadableByteCount(transferRate, true));
-
-        metricHandler.updateScansPerSecond();
-        metricHandler.updateScanningTime(duration.getMillis());
-        metricHandler.updateTransferRate(contentLength);
     }
 }

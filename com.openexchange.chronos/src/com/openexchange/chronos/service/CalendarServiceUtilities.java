@@ -51,6 +51,7 @@ package com.openexchange.chronos.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.exception.OXException;
@@ -124,6 +125,21 @@ public interface CalendarServiceUtilities {
      * @return The resolved event from the user's point of view, or <code>null</code> if not found
      */
     Event resolveByID(CalendarSession session, String id, Integer sequence) throws OXException;
+    
+    /**
+     * Resolves an UID to the identifier of an existing event. The lookup is performed case-sensitive and context-wise, independently of
+     * the current session user's access rights.
+     * <p/>
+     * If an event series with change exceptions is matched, the identifier of the recurring <i>master</i> event is returned.
+     *
+     * @param session The calendar session
+     * @param id The identifier of the event to resolve
+     * @param sequence The expected sequence number to match, or <code>null</code> to resolve independently of the event's sequence number
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The identifier of the resolved event, or <code>null</code> if not found
+     * @throws OXException If permissions are missing
+     */
+    Event resolveByID(CalendarSession session, String id, Integer sequence, int calendarUserId) throws OXException;
 
     /**
      * Resolves a specific event (and any overridden instances or <i>change exceptions</i>) by its externally used resource name, which
@@ -206,5 +222,12 @@ public interface CalendarServiceUtilities {
      * @return The recurrence data
      */
     RecurrenceData loadRecurrenceData(CalendarSession session, String seriesId) throws OXException;
+
+    /**
+     * Gets the registered calendar service interceptors.
+     * 
+     * @return The calendar service interceptors, or an emoty set if there are none.
+     */
+    Set<CalendarInterceptor> getInterceptors();
 
 }

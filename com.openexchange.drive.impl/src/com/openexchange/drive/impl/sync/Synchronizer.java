@@ -77,7 +77,7 @@ public abstract class Synchronizer<T extends DriveVersion> {
      * @param mapper The version mapper
      * @throws OXException
      */
-    public Synchronizer(SyncSession session, VersionMapper<T> mapper) throws OXException {
+    public Synchronizer(SyncSession session, VersionMapper<T> mapper) {
         super();
         this.session = session;
         this.mapper = mapper;

@@ -92,7 +92,7 @@ public class AbstractPlistSMSTest extends AbstractConfigAwareAPIClientSession {
 
     private void checkException(String code, String prefix, int number, String message) {
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", code);
-        assertTrue("The error code should start with " + prefix + " but it is " + code + " instead (error: " + message + ")", code.startsWith(prefix));
+        assertTrue("The error code should start with " + prefix + " but it is " + code + " instead.", code.startsWith(prefix));
         int actualCodeNumber = Integer.parseInt(code.substring(code.indexOf('-')+1));
         assertEquals("Wrong exception number (error: " + message + ")!", number, actualCodeNumber);
     }

@@ -18,6 +18,24 @@
         ${labels.noteAsHTML}
     </div>
     <div class="participants">
+	  <#if mail.conferences?has_content>
+        <div class="label">
+            ${labels.conferencesLabel}
+        </div>
+        <div class="participant-list">
+            <#list mail.conferences as conference>
+            <div class="participant">
+              <span class="resource">
+                <#if (conference.label??)>${conference.label?html}:&nbsp;</#if>
+                <a href="${conference.uri}">${conference.uri}</a><span></span>
+              </span>
+            </div>
+            </#list>
+        </div>
+        <div class="participants-clear"></div>
+      </#if>
+    </div>
+    <div class="participants">
 	  <#if mail.participants?has_content>
         <div class="label">
             ${labels.participantsLabel}

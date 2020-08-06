@@ -381,7 +381,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                 final MailPermission ownPermission;
                 String parentFullname = parentAndName[0];
                 if (0 == parentFullname.length()) {
-                    parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                    parentFullname = MailFolder.ROOT_FOLDER_ID;
                 }
                 if ("INBOX".equals(parentFullname)) {
                     ownPermission = inboxFolder.getOwnPermission();
@@ -407,7 +407,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                      * Compose new path
                      */
                     final StringBuilder sb = new StringBuilder();
-                    if (!MailFolder.DEFAULT_FOLDER_ID.equals(newParentFullname)) {
+                    if (!MailFolder.ROOT_FOLDER_ID.equals(newParentFullname)) {
                         sb.append(newParentFullname);
                     }
                     sb.append(separator);
@@ -465,7 +465,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
     private static String[] parseFullname(final String fullname, final char separator) {
         final int pos = fullname.lastIndexOf(separator);
         if (-1 == pos) {
-            return new String[] { MailFolder.DEFAULT_FOLDER_ID, fullname };
+            return new String[] { MailFolder.ROOT_FOLDER_ID, fullname };
         }
         return new String[] { fullname.substring(0, pos), fullname.substring(pos + 1) };
     }

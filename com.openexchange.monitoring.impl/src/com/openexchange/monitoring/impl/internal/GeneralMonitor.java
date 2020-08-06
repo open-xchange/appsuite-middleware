@@ -52,7 +52,6 @@ package com.openexchange.monitoring.impl.internal;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import org.slf4j.Logger;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessiondService;

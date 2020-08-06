@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SOAP Plugin based on Apache CXF
 Bundle-SymbolicName: com.openexchange.soap.cxf
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Activator: com.openexchange.soap.cxf.osgi.CXFActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -44,6 +44,8 @@ Import-Package: com.ctc.wstx.stax,
  com.sun.xml.internal.ws.streaming,
  com.sun.xml.internal.ws.transport,
  com.sun.xml.internal.ws.util,
+ io.micrometer.core.instrument,
+ io.micrometer.core.instrument.composite,
  javax.activation;version="1.1.0",
  javax.annotation,
  javax.annotation.processing,

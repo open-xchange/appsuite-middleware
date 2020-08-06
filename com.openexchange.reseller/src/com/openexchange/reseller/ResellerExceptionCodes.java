@@ -69,7 +69,12 @@ public enum ResellerExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Unable to retrieve ResellerAdmin for ctx %s
      */
-    NO_RESELLER_FOUND_FOR_CTX("Unable to retrieve ResellerAdmin for ctx %s", MESSAGE, Category.CATEGORY_ERROR, 2);
+    NO_RESELLER_FOUND_FOR_CTX("Unable to retrieve ResellerAdmin for ctx %s", MESSAGE, Category.CATEGORY_ERROR, 2),
+    /**
+     * Unexpected database error: %s
+     */
+    UNEXPECTED_DATABASE_ERROR("Unexpected database error: %s", MESSAGE, Category.CATEGORY_ERROR, 3);
+    
 
     public static final String PREFIX = "RESELL";
 

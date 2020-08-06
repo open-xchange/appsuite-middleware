@@ -108,7 +108,7 @@ public class DefaultGrizzlyWebSocketAuthenticator implements GrizzlyWebSocketAut
         }
 
         // Look-up appropriate session
-        Session session = sessiond instanceof SessiondServiceExtended ? ((SessiondServiceExtended) sessiond).getSession(sessionId, false) : sessiond.getSession(sessionId);
+        Session session = sessiond.getSession(sessionId, false);
         if (null == session) {
             throw new NoSuchSessionHandshakeException(sessionId);
         }

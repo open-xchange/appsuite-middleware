@@ -43,6 +43,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.exc.StreamReadException;
 
 /**
  * A JSONArray is an ordered sequence of values. Its external text form is a string wrapped in square brackets with commas separating the
@@ -1079,9 +1080,16 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
                 case VALUE_NUMBER_INT:
                     try {
                         ja.put(jParser.getIntValue());
-                    } catch (JsonParseException e) {
+                    } catch (StreamReadException e) {
                         // Outside of range of Java int
-                        ja.put(jParser.getLongValue());
+                        try {
+                            ja.put(jParser.getLongValue());
+                        } catch (JsonParseException pe) {
+                            // Outside of range of Java long
+                            // Fallback: Treat number as double, so we don't lose
+                            // too much precision (#44850)
+                            ja.put(jParser.getDoubleValue());
+                        }
                     }
                     break;
                 case VALUE_TRUE:

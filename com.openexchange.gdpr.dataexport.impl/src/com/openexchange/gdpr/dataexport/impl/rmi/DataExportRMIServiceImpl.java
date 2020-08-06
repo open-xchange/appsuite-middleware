@@ -258,7 +258,7 @@ public class DataExportRMIServiceImpl implements DataExportRMIService {
                 for (DataExportWorkItem item : task.getWorkItems()) {
                     storageService.markWorkItemPending(task.getId(), item.getModuleId(), task.getUserId(), task.getContextId());
                 }
-                storageService.deleteResultFiles(task.getId(), task.getContextId());
+                storageService.deleteResultFiles(task.getId(), task.getUserId(), task.getContextId());
                 fixed++;
             }
         } catch (OXException e) {

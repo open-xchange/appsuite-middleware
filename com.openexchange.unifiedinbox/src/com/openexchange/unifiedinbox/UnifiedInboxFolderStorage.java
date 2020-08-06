@@ -50,7 +50,7 @@
 package com.openexchange.unifiedinbox;
 
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
+import static com.openexchange.mail.dataobjects.MailFolder.ROOT_FOLDER_ID;
 import static com.openexchange.unifiedinbox.utility.UnifiedInboxUtility.generateNestedFullName;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -149,7 +149,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
 
     @Override
     public void expungeFolder(final String fullName, final boolean hardDelete) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             return;
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -269,7 +269,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
 
     @Override
     public int[] getTotalAndUnreadCounter(final String fullName) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             return new int[] {0,0};
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -376,7 +376,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
 
     @Override
     public int getTotalCounter(final String fullName) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             return 0;
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -456,7 +456,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
 
     @Override
     public int getNewCounter(final String fullName) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             return 0;
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -538,7 +538,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
 
     @Override
     public int getUnreadCounter(final String fullName) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             return 0;
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -618,7 +618,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
 
     @Override
     public boolean exists(final String fullname) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullname)) {
+        if (ROOT_FOLDER_ID.equals(fullname)) {
             return true;
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullname)) {
@@ -646,7 +646,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
 
     @Override
     public MailFolder getFolder(final String fullname) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullname)) {
+        if (ROOT_FOLDER_ID.equals(fullname)) {
             return UnifiedInboxFolderConverter.getRootFolder();
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullname)) {
@@ -686,7 +686,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
 
     @Override
     public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
+        if (ROOT_FOLDER_ID.equals(parentFullname)) {
             return getRootSubfolders(false);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(parentFullname)) {
@@ -931,7 +931,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
 
     @Override
     public void clearFolder(final String fullName, final boolean hardDelete) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             throw MailExceptionCode.NO_ROOT_FOLDER_MODIFY_DELETE.create();
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
@@ -1009,7 +1009,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
 
     @Override
     public MailFolder[] getPath2DefaultFolder(final String fullName) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (ROOT_FOLDER_ID.equals(fullName)) {
             return EMPTY_PATH;
         }
         if (!UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {

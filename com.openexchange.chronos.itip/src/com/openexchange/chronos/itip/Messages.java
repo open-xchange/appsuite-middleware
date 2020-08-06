@@ -203,6 +203,8 @@ public class Messages implements LocalizableStrings {
 
     public static final String LABEL_PARTICIPANTS = "Participants";
 
+    public static final String LABEL_CONFERENCES = "Meeting access";
+
     public static final String LABEL_DETAILS = "Details";
 
     public static final String LABEL_SHOW_AS = "Show as:";
@@ -238,6 +240,8 @@ public class Messages implements LocalizableStrings {
     public static final String INTENTION_CHANGE_LOCATION = "Change the location to %1$s.";
 
     public static final String HAS_CHANGED_LOCATION = "The appointment takes place in a new location: %1$s.";
+
+    public static final String HAS_REMOVED_LOCATION = "The location of the appointment has been removed.";
 
     public static final String ASK_CHANGE_NOTE = "Use the appointment description below.";
 
@@ -341,9 +345,9 @@ public class Messages implements LocalizableStrings {
 	public static final String PRINCIPAL_JUSTIFICATION = "You have received this E-Mail because you are the chair for this appointment.";
 
 	public static final String ORGANIZER_JUSTIFICATION = "You have received this E-Mail because you are the organizer of this appointment.";
-	
+
 	public static final String RESOURCE_MANAGER_JUSTIFICATION = "You have received this E-Mail because this appointment contains the resource %1$s which is managed by you.";
-	
+
     // You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
 	public static final String NO_PERMISSION = "You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.";
 
@@ -351,10 +355,23 @@ public class Messages implements LocalizableStrings {
 	 * The organizer of the appointment has changed. New organizer is: %1$s
 	 */
 	public static final String ORGANIZER_CHANGE = "The organizer of the appointment has changed. New organizer is: %1$s";
-	
+
 	/**
 	 * The organizer of the appointment has changed. This operation is not allowed.
 	 */
 	public static final String UNALLOWED_ORGANIZER_CHANGE = "The organizer of the appointment has changed. This operation is not allowed.";
+
+    /** Used when there are multiple changes in the appointment's conference properties */
+    public static final String HAS_CHANGED_CONFERENCE = "The meeting access information was changed.";
+
+    /** Used when there is one particular conference property in the appointment with URI */
+    public static final String HAS_CHANGED_CONFERENCE_URI = "The meeting access information was changed: %1$s;";
+
+    /** Used when there is one particular conference property in the appointment with URI and additional label */
+    public static final String HAS_CHANGED_CONFERENCE_URI_WITH_LABEL = "The meeting access information was changed. %1$s: %2$s";
+
+    /** Used when all conference properties in the appointment were removed */
+    public static final String HAS_REMOVED_CONFERENCE = "The meeting access information was removed.";
+
 }
 

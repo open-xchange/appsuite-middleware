@@ -51,14 +51,17 @@ package com.openexchange.folderstorage.internal.performers;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.CalculatePermission;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -71,6 +74,7 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.LockCleaningFolderStorage;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.PermissionTypeAwareFolder;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParametersUtility;
@@ -250,6 +254,20 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
                 }
             }
+            boolean changeUsedForSync = false;
+            {
+                if (folder.getUsedForSync() != null) {
+                    if (folder instanceof SetterAwareFolder) {
+                        if (((SetterAwareFolder) folder).containsUsedForSync() && folder.getUsedForSync().isUsedForSync() != storageFolder.getUsedForSync().isUsedForSync()) {
+                            changeUsedForSync = true;
+                        }
+                    } else {
+                        if (folder.getUsedForSync().isUsedForSync() != storageFolder.getUsedForSync().isUsedForSync()) {
+                            changeUsedForSync = true;
+                        }
+                    }
+                }
+            }
             final boolean changedMetaInfo;
             {
                 Map<String, Object> meta = folder.getMeta();
@@ -284,6 +302,15 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 }
             }
 
+            /*
+             * restore inherited/legator permission type from original folder's permissions as needed
+             */
+            if ((false == folder instanceof PermissionTypeAwareFolder) && 
+                (storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) ||
+                (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
+                restorePermissionType(folder, storageFolder);
+            }
+
             ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, folder, storageFolder);
             boolean addedDecorator = false;
             FolderServiceDecorator decorator = storageParameters.getDecorator();
@@ -316,7 +343,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     }
                 } else if (comparedPermissions.hasChanges() || cascadePermissions) {
                     try {
-                        doPermissionChange(treeId, folderId, folder, comparedPermissions, oldParentId, storageFolder, storage, isRecursion ? Boolean.TRUE : Boolean.FALSE, cascadePermissions, decorator, transactionManager, openedStorages);
+                        doPermissionChange(treeId, folderId, folder, comparedPermissions, storageFolder, storage, isRecursion ? Boolean.TRUE : Boolean.FALSE, cascadePermissions, decorator, transactionManager, openedStorages);
                     } catch (OXException e) {
                         if (OXFolderExceptionCode.NO_ADMIN_ACCESS.equals(e)) {
                             addWarning(e);
@@ -324,7 +351,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         }
                         throw e;
                     }
-                } else if (changeSubscription || changedMetaInfo || changedProperties) {
+                } else if (changeSubscription || changeUsedForSync || changedMetaInfo || changedProperties) {
                     /*
                      * Change subscription, meta, properties either in real or in virtual storage
                      */
@@ -433,13 +460,13 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         MovePerformer movePerformer = newMovePerformer();
         movePerformer.setStorageParameters(storageParameters);
         if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-            movePerformer.doMoveReal(folder, storage, realParentStorage, newRealParentStorage, storageFolder);
+            movePerformer.doMoveReal(folder, storage);
         } else {
             movePerformer.doMoveVirtual(folder, storage, realStorage, realParentStorage, newRealParentStorage, storageFolder, openedStorages);
         }
     }
 
-    private void doPermissionChange(String treeId, String folderId, Folder folder, ComparedFolderPermissions comparedPermissions, String oldParentId, Folder storageFolder, FolderStorage storage, Boolean isRecursion, boolean cascadePermissions, FolderServiceDecorator decorator,TransactionManager transactionManager, Collection<FolderStorage> openedStorages) throws OXException {
+    private void doPermissionChange(String treeId, String folderId, Folder folder, ComparedFolderPermissions comparedPermissions, Folder storageFolder, FolderStorage storage, Boolean isRecursion, boolean cascadePermissions, FolderServiceDecorator decorator,TransactionManager transactionManager, Collection<FolderStorage> openedStorages) throws OXException {
         if (this.increaseObjectUseCount) {
             ObjectUseCountService useCountService = FolderStorageServices.getService(ObjectUseCountService.class);
             List<Integer> addedUsers = comparedPermissions.getAddedUsers();
@@ -459,14 +486,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     }
                 }
             }
-        }
-
-        /*
-         * Properly inherit permissions
-         */
-        if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
-            addjustPermissionType(folder, storageFolder);
-            addParentLinkPermission(folder, oldParentId, storage);
         }
 
         /*
@@ -509,7 +528,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         List<Permission> removedPermissions = comparedPermissions.getRemovedUserPermissions();
                         int[] userIdRemoved = new int[removedPermissions.size()];
                         int x = 0;
-                        for(Permission perm: removedPermissions){
+                        for (Permission perm : removedPermissions) {
                             userIdRemoved[x++] = perm.getEntity();
                         }
 
@@ -562,73 +581,39 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     }
 
     /**
-     * Makes sure that legator permissions didn't get lost.
+     * Makes sure that permissions types didn't get lost.
      *
      * @param updated The updated folder
      * @param original The original folder
      */
-    private void addjustPermissionType(Folder updated, Folder original) {
-        for(Permission origPerm : original.getPermissions()) {
-            if (FolderPermissionType.LEGATOR.equals(origPerm.getType())) {
-                // Adjust type of existing permission
-                for(Permission updatedPerm: updated.getPermissions()) {
-                    if (updatedPerm.getEntity() == origPerm.getEntity() && updatedPerm.isGroup() == origPerm.isGroup() && updatedPerm.getSystem() == origPerm.getSystem()) {
-                        if (!FolderPermissionType.LEGATOR.equals(updatedPerm.getType())) {
-                            updatedPerm.setType(FolderPermissionType.LEGATOR);
-                        }
-                        break;
-                    }
-                }
-            }
+    private void restorePermissionType(Folder updated, Folder original) {
+        if (null == updated.getPermissions()) {
+            return;
         }
-    }
+        // @formatter:off
+        List<Permission> updatedPerms = Arrays.asList(updated.getPermissions());
+        // Create a mapping from the old to the new permissions
+        Map<Permission, Permission> updated2originalMap = updatedPerms.stream()
+                                                .filter((p) -> p != null)
+                                                .collect(HashMap::new,
+                                                    (m,p)-> m.put(p, Arrays.asList(original.getPermissions())
+                                                                    .parallelStream()
+                                                                    .filter((ori) -> ori != null && ori.getEntity() == p.getEntity() && ori.isGroup() == p.isGroup() && ori.getSystem() == p.getSystem())
+                                                                    .findAny().orElse(null)),
+                                                    HashMap::putAll);
+        // Replace all new permissions with a permission with the correct type
+        updatedPerms.replaceAll((updatedPerm) -> {
+            Permission orig = updated2originalMap.get(updatedPerm);
+            if(orig != null && (FolderPermissionType.LEGATOR.equals(orig.getType()) || FolderPermissionType.INHERITED.equals(orig.getType()))) {
+                BasicPermission result = new BasicPermission(updatedPerm);
+                result.setType(orig.getType());
+                return result;
+            }
+            return updatedPerm;
+        });
+        // @formatter:on
 
-    /**
-     * Add missing permissions to the folder which must be inherited from the parent folder
-     *
-     * @param folder The folder to check
-     * @param newRealParentStorage The storage of the folder
-     * @return A list of {@link Permission}s
-     * @throws OXException
-     */
-    private void addParentLinkPermission(Folder folder, String parentId, FolderStorage newRealParentStorage) throws OXException {
-        List<Permission> result = new ArrayList<>(folder.getPermissions().length);
-        for (Permission perm : folder.getPermissions()) {
-            result.add(perm);
-        }
-        Folder parent = newRealParentStorage.getFolder(folder.getTreeID(), parentId, storageParameters);
-        for (Permission perm : parent.getPermissions()) {
-            if (perm.getType() == FolderPermissionType.INHERITED || perm.getType() == FolderPermissionType.LEGATOR) {
-                boolean exists = false;
-                for (Permission tmp : folder.getPermissions()) {
-                    if (tmp.getEntity() == perm.getEntity() && tmp.isGroup() == perm.isGroup() && tmp.getSystem() == perm.getSystem()) {
-                        if (!FolderPermissionType.INHERITED.equals(tmp.getType())) {
-                            tmp.setType(FolderPermissionType.INHERITED);
-                        }
-                        if (perm.getType() == FolderPermissionType.LEGATOR) {
-                            if (!parentId.equals(tmp.getPermissionLegator())) {
-                                tmp.setPermissionLegator(parentId);
-                            }
-                        } else {
-                            if (tmp.getPermissionLegator() == null || !tmp.getPermissionLegator().equals(perm.getPermissionLegator())) {
-                                tmp.setPermissionLegator(perm.getPermissionLegator());
-                            }
-                        }
-                        exists = true;
-                        break;
-                    }
-                }
-                if (!exists) {
-                    Permission cloned = (Permission) perm.clone();
-                    cloned.setType(FolderPermissionType.INHERITED);
-                    if (perm.getType() == FolderPermissionType.LEGATOR) {
-                        cloned.setPermissionLegator(parentId);
-                    }
-                    result.add(cloned);
-                }
-            }
-        }
-        folder.setPermissions(result.toArray(new Permission[result.size()]));
+        updated.setPermissions(updatedPerms.toArray(new Permission[updatedPerms.size()]));
     }
 
     /**

@@ -306,6 +306,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
         } else {
             attendee.setPartStat(session.getConfig().getInitialPartStat(organizerId, true));
         }
+        attendee.setTimestamp(timestamp.getTime());
         storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(attendee));
 
         // Add default alarm

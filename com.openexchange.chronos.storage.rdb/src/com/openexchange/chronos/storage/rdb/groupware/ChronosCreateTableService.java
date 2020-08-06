@@ -64,6 +64,15 @@ import com.openexchange.database.AbstractCreateTableImpl;
 public class ChronosCreateTableService extends AbstractCreateTableImpl {
 
     /**
+     * Gets the <code>CREATE TABLE</code> statement for a specific <i>chronos</i> table.
+     *
+     * @return The <code>CREATE TABLE</code> statement, or <code>null</code> if table name unknown
+     */
+    static String getCreateTableStmt(String tableName) {
+        return getTablesByName().get(tableName);
+    }
+
+    /**
      * Gets the <code>CREATE TABLE</code> statements for the <i>chronos</i> tables, mapped by their table names.
      *
      * @return The <code>CREATE TABLE</code> statements mapped by their table name
@@ -99,6 +108,14 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "PRIMARY KEY (cid,account)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
+        tablesByName.put("calendar_conference_sequence",
+            "CREATE TABLE calendar_conference_sequence (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "id INT4 UNSIGNED NOT NULL," +
+                "PRIMARY KEY (cid,account)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+        );
         tablesByName.put("calendar_event",
             "CREATE TABLE calendar_event (" +
                 "cid INT4 UNSIGNED NOT NULL," +
@@ -123,7 +140,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "rDate TEXT DEFAULT NULL," +
                 "exDate TEXT DEFAULT NULL," +
                 "overriddenDate TEXT DEFAULT NULL," +
-                "recurrence VARCHAR(32) COLLATE utf8mb4_bin DEFAULT NULL," +
+                "recurrence VARCHAR(64) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
                 "class VARCHAR(64) DEFAULT NULL," +
@@ -175,7 +192,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "rDate TEXT DEFAULT NULL," +
                 "exDate TEXT DEFAULT NULL," +
                 "overriddenDate TEXT DEFAULT NULL," +
-                "recurrence VARCHAR(32) COLLATE utf8mb4_bin DEFAULT NULL," +
+                "recurrence VARCHAR(64) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
                 "class VARCHAR(64) DEFAULT NULL," +
@@ -220,6 +237,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "comment TEXT DEFAULT NULL," +
                 "member VARCHAR(1024) DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
+                "timestamp BIGINT UNSIGNED DEFAULT NULL," +
                 "extendedParameters BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,entity)," +
                 "KEY uri (cid,account,event,uri(191))," +
@@ -243,6 +261,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "comment TEXT DEFAULT NULL," +
                 "member VARCHAR(1024) DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
+                "timestamp BIGINT UNSIGNED DEFAULT NULL," +
                 "extendedParameters BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,entity)," +
                 "KEY uri (cid,account,event,uri(191))," +
@@ -280,7 +299,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "folder VARCHAR(255) COLLATE utf8mb4_bin NOT NULL,"+
                 "triggerDate BIGINT(20) NOT NULL," +
                 "action VARCHAR(32) NOT NULL," +
-                "recurrence VARCHAR(32) COLLATE utf8mb4_bin DEFAULT NULL," +
+                "recurrence VARCHAR(64) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "floatingTimezone VARCHAR(255) DEFAULT NULL," +
                 "relatedTime BIGINT(20) DEFAULT NULL," +
                 "pushed BOOL DEFAULT FALSE," +
@@ -289,6 +308,20 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY triggerDate (cid,account,user,triggerDate)," +
                 "KEY event (cid,account,user,eventId)," +
                 "KEY action (action, triggerDate)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+        );
+        tablesByName.put("calendar_conference",
+            "CREATE TABLE calendar_conference (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "id INT4 UNSIGNED NOT NULL," +
+                "event INT4 UNSIGNED NOT NULL," +
+                "uri VARCHAR(767) COLLATE utf8mb4_bin NOT NULL," +
+                "label VARCHAR(1024) DEFAULT NULL," +
+                "features VARCHAR(767) DEFAULT NULL," +
+                "extendedParameters BLOB DEFAULT NULL," +
+                "PRIMARY KEY (cid,account,id)," +
+                "KEY event (cid,account,event)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
 

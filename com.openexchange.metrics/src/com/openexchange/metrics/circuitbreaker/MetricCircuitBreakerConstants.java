@@ -72,34 +72,34 @@ public class MetricCircuitBreakerConstants {
     public static final String METRICS_DIMENSION_ACCOUNT_KEY = "account";
 
     /** The group name for circuit breaker metrics */
-    public static final String METRICS_GROUP = "circuit-breakers";
+    public static final String METRICS_GROUP = "appsuite.circuit.breaker.";
 
     /** The name for circuit breaker status */
     public static final String METRICS_STATUS_NAME = "status";
     /** The description for circuit breaker status */
-    public static final String METRICS_STATUS_DESC = "The current status of the circuit breaker";
+    public static final String METRICS_STATUS_DESC = "The current status of the circuit breaker (0: closed, 1: open, 2: half-open)";
 
 
     /** The name for circuit breaker failure threshold */
-    public static final String METRICS_FAILURE_THRESHOLD_NAME = "failureThreshold";
+    public static final String METRICS_FAILURE_THRESHOLD_NAME = "failure.threshold";
     /** The description for circuit breaker failure threshold */
     public static final String METRICS_FAILURE_THRESHOLD_DESC = "The number of successive failures that must occur in order to open the circuit";
 
 
     /** The name for circuit breaker success threshold */
-    public static final String METRICS_SUCCESS_THRESHOLD_NAME = "successThreshold";
+    public static final String METRICS_SUCCESS_THRESHOLD_NAME = "success.threshold";
     /** The description for circuit breaker success threshold */
     public static final String METRICS_SUCCESS_THRESHOLD_DESC = "The number of successive successful executions that must occur when in a half-open state in order to close the circuit";
 
 
     /** The name for circuit breaker delay in milliseconds */
-    public static final String METRICS_DELAY_MILLIS_NAME = "delayMillis";
+    public static final String METRICS_DELAY_MILLIS_NAME = "delay.millis";
     /** The description for circuit breaker delay in milliseconds */
     public static final String METRICS_DELAY_MILLIS_DESC = "The number of milliseconds to wait in open state before transitioning to half-open";
 
 
     /** The name for circuit breaker trip count */
-    public static final String METRICS_TRIP_COUNT_NAME = "tripCount";
+    public static final String METRICS_TRIP_COUNT_NAME = "trips";
     /** The description for circuit breaker trip count */
     public static final String METRICS_TRIP_COUNT_DESC = "The number representing how often the circuit breaker tripped";
     /** The units' name for circuit breaker trip count */
@@ -107,7 +107,7 @@ public class MetricCircuitBreakerConstants {
 
 
     /** The name for circuit breaker denials meter */
-    public static final String METRICS_DENIALS_NAME = "denialsMeter";
+    public static final String METRICS_DENIALS_NAME = "denials";
     /** The description for circuit breaker denials meter */
     public static final String METRICS_DENIALS_DESC = "The occurrences when an access attempt has been denied because circuit breaker is currently open and thus not allowing executions to occur";
     /** The units' name for circuit breaker denials meter */

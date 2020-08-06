@@ -99,14 +99,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
         public boolean isRequired();
 
-        /**
-         * @param required The value to set
-         *
-         * @deprecated since 7.10.2
-         */
-        @Deprecated
-        public void setRequired(final boolean required);
-
     }
 
     protected static class MethodAndNames {
@@ -257,10 +249,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             return required;
         }
 
-        @Override
-        public void setRequired(final boolean required) {
-            throw new UnsupportedOperationException("setRequired() is not supported for AccessCombinations." + this.name() + " enum constant");
-        }
     }
 
     static int INITIAL_CONSTANTS_VALUE = AccessCombinations.values().length;
@@ -413,11 +401,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         @Override
         public boolean isRequired() {
             return required;
-        }
-
-        @Override
-        public void setRequired(final boolean required) {
-            throw new UnsupportedOperationException("setRequired() is not supported for Constants." + this.name() + " enum constant");
         }
 
     }
@@ -3832,14 +3815,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * @throws InvalidDataException
      */
     protected void checkRequired(final int[] idarray) throws InvalidDataException {
-        for (final Constants value : Constants.values()) {
-            if (value.isRequired()) {
-                if (-1 == idarray[value.getIndex()]) {
-                    throw new InvalidDataException("The required column \"" + value.getString() + "\" is missing");
-                }
-            }
-        }
-        for (final AccessCombinations value : AccessCombinations.values()) {
+        for (final CSVConstants value : constantsMap.values()) {
             if (value.isRequired()) {
                 if (-1 == idarray[value.getIndex()]) {
                     throw new InvalidDataException("The required column \"" + value.getString() + "\" is missing");

@@ -79,4 +79,14 @@ public interface PushManagerService {
      */
     boolean stopListener(Session session) throws OXException;
 
+    /**
+     * Checks if listeners actually need any kind of socket, connection, whatever and therefore represent an acquired resource that needs to
+     * be managed; e.g. orderly closed once no more needed.
+     *
+     * @return <code>true</code> if any kind of resource is acquired; otherwise <code>false</code>
+     */
+    default boolean listenersRequireResources() {
+        return true;
+    }
+
 }

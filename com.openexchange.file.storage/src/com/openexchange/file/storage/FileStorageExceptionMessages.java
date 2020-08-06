@@ -141,6 +141,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The provided %1$s resource does not exist: %2$s
     public static final String NOT_FOUND_MSG = "The provided %1$s resource does not exist: %2$s";
 
+    // Authentication failed. Please check the provided credentials and try again.
+    public static final String AUTHENTICATION_FAILED_MSG = "Authentication failed. Please check the provided credentials and try again.";
+
     // The file %1$s doesn't have any content.
     public static final String NO_CONTENT_MSG = "The file %1$s doesn't have any content.";
 
@@ -185,6 +188,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // Restore from trash is not supported.
     public static final String NO_RESTORE_SUPPORT_MSG = "Restore from trash is not supported";
+
+    // The account name is too long. Please limit the account name to a maximum of %1$s characters.
+    public static final String ACCOUNT_NAME_TO_LONG_MSG = "The account name is too long. Please limit the account name to a maximum of %1$s characters.";
 
     /**
      * Initializes a new {@link OXExceptionMessages}.

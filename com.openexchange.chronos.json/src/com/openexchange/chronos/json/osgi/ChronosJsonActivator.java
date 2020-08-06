@@ -60,6 +60,7 @@ import com.openexchange.chronos.Available;
 import com.openexchange.chronos.alarm.json.AlarmActionFactory;
 import com.openexchange.chronos.availability.json.mapper.AvailableMapper;
 import com.openexchange.chronos.common.DataHandlers;
+import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.itip.ITipActionPerformerFactoryService;
 import com.openexchange.chronos.itip.ITipAnalyzerService;
 import com.openexchange.chronos.itip.json.action.ITipActionFactory;
@@ -87,8 +88,10 @@ import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.json.oauth.OAuthScopeDescription;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.scheduling.SchedulingBroker;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
@@ -113,10 +116,12 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
+        return new Class<?>[] { //@formatter:off
             IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class,
             CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class,
-            ContactService.class, ResourceService.class, GroupService.class, MimeTypeMap.class
+            ContactService.class, ResourceService.class, GroupService.class, MimeTypeMap.class, ICalService.class, 
+            SchedulingBroker.class, ConfigurationService.class
+            //@formatter:on
         };
     }
 

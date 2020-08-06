@@ -242,7 +242,7 @@ public class InfostoreAutodeletePerformer {
             for (int i = numberOfVersionsToDelete; i-- > 0;) {
                 versionsToDelete.add(versionsOfDocumentIter.next().getVersion());
             }
-            infostoreFacade.removeVersion(id, versionsToDelete.toArray(), false, false, session);
+            infostoreFacade.removeVersion(id, versionsToDelete.toArray(), false, false, session, false);
         }
     }
 

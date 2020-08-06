@@ -78,7 +78,7 @@ public class SchedulingActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOGGER.info("Starting calendar scheduling related services");
 
-        broker = new SchedulingBrokerImpl(context);
+        broker = new SchedulingBrokerImpl(context, this);
         /*
          * Register service tracker
          */

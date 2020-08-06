@@ -82,6 +82,7 @@ import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.api.MailConfig.ServerSource;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.config.ConfiguredServer;
+import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.Attribute;
@@ -451,6 +452,9 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             isDefault = accountDescription.getId() == MailAccount.DEFAULT_ID;
             if (isDefault && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId(), MailAccounts.isGuest(session)))) {
                 ConfiguredServer mailServer = MailProperties.getInstance().getMailServer(session.getUserId(), session.getContextId());
+                if (mailServer == null) {
+                    throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + session.getUserId() + " in context " + session.getContextId());
+                }
                 mailProvider = getMailProviderByURL(mailServer.getUrlString(false));
             } else {
                 mailProvider = getMailProviderByURL(mailServerURL);
@@ -553,12 +557,12 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @param account The corresponding account
      * @param storageService The storage service (needed for update)
      * @param session The session providing needed user information
-     * @param folderNames Array of predefined folder names (e.g. Special-Use Folders) or null entries. If present, these names are used for creation.
+     * @param folderFullNames Array of predefined folder full names (e.g. IMAP SPECIAL-USE folders) or <code>null</code> entries. If present, these full names are used for creation.
      * @return The mail account with full names present
      * @throws OXException If check for full names fails
      */
-    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session, final Connection con, final Map<String, String> folderNames) throws OXException {
-        return Tools.checkFullNames(account, storageService, session, con, folderNames);
+    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session, final Connection con, final Map<String, String> folderFullNames) throws OXException {
+        return Tools.checkFullNames(account, storageService, session, con, folderFullNames);
     }
 
     /** Checks for an empty string */

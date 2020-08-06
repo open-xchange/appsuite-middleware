@@ -72,6 +72,7 @@ import com.openexchange.admin.rmi.dataobjects.Quota;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.oxfolder.GABMode;
 
 public abstract class ContextAbstraction extends UserAbstraction {
 
@@ -116,11 +117,6 @@ public abstract class ContextAbstraction extends UserAbstraction {
         @Override
         public boolean isRequired() {
             return required;
-        }
-
-        @Override
-        public void setRequired(final boolean required) {
-            throw new UnsupportedOperationException("setRequired() is not supported for ContextConstants." + this.name() + " enum constant");
         }
 
     }
@@ -175,7 +171,10 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected static final String OPT_NAME_ADMINPASS_DESCRIPTION = "master Admin password";
     protected static final String OPT_NAME_ADMINUSER_DESCRIPTION = "master Admin user name";
 
+    private final static String OPT_GAB_MODE = "gabMode";
+
     protected CLIOption contextQuotaOption = null;
+    protected CLIOption gabModeOption = null;
 
     protected String contextname = null;
 
@@ -215,6 +214,13 @@ public abstract class ContextAbstraction extends UserAbstraction {
         final String contextQuota = (String) parser.getOptionValue(this.contextQuotaOption);
         if (null != contextQuota) {
             ctx.setMaxQuota(Long.parseLong(contextQuota));
+        }
+    }
+
+    protected void parseAndSetGABMode(final AdminParser parser, final Context ctx) {
+        String value = (String) parser.getOptionValue(gabModeOption);
+        if (null != value) {
+            ctx.setGABMode(GABMode.of(value));
         }
     }
 
@@ -268,6 +274,10 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
     protected void setContextQuotaOption(final AdminParser parser, final boolean required) {
         this.contextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT, OPT_QUOTA_LONG, OPT_NAME_CONTEXT_QUOTA_DESCRIPTION, true, convertBooleantoTriState(required));
+    }
+    
+    protected void seGABModeOption(final AdminParser parser) {
+        this.gabModeOption = setLongOpt(parser, OPT_GAB_MODE, "The optional modus the global address book shall operate on. Currently 'global' and 'individual' are known values.", true, false, true);
     }
 
     protected void sysoutOutput(Context[] ctxs, AdminParser parser) throws InvalidDataException {

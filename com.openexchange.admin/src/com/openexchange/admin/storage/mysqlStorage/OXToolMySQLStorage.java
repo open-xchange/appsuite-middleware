@@ -59,7 +59,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -78,6 +77,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -373,26 +373,26 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     @Override
     public boolean existsDisplayName(final Context ctx, final User user, final int userId) throws StorageException {
-        final int ctxId = i(ctx.getId());
-        final Connection con;
-        try {
-            con = cache.getConnectionForContext(ctxId);
-        } catch (PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
-        }
+        int ctxId = i(ctx.getId());
+        Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        boolean foundOther = false;
         try {
+            con = cache.getConnectionForContext(ctxId);
             stmt = con.prepareStatement("SELECT field01,userid FROM prg_contacts WHERE cid=? AND field01=? AND fid=?");
             stmt.setInt(1, ctxId);
             stmt.setString(2, user.getDisplay_name());
             stmt.setInt(3, FolderObject.SYSTEM_LDAP_FOLDER_ID);
             rs = stmt.executeQuery();
+
+            boolean foundOther = false;
             while (!foundOther && rs.next()) {
                 foundOther = user.getDisplay_name().equals(rs.getString(1)) && (userId == 0 || userId != rs.getInt(2));
             }
+            return foundOther;
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
         } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);
@@ -407,7 +407,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 }
             }
         }
-        return foundOther;
     }
 
     @Override
@@ -1987,7 +1986,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
             // Determine outdated threshold
             long outdatedThreshold = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1); // 24h ago
-            List<Database> outdatedUpdating = new LinkedList<Database>();
+            List<Database> outdatedUpdating = null;
 
             // Unblock outdated schemas
             Updater updater = Updater.getInstance();
@@ -2000,6 +1999,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                         int contextId = getAnyContextFromSchema(poolId, database.getScheme());
                         try {
                             updater.unblock(database.getScheme(), poolId, contextId);
+                            if (outdatedUpdating == null) {
+                                outdatedUpdating = new LinkedList<Database>();
+                            }
                             outdatedUpdating.add(database);
                         } catch (OXException e) {
                             if (!e.equalsCode(5, "UPD")) {
@@ -2010,7 +2012,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     }
                 }
             }
-            return outdatedUpdating;
+            return outdatedUpdating == null ? Collections.emptyList() : outdatedUpdating;
         } catch (OXException e) {
             if (e.getCode() == 102) {
                 // NOTE: this situation should not happen!
@@ -2072,9 +2074,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         }
 
-        List<Database> needingUpdate = new LinkedList<Database>();
-        List<Database> currentlyUpdating = new LinkedList<Database>();
-        List<Database> outdatedUpdating = new LinkedList<Database>();
+        List<Database> needingUpdate = null;
+        List<Database> currentlyUpdating = null;
+        List<Database> outdatedUpdating = null;
 
         long outdatedThreshold = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1); // 24h ago
 
@@ -2086,12 +2088,21 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     // Currently updating
                     Date runningSince = status.blockingUpdatesRunningSince();
                     if (null != runningSince && runningSince.getTime() < outdatedThreshold) {
+                        if (outdatedUpdating == null) {
+                            outdatedUpdating = new LinkedList<Database>();
+                        }
                         outdatedUpdating.add(database);
                     } else {
+                        if (currentlyUpdating == null) {
+                            currentlyUpdating = new LinkedList<Database>();
+                        }
                         currentlyUpdating.add(database);
                     }
                 } else if (status.needsBlockingUpdates()) {
                     // Needs update
+                    if (needingUpdate == null) {
+                        needingUpdate = new LinkedList<Database>();
+                    }
                     needingUpdate.add(database);
                 }
             }
@@ -2105,7 +2116,11 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw StorageException.wrapForRMI(e);
         }
 
-        return Arrays.asList(needingUpdate, currentlyUpdating, outdatedUpdating);
+        List<List<Database>> retval = new ArrayList<>(3);
+        retval.add(needingUpdate == null ? Collections.emptyList() : needingUpdate);
+        retval.add(currentlyUpdating == null ? Collections.emptyList() : currentlyUpdating);
+        retval.add(outdatedUpdating == null ? Collections.emptyList() : outdatedUpdating);
+        return retval;
     }
 
     /**
@@ -2570,6 +2585,47 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     public boolean existsContextNameInServer(String contextName) throws StorageException {
         Context ctx = new Context(-1, contextName);
         return existsContextNameInServer(ctx);
+    }
+
+    @Override
+    public void checkContextIdentifier(Context ctx) throws InvalidDataException, StorageException, ContextExistsException {
+        if (null == ctx || null == ctx.getId()) {
+            throw new InvalidDataException("There must be a context identifier!");
+        }
+        if (i(ctx.getId()) <= 0) {
+            throw new InvalidDataException("The context identifier " + ctx.getId() + " is not allowed!");
+        }
+
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+            int contextId = ctx.getId().intValue();
+            stmt = con.prepareStatement("SELECT 1 FROM context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                throw new ContextExistsException("Context " + ctx.getId().intValue() + " already exists!");
+            }
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(stmt);
+
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
     }
 
     @Override

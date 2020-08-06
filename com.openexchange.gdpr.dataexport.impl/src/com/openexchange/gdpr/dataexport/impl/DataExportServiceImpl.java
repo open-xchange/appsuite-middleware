@@ -94,6 +94,7 @@ import com.openexchange.gdpr.dataexport.DataExportWorkItem;
 import com.openexchange.gdpr.dataexport.DayOfWeekTimeRanges;
 import com.openexchange.gdpr.dataexport.DefaultDataExport;
 import com.openexchange.gdpr.dataexport.DefaultDataExportResultFile;
+import com.openexchange.gdpr.dataexport.DiagnosticsReportOptions;
 import com.openexchange.gdpr.dataexport.FileLocation;
 import com.openexchange.gdpr.dataexport.FileLocations;
 import com.openexchange.gdpr.dataexport.HostInfo;
@@ -721,7 +722,7 @@ public class DataExportServiceImpl implements DataExportService {
             throw new IllegalArgumentException("Start delay must not be less than 0 (zero): " + startDelay);
         }
         if (stopDelay < startDelay) {
-            throw new IllegalArgumentException("Stop delay (" + startDelay + ") must be greater than start delay (" + stopDelay + ")");
+            throw new IllegalArgumentException("Stop delay (" + stopDelay + ") must be greater than start delay (" + startDelay + ")");
         }
         final long endTimeMillis = currentTimeMillis + stopDelay;
         Runnable startTask = new Runnable() {
@@ -826,8 +827,11 @@ public class DataExportServiceImpl implements DataExportService {
             long nanosToWait = TimeUnit.NANOSECONDS.convert((count++ * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
 
-            // Check if a diagnostics report is supposed to be compiled for task-associated user
-            boolean addDiagnosticsReport = isAddDiagnosticsReport(job);
+            // Diagnostics report
+            DiagnosticsReportOptions reportOptions = DiagnosticsReportOptions.builder()
+                .withAddDiagnosticsReport(isAddDiagnosticsReport(job))
+                .withConsiderPermissionDeniedErrors(isConsiderPermissionDeniedErrors(job))
+                .build();
 
             // Some variables for clean-up
             DataExportTaskExecution execution = null;
@@ -835,7 +839,7 @@ public class DataExportServiceImpl implements DataExportService {
             boolean openedForProcessing = false;
             try {
                 // Initialize execution & submit it to thread pool
-                execution = new DataExportTaskExecution(job, addDiagnosticsReport, config, storageService, providerRegistry, services);
+                execution = new DataExportTaskExecution(job, reportOptions, config, storageService, providerRegistry, services);
                 future = threadPool.submit(execution);
 
                 // Store execution in map. Then open it for being processed while registering a clean-up task that ensures execution is removed from map when finished
@@ -864,6 +868,17 @@ public class DataExportServiceImpl implements DataExportService {
             DataExportTask task = job.getDataExportTask();
             ConfigView view = viewFactory.getView(task.getUserId(), job.getDataExportTask().getContextId());
             addDiagnosticsReport = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.gdpr.dataexport.addDiagnosticsReport", addDiagnosticsReport, view);
+        }
+        return addDiagnosticsReport;
+    }
+
+    private boolean isConsiderPermissionDeniedErrors(DataExportJob job) throws OXException {
+        boolean addDiagnosticsReport = false;
+        ConfigViewFactory viewFactory = services.getOptionalService(ConfigViewFactory.class);
+        if (viewFactory != null) {
+            DataExportTask task = job.getDataExportTask();
+            ConfigView view = viewFactory.getView(task.getUserId(), job.getDataExportTask().getContextId());
+            addDiagnosticsReport = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.gdpr.dataexport.considerPermissionDeniedErrors", addDiagnosticsReport, view);
         }
         return addDiagnosticsReport;
     }

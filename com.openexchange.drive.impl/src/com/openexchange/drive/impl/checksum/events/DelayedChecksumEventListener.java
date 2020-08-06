@@ -200,7 +200,7 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
         }
     }
 
-    private void triggerChecksumInvalidation() {
+    void triggerChecksumInvalidation() {
         DelayedChecksumInvalidation invalidation = invalidationQueue.poll();
         if (null != invalidation) {
             List<DelayedChecksumInvalidation> invalidations = new ArrayList<DelayedChecksumInvalidation>();

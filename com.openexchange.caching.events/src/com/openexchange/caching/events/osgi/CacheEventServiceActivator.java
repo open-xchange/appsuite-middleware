@@ -59,7 +59,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
-import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -110,11 +109,10 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
         logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
 
-        CacheEventMetricHandler metricHandler = new CacheEventMetricHandler(null);
+        CacheEventMetricHandler metricHandler = new CacheEventMetricHandler();
         CacheEventServiceImpl service = new CacheEventServiceImpl(new CacheEventConfigurationImpl(getService(ConfigurationService.class)), getService(ThreadPoolService.class), metricHandler);
         this.cacheEventService = service;
 
-        track(MetricService.class, new MetricServiceTracker(metricHandler, context));
         track(ManagementService.class, new HousekeepingManagementTracker(context, CacheEventMBean.NAME, CacheEventMBean.DOMAIN, new CacheEventMBeanImpl(metricHandler)));
         openTrackers();
 

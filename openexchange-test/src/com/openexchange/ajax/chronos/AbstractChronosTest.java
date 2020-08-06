@@ -62,7 +62,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
 import com.openexchange.ajax.chronos.manager.EventManager;
-import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.configuration.asset.AssetManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -234,7 +234,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", CALENDAR_MODULE, null);
+        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", CALENDAR_MODULE, null, null);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
 
         String result = createFolder.getData();
@@ -350,7 +350,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      */
     @SuppressWarnings({ "unchecked" })
     protected ArrayList<ArrayList<?>> getPrivateFolderList(FoldersApi foldersApi, String session, String module, String columns, String tree) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, columns, tree, null);
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, columns, tree, null, Boolean.TRUE);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }
@@ -436,7 +436,12 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
                 if (null == recurrenceId2) {
                     return 1;
                 }
-                return new DefaultRecurrenceId(recurrenceId1).compareTo(new DefaultRecurrenceId(recurrenceId2));
+                long dateTime1 = CalendarUtils.decode(recurrenceId1).getTimestamp();
+                long dateTime2 = CalendarUtils.decode(recurrenceId2).getTimestamp();
+                if (dateTime1 == dateTime2 ) {
+                    return 0;
+                }
+                return dateTime1 < dateTime2 ? -1 : 1;
             }
         });
         return matchingEvents;

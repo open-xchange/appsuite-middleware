@@ -194,7 +194,7 @@ public class CalendarConfigImpl implements CalendarConfig {
     public boolean isRestrictAllowedAttendeeChanges() {
         return getConfigValue("com.openexchange.calendar.restrictAllowedAttendeeChanges", Boolean.class, Boolean.TRUE).booleanValue();
     }
-    
+
     @Override
     public boolean isOrganizerChangeAllowed() {
         return getConfigValue("com.openexchange.calendar.allowChangeOfOrganizer", Boolean.class, Boolean.FALSE).booleanValue();
@@ -203,6 +203,11 @@ public class CalendarConfigImpl implements CalendarConfig {
     @Override
     public boolean isAllowOrganizerPartStatChanges() {
         return b(getConfigValue("com.openexchange.calendar.allowOrganizerPartStatChanges", Boolean.class, Boolean.FALSE));
+    }
+
+    @Override
+    public boolean isLookupPeerAttendeesForSameMailDomainOnly() {
+        return b(getConfigValue("com.openexchange.calendar.lookupPeerAttendeesForSameMailDomainOnly", Boolean.class, Boolean.TRUE));
     }
 
     private CalendarUserSettings getUserSettings(int userId) {

@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.plugin.hosting.schemamove.internal;
 
+import static com.openexchange.log.LogProperties.Name.DATABASE_POOL_ID;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -68,10 +69,15 @@ import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorage;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -162,19 +168,50 @@ public class SchemaMoveImpl implements SchemaMoveService {
     @Override
     public void invalidateContexts(String schemaName, boolean invalidateSession) throws StorageException, MissingServiceException {
         /*
-         * Invalidate disabled contexts
+         * Obtain needed services
          */
-        OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
-        List<Integer> contextIds = contextStorage.getContextIdsBySchema(schemaName);
         ContextService contextService = getContextService();
         DatabaseService dbService = getDatabaseService();
+        CacheService cacheService = getCacheService();
+        List<Integer> contextIds;
         try {
+            /*
+             * Determine all contexts associated with given schema
+             */
+            contextIds = OXContextStorageInterface.getInstance().getContextIdsBySchema(schemaName);
+            if (contextIds == null || contextIds.isEmpty()) {
+                return;
+            }
+            /*
+             * Obtain pool identifier
+             */
+            int poolId;
+            {
+                String sPoolId = LogProperties.get(DATABASE_POOL_ID);
+                if (Strings.isEmpty(sPoolId)) {
+                    poolId = dbService.getSchemaInfo(contextIds.get(0).intValue()).getPoolId();
+                } else {
+                    try {
+                        poolId = Integer.parseInt(sPoolId);
+                    } catch (NumberFormatException e) {
+                        poolId = dbService.getSchemaInfo(contextIds.get(0).intValue()).getPoolId();
+                    }
+                }
+            }
+            /*
+             * Invalidate contexts
+             */
             int[] contextIdArray = Autoboxing.I2i(contextIds);
+            // Invalidate database assignments
             dbService.invalidate(contextIdArray);
+            // Invalidate context stuff
+            invalidateSchema(poolId, schemaName, cacheService);
             contextService.invalidateContexts(contextIdArray);
             LOG.info("Invalidated {} cached context objects for schema '{}'", Integer.valueOf(contextIdArray.length), schemaName);
         } catch (OXException e) {
             throw StorageException.wrapForRMI(e);
+        } finally {
+            LogProperties.remove(DATABASE_POOL_ID);
         }
 
         if (invalidateSession) {
@@ -186,6 +223,20 @@ public class SchemaMoveImpl implements SchemaMoveService {
                 sessiondService.removeContextSessionsGlobal(new HashSet<Integer>(contextIds));
             } catch (OXException e) {
                 throw StorageException.wrapForRMI(e);
+            }
+        }
+    }
+
+    private static final String CACHE_REGION = "OXDBPoolCache";
+
+    private void invalidateSchema(int poolId, String schemaName, CacheService cacheService) throws OXException {
+        Cache cache = cacheService.getCache(CACHE_REGION);
+        if (null != cache) {
+            CacheKey key = cache.newCacheKey(poolId, schemaName);
+            try {
+                cache.remove(key);
+            } catch (OXException e) {
+                LOG.error("", e);
             }
         }
     }
@@ -219,6 +270,14 @@ public class SchemaMoveImpl implements SchemaMoveService {
     private DatabaseService getDatabaseService() throws MissingServiceException {
         try {
             return AdminServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        } catch (OXException e) {
+            throw new MissingServiceException(e.getMessage());
+        }
+    }
+
+    private CacheService getCacheService() throws MissingServiceException {
+        try {
+            return AdminServiceRegistry.getInstance().getService(CacheService.class, true);
         } catch (OXException e) {
             throw new MissingServiceException(e.getMessage());
         }

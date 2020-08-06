@@ -81,7 +81,7 @@ public class ID {
 
 	serverParams = new HashMap<>();
 
-	String[] v = r.readStringList();
+	String[] v = r.readStringList(true);
 	if (v != null) {
 	    for (int i = 0; i < v.length; i += 2) {
 		String name = v[i];

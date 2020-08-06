@@ -77,6 +77,7 @@ import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.lock.LockService;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -207,8 +208,9 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         }
         final FolderMap folderMap = FolderMapManagement.getInstance().optFor(userId, contextId);
         if (null != folderMap) {
-            folderMap.remove(MailFolder.DEFAULT_FOLDER_ID + id, FolderStorage.REAL_TREE_ID);
-            folderMap.remove(MailFolder.DEFAULT_FOLDER_ID + id, OutlookFolderStorage.OUTLOOK_TREE_ID);
+            String rootId = MailFolderUtility.prepareFullname(id, MailFolder.ROOT_FOLDER_ID);
+            folderMap.remove(rootId, FolderStorage.REAL_TREE_ID);
+            folderMap.remove(rootId, OutlookFolderStorage.OUTLOOK_TREE_ID);
         }
     }
 
@@ -280,27 +282,38 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary, Connection con) throws OXException {
+    public boolean deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary, Connection con) throws OXException {
         dropSessionParameter(userId, contextId);
 
-        delegate.deleteMailAccount(id, properties, userId, contextId, deletePrimary, con);
+        boolean deleted = delegate.deleteMailAccount(id, properties, userId, contextId, deletePrimary, con);
         invalidateMailAccount(id, userId, contextId);
+        return deleted;
     }
 
     @Override
-    public void deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary) throws OXException {
+    public void deleteAllMailAccounts(int userId, int contextId, Connection connection) throws OXException {
         dropSessionParameter(userId, contextId);
 
-        delegate.deleteMailAccount(id, properties, userId, contextId, deletePrimary);
-        invalidateMailAccount(id, userId, contextId);
+        delegate.deleteAllMailAccounts(userId, contextId, connection);
+        invalidateMailAccounts(userId, contextId);
     }
 
     @Override
-    public void deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId) throws OXException {
+    public boolean deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary) throws OXException {
         dropSessionParameter(userId, contextId);
 
-        delegate.deleteMailAccount(id, properties, userId, contextId);
+        boolean deleted = delegate.deleteMailAccount(id, properties, userId, contextId, deletePrimary);
         invalidateMailAccount(id, userId, contextId);
+        return deleted;
+    }
+
+    @Override
+    public boolean deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId) throws OXException {
+        dropSessionParameter(userId, contextId);
+
+        boolean deleted = delegate.deleteMailAccount(id, properties, userId, contextId);
+        invalidateMailAccount(id, userId, contextId);
+        return deleted;
     }
 
     private void dropSessionParameter(final int userId, final int contextId) {
@@ -484,6 +497,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public List<MailAccount> getUserMailAccounts(int contextId) throws OXException {
+        return delegate.getUserMailAccounts(contextId);
+    }
+
+    @Override
     public MailAccount getRawMailAccount(int id, int userId, int contextId) throws OXException {
         return delegate.getRawMailAccount(id, userId, contextId);
     }
@@ -578,6 +596,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public MailAccount[] resolveLogin(String login, int contextId) throws OXException {
         int[][] idsAndUsers = resolveFromCache(login, contextId, new FromDelegate() {
+
             @Override
             public int[][] getFromDelegate(String pattern, int contextId) throws OXException {
                 return getDelegate().resolveLogin2IDs(pattern, contextId);
@@ -594,6 +613,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public MailAccount[] resolveLogin(String login, String serverUrl, int contextId) throws OXException {
         int[][] idsAndUsers = resolveFromCache(login, contextId, new FromDelegate() {
+
             @Override
             public int[][] getFromDelegate(String pattern, int contextId) throws OXException {
                 return getDelegate().resolveLogin2IDs(pattern, contextId);
@@ -630,7 +650,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
-                if (rollback==1) {
+                if (rollback == 1) {
                     rollback(con);
                 }
                 autocommit(con);
@@ -716,6 +736,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public MailAccount[] resolvePrimaryAddr(String primaryAddress, int contextId) throws OXException {
         int[][] idsAndUsers = resolveFromCache(primaryAddress, contextId, new FromDelegate() {
+
             @Override
             public int[][] getFromDelegate(String pattern, int contextId) throws OXException {
                 return getDelegate().resolvePrimaryAddr2IDs(pattern, contextId);
@@ -729,6 +750,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     private static interface FromDelegate {
+
         int[][] getFromDelegate(String pattern, int contextId) throws OXException;
     }
 

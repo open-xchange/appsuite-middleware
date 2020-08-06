@@ -302,7 +302,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             return null;
         }
         final Set<SessionMatcher.Flag> flags = matcher.flags();
-        return SessionHandler.findFirstSessionForUser(userId, contextId, matcher, flags.contains(SessionMatcher.Flag.IGNORE_LONG_TERM), flags.contains(SessionMatcher.Flag.IGNORE_SESSION_STORAGE));
+        return SessionHandler.findFirstSessionForUser(userId, contextId, matcher, flags.contains(SessionMatcher.Flag.IGNORE_SHORT_TERM), flags.contains(SessionMatcher.Flag.IGNORE_LONG_TERM), flags.contains(SessionMatcher.Flag.IGNORE_SESSION_STORAGE));
     }
 
     @Override

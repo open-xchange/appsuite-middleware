@@ -47,16 +47,17 @@
  *
  */
 
-
 package com.openexchange.subscribe.osgi;
 
 import static com.openexchange.osgi.Tools.withRanking;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.context.ContextService;
 import com.openexchange.context.osgi.WhiteboardContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.osgi.tools.WhiteboardGenericConfigurationStorageService;
+import com.openexchange.external.account.ExternalAccountProvider;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -70,6 +71,7 @@ import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
+import com.openexchange.subscribe.SubscriptionExternalAccountProvider;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.database.SubscriptionUserDeleteListener;
 import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategy;
@@ -136,6 +138,8 @@ public class DiscoveryActivator extends HousekeepingActivator {
         registerService(EncryptedItemDetectorService.class, secretHandling);
         registerService(EncryptedItemCleanUpService.class, secretHandling);
         registerService(SecretMigrator.class, secretHandling);
+
+        registerService(ExternalAccountProvider.class, new SubscriptionExternalAccountProvider(this));
     }
 
     @Override
@@ -167,7 +171,7 @@ public class DiscoveryActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { UserService.class, UserPermissionService.class, InfostoreFacade.class, FolderService.class, DBProvider.class, SecretEncryptionFactoryService.class, CryptoService.class };
+        return new Class[] { UserService.class, UserPermissionService.class, InfostoreFacade.class, FolderService.class, DBProvider.class, SecretEncryptionFactoryService.class, CryptoService.class, ContextService.class };
     }
 
 }

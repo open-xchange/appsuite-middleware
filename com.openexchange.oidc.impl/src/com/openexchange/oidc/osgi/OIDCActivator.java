@@ -60,7 +60,9 @@ import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.lock.LockService;
 import com.openexchange.login.listener.LoginListener;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.oidc.OIDCBackend;
+import com.openexchange.oidc.http.outbound.OIDCHttpClientConfig;
 import com.openexchange.oidc.hz.PortableAuthenticationRequestFactory;
 import com.openexchange.oidc.hz.PortableLogoutRequestFactory;
 import com.openexchange.oidc.impl.OIDCAuthenticationFailedHandler;
@@ -71,6 +73,8 @@ import com.openexchange.oidc.impl.OIDCSessionParameterNamesProvider;
 import com.openexchange.oidc.impl.OIDCSessionSsoProvider;
 import com.openexchange.oidc.spi.OIDCCoreBackend;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.SessionSsoProvider;
@@ -81,6 +85,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.user.UserService;
+import com.openexchange.version.VersionService;
 
 /**
  * Activates the OpenID feature.
@@ -127,7 +132,13 @@ public class OIDCActivator extends HousekeepingActivator{
         Services.setServices(this);
         trackService(SessionStorageService.class);
         trackService(LockService.class);
+        trackService(SSLSocketFactoryProvider.class);
+        trackService(VersionService.class);
+        trackService(HttpClientService.class);
         openTrackers();
+
+        // Initialize configuration for outbound HTTP traffic
+        registerService(SpecificHttpClientConfigProvider.class, new OIDCHttpClientConfig());
 
         OIDCConfigImpl config = new OIDCConfigImpl(this);
 
@@ -163,6 +174,10 @@ public class OIDCActivator extends HousekeepingActivator{
         if (null != oidcBackends) {
             this.oidcBackendRegistry = null;
             oidcBackends.close();
+        }
+        HttpClientService httpClientService = getService(HttpClientService.class);
+        if (httpClientService != null) {
+            httpClientService.destroyHttpClient(OIDCHttpClientConfig.getClientIdOidc());
         }
         Services.setServices(null);
         super.stopBundle();

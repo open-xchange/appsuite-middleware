@@ -152,8 +152,7 @@ public final class PushImplActivator extends HousekeepingActivator {
             registerService(CustomPortableFactory.class, new PortableDropAllPermanentListenerCallableFactory());
             registerService(CustomPortableFactory.class, new PortableStartPermanentListenerCallableFactory());
 
-            if (pushManagerRegistry.isPermanentPushAllowed()) {
-
+            if (pushManagerRegistry.isPermanentPushAllowedPerConfig()) {
                 // Track HazelcastInstance
                 HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
                 if (hazelcastConfig.isEnabled()) {
@@ -170,7 +169,7 @@ public final class PushImplActivator extends HousekeepingActivator {
                         registerService(EventHandler.class, rescheduler, serviceProperties);
                     }
                 } else {
-                    pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners(), 0L);
+                    pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners(), true, 0L);
                 }
             }
 

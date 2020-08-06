@@ -65,6 +65,7 @@ import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.i18n.LocaleTools;
@@ -614,6 +615,16 @@ public class UserizedFolderImpl implements UserizedFolder {
     @Override
     public void setOriginPath(FolderPath originPath) {
         folder.setOriginPath(originPath);
+    }
+
+    @Override
+    public UsedForSync getUsedForSync() {
+        return folder.getUsedForSync() == null ? UsedForSync.DEFAULT : folder.getUsedForSync();
+    }
+
+    @Override
+    public void setUsedForSync(UsedForSync usedForSync) {
+        folder.setUsedForSync(usedForSync);
     }
 
 }

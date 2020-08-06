@@ -51,7 +51,6 @@ package com.openexchange.admin.plugin.hosting.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
@@ -70,6 +69,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
+import com.openexchange.log.LogProperties;
 import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
@@ -333,10 +333,12 @@ public abstract class OXContextStorageInterface {
 
     /**
      * Gets all contexts that belong to the given schema.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">{@link LogProperties.Name#DATABASE_POOL_ID} is set by this method.</div>
      *
-     * @param schema
-     * @return
-     * @throws StorageException
+     * @param schema The schema name
+     * @return The identifiers of all contexts that belong to the schema
+     * @throws StorageException If context identifiers cannot be returned
      */
     public abstract List<Integer> getContextIdsBySchema(final String schema) throws StorageException;
 
@@ -381,24 +383,4 @@ public abstract class OXContextStorageInterface {
      * @throws StorageException
      */
     public abstract String createSchema(int targetClusterId) throws StorageException;
-
-    /**
-     * Checks the consistencies for the count tables
-     *
-     * @param configCon The connection to the ConfigDb
-     * @param checkDatabaseCounts Whether to check the counts related to context to database/schema associations
-     * @param checkFilestoreCounts Whether to check the counts related to context to filestore associations
-     * @throws StorageException If check fails
-     */
-    public abstract void checkCountsConsistency(Connection configCon, boolean checkDatabaseCounts, boolean checkFilestoreCounts) throws StorageException;
-
-    /**
-     * Checks the consistencies for the count tables
-     *
-     * @param checkDatabaseCounts Whether to check the counts related to context to database/schema associations
-     * @param checkFilestoreCounts Whether to check the counts related to context to filestore associations
-     * @throws StorageException If check fails
-     */
-    public abstract void checkCountsConsistency(boolean checkDatabaseCounts, boolean checkFilestoreCounts) throws StorageException;
-
 }

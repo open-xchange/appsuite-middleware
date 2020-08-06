@@ -48,7 +48,7 @@
  */
 package com.openexchange.admin.rmi.exceptions;
 
-public class DuplicateExtensionException extends Exception {
+public class DuplicateExtensionException extends AbstractAdminRmiException {
 
     /**
      * For serialization

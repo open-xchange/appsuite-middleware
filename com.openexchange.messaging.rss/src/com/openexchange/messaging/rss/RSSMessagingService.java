@@ -61,6 +61,7 @@ import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAction;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.messaging.MessagingService;
+import com.openexchange.rss.utils.RssProperties;
 import com.openexchange.session.Session;
 import com.sun.syndication.fetcher.FeedFetcher;
 import com.sun.syndication.fetcher.impl.HashMapFeedInfoCache;
@@ -91,9 +92,9 @@ public class RSSMessagingService implements MessagingService {
      *
      * @param rssProperties The RSS properties service
      */
-    public RSSMessagingService() {
+    public RSSMessagingService(RssProperties rssProperties) {
         super();
-        accountManager = new ConfigurationCheckingAccountManager(this);
+        accountManager = new ConfigurationCheckingAccountManager(this, rssProperties);
         fetcher = new HttpURLFeedFetcher(HashMapFeedInfoCache.getInstance());
     }
 

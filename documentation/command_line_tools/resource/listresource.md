@@ -2,6 +2,7 @@
 title: listresource
 icon: far fa-circle
 tags: Administration, Command Line tools, Resource, Context
+package: open-xchange-admin
 ---
 
 # NAME

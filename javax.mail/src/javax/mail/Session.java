@@ -40,34 +40,26 @@
 
 package javax.mail;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.lang.reflect.Constructor;
-import java.net.InetAddress;
-import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.lang.reflect.*;
+import java.io.*;
+import java.net.*;
+import java.security.*;
+import java.util.Collections;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Properties;
-import java.util.ServiceLoader;
 import java.util.StringTokenizer;
-import java.util.Vector;
-import java.util.concurrent.Executor;
+import java.util.ServiceLoader;
 import java.util.logging.Level;
 import javax.mail.osgi.BundleResourceLoader;
+import java.util.concurrent.Executor;
+
 import com.sun.mail.util.LineInputStream;
 import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.DefaultProvider;
 
 /**
  * The Session class represents a mail session and is not subclassed.
@@ -242,12 +234,12 @@ public final class Session {
     private boolean debug = false;
     private PrintStream out;			// debug output stream
     private MailLogger logger;
-    private List<Provider> providers;
+    private final List<Provider> providers = new ArrayList<>();
+    private boolean loadedProviders;
     private final Map<String, Provider> providersByProtocol = new HashMap<>();
     private final Map<String, Provider> providersByClassName = new HashMap<>();
     private final Properties addressMap = new Properties();
 						// maps type to protocol
-    private boolean loadedProviders;    // javamail.[default.]providers loaded?
     // the queue of events to be delivered, if mail.event.scope===session
     private final EventQueue q;
 
@@ -297,6 +289,8 @@ public final class Session {
 	else
 	    cl = this.getClass();
 	// load the resources
+    // loadProviders(cl);
+	loadedProviders = false;
 	loadAddressMap(cl);
 	q = new EventQueue((Executor)props.get("mail.event.executor"));
     }
@@ -508,22 +502,19 @@ public final class Session {
      * @return Array of configured providers
      */
     public synchronized Provider[] getProviders() {
-    List<Provider> plist = new ArrayList<Provider>();
-    boolean needFallback = true;
-    // first, add all the services
-    ServiceLoader<Provider> loader = ServiceLoader.load(Provider.class);
-    for (Provider p : loader) {
-        plist.add(p);
-        needFallback = false;
+    if (!loadedProviders) {
+        Class<?> cl;
+        if (authenticator != null)
+            cl = authenticator.getClass();
+        else
+            cl = this.getClass();
+        // load the resources
+        loadProviders(cl);
     }
-    // then, add all the providers from config files
-    if (!loadedProviders)
-        loadProviders(needFallback);
-    if (providers != null)
-        plist.addAll(providers);
-    Provider[] _providers = new Provider[plist.size()];
-    plist.toArray(_providers);
-	return _providers;
+
+    Provider[] _providers = new Provider[providers.size()];
+    providers.toArray(_providers);
+    return _providers;
     }
 
     /**
@@ -560,8 +551,12 @@ public final class Session {
 	    _provider = getProviderByClassName(_className);
 	} 
 
-	if (_provider == null)
+	if (_provider != null) {
+        return _provider;
+    } else {
+        // returning currently default protocol in providersByProtocol
         _provider = getProviderByProtocol(protocol);
+    }
 
 	if (_provider == null) {
 	    throw new NoSuchProviderException("No provider for " + protocol);
@@ -571,6 +566,58 @@ public final class Session {
 	    }
 	    return _provider;
 	}
+    }
+    
+    /**
+     * Get the Provider that uses the specified class name.
+     *
+     * @param   className   the class name
+     * @return      the Provider
+     */
+    private Provider getProviderByClassName(String className) {
+    // first, try our local list of providers
+    Provider p = providersByClassName.get(className);
+    if (p != null)
+        return p;
+
+    // finally, if we haven't loaded our config, load it and try again
+    if (!loadedProviders) {
+        Class<?> cl;
+        if (authenticator != null)
+            cl = authenticator.getClass();
+        else
+            cl = this.getClass();
+        // load the resources
+        loadProviders(cl);
+        p = providersByClassName.get(className);
+    }
+    return p;
+    }
+
+    /**
+     * Get the Provider for the specified protocol.
+     *
+     * @param   protocol    the protocol
+     * @return      the Provider
+     */
+    private Provider getProviderByProtocol(String protocol) {
+    // first, try our local list of providers
+    Provider p = providersByProtocol.get(protocol);
+    if (p != null)
+        return p;
+
+    // finally, if we haven't loaded our config, load it and try again
+    if (!loadedProviders) {
+        Class<?> cl;
+        if (authenticator != null)
+            cl = authenticator.getClass();
+        else
+            cl = this.getClass();
+        // load the resources
+        loadProviders(cl);
+        p = providersByProtocol.get(protocol);
+    }
+    return p;
     }
 
     /**
@@ -996,70 +1043,15 @@ public final class Session {
     }
 
     /**
-     * Get the Provider that uses the specified class name.
-     *
-     * @param   className   the class name
-     * @return      the Provider
-     */
-    private Provider getProviderByClassName(String className) {
-    // first, try our local list of providers
-    Provider p = providersByClassName.get(className);
-    if (p != null)
-        return p;
-
-    // now, try services
-    ServiceLoader<Provider> loader = ServiceLoader.load(Provider.class);
-    for (Provider pp : loader) {
-        if (className.equals(pp.getClassName()))
-        return pp;
-    }
-
-    // finally, if we haven't loaded our config, load it and try again
-    if (!loadedProviders) {
-        loadProviders(true);
-        p = providersByClassName.get(className);
-    }
-    return p;
-    }
-
-    /**
-     * Get the Provider for the specified protocol.
-     *
-     * @param   protocol    the protocol
-     * @return      the Provider
-     */
-    private Provider getProviderByProtocol(String protocol) {
-    // first, try our local list of providers
-    Provider p = providersByProtocol.get(protocol);
-    if (p != null)
-        return p;
-
-    // now, try services
-    ServiceLoader<Provider> loader = ServiceLoader.load(Provider.class);
-    for (Provider pp : loader) {
-        if (protocol.equals(pp.getProtocol()))
-        return pp;
-    }
-
-    // finally, if we haven't loaded our config, load it and try again
-    if (!loadedProviders) {
-        loadProviders(true);
-        p = providersByProtocol.get(protocol);
-    }
-    return p;
-    }
-
-    /**
      * Load the protocol providers config files.
-     * If fallback is true, provide built in defaults if nothing is loaded.
      */
-    private void loadProviders(boolean fallback) {
+    private void loadProviders(Class<?> cl) {
     StreamLoader loader = new StreamLoader() {
-	    @Override
-	    public void load(InputStream is) throws IOException {
-		loadProvidersFromStream(is);
-	    }
-	};
+        @Override
+        public void load(InputStream is) throws IOException {
+        loadProvidersFromStream(is);
+        }
+    };
 
 	// load system-wide javamail.providers from the
 	// <java.home>/{conf,lib} directory
@@ -1068,12 +1060,12 @@ public final class Session {
 		loadFile(confDir + "javamail.providers", loader);
 	} catch (SecurityException ex) {}
 
-	// get the Class associated with the Authenticator
-    Class<?> cl;
-    if (authenticator != null)
-        cl = authenticator.getClass();
-    else
-        cl = this.getClass();
+    // next, add all the non-default services
+    ServiceLoader<Provider> sl = ServiceLoader.load(Provider.class);
+    for (Provider p : sl) {
+        if (!p.getClass().isAnnotationPresent(DefaultProvider.class))
+        addProvider(p);
+    }
 
 	// load the META-INF/javamail.providers file supplied by an application
 	loadAllResources("META-INF/javamail.providers", cl, loader);
@@ -1081,48 +1073,48 @@ public final class Session {
 	// load default META-INF/javamail.default.providers from mail.jar file
 	loadResource("/META-INF/javamail.default.providers", cl, loader, false);
 
-	/*
-     * If we haven't loaded any providers and the fallback configuration
-     * is needed, fake it.
+	// finally, add all the default services
+    sl = ServiceLoader.load(Provider.class);
+    for (Provider p : sl) {
+        if (p.getClass().isAnnotationPresent(DefaultProvider.class))
+        addProvider(p);
+    }
+
+    /*
+     * If we haven't loaded any providers, fake it.
      */
-    if ((providers == null || providers.size() == 0) && fallback) {
-	    logger.config("failed to load any providers, using defaults");
-	    // failed to load any providers, initialize with our defaults
-	    addProvider(new Provider(Provider.Type.STORE,
-			"imap", "com.sun.mail.imap.IMAPStore",
-			"Oracle", "1.6.2"));
-	    addProvider(new Provider(Provider.Type.STORE,
-			"imaps", "com.sun.mail.imap.IMAPSSLStore",
-			"Oracle", "1.6.2"));
-	    addProvider(new Provider(Provider.Type.STORE,
-			"pop3", "com.sun.mail.pop3.POP3Store",
-			"Oracle", "1.6.2"));
-	    addProvider(new Provider(Provider.Type.STORE,
-			"pop3s", "com.sun.mail.pop3.POP3SSLStore",
-			"Oracle", "1.6.2"));
-	    addProvider(new Provider(Provider.Type.TRANSPORT,
-			"smtp", "com.sun.mail.smtp.SMTPTransport",
-			"Oracle", "1.6.2"));
-	    addProvider(new Provider(Provider.Type.TRANSPORT,
-			"smtps", "com.sun.mail.smtp.SMTPSSLTransport",
-			"Oracle", "1.6.2"));
-	    addProvider(new Provider(Provider.Type.STORE,
-            "gimap", "com.sun.mail.gimap.GmailStore",
-            "Oracle", "1.6.2"));
+    if (providers.size() == 0) {
+        logger.config("failed to load any providers, using defaults");
+        // failed to load any providers, initialize with our defaults
         addProvider(new Provider(Provider.Type.STORE,
-            "gimap", "com.sun.mail.gimap.GmailSSLStore",
-            "Oracle", "1.6.2"));
-	}
+            "imap", "com.sun.mail.imap.IMAPStore",
+            "Oracle", "1.6.5"));
+        addProvider(new Provider(Provider.Type.STORE,
+            "imaps", "com.sun.mail.imap.IMAPSSLStore",
+            "Oracle", "1.6.5"));
+        addProvider(new Provider(Provider.Type.STORE,
+            "pop3", "com.sun.mail.pop3.POP3Store",
+            "Oracle", "1.6.5"));
+        addProvider(new Provider(Provider.Type.STORE,
+            "pop3s", "com.sun.mail.pop3.POP3SSLStore",
+            "Oracle", "1.6.5"));
+        addProvider(new Provider(Provider.Type.TRANSPORT,
+            "smtp", "com.sun.mail.smtp.SMTPTransport",
+            "Oracle", "1.6.5"));
+        addProvider(new Provider(Provider.Type.TRANSPORT,
+            "smtps", "com.sun.mail.smtp.SMTPSSLTransport",
+            "Oracle", "1.6.5"));
+    }
 
 	if (logger.isLoggable(Level.CONFIG)) {
 	    // dump the output of the tables for debugging
-	    logger.config("Tables of loaded providers from javamail.providers");
+        logger.config("Tables of loaded providers");
 	    logger.config("Providers Listed By Class Name: " + 
 	       providersByClassName.toString());
 	    logger.config("Providers Listed By Protocol: " + 
 	       providersByProtocol.toString());
 	}
-	loadedProviders = true;
+    loadedProviders = true;
     }
 
     private void loadProvidersFromStream(InputStream is) 
@@ -1191,8 +1183,6 @@ public final class Session {
      * @since	JavaMail 1.4
      */
     public synchronized void addProvider(Provider provider) {
-    if (providers == null)
-        providers = new ArrayList<Provider>();
     providers.add(provider);
 	providersByClassName.put(provider.getClassName(), provider);
 	if (!providersByProtocol.containsKey(provider.getProtocol()))

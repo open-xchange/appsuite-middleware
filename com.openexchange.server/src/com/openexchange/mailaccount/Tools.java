@@ -138,32 +138,30 @@ public final class Tools {
      * @param storageService The storage service (needed for update)
      * @param session The session providing needed user information
      * @param con The connection or <code>null</code>
-     * @param folderNames Array of predefined folder names (e.g. Special-Use Folders) or null entries. If present, these names are used for creation.
+     * @param folderFullNames Array of predefined folder full names (e.g. IMAP SPECIAL-USE folders) or <code>null</code> entries. If present, these full names are used for creation.
      * @return The mail account with full names present
      * @throws OXException If check for full names fails
      */
-    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final Session session, final Connection con, final Map<String, String> folderNames) throws OXException {
+    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final Session session, final Connection con, final Map<String, String> folderFullNames) throws OXException {
 
-        Map<String, String> given_names = folderNames;
-        if (null == given_names) {
-            given_names = new HashMap<String, String>();
+        Map<String, String> givenFullNames = folderFullNames;
+        if (null == givenFullNames) {
+            givenFullNames = new HashMap<String, String>();
         }
 
         final int accountId = account.getId();
         if (MailAccount.DEFAULT_ID == accountId) {
-            /*
-             * No check for primary account
-             */
+            // No check for primary account
             return account;
         }
 
+        // Initialize mail account description and attributes to update
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final MailAccountDescription mad = new MailAccountDescription();
         mad.setId(accountId);
         final Set<Attribute> attributes = EnumSet.noneOf(Attribute.class);
-        /*
-         * Variables
-         */
+
+        // Variables
         String prefix = null;
         {
             final String mailProtocol = account.getMailProtocol();
@@ -174,13 +172,12 @@ public final class Tools {
         StringBuilder tmp = null;
         MailAccount primaryAccount = null;
         Locale locale = null;
-        /*
-         * Check full names
-         */
+
+        // Check full names
         final int userId = serverSession.getUserId();
         final int contextId = serverSession.getContextId();
         try {
-            //Confirmed-Ham
+            // Confirmed-Ham
             String fullName = account.getConfirmedHamFullname();
             if (null == fullName) {
                 if (null == prefix) {
@@ -198,6 +195,7 @@ public final class Tools {
                 mad.setConfirmedHamFullname((tmp = new StringBuilder(prefix)).append(name).toString());
                 attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
             }
+
             // Confirmed-Spam
             fullName = account.getConfirmedSpamFullname();
             if (null == fullName) {
@@ -227,174 +225,192 @@ public final class Tools {
                 mad.setConfirmedSpamFullname(tmp.append(name).toString());
                 attributes.add(Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
             }
+
             // Drafts
             fullName = account.getDraftsFullname();
             if (null == fullName) {
-                if (null == prefix) {
-                    prefix = getPrefix(accountId, serverSession);
-                    tmp = new StringBuilder(prefix);
+                fullName = givenFullNames.get(IMailFolderStorageDefaultFolderAware.DRAFTS);
+                if (fullName != null) {
+                    mad.setDraftsFullname(fullName);
+                    attributes.add(Attribute.DRAFTS_FULLNAME_LITERAL);
                 } else {
-                    if (null == tmp) {
+                    if (null == prefix) {
+                        prefix = getPrefix(accountId, serverSession);
                         tmp = new StringBuilder(prefix);
                     } else {
-                        tmp.setLength(prefix.length());
+                        if (null == tmp) {
+                            tmp = new StringBuilder(prefix);
+                        } else {
+                            tmp.setLength(prefix.length());
+                        }
                     }
-                }
-                String name = given_names.get(IMailFolderStorageDefaultFolderAware.DRAFTS);
-                if (null == name) {
-                    name = account.getDrafts();
-                }
-                if (null == name) {
-                    if (null == locale) {
-                        locale = serverSession.getUser().getLocale();
+                    String name = account.getDrafts();
+                    if (null == name) {
+                        if (null == locale) {
+                            locale = serverSession.getUser().getLocale();
+                        }
+                        name = StringHelper.valueOf(locale).getString(MailStrings.DRAFTS);
+                        mad.setDrafts(name);
+                        attributes.add(Attribute.DRAFTS_LITERAL);
                     }
-                    name = StringHelper.valueOf(locale).getString(MailStrings.DRAFTS);
-                    mad.setDrafts(name);
-                    attributes.add(Attribute.DRAFTS_LITERAL);
+                    if ("Drafts".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
+                        name = "Draft";
+                        mad.setDrafts(name);
+                        attributes.add(Attribute.DRAFTS_LITERAL);
+                    }
+                    mad.setDraftsFullname(tmp.append(name).toString());
+                    attributes.add(Attribute.DRAFTS_FULLNAME_LITERAL);
                 }
-                if ("Drafts".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
-                    name = "Draft";
-                    mad.setDrafts(name);
-                    attributes.add(Attribute.DRAFTS_LITERAL);
-                }
-                mad.setDraftsFullname(tmp.append(name).toString());
-                attributes.add(Attribute.DRAFTS_FULLNAME_LITERAL);
             }
+
             // Sent
             fullName = account.getSentFullname();
             if (null == fullName) {
-                if (null == prefix) {
-                    prefix = getPrefix(accountId, serverSession);
-                    tmp = new StringBuilder(prefix);
+                fullName = givenFullNames.get(IMailFolderStorageDefaultFolderAware.SENT);
+                if (fullName != null) {
+                    mad.setSentFullname(fullName);
+                    attributes.add(Attribute.SENT_FULLNAME_LITERAL);
                 } else {
-                    if (null == tmp) {
+                    if (null == prefix) {
+                        prefix = getPrefix(accountId, serverSession);
                         tmp = new StringBuilder(prefix);
                     } else {
-                        tmp.setLength(prefix.length());
+                        if (null == tmp) {
+                            tmp = new StringBuilder(prefix);
+                        } else {
+                            tmp.setLength(prefix.length());
+                        }
                     }
-                }
-                String name = given_names.get(IMailFolderStorageDefaultFolderAware.SENT);
-                if (null == name) {
-                    name = account.getSent();
-                }
-                if (null == name) {
-                    if (null == locale) {
-                        locale = serverSession.getUser().getLocale();
-                    }
-                    name = StringHelper.valueOf(locale).getString(MailStrings.SENT);
+                    String name = account.getSent();
+                    if (null == name) {
+                        if (null == locale) {
+                            locale = serverSession.getUser().getLocale();
+                        }
+                        name = StringHelper.valueOf(locale).getString(MailStrings.SENT);
 
-                    mad.setSent(name);
-                    attributes.add(Attribute.SENT_LITERAL);
+                        mad.setSent(name);
+                        attributes.add(Attribute.SENT_LITERAL);
+                    }
+                    if ("Sent Items".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
+                        name = "Sent";
+                        mad.setSent(name);
+                        attributes.add(Attribute.SENT_LITERAL);
+                    }
+                    mad.setSentFullname(tmp.append(name).toString());
+                    attributes.add(Attribute.SENT_FULLNAME_LITERAL);
                 }
-                if ("Sent Items".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
-                    name = "Sent";
-                    mad.setSent(name);
-                    attributes.add(Attribute.SENT_LITERAL);
-                }
-                mad.setSentFullname(tmp.append(name).toString());
-                attributes.add(Attribute.SENT_FULLNAME_LITERAL);
             }
+
             // Spam
             fullName = account.getSpamFullname();
             if (null == fullName) {
-                if (null == prefix) {
-                    prefix = getPrefix(accountId, serverSession);
-                    tmp = new StringBuilder(prefix);
+                fullName = givenFullNames.get(IMailFolderStorageDefaultFolderAware.SPAM);
+                if (fullName != null) {
+                    mad.setSpamFullname(fullName);
+                    attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
                 } else {
-                    if (null == tmp) {
+                    if (null == prefix) {
+                        prefix = getPrefix(accountId, serverSession);
                         tmp = new StringBuilder(prefix);
                     } else {
-                        tmp.setLength(prefix.length());
+                        if (null == tmp) {
+                            tmp = new StringBuilder(prefix);
+                        } else {
+                            tmp.setLength(prefix.length());
+                        }
                     }
-                }
-                String name = given_names.get(IMailFolderStorageDefaultFolderAware.SPAM);
-                if (null == name) {
-                    name = account.getSpam();
-                }
-                if (null == name) {
-                    if (null == locale) {
-                        locale = serverSession.getUser().getLocale();
-                    }
-                    name = StringHelper.valueOf(locale).getString(MailStrings.SPAM);
+                    String name = account.getSpam();
+                    if (null == name) {
+                        if (null == locale) {
+                            locale = serverSession.getUser().getLocale();
+                        }
+                        name = StringHelper.valueOf(locale).getString(MailStrings.SPAM);
 
-                    mad.setSpam(name);
-                    attributes.add(Attribute.SPAM_LITERAL);
+                        mad.setSpam(name);
+                        attributes.add(Attribute.SPAM_LITERAL);
+                    }
+                    if ("Spam".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
+                        name = "Bulk Mail";
+                        mad.setSpam(name);
+                        attributes.add(Attribute.SPAM_LITERAL);
+                    }
+                    mad.setSpamFullname(tmp.append(name).toString());
+                    attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
                 }
-                if ("Spam".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
-                    name = "Bulk Mail";
-                    mad.setSpam(name);
-                    attributes.add(Attribute.SPAM_LITERAL);
-                }
-                mad.setSpamFullname(tmp.append(name).toString());
-                attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
             }
+
             // Trash
             fullName = account.getTrashFullname();
             if (null == fullName) {
-                if (null == prefix) {
-                    prefix = getPrefix(accountId, serverSession);
-                    tmp = new StringBuilder(prefix);
+                fullName = givenFullNames.get(IMailFolderStorageDefaultFolderAware.TRASH);
+                if (fullName != null) {
+                    mad.setTrashFullname(fullName);
+                    attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
                 } else {
-                    if (null == tmp) {
+                    if (null == prefix) {
+                        prefix = getPrefix(accountId, serverSession);
                         tmp = new StringBuilder(prefix);
                     } else {
-                        tmp.setLength(prefix.length());
+                        if (null == tmp) {
+                            tmp = new StringBuilder(prefix);
+                        } else {
+                            tmp.setLength(prefix.length());
+                        }
                     }
-                }
-                String name = given_names.get(IMailFolderStorageDefaultFolderAware.TRASH);
-                if (null == name) {
-                    name = account.getTrash();
-                }
-                if (null == name) {
-                    if (null == locale) {
-                        locale = serverSession.getUser().getLocale();
-                    }
-                    name = StringHelper.valueOf(locale).getString(MailStrings.TRASH);
+                    String name = account.getTrash();
+                    if (null == name) {
+                        if (null == locale) {
+                            locale = serverSession.getUser().getLocale();
+                        }
+                        name = StringHelper.valueOf(locale).getString(MailStrings.TRASH);
 
-                    mad.setTrash(name);
-                    attributes.add(Attribute.TRASH_LITERAL);
+                        mad.setTrash(name);
+                        attributes.add(Attribute.TRASH_LITERAL);
+                    }
+                    mad.setTrashFullname(tmp.append(name).toString());
+                    attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
                 }
-                mad.setTrashFullname(tmp.append(name).toString());
-                attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
             }
-            // archive
+
+            // Archive
             fullName = account.getArchiveFullname();
             if (null == fullName) {
-                if (null == prefix) {
-                    prefix = getPrefix(accountId, serverSession);
-                    tmp = new StringBuilder(prefix);
+                fullName = givenFullNames.get(IMailFolderStorageDefaultFolderAware.ARCHIVE);
+                if (fullName != null) {
+                    mad.setArchiveFullname(fullName);
+                    attributes.add(Attribute.ARCHIVE_FULLNAME_LITERAL);
                 } else {
-                    if (null == tmp) {
+                    if (null == prefix) {
+                        prefix = getPrefix(accountId, serverSession);
                         tmp = new StringBuilder(prefix);
                     } else {
-                        tmp.setLength(prefix.length());
+                        if (null == tmp) {
+                            tmp = new StringBuilder(prefix);
+                        } else {
+                            tmp.setLength(prefix.length());
+                        }
                     }
-                }
-                String name = given_names.get(IMailFolderStorageDefaultFolderAware.ARCHIVE);
-                if (null == name) {
-                    name = account.getArchive();
-                }
-                if (null == name) {
-                    if (null == locale) {
-                        locale = serverSession.getUser().getLocale();
-                    }
-                    name = StringHelper.valueOf(locale).getString(MailStrings.ARCHIVE);
+                    String name = account.getArchive();
+                    if (null == name) {
+                        if (null == locale) {
+                            locale = serverSession.getUser().getLocale();
+                        }
+                        name = StringHelper.valueOf(locale).getString(MailStrings.ARCHIVE);
 
-                    mad.setArchive(name);
-                    attributes.add(Attribute.ARCHIVE_LITERAL);
+                        mad.setArchive(name);
+                        attributes.add(Attribute.ARCHIVE_LITERAL);
+                    }
+                    mad.setArchiveFullname(tmp.append(name).toString());
+                    attributes.add(Attribute.ARCHIVE_FULLNAME_LITERAL);
                 }
-                mad.setArchiveFullname(tmp.append(name).toString());
-                attributes.add(Attribute.ARCHIVE_FULLNAME_LITERAL);
             }
-            /*
-             * Something to update?
-             */
+
+            // Something to update?
             if (attributes.isEmpty()) {
                 return account;
             }
-            /*
-             * Update and return re-fetched account instance
-             */
+
+            // Update and return re-fetched account instance
             if (null == con) {
                 final DatabaseService databaseService = ServerServiceRegistry.getServize(DatabaseService.class);
                 final Connection wcon = databaseService.getWritable(contextId);
@@ -408,9 +424,7 @@ public final class Tools {
             storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession, con, false);
             return storageService.getMailAccount(accountId, userId, contextId, con);
         } catch (OXException e) {
-            /*
-             * Checking full names failed
-             */
+            // Checking full names failed
             final StringBuilder sb = new StringBuilder("Checking default folder full names for account ");
             sb.append(account.getId()).append(" failed with user ").append(userId);
             sb.append(" in context ").append(contextId);

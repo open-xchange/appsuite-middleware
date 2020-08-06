@@ -106,7 +106,7 @@ import com.openexchange.user.UserService;
  */
 public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
-    public static final EventField[] SKIP = new EventField[] { EventField.FOLDER_ID, EventField.ID, EventField.CREATED_BY, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.SEQUENCE,
+    public static final EventField[] SKIP = new EventField[] { EventField.FOLDER_ID, EventField.ID, EventField.SERIES_ID, EventField.CREATED_BY, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.SEQUENCE,
         EventField.ALARMS, EventField.FLAGS, EventField.ATTENDEE_PRIVILEGES };
     
     protected ITipIntegrationUtility util;
@@ -319,13 +319,23 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         return null;
     }
 
-    public boolean doAppointmentsDiffer(final Event update, final Event original) throws OXException {
+    public boolean doAppointmentsDiffer(final Event update, final Event original, final CalendarSession session) throws OXException {
         if (original == update) {
             // Can be the same object .. so avoid roundtrip of diff
             return false;
         }
         final ITipEventUpdate diff = new ITipEventUpdate(original, update, true, AbstractITipAnalyzer.SKIP);
-        return !diff.getUpdatedFields().isEmpty();
+        if (diff.getUpdatedFields().isEmpty()) {
+            return false;
+        }
+        /*
+         * Check if they do only differ because of the participant status of the user, that has already been updated
+         */
+        if (diff.isAboutCertainParticipantsStateChangeOnly(String.valueOf(session.getUserId())) && original.getTimestamp() > update.getTimestamp()) {
+            return false;
+        }
+
+        return true;
     }
 
     public boolean hasConflicts(final ITipAnalysis analysis) {
@@ -363,11 +373,14 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             final Event masterEvent = change.getMasterEvent();
             for (final Iterator<EventConflict> iterator = conflicts.iterator(); iterator.hasNext();) {
                 final EventConflict conflict = iterator.next();
-                if (currentEvent != null && (currentEvent.getId().equals(conflict.getConflictingEvent().getId()))) {
+                if (null != conflict.getConflictingEvent()) {
+                    continue;
+                }
+                if (currentEvent != null && currentEvent.getId() != null && (currentEvent.getId().equals(conflict.getConflictingEvent().getId()))) {
                     iterator.remove();
                     continue;
                 }
-                if (masterEvent != null && (masterEvent.getId().equals(conflict.getConflictingEvent().getId()))) {
+                if (masterEvent != null && masterEvent.getId() != null && (masterEvent.getId().equals(conflict.getConflictingEvent().getId()))) {
                     iterator.remove();
                     continue;
                 }

@@ -362,8 +362,7 @@ public class ModuleSupportImpl implements ModuleSupport {
          */
         SearchIterator<FolderObject> searchIterator = null;
         try {
-            searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
-                user.getId(), user.getGroups(), permissionBits.getAccessibleModules(), moduleID, context);
+            searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(user.getId(), user.getGroups(), permissionBits.getAccessibleModules(), moduleID, context);
             while (searchIterator.hasNext()) {
                 FolderObject folder = searchIterator.next();
                 if (FolderObject.SYSTEM_TYPE == folder.getType() || FolderObject.MIN_FOLDER_ID > folder.getObjectID()) {

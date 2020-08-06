@@ -58,6 +58,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
+import com.openexchange.chronos.schedjoules.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.v2.AbstractRESTClient;
@@ -81,7 +82,6 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
     };
 
     private static final String CLIENT_NAME = "schedjoules";
-    private static final String USER_AGENT = "Open-Xchange SchedJoules Client";
     private static final int API_VERSION = 1;
 
     private static final String ACCEPT_HEADER = "application/vnd.schedjoules; version=%s";
@@ -94,10 +94,14 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
 
     /**
      * Initialises a new {@link SchedJoulesRESTClient}.
+     * 
+     * @param scheme The HTTP scheme 
+     * @param host The host to send requests to
+     * @param apiKey The API key
+     * @param timeout The timeout for requests
      */
-    public SchedJoulesRESTClient(String scheme, String host, String apiKey, int timeout) {
-        super(CLIENT_NAME, USER_AGENT, timeout, new SchedJoulesRESTResponseParser());
-
+    public SchedJoulesRESTClient(String scheme, String host, String apiKey) {
+        super(Services.getServiceLookup(), CLIENT_NAME, new SchedJoulesRESTResponseParser());
         this.scheme = scheme;
         this.host = host;
         authorizationHeader = String.format(AUTHORIZATION_HEADER, apiKey);
@@ -182,7 +186,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      * Executes the specified {@link SchedJoulesRequest}
      *
      * @param request The {@link SchedJoulesRequest} to execute
-     * @return The {@link SchedJoulesResponse}
+     * @return The {@link RESTResponse}
      * @throws OXException if an error is occurred
      */
     public RESTResponse executeRequest(SchedJoulesRequest request) throws OXException {
@@ -193,7 +197,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      * Executes a GET request to the specified {@link URL}
      *
      * @param url The {@link URL}
-     * @return The {@link SchedJoulesResponse}
+     * @return The {@link RESTResponse}
      * @throws OXException if an error is occurred
      */
     public RESTResponse executeRequest(URL url) throws OXException {
@@ -203,11 +207,11 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
     /**
      * Executes the specified {@link SchedJoulesRequest} with the specified method
      *
-     * @param url The {@link URL}
-     * @param httpMethod the {@link HttpMethod} to use
+     * @param request The {@link SchedJoulesRequest}
+     * @param httpMethod the {@link RESTMethod} to use
      * @param eTag The optional etag to use
      * @param lastModified The optional last modified timestamp to use
-     * @return The {@link SchedJoulesResponse}
+     * @return The {@link RESTResponse}
      * @throws OXException if an error is occurred
      */
     public RESTResponse executeRequest(SchedJoulesRequest request, RESTMethod httpMethod, String eTag, long lastModified) throws OXException {
@@ -221,10 +225,10 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      * Executes a request with the specified method to the specified {@link URL}
      *
      * @param url The {@link URL}
-     * @param httpMethod the {@link HttpMethod} to use
+     * @param httpMethod the {@link RESTMethod} to use
      * @param eTag The optional etag to use
      * @param lastModified The optional last modified timestamp to use
-     * @return The {@link SchedJoulesResponse}
+     * @return The {@link RESTResponse}
      * @throws OXException if an error is occurred
      */
     public RESTResponse executeRequest(URL url, RESTMethod httpMethod, String eTag, long lastModified) throws OXException {

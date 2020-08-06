@@ -319,6 +319,15 @@ public final class MailPath implements Cloneable, Serializable {
     }
 
     /**
+     * Gets the full name argument; <i>default3/INBOX</i>.
+     *
+     * @return The full name argument
+     */
+    public FullnameArgument getFullnameArgument() {
+        return new FullnameArgument(accountId, folder);
+    }
+
+    /**
      * Gets this mail path's string representation.
      *
      * @return This mail path's string representation

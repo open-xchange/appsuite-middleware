@@ -159,16 +159,11 @@ public abstract class PasswordChangeService {
      * @throws OXException If old password is invalid
      */
     protected void check(final PasswordChangeEvent event) throws OXException {
-        User user;
         try {
             /*
              * Check whether to verify old password prior to applying new one
              */
             boolean checkOldPassword = checkOldPassword(event);
-            final AuthenticationService authenticationService = Authentication.getService();
-            if (checkOldPassword && authenticationService == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthenticationService.class.getName());
-            }
             UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
             if (null == userService) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
@@ -177,9 +172,9 @@ public abstract class PasswordChangeService {
              * Loading user also verifies its existence
              */
             final Session session = event.getSession();
-            user = userService.getUser(session.getUserId(), session.getContextId());
+            User user = userService.getUser(session.getUserId(), session.getContextId());
             /*
-             * verify mandatory parameters
+             * Verify mandatory parameters
              */
             if (checkOldPassword && Strings.isEmpty(event.getOldPassword()) && false == user.isGuest()) {
                 throw UserExceptionCode.MISSING_CURRENT_PASSWORD.create();
@@ -187,7 +182,9 @@ public abstract class PasswordChangeService {
             if (Strings.isEmpty(event.getNewPassword()) && false == user.isGuest()) {
                 throw UserExceptionCode.MISSING_NEW_PASSWORD.create();
             }
-
+            /*
+             * Check old password
+             */
             if (checkOldPassword) {
                 Map<String, Object> properties = new LinkedHashMap<String, Object>(2);
                 {
@@ -207,8 +204,19 @@ public abstract class PasswordChangeService {
                     }
                     basicService.handleLoginInfo(user.getId(), session.getContextId(), event.getOldPassword());
                 } else {
-                    Authentication.login(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties), authenticationService);
+                    AuthenticationService authenticationService = Authentication.getService();
+                    if (authenticationService == null) {
+                        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthenticationService.class.getName());
+                    }
+                    Authentication.login(new LoginInfoImpl(session.getLogin(), event.getOldPassword(), properties), authenticationService);
                 }
+            }
+
+            if (false == user.isGuest()) {
+                ConfigViewFactory factory = ServerServiceRegistry.getServize(ConfigViewFactory.class, true);
+                ConfigView view = factory.getView(event.getSession().getUserId(), event.getSession().getContextId());
+                checkLength(event, view);
+                checkPattern(event, view);
             }
         } catch (OXException e) {
             if (e.equalsCode(6, "LGI")) {
@@ -218,13 +226,6 @@ public abstract class PasswordChangeService {
                 throw UserExceptionCode.INCORRECT_CURRENT_PASSWORD.create(e);
             }
             throw e;
-        }
-
-        if (false == user.isGuest()) {
-            ConfigViewFactory factory = ServerServiceRegistry.getServize(ConfigViewFactory.class, true);
-            ConfigView view = factory.getView(event.getSession().getUserId(), event.getSession().getContextId());
-            checkLength(event, view);
-            checkPattern(event, view);
         }
     }
 
@@ -363,23 +364,23 @@ public abstract class PasswordChangeService {
      */
 
     /**
-     * {@link _LoginInfo} - Simple class that implements {@link LoginInfo}
+     * {@link LoginInfoImpl} - Simple class that implements {@link LoginInfo}
      *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
-    protected static final class _LoginInfo implements LoginInfo {
+    protected static final class LoginInfoImpl implements LoginInfo {
 
         private final String pw;
         private final String loginInfo;
         private final Map<String, Object> properties;
 
         /**
-         * Initializes a new {@link _LoginInfo}
+         * Initializes a new {@link LoginInfoImpl}
          *
          * @param loginInfo The login info
          * @param pw The password
          */
-        public _LoginInfo(String loginInfo, String pw, Map<String, Object> properties) {
+        public LoginInfoImpl(String loginInfo, String pw, Map<String, Object> properties) {
             super();
             this.loginInfo = loginInfo;
             this.pw = pw;

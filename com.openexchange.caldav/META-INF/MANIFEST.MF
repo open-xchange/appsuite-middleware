@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Caldav Plug-in
 Bundle-SymbolicName: com.openexchange.caldav
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.escape,
@@ -14,6 +14,7 @@ Import-Package: com.google.common.escape,
  com.openexchange.ajax.requesthandler.oauth,
  com.openexchange.api2,
  com.openexchange.authentication,
+ com.openexchange.authentication.application.ajax,
  com.openexchange.capabilities,
  com.openexchange.chronos,
  com.openexchange.chronos.common,
@@ -25,6 +26,7 @@ Import-Package: com.google.common.escape,
  com.openexchange.chronos.service,
  com.openexchange.config,
  com.openexchange.config.cascade,
+ com.openexchange.config.lean,
  com.openexchange.contact,
  com.openexchange.data.conversion.ical,
  com.openexchange.database,

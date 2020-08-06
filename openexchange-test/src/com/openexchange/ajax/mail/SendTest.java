@@ -102,6 +102,10 @@ public final class SendTest extends AbstractMailTest {
     @After
     public void tearDown() throws Exception {
         try {
+            clearFolder(getInboxFolder());
+            clearFolder(getSentFolder());
+            clearFolder(getTrashFolder());
+
             manager.cleanUp();
         } finally {
             super.tearDown();
@@ -115,13 +119,6 @@ public final class SendTest extends AbstractMailTest {
      */
     @Test
     public void testSend() throws Throwable {
-
-        /*
-         * Clean everything
-         */
-        clearFolder(getInboxFolder());
-        clearFolder(getSentFolder());
-        clearFolder(getTrashFolder());
         /*
          * Create JSON mail object
          */
@@ -133,12 +130,6 @@ public final class SendTest extends AbstractMailTest {
         assertNull(response.getErrorMessage(), response.getErrorMessage());
         assertNotNull("Response should contain a folder and a id but only contained: " + response.getData(), response.getFolderAndID());
         assertTrue("No mail in the sent folder", response.getFolderAndID().length > 0);
-        /*
-         * Clean everything
-         */
-        clearFolder(getInboxFolder());
-        clearFolder(getSentFolder());
-        clearFolder(getTrashFolder());
     }
 
     @Test
@@ -157,60 +148,4 @@ public final class SendTest extends AbstractMailTest {
         assertFalse("Sending resulted in error", manager.getLastResponse().hasError());
         assertEquals("Mail went into inbox", values.getSentFolder(), inSentBox.getFolder());
     }
-
-    /**
-     * Tests the <code>action=new</code> request on INBOX folder
-     *
-     * @throws Throwable
-     */
-    @Test
-    @Ignore("always failing - obsolete, wrong behavior, unfixable or whatever")
-    public void testSendUnicode() throws Throwable {
-
-        /*
-         * Clean everything
-         */
-        clearFolder(getInboxFolder());
-        clearFolder(getSentFolder());
-        clearFolder(getTrashFolder());
-        /*
-         * Create JSON mail object
-         */
-        final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
-
-        JSONObject jMail = new JSONObject(mailObject_25kb);
-        JSONObject jAttach = jMail.getJSONArray("attachments").getJSONObject(0);
-
-        char a = '\uD83D';
-        char b = '\uDCA9';
-        String s = "Pile of poo ";
-
-        jAttach.put("content", s + a + b);
-
-        /*
-         * Perform send request
-         */
-        final SendResponse response = Executor.execute(getSession(), new SendRequest(jMail.toString(true)));
-        final String[] folderAndID = response.getFolderAndID();
-        assertTrue("Send request failed", folderAndID != null && folderAndID.length > 0);
-
-        final GetResponse getResponse = Executor.execute(getSession(), new GetRequest(folderAndID[0], folderAndID[1]));
-
-        final String content = getResponse.getAttachments().getJSONObject(0).getString("content").replaceAll(Pattern.quote("&nbsp;"), " ");
-        assertTrue("Content is empty", null != content && content.length() > 0);
-
-        int pos = content.indexOf("Pile of poo ");
-        assertTrue("Content not found: \"Pile of poo \" -- Content:\n" + content, pos >= 0);
-
-        pos += s.length();
-        assertEquals("Missing \\uD83D unicode", '\uD83D', content.charAt(pos++));
-        assertEquals("Missing \\uDCA9 unicode", '\uDCA9', content.charAt(pos++));
-        /*
-         * Clean everything
-         */
-        clearFolder(getInboxFolder());
-        clearFolder(getSentFolder());
-        clearFolder(getTrashFolder());
-    }
-
 }

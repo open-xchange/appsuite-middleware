@@ -123,7 +123,13 @@ public class VersionsAction extends AbstractListingAction {
         return result( skipVersion0( versions ), request);
     }
 
-    private TimedResult<File> skipVersion0(final TimedResult<File> versions) throws OXException {
+    /**
+     * Skips the version 0 of the given versions
+     *
+     * @param versions The versions as a {@link TimedResult}
+     * @return A {@link TimedResult} not containing the version 0
+     */
+    private TimedResult<File> skipVersion0(final TimedResult<File> versions) {
 
         return new TimedResult<File>() {
 
@@ -134,10 +140,8 @@ public class VersionsAction extends AbstractListingAction {
                     @Override
                     public boolean accept(final File thing) throws OXException {
                         final String version = thing.getVersion();
-                        return version != null && !version.equals("0");
+                        return version == null || !version.equals("0");
                     }
-
-
                 };
             }
 

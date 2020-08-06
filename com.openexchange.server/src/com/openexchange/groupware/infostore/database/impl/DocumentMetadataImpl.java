@@ -85,13 +85,19 @@ public class DocumentMetadataImpl extends DefaultDocumentMetadata {
 	}
 
 	public DocumentMetadataImpl(final DocumentMetadata dm) {
+        this(dm, Metadata.VALUES_ARRAY);
+	}
+
+	public DocumentMetadataImpl(final DocumentMetadata dm, Metadata[] values) {
 	    this();
 		final SetSwitch setSwitch = new SetSwitch(this);
 		final GetSwitch getSwitch = new GetSwitch(dm);
-		for(final Metadata attr : Metadata.VALUES) {
+		for(final Metadata attr : values) {
 			setSwitch.setValue(attr.doSwitch(getSwitch));
 			attr.doSwitch(setSwitch);
 		}
+        setOriginalFolderId(dm.getOriginalFolderId());
+        setOriginalId(dm.getOriginalId());
 	}
 
 	@Override

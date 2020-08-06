@@ -68,26 +68,30 @@ import com.openexchange.user.UserService;
 
 /**
  * This implementation authenticates the user against the database.
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class DefaultBasicAuthentication implements BasicAuthenticationService {
 
     private static final class AuthenticatedImpl implements Authenticated {
 
-        private final String[] splitted;
+        private final String userInfo;
+        private final String contextInfo;
 
-        protected AuthenticatedImpl(String[] splitted) {
-            this.splitted = splitted;
+        AuthenticatedImpl(String userInfo, String contextInfo) {
+            super();
+            this.userInfo = userInfo;
+            this.contextInfo = contextInfo;
         }
 
         @Override
         public String getContextInfo() {
-            return splitted[0];
+            return contextInfo;
         }
 
         @Override
         public String getUserInfo() {
-            return splitted[1];
+            return userInfo;
         }
 
     } // End of class AuthenticatedImpl
@@ -110,7 +114,7 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
     public Authenticated handleLoginInfo(int userId, int contextId) throws OXException {
         Context ctx = contextService.getContext(contextId);
         User user = userService.getUser(userId, ctx);
-        return new AuthenticatedImpl(new String[] {ctx.getLoginInfo()[0], user.getLoginInfo()});
+        return new AuthenticatedImpl(user.getLoginInfo(), ctx.getLoginInfo()[0]);
     }
 
     @Override
@@ -121,7 +125,7 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
         if (!userService.authenticate(user, password)) {
             throw INVALID_CREDENTIALS.create();
         }
-        return new AuthenticatedImpl(new String[] {ctx.getLoginInfo()[0], user.getLoginInfo()});
+        return new AuthenticatedImpl(user.getLoginInfo(), ctx.getLoginInfo()[0]);
     }
 
     /**
@@ -134,25 +138,25 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
             throw INVALID_CREDENTIALS.create();
         }
 
-        String[] splitted = split(loginInfo.getUsername());
+        Authenticated splitted = split(loginInfo.getUsername());
         {
             int ctxId;
             try {
-                ctxId = contextService.getContextId(splitted[0]);
+                ctxId = contextService.getContextId(splitted.getContextInfo());
             } catch (OXException e) {
                 throw COMMUNICATION.create(e);
             }
             if (ContextStorage.NOT_FOUND == ctxId) {
-                throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(splitted[0]);
+                throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(splitted.getContextInfo());
             }
             Context ctx = contextService.getContext(ctxId);
 
             int userId;
             try {
-                userId = userService.getUserId(splitted[1], ctx);
+                userId = userService.getUserId(splitted.getUserInfo(), ctx);
             } catch (OXException e) {
                 if (e.equalsCode(LdapExceptionCode.USER_NOT_FOUND.getNumber(), UserExceptionCode.PROPERTY_MISSING.getPrefix())) {
-                    throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(splitted[1]);
+                    throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(splitted.getUserInfo());
                 }
                 throw e;
             }
@@ -161,7 +165,7 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
                 throw INVALID_CREDENTIALS.create();
             }
         }
-        return new AuthenticatedImpl(splitted);
+        return splitted;
     }
 
     @Override
@@ -172,15 +176,12 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
     /**
      * Splits user name and context.
      *
-     * @param loginInfo Combined information separated by an <code>'@'</code> sign
-     * @return A string array with context and user name (in this order)
+     * @param loginInfo the composite login information separated by an <code>'@'</code> sign
+     * @return An {@code Authenticated} instance providing context and user name
      * @throws OXException If no separator is found
      */
-    private static String[] split(final String loginInfo) {
+    private static Authenticated split(final String loginInfo) {
         int pos = loginInfo.lastIndexOf('@');
-        if (pos < 0) {
-            return new String[] { "defaultcontext", loginInfo };
-        }
-        return new String[] { loginInfo.substring(pos + 1), loginInfo.substring(0, pos) };
+        return pos < 0 ? new AuthenticatedImpl(loginInfo, "defaultcontext") : new AuthenticatedImpl(loginInfo.substring(0, pos), loginInfo.substring(pos + 1));
     }
 }

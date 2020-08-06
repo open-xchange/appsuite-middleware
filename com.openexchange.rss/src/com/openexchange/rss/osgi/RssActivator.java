@@ -64,6 +64,7 @@ import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.rss.RssJsonConverter;
 import com.openexchange.rss.actions.RssActionFactory;
+import com.openexchange.rss.utils.RssProperties;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -72,7 +73,7 @@ public class RssActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HtmlService.class, CapabilityService.class, ConfigViewFactory.class, ConfigurationService.class, SSLSocketFactoryProvider.class, UserAwareSSLConfigurationService.class };
+        return new Class<?>[] { HtmlService.class, CapabilityService.class, ConfigViewFactory.class, ConfigurationService.class, SSLSocketFactoryProvider.class, UserAwareSSLConfigurationService.class, RssProperties.class };
     }
 
     @Override
@@ -95,7 +96,7 @@ public class RssActivator extends AJAXModuleActivator {
                     final ConfigViewFactory factory = getService(ConfigViewFactory.class);
                     if (null != factory) {
                         final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-                        return view.opt("com.openexchange.rss", boolean.class, Boolean.TRUE).booleanValue();
+                        return view.opt("com.openexchange.rss", boolean.class, Boolean.TRUE).booleanValue() && view.opt("com.openexchange.messaging.rss", boolean.class, Boolean.TRUE).booleanValue();
                     }
                 }
 

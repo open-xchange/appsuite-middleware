@@ -112,30 +112,29 @@ public final class DeleteAction extends AbstractMailAction {
 
                 // Try to batch-delete per folder
                 Collections.sort(l, MailPath.COMPARATOR);
-                String lastFldArg = l.get(0).getFolderArgument();
+                FullnameArgument lastFldArg = l.get(0).getFullnameArgument();
                 List<String> arr = new ArrayList<String>(length);
                 for (int i = 0; i < length; i++) {
                     MailPath current = l.get(i);
-                    String folderArgument = current.getFolderArgument();
+                    FullnameArgument folderArgument = current.getFullnameArgument();
 
                     // Check if collectable
                     if (!lastFldArg.equals(folderArgument)) {
                         // Delete all collected UIDs until here and reset
                         String[] uids = arr.toArray(new String[arr.size()]);
-                        mailInterface.deleteMessages(lastFldArg, uids, hardDelete);
+                        mailInterface.deleteMessages(lastFldArg.getPreparedName(), uids, hardDelete);
 
                         if (null != folders) {
                             int connectedAccount = mailInterface.getAccountID();
 
                             // Add folder
-                            FullnameArgument fa = new FullnameArgument(connectedAccount, current.getFolder());
-                            folders.put(fa, getFolderInfo(current.getFolder(), mailInterface));
+                            folders.put(lastFldArg, getFolderInfo(lastFldArg.getFullName(), mailInterface));
 
                             // Check if trash needs to be added, too
                             if (!hardDelete) {
                                 // Add account's trash folder
                                 FullnameArgument trash = MailFolderUtility.prepareMailFolderParam(mailInterface.getTrashFolder(connectedAccount));
-                                if (!trash.equals(fa)) {
+                                if (!trash.equals(lastFldArg)) {
                                     folders.put(trash, getFolderInfo(trash.getFullName(), mailInterface));
                                 }
                             }
@@ -150,20 +149,19 @@ public final class DeleteAction extends AbstractMailAction {
                 int size = arr.size();
                 if (size > 0) {
                     String[] uids = arr.toArray(new String[size]);
-                    mailInterface.deleteMessages(lastFldArg, uids, hardDelete);
+                    mailInterface.deleteMessages(lastFldArg.getPreparedName(), uids, hardDelete);
 
                     if (null != folders) {
                         int connectedAccount = mailInterface.getAccountID();
 
                         // Add folder
-                        FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(lastFldArg);
-                        folders.put(fa, getFolderInfo(fa.getFullName(), mailInterface));
+                        folders.put(lastFldArg, getFolderInfo(lastFldArg.getFullName(), mailInterface));
 
                         // Check if trash needs to be added, too
                         if (!hardDelete) {
                             // Add account's trash folder
                             FullnameArgument trash = MailFolderUtility.prepareMailFolderParam(mailInterface.getTrashFolder(connectedAccount));
-                            if (!trash.equals(fa)) {
+                            if (!trash.equals(lastFldArg)) {
                                 folders.put(trash, getFolderInfo(trash.getFullName(), mailInterface));
                             }
                         }

@@ -13,7 +13,6 @@
     <!-- Compile Constants -->
     <property name="srcCommon" value="common"/>
     <property name="srcIface" value="src"/>
-    <property name="srcUnit" value="unittests"/>
     <property name="build" value="build"/>
     <property name="lib" value="lib"/>
 
@@ -37,7 +36,7 @@
         </fileset>
     </path>
 
-    <target name="default" depends="interface-jar,unit-jar"/>
+    <target name="default" depends="interface-jar"/>
 
     <target name="clean">
         <delete dir="${build}"/>
@@ -77,21 +76,11 @@
         </antcall>
     </target>
 
-    <target name="compile-unit-tests" depends="compile-common">
-        <antcall target="compile-specific">
-            <param name="testSrc" value="${srcUnit}"/>
-        </antcall>
-    </target>
-
     <target name="interface-jar" depends="compile-interface-tests">
         <jar jarfile="open-xchange-iface-tests.jar" basedir="${build}" includes="**"/>
     </target>
 
-    <target name="unit-jar" depends="compile-unit-tests">
-        <jar jarfile="open-xchange-unit-tests.jar" basedir="${build}" includes="**"/>
-    </target>
-
-    <target name="all-jar" depends="unit-jar,interface-jar"/>
+    <target name="all-jar" depends="interface-jar"/>
 
     <target name="run-interface-tests">
         <antcall target="run-tests">
@@ -111,13 +100,6 @@
         <antcall target="run-tests">
             <param name="testJar" value="open-xchange-rtc-test.jar"/>
             <param name="testClass" value="com.openexchange.ajax.rtc.RTCTestSuite"/>
-        </antcall>
-    </target>
-
-    <target name="run-unit-tests">
-        <antcall target="run-tests">
-            <param name="testJar" value="open-xchange-unit-tests.jar"/>
-            <param name="testClass" value="com.openexchange.test.UnitTests"/>
         </antcall>
     </target>
 

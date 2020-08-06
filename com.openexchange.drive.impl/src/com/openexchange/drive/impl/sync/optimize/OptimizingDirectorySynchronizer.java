@@ -64,7 +64,7 @@ import com.openexchange.exception.OXException;
  */
 public class OptimizingDirectorySynchronizer extends DirectorySynchronizer {
 
-    public OptimizingDirectorySynchronizer(SyncSession session, VersionMapper<DirectoryVersion> mapper) throws OXException {
+    public OptimizingDirectorySynchronizer(SyncSession session, VersionMapper<DirectoryVersion> mapper) {
         super(session, mapper);
     }
 

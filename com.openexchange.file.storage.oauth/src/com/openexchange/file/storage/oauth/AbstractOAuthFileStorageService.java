@@ -78,9 +78,9 @@ import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.scope.OAuthScope;
@@ -235,6 +235,18 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     @Override
     public void onAfterFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection con) throws OXException {
+        try {
+            getAccountManager().getAccount(Integer.toString(id), session);
+        } catch (OXException e) {
+            if (e.equalsCode(4, "FILE_STORAGE")) {
+                // E.g. "File storage account 31 of service "xyz" could not be found for user 3 in context 1"
+                return;
+            }
+
+            LOG.warn("Failed to load file storage account {} with service \"{}\".", Integer.valueOf(id), serviceId, e);
+            return;
+        }
+
         if (!updateScopes(session)) {
             return;
         }
@@ -242,7 +254,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         // Retrieve the OAuth account id that is linked with the file storage account that was deleted.
         Object value = eventProps.get("account");
         if (value == null) {
-            LOG.debug("Not OAuth account information was found");
+            LOG.debug("No OAuth account information was found");
             return;
         }
 
@@ -250,13 +262,17 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         try {
             accountId = Integer.parseInt((String) value);
         } catch (NumberFormatException e) {
-            LOG.debug("Not OAuth account information was found");
+            LOG.debug("No OAuth account information was found");
             return;
         }
 
         session.setParameter("__file.storage.delete.connection", con);
         try {
-            OAuthAccountStorage storage = services.getService(OAuthAccountStorage.class);
+            OAuthService storage = services.getService(OAuthService.class);
+            if (storage == null) {
+                // Missing OAuth service
+                return;
+            }
             OAuthAccount account;
             try {
                 account = storage.getAccount(session, accountId);
@@ -267,6 +283,10 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
                 }
                 throw e;
             }
+            if (!account.getMetaData().getAPI().equals(this.api)) {
+                // File storage account does not belong to this
+                return;
+            }
             // Get the enabled scopes...
             Set<OAuthScope> scopes = new HashSet<>();
             for (OAuthScope scope : account.getEnabledScopes()) {
@@ -275,6 +295,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             // ...and remove the 'drive' scope.
             scopes.remove(getScope());
             if (scopes.size() == 0) {
+                storage.deleteAccount(session, accountId);
                 return;
             }
             eventProps.put(OAuthConstants.ARGUMENT_SCOPES, scopes);

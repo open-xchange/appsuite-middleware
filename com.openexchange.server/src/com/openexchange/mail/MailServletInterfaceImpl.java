@@ -50,6 +50,7 @@
 package com.openexchange.mail;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.ByteArrayOutputStream;
@@ -144,7 +145,6 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
-import com.openexchange.mail.json.actions.AbstractArchiveMailAction.ArchiveDataWrapper;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -519,7 +519,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
                 String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
                 int spamAction;
-                if (usm.isSpamEnabled()) {
+                if (usm.isSpamEnabled() && spamFullname != null && trashFullname != null) {
                     if (spamFullname.equals(sourceFullname)) {
                         spamAction = trashFullname.equals(destFullname) ? SPAM_NOOP : SPAM_HAM;
                     } else {
@@ -581,7 +581,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Differing accounts...
          */
-        MailAccess<?, ?> destAccess = initMailAccess(destAccountId);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> destAccess = initMailAccess(destAccountId);
         try {
             // Chunk wise copy
             int chunkSize;
@@ -797,7 +797,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
 
         // Differing accounts...
-        MailAccess<?, ?> destAccess = initMailAccess(destAccountId);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> destAccess = initMailAccess(destAccountId);
         try {
             String[] mailIds = null;
             MailMessage[] flagInfo = null;
@@ -1083,7 +1083,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, mailFields.toArray(), headerFields).setSearchTerm(searchTerm).setSortOptions(sortField, orderDir).build();
         Map<String, Object> fetchListenerState = new HashMap<>(4);
         MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, mailAccess, fetchListenerState);
-        if (null != listenerChain) {
+        boolean notEmptyChain = MailFetchListenerChain.isNotEmptyChain(listenerChain);
+        if (notEmptyChain) {
             MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, mailAccess, fetchListenerState);
             if (attributation.isApplicable()) {
                 mailFields = new MailFields(attributation.getFields());
@@ -1106,7 +1107,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Trigger fetch listener processing
                  */
-                if (null != listenerChain) {
+                if (notEmptyChain) {
                     List<MailMessage> l = new ArrayList<>(result.size());
                     for (List<MailMessage> mails : result) {
                         for (MailMessage mail : mails) {
@@ -1152,7 +1153,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Trigger fetch listener processing
                  */
-                if (null != listenerChain) {
+                if (notEmptyChain) {
                     List<MailMessage> l = new ArrayList<>(mails.size());
                     for (List<MailMessage> sublist : mails) {
                         for (MailMessage mail : sublist) {
@@ -1215,7 +1216,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Check if denoted parent can hold default folders like Trash, Sent, etc.
          */
-        if (!MailFolder.DEFAULT_FOLDER_ID.equals(parentFullname) && !INBOX_ID.equals(parentFullname)) {
+        if (!MailFolder.ROOT_FOLDER_ID.equals(parentFullname) && !INBOX_ID.equals(parentFullname)) {
             /*
              * Denoted parent is not capable to hold default folders. Therefore output as it is.
              */
@@ -1363,7 +1364,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailMessage[] originalMails = new MailMessage[folders.length];
         {
             for (int i = 0; i < length; i++) {
-                MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = initMailAccess(arguments[i].getAccountId());
                 try {
                     MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
                     if (null == origMail) {
@@ -1423,8 +1424,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         FullnameArgument argument = prepareMailFolderParam(folder);
         int localAccountId = argument.getAccountId();
         initConnection(localAccountId);
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(folder)) {
-            throw MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.create(MailFolder.DEFAULT_FOLDER_ID);
+        if (MailFolder.ROOT_FOLDER_ID.equals(argument.getFullname())) {
+            throw MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.create(MailFolder.ROOT_FOLDER_NAME);
         }
         String fullName = argument.getFullname();
         MailMessage mail = mailAccess.getMessageStorage().getMessage(fullName, msgUID, markAsSeen);
@@ -2012,7 +2013,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
 
         MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, mailAccess, fetchListenerState);
-        if (null != listenerChain) {
+        boolean notEmptyChain = MailFetchListenerChain.isNotEmptyChain(listenerChain);
+        if (notEmptyChain) {
             MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, mailAccess, fetchListenerState);
             if (attributation.isApplicable()) {
                 useFields = attributation.getFields();
@@ -2046,7 +2048,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
 
-        if (null != listenerChain) {
+        if (notEmptyChain) {
             MailFetchListenerResult result = listenerChain.onAfterFetch(mails, cachable, mailAccess, fetchListenerState);
             if (ListenerReply.DENY == result.getReply()) {
                 OXException e = result.getError();
@@ -2175,7 +2177,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, useFields, headerNames).setSearchTerm(searchTerm).setSortOptions(sortField, orderDir).build();
         Map<String, Object> fetchListenerState = new HashMap<>(4);
         MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, mailAccess, fetchListenerState);
-        if (null != listenerChain) {
+        boolean notEmptyChain = MailFetchListenerChain.isNotEmptyChain(listenerChain);
+        if (notEmptyChain) {
             MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, mailAccess, fetchListenerState);
             if (attributation.isApplicable()) {
                 useFields = attributation.getFields();
@@ -2225,7 +2228,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Trigger fetch listener processing
          */
-        if (null != listenerChain) {
+        if (notEmptyChain) {
             MailFetchListenerResult result = listenerChain.onAfterFetch(mails, cachable, mailAccess, fetchListenerState);
             if (ListenerReply.DENY == result.getReply()) {
                 OXException e = result.getError();
@@ -2305,7 +2308,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailFetchArguments fetchArguments = MailFetchArguments.builder(new FullnameArgument(accountId, fullName), useFields, headerNames).setSearchTerm(searchTerm).setSortOptions(sortField, orderDir).build();
         Map<String, Object> fetchListenerState = new HashMap<>(4);
         MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, mailAccess, fetchListenerState);
-        if (null != listenerChain) {
+        boolean notEmptyChain = MailFetchListenerChain.isNotEmptyChain(listenerChain);
+        if (notEmptyChain) {
             MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, mailAccess, fetchListenerState);
             if (attributation.isApplicable()) {
                 useFields = attributation.getFields();
@@ -2371,7 +2375,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Trigger fetch listener processing
          */
-        if (null != listenerChain) {
+        if (notEmptyChain) {
             MailFetchListenerResult result = listenerChain.onAfterFetch(mails, cachable, mailAccess, fetchListenerState);
             if (ListenerReply.DENY == result.getReply()) {
                 OXException e = result.getError();
@@ -2751,7 +2755,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, useFields, null).setSearchTerm(searchTerm).setSortOptions(sortField, orderDirection).build();
         Map<String, Object> fetchListenerState = new HashMap<>(4);
         MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, mailAccess, fetchListenerState);
-        if (null != listenerChain) {
+        boolean notEmptyChain = MailFetchListenerChain.isNotEmptyChain(listenerChain);
+        if (notEmptyChain) {
             MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, mailAccess, fetchListenerState);
             if (attributation.isApplicable()) {
                 useFields = attributation.getFields();
@@ -2798,7 +2803,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Trigger fetch listener processing
          */
-        if (null != listenerChain) {
+        if (notEmptyChain) {
             MailFetchListenerResult result = listenerChain.onAfterFetch(mails, cacheable, mailAccess, fetchListenerState);
             if (ListenerReply.DENY == result.getReply()) {
                 OXException e = result.getError();
@@ -2889,7 +2894,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
-    void initConnection(int accountId) throws OXException {
+    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> initConnection(int accountId) throws OXException {
         if (!init) {
             mailAccess = initMailAccess(accountId);
             mailConfig = mailAccess.getMailConfig();
@@ -2901,18 +2906,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             mailConfig = mailAccess.getMailConfig();
             this.accountId = accountId;
         }
+        return mailAccess;
     }
 
-    private MailAccess<?, ?> initMailAccess(int accountId) throws OXException {
+    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> initMailAccess(int accountId) throws OXException {
         return initMailAccess(accountId, null);
     }
 
     @SuppressWarnings("unchecked")
-    private MailAccess<?, ?> initMailAccess(int accountId, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access) throws OXException {
+    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> initMailAccess(int accountId, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access) throws OXException {
         /*
          * Fetch a mail access (either from cache or a new instance)
          */
-        MailAccess<?, ?> localMailAccess = null == access ? MailAccess.getInstance(session, accountId) : access;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> localMailAccess = null == access ? MailAccess.getInstance(session, accountId) : access;
 
         /**
          * Decorate the MailAccess with crypto functionality
@@ -2949,8 +2955,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return (b != null) && b.booleanValue();
     }
 
-    private ComposedMailMessage checkGuardEmail(ComposedMailMessage composedMail) throws OXException {
+    private ComposedMailMessage checkGuardEmail(ComposedMailMessage composedMailMessage) throws OXException {
         // Check if Guard email
+        ComposedMailMessage composedMail = composedMailMessage;
         if (composedMail.getSecuritySettings() != null && composedMail.getSecuritySettings().anythingSet()) {
             EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
             if (encryptor != null) {
@@ -2961,11 +2968,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailPath saveDraft(ComposedMailMessage draftMail, boolean autosave, int accountId) throws OXException {
+    public MailPath saveDraft(ComposedMailMessage draftMailMessage, boolean autosave, int accountId) throws OXException {
         if (autosave) {
-            return autosaveDraft(draftMail, accountId);
+            return autosaveDraft(draftMailMessage, accountId);
         }
-        draftMail = checkGuardEmail(draftMail);
+        ComposedMailMessage draftMail = checkGuardEmail(draftMailMessage);
         initConnection(isTransportOnly(accountId) ? MailAccount.DEFAULT_ID : accountId);
         String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
         if (!draftMail.containsSentDate()) {
@@ -2993,7 +3000,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             draftMail.setFlag(MailMessage.FLAG_DRAFT, true);
         }
         MailPath msgref = draftMail.getMsgref();
-        MailAccess<?, ?> otherAccess = null;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
         try {
             MailMessage origMail;
             if (null == msgref || !draftFullname.equals(msgref.getFolder())) {
@@ -3132,7 +3139,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                 } else {
                     // Move to another account
-                    MailAccess<?, ?> otherAccess = initMailAccess(parentAccountID);
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = initMailAccess(parentAccountID);
                     try {
                         String newParent = mailFolder.getParentFullname();
                         // Check if parent mail folder exists
@@ -3381,7 +3388,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                     sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                                 } else if (!properties.getRateLimitPrimaryOnly(session.getUserId(), session.getContextId()) || MailAccount.DEFAULT_ID == accountId) {
                                     int rateLimit = properties.getRateLimit(session.getUserId(), session.getContextId());
-                                    LOG.debug("Checking rate limit {} for request with IP {} ({}) from user {} in context {}", rateLimit, remoteAddr, null == remoteAddress ? "from session" : "from request", session.getUserId(), session.getContextId());
+                                    LOG.debug("Checking rate limit {} for request with IP {} ({}) from user {} in context {}", I(rateLimit), remoteAddr, null == remoteAddress ? "from session" : "from request", I(session.getUserId()), I(session.getContextId()));
                                     rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc(session.getUserId(), session.getContextId()));
                                     sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                                     setRateLimitTime(rateLimit);
@@ -3640,7 +3647,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         MailPath retval = new MailPath(mailAccess.getAccountId(), sentFullname, (uidArr == null || uidArr.length == 0) ? null : uidArr[0]);
-        LOG.debug("Mail copy ({}) appended in {}msec", retval, System.currentTimeMillis() - start);
+        LOG.debug("Mail copy ({}) appended in {}msec", retval, L(System.currentTimeMillis() - start));
         return retval;
     }
 
@@ -3699,7 +3706,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 LOG.error("", e);
             }
         } else {
-            MailAccess<?, ?> otherAccess = null;
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
             try {
                 otherAccess = MailAccess.getInstance(session, pathAccount);
                 otherAccess.connect(true);
@@ -3743,7 +3750,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     LOG.error("", e);
                 }
             } else {
-                MailAccess<?, ?> otherAccess = null;
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
                 try {
                     otherAccess = MailAccess.getInstance(session, pathAccount);
                     otherAccess.connect(true);
@@ -3781,7 +3788,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (mailAccess.getAccountId() == pathAccount) {
             mailAccess.getMessageStorage().deleteMessages(fullName, uids, true);
         } else {
-            MailAccess<?, ?> otherAccess = null;
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
             try {
                 otherAccess = MailAccess.getInstance(session, pathAccount);
                 otherAccess.connect(true);
@@ -3829,7 +3836,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Mark as \Answered in foreign account
              */
-            MailAccess<?, ?> otherAccess = null;
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> otherAccess = null;
             try {
                 otherAccess = MailAccess.getInstance(session, pathAccount);
                 otherAccess.connect(true);
@@ -4097,14 +4104,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, mailFields.toArray(), null).build();
         Map<String, Object> fetchListenerState = new HashMap<>(4);
         MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, mailAccess, fetchListenerState);
-        if (null != listenerChain) {
+        boolean notEmptyChain = MailFetchListenerChain.isNotEmptyChain(listenerChain);
+        if (notEmptyChain) {
             MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, mailAccess, fetchListenerState);
             if (attributation.isApplicable()) {
                 mailFields = new MailFields(attributation.getFields());
             }
         }
         MailMessage[] mails = mailAccess.getMessageStorage().getNewAndModifiedMessages(fullName, mailFields.toArray());
-        if (null != listenerChain) {
+        if (notEmptyChain) {
             MailFetchListenerResult result = listenerChain.onAfterFetch(mails, false, mailAccess, fetchListenerState);
             if (ListenerReply.DENY == result.getReply()) {
                 OXException e = result.getError();
@@ -4130,14 +4138,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, mailFields.toArray(), null).build();
         Map<String, Object> fetchListenerState = new HashMap<>(4);
         MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, mailAccess, fetchListenerState);
-        if (null != listenerChain) {
+        boolean notEmptyChain = MailFetchListenerChain.isNotEmptyChain(listenerChain);
+        if (notEmptyChain) {
             MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, mailAccess, fetchListenerState);
             if (attributation.isApplicable()) {
                 mailFields = new MailFields(attributation.getFields());
             }
         }
         MailMessage[] mails = mailAccess.getMessageStorage().getDeletedMessages(fullName, mailFields.toArray());
-        if (null != listenerChain) {
+        if (notEmptyChain) {
             MailFetchListenerResult result = listenerChain.onAfterFetch(mails, false, mailAccess, fetchListenerState);
             if (ListenerReply.DENY == result.getReply()) {
                 OXException e = result.getError();
@@ -4468,14 +4477,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public List<ArchiveDataWrapper> archiveMultipleMail(List<String[]> entries, final ServerSession session, final boolean useDefaultName, final boolean createIfAbsent) throws OXException {
+    public List<ArchiveDataWrapper> archiveMultipleMail(List<FolderAndId> entries, final ServerSession session, final boolean useDefaultName, final boolean createIfAbsent) throws OXException {
         // Expect array of objects: [{"folder":"INBOX/foo", "id":"1234"},{"folder":"INBOX/foo", "id":"1235"},...,{"folder":"INBOX/bar", "id":"1299"}]
         TIntObjectMap<Map<String, List<String>>> m = new TIntObjectHashMap<>(2);
-        final List<ArchiveDataWrapper> retval = new ArrayList<>();
-        // Parse JSON body
-        for (String[] obj : entries) {
+        for (FolderAndId obj : entries) {
 
-            FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(obj[0]);
+            FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(obj.getFolderId());
             int folderAccountId = fa.getAccountId();
 
             Map<String, List<String>> map = m.get(folderAccountId);
@@ -4491,10 +4498,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 map.put(fullName, list);
             }
 
-            list.add(obj[1]);
+            list.add(obj.getMailId());
         }
 
         // Iterate map
+        final List<ArchiveDataWrapper> retval = new ArrayList<>();
         final Reference<OXException> exceptionRef = new Reference<>();
         final Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
         boolean success = m.forEachEntry(new TIntObjectProcedure<Map<String, List<String>>>() {
@@ -4503,7 +4511,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             public boolean execute(int accountId, Map<String, List<String>> mapping) {
                 boolean proceed = false;
                 try {
-                    initConnection(accountId);
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = initConnection(accountId);
 
                     // Check archive full name
                     int[] separatorRef = new int[1];
@@ -4658,7 +4666,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             if (Strings.isEmpty(prefix)) {
                 separator = mailAccess.getFolderStorage().getFolder(INBOX_ID).getSeparator();
                 archiveFullName = archiveName;
-                parentFullName = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullName = MailFolder.ROOT_FOLDER_ID;
             } else {
                 separator = prefix.charAt(prefix.length() - 1);
                 archiveFullName = new StringBuilder(prefix).append(archiveName).toString();
@@ -4689,7 +4697,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 parentFullName = archiveFullName.substring(0, pos);
                 archiveName = archiveFullName.substring(pos + 1);
             } else {
-                parentFullName = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullName = MailFolder.ROOT_FOLDER_ID;
                 archiveName = archiveFullName;
             }
         }
@@ -4743,16 +4751,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage[] searchMails(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException {
+    public MailMessage[] searchMails(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields, String[] headers) throws OXException {
         FullnameArgument argument = prepareMailFolderParam(folder);
         String fullName = argument.getFullname();
         initConnection(argument.getAccountId());
 
+        MailField[] mailFields = fields;
+        String[] headerNames = headers;
+
         MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, mailFields, headerNames).build();
         Map<String, Object> fetchListenerState = new HashMap<>(4);
         MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, mailAccess, fetchListenerState);
+        boolean notEmptyChain = MailFetchListenerChain.isNotEmptyChain(listenerChain);
 
-        if (null != listenerChain) {
+        if (notEmptyChain) {
             MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, mailAccess, fetchListenerState);
             if (attributation.isApplicable()) {
                 mailFields = attributation.getFields();
@@ -4778,7 +4790,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             warnings.addAll(mailAccess.getWarnings());
         }
 
-        if (null != listenerChain) {
+        if (notEmptyChain) {
             MailFetchListenerResult result = listenerChain.onAfterFetch(mails, false, mailAccess, fetchListenerState);
             if (ListenerReply.DENY == result.getReply()) {
                 OXException e = result.getError();

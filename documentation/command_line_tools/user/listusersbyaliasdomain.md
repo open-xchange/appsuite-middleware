@@ -2,6 +2,7 @@
 title: listusersbyaliasdomain
 icon: far fa-circle
 tags: Administration, Command Line tools, User, Alias
+package: open-xchange-admin
 ---
 
 # NAME

@@ -64,6 +64,7 @@ import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.ical.SimpleICal.Component;
+import com.openexchange.dav.caldav.ical.SimpleICal.Property;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
@@ -137,7 +138,8 @@ public class Bug57313Test extends CalDAVTest {
          * delete the change exception on client
          */
         iCalResource.getVCalendar().getComponents().remove(vEventException);
-        vEventSeries.setProperty("EXDATE", vEventException.getPropertyValue("RECURRENCE-ID"));
+        Property recurrenceIdProperty = vEventException.getProperty("RECURRENCE-ID");
+        vEventSeries.setProperty("EXDATE", recurrenceIdProperty.getValue(), recurrenceIdProperty.getAttributes());
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
         /*
          * verify series & exception on server

@@ -51,7 +51,9 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.collectAttendees;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
+import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getConferenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.getSimpleAttendeeUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.getUpdatedResource;
@@ -59,17 +61,21 @@ import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
+import static com.openexchange.chronos.common.CalendarUtils.isExternalUser;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Utils.extractReplies;
+import static com.openexchange.chronos.impl.Utils.isSameMailDomain;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -82,6 +88,8 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -93,6 +101,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.common.mapping.ConferenceMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
@@ -108,6 +117,7 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.tools.arrays.Arrays;
 
@@ -118,11 +128,6 @@ import com.openexchange.tools.arrays.Arrays;
  * @since v7.10.0
  */
 public class UpdatePerformer extends AbstractUpdatePerformer {
-
-    /** <i>Meta</i>-fields of events that are always skipped when applying updated event data */
-    private static final EventField[] SKIPPED_FIELDS = {
-        EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.FLAGS
-    };
 
     /**
      * Initializes a new {@link UpdatePerformer}.
@@ -168,9 +173,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     public InternalCalendarResult perform(String objectId, RecurrenceId recurrenceId, Event updatedEventData, long clientTimestamp) throws OXException {
         getSelfProtection().checkEvent(updatedEventData);
         /*
-         * load original event data
+         * load original event data & pre-process event update
          */
         Event originalEvent = requireUpToDateTimestamp(loadEventData(objectId), clientTimestamp);
+        updatedEventData = restoreInjectedAttendeeDate(originalEvent, updatedEventData);
         /*
          * update event or event occurrence
          */
@@ -182,7 +188,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             result = updateEvent(originalEvent, updatedEventData);
         } else if (isSeriesMaster(originalEvent)) {
             result = updateRecurrence(originalEvent, recurrenceId, updatedEventData);
-        } else if (isSeriesException(originalEvent) && recurrenceId.equals(originalEvent.getRecurrenceId())) {
+        } else if (isSeriesException(originalEvent) && recurrenceId.matches(originalEvent.getRecurrenceId())) {
             result = updateEvent(originalEvent, updatedEventData);
         } else {
             throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceId), null);
@@ -197,7 +203,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
 
     /**
      * Handles any necessary scheduling after an update has been performed, i.e. tracks suitable scheduling messages and notifications.
-     * 
+     *
      * @param result The update result
      */
     private void handleScheduling(InternalUpdateResult result) throws OXException {
@@ -209,7 +215,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (isSeriesMaster(eventUpdate.getOriginal())) {
                 /*
                  * update of series, determine scheduling operations based on superset of attendees in all instances of the series
-                 */                
+                 */
                 AbstractSimpleCollectionUpdate<Attendee> collectedAttendeeUpdates = getSimpleAttendeeUpdates(
                     collectAttendees(result.getOriginalResource(), null, (CalendarUserType[]) null),
                     collectAttendees(result.getUpdatedResource(), null, (CalendarUserType[]) null));
@@ -240,7 +246,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * track reply message from calendar user to organizer
              */
-            schedulingHelper.trackReply(result.getUpdatedResource(), result.getSeriesMaster(), result.getEventUpdate());
+            Attendee userAttendee = find(eventUpdate.getOriginal().getAttendees(), calendarUserId);
+            schedulingHelper.trackReply(userAttendee, result.getUpdatedResource(), result.getSeriesMaster(), eventUpdate);
         } else {
             /*
              * track deletions for newly created delete exceptions
@@ -298,7 +305,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * update for existing change exception, perform update, touch master & track results
              */
             Check.recurrenceRangeMatches(recurrenceId, null);
-            Event originalExceptionEvent = loadExceptionData(originalSeriesMaster, recurrenceId);
+            Event originalExceptionEvent = loadExceptionData(originalSeriesMaster, CalendarUtils.find(originalSeriesMaster.getChangeExceptionDates(), recurrenceId));
             InternalUpdateResult result = updateEvent(originalExceptionEvent, updatedEventData, ignoredFields);
             touch(originalSeriesMaster.getSeriesId());
             resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
@@ -314,6 +321,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getEventStorage().insertEvent(newExceptionEvent);
             storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
+            storage.getConferenceStorage().insertConferences(newExceptionEvent.getId(), prepareConferences(originalSeriesMaster.getConferences()));
             insertAlarms(newExceptionEvent, newExceptionAlarms, true);
             newExceptionEvent = loadEventData(newExceptionEvent.getId());
             resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
@@ -328,7 +336,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * add change exception date to series master & track results
              */
             resultTracker.rememberOriginalEvent(originalSeriesMaster);
-            addChangeExceptionDate(originalSeriesMaster, recurrenceId, CalendarUtils.isInternal(originalSeriesMaster.getOrganizer(), CalendarUserType.INDIVIDUAL));
+            addChangeExceptionDate(originalSeriesMaster, newExceptionEvent.getRecurrenceId(), CalendarUtils.isInternal(originalSeriesMaster.getOrganizer(), CalendarUserType.INDIVIDUAL));
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
             /*
@@ -358,7 +366,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * handle new delete exceptions from the calendar user's point of view beforehand
          */
-        if (isSeriesMaster(originalEvent) && eventData.containsDeleteExceptionDates() && 
+        if (isSeriesMaster(originalEvent) && eventData.containsDeleteExceptionDates() &&
             false == hasExternalOrganizer(originalEvent) && false == deleteRemovesEvent(originalEvent)) {
             if (updateDeleteExceptions(originalEvent, eventData)) {
                 originalEvent = loadEventData(originalEvent.getId());
@@ -389,10 +397,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             }
         }
         /*
+         * trigger calendar interceptors
+         */
+        interceptorRegistry.triggerInterceptorsOnBeforeUpdate(eventUpdate.getOriginal(), eventUpdate.getUpdate());
+        /*
          * update event data in storage, checking permissions as required
          */
         storeEventUpdate(originalEvent, eventUpdate.getDelta(), eventUpdate.getUpdatedFields(), assumeExternalOrganizerUpdate);
         storeAttendeeUpdates(originalEvent, eventUpdate.getAttendeeUpdates(), assumeExternalOrganizerUpdate);
+        storeConferenceUpdates(originalEvent, eventUpdate.getConferenceUpdates(), assumeExternalOrganizerUpdate);
         storeAttachmentUpdates(originalEvent, eventUpdate.getAttachmentUpdates(), assumeExternalOrganizerUpdate);
         /*
          * update passed alarms for calendar user, apply default alarms for newly added internal user attendees
@@ -406,7 +419,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 for(Event eve: originalChangeExceptions) {
                     copies.add(EventMapper.getInstance().copy(eve, null, EventMapper.getInstance().getAssignedFields(eve)));
                 }
-                
+
                 List<Event> exceptionsWithAlarms = storage.getUtilities().loadAdditionalEventData(calendarUserId, copies, null);
                 Map<Event, List<Alarm>> alarmsToUpdate = AlarmUpdateProcessor.getUpdatedExceptions(originalAlarms, eventData.getAlarms(), exceptionsWithAlarms);
                 for (Entry<Event, List<Alarm>> toUpdate : alarmsToUpdate.entrySet()) {
@@ -433,7 +446,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * track update result & update any stored alarm triggers of all users if required
          */
         Event updatedEvent = loadEventData(originalEvent.getId());
-        if (originalEvent.getId().equals(updatedEvent.getId()) && Objects.equals(originalEvent.getRecurrenceId(), updatedEvent.getRecurrenceId())) {
+        if (originalEvent.getId().equals(updatedEvent.getId()) && matches(originalEvent.getRecurrenceId(), updatedEvent.getRecurrenceId())) {
             resultTracker.trackUpdate(originalEvent, updatedEvent);
         } else {
             resultTracker.trackDeletion(originalEvent);
@@ -551,7 +564,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                  */
                 List<EventUpdate> attendeeReplies = extractReplies(attendeeEventUpdates, calendarUser);
                 if (0 < attendeeReplies.size()) {
-                    schedulingHelper.trackReply(getUpdatedResource(attendeeReplies), attendeeReplies);
+                    schedulingHelper.trackReply(userAttendee, getUpdatedResource(attendeeReplies), attendeeReplies);
                 }
                 return true;
             }
@@ -597,7 +610,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * in order to do so.
      *
      * @param originalEvent The event the attendees are updated for
-     * @param attachmentUpdates The attendee updates to persist
+     * @param attendeeUpdates The attendee updates to persist
      * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
@@ -617,7 +630,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), getUserIDs(removedItems));
         }
         /*
-         * perform attendee updates
+         * perform attendee updates, ensure correct timestamp for each attendee
          */
         List<? extends ItemUpdate<Attendee, AttendeeField>> updatedItems = attendeeUpdates.getUpdatedItems();
         if (0 < updatedItems.size()) {
@@ -626,17 +639,63 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 requireWritePermissions(originalEvent, attendeeToUpdate, assumeExternalOrganizerUpdate);
                 Attendee originalAttendee = attendeeToUpdate.getOriginal();
                 Attendee newAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, (AttendeeField[]) null);
-                AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.HIDDEN, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
+                AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.HIDDEN, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS, AttendeeField.TIMESTAMP);
                 attendeesToUpdate.add(newAttendee);
             }
             storage.getAttendeeStorage().updateAttendees(originalEvent.getId(), attendeesToUpdate);
         }
         /*
-         * perform attendee inserts
+         * perform attendee inserts, ensure correct timestamp for attendees
          */
         if (0 < attendeeUpdates.getAddedItems().size()) {
             requireWritePermissions(originalEvent, assumeExternalOrganizerUpdate);
-            storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendeeUpdates.getAddedItems());
+            List<Attendee> addedAttendees = attendeeUpdates.getAddedItems();
+            for (Attendee attendee : addedAttendees) {
+                attendee.setTimestamp(timestamp.getTime());
+            }
+            storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), addedAttendees);
+        }
+        return true;
+    }
+
+    /**
+     * Persists conference updates in the underlying calendar storage, verifying that the current user has appropriate write permissions
+     * in order to do so.
+     *
+     * @param originalEvent The event the conferences are updated for
+     * @param conferenceUpdates The conference updates to persist
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
+     * @return <code>true</code> if there were changes, <code>false</code>, otherwise
+     */
+    private boolean storeConferenceUpdates(Event originalEvent, CollectionUpdate<Conference, ConferenceField> conferenceUpdates, boolean assumeExternalOrganizerUpdate) throws OXException {
+        if (conferenceUpdates.isEmpty()) {
+            return false;
+        }
+        requireWritePermissions(originalEvent, assumeExternalOrganizerUpdate);
+        /*
+         * perform conference deletions
+         */
+        if (0 < conferenceUpdates.getRemovedItems().size()) {
+            storage.getConferenceStorage().deleteConferences(originalEvent.getId(), getConferenceIds(conferenceUpdates.getRemovedItems()));
+        }
+        /*
+         * perform conference updates
+         */
+        if (0 < conferenceUpdates.getUpdatedItems().size()) {
+            List<Conference> conferencesToUpdate = new ArrayList<Conference>(conferenceUpdates.getUpdatedItems().size());
+            for (ItemUpdate<Conference, ConferenceField> conferenceToUpdate : conferenceUpdates.getUpdatedItems()) {
+                Conference originalConference = conferenceToUpdate.getOriginal();
+                Conference newConference = ConferenceMapper.getInstance().copy(originalConference, null, (ConferenceField[]) null);
+                ConferenceMapper.getInstance().copy(conferenceToUpdate.getUpdate(), newConference, ConferenceField.URI, ConferenceField.LABEL, ConferenceField.FEATURES, ConferenceField.EXTENDED_PARAMETERS);
+                conferencesToUpdate.add(newConference);
+            }
+            storage.getConferenceStorage().updateConferences(originalEvent.getId(), conferencesToUpdate);
+        }
+        /*
+         * perform conference inserts
+         */
+        if (0 < conferenceUpdates.getAddedItems().size()) {
+            storage.getConferenceStorage().insertConferences(originalEvent.getId(), prepareConferences(conferenceUpdates.getAddedItems()));
         }
         return true;
     }
@@ -663,6 +722,59 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), originalEvent.getId(), attachmentUpdates.getAddedItems());
         }
         return true;
+    }
+
+    /**
+     * Restores data of foreign attendees that may have been injected previously from copies of the same group-scheduled event located
+     * in calendar folders of other internal users, effectively undoing the applied changes so that they do not appear as being actively
+     * updated by the client.
+     *
+     * @param originalEvent The original event
+     * @param updatedEventData The updated event data
+     * @return The possibly patched event, or the passed updated event data if not applicable
+     * @see ResolvePerformer#injectKnownAttendeeData(Event, CalendarFolder)
+     */
+    private Event restoreInjectedAttendeeDate(Event originalEvent, Event updatedEventData) {
+        if (null == updatedEventData.getAttendees() || null == originalEvent.getAttendees() || null == originalEvent.getOrganizer() ||
+            PublicType.getInstance().equals(folder.getType()) || isInternal(originalEvent.getOrganizer(), CalendarUserType.INDIVIDUAL)) {
+            return updatedEventData;
+        }
+        Attendee calendarUserAttendee = find(originalEvent.getAttendees(), folder.getCalendarUserId());
+        if (null == calendarUserAttendee) {
+            return updatedEventData;
+        }
+        List<Attendee> restoredAttendees = new ArrayList<Attendee>(updatedEventData.getAttendees());
+        boolean modified = false;
+        for (ListIterator<Attendee> iterator = restoredAttendees.listIterator(); iterator.hasNext();) {
+            Attendee attendee = iterator.next();
+            /*
+             * check if (virtually) internal attendee needs to be restored with original attendee data
+             */
+            if (matches(attendee, calendarUserAttendee) || matches(originalEvent.getOrganizer(), attendee) ||
+                session.getConfig().isLookupPeerAttendeesForSameMailDomainOnly() && false == isSameMailDomain(extractEMailAddress(attendee.getUri()), extractEMailAddress(calendarUserAttendee.getUri()))) {
+                continue; // not applicable
+            }
+            Attendee matchingOriginalAttendee = find(originalEvent.getAttendees(), attendee);
+            if (null != matchingOriginalAttendee && isExternalUser(matchingOriginalAttendee)) {
+                LOG.debug("Restoring previously injected attendee data {} from calendar {} back to {} in {}",
+                    attendee, attendee.getFolderId(), matchingOriginalAttendee, updatedEventData);
+                iterator.set(matchingOriginalAttendee);
+                modified = true;
+            }
+        }
+        if (modified) {
+            /*
+             * continue with restored attendee data
+             */
+            return new UnmodifiableEvent(updatedEventData) {
+
+                @Override
+                public List<Attendee> getAttendees() {
+                    return restoredAttendees;
+                }
+            };
+        }
+        return updatedEventData;
     }
 
     /**
@@ -702,7 +814,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * ensure the sequence number is incremented
          */
-        if (originalSeriesMaster.getSequence() >= updatedSeriesMaster.getSequence() && 
+        if (originalSeriesMaster.getSequence() >= updatedSeriesMaster.getSequence() &&
             (false == clientUpdate.containsSequence() || originalSeriesMaster.getSequence() >= clientUpdate.getSequence())) {
             adjustedClientUpdate.setSequence(updatedSeriesMaster.getSequence() + 1);
         }
@@ -712,7 +824,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         adjustedClientUpdate.setRelatedTo(updatedSeriesMaster.getRelatedTo());
         /*
          * adjust recurrence rule as needed
-         */        
+         */
         Mapping<? extends Object, Event> rruleMapping = EventMapper.getInstance().get(EventField.RECURRENCE_RULE);
         if (false == rruleMapping.isSet(clientUpdate) || rruleMapping.equals(updatedSeriesMaster, clientUpdate)) {
             /*

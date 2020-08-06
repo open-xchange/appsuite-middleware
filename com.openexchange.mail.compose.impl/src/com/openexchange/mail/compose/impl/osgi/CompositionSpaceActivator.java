@@ -106,7 +106,9 @@ import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddReplyTo;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableService;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableTask;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceDeleteListener;
+import com.openexchange.mail.compose.impl.groupware.CompositionSpaceEnlargeAttachmentNameField;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceEnlargeSubjectField;
+import com.openexchange.mail.compose.impl.groupware.CompositionSpaceRestoreAttachmentBinaryDataColumn;
 import com.openexchange.mail.compose.impl.rmi.RemoteCompositionSpaceServiceImpl;
 import com.openexchange.mail.compose.impl.security.CompositionSpaceKeyStorageServiceImpl;
 import com.openexchange.mail.compose.impl.security.FileStorageCompositionSpaceKeyStorage;
@@ -338,7 +340,9 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
             new CompositionSpaceAddFileStorageIdentifier(),
             new CompositionSpaceEnlargeSubjectField(),
             new CompositionSpaceAddCustomHeaders(),
-            new CompositionSpaceAddReplyTo()
+            new CompositionSpaceEnlargeAttachmentNameField(),
+            new CompositionSpaceAddReplyTo(),
+            new CompositionSpaceRestoreAttachmentBinaryDataColumn()
         ));
         registerService(DeleteListener.class, new CompositionSpaceDeleteListener(this));
 

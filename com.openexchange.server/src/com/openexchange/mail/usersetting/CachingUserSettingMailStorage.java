@@ -50,16 +50,21 @@
 package com.openexchange.mail.usersetting;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
+import com.google.common.collect.Lists;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -71,6 +76,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
+import com.openexchange.java.Reference;
 import com.openexchange.lock.LockService;
 import com.openexchange.mail.usersetting.UserSettingMail.Signature;
 import com.openexchange.server.impl.DBPool;
@@ -106,6 +112,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         m_cache = ServerServiceRegistry.getInstance().getService(CacheService.class, true).getCache(CACHE_REGION_NAME);
     }
 
+    @SuppressWarnings("unused")
     private void releaseCache() throws OXException {
         this.m_cache = null;
     }
@@ -115,6 +122,8 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     }
 
     private static final String SQL_LOAD = "SELECT bits, send_addr, reply_to_addr, msg_format, display_msg_headers, auto_linebreak, std_trash, std_sent, std_drafts, std_spam, " + "upload_quota, upload_quota_per_file, confirmed_spam, confirmed_ham FROM user_setting_mail WHERE cid = ? AND user = ?";
+
+    private static final String SQL_LOAD_MULTIPLE_SEND_ADDRESS = "SELECT user, send_addr FROM user_setting_mail WHERE cid = ? AND user IN (";
 
     private static final String SQL_INSERT = "INSERT INTO user_setting_mail (cid, user, bits, send_addr, reply_to_addr, msg_format, display_msg_headers, auto_linebreak, std_trash, std_sent, std_drafts, std_spam, upload_quota, upload_quota_per_file, confirmed_spam, confirmed_ham) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -395,6 +404,78 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         }
     }
 
+    @Override
+    public Map<Integer, String> getSenderAddresses(Set<Integer> userIds, Context ctx, Connection connection) throws OXException {
+        try {
+            // Create resulting map instance
+            Map<Integer, String> result = new HashMap<>(userIds.size());
+
+            // Check which user identifiers can be served from cache and which need to be loaded from database
+            List<Integer> toLoad;
+            {
+                Reference<List<Integer>> toLoadReference = new Reference<>(null);
+                Cache cache = getCache();
+                userIds.stream().filter((u) -> u != null).forEach(user -> {
+                    UserSettingMail usm = null == cache ? null : (UserSettingMail) cache.get(cache.newCacheKey(ctx.getContextId(), i(user)));
+                    if (usm == null) {
+                        List<Integer> l = toLoadReference.getValue();
+                        if (l == null) {
+                            l = new ArrayList<>(userIds.size());
+                            toLoadReference.setValue(l);
+                        }
+                        l.add(user);
+                    } else {
+                        result.put(user, usm.getSendAddr());
+                    }
+                });
+
+                toLoad = toLoadReference.getValue();
+                if (toLoad == null) {
+                    return result;
+                }
+            }
+
+            // Load non-cached ones from database
+            Connection readCon = null;
+            boolean closeCon = false;
+            try {
+                readCon = connection;
+                if (readCon == null) {
+                    readCon = DBPool.pickup(ctx);
+                    closeCon = true;
+                }
+
+                for (List<Integer> partition : Lists.partition(toLoad, Databases.IN_LIMIT)) {
+                    PreparedStatement stmt = null;
+                    ResultSet rs = null;
+                    try {
+                        stmt = readCon.prepareStatement(Databases.getIN(SQL_LOAD_MULTIPLE_SEND_ADDRESS, partition.size()));
+                        int index = 1;
+                        stmt.setInt(index++, ctx.getContextId());
+                        for (Integer user : partition) {
+                            stmt.setInt(index++, i(user));
+                        }
+                        rs = stmt.executeQuery();
+                        while (rs.next()) {
+                            result.put(I(rs.getInt(1)), rs.getString(2));
+                        }
+                    } finally {
+                        Databases.closeSQLStuff(rs, stmt);
+                    }
+                }
+            } finally {
+                if (closeCon) {
+                    DBPool.closeReaderSilent(ctx, readCon);
+                }
+            }
+
+            return result;
+        } catch (SQLException e) {
+            LOG.error("", e);
+            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
     protected static final String SPAM_ENABLED = "com.openexchange.spamhandler.enabled";
 
     protected void applyConfigCascadeSettings(UserSettingMail userSettingMail, int userId, Context ctx) throws OXException {
@@ -668,4 +749,5 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     public void handleAvailability() throws OXException {
         initCache();
     }
+
 }

@@ -89,6 +89,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.xing.exception.XingApiException;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingIOException;
@@ -98,6 +99,7 @@ import com.openexchange.xing.exception.XingSSLException;
 import com.openexchange.xing.exception.XingServerException;
 import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.session.Session;
+import com.openexchange.xing.util.Services;
 
 /**
  * This class is mostly used internally by {@link XingAPI} for creating and executing REST requests to the XING API, and parsing responses.
@@ -511,6 +513,24 @@ public class RESTUtility {
     }
 
     /**
+     * Get the {@link HttpClientService}
+     *
+     * @return The service
+     * @throws XingException If service is missing
+     */
+    private static HttpClient getHttpClient() throws XingException {
+        try {
+            HttpClientService httpClientService = Services.getService(HttpClientService.class);
+            if (null == httpClientService) {
+                throw new XingException("Internal server error. Missing service " + HttpClientService.class.getSimpleName());
+            }
+            return httpClientService.getHttpClient("xing");
+        } catch (Exception e) {
+            throw new XingException("Internal server error. Unable to get HTTP client", e);
+        }
+    }
+
+    /**
      * Executes an {@link HttpUriRequest} with the given {@link Session} and returns an {@link HttpResponse}.
      *
      * @param session The session to use.
@@ -546,7 +566,7 @@ public class RESTUtility {
      *             catch this exception which signals that some kind of error occurred.
      */
     private static HttpResponse execute(final Session session, final HttpRequestBase req, final int socketTimeoutOverrideMs, final List<Integer> expectedStatusCode) throws XingException {
-        final HttpClient client = updatedHttpClient(session);
+        final HttpClient client = getHttpClient();
 
         // Set request timeouts.
         session.setRequestTimeout(req);
@@ -556,8 +576,8 @@ public class RESTUtility {
 
         final boolean repeatable = isRequestRepeatable(req);
 
+        HttpResponse response = null;
         try {
-            HttpResponse response = null;
             for (int retries = 0; response == null && retries < 5; retries++) {
                 /*
                  * The try/catch is a workaround for a bug in the HttpClient libraries. It should be returning null instead when an error
@@ -663,13 +683,6 @@ public class RESTUtility {
         } catch (java.text.ParseException e) {
             return null;
         }
-    }
-
-    /**
-     * Gets the session's client
-     */
-    private static synchronized HttpClient updatedHttpClient(final Session session) {
-        return session.getHttpClient();
     }
 
     /**

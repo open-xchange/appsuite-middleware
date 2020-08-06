@@ -221,6 +221,10 @@ public final class IMAPException extends OXException {
          */
         IO_ERROR(IMAPCode.IO_ERROR),
         /**
+         * The IP address could not be determined: %1$s
+         */
+        UNKNOWN_HOST_ERROR(IMAPCode.UNKNOWN_HOST_ERROR),
+        /**
          * Flag %1$s could not be changed due to reason "%2$s"
          */
         FLAG_FAILED(IMAPCode.FLAG_FAILED),
@@ -836,6 +840,10 @@ public final class IMAPException extends OXException {
          */
         IO_ERROR(MailExceptionCode.IO_ERROR, null),
         /**
+         * The IP address could not be determined: %1$s
+         */
+        UNKNOWN_HOST_ERROR("The IP address could not be determined: %1$s", MailExceptionCode.IO_ERROR.getCategory(), MailExceptionCode.IO_ERROR.getNumber(), null),
+        /**
          * Flag %1$s could not be changed due to reason "%2$s"
          */
         FLAG_FAILED(FLAG_FAILED_MSG, Category.CATEGORY_ERROR, 2025, IMAPExceptionMessages.FLAG_FAILED_MSG),
@@ -1289,7 +1297,7 @@ public final class IMAPException extends OXException {
     public static OXException create(final Code code, final IMAPConfig imapConfig, final Session session, final Throwable cause, final Object... messageArgs) {
         if (IMAPException.Code.NO_ACCESS.equals(code) && messageArgs[0] != null) {
             final String fullName = messageArgs[0].toString();
-            if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
+            if (!MailFolder.ROOT_FOLDER_ID.equals(fullName)) {
                 ListLsubCache.removeCachedEntry(fullName, imapConfig.getAccountId(), session);
                 final IMAPStore imapStore = imapConfig.optImapStore();
                 if (null != imapStore) {

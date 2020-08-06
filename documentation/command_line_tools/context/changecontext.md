@@ -2,6 +2,7 @@
 title: changecontext
 icon: far fa-circle
 tags: Administration, Command Line tools, Context
+package: open-xchange-admin
 ---
 
 # NAME

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Admin SOAP Reseller Bundle
 Bundle-SymbolicName: com.openexchange.admin.soap.reseller
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.admin.plugins,
@@ -20,6 +20,7 @@ Import-Package: com.openexchange.admin.plugins,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.tools.net,
+ com.openexchange.tools.oxfolder,
  javax.jws,
  javax.jws.soap,
  javax.xml.bind,

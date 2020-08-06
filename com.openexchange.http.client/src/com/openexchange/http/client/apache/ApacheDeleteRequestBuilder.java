@@ -49,11 +49,16 @@
 
 package com.openexchange.http.client.apache;
 
-
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.methods.DeleteMethod;
 import com.openexchange.http.client.builder.HTTPDeleteRequestBuilder;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpRequestBase;
 
+/**
+ *
+ * {@link ApacheDeleteRequestBuilder}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ */
 public class ApacheDeleteRequestBuilder extends CommonApacheHTTPRequest<HTTPDeleteRequestBuilder> implements
 		HTTPDeleteRequestBuilder {
 
@@ -62,8 +67,8 @@ public class ApacheDeleteRequestBuilder extends CommonApacheHTTPRequest<HTTPDele
 	}
 
 	@Override
-	protected HttpMethodBase createMethod(String encodedSite) {
-		return new DeleteMethod(encodedSite);
+	protected HttpRequestBase createMethod(String encodedSite) {
+		return new HttpDelete(encodedSite);
 	}
 
 

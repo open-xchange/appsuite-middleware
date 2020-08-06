@@ -67,7 +67,7 @@ public final class DefaultMailAccount extends AbstractMailAccount {
     public DefaultMailAccount() {
         super();
         id = DEFAULT_ID;
-        rootFolder = MailFolderUtility.prepareFullname(DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
+        rootFolder = MailFolderUtility.prepareFullname(DEFAULT_ID, MailFolder.ROOT_FOLDER_ID);
     }
 
     @Override

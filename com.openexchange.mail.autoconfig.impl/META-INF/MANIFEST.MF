@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Autoconfig Bundle
 Bundle-SymbolicName: com.openexchange.mail.autoconfig.impl
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Activator: com.openexchange.mail.autoconfig.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -29,11 +29,13 @@ Import-Package: com.google.common.annotations,
  com.openexchange.log,
  com.openexchange.mail.autoconfig,
  com.openexchange.mail.mime,
+ com.openexchange.mailaccount,
  com.openexchange.net.ssl,
  com.openexchange.net.ssl.exception,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
  com.openexchange.rest.client.httpclient,
+ com.openexchange.rest.client.httpclient.util,
  com.openexchange.server,
  com.openexchange.tools.net,
  com.openexchange.tools.sql,
@@ -48,12 +50,6 @@ Import-Package: com.google.common.annotations,
  javax.mail.internet.idn,
  javax.net,
  javax.net.ssl,
- org.apache.commons.httpclient,
- org.apache.commons.httpclient.auth,
- org.apache.commons.httpclient.cookie,
- org.apache.commons.httpclient.methods,
- org.apache.commons.httpclient.params,
- org.apache.commons.httpclient.protocol,
  org.apache.commons.logging,
  org.apache.http,
  org.apache.http.annotation,

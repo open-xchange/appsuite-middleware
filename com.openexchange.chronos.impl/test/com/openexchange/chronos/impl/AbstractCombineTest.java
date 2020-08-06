@@ -73,18 +73,8 @@ public abstract class AbstractCombineTest {
     protected CalendarSession session;
     protected List<Available> available;
 
-    /**
-     * Initialises a new {@link AbstractCombineTest}.
-     */
-    public AbstractCombineTest() {
-        super();
-    }
-
-    /**
-     * Initialise mocks
-     */
     @Before
-    public void init() throws OXException {
+    public void setUp() throws OXException {
         available = new ArrayList<>();
 
         // Mock the session

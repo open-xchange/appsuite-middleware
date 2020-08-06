@@ -49,7 +49,7 @@
 
 package com.openexchange.saml.validation;
 
-import org.opensaml.saml2.core.StatusResponseType;
+import org.opensaml.saml.saml2.core.StatusResponseType;
 
 /**
  * An interface for response validators. Allows to build fine grained validation steps

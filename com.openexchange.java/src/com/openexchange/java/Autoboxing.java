@@ -163,8 +163,18 @@ public final class Autoboxing {
     }
 
     /**
+     * Short method name for {@link Double#doubleValue()}.
+     *
+     * @param d Double object to be converted to a double value.
+     * @return double value
+     */
+    public static double d(final Double d) {
+        return d.doubleValue();
+    }
+
+    /**
      * Short method name for {@link Character#charValue()}.
-     * 
+     *
      * @param c {@link Character} object to be converted to a char value.
      * @return char value.
      */
@@ -174,7 +184,7 @@ public final class Autoboxing {
 
     /**
      * Short method name for {@link Character#valueOf(char)} that uses cached instances.
-     * 
+     *
      * @param c char value to be converted to a Character object.
      * @return Character object.
      */
@@ -184,7 +194,7 @@ public final class Autoboxing {
 
     /**
      * Short method name for {@link Double#doubleValue()}.
-     * 
+     *
      * @param b {@link Double} object to be converted to a double value.
      * @return double value.
      */

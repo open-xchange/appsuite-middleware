@@ -52,6 +52,7 @@ package com.openexchange.ajax.chronos.itip;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import com.openexchange.ajax.chronos.itip.bugs.Bug65533Test;
+import com.openexchange.ajax.chronos.itip.bugs.MWB263Test;
 import com.openexchange.ajax.chronos.itip.bugs.ReplyBugsTest;
 
 /**
@@ -63,13 +64,17 @@ import com.openexchange.ajax.chronos.itip.bugs.ReplyBugsTest;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     ITipRequestTests.class,
-    ITipAnalyzeReplyTest.class,
-    ReplyBugsTest.class,
-    Bug65533Test.class,
+    ITipReplyTest.class,
     ITipAnalyzeChangesTest.class,
     ITipSeriesTest.class,
     ITipSeriesExceptionTest.class,
-    ITipOnBehalfTest.class
+    ITipOnBehalfTest.class,
+    ITipCancelTest.class,
+    //    InternalNotificationTest.class, No such notifications yet
+
+    ReplyBugsTest.class, 
+    Bug65533Test.class, 
+    MWB263Test.class,
 })
 public class ITipTestSuite {
 

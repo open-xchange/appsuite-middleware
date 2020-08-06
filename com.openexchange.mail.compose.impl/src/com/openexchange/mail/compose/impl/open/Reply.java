@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.compose.impl.open;
 
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import java.util.ArrayList;
@@ -176,7 +175,16 @@ public class Reply extends AbstractOpener {
 
         // Determine "From"
         InternetAddress from = null;
-        {
+        if (preferToAsRecipient) {
+            // Replying to a message residing in "Sent" folder
+            Optional<InternetAddress> optionalValidatedFrom = MimeProcessingUtility.validateFrom(originalMail, accountId, session, context);
+            if (optionalValidatedFrom.isPresent()) {
+                from = optionalValidatedFrom.get();
+            }
+        }
+
+        // Set "From" address
+        if (from == null) {
             FromAddressProvider fromAddressProvider = FromAddressProvider.byAccountId();
             if (null != fromAddressProvider) {
                 if (fromAddressProvider.isDetectBy()) {
@@ -194,6 +202,8 @@ public class Reply extends AbstractOpener {
                     }
                 }
             }
+        } else {
+            state.message.setFrom(toAddress(from));
         }
 
         /*
@@ -389,7 +399,7 @@ public class Reply extends AbstractOpener {
         }
 
         // Check whether to attach original message
-        Optional<Boolean> optionalEncrypt = Optional.of(B(state.encrypt));
+        Optional<Boolean> optionalEncrypt = Optional.of(state.encrypt);
         if (usm.getAttachOriginalMessage() > 0) {
             // Obtain attachment storage (can only be null here)
             state.attachmentStorage = getAttachmentStorage(session);

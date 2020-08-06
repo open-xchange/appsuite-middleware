@@ -1383,7 +1383,17 @@ public class Strings {
         return null == builder ? chars.toString() : builder.toString();
     }
 
-    private static char[] lowercases = { '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017', '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037', '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057', '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077', '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157', '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137', '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157', '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177' };
+    // @formatter:off
+    private static char[] lowercases = {
+        '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
+        '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037',
+        '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057',
+        '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077',
+        '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
+        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137',
+        '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
+        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177' };
+    // @formatter:on
 
     /**
      * Fast lower-case conversion.
@@ -1424,6 +1434,39 @@ public class Strings {
 
     /**
      * Accepts a string of separated values, splits it around matches of the given {@link java.util.regex.Pattern regular expression}, trims
+     * the split values and returns them as an array.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
+     * <b>Note</b>: The separator is interpreted a regular expression. Please consider {@link java.util.regex.Pattern#quote(String) quoting}
+     * in case separator should be interpreted as a literal pattern or use the {@link #splitBy(String, char, boolean) splitBy() method}
+     * </div>
+     *
+     * @param input The string of separated values
+     * @param separator The separator as a regular expression used to split the input around this separator
+     * @return The split and trimmed input as an array
+     * @throws IllegalArgumentException If input or the separator are missing or if the separator isn't a valid pattern
+     * @see #splitBy(String, char, boolean)
+     */
+    public static String[] trimAndSplit(String input, String separator) {
+        if (input == null) {
+            throw new IllegalArgumentException("Missing input");
+        }
+        if (Strings.isEmpty(input)) {
+            return new String[0];
+        }
+        if (Strings.isEmpty(separator)) {
+            throw new IllegalArgumentException("Missing separator");
+        }
+
+        try {
+            return input.split(separator);
+        } catch (PatternSyntaxException pse) {
+            throw new IllegalArgumentException("Illegal pattern syntax", pse);
+        }
+    }
+
+    /**
+     * Accepts a string of separated values, splits it around matches of the given {@link java.util.regex.Pattern regular expression}, trims
      * the split values and returns them as a list.
      * <p>
      * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
@@ -1438,18 +1481,11 @@ public class Strings {
      * @see #splitBy(String, char, boolean)
      */
     public static List<String> splitAndTrim(String input, String separator) {
-        if (input == null) {
-            throw new IllegalArgumentException("Missing input");
-        }
-        if (Strings.isEmpty(input)) {
-            return Collections.emptyList();
-        }
-        if (Strings.isEmpty(separator)) {
-            throw new IllegalArgumentException("Missing separator");
-        }
-
         try {
-            String[] tokens = input.split(separator);
+            String[] tokens = trimAndSplit(input, separator);
+            if (tokens.length == 0) {
+                return Collections.emptyList();
+            }
             List<String> trimmedSplits = new ArrayList<String>(tokens.length);
             for (String token : tokens) {
                 trimmedSplits.add(token.trim());

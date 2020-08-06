@@ -97,10 +97,11 @@ public final class ListUpdateTasksCLT extends AbstractUpdateTasksCLT<Void> {
         super("listUpdateTasks [[-a | -g | -e | -x | -xf | -xn] -n <schemaName> -A <masterAdminUser> -P <masterAdminPassword> [-p <port> -s <server> --responsetime <responseTime>]] | -h", 
            "Lists executed, pending and excluded update tasks of a schema specified by the '-n' switch (mandatory). The switches '-a', '-e', '-g', '-x', '-xf' and '-xn' are mutually exclusive AND mandatory."
             + "\n\n An overall database status of all schemata can be retrieved via the 'checkdatabase' command line tool.\n\n"
-            + "An update task may be in 'pending' state for three reasons:"
-            + "\n  a) It was never executed before and is due for execution"
-            + "\n  b) It is excluded via a namespace"
-            + "\n  c) It is excluded via an entry in the 'excludeupdatetasks.properties'");
+            + "An update task may be in 'pending' state for one of the following reasons:"
+            + "\n  a) It was never executed before and is due for execution. Use the 'runupdate' tool to run all (previously never executed) pending tasks."
+            + "\n  b) It is excluded via a namespace. Use the 'listUpdateTaskNamespaces' tool to list all namespaces."
+            + "\n  c) It is excluded via an entry in the 'excludeupdatetasks.properties'."
+            + "\n  d) It was not successfully executed. Use the 'forceupdatetask' tool to re-run the failed task.");
         //@formatter:on
     }
 
@@ -112,7 +113,7 @@ public final class ListUpdateTasksCLT extends AbstractUpdateTasksCLT<Void> {
 
         OptionGroup optionGroup = new OptionGroup();
         optionGroup.addOption(createOption("a", "all", false, "Lists all pending and excluded update tasks (both via excludeupdatetasks.properties' file and namespace)", false));
-        optionGroup.addOption(createOption("g", "pending", false, "Lists only the pending update tasks, i.e. those that were never executed but are due for execution.", false));
+        optionGroup.addOption(createOption("g", "pending", false, "Lists only the pending update tasks, i.e. those that were never executed but are due for execution or were executed at least once and failed.", false));
         optionGroup.addOption(createOption("x", "excluded", false, "Lists only the update tasks excluded both via excludedupdate.properties' file and namespace", false));
         optionGroup.addOption(createOption("xf", "excluded-via-file", false, "Lists only the update tasks excluded via 'excludeupdatetasks.properties' file", false));
         optionGroup.addOption(createOption("xn", "excluded-via-namespace", false, "Lists only the update tasks excluded via namespace", false));

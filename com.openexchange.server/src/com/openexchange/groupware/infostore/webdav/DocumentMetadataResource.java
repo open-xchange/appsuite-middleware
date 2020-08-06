@@ -146,7 +146,6 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         this.loadedMetadata = true;
         this.setId(metadata.getId());
         this.setExists(true);
-
     }
 
     @Override
@@ -176,7 +175,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    protected void internalRemoveProperty(final String namespace, final String name) {
+    protected void internalRemoveProperty(final String namespace, final String name) throws WebdavProtocolException {
         propertyHelper.removeProperty(namespace, name);
     }
 
@@ -293,7 +292,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public String getETag() {
+    public String getETag() throws WebdavProtocolException {
         if (!exists && !existsInDB) {
             /*
              * try { dumpMetadataToDB(); } catch (Exception e) { throw new
@@ -302,8 +301,9 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
              */
             return null;
         }
+        loadMetadata();
         return String.format(
-                "http://www.open-xchange.com/webdav/etags/%d-%d-%d-%d",
+                "%d-%d-%d-%d",
                 Integer.valueOf(getSession().getContext().getContextId()),
                 Integer.valueOf(metadata.getId()),
                 Integer.valueOf(metadata.getVersion()),
@@ -541,13 +541,15 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 throw WebdavProtocolException.Code.FOLDER_NOT_FOUND.create(getUrl(), HttpServletResponse.SC_CONFLICT, parent);
             }
 
-            final DocumentMetadataResource copy = (DocumentMetadataResource) factory.resolveResource(dest);
-            if (copy.exists()) {
+            WebdavResource destinationResource = factory.resolveResource(dest);
+            if (destinationResource.exists()) {
                 if (!overwrite) {
                     throw WebdavProtocolException.Code.FILE_ALREADY_EXISTS.create(getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED, dest);
                 }
-                copy.delete();
+                destinationResource.delete();
             }
+
+            final DocumentMetadataResource copy = (DocumentMetadataResource) factory.resolveResource(dest);
             copyMetadata(copy);
             initDest(copy, name, coll.getId());
             copy.url = dest;
@@ -557,7 +559,6 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             copy.create();
 
             factory.invalidate(dest, copy.getId(), Type.RESOURCE);
-            lockHelper.deleteLocks();
             return copy;
         } catch (OXException e) {
             if (e instanceof WebdavProtocolException) {
@@ -774,6 +775,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             }
         } else {
             database.startTransaction();
+            metadata.setId(getId());
             if (setMetadata.contains(Metadata.FILENAME_LITERAL)) {
                 metadata.setTitle(metadata.getFileName());
                 setMetadata.add(Metadata.TITLE_LITERAL);
@@ -825,16 +827,17 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 
     private void deleteMetadata() throws OXException {
         final ServerSession session = getSession();
+        final boolean hardDelete = !factory.isTrashEnabled(session);
         database.startTransaction();
         try {
             DocumentMetadata document = database.getDocumentMetadata(-1, id, InfostoreFacade.CURRENT_VERSION, session);
-			List<IDTuple> nd = database.removeDocument(
-			    Collections.<IDTuple>singletonList(
-			        new IDTuple(
-			            Long.toString(document.getFolderId()),
-			            Integer.toString(document.getId())
-			        )
-			    ), Long.MAX_VALUE, session);
+            List<IDTuple> nd = database.removeDocument(
+                Collections.<IDTuple>singletonList(
+                    new IDTuple(
+                        Long.toString(document.getFolderId()),
+                        Integer.toString(document.getId())
+                    )
+                ), Long.MAX_VALUE, session, hardDelete);
             if (nd.size() > 0) {
                 database.rollback();
                 throw InfostoreExceptionCodes.DELETE_FAILED.create(Integer.valueOf(nd.get(0).getId()));

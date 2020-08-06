@@ -194,9 +194,9 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
      */
     INVALID_FILTER_TYPE_FLAG("Invalid filter type flag: %1$s", CATEGORY_ERROR, 26),
     /**
-     * Mailfilter not available for user %1$d in context %1$d.
+     * Mailfilter not available for user %1$d in context %2$d.
      */
-    MAILFILTER_NOT_AVAILABLE("Mailfilter not available for user %1$d in context %1$d.", MAILFILTER_NOT_AVAILABLE_MSG, CATEGORY_PERMISSION_DENIED, 27),
+    MAILFILTER_NOT_AVAILABLE("Mailfilter not available for user %1$d in context %2$d.", MAILFILTER_NOT_AVAILABLE_MSG, CATEGORY_PERMISSION_DENIED, 27),
     /**
      * The specified 'reorder' array is invalid as the size (%1$d) exceeds the amount (%2$d) of rules for user '%3$d' in context '%4$d'.
      */

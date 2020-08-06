@@ -342,7 +342,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
                 }
                 try {
                     UserizedFolder globalAddressBookFolder = factory.getFolderService().getFolder(FolderStorage.REAL_TREE_ID, FolderStorage.GLOBAL_ADDRESS_BOOK_ID, factory.getSession(), null);
-                    if (false == isBlacklisted(globalAddressBookFolder)) {
+                    if (false == isBlacklisted(globalAddressBookFolder) && globalAddressBookFolder.getUsedForSync().isUsedForSync()) {
                         reducedFolders.add(globalAddressBookFolder);
                     }
                 } catch (OXException e) {
@@ -386,7 +386,10 @@ public class GroupwareCarddavFactory extends DAVFactory {
             FolderResponse<UserizedFolder[]> visibleFoldersResponse = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, true, this.factory.getSession(), null);
             UserizedFolder[] response = visibleFoldersResponse.getResponse();
             for (UserizedFolder folder : response) {
-                if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == isBlacklisted(folder)) {
+                if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() &&
+                    false == isBlacklisted(folder) &&
+                    folder.isSubscribed() &&
+                    folder.getUsedForSync().isUsedForSync()) {
                     folders.add(folder);
                 }
             }
@@ -406,7 +409,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
             UserizedFolder[][] response = updatedFoldersResponse.getResponse();
             if (2 <= response.length && null != response[1] && 0 < response[1].length) {
                 for (UserizedFolder folder : response[1]) {
-                    if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == this.isBlacklisted(folder) && ContactContentType.getInstance().equals(folder.getContentType())) {
+                    if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == this.isBlacklisted(folder) && ContactContentType.getInstance().equals(folder.getContentType()) && folder.getUsedForSync().isUsedForSync()) {
                         folders.add(folder);
                     }
                 }

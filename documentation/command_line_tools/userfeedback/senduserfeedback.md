@@ -2,6 +2,7 @@
 title: senduserfeedback
 icon: far fa-circle
 tags: Administration, Command Line tools, User, Feedback
+package: open-xchange-userfeedback
 ---
 
 # NAME
@@ -29,7 +30,7 @@ This command line tool sends the user feedback via mail.
 : Use to gzip-compress exported feedback.
 
 **-e**, **--end-time** *arg*
-: End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is deleted. If not set, all feedback since -s is deleted.
+: End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is considered. If not set, all feedback since -s is considered.
 
 **-g**, **--context-group** *arg*
 : The context group identifying the global DB where the feedback is stored. Default: 'default'.
@@ -41,13 +42,13 @@ This command line tool sends the user feedback via mail.
 : Single Recipient's mail address like "Displayname <email@example.com>" or the local path to a CSV file containing all the recipients, starting with an '@' (@/tmp/file.csv). Where the address is followed by the display name, seperated by a comma.
 
 **-s**, **--start-time** *arg*
-: Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is deleted. If not set, all feedback up to -e is deleted.
+: Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is considered. If not set, all feedback up to -e is considered.
 
 **-S**, **--subject** *arg*
 : The mail subject. Default: "User Feedback Report: [time range]".
  
 **-t**, **--type** *arg*
-: The feedback type to delete. Default: 'star-rating-v1'.
+: The feedback type. Default: 'star-rating-v1'. Alternative value: 'nps-v1'.
 
 **-U**, **--api-user** *user:password*
 : Username and password to use for REST API authentication (user:password).

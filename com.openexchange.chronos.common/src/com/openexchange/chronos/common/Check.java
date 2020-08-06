@@ -52,6 +52,8 @@ package com.openexchange.chronos.common;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.SearchStrings.lengthWithoutWildcards;
 import static com.openexchange.tools.arrays.Arrays.contains;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +135,7 @@ public class Check {
      *
      * @param recurrenceService A reference to the recurrence service
      * @param seriesMaster The series master event providing the recurrence information
-     * @param recurrenceID The recurrence identifier
+     * @param recurrenceIDs The recurrence identifier
      * @return The passed list of recurrence identifiers, after their existence was checked
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
@@ -142,7 +144,7 @@ public class Check {
             RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
             SortedSet<RecurrenceId> validRecurrenceIds = CalendarUtils.removeInvalid(recurrenceIDs, recurrenceData, recurrenceService);
             for (RecurrenceId recurrenceID : recurrenceIDs) {
-                if (false == validRecurrenceIds.contains(recurrenceID)) {
+                if (false == CalendarUtils.contains(validRecurrenceIds, recurrenceID)) {
                     throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), recurrenceData);
                 }
             }
@@ -384,6 +386,26 @@ public class Check {
             throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, calendarUser.getUri(), I(calendarUser.getEntity()), "");
         }
         return calendarUser;
+    }
+
+    /**
+     * Checks that the supplied string represents a valid URI.
+     *
+     * @param uri The URI to check
+     * @param field The <i>field</i> the value originates in for the error message
+     * @return The URI string, after it has been checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
+     */
+    public static String requireValidURI(String uri, String field) throws OXException {
+        if (Strings.isEmpty(uri)) {
+            throw CalendarExceptionCodes.INVALID_DATA.create(field, uri);
+        }
+        try {
+            new URI(uri);
+        } catch (URISyntaxException e) {
+            throw CalendarExceptionCodes.INVALID_DATA.create(e, field, e.getMessage());
+        }
+        return uri;
     }
 
     /**

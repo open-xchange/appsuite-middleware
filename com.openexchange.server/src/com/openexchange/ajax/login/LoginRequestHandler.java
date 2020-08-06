@@ -60,5 +60,12 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface LoginRequestHandler {
 
-    void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException;
+    @Deprecated
+    default void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        throw new IllegalStateException("This method must not be called anymore.");
+    }
+
+    default void handleRequest(HttpServletRequest req, HttpServletResponse resp, @SuppressWarnings("unused") LoginRequestContext requestContext) throws IOException{
+        handleRequest(req, resp);
+    }
 }

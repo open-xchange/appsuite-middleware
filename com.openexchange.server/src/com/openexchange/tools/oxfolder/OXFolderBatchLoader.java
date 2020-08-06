@@ -315,7 +315,7 @@ public final class OXFolderBatchLoader {
                 try {
                     final int[] currentIds = com.openexchange.tools.arrays.Arrays.extract(folderIds, i, IN_LIMIT);
                     final String sql = getIN(
-                        "SELECT permission_id,fp,orp,owp,odp,admin_flag,group_flag,system,fuid,type,sharedParentFolder FROM #TABLE# WHERE cid=? AND fuid IN (",
+                        "SELECT permission_id,fp,orp,owp,odp,admin_flag,group_flag,`system`,fuid,type,sharedParentFolder FROM #TABLE# WHERE cid=? AND fuid IN (",
                         currentIds.length);
                     stmt = readCon.prepareStatement(Strings.replaceSequenceWith(sql, "#TABLE#", table));
                     int pos = 1;

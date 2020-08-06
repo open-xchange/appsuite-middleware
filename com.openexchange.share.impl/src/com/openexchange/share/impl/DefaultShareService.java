@@ -85,6 +85,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.quota.AccountQuota;
@@ -257,34 +258,23 @@ public class DefaultShareService implements ShareService {
         if (false == guestUser.isGuest()) {
             throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guestID));
         }
-
-        int userId = session.getUserId();
-        if ((guestUser.getCreatedBy() == userId) || ShareTool.isAnonymousGuest(guestUser)) {
+        /*
+         * check if guest was created by session's user
+         */
+        ;
+        if (guestID == session.getUserId() || guestUser.getCreatedBy() == session.getUserId() || ShareTool.isAnonymousGuest(guestUser)) {
             return true;
         }
-
-        List<TargetProxy> targets = requireService(ModuleSupport.class).listTargets(session.getContextId(), guestID);
-        GroupService groupService = null;
-        for (TargetProxy target : targets) {
-            List<TargetPermission> permissions = target.getPermissions();
-            if (null != permissions && 0 < permissions.size()) {
-                for (TargetPermission permission : permissions) {
-                    if (userId == permission.getEntity()) {
-                        return true;
-                    }
-                    if (permission.isGroup()) {
-                        groupService = requireService(GroupService.class, groupService);
-                        Group group = groupService.getGroup(context, permission.getEntity());
-                        for (int memberId : group.getMember()) {
-                            if (userId == memberId) {
-                                return true;
-                            }
-                        }
-                    }
-                }
+        /*
+         * check if any share target is visible to session's user, using the share target path to have the global view on the target
+         */
+        ModuleSupport moduleSupport = requireService(ModuleSupport.class);
+        for (TargetProxy target : moduleSupport.listTargets(session.getContextId(), guestID)) {
+            ShareTargetPath targetPath = target.getTargetPath();
+            if (moduleSupport.isVisible(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem(), session.getContextId(), session.getUserId())) {
+                return true;
             }
         }
-
         return false;
     }
 
@@ -294,6 +284,9 @@ public class DefaultShareService implements ShareService {
         LOG.info("Configuring accounts for {} at {} in context {}...", recipients, target, I(session.getContextId()));
         Map<ShareRecipient, ShareInfo> sharesByRecipient = new HashMap<ShareRecipient, ShareInfo>(recipients.size());
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        List<ShareInfo> sharesInfos = new ArrayList<ShareInfo>(recipients.size());
+        List<GuestInfo> createdGuests = new ArrayList<>(recipients.size());
+
         try {
             connectionHelper.start();
             /*
@@ -303,15 +296,16 @@ public class DefaultShareService implements ShareService {
             /*
              * prepare guest users and resulting shares
              */
-            List<ShareInfo> sharesInfos = new ArrayList<ShareInfo>(recipients.size());
             for (ShareRecipient recipient : recipients) {
                 /*
                  * prepare shares for this recipient
                  */
-                ShareInfo shareInfo = prepareShare(connectionHelper, session, recipient, target);
-
-                sharesInfos.add(shareInfo);
-                sharesByRecipient.put(recipient, shareInfo);
+                Pair<Boolean, ShareInfo> shareInfo = prepareShare(connectionHelper, session, recipient, target);
+                sharesInfos.add(shareInfo.getSecond());
+                sharesByRecipient.put(recipient, shareInfo.getSecond());
+                if (Boolean.TRUE.equals(shareInfo.getFirst())) {
+                    createdGuests.add(shareInfo.getSecond().getGuest());
+                }
             }
             /*
              * check quota restrictions & commit transaction
@@ -322,6 +316,9 @@ public class DefaultShareService implements ShareService {
             LOG.info("Accounts at {} in context {} configured: {}", target, I(session.getContextId()), sharesByRecipient.values());
             return new CreatedSharesImpl(sharesByRecipient);
         } finally {
+            if (false == connectionHelper.isCommitted()) {
+                removeGuestReferences(createdGuests);
+            }
             connectionHelper.finish();
         }
     }
@@ -575,14 +572,13 @@ public class DefaultShareService implements ShareService {
         return removeExpired(contextID, shareInfos);
     }
 
-    private boolean checkForLegatorPermission(List<TargetPermission> permissions, int guestId){
-        for(TargetPermission perm: permissions) {
+    private boolean checkForLegatorPermission(List<TargetPermission> permissions, int guestId) {
+        for (TargetPermission perm : permissions) {
             if (perm.isGroup() == false && perm.getBits() == LINK_PERMISSION_BITS && perm.getEntity() == guestId) {
                 if (perm instanceof SubfolderAwareTargetPermission) {
                     return ((SubfolderAwareTargetPermission) perm).getType() == FolderPermissionType.LEGATOR.getTypeNumber();
-                } else {
-                    return false;
                 }
+                return false;
             }
         }
         return false;
@@ -770,7 +766,7 @@ public class DefaultShareService implements ShareService {
      *
      * @param recipients The recipients
      * @param userId the sharing users ID
-     * @throws OXException {@link ShareExceptionCodes#NO_SHARING_WITH_YOURSELF)
+     * @throws OXException If user is missing appropriate permissions
      */
     private void checkRecipients(List<ShareRecipient> recipients, Session session) throws OXException {
         boolean shareLinks = false;
@@ -944,17 +940,17 @@ public class DefaultShareService implements ShareService {
      * @param connectionHelper A (started) connection helper
      * @param session The sharing users session
      * @param recipient The share recipient
-     * @param target The share target from the sharing users point of view
-     * @return The prepared share
+     * @param shareTarget The share target from the sharing users point of view
+     * @return The prepared share, with information if a user was created for the share or not
      */
-    private ShareInfo prepareShare(ConnectionHelper connectionHelper, Session session, ShareRecipient recipient, ShareTarget target) throws OXException {
+    private Pair<Boolean, ShareInfo> prepareShare(ConnectionHelper connectionHelper, Session session, ShareRecipient recipient, ShareTarget shareTarget) throws OXException {
         User sharingUser = utils.getUser(session);
         Context context = requireService(ContextService.class).getContext(connectionHelper.getContextID());
         ModuleSupport moduleSupport = requireService(ModuleSupport.class);
         /*
          * pre-adjust share target to ensure having the current session user's point of view
          */
-        target = moduleSupport.adjustTarget(target, session, session.getUserId());
+        ShareTarget target = moduleSupport.adjustTarget(shareTarget, session, session.getUserId());
         if (RecipientType.GROUP.equals(recipient.getType())) {
             /*
              * prepare pseudo share infos for group recipient
@@ -967,17 +963,18 @@ public class DefaultShareService implements ShareService {
             } else {
                 dstTarget = moduleSupport.adjustTarget(target, session, members[0]);
             }
-            return new InternalGroupShareInfo(context.getContextId(), group, target, dstTarget, true);
+            return new Pair<>(Boolean.FALSE, new InternalGroupShareInfo(context.getContextId(), group, target, dstTarget, true));
         }
         /*
          * prepare guest or internal user shares for other recipient types
          */
         int permissionBits = utils.getRequiredPermissionBits(recipient, target);
-        User targetUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, target);
+        Pair<Boolean, User> userPair = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, target);
+        User targetUser = userPair.getSecond();
 
         ShareTarget dstTarget = moduleSupport.adjustTarget(target, session, targetUser.getId());
         if (false == targetUser.isGuest()) {
-            return new InternalUserShareInfo(context.getContextId(), targetUser, target, dstTarget, true);
+            return new Pair<>(Boolean.FALSE, new InternalUserShareInfo(context.getContextId(), targetUser, target, dstTarget, true));
         }
         /*
          * (re-)adjust persisted link permission association for anonymous guests if required
@@ -989,7 +986,7 @@ public class DefaultShareService implements ShareService {
                 ShareTool.targetToJSON(realTarget).toString(), targetUser.getId(), context, false);
         }
         ShareTargetPath targetPath = moduleSupport.getPath(target, session);
-        return new DefaultShareInfo(services, context.getContextId(), targetUser, target, dstTarget, targetPath, true);
+        return new Pair<>(userPair.getFirst(), new DefaultShareInfo(services, context.getContextId(), targetUser, target, dstTarget, targetPath, true));
     }
 
     /**
@@ -1087,9 +1084,9 @@ public class DefaultShareService implements ShareService {
      * @param permissionBits The permission bits to apply to the guest user
      * @param recipient The recipient description
      * @param target The share target
-     * @return The guest user
+     * @return The guest user with the information if the guest user and its corresponding entries in the configDB was created or not
      */
-    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient, ShareTarget target) throws OXException {
+    private Pair<Boolean, User> getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient, ShareTarget target) throws OXException {
         UserService userService = requireService(UserService.class);
         if (GuestRecipient.class.isInstance(recipient)) {
             /*
@@ -1124,12 +1121,12 @@ public class DefaultShareService implements ShareService {
                     LOG.debug("Guest recipient {} points to internal user {} in context {}: {}",
                         guestRecipient.getEmailAddress(), existingUser.getLoginInfo(), I(context.getContextId()), I(existingUser.getId()));
                 }
-                return existingUser;
+                return new Pair<>(Boolean.FALSE, existingUser);
             }
         } else if (InternalRecipient.class.isInstance(recipient)) {
             InternalRecipient internalRecipient = (InternalRecipient) recipient;
             User user = userService.getUser(internalRecipient.getEntity(), context);
-            return user;
+            return new Pair<>(Boolean.FALSE, user);
         }
         /*
          * create new guest user & contact in this context
@@ -1153,18 +1150,12 @@ public class DefaultShareService implements ShareService {
             LOG.info("Created anonymous guest user with permissions {} in context {}: {}", I(permissionBits), I(context.getContextId()), I(guestID));
         } else {
             GuestService guestService = requireService(GuestService.class);
-            if (guestService == null) {
-                LOG.error("Required service GuestService absent");
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("GuestService");
-            }
             String groupId = requireService(ConfigViewFactory.class).getView(sharingUser.getId(), context.getContextId()).opt("com.openexchange.context.group", String.class, "default");
-
             guestService.addGuest(guestUser.getMail(), groupId, context.getContextId(), guestID, guestUser.getUserPassword(), guestUser.getPasswordMech(), guestUser.getSalt());
-
             LOG.info("Created guest user {} with permissions {} in context {}: {}", guestUser.getMail(), I(permissionBits), I(context.getContextId()), I(guestID));
         }
 
-        return guestUser;
+        return new Pair<>(Boolean.TRUE, guestUser);
     }
 
     /**
@@ -1218,7 +1209,7 @@ public class DefaultShareService implements ShareService {
 
             checkRecipients(Collections.singletonList(recipient), session);
 
-            ShareInfo shareInfo = prepareShare(connectionHelper, session, recipient, target);
+            ShareInfo shareInfo = prepareShare(connectionHelper, session, recipient, target).getSecond();
             checkQuota(session, Collections.singletonList(shareInfo));
             /*
              * apply new permission entity for this target
@@ -1226,13 +1217,18 @@ public class DefaultShareService implements ShareService {
             TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, recipient.getBits(), FolderPermissionType.LEGATOR.getTypeNumber(), null, 0);
 
             targetProxy.applyPermissions(Collections.singletonList(targetPermission));
+            Date oldSeq = targetProxy.getTimestamp();
             /*
              * run target update, commit transaction & return created share link info
              */
             targetUpdate.run();
             connectionHelper.commit();
             LOG.info("Share link to {} for {} in context {} added successfully.", target, recipient, I(session.getContextId()));
-            Date timestamp = moduleSupport.load(target, session).getTimestamp();
+            Date timestamp = targetProxy.getTimestamp();
+            if (oldSeq.getTime() == timestamp.getTime()) {
+                // Timestamp not updated. Try a reload
+                timestamp = moduleSupport.load(target, session).getTimestamp();
+            }
             return new DefaultShareLink(shareInfo, timestamp, true);
         } finally {
             connectionHelper.finish();
@@ -1261,6 +1257,31 @@ public class DefaultShareService implements ShareService {
             return null;
         }
         return guestInfo;
+    }
+
+    /**
+     * Removes any references stored in the globalDB that has been created during user creation
+     *
+     * @param createdGuests The list of guest users that were created but not committed to the DB
+     * @throws OXException
+     */
+    private void removeGuestReferences(List<GuestInfo> createdGuests) {
+        /*
+         * Transaction rolled back, no users have been created. Therefore
+         * deleted references in globalDB guest tables
+         */
+        try {
+            GuestService guestService = services.getService(GuestService.class);
+            if (null == guestService) {
+                LOG.error(GuestService.class.getSimpleName() + " is missing. Can't remove orphaned entries in globalDB for guest users: [{}]", createdGuests);
+                return;
+            }
+            for (GuestInfo guestInfo : createdGuests) {
+                guestService.removeGuest(guestInfo.getContextID(), guestInfo.getGuestID());
+            }
+        } catch (OXException e) {
+            LOG.error("Error while removing orphaned entries in the globalDB for guest users [{}]", createdGuests, e);
+        }
     }
 
 }

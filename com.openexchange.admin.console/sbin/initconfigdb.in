@@ -100,7 +100,7 @@ usage() {
     echo
     echo
     echo 'NOTE: use "-a" to create SQL admin user using GRANT command'
-    echo        use "-i" to automatically delete the configdb if exists
+    echo '      use "-i" to automatically delete the configdb if exists'
     echo
     echo
 cat<<EOF
@@ -205,8 +205,9 @@ fi
 MYSQL_RESULT="$(mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} -e "show databases;" -B 2>&1)"
 
 # Check if result hints to missing MySQL user; e.g. "ERROR 1045 (28000): Access denied for user 'nogo'@'localhost' (using password: YES)"
+#                                                   "ERROR 1698 (28000): Access denied for user 'openexchange'@'localhost'"
 ACCESS_DENIED="false"
-if [[ ${MYSQL_RESULT} == *"ERROR 1045"* ]] && [ "$DLETETECONFIGDB" != "true" ]; then
+if [[ ${MYSQL_RESULT} == *"ERROR 1045"* ]] || [[ ${MYSQL_RESULT} == *"ERROR 1698"* ]] && [ "$DLETETECONFIGDB" != "true" ]; then
     ACCESS_DENIED="true"
 fi
 

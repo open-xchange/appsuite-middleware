@@ -1,0 +1,28 @@
+/mail?action=move_all:
+  put:
+    operationId: moveAllMails
+    tags:
+      - Mail
+    summary: Moves all mails from a given source to a specified target folder.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: >
+          A JSON object containing an entry for each affected folder. Each entry in turn references
+          a JSON object providing "total" and "unread" fields, which given the total number of mails
+          and the number of unread mails in the folder.
+          
+          In case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              type: string
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MailMoveAllBody'
+      description: A JSON object providing the identifiers of the source and target folder.
+      required: true

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage Bundle
 Bundle-SymbolicName: com.openexchange.file.storage
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -25,6 +25,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
  com.openexchange.quota,
+ com.openexchange.rest.client.httpclient.util,
  com.openexchange.secret,
  com.openexchange.server,
  com.openexchange.session,

@@ -1,49 +1,22 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Copyright (c) 2013, 2019 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, 2019 Jason Mehrens. All rights reserved.
  *
- * Copyright (c) 2013-2017 Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2013-2017 Jason Mehrens. All rights reserved.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0, which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
  *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common Development
- * and Distribution License("CDDL") (collectively, the "License").  You
- * may not use this file except in compliance with the License.  You can
- * obtain a copy of the License at
- * https://oss.oracle.com/licenses/CDDL+GPL-1.1
- * or LICENSE.txt.  See the License for the specific
- * language governing permissions and limitations under the License.
+ * This Source Code may also be made available under the following Secondary
+ * Licenses when the conditions for such availability set forth in the
+ * Eclipse Public License v. 2.0 are satisfied: GNU General Public License,
+ * version 2 with the GNU Classpath Exception, which is available at
+ * https://www.gnu.org/software/classpath/license.html.
  *
- * When distributing the software, include this License Header Notice in each
- * file and include the License file at LICENSE.txt.
- *
- * GPL Classpath Exception:
- * Oracle designates this particular file as subject to the "Classpath"
- * exception as provided by Oracle in the GPL Version 2 section of the License
- * file that accompanied this code.
- *
- * Modifications:
- * If applicable, add the following below the License Header, with the fields
- * enclosed by brackets [] replaced by your own identifying information:
- * "Portions Copyright [year] [name of copyright owner]"
- *
- * Contributor(s):
- * If you wish your version of this file to be governed by only the CDDL or
- * only the GPL Version 2, indicate your decision by adding "[Contributor]
- * elects to include this software in this distribution under the [CDDL or GPL
- * Version 2] license."  If you don't indicate a single choice of license, a
- * recipient has the option to distribute your version of this file under
- * either the CDDL, the GPL Version 2 or to extend the choice of license to
- * its licensees as provided above.  However, if you add GPL Version 2 code
- * and therefore, elected the GPL Version 2 license, then the option applies
- * only if the new code is made subject to such option by the copyright
- * holder.
+ * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
 package com.sun.mail.util.logging;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.logging.LogRecord;
 
 /**
@@ -52,16 +25,16 @@ import java.util.logging.LogRecord;
  * separator and newline characters. Only specified fields support an
  * {@linkplain #toAlternate(java.lang.String) alternate} fixed width format.
  * <p>
- * By default each <tt>CompactFormatter</tt> is initialized using the following
- * LogManager configuration properties where
- * <tt>&lt;formatter-name&gt;</tt> refers to the fully qualified class name or
- * the fully qualified derived class name of the formatter. If properties are
+ * By default each <code>CompactFormatter</code> is initialized using the
+ * following LogManager configuration properties where
+ * <code>&lt;formatter-name&gt;</code> refers to the fully qualified class name
+ * or the fully qualified derived class name of the formatter. If properties are
  * not defined, or contain invalid values, then the specified default values are
  * used.
  * <ul>
  * <li>&lt;formatter-name&gt;.format - the {@linkplain java.util.Formatter
  *     format} string used to transform the output. The format string can be
- * used to fix the output size. (defaults to <tt>%7$#.160s%n</tt>)</li>
+ * used to fix the output size. (defaults to <code>%7$#.160s%n</code>)</li>
  * </ul>
  *
  * @author Jason Mehrens
@@ -709,7 +682,7 @@ public class CompactFormatter extends java.util.logging.Formatter {
     private static String simpleClassName(final Class<?> k) {
         try {
             return k.getSimpleName();
-        } catch (InternalError JDK8057919) {
+        } catch (final InternalError JDK8057919) {
         }
         return simpleClassName(k.getName());
     }

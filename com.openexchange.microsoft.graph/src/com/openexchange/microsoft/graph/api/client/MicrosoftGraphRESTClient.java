@@ -67,6 +67,7 @@ import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIException
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.v2.AbstractRESTClient;
 import com.openexchange.rest.client.v2.RESTResponse;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link MicrosoftGraphRESTClient}
@@ -76,22 +77,22 @@ import com.openexchange.rest.client.v2.RESTResponse;
  */
 public class MicrosoftGraphRESTClient extends AbstractRESTClient {
 
-
     private static final Logger LOG = LoggerFactory.getLogger(MicrosoftGraphRESTClient.class);
 
-    private static final String CLIENT_NAME = "msgraph";
-    private static final String USER_AGENT = "Open-Xchange Microsoft Graph Client";
+    public static final String CLIENT_NAME = "msgraph";
+
     private static final String API_URL = "graph.microsoft.com";
     private static final String API_VERSION = "v1.0";
     private static final String SCHEME = "https";
     private static final String APPLICATION_JSON = "application/json";
-    private static final int TIMEOUT = 30000;
 
     /**
      * Initialises a new {@link MicrosoftGraphRESTClient}.
+     * 
+     * @param serviceLookup The service lookup
      */
-    public MicrosoftGraphRESTClient() {
-        super(CLIENT_NAME, USER_AGENT, TIMEOUT, new MicrosoftGraphRESTResponseParser());
+    public MicrosoftGraphRESTClient(ServiceLookup serviceLookup) {
+        super(serviceLookup, CLIENT_NAME, new MicrosoftGraphRESTResponseParser());
     }
 
     /**
@@ -108,7 +109,7 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
     /**
      * Executes the specified {@link HttpRequest} and examines the response body.
      *
-     * @param request The {@link HttpRequest} to execute
+     * @param httpRequest The {@link HttpRequest} to execute
      * @return The {@link RESTResponse}
      * @throws OXException if an error is occurred
      */

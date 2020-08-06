@@ -55,11 +55,12 @@ import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.LogoutRequest;
-import org.opensaml.saml2.core.LogoutResponse;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.xml.security.credential.Credential;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.LogoutRequest;
+import org.opensaml.saml.saml2.core.LogoutResponse;
+import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.security.credential.Credential;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig;
@@ -67,6 +68,7 @@ import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.spi.AbstractSAMLBackend;
 import com.openexchange.saml.spi.AuthenticationInfo;
 import com.openexchange.saml.spi.CredentialProvider;
+import com.openexchange.saml.spi.DefaultConfig;
 import com.openexchange.saml.spi.LogoutInfo;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.LogoutRequestInfo;
@@ -90,15 +92,21 @@ public class VeryDangerousSAMLBackend extends AbstractSAMLBackend {
 
     private final ContextService contextService;
 
+    private DefaultConfig defaultConfig;
+
     /**
      * Initializes a new {@link VeryDangerousSAMLBackend}.
+     *
      * @param userService
      * @param contextService
+     * @param config The {@link LeanConfigurationService} to use
+     * @throws OXException
      */
-    public VeryDangerousSAMLBackend(UserService userService, ContextService contextService) {
+    public VeryDangerousSAMLBackend(UserService userService, ContextService contextService, LeanConfigurationService config) throws OXException {
         super();
         this.userService = userService;
         this.contextService = contextService;
+        this.defaultConfig = DefaultConfig.init(config);
     }
 
     @Override
@@ -198,6 +206,11 @@ public class VeryDangerousSAMLBackend extends AbstractSAMLBackend {
     @Override
     protected void doFinishLogout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         httpResponse.sendRedirect("https://www.google.com");
+    }
+
+    @Override
+    public SAMLConfig getConfig() {
+        return defaultConfig;
     }
 
 }

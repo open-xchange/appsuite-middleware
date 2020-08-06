@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.scheduling.common;
 
+import static com.openexchange.chronos.common.CalendarUtils.contains;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarObjectResource;
@@ -57,7 +58,13 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.changes.Change;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
@@ -118,5 +125,40 @@ public class Utils {
             return CalendarUtils.isInternal(attendee);
         }
         return CalendarUtils.isInternal(calendarUser, CalendarUserType.INDIVIDUAL);
+    }
+
+    /**
+     * Get the event ID for the given event.
+     * <p>
+     * In case the event can't be found, the events master ID is set along the fitting recurrence ID
+     *
+     * @param calendarService The {@link CalendarService} to get the event from
+     * @param session The {@link CalendarSession}
+     * @param incomingScheduling The scheduling object
+     * @param event The {@link Event} to get the ID for
+     * @return A {@link EventID}
+     * @throws OXException IN case the event or folder can't be found
+     */
+    public static EventID getEventID(CalendarService calendarService, CalendarSession session, IncomingSchedulingMessage incomingScheduling, Event event) throws OXException {
+        String eventId = calendarService.getUtilities().resolveByUID(session, event.getUid(), null, incomingScheduling.getTargetUser());
+        if (null != event.getRecurrenceId()) {
+            /*
+             * Check if the recurrence already exists with an own event identifier
+             */
+            Event originalEvent = calendarService.getUtilities().resolveByID(session, eventId, null);
+            if (null != originalEvent && contains(originalEvent.getChangeExceptionDates(), event.getRecurrenceId())) {
+                eventId = calendarService.getUtilities().resolveByUID(session, event.getUid(), event.getRecurrenceId(), session.getUserId());
+            }
+        }
+        if (Strings.isEmpty(eventId)) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(event.getUid());
+        }
+        Event originalEvent = calendarService.getUtilities().resolveByID(session, eventId, null, incomingScheduling.getTargetUser());
+        String folderId = originalEvent.getFolderId();
+        if (Strings.isEmpty(folderId)) {
+            throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create(folderId);
+        }
+
+        return new EventID(folderId, eventId, event.getRecurrenceId());
     }
 }

@@ -64,6 +64,7 @@ import static com.openexchange.chronos.impl.Utils.isSkipExternalAttendeeURICheck
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -96,6 +97,7 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
     private final List<Attendee> attendeesToInsert;
     private final List<Attendee> attendeesToDelete;
     private final List<ItemUpdate<Attendee, AttendeeField>> attendeesToUpdate;
+    private final Date timestamp;
 
     /**
      * Initializes a new {@link InternalAttendeeUpdates} for a new event.
@@ -103,9 +105,10 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
      * @param session The calendar session
      * @param folder The parent folder of the event being processed
      * @param event The event data holding the list of attendees, as supplied by the client
+     * @param timestamp The timestamp to apply in the updated event data
      */
-    public static InternalAttendeeUpdates onNewEvent(CalendarSession session, CalendarFolder folder, Event event) throws OXException {
-        InternalAttendeeUpdates attendeeHelper = new InternalAttendeeUpdates(session, folder, null);
+    public static InternalAttendeeUpdates onNewEvent(CalendarSession session, CalendarFolder folder, Event event, Date timestamp) throws OXException {
+        InternalAttendeeUpdates attendeeHelper = new InternalAttendeeUpdates(session, folder, null, timestamp);
         attendeeHelper.processNewEvent(emptyForNull(event.getAttendees()), getResolvableEntities(session, folder, event));
         return attendeeHelper;
     }
@@ -115,11 +118,12 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
      *
      * @param session The calendar session
      * @param folder The parent folder of the event being processed
-     * @param originalAttendees The original event holding the original attendees
-     * @param updatedAttendees The updated event holding the new/updated list of attendees, as supplied by the client
+     * @param originalEvent The original event holding the original attendees
+     * @param updatedEvent The updated event holding the new/updated list of attendees, as supplied by the client
+     * @param timestamp The timestamp to apply in the updated event data
      */
-    public static InternalAttendeeUpdates onUpdatedEvent(CalendarSession session, CalendarFolder folder, Event originalEvent, Event updatedEvent) throws OXException {
-        InternalAttendeeUpdates attendeeHelper = new InternalAttendeeUpdates(session, folder, originalEvent.getAttendees());
+    public static InternalAttendeeUpdates onUpdatedEvent(CalendarSession session, CalendarFolder folder, Event originalEvent, Event updatedEvent, Date timestamp) throws OXException {
+        InternalAttendeeUpdates attendeeHelper = new InternalAttendeeUpdates(session, folder, originalEvent.getAttendees(), timestamp);
         attendeeHelper.processUpdatedEvent(emptyForNull(updatedEvent.getAttendees()), getResolvableEntities(session, folder, originalEvent));
         return attendeeHelper;
     }
@@ -130,9 +134,10 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
      * @param session The calendar session
      * @param folder The parent folder of the event being processed
      * @param originalAttendees The original list of attendees
+     * @param timestamp The timestamp to apply in the deleted event data
      */
-    public static InternalAttendeeUpdates onDeletedEvent(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees) {
-        InternalAttendeeUpdates attendeeHelper = new InternalAttendeeUpdates(session, folder, originalAttendees);
+    public static InternalAttendeeUpdates onDeletedEvent(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees, Date timestamp) throws OXException {
+        InternalAttendeeUpdates attendeeHelper = new InternalAttendeeUpdates(session, folder, originalAttendees, timestamp);
         attendeeHelper.processDeletedEvent();
         return attendeeHelper;
     }
@@ -143,11 +148,13 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
      * @param session The calendar session
      * @param folder The parent folder of the event being processed
      * @param originalAttendees The original attendees of the event, or <code>null</code> for new event creations
+     * @param timestamp The timestamp to apply in the updated event data
      */
-    private InternalAttendeeUpdates(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees) {
+    private InternalAttendeeUpdates(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees, Date timestamp) {
         super();
         this.session = session;
         this.folder = folder;
+        this.timestamp = timestamp;
         this.originalAttendees = emptyForNull(originalAttendees);
         this.attendeesToInsert = new ArrayList<Attendee>();
         this.attendeesToDelete = new ArrayList<Attendee>();
@@ -232,7 +239,7 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
          */
         Attendee defaultAttendee = null;
         if (!PublicType.getInstance().equals(folder.getType())) {
-            defaultAttendee = getDefaultAttendee(session, folder, requestedAttendees);
+            defaultAttendee = getDefaultAttendee(session, folder, requestedAttendees, timestamp);
             attendeesToInsert.add(defaultAttendee);
         }
         if (null != requestedAttendees && 0 < requestedAttendees.size()) {
@@ -297,6 +304,11 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
                     }
                 }
             }
+            /*
+             * Track time of attendee deletion 
+             */
+            removedAttendee.setTimestamp(timestamp.getTime());
+            
             attendeeList.remove(removedAttendee);
             attendeesToDelete.add(removedAttendee);
         }
@@ -304,6 +316,7 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
          * apply updated attendee data
          */
         for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : attendeeDiff.getUpdatedItems()) {
+            Check.requireUpToDateTimestamp(attendeeUpdate.getOriginal(), attendeeUpdate.getUpdate());
             Attendee attendee = apply(attendeeUpdate);
             if (attendeeUpdate.getUpdatedFields().contains(AttendeeField.URI)) {
                 if (false == isInternal(attendee) && false == isSkipExternalAttendeeURIChecks(session)) {
@@ -313,8 +326,16 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
             if (attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT)) {
                 /*
                  * ensure to reset RSVP expectation along with change of participation status
+                 * ensure to update the timestamp
                  */
                 attendee.setRsvp(null);
+                attendee.setTimestamp(timestamp.getTime());
+            }
+            if (attendeeUpdate.getUpdatedFields().contains(AttendeeField.COMMENT)) {
+                /*
+                 * ensure to update the timestamp
+                 */
+                attendee.setTimestamp(timestamp.getTime());
             }
             attendeesToUpdate.add(new DefaultItemUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), attendeeUpdate.getOriginal(), attendee));
         }
@@ -328,8 +349,12 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
         handleDefaultAttendee(isEnforceDefaultAttendee(session));
     }
 
-    private void processDeletedEvent() {
-        attendeesToDelete.addAll(originalAttendees);
+    private void processDeletedEvent() throws OXException {
+        for (Attendee attendee : originalAttendees) {
+            Attendee removed = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+            removed.setTimestamp(timestamp.getTime());
+            attendeesToDelete.add(removed);
+        }
     }
 
     private List<Attendee> prepareNewAttendees(List<Attendee> existingAttendees, List<Attendee> newAttendees) throws OXException {
@@ -348,6 +373,7 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
             if (false == userAttendee.containsPartStat() || null == userAttendee.getPartStat()) {
                 userAttendee.setPartStat(session.getConfig().getInitialPartStat(userAttendee.getEntity(), inPublicFolder));
             }
+            userAttendee.setTimestamp(timestamp.getTime());
             attendees.add(userAttendee);
         }
         /*
@@ -373,6 +399,7 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
                 Attendee memberAttendee = session.getEntityResolver().prepareUserAttendee(memberID);
                 memberAttendee.setFolderId(PublicType.getInstance().equals(folder.getType()) ? null : session.getConfig().getDefaultFolderId(memberID));
                 memberAttendee.setPartStat(session.getConfig().getInitialPartStat(memberID, inPublicFolder));
+                memberAttendee.setTimestamp(timestamp.getTime());
                 if (false == resolveGroupAttendees) {
                     memberAttendee.setMember(Collections.singletonList(groupAttendee.getUri()));
                 }
@@ -411,15 +438,18 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
      * @param session The calendar session
      * @param folder The folder to get the default attendee for
      * @param requestedAttendees The attendees as supplied by the client, or <code>null</code> if not available
+     * @param timestamp The timestamp to apply for the default attendee, or <code>null</code> to use the systems current time
      * @return The default attendee
+     * @throws OXException 
      */
-    public static Attendee getDefaultAttendee(CalendarSession session, CalendarFolder folder, List<Attendee> requestedAttendees) throws OXException {
+    public static Attendee getDefaultAttendee(CalendarSession session, CalendarFolder folder, List<Attendee> requestedAttendees, Date timestamp) throws OXException {
         /*
          * prepare attendee for default calendar user in folder
          */
         int calendarUserId = getCalendarUserId(folder);
         Attendee defaultAttendee = session.getEntityResolver().prepareUserAttendee(calendarUserId);
         defaultAttendee.setPartStat(ParticipationStatus.ACCEPTED);
+        defaultAttendee.setTimestamp(null == timestamp ? System.currentTimeMillis() : timestamp.getTime());
         defaultAttendee.setFolderId(PublicType.getInstance().equals(folder.getType()) ? null : folder.getId());
         if (session.getUserId() != calendarUserId) {
             defaultAttendee.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
@@ -430,7 +460,8 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
         Attendee requestedAttendee = find(requestedAttendees, defaultAttendee);
         if (null != requestedAttendee) {
             AttendeeMapper.getInstance().copy(requestedAttendee, defaultAttendee,
-                AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.PARTSTAT, AttendeeField.CN, AttendeeField.URI);
+                AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, 
+                AttendeeField.PARTSTAT, AttendeeField.CN, AttendeeField.URI, AttendeeField.TIMESTAMP);
         }
         return defaultAttendee;
     }
@@ -460,6 +491,7 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
      *
      * @param enforceDefaultAttendee <code>true</code> the current calendar user should be added as default attendee to events implicitly,
      *            <code>false</code>, otherwise
+     * @param timestamp The timestamp to apply in the updated event data
      */
     private void handleDefaultAttendee(boolean enforceDefaultAttendee) throws OXException {
         int calendarUserId = getCalendarUserId(folder);
@@ -497,7 +529,7 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
                         attendeesToDelete.remove(defaultAttendee);
                     } else {
                         LOG.info("Implicitly adding default calendar user {} in public folder {}.", I(calendarUserId), folder);
-                        attendeesToInsert.add(getDefaultAttendee(session, folder, null));
+                        attendeesToInsert.add(getDefaultAttendee(session, folder, null, timestamp));
                     }
                 }
             } else if (false == contains(attendees, calendarUserId)) {
@@ -510,7 +542,7 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
                     attendeesToDelete.remove(defaultAttendee);
                 } else {
                     LOG.info("Implicitly adding default calendar user {} in personal folder {}.", I(calendarUserId), folder);
-                    attendeesToInsert.add(getDefaultAttendee(session, folder, null));
+                    attendeesToInsert.add(getDefaultAttendee(session, folder, null, timestamp));
                 }
             }
         }

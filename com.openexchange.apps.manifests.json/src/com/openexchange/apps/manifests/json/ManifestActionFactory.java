@@ -53,6 +53,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.apps.manifests.ManifestBuilder;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -65,11 +66,30 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class ManifestActionFactory implements AJAXActionServiceFactory {
 
+    private static final String MODULE = "apps/manifests";
+
+    /**
+     * Gets the <code>"apps/manifests"</code> module identifier.
+     *
+     * @return The module identifier
+     */
+    public static String getModule() {
+        return MODULE;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private final Map<String, AJAXActionService> actions;
 
+    /**
+     * Initializes a new {@link ManifestActionFactory}.
+     *
+     * @param services The {@link ServiceLookup}
+     * @param manifestBuilder The {@link ManifestBuilder}
+     */
     public ManifestActionFactory(ServiceLookup services, ManifestBuilder manifestBuilder) {
         super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builderWithExpectedSize(2);
         actions.put("all", new AllAction( manifestBuilder));
         actions.put("config", new ConfigAction(services, manifestBuilder));
         this.actions = actions.build();
@@ -79,7 +99,7 @@ public class ManifestActionFactory implements AJAXActionServiceFactory {
     public AJAXActionService createActionService(String action) throws OXException {
         AJAXActionService actionService = actions.get(action);
         if (null == actionService) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, "apps/manifests");
+            throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, MODULE);
         }
         return actionService;
     }

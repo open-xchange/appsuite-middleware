@@ -50,53 +50,16 @@
 package com.openexchange.database;
 
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link JdbcProperties} - Provides the currently active JDBC properties as specified in <code>"dbconnector.yaml"</code> file.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.1
+ * @since v7.10.4
  */
-public class JdbcProperties {
-
-    private static final JdbcProperties INSTANCE = new JdbcProperties();
-
-    /**
-     * Gets the instance
-     *
-     * @return The instance
-     */
-    public static JdbcProperties getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Removes possible parameters appended to specified JDBC URL and returns it.
-     *
-     * @param url The URL to remove possible parameters from
-     * @return The parameter-less JDBC URL
-     */
-    public static String removeParametersFromJdbcUrl(String url) {
-        if (null == url) {
-            return url;
-        }
-
-        int paramStart = url.indexOf('?');
-        return paramStart >= 0 ? url.substring(0, paramStart) : url;
-    }
-
-    // --------------------------------------------------------------------------------------------------------------------------------
-
-    private final AtomicReference<Properties> jdbcPropsReference;
-
-    /**
-     * Initializes a new {@link JdbcProperties}.
-     */
-    private JdbcProperties() {
-        super();
-        jdbcPropsReference = new AtomicReference<Properties>();
-    }
+@SingletonService
+public interface JdbcProperties {
 
     /**
      * Gets the reference to the currently active JDBC properties.
@@ -105,35 +68,15 @@ public class JdbcProperties {
      * <b>Note</b>: Modifying the returned <code>java.util.Properties</code> instance is reflected in JDBC properties
      * </div>
      *
-     * @return The JDBC properties or <code>null</code> if not yet initialized
+     * @return The JDBC properties
      */
-    public Properties getJdbcPropertiesRaw() {
-        return jdbcPropsReference.get();
-    }
+    Properties getJdbcPropertiesRaw();
 
     /**
      * Gets a copy of the currently active JDBC properties.
      *
-     * @return The JDBC properties copy or <code>null</code> if not yet initialized
+     * @return The JDBC properties copy
      */
-    public Properties getJdbcPropertiesCopy() {
-        Properties properties = jdbcPropsReference.get();
-        if (null == properties) {
-            return null;
-        }
-
-        Properties copy = new Properties();
-        copy.putAll(properties);
-        return copy;
-    }
-
-    /**
-     * Sets the JDBC properties to use.
-     *
-     * @param jdbcProperties The JDBC properties or <code>null</code> to clear them
-     */
-    public void setJdbcProperties(Properties jdbcProperties) {
-        jdbcPropsReference.set(jdbcProperties);
-    }
+    Properties getJdbcPropertiesCopy();
 
 }

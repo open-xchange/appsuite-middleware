@@ -613,6 +613,13 @@ exclude_secret_entries() {
     local _separator='@SEPARATOR@'
     local _pattern='[[:blank:]]*(=|:)'
     local _whitelist='enabledMailCapableKey|UserAttributePassword|forgotPassword|secretSource'
+    local _whitelist="${_whitelist}|com\.openexchange\.capability\.edit_password"
+    local _whitelist="${_whitelist}|com\.openexchange\.capability\.password_change_without_old_password"
+    local _whitelist="${_whitelist}|com\.openexchange\.cloudplugins\.password\.updateUserPassword"
+    local _whitelist="${_whitelist}|com\.openexchange\.guard\.newGuestsRequirePassword"
+    local _whitelist="${_whitelist}|com\.openexchange\.plugins\.onboarding\.login"
+    local _whitelist="${_whitelist}|UserAttributeJDBCLogin|UserAttributeJDBCPassword"
+    local _whitelist="${_whitelist}|webmail_editpassword|jcs\.region\.User"
     local _blacklist="pass(word|wd|crypt)*${_pattern}"
     local _blacklist="${_blacklist}|secret(source|random)*${_pattern}"
     local _blacklist="${_blacklist}|accountSID${_pattern}"
@@ -666,35 +673,15 @@ exclude_secret_entries() {
                 sed 's|:.*$|:|g')
         fi
 
-        # secret
-        local _secret_part=$(echo "${_original_line}" | \
-            sed "s|${_plain_property}||g" | \
-            sed 's|=password=||g' | \
-            sed 's|=user=||g')
-        # replace special chars to wildcards (bug 43117) e.g. secr[et -> secr.et
-        local _secret_part=$(echo "${_secret_part}" | \
-            sed 's|\[|.|g' | \
-            sed 's|\]|.|g' | \
-            sed 's|\||.|g' | \
-            sed 's|\*|.|g' | \
-            sed "s|'|.|g")
-        # com.openexchange.oauth.msn.apiSecret=<REMOVED BY OXSYSREPORT>
-        if [ -n "${_secret_part}" ]; then
-            local _modified_line=$(echo "${_original_line}" | \
-                sed "s|${_secret_part}$|<REMOVED BY OXSYSREPORT>|g")
-            local _original_line=$(echo "${_original_line}" | \
-                sed "s|${_secret_part}$|${_secret_part}|g")
-        else
-            # set this marker also if no value was set
-            local _modified_line="${_original_line}<REMOVED BY OXSYSREPORT>"
-        fi
+        local _modified_line="${_plain_property}<REMOVED BY OXSYSREPORT>"
 
+        local _plain_property=$(echo "${_plain_property}" | sed 's|\[|\\[|g' | sed 's|\]|\\]|g')
         if [ -n "$(echo ${_file} | grep "^${TMP}/*${LOGDIR}")" ]; then
-            sed -i "s|^${_original_line}[[:blank:]]*$|${_modified_line}|g" "${_file}"
+            sed -i "s|^${_plain_property}.*|${_modified_line}|g" "${_file}"
         else
             die "${0}: Internal Error, tried to modify original data: ${_file}"
         fi
-        sed -i "s|${_separator}${_original_line}[[:blank:]]*$|:${_modified_line}|g" "${_tmp_exclude_status}"
+        sed -i "s|${_separator}${_plain_property}.*|:${_modified_line}|g" "${_tmp_exclude_status}"
     done < ${_tmp_exclude_status}
     print_hint_to_line_end ${_tmp_exclude_status} "modified"
     cat ${_tmp_exclude_status} >> ${_exclude_status}

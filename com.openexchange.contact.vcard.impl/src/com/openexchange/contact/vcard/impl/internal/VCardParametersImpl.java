@@ -53,10 +53,10 @@ import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.contact.vcard.DistributionListMode;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.VCardVersion;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link VCardParametersImpl}
@@ -76,9 +76,9 @@ public class VCardParametersImpl implements VCardParameters {
     private long maxVCardSize;
     private boolean keepOriginalVCard;
     private boolean removeImageFromKeptVCard;
-    private boolean enforceUtf8;
     private boolean importAttachments;
     private boolean removeAttachmentsFromKeptVCard;
+    private DistributionListMode distributionListMode;
     private Map<String, Object> parameters;
     private Set<String> propertyNames;
 
@@ -200,17 +200,6 @@ public class VCardParametersImpl implements VCardParameters {
     }
 
     @Override
-    public boolean isEnforceUtf8() {
-        return enforceUtf8;
-    }
-
-    @Override
-    public VCardParameters setEnforceUtf8(boolean enforceUtf8) {
-        this.enforceUtf8 = enforceUtf8;
-        return this;
-    }
-
-    @Override
     public boolean isImportAttachments() {
         return importAttachments;
     }
@@ -229,6 +218,17 @@ public class VCardParametersImpl implements VCardParameters {
     @Override
     public VCardParameters setRemoveAttachmentsFromKeptVCard(boolean removeAttachmentsFromKeptVCard) {
         this.removeAttachmentsFromKeptVCard = removeAttachmentsFromKeptVCard;
+        return this;
+    }
+
+    @Override
+    public DistributionListMode getDistributionListMode() {
+        return distributionListMode;
+    }
+
+    @Override
+    public VCardParameters setDistributionListMode(DistributionListMode mode) {
+        this.distributionListMode = mode;
         return this;
     }
 

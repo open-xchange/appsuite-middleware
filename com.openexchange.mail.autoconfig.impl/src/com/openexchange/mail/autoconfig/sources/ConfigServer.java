@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.autoconfig.sources;
 
+import static com.openexchange.mail.autoconfig.tools.Utils.OX_TARGET_ID;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -60,12 +61,11 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import org.apache.http.protocol.HttpContext;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.InetAddresses;
@@ -73,7 +73,7 @@ import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
-import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -108,40 +108,22 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
                 LOG.warn("Unable to parse URL: {}. Skipping config server source for mail auto-config", sUrl, e);
                 return null;
             }
-        }
 
-        boolean isLocalAddress;
-        try {
-            InetAddress inetAddress = InetAddress.getByName(url.getHost());
-            isLocalAddress = InetAddresses.isInternalAddress(inetAddress);
-        } catch (UnknownHostException e) {
-            // IP address of that host could not be determined
-            LOG.warn("Unknown host: {}. Skipping config server source for mail auto-config", url.getHost(), e);
-            return null;
-        }
-
-        // New HTTP client
-        CloseableHttpClient httpclient = null;
-        try {
-
-            {
-                int readTimeout = 10000;
-                int connecTimeout = 3000;
-                HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance("autoconfig-server").setConnectionTimeout(connecTimeout).setSocketReadTimeout(readTimeout).setUserAgent("Open-Xchange Auto-Config Client").setDenyLocalRedirect(false == isLocalAddress);
-
-                ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
-                ConfigView view = configViewFactory.getView(userId, contextId);
-                ProxyInfo proxy = getHttpProxyIfEnabled(view);
-                if (null != proxy) {
-                    clientConfig.setProxy(proxy.proxyUrl, proxy.proxyLogin, proxy.proxyPassword);
-                }
-                httpclient = HttpClients.getHttpClient(clientConfig);
+            if (isInvalid(url)) {
+                LOG.warn("Invalid URL: {}. Skipping config server source for mail auto-config", sUrl);
+                return null;
             }
+        }
+
+        HttpContext httpContext = httpContextFor(contextId, userId);
+        httpContext.setAttribute(OX_TARGET_ID, url);
+        HttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-server");
+        try {
 
             HttpHost target = new HttpHost(url.getHost(), -1, url.getProtocol());
             HttpGet req = new HttpGet(url.getPath() + "?" + URLEncodedUtils.format(Arrays.<NameValuePair> asList(new BasicNameValuePair("emailaddress", new StringBuilder(emailLocalPart).append('@').append(emailDomain).toString())), "UTF-8"));
 
-            HttpResponse rsp = httpclient.execute(target, req);
+            HttpResponse rsp = httpclient.execute(target, req, httpContext);
             int statusCode = rsp.getStatusLine().getStatusCode();
             if (statusCode != 200) {
                 LOG.info("Could not retrieve config XML from autoconfig server. Return code was: {}", Autoboxing.I(statusCode));
@@ -152,12 +134,17 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
                     try {
                         url = new URL(sUrl);
                     } catch (MalformedURLException e) {
-                        LOG.warn("Unable to parse URL: {}", sUrl, e);
+                        LOG.warn("Unable to parse URL: {}. Skipping config server source for mail auto-config", sUrl, e);
+                        return null;
+                    }
+
+                    if (isInvalid(url)) {
+                        LOG.warn("Invalid URL: {}. Skipping config server source for mail auto-config", sUrl);
                         return null;
                     }
                 }
                 req = new HttpGet(url.getPath() + "?" + URLEncodedUtils.format(Arrays.<NameValuePair> asList(new BasicNameValuePair("emailaddress", new StringBuilder(emailLocalPart).append('@').append(emailDomain).toString())), "UTF-8"));
-                rsp = httpclient.execute(target, req);
+                rsp = httpclient.execute(target, req, httpContext);
                 statusCode = rsp.getStatusLine().getStatusCode();
                 if (statusCode != 200) {
                     LOG.info("Could not retrieve config XML from main domain. Return code was: {}",  Autoboxing.I(statusCode));
@@ -167,7 +154,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
 
             Header contentType = rsp.getFirstHeader("Content-Type");
             if (!contentType.getValue().contains("text/xml")) {
-                LOG.warn("Could not retrieve config XML from autoconfig server. The response's content type is not of 'text/xml'.");
+                LOG.warn("Could not retrieve config XML from autoconfig server. The response's content type is not of type 'text/xml'.");
                 return null;
             }
 
@@ -197,19 +184,41 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             // Apparently an I/O communication problem occurred while trying to connect to/read from deduced end-point from auto-config data
             LOG.debug("Could not retrieve config XML.", e);
             return null;
-        } finally {
-            // When HttpClient instance is no longer needed,
-            // shut down the connection manager to ensure
-            // immediate deallocation of all system resources
-            if (null != httpclient) {
-                try {
-                    httpclient.close(); // Performs 'getConnectionManager().shutdown();'
-                } catch (Exception e) {
-                    // Ignore
-                }
-            }
         }
     }
 
-}
+    @Override
+    protected String getAccountId() {
+        return "configServer";
+    }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Checks whether the given URL is invalid or not
+     *
+     * @param url The URL to check
+     * @return <code>true</code> if the URL is invalid, <code>false</code> otherwise
+     */
+    private static boolean isInvalid(URL url) {
+        return isValid(url) == false;
+    }
+
+    /**
+     * Checks whether the given URL is valid or not
+     *
+     * @param url The URL to check
+     * @return <code>true</code> if the URL is valid, <code>false</code> otherwise
+     */
+    private static boolean isValid(URL url) {
+        try {
+            InetAddress inetAddress = InetAddress.getByName(url.getHost());
+            if (InetAddresses.isInternalAddress(inetAddress)) {
+                return false;
+            }
+        } catch (UnknownHostException e) {
+            return false;
+        }
+        return true;
+    }
+}

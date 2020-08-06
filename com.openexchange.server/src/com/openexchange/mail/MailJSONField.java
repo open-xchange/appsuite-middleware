@@ -265,6 +265,10 @@ public enum MailJSONField {
      * The message's authenticity results.
      */
     AUTHENTICITY("authenticity"),
+    /**
+     * A preview of the message's authenticity results.
+     */
+    AUTHENTICITY_PREVIEW("authenticity_preview")
 
     ;
 

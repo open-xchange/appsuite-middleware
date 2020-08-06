@@ -103,7 +103,7 @@ public abstract class AbstractIMAPCommand<T> {
     }
 
     private static final class IMAPCommandResponseInterceptor implements ResponseInterceptor {
-
+        
         private final AbstractIMAPCommand<?> abstractIMAPCommand;
         private MessagingException exception;
 
@@ -114,7 +114,7 @@ public abstract class AbstractIMAPCommand<T> {
 
         @Override
         public boolean intercept(Response response) {
-            if (exception == null) {
+            if (exception == null) {                
                 try {
                     return abstractIMAPCommand.addLoopCondition() ? abstractIMAPCommand.handleResponse(response) : false;
                 } catch (MessagingException e) {
@@ -236,6 +236,12 @@ public abstract class AbstractIMAPCommand<T> {
         }
     }
 
+    /**
+     * Performs this IMAP command.
+     *
+     * @return The return value
+     * @throws MessagingException If IMAP command fails
+     */
     public final T doCommand() throws MessagingException {
         final long start = System.currentTimeMillis();
         final @SuppressWarnings("unchecked") T obj = (T) imapFolder.doCommand(protocolCommand);

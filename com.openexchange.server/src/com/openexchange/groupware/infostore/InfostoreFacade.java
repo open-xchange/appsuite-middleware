@@ -309,16 +309,55 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Removes all documents contained in specified folder.
+     * <p>
+     * If <code>hardDelete</code> is <code>false</code>, the storage supports a trash folder, and a document is not yet located below
+     * that trash folder, it is backed up, otherwise it is deleted permanently.
+     *
+     * @param folderId The identifier of the folder to clear
+     * @param date The client's time stamp
+     * @param session The session
+     * @param hardDelete <code>true</code> to permanently remove the documents, <code>false</code> to move the documents to the default
+     *                   trash folder of the storage if possible
+     * @throws OXException If remove operation fails
+     */
+    void removeDocument(long folderId, long date, ServerSession session, boolean hardDelete) throws OXException;
+
+    /**
+     * Removes all documents contained in specified folder.
+     * <p>
+     * Calling this method should have the same effect as invoking {@link #removeDocument(long, long, ServerSession, boolean)} with
+     * <code>hardDelete</code> set to <code>true</code>, i.e. the document is deleted permanently.
      *
      * @param folderId The identifier of the folder to clear
      * @param date The client's time stamp
      * @param session The session
      * @throws OXException If remove operation fails
      */
-    void removeDocument(long folderId, long date, ServerSession session) throws OXException;
+    default void removeDocument(long folderId, long date, ServerSession session) throws OXException {
+       removeDocument(folderId, date, session, true);
+    }
 
     /**
      * Removes denoted documents.
+     * <p>
+     * If <code>hardDelete</code> is <code>false</code>, the storage supports a trash folder, and a document is not yet located below
+     * that trash folder, it is backed up, otherwise it is deleted permanently.
+     *
+     * @param ids The identifiers of the documents to remove
+     * @param date The client's time stamp
+     * @param session The session
+     * @param hardDelete <code>true</code> to permanently remove the documents, <code>false</code> to move the documents to the default
+     *                   trash folder of the storage if possible
+     * @return The identifiers of those documents that could <b>not</b> be deleted successfully
+     * @throws OXException If remove operation fails
+     */
+    List<IDTuple> removeDocument(List<IDTuple> ids, long date, ServerSession session, boolean hardDelete) throws OXException;
+
+    /**
+     * Removes denoted documents.
+     * <p>
+     * Calling this method should have the same effect as invoking {@link #removeDocument(List, long, ServerSession, boolean)} with
+     * <code>hardDelete</code> set to <code>true</code>, i.e. the document is deleted permanently.
      *
      * @param ids The identifiers of the documents to remove
      * @param date The client's time stamp
@@ -326,7 +365,9 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The identifiers of those documents that could <b>not</b> be deleted successfully
      * @throws OXException If remove operation fails
      */
-    List<IDTuple> removeDocument(List<IDTuple> ids, long date, ServerSession session) throws OXException;
+    default List<IDTuple> removeDocument(List<IDTuple> ids, long date, ServerSession session) throws OXException {
+        return removeDocument(ids, date, session, true);
+    }
 
     /**
      * Removes denoted documents.<br>
@@ -337,6 +378,23 @@ public interface InfostoreFacade extends TransactionAware {
      * @throws OXException If remove operation fails
      */
     void removeDocuments(List<IDTuple> ids, Context context) throws OXException;
+
+    /**
+     * Copies a document to another folder. Colliding filenames in the target folder may be renamed automatically.
+     *
+     * @param session The session
+     * @param id The identifier of the document to copy
+     * @param version The version to copy. Pass {@link InfostoreFacade#CURRENT_VERSION} for the current version.
+     * @param update Which other changes to apply to the copy. May be null, if no changes are to be applied.
+     * @param modifiedColumns The fields to use from the update. May be null if the update is null.
+     * @param InputStream the new binary data so save
+     * @param newFile A new file to be attached to the copy. May be null, if no new file data should be attached to the file.
+     * @param sequenceNumber The sequence number to catch concurrent modifications, i.e. the client's most recent time stamp
+     * @param targetFolderID The target folder ID.
+     * @return The new identifier of the copied document
+     * @throws OXException If remove operation fails
+     */
+    IDTuple copyDocument(ServerSession session, IDTuple id, int version, DocumentMetadata update, Metadata[] modifiedColumns, InputStream newFile, long sequenceNumber, String targetFolderID) throws OXException;
 
     /**
      * Moves denoted documents to another folder. Colliding filenames in the target folder may be renamed automatically.
@@ -350,20 +408,6 @@ public interface InfostoreFacade extends TransactionAware {
      * @throws OXException If remove operation fails
      */
     List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException;
-
-    /**
-     * Moves denoted documents to another folder and saves path to origin folder. Colliding filenames in the target folder may be renamed automatically.
-     *
-     * @param session The session
-     * @param ids The identifiers of the documents to remove
-     * @param sequenceNumber The sequence number to catch concurrent modifications, i.e. the client's most recent time stamp
-     * @param targetFolderID The target folder ID.
-     * @param adjustFilenamesAsNeeded <code>true</code> to adjust filenames in target folder automatically, <code>false</code>, otherwise
-     * @param optOriginPath Origin folder path mapped by file id or <code>null</code> to ignore
-     * @return The identifiers of those documents that could <b>not</b> be moved successfully
-     * @throws OXException If remove operation fails
-     */
-    List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded, Map<String, InfostoreFolderPath> optOriginPath) throws OXException;
 
     /**
      * Removes denoted versions.
@@ -474,17 +518,19 @@ public interface InfostoreFacade extends TransactionAware {
     /**
      * Gets the document's versions.
      *
+     * @param folderId The folder identifier
      * @param id The document identifier
      * @param columns The columns to set in returned documents
      * @param session The associated session
      * @return The document's versions
      * @throws OXException If retrieval fails
      */
-    TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, ServerSession session) throws OXException;
+    TimedResult<DocumentMetadata> getVersions(long folderId, int id, Metadata[] columns, ServerSession session) throws OXException;
 
     /**
      * Gets the document's versions.
      *
+     * @param folderId The folder identifier
      * @param id The document identifier
      * @param columns The columns to set in returned documents
      * @param sort The sort-by field
@@ -493,7 +539,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The document's versions
      * @throws OXException If retrieval fails
      */
-    TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException;
+    TimedResult<DocumentMetadata> getVersions(long folderId, int id, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException;
 
     /**
      * Gets the specified documents.
@@ -721,11 +767,11 @@ public interface InfostoreFacade extends TransactionAware {
     /**
      * Restores files from trash folder to origin location. If the path was deleted too, it will be recreated.
      *
-     * @param toRestore A mapping of target folder identifiers to files to restore
+     * @param toRestore A list of items to restore
+     * @param destFolderId The identifier of the default destination folder
      * @param session The session
-     * @return The identifiers of those documents that could <b>not</b> be restored successfully
-     * @throws OXException If restore fails
+     * @return A Mapping of restored items to the restored paths
+     * @throws OXException
      */
-    List<IDTuple> restore(Map<String, List<IDTuple>> toRestore, ServerSession session) throws OXException;
-
+    Map<IDTuple, String> restore(List<IDTuple> toRestore, long destFolderId, ServerSession session) throws OXException;
 }

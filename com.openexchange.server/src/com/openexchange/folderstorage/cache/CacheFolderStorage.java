@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.cache;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -344,7 +345,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                                 for (MailAccount mailAccount : accounts) {
                                     int accountId = mailAccount.getId();
                                     if (accountId != MailAccount.DEFAULT_ID && !IGNORABLES.contains(mailAccount.getMailProtocol())) {
-                                        final String folderId = prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
+                                        final String folderId = prepareFullname(accountId, MailFolder.ROOT_FOLDER_ID);
                                         /*
                                          * Check if already present
                                          */
@@ -970,10 +971,6 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             Folder deleteMe;
             try {
                 deleteMe = getFolder(treeId, folderId, storageParameters);
-                /*
-                 * Load all subfolders
-                 */
-                subfolderIDs = loadAllSubfolders(treeId, deleteMe, false, storageParameters);
             } catch (OXException e) {
                 /*
                  * Obviously folder does not exist
@@ -984,6 +981,18 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                 FolderMapManagement.getInstance().dropFor(folderId, treeId, userId, contextId, session);
                 return;
             }
+            /*
+             * Load all subfolders
+             */
+            try {
+                subfolderIDs = loadAllSubfolders(treeId, deleteMe, false, storageParameters);
+            } catch (Exception e) {
+                LOG.warn("Failed to load subfolders of {} for user {} in context {}", folderId, I(userId), I(contextId), e);
+                subfolderIDs = new String[0];
+            }
+            /*
+             * Determine parent
+             */
             parentId = deleteMe.getParentID();
             if (!realTreeId.equals(treeId)) {
                 StorageParameters parameters = newStorageParameters(storageParameters);

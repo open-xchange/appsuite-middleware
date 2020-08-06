@@ -49,19 +49,20 @@
 
 package com.openexchange.carddav.servlet;
 
-import static com.openexchange.java.Autoboxing.I;
-import static org.slf4j.LoggerFactory.getLogger;
+import static com.openexchange.java.Autoboxing.b;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
-import com.openexchange.carddav.Tools;
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dav.DAVOAuthScope;
 import com.openexchange.dav.DAVServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.webdav.protocol.WebdavMethod;
 
 /**
  * The {@link CardDAV} servlet. It delegates all calls to the CaldavPerformer
@@ -70,7 +71,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CardDAV extends DAVServlet {
 
-	private static final long serialVersionUID = -6381396333467867154L;
+    private static final long serialVersionUID = -6381396333467867154L;
+
+    /** The required scope to access read-only CardDAV-related endpoints for restricted sessions (authenticated with app-specific passwords) */
+    private static final String RESTRICTED_SCOPE_CARDDAV_READ = "read_carddav";
+
+    /** The required scope to access read-only CardDAV-related endpoints for restricted sessions (authenticated with app-specific passwords) */
+    private static final String RESTRICTED_SCOPE_CARDDAV_WRITE = "write_carddav";
 
     /**
      * Initializes a new {@link CardDAV}.
@@ -81,35 +88,42 @@ public class CardDAV extends DAVServlet {
         super(performer, Interface.CARDDAV);
     }
 
-    /**
-     * Gets a value indicating whether CardDAV is enabled for the supplied session.
-     *
-     * @param request the HTTP request
-     * @param session The session to check permissions for
-     * @return <code>true</code> if CardDAV is enabled, <code>false</code>, otherwise
-     */
     @Override
-    protected boolean checkPermission(HttpServletRequest request, ServerSession session) {
-        if (false == session.getUserPermissionBits().hasContact()) {
-            return false;
-        }
-        ConfigViewFactory configViewFactory = performer.getFactory().getOptionalService(ConfigViewFactory.class);
-        if (null == configViewFactory) {
-            getLogger(CardDAV.class).warn("Unable to access confic cascade, unable to check servlet permissions.");
-            return false;
-        }
+    protected boolean checkPermission(HttpServletRequest request, WebdavMethod method, ServerSession session) {
+        /*
+         * check basic permissions of the session's user
+         */
+        boolean enabled = false;
         try {
-            ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
-            ComposedConfigProperty<Boolean> property = configView.property("com.openexchange.carddav.enabled", boolean.class);
-            if (property.isDefined() && property.get().booleanValue()) {
-                OAuthAccess oAuthAccess = (OAuthAccess) request.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
-                return oAuthAccess == null ? true : oAuthAccess.getScope().has(Tools.OAUTH_SCOPE);
-            }
+            ComposedConfigProperty<Boolean> enabledProperty = performer.getFactory().requireService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.carddav.enabled", Boolean.class);
+            enabled = enabledProperty.isDefined() && b(enabledProperty.get());
         } catch (OXException e) {
-            getLogger(CardDAV.class).error("Error checking if CardDAV is enabled for user {} in context {}: {}",
-                I(session.getUserId()), I(session.getContextId()), e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(CardDAV.class).warn("Error obtaining 'enabled' property from config-cascade, assuming 'false'.", e);
+            return false;
         }
-        return false;
+        if (false == enabled || false == session.getUserPermissionBits().hasContact()) {
+            return false;
+        }
+        /*
+         * check that "carddav" scope is available when authenticated through OAuth
+         */
+        OAuthAccess oAuthAccess = (OAuthAccess) request.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
+        if (null != oAuthAccess) {
+            Scope scope = oAuthAccess.getScope();
+            return scope.has(DAVOAuthScope.CARDDAV.getScope());
+        }
+        /*
+         * check that an "carddav" scope appropriate for the method is available when session is restricted (authenticated through app-specific password)
+         */
+        String[] restrictedScopes = (String[]) session.getParameter(Session.PARAM_RESTRICTED);
+        if (null != restrictedScopes) {
+            String requiredScope = null != method && method.isReadOnly() ? RESTRICTED_SCOPE_CARDDAV_READ : RESTRICTED_SCOPE_CARDDAV_WRITE;
+            return com.openexchange.tools.arrays.Arrays.contains(restrictedScopes, requiredScope);
+        }
+        /*
+         * assume regularly authenticated *DAV session, otherwise
+         */
+        return true;
     }
 
 }

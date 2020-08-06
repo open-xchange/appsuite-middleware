@@ -117,6 +117,8 @@ public class GrizzlyConfig {
         private List<String> enabledCiphers = null;
         private long wsTimeoutMillis;
         private int sessionExpiryCheckInterval = 60;
+        private int sessionUnjoinedThreshold = 120;
+        private boolean removeNonAuthenticatedSessions = true;
         private boolean checkTrackingIdInRequestParameters = false;
         private int maxNumberOfConcurrentRequests = 0;
         private boolean supportHierachicalLookupOnNotFound = false;
@@ -145,7 +147,9 @@ public class GrizzlyConfig {
             this.keystorePath = configService.getProperty("com.openexchange.http.grizzly.keystorePath", "");
             this.keystorePassword = configService.getProperty("com.openexchange.http.grizzly.keystorePassword", "");
             this.sessionExpiryCheckInterval = configService.getIntProperty("com.openexchange.http.grizzly.sessionExpiryCheckInterval", 60);
+            this.sessionUnjoinedThreshold = configService.getIntProperty("com.openexchange.http.grizzly.sessionUnjoinedThreshold", 120);
             this.maxNumberOfConcurrentRequests = configService.getIntProperty("com.openexchange.http.grizzly.maxNumberOfConcurrentRequests", 0);
+            this.removeNonAuthenticatedSessions = configService.getBoolProperty("com.openexchange.http.grizzly.removeNonAuthenticatedSessions", true);
 
             // server properties
             this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W"))).intValue();
@@ -454,7 +458,7 @@ public class GrizzlyConfig {
         }
 
         public GrizzlyConfig build() {
-            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, accessLogConfig, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, robotsMetaTag, maxBodySize, maxNumberOfHttpSessions, enabledCiphers, wsTimeoutMillis, supportHierachicalLookupOnNotFound);
+            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, accessLogConfig, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, sessionUnjoinedThreshold, removeNonAuthenticatedSessions, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, robotsMetaTag, maxBodySize, maxNumberOfHttpSessions, enabledCiphers, wsTimeoutMillis, supportHierachicalLookupOnNotFound);
         }
     }
 
@@ -574,6 +578,9 @@ public class GrizzlyConfig {
     /** The interval in seconds when to check for expired/invalid HTTP sessions */
     private final int sessionExpiryCheckInterval;
 
+    /** The threshold in seconds for new/unjoined HTTP sessions */
+    private final int sessionUnjoinedThreshold;
+
     /** The max. number of concurrent HTTP requests that are allowed being processed */
     private final int maxNumberOfConcurrentRequests;
 
@@ -583,7 +590,10 @@ public class GrizzlyConfig {
     /** Checks if hierarchical look-up of "parent" servlets should be supported. */
     private final boolean supportHierachicalLookupOnNotFound;
 
-    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, GrizzlyAccessLogConfig accessLogConfig, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<IPRange> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, List<String> enabledCiphers, long wsTimeoutMillis, boolean supportHierachicalLookupOnNotFound) {
+    /** Whether to remove non-authenticated HTTP sessions (no Open-Xchange session associated with it) */
+    private final boolean removeNonAuthenticatedSessions;
+
+    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, GrizzlyAccessLogConfig accessLogConfig, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int sessionUnjoinedThreshold, boolean removeNonAuthenticatedSessions, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<IPRange> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, List<String> enabledCiphers, long wsTimeoutMillis, boolean supportHierachicalLookupOnNotFound) {
         super();
         this.httpHost = httpHost;
         this.httpPort = httpPort;
@@ -602,6 +612,8 @@ public class GrizzlyConfig {
         this.keystorePath = keystorePath;
         this.keystorePassword = keystorePassword;
         this.sessionExpiryCheckInterval = sessionExpiryCheckInterval;
+        this.sessionUnjoinedThreshold = sessionUnjoinedThreshold;
+        this.removeNonAuthenticatedSessions = removeNonAuthenticatedSessions;
         this.maxNumberOfConcurrentRequests = maxNumberOfConcurrentRequests;
         this.checkTrackingIdInRequestParameters = checkTrackingIdInRequestParameters;
         this.cookieMaxAge = cookieMaxAge;
@@ -633,6 +645,30 @@ public class GrizzlyConfig {
      */
     public int getSessionExpiryCheckInterval() {
         return sessionExpiryCheckInterval;
+    }
+
+    /**
+     * Gets the the threshold in seconds when an HTTP sessions may be safely considered as unjoined
+     * <p>
+     * An HTTP session is considered as new (or unjoined) if the client does not yet know about the
+     * session or if the client chooses not to join the session. For example, if the server used
+     * only cookie-based sessions, and the client had disabled the use of cookies, then a session
+     * would be new on each request.
+     *
+     * @return The threshold in seconds for new/unjoined HTTP sessions
+     */
+    public int getSessionUnjoinedThreshold() {
+        return sessionUnjoinedThreshold;
+    }
+
+    /**
+     * Checks whether HTTP sessions may be considered for removal during clean-up run if there is no associated Open-Xchange session
+     * associated with it.
+     *
+     * @return <code>true</code> to remove non-authenticated sessions; otherwise <code>false</code>
+     */
+    public boolean isRemoveNonAuthenticatedSessions() {
+        return removeNonAuthenticatedSessions;
     }
 
     /**

@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.common;
 
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -75,10 +77,13 @@ import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.DefaultCollectionUpdate;
 import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.service.CollectionUpdate;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.ItemUpdate;
+import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link AlarmUtils}
@@ -339,8 +344,6 @@ public class AlarmUtils extends CalendarUtils {
         return null;
     }
 
-    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-
     /**
      * Calculates the actual time of an alarm trigger associated with an event.
      *
@@ -362,7 +365,7 @@ public class AlarmUtils extends CalendarUtils {
                 long dateInTimeZone = getDateInTimeZone(relatedDate, timeZone);
                 relatedDate = new DateTime(timeZone, dateInTimeZone);
             }
-            Calendar calendar = initCalendar(UTC, relatedDate.getTimestamp());
+            Calendar calendar = initCalendar(timeZone, relatedDate.getTimestamp());
             return applyDuration(trigger.getDuration(), calendar).getTime();
         }
         return null;
@@ -496,7 +499,6 @@ public class AlarmUtils extends CalendarUtils {
         }
         return null;
     }
-
 
     /**
      * Calculates the next date-time for a specific alarm trigger associated with an event series and returns the corresponding event occurrence.
@@ -726,6 +728,88 @@ public class AlarmUtils extends CalendarUtils {
             }
         }
         return filteredTriggers;
+    }
+
+    /**
+     * Gets a value indicating whether a alarm trigger falls into a defined time range.
+     *
+     * @param trigger The trigger to check
+     * @param rangeFrom The lower (inclusive) boundary of the time range, or <code>null</code> if not limited
+     * @param rangeUntil The upper (exclusive) boundary of the time range, or <code>null</code> if not limited
+     * @return <code>true</code> if the trigger falls into the time range, <code>false</code>, otherwise
+     */
+    public static boolean isInRange(AlarmTrigger trigger, Date rangeFrom, Date rangeUntil) {
+        long triggerTime = l(trigger.getTime());
+        return (null == rangeFrom || rangeFrom.getTime() <= triggerTime) && (null == rangeUntil || rangeUntil.getTime() > triggerTime);
+    }
+
+    /**
+     * Attempts to shift the trigger time of an alarm trigger to a later occurrence of an event series in case the current trigger lies
+     * before the lower boundary of the requested range. If no further or no matching occurrence can be looked for which the alarm trigger
+     * time would fall into the requested time range, nothing is changed.
+     *
+     * @param trigger The trigger to adjust
+     * @param alarm The corresponding alarm
+     * @param iterator The initialized recurrence iterator over possible further occurrences of the referenced event series
+     * @param rangeFrom The lower (inclusive) boundary of the requested time range, or <code>null</code> if not limited
+     * @param rangeUntil The upper (exclusive) boundary of the requested time range, or <code>null</code> if not limited
+     * @return The (possibly adjusted) alarm trigger
+     */
+    public static AlarmTrigger shiftIntoRange(AlarmTrigger trigger, Alarm alarm, RecurrenceIterator<Event> iterator, Date rangeFrom, Date rangeUntil) {
+        if (false == iterator.hasNext() || null == rangeFrom || false == rangeFrom.after(new Date(l(trigger.getTime())))) {
+            /*
+             * outside range or no other occurrences possible, use trigger as-is
+             */
+            return trigger;
+        }
+        TimeZone timeZone = trigger.containsTimezone() ? trigger.getTimezone() : TimeZones.UTC;
+        do {
+            Event shiftedOccurrence = iterator.next();
+            Date shiftedTriggerTime = getTriggerTime(alarm.getTrigger(), shiftedOccurrence, timeZone);
+            if (null == shiftedTriggerTime) {
+                /*
+                 * no trigger time calculated, cancel check
+                 */
+                break;
+            }
+            if (null != rangeUntil && rangeUntil.before(shiftedTriggerTime)) {
+                /*
+                 * outside requested range
+                 */
+                break;
+            }
+            if (false == rangeFrom.after(shiftedTriggerTime)) {
+                /*
+                 * occurrence's trigger is on or after lower boundary of requested range, use this occurrence
+                 */
+                trigger.setRecurrenceId(shiftedOccurrence.getRecurrenceId());
+                trigger.setTime(L(shiftedTriggerTime.getTime()));
+                if (null == alarm.getTrigger().getDateTime()) {
+                    trigger.setRelatedTime(L(getRelatedDate(alarm.getTrigger().getRelated(), shiftedOccurrence).getTimestamp()));
+                }
+                break;
+            }
+        } while (iterator.hasNext());
+        return trigger;
+    }
+
+    /**
+     * Gets the event identifiers for a list of alarm triggers
+     * 
+     * @param alarmTriggers The alarm triggers to get the referenced event identifiers for
+     * @param ignoreRecurrenceId <code>true</code> to ignore the recurrence identifier, <code>false</code>, otherwise
+     * @return The referenced event identifiers
+     */
+    public static List<EventID> getEventIds(List<AlarmTrigger> alarmTriggers, boolean ignoreRecurrenceId) {
+        List<EventID> eventIds = new ArrayList<EventID>(alarmTriggers.size());
+        for (AlarmTrigger alarmTrigger : alarmTriggers) {
+            if (ignoreRecurrenceId || null == alarmTrigger.getRecurrenceId()) {
+                eventIds.add(new EventID(alarmTrigger.getFolder(), alarmTrigger.getEventId()));
+            } else {
+                eventIds.add(new EventID(alarmTrigger.getFolder(), alarmTrigger.getEventId(), alarmTrigger.getRecurrenceId()));
+            }
+        }
+        return eventIds;
     }
 
 }

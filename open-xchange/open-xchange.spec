@@ -1,29 +1,16 @@
 %define __jar_repack %{nil}
-%define use_systemd (0%{?rhel} && 0%{?rhel} >= 7) || (0%{?suse_version} && 0%{?suse_version} >=1210)
 Name:             open-xchange
 BuildArch:        noarch
-%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
-BuildRequires:    ant
-%else
-BuildRequires:    ant-nodeps
-%endif
-%if 0%{?suse_version}
-BuildRequires: java-1_8_0-openjdk-devel
-%else
+BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
-%endif
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires:    systemd-rpm-macros
-%endif
 Version:          @OXVERSION@
-%define           ox_release 19
+%define           ox_release 7
 Release:          %{ox_release}_<CI_CNT>.<B_CNT>
 Group:            Applications/Productivity
 License:          GPL-2.0
 BuildRoot:        %{_tmppath}/%{name}-%{version}-build
 URL:              http://www.open-xchange.com/
 Source:           %{name}_%{version}.orig.tar.bz2
-Source1:          open-xchange.init
 Source2:          open-xchange.service
 %define           dropin_dir /etc/systemd/system/open-xchange.service.d
 %define           dropin_example limits.conf
@@ -35,16 +22,10 @@ Requires:         open-xchange-authorization
 Requires:         open-xchange-mailstore
 Requires:         open-xchange-httpservice
 Requires:         open-xchange-smtp >= @OXVERSION@
-%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
 Requires(pre):    systemd
 Requires(post):   systemd
 Requires(preun):  systemd
 Requires(postun): systemd
-%endif
-%if 0%{?rhel_version} && 0%{?rhel_version} < 700
-# Bug #23216
-Requires:         redhat-lsb
-%endif
 
 %description
 This package provides the dependencies to install a working Open-Xchange backend system. By installing this package a minimal backend is
@@ -62,33 +43,16 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 mkdir -p %{buildroot}%{_sbindir}
-%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
 %__install -D -m 444 %{SOURCE2} %{buildroot}/usr/lib/systemd/system/open-xchange.service
 ln -sf /usr/sbin/service %{buildroot}%{_sbindir}/rcopen-xchange
-%else
-mkdir -p %{buildroot}/etc/init.d
-install -m 755 %{SOURCE1} %{buildroot}/etc/init.d/open-xchange
-ln -sf /etc/init.d/open-xchange %{buildroot}%{_sbindir}/rcopen-xchange
-%endif
 
 # On Redhat and SuSE start scripts are not automatically added to system start. This is wanted behavior and standard.
 
 %post
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-%service_add_post open-xchange.service
-%endif
-%if (0%{?rhel_version} && 0%{?rhel_version} >= 700)
 if [ ! -f %{dropin_dir}/%{dropin_example} ]
 then
   install -D -m 644 %{_defaultdocdir}/%{name}-%{version}/%{dropin_example} %{dropin_dir}/%{dropin_example}
 fi
-%endif
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-if [ ! -f %{dropin_dir}/%{dropin_example} ]
-then
-  install -D -m 644 %{_defaultdocdir}/%{name}/%{dropin_example} %{dropin_dir}/%{dropin_example}
-fi
-%endif
 
 # SoftwareChange_Request-3859
 drop_in=%{dropin_dir}/%{dropin_example}
@@ -105,70 +69,38 @@ then
 fi
 
 # Trigger a service definition/config reload
-%if %{use_systemd}
 systemctl daemon-reload &> /dev/null || :
-%endif
 
 %preun
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-%service_del_preun open-xchange.service
-%endif
 
 %postun
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-%service_del_postun open-xchange.service
-%endif
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
-%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
 /usr/lib/systemd/system/open-xchange.service
 /usr/sbin/rcopen-xchange
-%else
-/etc/init.d/open-xchange
-/usr/sbin/rcopen-xchange
-%endif
-
-%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
 %doc docs/%{dropin_example}
-%endif
 
 %changelog
-* Tue Jul 21 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-07-27 (5821)
-* Wed Jul 15 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-07-17 (5819)
-* Thu Jul 09 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-07-13 (5804)
-* Fri Jun 26 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-07-02 (5792)
-* Wed Jun 24 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-06-30 (5781)
-* Mon Jun 15 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-06-15 (5765)
-* Fri May 15 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-05-26 (5742)
-* Mon May 04 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-05-11 (5720)
-* Thu Apr 23 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-04-30 (5702)
-* Fri Apr 17 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-04-02 (5692)
-* Mon Apr 06 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-04-14 (5677)
-* Thu Mar 19 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-03-23 (5653)
-* Fri Feb 28 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-03-02 (5623)
-* Wed Feb 12 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-02-19 (5588)
-* Wed Feb 12 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-02-10 (5572)
-* Mon Jan 20 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-01-20 (5547)
+* Wed Aug 05 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth candidate for 7.10.4 release
+* Tue Aug 04 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.10.4 release
+* Tue Aug 04 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.10.4 release
+* Fri Jul 31 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.10.4 release
+* Tue Jul 28 2020 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.4 release
+* Tue Jun 30 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview of 7.10.4 release
+* Wed May 20 2020 Marcus Klein <marcus.klein@open-xchange.com>
+First preview of 7.10.4 release
+* Thu Jan 16 2020 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.4 release
 * Thu Nov 28 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.10.3 release
 * Thu Nov 21 2019 Marcus Klein <marcus.klein@open-xchange.com>

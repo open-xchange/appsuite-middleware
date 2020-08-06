@@ -49,13 +49,16 @@
 
 package com.openexchange.ajax.chronos.manager;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.InfoItemExport;
@@ -136,6 +139,11 @@ public class ICalImportExportManager {
             }
         }
         return eventIds;
+    }
+    
+    
+    public static void assertRecurrenceID(String recurrenceId, String recurrenceId2) {
+        assertEquals(CalendarUtils.decode(recurrenceId).shiftTimeZone(DateTime.UTC), CalendarUtils.decode(recurrenceId2).shiftTimeZone(DateTime.UTC));
     }
 
 }

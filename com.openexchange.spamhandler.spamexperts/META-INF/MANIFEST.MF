@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spamexperts Integration Plugin
 Bundle-SymbolicName: com.openexchange.spamhandler.spamexperts
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Activator: com.openexchange.spamhandler.spamexperts.osgi.SpamExpertsActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -44,6 +44,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.mail.dataobjects,
  com.openexchange.mail.mime.utils,
  com.openexchange.mail.service,
+ com.openexchange.mailaccount,
  com.openexchange.net.ssl,
  com.openexchange.osgi,
  com.openexchange.rest.client.httpclient,

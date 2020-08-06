@@ -274,9 +274,8 @@ public class EventConverter {
         StringHelper stringHelper = StringHelper.valueOf(locale);
         if (0 < age) {
             return String.format(stringHelper.getString(BirthdaysCalendarStrings.EVENT_SUMMARY_WITH_AGE), name, I(age));
-        } else {
-            return String.format(stringHelper.getString(BirthdaysCalendarStrings.EVENT_SUMMARY), name);
         }
+        return String.format(stringHelper.getString(BirthdaysCalendarStrings.EVENT_SUMMARY), name);
     }
 
     protected static boolean hasYear(Date birthday) {

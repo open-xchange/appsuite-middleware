@@ -2,6 +2,7 @@
 title: getusercapabilities
 icon: far fa-circle
 tags: Administration, Command Line tools, User, Capabilities
+package: open-xchange-admin
 ---
 
 # NAME

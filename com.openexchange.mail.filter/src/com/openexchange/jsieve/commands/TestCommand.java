@@ -107,6 +107,7 @@ public class TestCommand extends Command {
      * </ul>
      */
     public enum Commands implements ITestCommand {
+
         /**
          * <p>The "address" test matches Internet addresses in structured headers that
          * contain addresses. The type of match is specified by the optional match argument,
@@ -208,7 +209,7 @@ public class TestCommand extends Command {
          */
         HASFLAG("hasflag", 1, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), Arrays.asList("imap4flags", "imapflags"), null),
         /**
-         * <p>  The "string" test evaluates to true if any of the source strings matches any key. The type of match defaults to ":is".</p>
+         * <p> The "string" test evaluates to true if any of the source strings matches any key. The type of match defaults to ":is".</p>
          * <code>string [MATCH-TYPE] [COMPARATOR] &lt;source: string-list&gt; &lt;key-list: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5229#section-5">RFC-5229: Test string</a></p>
          */
@@ -487,7 +488,8 @@ public class TestCommand extends Command {
          * @param required The 'require'
          * @param otherArguments Other optional arguments
          */
-        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Map<String, String> address, final Map<String, String> comparator, final Map<String, String> matchTypes, List<JSONMatchType> jsonMatchTypes, final List<String> required, final Map<String, String> otherArguments) {
+        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Map<String, String> address, final Map<String, String> comparator, final Map<String, String> matchTypes, List<JSONMatchType> jsonMatchTypes,
+            final List<String> required, final Map<String, String> otherArguments) {
             this.commandName = commandName;
             this.numberOfArguments = numberOfArguments;
             this.maxNumberOfArguments = maxNumberOfArguments;
@@ -775,7 +777,7 @@ public class TestCommand extends Command {
                 retval.add(string);
             } else {
                 Map<String, String> address = this.command.getAddress();
-                string = null == address ? null :address.get(text);
+                string = null == address ? null : address.get(text);
                 if (null != string && (0 != string.length())) {
                     retval.add(string);
                 }

@@ -101,7 +101,7 @@ public class CompositionSpaceAddReplyTo extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { CompositionSpaceAddCustomHeaders.class.getName() };
+        return new String[] { CompositionSpaceEnlargeAttachmentNameField.class.getName() };
     }
 
 }

@@ -110,6 +110,25 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
     List<Event> getEventsOfUser() throws OXException;
 
     /**
+     * Gets all events the session's user attends in and having the participation status NEEDS-ACTION in a <b>user prepared</b> way. This means only those events will be returned the user is required to change his status and technical exceptions (for
+     * instance based on participant status changes) are left out.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RIGHT_HAND_LIMIT}</li>
+     * <li>{@link CalendarParameters#PARAMETER_LEFT_HAND_LIMIT}</li>
+     * </ul>
+     * 
+     * @return The events
+     */
+    List<Event> getEventsNeedingAction() throws OXException;
+
+    /**
      * Gets all events the session's user attends in, having a particular participation status.
      * <p/>
      * The following calendar parameters are evaluated:
@@ -215,7 +234,7 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
      * @return The update result
      */
     CalendarResult updateAttendee(EventID eventID, Attendee attendee, List<Alarm> alarms, long clientTimestamp) throws OXException;
-    
+
     /**
      * Updates the event's organizer to the new one.
      * <p>

@@ -64,25 +64,25 @@ public class Bug21757Test extends AbstractSanitizing {
      @Test
      public void testEnsureBodyTagPresence() throws Exception {
         String htmlContent = "<center>Lorem Ipsum Dolor<table<tr><td>cell</td></tr></table></center>";
-        String actual = getHtmlService().getConformHTML(htmlContent, "UTF-8");
+        String actual = trimLines(getHtmlService().getConformHTML(htmlContent, "UTF-8"));
 
         String expected = "<!doctype html>\n" +
             "<html>\n" +
-            " <head> \n" +
-            "  <meta charset=\"UTF-8\"> \n" +
-            " </head>\n" +
-            " <body>\n" +
-            "  <center>\n" +
-            "   Lorem Ipsum Dolor\n" +
-            "   <table>\n" +
-            "    <tbody>\n" +
-            "     <tr>\n" +
-            "      <td>cell</td>\n" +
-            "     </tr>\n" +
-            "    </tbody>\n" +
-            "   </table>\n" +
-            "  </center> \n" +
-            " </body>\n" +
+            "<head>\n" +
+            "<meta charset=\"UTF-8\">\n" +
+            "</head>\n" +
+            "<body>\n" +
+            "<center>\n" +
+            "Lorem Ipsum Dolor\n" +
+            "<table>\n" +
+            "<tbody>\n" +
+            "<tr>\n" +
+            "<td>cell</td>\n" +
+            "</tr>\n" +
+            "</tbody>\n" +
+            "</table>\n" +
+            "</center>\n" +
+            "</body>\n" +
             "</html>";
 
         assertTrue("The opening <body> tag is missing", actual.contains("<body>"));

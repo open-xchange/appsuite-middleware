@@ -51,7 +51,11 @@ package com.openexchange.proxy.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
-import org.apache.commons.httpclient.HttpMethodBase;
+import java.util.Arrays;
+import org.apache.http.HttpResponse;
+import org.apache.http.impl.io.ChunkedInputStream;
+import org.apache.http.util.EntityUtils;
+import com.openexchange.java.Streams;
 import com.openexchange.proxy.Header;
 import com.openexchange.proxy.Response;
 
@@ -62,31 +66,31 @@ import com.openexchange.proxy.Response;
  */
 public final class ResponseImpl implements Response {
 
-    private final HttpMethodBase httpMethod;
+    private final HttpResponse response;
 
     /**
      * Initializes a new {@link ResponseImpl}.
      *
-     * @param httpMethod The delegatee
+     * @param response The delegatee
      */
-    public ResponseImpl(final HttpMethodBase httpMethod) {
+    public ResponseImpl(final HttpResponse response) {
         super();
-        this.httpMethod = httpMethod;
+        this.response = response;
     }
 
     @Override
     public int getStatusCode() {
-        return httpMethod.getStatusCode();
+        return response.getStatusLine().getStatusCode();
     }
 
     @Override
     public String getStatusText() {
-        return httpMethod.getStatusText();
+        return response.getStatusLine().getReasonPhrase();
     }
 
     @Override
     public Header[] getResponseHeaders() {
-        final org.apache.commons.httpclient.Header[] headers = httpMethod.getResponseHeaders();
+        org.apache.http.Header[] headers = response.getAllHeaders();
         if (null == headers) {
             return null;
         }
@@ -100,12 +104,12 @@ public final class ResponseImpl implements Response {
 
     @Override
     public Header getResponseHeader(final String headerName) {
-        return new HeaderImpl(httpMethod.getResponseHeader(headerName));
+        return new HeaderImpl(response.getFirstHeader(headerName));
     }
 
     @Override
     public Header[] getResponseHeaders(final String headerName) {
-        final org.apache.commons.httpclient.Header[] headers = httpMethod.getResponseHeaders(headerName);
+        final org.apache.http.Header[] headers = response.getHeaders(headerName);
         if (null == headers) {
             return null;
         }
@@ -119,36 +123,48 @@ public final class ResponseImpl implements Response {
 
     @Override
     public Header[] getResponseFooters() {
-        final org.apache.commons.httpclient.Header[] headers = httpMethod.getResponseFooters();
-        if (null == headers) {
-            return null;
+        InputStream inputStream = null;
+        try {
+            inputStream = response.getEntity().getContent();
+
+            if (inputStream instanceof ChunkedInputStream) {
+                org.apache.http.Header[] footers = ((ChunkedInputStream) inputStream).getFooters();
+
+                final Header[] ret = new Header[footers.length];
+                int i = 0;
+                for (org.apache.http.Header footer : footers) {
+                    ret[i++] = new HeaderImpl(footer);
+                }
+                return ret;
+            }
+        } catch (UnsupportedOperationException e) {
+           // nothing to do
+        } catch (IOException e) {
+            // nothing to do
+        } finally {
+            Streams.close(inputStream);
         }
-        final int length = headers.length;
-        final Header[] ret = new Header[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = new HeaderImpl(headers[i]);
-        }
-        return ret;
+        return new Header[0];
     }
 
     @Override
     public Header getResponseFooter(final String footerName) {
-        return new HeaderImpl(httpMethod.getResponseFooter(footerName));
+        return Arrays.asList(getResponseFooters()).stream().filter((header) -> header.getName().equals(footerName)).findFirst().orElse(null);
     }
 
     @Override
     public byte[] getResponseBody() throws IOException {
-        return httpMethod.getResponseBody();
+        return EntityUtils.toByteArray(response.getEntity());
     }
 
     @Override
     public String getResponseBodyAsString() throws IOException {
-        return httpMethod.getResponseBodyAsString();
+        return EntityUtils.toString(response.getEntity());
     }
 
     @Override
     public InputStream getResponseBodyAsStream() throws IOException {
-        return httpMethod.getResponseBodyAsStream();
+        return response.getEntity().getContent();
     }
 
 }

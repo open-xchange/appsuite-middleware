@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.client.httpclient.internal;
 
+import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.getRequestTimer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpClientConnection;
@@ -57,12 +58,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestExecutor;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
-import com.openexchange.metrics.noop.NoopTimer;
-import com.openexchange.metrics.types.Timer;
-import com.openexchange.rest.client.osgi.RestClientServices;
-
 
 /**
  * A {@link HttpRequestExecutor} that monitors executed requests in terms of method, response time and response status.
@@ -74,24 +69,20 @@ import com.openexchange.rest.client.osgi.RestClientServices;
  */
 public class MeteredHttpRequestExecutor extends HttpRequestExecutor {
 
-    private final MonitoringId monitoringId;
+    private final String clientName;
 
     /**
      * Initializes a new {@link MeteredHttpRequestExecutor}.
-     *
-     * @param monitoringId The monitoring identifier
+     * 
+     * @param clientName The identifier of the HTTP client
      */
-    public MeteredHttpRequestExecutor(MonitoringId monitoringId) {
+    public MeteredHttpRequestExecutor(String clientName) {
         super();
-        this.monitoringId = monitoringId;
+        this.clientName = clientName;
     }
 
     @Override
     public HttpResponse execute(HttpRequest request, HttpClientConnection conn, HttpContext context) throws IOException, HttpException {
-        if (monitoringId == MonitoringId.getNoop()) {
-            return super.execute(request, conn, context);
-        }
-
         long start = System.nanoTime();
         String status = "UNKNOWN";
         try {
@@ -102,23 +93,7 @@ public class MeteredHttpRequestExecutor extends HttpRequestExecutor {
             status = "IO_ERROR";
             throw e;
         } finally {
-             getTimer(request.getRequestLine().getMethod(), status).update(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+            getRequestTimer(clientName, request.getRequestLine().getMethod(), status).record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
         }
     }
-
-    private Timer getTimer(String method, String status) {
-        MetricService metrics = RestClientServices.getOptionalService(MetricService.class);
-        if (metrics == null || monitoringId == MonitoringId.getNoop()) {
-            return NoopTimer.getInstance();
-        }
-
-        return metrics.getTimer(monitoringId.newMetricBuilder("httpclient", "RequestTimes", MetricType.TIMER)
-            .withRate(TimeUnit.SECONDS)
-            .withUnit("requests")
-            .withDescription("Duration of Apache HttpClient request execution")
-            .addDimension("method", method)
-            .addDimension("status", status)
-            .build());
-    }
-
 }

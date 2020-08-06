@@ -49,7 +49,7 @@
 
 package com.openexchange.mailfilter.internal;
 
-import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.metrics.micrometer.binders.CircuitBreakerMetrics;
 import net.jodah.failsafe.CircuitBreaker;
 
 /**
@@ -61,18 +61,18 @@ import net.jodah.failsafe.CircuitBreaker;
 public class CircuitBreakerInfo {
 
     private final CircuitBreaker circuitBreaker;
-    private final AtomicReference<Runnable> onDeniedMetricTask;
+    private final CircuitBreakerMetrics metrics;
 
     /**
      * Initializes a new {@link CircuitBreakerInfo}.
      *
      * @param circuitBreaker The circuit breaker
-     * @param onDeniedMetricTask The reference to on-denied task
+     * @param metrics The metrics reference
      */
-    public CircuitBreakerInfo(CircuitBreaker circuitBreaker, AtomicReference<Runnable> onDeniedMetricTask) {
+    public CircuitBreakerInfo(CircuitBreaker circuitBreaker, CircuitBreakerMetrics metrics) {
         super();
         this.circuitBreaker = circuitBreaker;
-        this.onDeniedMetricTask = onDeniedMetricTask;
+        this.metrics = metrics;
     }
 
     /**
@@ -85,12 +85,20 @@ public class CircuitBreakerInfo {
     }
 
     /**
-     * Gets the reference to on-denied task
-     *
-     * @return The reference to on-denied task
+     * Increments the number of denials due to a closed circuit breaker. The current value
+     * is reported as a monitoring metric.
      */
-    public AtomicReference<Runnable> getOnDeniedMetricTask() {
-        return onDeniedMetricTask;
+    public void incrementDenials() {
+        metrics.getDenialsCounter().ifPresent(c -> c.increment());
+    }
+
+    /**
+     * Increments the number of circuit breaker trips. The current value
+     * is reported as a monitoring metric.
+     *
+     */
+    public void incrementOpens() {
+        metrics.getOpensCounter().ifPresent(c -> c.increment());
     }
 
 }

@@ -232,23 +232,37 @@ public final class HtmlServices {
             }
         }
 
-        // Check basic unsafe tokens
+        if (!isSafeLowerCaseValue(lc, more)) {
+            return false;
+        }
+
+        // Drop white-spaces
         lc = dropWhitespacesFrom(lc);
+
+        if (!isSafeLowerCaseValue(lc, more)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static boolean isSafeLowerCaseValue(String lowerCaseValue, String[] more) {
+        // Check basic unsafe tokens
         for (String unsafeToken : UNSAFE_TOKENS) {
-            if (lc.indexOf(unsafeToken) >= 0) {
+            if (lowerCaseValue.indexOf(unsafeToken) >= 0) {
                 return false;
             }
         }
 
         // Check for global event handlers
-        if (doContainsEventHandler(lc)) {
+        if (doContainsEventHandler(lowerCaseValue)) {
             return false;
         }
 
-        // Check additionally specified unsafe tokens
+        // Check additionally specified unsafe tokens if any)
         if (null != more && more.length > 0) {
             for (final String token : more) {
-                if (lc.indexOf(asciiLowerCase(token)) >= 0) {
+                if (lowerCaseValue.indexOf(asciiLowerCase(token)) >= 0) {
                     return false;
                 }
             }

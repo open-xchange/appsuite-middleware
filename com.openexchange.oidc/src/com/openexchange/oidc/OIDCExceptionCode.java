@@ -80,7 +80,7 @@ public enum OIDCExceptionCode implements OXExceptionCode {
     /**
      * Unable to parse the given JWS algorithm parameter: '%1$s'
      */
-    UNABLE_TO_PARSE_JWS_ALGORITHM("Unable to parse the given JWS algorithm parameter: '%1$s'", Category.CATEGORY_CONFIGURATION, 5), 
+    UNABLE_TO_PARSE_JWS_ALGORITHM("Unable to parse the given JWS algorithm parameter: '%1$s'", Category.CATEGORY_CONFIGURATION, 5),
     /**
      * Users IDToken validation failed because of invalid claims or signature
      */
@@ -88,55 +88,55 @@ public enum OIDCExceptionCode implements OXExceptionCode {
     /**
      * Users IDToken validation failed because internal errors: '%1$s'
      */
-    IDTOKEN_VALIDATON_FAILED("Users IDToken validation failed because internal errors: '%1$s'", Category.CATEGORY_ERROR, 7), 
+    IDTOKEN_VALIDATON_FAILED("Users IDToken validation failed because internal errors: '%1$s'", Category.CATEGORY_ERROR, 7),
     /**
      * Failed to get IDToken from IDP: '%1$s'
      */
-    IDTOKEN_GATHERING_ERROR("Failed to get IDToken from IDP: '%1$s'", Category.CATEGORY_ERROR, 8), 
+    IDTOKEN_GATHERING_ERROR("Failed to get IDToken from IDP: '%1$s'", Category.CATEGORY_ERROR, 8),
     /**
      * No user information available for the give state.
      */
-    INVALID_AUTHENTICATION_STATE_NO_USER("No user information available for the given state.", Category.CATEGORY_ERROR, 9), 
+    INVALID_AUTHENTICATION_STATE_NO_USER("No user information available for the given state.", Category.CATEGORY_ERROR, 9),
     /**
      * Unable to load user information from IDP after valid authentication: '%1$s'
      */
-    UNABLE_TO_LOAD_USERINFO("Unable to load user information from IDP after valid authentication: '%1$s'", Category.CATEGORY_ERROR, 10), 
+    UNABLE_TO_LOAD_USERINFO("Unable to load user information from IDP after valid authentication: '%1$s'", Category.CATEGORY_ERROR, 10),
     /**
      * Unable to send request to the IDP when trying to '%1$s'
      */
-    UNABLE_TO_SEND_REQUEST("Unable to send request to the IDP when trying to '%1$s'", Category.CATEGORY_ERROR, 11), 
+    UNABLE_TO_SEND_REQUEST("Unable to send request to the IDP when trying to '%1$s'", Category.CATEGORY_ERROR, 11),
     /**
      * Unable to parse the IDP response, when trying to '%1$s'
      */
-    UNABLE_TO_PARSE_RESPONSE_FROM_IDP("Unable to parse the IDP response, when trying to '%1$s'", Category.CATEGORY_ERROR, 12), 
+    UNABLE_TO_PARSE_RESPONSE_FROM_IDP("Unable to parse the IDP response, when trying to '%1$s'", Category.CATEGORY_ERROR, 12),
     /**
      * Unable to parse the following URI: '%1$s'
      */
-    UNABLE_TO_PARSE_URI("Unable to parse the following URI: '%1$s'", Category.CATEGORY_CONFIGURATION, 13), 
+    UNABLE_TO_PARSE_URI("Unable to parse the following URI: '%1$s'", Category.CATEGORY_CONFIGURATION, 13),
     /**
      * Received an invalid logout request: '%1$s'
      */
-    INVALID_LOGOUT_REQUEST("Received an invalid logout request: '%1$s'", Category.CATEGORY_WARNING, 14), 
+    INVALID_LOGOUT_REQUEST("Received an invalid logout request: '%1$s'", Category.CATEGORY_WARNING, 14),
     /**
      * Unable to parse the IDToken which was transported with the session.
      */
-    UNABLE_TO_PARSE_SESSIONS_IDTOKEN("Unable to parse the IDToken which was transported with the session.", Category.CATEGORY_WARNING, 15), 
+    UNABLE_TO_PARSE_SESSIONS_IDTOKEN("Unable to parse the IDToken which was transported with the session.", Category.CATEGORY_WARNING, 15),
     /**
      * Subject claim in IDToken is not valid. Subject: '%1$s'
      */
-    BAD_SUBJECT("Subject claim in IDToken is not valid. Subject: '%1$s'", Category.CATEGORY_WARNING, 16), 
+    BAD_SUBJECT("Subject claim in IDToken is not valid. Subject: '%1$s'", Category.CATEGORY_WARNING, 16),
     /**
      * Unable to find the needed backend for a given session path: '%1$s'
      */
-    UNABLE_TO_FIND_BACKEND_FOR_SESSION("Unable to find the needed backend for a given session path: '%1$s'", Category.CATEGORY_WARNING, 17), 
+    UNABLE_TO_FIND_BACKEND_FOR_SESSION("Unable to find the needed backend for a given session path: '%1$s'", Category.CATEGORY_WARNING, 17),
     /**
      * Unable to refresh the access token from IDP, because of: '%1$s'
      */
-    UNABLE_TO_RELOAD_ACCESSTOKEN("Unable to refresh the access token from IDP, because of: '%1$s'", Category.CATEGORY_WARNING, 18), 
+    UNABLE_TO_RELOAD_ACCESSTOKEN("Unable to refresh the access token from IDP, because of: '%1$s'", Category.CATEGORY_WARNING, 18),
     /**
      * Unable to send login redirect, because of: '%1$s'
      */
-    UNABLE_TO_SEND_REDIRECT("Unable to send login redirect, because of: '%1$s'", Category.CATEGORY_WARNING, 19), 
+    UNABLE_TO_SEND_REDIRECT("Unable to send login redirect, because of: '%1$s'", Category.CATEGORY_WARNING, 19),
     /**
      * "Unable to handle third party login request, because of: '%1$s'"
      */
@@ -145,28 +145,27 @@ public enum OIDCExceptionCode implements OXExceptionCode {
      * "The OpenID-Provider responded with an error: '%1$s'"
      */
     OP_SERVER_ERROR("The OpenID-Provider responded with an error: '%1$s'", Category.CATEGORY_ERROR, 21),
-    
     /**
      * "An error occured while accessing an IMap: '%1$s'"
      */
     HAZELCAST_EXCEPTION("An error occured while accessing an IMap: '%1$s'", Category.CATEGORY_ERROR, 22);
-    
+
     private final String message;
     private final String displayMessage;
     private final int detailNumber;
     private final Category category;
-    
+
     private OIDCExceptionCode(final String message, final Category category, final int detailNumber) {
         this(message, null, category, detailNumber);
     }
-    
+
     private OIDCExceptionCode(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.displayMessage = displayMessage;
         this.category = category;
         this.detailNumber = detailNumber;
     }
-    
+
 
     @Override
     public boolean equals(OXException e) {
@@ -192,11 +191,11 @@ public enum OIDCExceptionCode implements OXExceptionCode {
     public String getMessage() {
         return this.message;
     }
-    
+
     public String getDisplaymessage() {
         return this.displayMessage;
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *

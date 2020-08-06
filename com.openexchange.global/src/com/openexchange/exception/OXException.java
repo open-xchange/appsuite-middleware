@@ -65,9 +65,9 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import com.openexchange.exception.Category.EnumType;
-import com.openexchange.exception.internal.I18n;
 import com.openexchange.i18n.Localizable;
 import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.i18n.internal.I18nServiceRegistryImpl;
 import com.openexchange.session.Session;
 
 /**
@@ -1030,10 +1030,10 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private String getDisplayMessage0(Locale locale) {
         Locale lcl = null == locale ? Locale.US : locale;
-        I18n i18n = I18n.getInstance();
+        I18nServiceRegistryImpl i18n = I18nServiceRegistryImpl.getInstance();
 
         // Translate format string
-        String msg = i18n.translate(lcl, displayMessage);
+        String msg = i18n.getI18nService(locale).getLocalized(displayMessage);
 
         // Generate formatted string using the specified locale, format string, and arguments.
         if (msg != null && displayArgs != null) {
@@ -1043,7 +1043,7 @@ public class OXException extends Exception implements OXExceptionConstants {
                     Object[] args = new Object[length];
                     for (int i = length; i-- > 0;) {
                         Object arg = displayArgs[i];
-                        args[i] = (arg instanceof Localizable) ? i18n.translate(lcl, ((Localizable) arg).getArgument()) : arg;
+                        args[i] = (arg instanceof Localizable) ? i18n.getI18nService(lcl).getLocalized(((Localizable) arg).getArgument()) : arg;
                     }
                     msg = String.format(lcl, msg, args);
                 } catch (NullPointerException e) {

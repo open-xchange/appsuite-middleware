@@ -105,9 +105,9 @@ public class JsoupParseControl {
     }
 
     /**
-     * Await expired push listeners from this control.
+     * Await expired parse tasks from this control.
      *
-     * @return The expired push listeners
+     * @return The expired parse tasks
      * @throws InterruptedException If interrupted while waiting
      */
     List<JsoupParseTask> awaitExpired() throws InterruptedException {
@@ -119,9 +119,9 @@ public class JsoupParseControl {
     }
 
     /**
-     * Removes expired push listeners from this control.
+     * Removes expired parse tasks from this control.
      *
-     * @return The expired push listeners
+     * @return The expired parse tasks
      */
     List<JsoupParseTask> removeExpired() {
         List<JsoupParseTask> expirees = new LinkedList<JsoupParseTask>();

@@ -50,23 +50,23 @@
 package com.openexchange.appsuite.osgi;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.appsuite.AppSuiteLoginRampUp;
 import com.openexchange.appsuite.AppsLoadServlet;
-import com.openexchange.appsuite.FileContribution;
-import com.openexchange.appsuite.FileContributor;
+import com.openexchange.appsuite.FileCacheProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AppsuiteActivator} - The activator for <code>"com.openexchange.appsuite"</code> bundle.
@@ -75,6 +75,7 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
 
     private AppsLoadServlet appsLoadServlet;
     private String alias;
+    private final boolean isWindows = Optional.ofNullable(System.getProperty("os.name")).orElse("").toLowerCase().startsWith("windows");
 
     /**
      * Initializes a new {@link AppsuiteActivator}.
@@ -99,32 +100,14 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
         File[] apps = getApps(config);
         File zoneinfo = new File(config.getProperty("com.openexchange.apps.tzdata", "/usr/share/zoneinfo/"));
 
-        // Track file contributors
-        final RankingAwareNearRegistryServiceTracker<FileContributor> contributorTracker = new RankingAwareNearRegistryServiceTracker<FileContributor>(context, FileContributor.class);
-        rememberTracker(contributorTracker);
+        // Track FileCacheProvider
+        final RankingAwareNearRegistryServiceTracker<FileCacheProvider> fileCacheProviderTracker = new RankingAwareNearRegistryServiceTracker<FileCacheProvider>(context, FileCacheProvider.class);
+        rememberTracker(fileCacheProviderTracker);
+        
         openTrackers();
 
-        // ... and register a composite file contributor
-        FileContributor compositeContributor = new FileContributor() {
-
-            @Override
-            public FileContribution getData(ServerSession session, String moduleName) throws OXException {
-                for (FileContributor contributor : contributorTracker.getServiceList()) {
-                    try {
-                        FileContribution contribution = contributor.getData(session, moduleName);
-                        if (contribution != null) {
-                            return contribution;
-                        }
-                    } catch (Exception x) {
-                        logger.warn("Failed to get data from file contributor {}.", contributor.getClass().getName(), x);
-                    }
-                }
-                return null;
-            }
-        };
-
         // Initialize Servlet
-        AppsLoadServlet appsLoadServlet = new AppsLoadServlet(compositeContributor);
+        AppsLoadServlet appsLoadServlet = new AppsLoadServlet(fileCacheProviderTracker);
         appsLoadServlet.reinitialize(apps, zoneinfo);
         this.appsLoadServlet = appsLoadServlet;
 
@@ -170,12 +153,24 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
         }
 
         String[] paths = property.split(":");
-        File[] apps = new File[paths.length];
+        List<File> apps = new ArrayList<File>(paths.length);
+        Optional<String> winPrefix = Optional.empty();
         for (int i = 0; i < paths.length; i++) {
-            apps[i] = new File(new File(paths[i]), "apps");
+            String path = paths[i];
+            if(winPrefix.isPresent()) {
+                path = winPrefix.get() + ":" + path;
+                winPrefix = Optional.empty();
+            }
+            File parent = new File(path);
+            if(parent.exists() == false && isWindows && path.length() == 1) {
+                // probably the drive name (e.g. the c of c:/folder/
+                winPrefix = Optional.of(path);
+                continue;
+            }
+            apps.add(path.endsWith("apps") ? parent : new File(parent, "apps"));
         }
 
-        return apps;
+        return apps.toArray(new File[apps.size()]);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------

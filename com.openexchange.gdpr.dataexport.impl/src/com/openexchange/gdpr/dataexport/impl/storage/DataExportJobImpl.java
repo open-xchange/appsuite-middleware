@@ -76,7 +76,7 @@ public class DataExportJobImpl implements DataExportJob {
 
     @Override
     public Optional<DataExportWorkItem> getNextDataExportWorkItem() throws OXException {
-        return Optional.ofNullable(sql.getNextWorkItem(task.getId(), task.getContextId()));
+        return Optional.ofNullable(sql.getNextWorkItem(task.getId(), task.getUserId(), task.getContextId()));
     }
 
     @Override

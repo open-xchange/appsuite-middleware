@@ -375,7 +375,7 @@ public final class IMAPConfig extends MailConfig {
                 // TODO: Touch address for proper equality check?
                 // imapServerAddress.toString();
             } catch (UnknownHostException e) {
-                throw IMAPException.Code.IO_ERROR.create(e, e.getMessage());
+                throw IMAPException.Code.UNKNOWN_HOST_ERROR.create(e, e.getMessage());
             }
         }
         return imapServerAddress;

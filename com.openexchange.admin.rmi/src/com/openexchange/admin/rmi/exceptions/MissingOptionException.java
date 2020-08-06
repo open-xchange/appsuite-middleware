@@ -48,7 +48,7 @@
  */
 package com.openexchange.admin.rmi.exceptions;
 
-public class MissingOptionException extends Exception {
+public class MissingOptionException extends AbstractAdminRmiException {
     /**
      * For serialization
      */
@@ -56,5 +56,13 @@ public class MissingOptionException extends Exception {
 
     public MissingOptionException(final String msg) {
         super(msg);
+    }
+
+    /**
+     * @param message
+     * @param cause
+     */
+    public MissingOptionException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

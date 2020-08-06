@@ -57,7 +57,7 @@ OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
 OXPREFIX=@prefix@
 CONSOLELOG=@consolelogfile@
-OSGI_JAR=/opt/open-xchange/bundles/org.eclipse.osgi_3.13.0.v20180409-1500.jar
+OSGI_JAR=/opt/open-xchange/bundles/org.eclipse.osgi_3.15.0.v20190830-1434.jar
 
 test -f $OXFUNCTIONS || {
     echo "missing common shell functions file"

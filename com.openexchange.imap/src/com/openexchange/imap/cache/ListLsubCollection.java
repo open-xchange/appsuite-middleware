@@ -80,7 +80,6 @@ import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.utils.MailFolderUtility;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -2055,12 +2054,17 @@ final class ListLsubCollection implements Serializable {
             listResponse.skip(2);
         }
 
-        // Read full name; decode the name (using RFC2060's modified UTF7)
+        // Read full name
         listResponse.skipSpaces();
-        String name = null == predefinedName ? BASE64MailboxDecoder.decode(listResponse.readAtomString()) : predefinedName;
-        if (MailFolderUtility.isInvalidFullName(name)) {
-            LOG.warn("Detected unsupported full name: {}. IMAP folder will be discarded.", name);
-            return null;
+        String name;
+        if (null == predefinedName) {
+            name = listResponse.readAtomString();
+            if (!listResponse.supportsUtf8()) {
+                // Decode the name (using RFC2060's modified UTF7)
+                name = BASE64MailboxDecoder.decode(name);
+            }
+        } else {
+            name = predefinedName;
         }
 
         // Return

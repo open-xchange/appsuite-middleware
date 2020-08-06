@@ -53,9 +53,12 @@ import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  *
@@ -82,7 +85,7 @@ public abstract class DateTimeMapping<O> extends DefaultJsonMapping<DateTime, O>
         if (dateTimeJSON.has(TIME_ZONE)) {
             tz = dateTimeJSON.getString(TIME_ZONE);
         }
-        this.set(to, from.isNull(getAjaxName()) ? null : DateTime.parse(tz, value));
+        this.set(to, from.isNull(getAjaxName()) ? null : parse(tz, value));
     }
 
     @Override
@@ -103,5 +106,22 @@ public abstract class DateTimeMapping<O> extends DefaultJsonMapping<DateTime, O>
         result.put(VALUE, value.toString());
         return result;
 	}
+
+    private DateTime parse(String timeZoneId, String value) throws OXException {
+        TimeZone timeZone = null;
+        if (null != timeZoneId) {
+            timeZone = CalendarUtils.optTimeZone(timeZoneId, null);
+            if (null == timeZone) {
+                throw CalendarExceptionCodes.INVALID_TIMEZONE.create(timeZoneId);
+            }
+        }
+        try {
+            DateTime dateTime = DateTime.parse(timeZone, value);
+            dateTime.getTimestamp(); // For input validation
+            return dateTime;
+        } catch (Exception e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, getAjaxName(), value);
+        }
+    }
 
 }

@@ -65,6 +65,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
@@ -414,6 +415,7 @@ public abstract class AbstractPerformer {
         private static final long serialVersionUID = -6666991788068206301L;
 
         private boolean containsSubscribed;
+        private boolean containsUsedForSync;
 
         /**
          * Initializes a new {@link UpdateFolder}.
@@ -421,6 +423,7 @@ public abstract class AbstractPerformer {
         public UpdateFolder() {
             super();
             containsSubscribed = false;
+            containsUsedForSync = false;
         }
 
         @Override
@@ -442,6 +445,17 @@ public abstract class AbstractPerformer {
         public void setSubscribed(boolean subscribed) {
             super.setSubscribed(subscribed);
             containsSubscribed = true;
+        }
+        
+        @Override
+        public void setUsedForSync(UsedForSync usedForSync) {
+            super.setUsedForSync(usedForSync);
+            containsUsedForSync = true;
+        }
+
+        @Override
+        public boolean containsUsedForSync() {
+            return containsUsedForSync;
         }
     }
 

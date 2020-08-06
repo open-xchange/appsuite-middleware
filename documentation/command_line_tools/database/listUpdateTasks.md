@@ -2,6 +2,7 @@
 title: listUpdateTasks
 icon: far fa-circle
 tags: Administration, Command Line tools, Database, Schema, Update Task
+package: open-xchange-core
 ---
 
 # NAME
@@ -46,7 +47,7 @@ An update task may be in 'pending' state for three reasons:
 : Lists only the update tasks excluded via namespace
 
 **-n**,**--name** *arg*
-: A valid schema name. This option is a substitute for '-c/--context' option. If both are present '-c/--context' is preferred.
+: A valid schema name. Can be retrieved via `listdatabaseschema` CLT
 
 **-A**, **--adminuser** *masterAdminUser*
 : Master admin user name for authentication. Optional, depending on your configuration.
@@ -66,3 +67,6 @@ An update task may be in 'pending' state for three reasons:
 **--responsetimeout**
 : The optional response timeout in seconds when reading data from server (default: 0s; infinite).
 
+# SEE ALSO
+
+[listdatabaseschema(1)](listdatabaseschema), [checkdatabase(1)](checkdatabase)

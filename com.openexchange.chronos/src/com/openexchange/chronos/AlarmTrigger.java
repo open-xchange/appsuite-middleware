@@ -474,4 +474,9 @@ public class AlarmTrigger implements Comparable<AlarmTrigger> {
         return thisTime == otherTime ? 0 : thisTime > otherTime ? 1 : 0;
     }
 
+    @Override
+    public String toString() {
+        return "AlarmTrigger [action=" + action + ", time=" + time + ", alarm=" + alarm + ", userId=" + userId + ", eventId=" + eventId + ", recurrenceId=" + recurrenceId + "]";
+    }
+
 }

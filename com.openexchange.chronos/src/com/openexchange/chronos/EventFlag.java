@@ -62,6 +62,10 @@ public enum EventFlag {
      */
     ATTACHMENTS,
     /**
+     * The event contains at least one conference.
+     */
+    CONFERENCES,
+    /**
      * The calendar user has at least one alarm associated with the event.
      */
     ALARMS,

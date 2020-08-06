@@ -104,14 +104,14 @@ public class ScheduleChangeImpl implements ScheduleChange {
 
     /**
      * Initializes a new {@link ScheduleChangeImpl}.
-     * 
+     *
      * @param services A service lookup reference
      * @param originator The originator of the schedule change
      * @param comment An optional comment set by the originator
      * @param templateName The template name to use for rendering
      * @param partStat The participations status of the originator
      * @param resource The underlying calendar object resource
-     * @param seriesMaster The series master event if changes affect a recurrence instance, <code>null</code>, otherwise 
+     * @param seriesMaster The series master event if changes affect a recurrence instance, <code>null</code>, otherwise
      * @param action The change action
      * @param changes The changes
      */
@@ -181,7 +181,7 @@ public class ScheduleChangeImpl implements ScheduleChange {
         resources = ChangesUtils.sortAttendees(resources, CalendarUserType.RESOURCE);
 
         Map<String, Object> env = new HashMap<String, Object>();
-        env.put("mail", new NotificationMail(event, participants, resources));
+        env.put("mail", new NotificationMail(event, participants, resources, event.getConferences()));
         env.put("templating", templateService.createHelper(env, null, false));
         env.put("formatters", new DateHelper(event, recipientSettings.getLocale(), recipientSettings.getTimeZone(), recipientSettings.getRegionalSettings()));
         env.put("labels", new LabelHelper(services, event, seriesMaster, originator, recipientSettings, comment, messageContext));

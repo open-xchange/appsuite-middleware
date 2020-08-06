@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.scheduling.ChangeNotification;
 import com.openexchange.chronos.scheduling.ScheduleStatus;
@@ -67,7 +68,6 @@ import com.openexchange.chronos.scheduling.common.Utils;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.version.VersionService;
@@ -150,17 +150,7 @@ public class IMipTransportProvider extends AbstractMailTransportProvider {
         /*
          * Search for an address to send to
          */
-        if (Strings.isNotEmpty(message.getRecipient().getUri()) && message.getRecipient().getUri().toLowerCase().startsWith("mailto:")) {
-            return true;
-        }
-        if (Strings.isNotEmpty(message.getRecipient().getEMail())) {
-            return true;
-        }
-
-        /*
-         * Don't send
-         */
-        return false;
+        return null != CalendarUtils.optEMailAddress(message.getRecipient().getUri());
     }
 
     private String getSubject(SchedulingMessage message) {
@@ -206,5 +196,10 @@ public class IMipTransportProvider extends AbstractMailTransportProvider {
         }
         subject = String.format(helper.getString(subject), summary);
         return subject;
+    }
+
+    @Override
+    protected boolean preferNoReplyAccount(Session session) {
+        return false;
     }
 }

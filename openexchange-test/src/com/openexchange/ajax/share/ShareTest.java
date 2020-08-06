@@ -663,7 +663,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @throws Exception
      */
     protected File updateFile(File file, Field[] modifiedColumns, RequestCustomizer<UpdateInfostoreRequest> customizer) throws Exception {
-        Date timestamp = file.getMeta() == null ? file.getLastModified() : (Date) file.getMeta().getOrDefault("timestamp", file.getLastModified()); 
+        Date timestamp = file.getMeta() == null ? file.getLastModified() : (Date) file.getMeta().getOrDefault("timestamp", file.getLastModified());
         UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(file, modifiedColumns, timestamp);
         updateInfostoreRequest.setNotifyPermissionEntities(Transport.MAIL);
         updateInfostoreRequest.setFailOnError(true);
@@ -864,14 +864,56 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
     }
 
     /**
-     * Fetches the currently stored e-mail messages on the server and discovers an inviation message sent to a specifc recipient.
+     * Fetches the currently stored e-mail messages on the server and discovers an invitation message sent to a specific recipient.
      *
      * @param client The ajax client to use
      * @param emailAddress The guest's e-mail address to search for
      * @return The message, or <code>null</code> if not found
      */
     protected Message discoverInvitationMessage(AJAXClient client, String emailAddress) throws Exception {
-        return discoverInvitationMessage(client.execute(new GetMailsRequest()).getMessages(), emailAddress);
+        return discoverInvitationMessage(client, emailAddress, 5000L);
+    }
+
+    /**
+     * Fetches the currently stored e-mail messages on the server and discovers an invitation message sent to a specific recipient.
+     *
+     * @param client The ajax client to use
+     * @param emailAddress The guest's e-mail address to search for
+     * @param timeout The maximum timeout to wait for the message to arrive, or <code>0</code> to only check once
+     * @return The message, or <code>null</code> if not found
+     */
+    protected Message discoverInvitationMessage(AJAXClient client, String emailAddress, long timeout) throws Exception {
+        if (0 >= timeout) {
+            return discoverInvitationMessage(client.execute(new GetMailsRequest()).getMessages(), emailAddress);
+        }
+        long until = System.currentTimeMillis() + timeout;
+        do {
+            Message message = discoverInvitationMessage(client.execute(new GetMailsRequest()).getMessages(), emailAddress);
+            if (null != message) {
+                return message;
+            }
+            Thread.sleep(500);
+        } while (System.currentTimeMillis() < until);
+        return null;
+    }
+
+    protected boolean awaitGuest8Cleanup(int guestID, long timeout) throws Exception {
+        long until = System.currentTimeMillis() + timeout;
+        do {
+            com.openexchange.ajax.user.actions.GetResponse response = getClient().execute(new com.openexchange.ajax.user.actions.GetRequest(guestID, TimeZones.UTC, false));
+            if (response.hasError() && null != response.getException()) {
+                OXException e = response.getException();
+                if ("USR-0010".equals(e.getErrorCode())) {
+                    return true;
+                } else if ("CON-0125".equals(e.getErrorCode())) {
+                    // partly okay
+                } else {
+                    throw e;
+                }
+            }
+            Thread.sleep(500);
+        } while (System.currentTimeMillis() < until);
+        return false;
     }
 
     /**

@@ -63,7 +63,6 @@ import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean;
 import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBeanImpl;
 import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetricCollector;
 import com.openexchange.management.ManagementService;
-import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.MultipleServiceTracker;
 import com.openexchange.server.ServiceLookup;
 
@@ -84,28 +83,30 @@ public class GeoLocationServiceTracker extends MultipleServiceTracker {
 
     /**
      * Initialises a new {@link GeoLocationServiceTracker}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      * @param bundleContext The {@link BundleContext}
      */
     public GeoLocationServiceTracker(ServiceLookup services, BundleContext bundleContext) {
-        super(bundleContext, GeoLocationService.class, ManagementService.class, MetricService.class);
+        super(bundleContext, GeoLocationService.class, ManagementService.class);
         this.services = services;
         this.bundleContext = bundleContext;
     }
 
     @Override
     protected void onAllAvailable() {
-        CountryCodeIpChecker service = new CountryCodeIpChecker(services, new IPCheckMetricCollector(getTrackedService(MetricService.class)));
+        CountryCodeIpChecker service = new CountryCodeIpChecker(services, new IPCheckMetricCollector());
         bundleContext.registerService(IPChecker.class, service, null);
 
         ManagementService managementService = getTrackedService(ManagementService.class);
-        try {
-            metricsMBean = new IPCheckMBeanImpl(services, service);
-            managementService.registerMBean(new ObjectName(IPCheckMBean.NAME), metricsMBean);
-        } catch (NotCompliantMBeanException | MalformedObjectNameException | OXException e) {
-            LOG.error("Could not start bundle '{}': {}", bundleContext.getBundle().getSymbolicName(), e.getMessage(), e);
-            return;
+        if (managementService != null) {
+            try {
+                metricsMBean = new IPCheckMBeanImpl(services, service);
+                managementService.registerMBean(new ObjectName(IPCheckMBean.NAME), metricsMBean);
+            } catch (NotCompliantMBeanException | MalformedObjectNameException | OXException e) {
+                LOG.error("Could not start bundle '{}': {}", bundleContext.getBundle().getSymbolicName(), e.getMessage(), e);
+                return;
+            }
         }
         LOG.info("Bundle successfully started: {}", bundleContext.getBundle().getSymbolicName());
 

@@ -85,11 +85,8 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
-import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
@@ -182,11 +179,9 @@ public class EventResultConverter implements ResultConverter {
             JSONObject result = EventMapper.getInstance().serialize(event, fields.toArray(new EventField[fields.size()]), timeZoneID, session);
             if (extendedEntities) {
                 /*
-                 * also resolve via email address for externally organized events
+                 * add extended information for internal attendees
                  */
-                JSONObject jsonOrganizer = result.optJSONObject(ChronosJsonFields.ORGANIZER);
-                boolean resolveExternals = null != jsonOrganizer && 0 >= jsonOrganizer.optInt(ChronosJsonFields.Attendee.ENTITY);
-                extendEntities(session, timeZoneID, result, resolveExternals);
+                extendEntities(session, timeZoneID, result);
             }
             return result;
         } catch (JSONException e) {
@@ -206,18 +201,16 @@ public class EventResultConverter implements ResultConverter {
     }
 
     /**
-     * Enriches the attendees within the supplied event with detailed information about the underlying groupware resource.
+     * Enriches the internal attendees within the supplied event with detailed information about the underlying groupware resource.
      *
      * @param session The session
      * @param timeZoneID The timezone identifier to use
      * @param jsonEvent The JSON representation of the event being converted
-     * @param resolveExternals <code>true</code> to also try to resolve external attendees per email address, <code>false</code>, otherwise
      */
-    private void extendEntities(ServerSession session, String timeZoneID, JSONObject jsonEvent, boolean resolveExternals) {
+    private void extendEntities(ServerSession session, String timeZoneID, JSONObject jsonEvent) {
         Map<Integer, JSONObject> userAttendeesPerId = new HashMap<Integer, JSONObject>();
         Map<Integer, JSONObject> resourceAttendeesPerId = new HashMap<Integer, JSONObject>();
         Map<Integer, JSONObject> groupAttendeesPerId = new HashMap<Integer, JSONObject>();
-        Map<String, JSONObject> userAttendeesPerEmail = new HashMap<String, JSONObject>();
         /*
          * collect resolvable attendees
          */
@@ -238,12 +231,6 @@ public class EventResultConverter implements ResultConverter {
                     } else if (CalendarUserType.GROUP.matches(cuType)) {
                         groupAttendeesPerId.put(I(entity), jsonAttendee);
                     }
-                } else if (resolveExternals && CalendarUserType.INDIVIDUAL.matches(cuType) && 
-                    Strings.isEmpty(jsonAttendee.optString(ChronosJsonFields.Attendee.CN, null))) {
-                    String email = CalendarUtils.optEMailAddress(jsonAttendee.optString(ChronosJsonFields.Attendee.URI, null));
-                    if (Strings.isNotEmpty(email)) {
-                        userAttendeesPerEmail.put(email, jsonAttendee);
-                    }
                 }
             }
         }
@@ -253,7 +240,6 @@ public class EventResultConverter implements ResultConverter {
         addGroupDetailsFromId(session.getContext(), groupAttendeesPerId);
         addResourceDetailsFromId(session.getContext(), resourceAttendeesPerId);
         addContactDetailsFromId(session, timeZoneID, userAttendeesPerId);
-        addContactDetailsFromEmail(session, timeZoneID, userAttendeesPerEmail);
     }
 
     private void addGroupDetailsFromId(Context context, Map<Integer, JSONObject> attendeesPerId) {
@@ -282,31 +268,6 @@ public class EventResultConverter implements ResultConverter {
                 entry.getValue().put(ChronosJsonFields.Attendee.RESOURCE, ResourceWriter.writeResource(resource));
             } catch (OXException | JSONException e) {
                 LOG.warn("Error adding resource details for attendee", e);
-            }
-        }
-    }
-
-    private void addContactDetailsFromEmail(Session session, String timeZoneID, Map<String, JSONObject> attendeesPerEmail) {
-        if (null == attendeesPerEmail || attendeesPerEmail.isEmpty()) {
-            return;
-        }
-        for (Entry<String, JSONObject> entry : attendeesPerEmail.entrySet()) {
-            ContactSearchObject contactSearch = new ContactSearchObject();
-            contactSearch.setExactMatch(true);
-            contactSearch.setAllEmail(entry.getKey());
-            contactSearch.setOrSearch(true);
-            contactSearch.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-            SearchIterator<Contact> users = null;
-            try {
-                users = requireService(ContactService.class, services).searchUsers(session, contactSearch, CONTACT_FIELDS_TO_LOAD, null);
-                if (users.hasNext()) {
-                    Contact con = users.next();
-                    entry.getValue().put(ChronosJsonFields.Attendee.CONTACT, serialize(con, CalendarUtils.optTimeZone(timeZoneID, TimeZones.UTC), session));
-                }
-            } catch (OXException | JSONException e) {
-                LOG.warn("Error adding contact details for internal user attendees", e);
-            } finally {
-                SearchIterators.close(users);
             }
         }
     }

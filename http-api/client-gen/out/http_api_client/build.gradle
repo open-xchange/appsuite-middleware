@@ -32,16 +32,24 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 ext {
     swagger_annotations_version = "1.5.8"
     jackson_version = "2.7.5"
-    jersey_version = "2.22.2"
+    jersey_version = "2.26"
     jodatime_version = "2.9.4"
     junit_version = "4.12"
+    hk2_version = "2.5.0-b42"
 }
 
 dependencies {
     compile "io.swagger:swagger-annotations:$swagger_annotations_version"
+    compile "org.glassfish.jersey.core:jersey-common:$jersey_version"
     compile "org.glassfish.jersey.core:jersey-client:$jersey_version"
+    compile "org.glassfish.jersey.core:jersey-server:$jersey_version"
+    compile "org.glassfish.jersey.inject:jersey-hk2:$jersey_version"
+    compile "org.glassfish.jersey.ext:jersey-entity-filtering:$jersey_version"
     compile "org.glassfish.jersey.media:jersey-media-multipart:$jersey_version"
     compile "org.glassfish.jersey.media:jersey-media-json-jackson:$jersey_version"
+    compile "org.glassfish.hk2:hk2-utils:$hk2_version"
+    compile "org.glassfish.hk2:hk2-api:$hk2_version"
+    compile "org.glassfish.hk2:hk2-locator:$hk2_version"
     compile "com.fasterxml.jackson.core:jackson-core:$jackson_version"
     compile "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
     compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"

@@ -51,11 +51,10 @@ package com.openexchange.chronos.provider.caching.internal.response;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import java.util.Date;
-import java.util.Iterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
@@ -82,35 +81,49 @@ public class SingleEventResponseGenerator extends ResponseGenerator {
         this.recurrenceId = recurrenceId;
     }
 
+    /**
+     * Loads a specific event from the storage.
+     *
+     * @param storage The initialized calendar storage to use
+     * @param userId The identifier of the calendar user to load additional data for, or <code>-1</code> to not load user-sensitive data
+     * @param eventId The identifier of the event to load
+     * @param recurrenceId The recurrence identifier of the targeted event occurrence, or <code>null</code> if not applicable
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to load all data
+     * @return The loaded event
+     */
+    public static Event loadEvent(CalendarStorage storage, int userId, String eventId, RecurrenceId recurrenceId, EventField[] fields) throws OXException {
+        Event event = storage.getEventStorage().loadEvent(eventId, getFields(fields, EventField.FOLDER_ID));
+        if (null == event) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
+        }
+        event = storage.getUtilities().loadAdditionalEventData(userId, event, fields);
+        event.setFlags(getFlags(event, userId));
+        if (null != recurrenceId) {
+            if (isSeriesMaster(event)) {
+                Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, fields);
+                if (null != exceptionEvent) {
+                    exceptionEvent = storage.getUtilities().loadAdditionalEventData(userId, exceptionEvent, fields);
+                    exceptionEvent.setFlags(getFlags(exceptionEvent, userId));
+                    event = exceptionEvent;
+                } else {
+                    event = CalendarUtils.getOccurrence(Services.getService(RecurrenceService.class), event, recurrenceId);
+                }
+            }
+            if (null == event || false == recurrenceId.matches(event.getRecurrenceId())) {
+                throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventId, recurrenceId);
+            }
+        }
+        return event;
+    }
+
     public Event generate() throws OXException {
+        EventField[] fields = cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        int userId = cachedCalendarAccess.getAccount().getUserId();
         return new OSGiCalendarStorageOperation<Event>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
 
             @Override
             protected Event call(CalendarStorage storage) throws OXException {
-                EventField[] fields = getFields(cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.FOLDER_ID);
-                Event event = storage.getEventStorage().loadEvent(eventId, fields);
-                if (event == null) {
-                    throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
-                }
-
-                event = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), event, fields);
-                event.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
-                if (null != recurrenceId) {
-                    if (isSeriesMaster(event)) {
-                        Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, fields);
-                        if (null != exceptionEvent) {
-                            exceptionEvent = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), exceptionEvent, fields);
-                            event = exceptionEvent;
-                        } else {
-                            Iterator<Event> iterator = Services.getService(RecurrenceService.class).iterateEventOccurrences(event, new Date(recurrenceId.getValue().getTimestamp()), null);
-                            event = iterator.hasNext() ? iterator.next() : null;
-                        }
-                    }
-                    if (null == event || false == recurrenceId.equals(event.getRecurrenceId())) {
-                        throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventId, recurrenceId);
-                    }
-                }
-                return event;
+                return loadEvent(storage, userId, eventId, recurrenceId, fields);
             }
         }.executeQuery();
     }

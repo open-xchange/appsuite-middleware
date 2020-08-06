@@ -498,7 +498,7 @@ public class Datamining {
             defaults.put("user", user);
             defaults.put("password", password);
 
-            Connection conn = DriverManager.getConnection(url, defaults);
+            Connection conn = DriverManager.getConnection(urlToUse, defaults);
             return (MySQLConnection) conn;
         } catch (ClassNotFoundException e) {
             System.out.println("Error : JDBC driver not found");
@@ -605,10 +605,10 @@ public class Datamining {
 
     private static void reportAverageNumberOfInfostoreObjectsPerContext() {
         allTheQuestions.add(AVERAGE_NUMBER_OF_INFOSTORE_OBJECTS_PER_CONTEXT);
-        Float numberInAllSchemata = new Float(0.0);
+        float numberInAllSchemata = 0.0F;
         try {
             for (Schema schema : allSchemata) {
-                String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
+                String url = generateDbUrlFrom(schema);
                 MySQLConnection conn = getDBConnection(url, schema.getLogin(), schema.getPassword());
                 if (conn != null) {
                     Statement query = null;
@@ -621,7 +621,7 @@ public class Datamining {
 
                         while (result.next()) {
                             String numberInOneSchema = result.getString(1);
-                            numberInAllSchemata += new Float(numberInOneSchema);
+                            numberInAllSchemata += Float.parseFloat(numberInOneSchema);
                         }
                         conn.close();
                     } catch (SQLException e) {
@@ -639,10 +639,10 @@ public class Datamining {
 
     private static void reportAverageNumberOfInfostoreObjectsPerSchema() {
         allTheQuestions.add(AVERAGE_NUMBER_OF_INFOSTORE_OBJECTS_PER_SCHEMA);
-        Float numberInAllSchemata = new Float(0.0);
+        float numberInAllSchemata = 0.0F;
         try {
             for (Schema schema : allSchemata) {
-                String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
+                String url = generateDbUrlFrom(schema);
                 MySQLConnection conn = getDBConnection(url, schema.getLogin(), schema.getPassword());
                 if (conn != null) {
                     Statement query = null;
@@ -655,7 +655,7 @@ public class Datamining {
 
                         while (result.next()) {
                             String numberInOneSchema = result.getString(1);
-                            numberInAllSchemata += new Float(numberInOneSchema);
+                            numberInAllSchemata += Float.parseFloat(numberInOneSchema);
                         }
                         conn.close();
                     } catch (SQLException e) {
@@ -674,7 +674,7 @@ public class Datamining {
     protected static BigInteger countOverAllSchemata(String sql) {
         BigInteger numberOfObjects = new BigInteger("0");
         for (Schema schema : allSchemata) {
-            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
+            String url = generateDbUrlFrom(schema);
             MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
             if (conn != null) {
                 Statement query = null;
@@ -704,7 +704,7 @@ public class Datamining {
         }
         rm.put(Integer.valueOf(Integer.MAX_VALUE), Integer.valueOf(0));
         for (Schema schema : allSchemata) {
-            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + '/' + schema.getSchemaname();
+            String url = generateDbUrlFrom(schema);
             MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
             if (conn != null) {
                 java.sql.PreparedStatement prep = null;
@@ -750,7 +750,7 @@ public class Datamining {
     protected static HashMap<Integer, Integer> externalAccountsOverAllSchemata(int max) {
         final HashMap<Integer, Integer> ret = new HashMap<>();
         for (Schema schema : allSchemata) {
-            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
+            String url = generateDbUrlFrom(schema);
             MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
             if (conn != null) {
                 java.sql.PreparedStatement prep = null;
@@ -783,7 +783,7 @@ public class Datamining {
     protected static BigInteger maximumForAllSchemata(String sql) {
         BigInteger numberOfObjects = new BigInteger("0");
         for (Schema schema : allSchemata) {
-            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
+            String url = generateDbUrlFrom(schema);
             MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
             if (conn != null) {
                 Statement query = null;
@@ -809,9 +809,9 @@ public class Datamining {
     }
 
     protected static Float averageForAllSchemata(String sql) {
-        Float numberOfObjects = new Float("0");
+        float numberOfObjects = 0.0F;
         for (Schema schema : allSchemata) {
-            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
+            String url = generateDbUrlFrom(schema);
             MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
             if (conn != null) {
                 Statement query = null;
@@ -821,7 +821,7 @@ public class Datamining {
                     result = query.executeQuery(sql);
                     while (result.next()) {
                         String numberInOneSchema = result.getString(1);
-                        Float numberInThisSchema = new Float(numberInOneSchema);
+                        float numberInThisSchema = Float.parseFloat(numberInOneSchema);
                         numberOfObjects = numberOfObjects + numberInThisSchema;
                     }
                 } catch (SQLException e) {
@@ -831,8 +831,27 @@ public class Datamining {
                 }
             }
         }
-        Float averageNumberOfObjects = numberOfObjects / allSchemata.size();
-        return averageNumberOfObjects;
+        return Float.valueOf(numberOfObjects / allSchemata.size());
+    }
+
+    private static String generateDbUrlFrom(Schema schema) {
+        String url = schema.getUrl();
+
+        int pos = url.indexOf("://");
+        String host, scheme;
+        if (pos < 0) {
+            host = url;
+            scheme =  "";
+        } else {
+            pos = pos + 3;
+            host = url.substring(pos);
+            scheme = url.substring(0, pos);
+        }
+
+        pos = host.lastIndexOf('/');
+        host = (pos < 0 ? host : host.substring(0, pos)) + '/' + schema.getSchemaname();
+
+        return scheme + host;
     }
 
     public static String getFilename(){

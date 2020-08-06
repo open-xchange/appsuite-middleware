@@ -92,8 +92,7 @@ public class Folders {
             ContentType contentType = getContentType(module);
             if (type != null && contentType != null) {
                 folderIDs = new LinkedList<Integer>();
-                FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(
-                    FolderStorage.REAL_TREE_ID, contentType, type, false, session, null);
+                FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(FolderStorage.REAL_TREE_ID, contentType, type, false, session, null);
                 UserizedFolder[] folders = visibleFolders.getResponse();
                 if (null != folders && 0 < folders.length) {
                     for (UserizedFolder folder : folders) {
@@ -102,7 +101,7 @@ public class Folders {
                                 folderIDs.add(Integer.valueOf(folder.getID()));
                             }
                         } catch (NumberFormatException e) {
-                            throw FindExceptionCode.INVALID_FOLDER_ID.create(folder.getID(), Module.CALENDAR.getIdentifier());
+                            throw FindExceptionCode.INVALID_FOLDER_ID.create(folder.getID(), Module.CALENDAR.getIdentifier(), e);
                         }
                     }
                 }
@@ -111,7 +110,7 @@ public class Folders {
             try {
                 folderIDs = Collections.singletonList(Integer.valueOf(folderID));
             } catch (NumberFormatException e) {
-                throw FindExceptionCode.INVALID_FOLDER_ID.create(folderID, Module.CALENDAR.getIdentifier());
+                throw FindExceptionCode.INVALID_FOLDER_ID.create(folderID, Module.CALENDAR.getIdentifier(), e);
             }
         }
 

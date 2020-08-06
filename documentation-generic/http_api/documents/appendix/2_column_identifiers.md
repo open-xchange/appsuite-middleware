@@ -58,6 +58,9 @@ specific field data of single or multiple objects.
 |share_url| String | The share link for "anonymous" entities.|
 |password| String | The optionally set password for "anonymous" entities.|
 |expiry_date| Date | The optionally set expiry date for "anonymous" entities.|
+|includeSubfolders| Boolean | The optionally set "include subfolders" option for "anonymous" entities. |
+|isInherited| boolean | A flag indicating whether the permissions is inherited from the parent folder or not. The client must not allow the user to delete or update inherited permissions. |
+
 
 </div>
 
@@ -103,6 +106,7 @@ specific field data of single or multiple objects.
 | 318 | account_id |String|Will be null if the folder does not belong to any account (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-agnostic system folder.|
 | 319 | folder_name |String|The raw and therefore untranslated name of this folder|
 | 320 | origin |String|The folder's origin path.|
+| 321 | used_for_sync |Object| A json object containing the fields 'value' and 'protected'. The value field indicates whether this folder is used for sync or not. And the 'protected' field shows if the client can change this value or not.|
 | 3010 | **_DEPRECATED_** com.openexchange.publish.publicationFlag |Boolean|**_DEPRECATED_** The publication feature has been removed with v7.10.2. This column is igonred.|
 | 3020 | com.openexchange.subscribe.subscriptionFlag |Boolean|Indicates whether this folder has subscriptions storing their content in this folder. Direct write operations on the content of this folder is forbidden. Clients should therefore not offer those options to the user. Read Only, provided by the com.openexchange.subscribe plugin|
 | 3030 | com.openexchange.folderstorage.displayName |String|Provides the display of the folder's owner. Read Only|
@@ -505,7 +509,7 @@ specific field data of single or multiple objects.
 |661 | date | String | The date of a mail message. As configured, either the internal received date or mail's sent date (as given by <code>"Date"</code> header). Supposed to be the replacement for ``sent_date`` (609) or ``received_date`` (610) to let the Open-Xchange Middleware decide based on configuration for ``com.openexchange.mail.preferSentDate`` property what to consider. Supported at both - ``columns`` parameter and ``sort`` parameter.|
 |662 | text\_preview\_if_available | String | A mail's text preview. Only returned if immediately available from mail server. An empty string signals that mail has no body content. ``NULL`` signals not available.|
 |663 | text_preview | String | A mail's text preview. An empty string signals that mail has no body content. Might be slow.|
-|664 | authenticity | JSON | The light-weighted version of the authenticity status result, i.e. the status string.|
+|664 | authenticity_preview | JSON | The light-weighted version of the authenticity status result, i.e. the status string.|
 |665 | authenticity | JSON | The heavy-weighted version of the authenticity status results as described in MailData.|
 
 </div>
@@ -578,7 +582,7 @@ specific field data of single or multiple objects.
 |708 | file_md5sum | String | MD5Sum of the document, if available. |
 |709 | version_comment | String | A version comment is used to file a changelog for the file. |
 |710 | current_version | Boolean | “true” if this version is the current version “false” otherwise. Note: This is not writeable |
-|711 | number_of\_versions | Number | The number of all versions of the infoitem. Note: This is not writeable. |
+|711 | number_of\_versions | Number | The number of versions of the infoitem. In case the number is unknown this field is set to -1. Note: This is not writeable. |
 |712 | origin | String | The file's origin path. Since 7.10.0. |
 |713 | capture_date | Time | The capture/creation date of the media resource. Since 7.10.2. |
 |714 | geolocation | String | The geo location of the media resource as a parenthesized latitude and longitude pair. Since 7.10.2. |

@@ -57,11 +57,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Properties;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.java.Streams;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * This class contains the methods for reading all configurations for
@@ -123,11 +120,6 @@ public final class DirectoryService {
    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DirectoryService.class);
 
    /**
-    * The customization properties for the directory service.
-    */
-   private static volatile Properties props;
-
-   /**
     * The URI for the directory service.
     */
    private static String uri = null;
@@ -165,39 +157,6 @@ public final class DirectoryService {
    private DirectoryService() {
        super();
    }
-
-    /**
-     * This method reads the customization properties for the directory service.
-     * @return the read customization properties.
-     */
-    public static Properties getCustomization() {
-        Properties tmp = props;
-        if (null == tmp) {
-            synchronized (DirectoryService.class) {
-                tmp = props;
-                if (null == tmp) {
-                    File propfile = null;
-                    try {
-                        propfile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("ldap.properties");
-                    } catch (NullPointerException e) {
-                        LOG.error("Config file ldap.properties is not set in ComfireConfig.");
-                    }
-                    tmp = new Properties();
-                    FileInputStream fis = null;
-                    try {
-                        fis = new FileInputStream(propfile);
-                        tmp.load(fis);
-                    } catch (IOException e) {
-                        LOG.error("Cannot load properties for ldap!", e);
-                    } finally {
-                        Streams.close(fis);
-                    }
-                    props = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
 
    /**
     * This method returns the base distinguished name of the directory service.

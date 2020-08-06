@@ -46,16 +46,25 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.NameAndIdObject;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -65,7 +74,12 @@ import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.log.LogProperties;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.PermissionConfigurationChecker;
 
 /**
  * General abstraction class used by all impl classes
@@ -74,32 +88,99 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
  */
 public abstract class OXCommonImpl {
 
+    private static final String CONFIG_NAMESPACE = "config";
+
     private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXCommonImpl.class);
 
     protected final OXToolStorageInterface tool;
 
+    /**
+     * Initializes a new {@link OXCommonImpl}.
+
+     * @throws StorageException In case the PermissionConfigurationChecker service is unavailable
+     */
     public OXCommonImpl() {
         tool = OXToolStorageInterface.getInstance();
     }
 
     /**
      * Checks whether the given context exists or not
-     * 
+     *
      * @param ctx The context to check
      * @throws NoSuchContextException In case the context doesn't exist
      * @throws StorageException In case of errors with the storage
      */
     protected void checkExistence(Context ctx) throws NoSuchContextException, StorageException {
-    	if (!tool.existsContext(ctx)) {
-            throw new NoSuchContextException(ctx.getId());
+        if (!tool.existsContext(ctx)) {
+            throw new NoSuchContextException(i(ctx.getId()));
         }
     }
-    
+
     protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
         if (null == ctx || null == ctx.getId()) {
             final InvalidCredentialsException e = new InvalidCredentialsException("Client sent invalid context data object");
             LOGGER.error("", e);
             throw e;
+        }
+    }
+
+    /**
+     * Checks if the given user has attributes which contain illegal properties
+     *
+     * @param user The user to check
+     * @throws InvalidDataException in case the given user has Attributes which contain invalid properties
+     */
+    protected void checkUserAttributes(final User user) throws InvalidDataException {
+        if (user != null && user.getUserAttributes() != null) {
+            checkUserAttributes(user.getUserAttributes());
+        }
+    }
+
+    /**
+     * Checks if the capabilities contain illegal capabilities
+     *
+     * @param capsToAdd The capabilities to check
+     * @param capsToRemove The capabilities to check
+     * @throws InvalidDataException in case an illegal capability has been found
+     */
+    protected void checkCapabilities(final Optional<Set<String>> capsToAdd, final Optional<Set<String>> capsToRemove) throws InvalidDataException {
+        try {
+            Set<String> capsToCheck;
+            if (capsToAdd.isPresent()) {
+                if (capsToRemove.isPresent()) {
+                    capsToCheck = Stream.concat(capsToAdd.get().stream(), capsToRemove.get().stream()).collect(Collectors.toSet());
+                } else {
+                    capsToCheck = capsToAdd.get();
+                }
+            } else {
+                if (capsToRemove.isPresent() == false) {
+                    // Nothing to do
+                    return;
+                }
+                capsToCheck = capsToRemove.get();
+            }
+            AdminServiceRegistry.getInstance().getService(PermissionConfigurationChecker.class, true).checkCapabilities(capsToCheck);
+        } catch (OXException e) {
+            throw new InvalidDataException(e);
+        }
+    }
+
+    /**
+     * Checks if the given user attributes contain any illegal properties
+     *
+     * @param attributes The user attributes to check
+     * @throws InvalidDataException in case the given user Attributes contain invalid properties
+     */
+    protected void checkUserAttributes(final Map<String, Map<String, String>> attributes) throws InvalidDataException {
+        if (attributes != null) {
+            Map<String, String> map = attributes.get(CONFIG_NAMESPACE);
+            if (map != null && map.isEmpty() == false) {
+                try {
+                    AdminServiceRegistry.getInstance().getService(PermissionConfigurationChecker.class, true).checkAttributes(map);
+                } catch (OXException e) {
+                    throw new InvalidDataException(e);
+                }
+            }
         }
     }
 
@@ -174,6 +255,242 @@ public abstract class OXCommonImpl {
             LOGGER.error(e.getMessage(), e);
             throw e;
         }
+    }
+
+    /**
+     * Gets the admin/reseller name from given credentials
+     *
+     * @param credentials The credentials
+     * @return The admin/reseller name
+     */
+    protected static String getAdminName(Credentials credentials) {
+        return null == credentials ? null : credentials.getLogin();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Logs provisioning exception with exception identifier in MDC, enhances exception message by identifier and returns exception with enhanced message
+     *
+     * @param logger The logger to log the exception
+     * @param e The exception to log and enhance
+     * @param creds The credentials used for this call
+     * @param contextId The identifier of the affected context
+     * @param objectId The identifier of the affected object
+     * @return The enhanced exception
+     */
+    protected static <E extends AbstractAdminRmiException> E logAndReturnException(org.slf4j.Logger logger, E e, Credentials creds, String contextId, String objectId) {
+        return logAndReturnException(logger, e, e.getExceptionId(), creds, contextId, objectId);
+    }
+
+    /**
+     * Logs provisioning exception with exception identifier in MDC, enhances exception message by identifier and returns exception with enhanced message
+     *
+     * @param logger The logger to log the exception
+     * @param e The exception to log and enhance
+     * @param creds The credentials used for this call
+     * @param contextId The identifier of the affected context
+     * @return The enhanced exception
+     */
+    protected static <E extends AbstractAdminRmiException> E logAndReturnException(org.slf4j.Logger logger, E e, Credentials creds, String contextId) {
+        return logAndReturnException(logger, e, e.getExceptionId(), creds, contextId, null);
+    }
+
+    /**
+     * Logs provisioning exception with exception identifier in MDC, enhances exception message by identifier and returns exception with enhanced message
+     *
+     * @param logger The logger to log the exception
+     * @param e The exception to log and enhance
+     * @param creds The credentials used for this call
+     * @return The enhanced exception
+     */
+    protected static <E extends AbstractAdminRmiException> E logAndReturnException(org.slf4j.Logger logger, E e, Credentials creds) {
+        return logAndReturnException(logger, e, e.getExceptionId(), creds, null, null);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Logs given exception with exception identifier in MDC, enhances exception message by identifier and returns exception with enhanced message
+     *
+     * @param logger The logger to log the exception
+     * @param e The exception to log and enhance
+     * @param exceptionId The exception identifier
+     * @param creds The credentials used for this call
+     * @param contextId The identifier of the affected context
+     * @param objectId The identifier of the affected object
+     * @return The enhanced exception
+     */
+    protected static <E extends Exception> E logAndReturnException(org.slf4j.Logger logger, E e, String exceptionId, Credentials creds, String contextId, String objectId) {
+        // Enhance by provisioning log properties & log exception
+        LogProperties.putProvisioningLogProperties(getAdminName(creds), exceptionId, contextId, objectId);
+        try {
+            logger.error("", e);
+        } finally {
+            LogProperties.removeProvisioningLogProperties();
+        }
+
+        // Return exception instance as-is
+        return e;
+    }
+
+    /**
+     * Logs given exception with exception identifier in MDC, enhances exception message by identifier and returns exception with enhanced message
+     *
+     * @param logger The logger to log the exception
+     * @param e The exception to log and enhance
+     * @param exceptionId The exception identifier
+     * @param creds The credentials used for this call
+     * @param contextId The identifier of the affected context
+     * @return The enhanced exception
+     */
+    protected static <E extends Exception> E logAndReturnException(org.slf4j.Logger logger, E e, String exceptionId, Credentials creds, String contextId) {
+        return logAndReturnException(logger, e, exceptionId, creds, contextId, null);
+    }
+
+    /**
+     * Logs given exception with exception identifier in MDC, enhances exception message by identifier and returns exception with enhanced message
+     *
+     * @param logger The logger to log the exception
+     * @param e The exception to log and enhance
+     * @param exceptionId The exception identifier
+     * @param creds The credentials used for this call
+     * @return The enhanced exception
+     */
+    protected static <E extends Exception> E logAndReturnException(org.slf4j.Logger logger, E e, String exceptionId, Credentials creds) {
+        return logAndReturnException(logger, e, exceptionId, creds, null, null);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Creates a comma-separated list of object identifiers
+     *
+     * @param objects The array of object
+     * @return The identifiers as comma-separated list
+     */
+    protected static String getObjectIds(NameAndIdObject[] objects) {
+        if (null == objects || 0 >= objects.length) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(objects[0].getId()).append(",");
+        for (int j = 1; j < objects.length; j++) {
+            sb.append(',').append(objects[j].getId());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Log a message with given log properties in MDC
+     *
+     * @param level The log level
+     * @param logger The logger
+     * @param creds The credentials to put in MDC
+     * @param contextId The affected context's identifier to put in MDC
+     * @param objectId The affected object's identifier to put in MDC
+     * @param e The exception to log
+     * @param message The message to log
+     * @param args The arguments to log
+     */
+    public static void log(LogLevel level, org.slf4j.Logger logger, Credentials creds, String contextId, String objectId, Exception e, String message, Object... args) {
+        if (null == level || null == logger) {
+            LOGGER.error("LogLevel and logger instance must not be null!");
+            return;
+        }
+        LogProperties.putProvisioningLogProperties(getAdminName(creds), null, contextId, objectId);
+        switch (level) {
+            case TRACE:
+                logger.trace(message, args, e);
+                break;
+            case DEBUG:
+                logger.debug(message, args, e);
+                break;
+            case INFO:
+                logger.info(message, args, e);
+                break;
+            case WARNING:
+                logger.warn(message, args, e);
+                break;
+            case ERROR:
+                logger.error(message, args, e);
+                break;
+            default:
+                LOGGER.error("Invalid log level {}", level.name());
+                break;
+        }
+    }
+
+    /**
+     * Log a message with given log properties in MDC
+     *
+     * @param level The log level
+     * @param logger The logger
+     * @param creds The credentials to put in MDC
+     * @param contextId The affected context's identifier to put in MDC
+     * @param objectId The affected object's identifier to put in MDC
+     * @param e The exception to log
+     * @param message The message to log
+     */
+    public static void log(LogLevel level, org.slf4j.Logger logger, Credentials creds, String contextId, String objectId, Exception e, String message) {
+        log(level, logger, creds, contextId, objectId, e, message, new Object[] {});
+    }
+
+    /**
+     * Log a message with given log properties in MDC
+     *
+     * @param level The log level
+     * @param logger The logger
+     * @param creds The credentials to put in MDC
+     * @param contextId The affected context's identifier to put in MDC
+     * @param e The exception to log
+     * @param message The message to log
+     * @param args The arguments to log
+     */
+    public static void log(LogLevel level, org.slf4j.Logger logger, Credentials creds, String contextId, Exception e, String message, Object... args) {
+        log(level, logger, creds, contextId, null, e, message, args);
+    }
+
+    /**
+     * Log a message with given log properties in MDC
+     *
+     * @param level The log level
+     * @param logger The logger
+     * @param creds The credentials to put in MDC
+     * @param contextId The affected context's identifier to put in MDC
+     * @param e The exception to log
+     * @param message The message to log
+     */
+    public static void log(LogLevel level, org.slf4j.Logger logger, Credentials creds, String contextId, Exception e, String message) {
+        log(level, logger, creds, contextId, null, e, message, new Object[] {});
+    }
+
+    /**
+     * Log a message with given log properties in MDC
+     *
+     * @param level The log level
+     * @param logger The logger
+     * @param creds The credentials to put in MDC
+     * @param e The exception to log
+     * @param message The message to log
+     * @param args The arguments to log
+     */
+    public static void log(LogLevel level, org.slf4j.Logger logger, Credentials creds, Exception e, String message, Object... args) {
+        log(level, logger, creds, null, null, e, message, args);
+    }
+
+    /**
+     * Log a message with given log properties in MDC
+     *
+     * @param level The log level
+     * @param logger The logger
+     * @param creds The credentials to put in MDC
+     * @param e The exception to log
+     * @param message The message to log
+     */
+    public static void log(LogLevel level, org.slf4j.Logger logger, Credentials creds, Exception e, String message) {
+        log(level, logger, creds, null, null, e, message, new Object[] {});
     }
 
 }

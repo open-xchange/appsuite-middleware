@@ -55,6 +55,8 @@ import java.util.Map;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.osgi.Services;
 import com.openexchange.config.ConfigurationService;
+import net.fortuna.ical4j.extensions.caldav.parameter.CalendarServerDtStamp;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryImpl;
 
@@ -93,6 +95,7 @@ public class ICalParametersImpl implements ICalParameters {
         if (null != configService) {
             set(IMPORT_LIMIT, I(configService.getIntProperty("com.openexchange.import.ical.limit", -1)));
         }
+        set(IGNORED_PROPERTY_PARAMETERS, new String[] { ICalUtils.preparePrameterToRemove(Property.ATTENDEE, CalendarServerDtStamp.PARAMETER_NAME) });
     }
 
     @Override
@@ -108,7 +111,7 @@ public class ICalParametersImpl implements ICalParameters {
 
     @Override
     public <T> ICalParameters set(String name, T value) {
-        if (null != name) {
+        if (null != value) {
             parameters.put(name, value);
         } else {
             parameters.remove(name);

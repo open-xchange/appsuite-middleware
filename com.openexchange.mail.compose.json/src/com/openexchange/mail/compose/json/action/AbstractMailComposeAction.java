@@ -65,6 +65,7 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
@@ -83,6 +84,7 @@ import com.openexchange.mail.compose.Message.Priority;
 import com.openexchange.mail.compose.MessageDescription;
 import com.openexchange.mail.compose.Security;
 import com.openexchange.mail.compose.SharedAttachmentsInfo;
+import com.openexchange.mail.compose.json.MailComposeActionFactory;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -94,6 +96,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = MailComposeActionFactory.MODULE, type = RestrictedAction.Type.WRITE)
 public abstract class AbstractMailComposeAction implements AJAXActionService {
 
     /** Simple class to delay initialization until needed */

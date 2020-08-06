@@ -309,8 +309,17 @@ public final class OXFolderUtility {
      * @throws OXException If specified folder contains contains duplicate permissions.
      */
     public static void checkForDuplicateNonSystemPermissions(final FolderObject folder, final Context ctx) throws OXException {
-        final OCLPermission[] permissions = folder.getNonSystemPermissionsAsArray();
-        if (permissions.length == 0) {
+        checkForDuplicatePermissions(folder.getNonSystemPermissionsAsArray());
+    }
+
+    /**
+     * Tests if specified folder contains contains duplicate permissions.
+     *
+     * @param permissions The permissions to check
+     * @throws OXException If specified permissions contains duplicates
+     */
+    public static void checkForDuplicatePermissions(OCLPermission[] permissions) throws OXException {
+        if (null == permissions || 2 > permissions.length) {
             return;
         }
         final TIntSet set = new TIntHashSet(permissions.length);
@@ -469,10 +478,22 @@ public final class OXFolderUtility {
      * @param originalPermissions The non-system permissions of the original folder in case of updates, or the parent folder's non-system permissions for new folders
      */
     public static void checkPermissionsAgainstSessionUserConfig(Session session, FolderObject folder, OCLPermission[] originalPermissions) throws OXException {
+        checkPermissionsAgainstSessionUserConfig(session, folder, folder.getNonSystemPermissionsAsArray(), originalPermissions);
+    }
+
+    /**
+     * Checks that any permission-related modifications to a folder are allowed based on the session user's module access permissions and
+     * capabilities.
+     *
+     * @param session The session
+     * @param folder The folder being saved
+     * @param newPermissions The non-system permissions of the updated or created folder
+     * @param originalPermissions The non-system permissions of the original folder in case of updates, or the parent folder's non-system permissions for new folders
+     */
+    public static void checkPermissionsAgainstSessionUserConfig(Session session, FolderObject folder, OCLPermission[] newPermissions, OCLPermission[] originalPermissions) throws OXException {
         /*
          * check for added, removed or modified permissions
          */
-        OCLPermission[] newPermissions = folder.getNonSystemPermissionsAsArray();
         List<OCLPermission> touchedPermissions = getTouchedPermissions(newPermissions, originalPermissions);
         if (null == touchedPermissions || 0 == touchedPermissions.size()) {
             return; // no changes

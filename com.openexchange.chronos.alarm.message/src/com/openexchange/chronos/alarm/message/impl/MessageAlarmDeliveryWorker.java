@@ -187,12 +187,12 @@ public class MessageAlarmDeliveryWorker implements Runnable {
             this.rateLimitFactory = rateLimitFactory;
             return this;
         }
-        
+
         public Builder setRecurrenceService(RecurrenceService recurrenceService) {
             this.recurrenceService = recurrenceService;
             return this;
         }
-        
+
         public MessageAlarmDeliveryWorker build() {
             return new MessageAlarmDeliveryWorker( storage,
                                                 calendarStorageFactory,
@@ -229,7 +229,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
     private final RateLimiterFactory rateLimitFactory;
     private final int lookAhead;
     private final int overdueWaitTime;
-    
+
 
     /**
      * Initializes a new {@link MessageAlarmDeliveryWorker}.
@@ -369,6 +369,13 @@ public class MessageAlarmDeliveryWorker implements Runnable {
         LOG.info("Alarm delivery worker run finished!");
     }
 
+    /**
+     * Spawns an delivery worker for the given triggers
+     *
+     * @param lockedTriggers The triggers to spawn a delivery task for
+     * @param currentUTCTime The current UTC time
+     * @throws OXException
+     */
     private void spawnDeliveryTaskForTriggers(Map<Pair<Integer, Integer>, List<AlarmTrigger>> lockedTriggers, Calendar currentUTCTime) throws OXException {
         for (Entry<Pair<Integer, Integer>, List<AlarmTrigger>> entry : lockedTriggers.entrySet()) {
             int cid = entry.getKey().getFirst().intValue();
@@ -584,6 +591,15 @@ public class MessageAlarmDeliveryWorker implements Runnable {
         return result == null ? Collections.emptyList() : result;
     }
 
+    /**
+     * Schedules a task for the given {@link AlarmTrigger}
+     *
+     * @param writeCon The write connection to use
+     * @param storage The {@link CalendarStorage} to use
+     * @param key The key
+     * @param trigger The {@link AlarmTrigger}
+     * @throws OXException
+     */
     void scheduleTaskForEvent(Connection writeCon, CalendarStorage storage, Key key, AlarmTrigger trigger) throws OXException {
         try {
             Alarm alarm = storage.getAlarmStorage().loadAlarm(trigger.getAlarm().intValue());

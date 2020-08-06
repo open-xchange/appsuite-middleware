@@ -49,6 +49,7 @@
 
 package org.glassfish.grizzly.http.server;
 
+import static com.openexchange.servlet.Constants.HTTP_SESSION_ATTR_AUTHENTICATED;
 import static com.openexchange.servlet.Constants.HTTP_SESSION_ATTR_RATE_LIMITED;
 import java.util.Iterator;
 import java.util.Random;
@@ -134,7 +135,7 @@ public class OXSessionManager implements SessionManager {
         Session session;
         for (Iterator<Session> it = sessions.values().iterator(); it.hasNext();) {
             session = it.next();
-            if (isInvalid(session) || isRateLimited(session) || isTimedOut(currentTime, session) || isUnusedSession(session)) {
+            if (isInvalid(session) || isNotAuthenticated(session) || isRateLimited(session) || isTimedOut(currentTime, session) || isUnusedSession(currentTime, session)) {
                 session.setValid(false);
                 it.remove();
                 sessionsCount--;
@@ -154,6 +155,19 @@ public class OXSessionManager implements SessionManager {
      */
     private static boolean isInvalid(Session session) {
         return !session.isValid();
+    }
+
+    /**
+     * Checks if given session has no "authenticated" marker set.
+     *
+     * @param session The session to check
+     * @return <code>true</code> if "authenticated" marker is absent; otherwise <code>false</code>
+     */
+    private boolean isNotAuthenticated(Session session) {
+        if (!grizzlyConfig.isRemoveNonAuthenticatedSessions()) {
+            return false;
+        }
+        return !Boolean.TRUE.equals(session.getAttribute(HTTP_SESSION_ATTR_AUTHENTICATED));
     }
 
     /**
@@ -183,11 +197,18 @@ public class OXSessionManager implements SessionManager {
      * <p>
      * Using {@link GrizzlyConfig#getSessionUnjoinedThreshold()} to measure elapsed time
      *
+     * @param currentTime The current time to compare to
      * @param session The session to check
      * @return <code>true</code> if the session can be seen as unused, <code>false</code> if not.
      */
-    private boolean isUnusedSession(Session session) {
-        return session.isNew();
+    private boolean isUnusedSession(long currentTime, Session session) {
+        if (!session.isNew()) {
+            // Client already joined the session
+            return false;
+        }
+
+        int unjoinedThresholdSeconds = grizzlyConfig.getSessionUnjoinedThreshold();
+        return (unjoinedThresholdSeconds > 0) && ((currentTime - session.getCreationTime()) > (unjoinedThresholdSeconds * 1000));
     }
 
     /**
@@ -282,8 +303,9 @@ public class OXSessionManager implements SessionManager {
      * @return The appropriate instance of <code>IllegalStateException</code> reflecting the exceeded count
      */
     protected IllegalStateException onMaxSessionCountExceeded() {
-        LOG.warn("Max. number of HTTP sessions ({}) exceeded.", Integer.valueOf(max));
-        return new IllegalStateException("Max. number of HTTP sessions (" + max + ") exceeded.");
+        String message = "Max. number of HTTP sessions (" + max + ") exceeded.";
+        LOG.warn(message);
+        return new IllegalStateException(message);
     }
 
     @Override

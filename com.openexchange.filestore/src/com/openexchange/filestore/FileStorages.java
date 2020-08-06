@@ -461,4 +461,23 @@ public final class FileStorages {
         return qfss.hasIndividualFileStorage(userId, contextId);
     }
 
+    // ---------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets a value indicating whether the supplied exception cause indicates that the end of stream has been reached unexpectedly while
+     * reading from the input or not.
+     *
+     * @param cause The cause to check
+     * @return <code>true</code>, if an unexpected connection close is indicated by the cause, <code>false</code>, otherwise
+     */
+    public static boolean indicatesConnectionClosed(Throwable cause) {
+        if (null != cause) {
+            if (cause instanceof java.io.EOFException || cause instanceof java.util.concurrent.TimeoutException) {
+                return true;
+            }
+            return indicatesConnectionClosed(cause.getCause());
+        }
+        return false;
+    }
+
 }

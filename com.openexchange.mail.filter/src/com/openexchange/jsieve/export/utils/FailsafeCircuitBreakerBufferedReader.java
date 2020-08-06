@@ -96,10 +96,7 @@ public class FailsafeCircuitBreakerBufferedReader extends BufferedReader {
      * @param exception The thrown exception when an execution is attempted while a configured CircuitBreaker is open
      */
     private void onDenied(CircuitBreakerOpenException exception) {
-        Runnable metricTask = circuitBreakerInfo.getOnDeniedMetricTask().get();
-        if (metricTask != null) {
-            metricTask.run();
-        }
+        circuitBreakerInfo.incrementDenials();
     }
 
     @Override

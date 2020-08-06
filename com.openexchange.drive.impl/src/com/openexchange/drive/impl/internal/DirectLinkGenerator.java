@@ -212,9 +212,10 @@ public class DirectLinkGenerator {
                     .replaceAll("\\[height\\]", String.valueOf(height))
                 ;
             }
-            if ((mimeType.matches(
+            if (session.hasCapability("document_preview") && 
+                (mimeType.matches(
                 "(?i)^application\\/.*(ms-word|ms-excel|ms-powerpoint|msword|msexcel|mspowerpoint|openxmlformats|opendocument|pdf|rtf).*$")
-                || mimeType.matches("(?i)^text\\/.*(rtf|plain).*$")) && session.hasCapability("document_preview")) {
+                || mimeType.matches("(?i)^text\\/.*(rtf|plain).*$"))) {
                 return DriveConfig.getInstance().getImageLinkDocumentFile(session.getServerSession().getContextId(), session.getServerSession().getUserId())
                     .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
                     .replaceAll("\\[hostname\\]", session.getHostData().getHost())

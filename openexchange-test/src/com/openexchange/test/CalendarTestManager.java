@@ -52,6 +52,7 @@ package com.openexchange.test;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -260,6 +261,7 @@ public class CalendarTestManager implements TestManager {
     public Appointment get(int parentFolderID, int objectID) throws OXException {
         GetRequest get = new GetRequest(parentFolderID, objectID, getFailOnError());
         GetResponse response = execute(get);
+        assertNotNull("Missing response object", response);
         extractInfo(response);
         return response.getAppointment(timezone);
     }

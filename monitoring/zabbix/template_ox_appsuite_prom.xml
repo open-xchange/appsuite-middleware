@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2020-05-05T07:52:12Z</date>
+    <groups>
+        <group>
+            <name>Linux servers</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template OX App Suite</template>
+            <name>Template OX App Suite</name>
+            <groups>
+                <group>
+                    <name>Linux servers</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>DB Pool</name>
+                </application>
+                <application>
+                    <name>Session</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>Active sessions</name>
+                    <type>DEPENDENT</type>
+                    <key>appsuite.sessions.active.total</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <applications>
+                        <application>
+                            <name>Session</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>appsuite_sessions_active_total{client=~&quot;.*&quot;}
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>appsuite_metrics.get</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Long Term sessions</name>
+                    <type>DEPENDENT</type>
+                    <key>appsuite.sessions.long.term.total</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <applications>
+                        <application>
+                            <name>Session</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>appsuite_sessions_long_term_total{client=~&quot;.*&quot;}
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>appsuite_metrics.get</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Max sessions</name>
+                    <type>DEPENDENT</type>
+                    <key>appsuite.sessions.max</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <applications>
+                        <application>
+                            <name>Session</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>appsuite_sessions_max{client=~&quot;.*&quot;}
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>appsuite_metrics.get</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Short Term sessions</name>
+                    <type>DEPENDENT</type>
+                    <key>appsuite.sessions.short.term.total</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <applications>
+                        <application>
+                            <name>Session</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>appsuite_sessions_short_term_total{client=~&quot;.*&quot;}
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>appsuite_metrics.get</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Total sessions</name>
+                    <type>DEPENDENT</type>
+                    <key>appsuite.sessions.total</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <description>{#HELP}</description>
+                    <applications>
+                        <application>
+                            <name>Session</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_PATTERN</type>
+                            <params>appsuite_sessions_total{client=~&quot;.*&quot;}
+</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>appsuite_metrics.get</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Get App Suite Metrics</name>
+                    <type>HTTP_AGENT</type>
+                    <key>appsuite_metrics.get</key>
+                    <delay>10s</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <url>http://{$APPSUITE.CONN}:{$APPSUITE.PORT}/metrics</url>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>DB Pool connections LLD</name>
+                    <type>DEPENDENT</type>
+                    <key>appsuite.dbpool.discovery</key>
+                    <delay>0</delay>
+                    <lifetime>7d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>appsuite_mysql_connections_active: &quot;{#DBCLASS}&quot;, Pool &quot;{#DBPOOL}&quot;, Type &quot;{#DBTYPE}&quot;</name>
+                            <type>DEPENDENT</type>
+                            <key>appsuite.mysql.connections.active[&quot;{#DBCLASS}&quot;,&quot;{#DBPOOL}&quot;,&quot;{#DBTYPE}&quot;]</key>
+                            <delay>0</delay>
+                            <history>7d</history>
+                            <description>{#HELP}</description>
+                            <applications>
+                                <application>
+                                    <name>DB Pool</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>PROMETHEUS_PATTERN</type>
+                                    <params>appsuite_mysql_connections_active{type=&quot;{#DBTYPE}&quot;,class=&quot;{#DBCLASS}&quot;,pool=&quot;{#DBPOOL}&quot;}
+</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>appsuite_metrics.get</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>appsuite_mysql_connections_idle: &quot;{#DBCLASS}&quot;, Pool &quot;{#DBPOOL}&quot;, Type &quot;{#DBTYPE}&quot;</name>
+                            <type>DEPENDENT</type>
+                            <key>appsuite.mysql.connections.idle[&quot;{#DBCLASS}&quot;,&quot;{#DBPOOL}&quot;,&quot;{#DBTYPE}&quot;]</key>
+                            <delay>0</delay>
+                            <history>7d</history>
+                            <description>{#HELP}</description>
+                            <applications>
+                                <application>
+                                    <name>DB Pool</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>PROMETHEUS_PATTERN</type>
+                                    <params>appsuite_mysql_connections_idle{type=&quot;{#DBTYPE}&quot;,class=&quot;{#DBCLASS}&quot;,pool=&quot;{#DBPOOL}&quot;}
+</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>appsuite_metrics.get</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>appsuite_mysql_connections_max: &quot;{#DBCLASS}&quot;, Pool &quot;{#DBPOOL}&quot;, Type &quot;{#DBTYPE}&quot;</name>
+                            <type>DEPENDENT</type>
+                            <key>appsuite.mysql.connections.max[&quot;{#DBCLASS}&quot;,&quot;{#DBPOOL}&quot;,&quot;{#DBTYPE}&quot;]</key>
+                            <delay>0</delay>
+                            <history>7d</history>
+                            <description>{#HELP}</description>
+                            <applications>
+                                <application>
+                                    <name>DB Pool</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>PROMETHEUS_PATTERN</type>
+                                    <params>appsuite_mysql_connections_max{type=&quot;{#DBTYPE}&quot;,class=&quot;{#DBCLASS}&quot;,pool=&quot;{#DBPOOL}&quot;}
+</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>appsuite_metrics.get</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>appsuite_mysql_connections_total: &quot;{#DBCLASS}&quot;, Pool &quot;{#DBPOOL}&quot;, Type &quot;{#DBTYPE}&quot;</name>
+                            <type>DEPENDENT</type>
+                            <key>appsuite.mysql.connections.total[&quot;{#DBCLASS}&quot;,&quot;{#DBPOOL}&quot;,&quot;{#DBTYPE}&quot;]</key>
+                            <delay>0</delay>
+                            <history>7d</history>
+                            <description>{#HELP}</description>
+                            <applications>
+                                <application>
+                                    <name>DB Pool</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>PROMETHEUS_PATTERN</type>
+                                    <params>appsuite_mysql_connections_total{type=&quot;{#DBTYPE}&quot;,class=&quot;{#DBCLASS}&quot;,pool=&quot;{#DBPOOL}&quot;}
+</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>appsuite_metrics.get</key>
+                            </master_item>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>DB Pool {#DBTYPE} connections ({#DBCLASS},{#DBPOOL})</name>
+                            <ymin_type_1>FIXED</ymin_type_1>
+                            <ymax_type_1>ITEM</ymax_type_1>
+                            <ymax_item_1>
+                                <host>Template OX App Suite</host>
+                                <key>appsuite.mysql.connections.max[&quot;{#DBCLASS}&quot;,&quot;{#DBPOOL}&quot;,&quot;{#DBTYPE}&quot;]</key>
+                            </ymax_item_1>
+                            <graph_items>
+                                <graph_item>
+                                    <color>1A7C11</color>
+                                    <item>
+                                        <host>Template OX App Suite</host>
+                                        <key>appsuite.mysql.connections.active[&quot;{#DBCLASS}&quot;,&quot;{#DBPOOL}&quot;,&quot;{#DBTYPE}&quot;]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <color>FFBF00</color>
+                                    <item>
+                                        <host>Template OX App Suite</host>
+                                        <key>appsuite.mysql.connections.idle[&quot;{#DBCLASS}&quot;,&quot;{#DBPOOL}&quot;,&quot;{#DBTYPE}&quot;]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>2</sortorder>
+                                    <color>2774A4</color>
+                                    <item>
+                                        <host>Template OX App Suite</host>
+                                        <key>appsuite.mysql.connections.total[&quot;{#DBCLASS}&quot;,&quot;{#DBPOOL}&quot;,&quot;{#DBTYPE}&quot;]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>3</sortorder>
+                                    <color>FF0000</color>
+                                    <item>
+                                        <host>Template OX App Suite</host>
+                                        <key>appsuite.mysql.connections.max[&quot;{#DBCLASS}&quot;,&quot;{#DBPOOL}&quot;,&quot;{#DBTYPE}&quot;]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                    <master_item>
+                        <key>appsuite_metrics.get</key>
+                    </master_item>
+                    <lld_macro_paths>
+                        <lld_macro_path>
+                            <lld_macro>{#DBCLASS}</lld_macro>
+                            <path>$.labels.class</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#DBPOOL}</lld_macro>
+                            <path>$.labels.pool</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#DBTYPE}</lld_macro>
+                            <path>$.labels.type</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#HELP}</lld_macro>
+                            <path>$.help</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#METRIC}</lld_macro>
+                            <path>$.name</path>
+                        </lld_macro_path>
+                    </lld_macro_paths>
+                    <preprocessing>
+                        <step>
+                            <type>PROMETHEUS_TO_JSON</type>
+                            <params>{__name__=~&quot;^appsuite_mysql_connections(?:_total)?$&quot;}</params>
+                        </step>
+                    </preprocessing>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$APPSUITE.CONN}</macro>
+                    <value>127.0.0.1</value>
+                    <description>Host IP or DNS name</description>
+                </macro>
+                <macro>
+                    <macro>{$APPSUITE.PORT}</macro>
+                    <value>8009</value>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <graphs>
+        <graph>
+            <name>Sessions Overview</name>
+            <ymax_type_1>ITEM</ymax_type_1>
+            <ymax_item_1>
+                <host>Template OX App Suite</host>
+                <key>appsuite.sessions.max</key>
+            </ymax_item_1>
+            <graph_items>
+                <graph_item>
+                    <color>0040FF</color>
+                    <item>
+                        <host>Template OX App Suite</host>
+                        <key>appsuite.sessions.total</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Template OX App Suite</host>
+                        <key>appsuite.sessions.active.total</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>2</sortorder>
+                    <color>BF00FF</color>
+                    <item>
+                        <host>Template OX App Suite</host>
+                        <key>appsuite.sessions.long.term.total</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>3</sortorder>
+                    <color>A54F10</color>
+                    <item>
+                        <host>Template OX App Suite</host>
+                        <key>appsuite.sessions.short.term.total</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>4</sortorder>
+                    <color>FF0000</color>
+                    <item>
+                        <host>Template OX App Suite</host>
+                        <key>appsuite.sessions.max</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+    </graphs>
+</zabbix_export>

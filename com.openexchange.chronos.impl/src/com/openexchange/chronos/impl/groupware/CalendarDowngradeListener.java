@@ -74,6 +74,7 @@ import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -84,6 +85,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class CalendarDowngradeListener implements DowngradeListener {
 
+	private final ServiceLookup services;
     private final CalendarUtilities calendarUtilities;
     private final CalendarEventNotificationService notificationService;
 
@@ -93,8 +95,9 @@ public class CalendarDowngradeListener implements DowngradeListener {
      * @param calendarUtilities A reference to the calendar utilities
      * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public CalendarDowngradeListener(CalendarUtilities calendarUtilities, CalendarEventNotificationService notificationService) {
+    public CalendarDowngradeListener(ServiceLookup services, CalendarUtilities calendarUtilities, CalendarEventNotificationService notificationService) {
         super();
+        this.services = services;
         this.notificationService = notificationService;
         this.calendarUtilities = calendarUtilities;
     }
@@ -106,7 +109,7 @@ public class CalendarDowngradeListener implements DowngradeListener {
             SimpleDBProvider dbProvider = new SimpleDBProvider(event.getReadCon(), event.getWriteCon());
             EntityResolver entityResolver = calendarUtilities.getEntityResolver(event.getContext().getContextId());
             CalendarStorage storage = Services.getService(CalendarStorageFactory.class).create(event.getContext(), Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-            StorageUpdater updater = new StorageUpdater(storage, entityResolver, notificationService, userId, event.getContext().getMailadmin());
+            StorageUpdater updater = new StorageUpdater(services, storage, entityResolver, notificationService, userId, event.getContext().getMailadmin());
 
             // Get all events which the user attends and that are *NOT* located in his private folders.
             CompositeSearchTerm term = new CompositeSearchTerm(CompositeOperation.AND)

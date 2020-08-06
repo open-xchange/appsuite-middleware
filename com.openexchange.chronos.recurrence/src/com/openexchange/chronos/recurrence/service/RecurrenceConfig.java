@@ -49,10 +49,13 @@
 
 package com.openexchange.chronos.recurrence.service;
 
+import java.util.Objects;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.lean.LeanConfigurationService;
 
 /**
  * {@link RecurrenceConfig}
@@ -63,14 +66,17 @@ import com.openexchange.config.Reloadable;
 public class RecurrenceConfig implements Reloadable {
 
     private volatile int calculationLimit;
+    private final LeanConfigurationService leanConfigService;
 
     /**
      * Initializes a new {@link RecurrenceConfig}.
      *
      * @param configService A reference to the configuration service for initialization
      */
-    public RecurrenceConfig(ConfigurationService configService) {
+    public RecurrenceConfig(LeanConfigurationService configService) {
         super();
+        Objects.requireNonNull(configService);
+        leanConfigService = configService;
         calculationLimit = readCalculationLimit(configService);
     }
 
@@ -85,16 +91,16 @@ public class RecurrenceConfig implements Reloadable {
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        calculationLimit = readCalculationLimit(configService);
+        calculationLimit = readCalculationLimit(leanConfigService);
     }
 
     @Override
     public Interests getInterests() {
-        return DefaultInterests.builder().propertiesOfInterest("com.openexchange.calendar.maxEventResults").build();
+        return DefaultInterests.builder().propertiesOfInterest(SelfProtectionFactory.PROPERTY_EVENT_LIMIT.getFQPropertyName()).build();
     }
 
-    private static int readCalculationLimit(ConfigurationService configService) {
-        return 1 + configService.getIntProperty("com.openexchange.calendar.maxEventResults", 1000);
+    private static int readCalculationLimit(LeanConfigurationService configService) {
+        return 1 + configService.getIntProperty(SelfProtectionFactory.PROPERTY_EVENT_LIMIT);
     }
 
 }

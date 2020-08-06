@@ -59,6 +59,7 @@ import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.SubfolderAwareShareInfo;
 import com.openexchange.user.User;
 
 /**
@@ -76,7 +77,7 @@ public abstract class AbstractJsonMetadata  {
      * @param session The sync session
      * @throws OXException
      */
-    protected AbstractJsonMetadata(SyncSession session) throws OXException {
+    protected AbstractJsonMetadata(SyncSession session) {
         super();
         this.session = session;
     }
@@ -134,6 +135,10 @@ public abstract class AbstractJsonMetadata  {
                 jsonObject.put("expiry_date", expiryDate.getTime());
             }
             jsonObject.putOpt("password", share.getGuest().getPassword());
+            if (share.getTarget().isFolder()) {
+                boolean includeSubfolders = SubfolderAwareShareInfo.class.isInstance(share) ? ((SubfolderAwareShareInfo) share).isIncludeSubfolders() : false;
+                jsonObject.putOpt("includeSubfolders", includeSubfolders);
+            }
         }
     }
 

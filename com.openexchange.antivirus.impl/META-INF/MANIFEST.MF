@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Default Anti-Virus Implementation
 Bundle-SymbolicName: com.openexchange.antivirus.impl
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.antivirus.impl
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -21,13 +21,14 @@ Import-Package: com.google.common.cache,
  com.openexchange.icap.header,
  com.openexchange.java,
  com.openexchange.lock,
- com.openexchange.metrics,
- com.openexchange.metrics.types,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.timer,
  com.openexchange.tools.session,
+ io.micrometer.core.instrument,
+ io.micrometer.core.instrument.binder.cache,
+ io.micrometer.core.instrument.composite,
  org.apache.commons.codec.digest,
  org.apache.commons.io,
  org.joda.time,

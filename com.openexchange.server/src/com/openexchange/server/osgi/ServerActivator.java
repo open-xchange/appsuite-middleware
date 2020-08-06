@@ -95,6 +95,7 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.service.AdministrativeFreeBusyService;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -167,9 +168,10 @@ import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.tree.JsonMaxSize;
 import com.openexchange.groupware.settings.tree.ShardingSubdomains;
-import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
 import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.groupware.upload.impl.UploadUtility;
+import com.openexchange.groupware.userconfiguration.PermissionConfigurationChecker;
+import com.openexchange.groupware.userconfiguration.internal.PermissionConfigurationCheckerImpl;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
 import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
@@ -274,6 +276,7 @@ import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.oxfolder.GABRestorerRMIServiceImpl;
+import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.uadetector.UserAgentParser;
 import com.openexchange.uploaddir.UploadDirService;
@@ -288,6 +291,7 @@ import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.userconf.internal.UserPermissionServiceImpl;
 import com.openexchange.version.VersionService;
+import com.openexchange.webdav.FreeBusyProperty;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.spring.SpringParser;
 import net.htmlparser.jericho.Config;
@@ -337,6 +341,7 @@ public final class ServerActivator extends HousekeepingActivator {
     private static final String STR_IDENTIFIER = "identifier";
 
     private static final Class<?>[] NEEDED_SERVICES_SERVER = {
+        // @formatter:off
         ConfigurationService.class, DatabaseService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class,
         JDOMParser.class, TimerService.class, ThreadPoolService.class,
         MessagingServiceRegistry.class, HtmlService.class,
@@ -344,6 +349,7 @@ public final class ServerActivator extends HousekeepingActivator {
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
         UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class, VersionService.class };
+        // @formatter:on
 
     private static volatile BundleContext CONTEXT;
 
@@ -649,12 +655,17 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track GroupService
          */
         track(GroupService.class, new RegistryCustomizer<>(context, GroupService.class));
+        /*
+         * Track AdministrativeFreeBusyService
+         */
+        track(AdministrativeFreeBusyService.class, new RegistryCustomizer<AdministrativeFreeBusyService>(context, AdministrativeFreeBusyService.class));
 
         /*
          * User Alias Service
          */
         CachingAliasStorage aliasStorage;
         {
+            // @formatter:off
             String regionName = "UserAlias";
             byte[] ccf = (  "jcs.region." + regionName + "=LTCP\n" +
                             "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
@@ -665,6 +676,7 @@ public final class ServerActivator extends HousekeepingActivator {
                             "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=-1\n" +
                             "jcs.region." + regionName + ".elementattributes.IdleTime=360\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" +
                             "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
+            // @formatter:on
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
 
             aliasStorage = new CachingAliasStorage(new RdbAliasStorage());
@@ -685,12 +697,25 @@ public final class ServerActivator extends HousekeepingActivator {
         track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
         track(CalendarService.class, new RegistryCustomizer<CalendarService>(context, CalendarService.class));
         track(ICalService.class, new RegistryCustomizer<ICalService>(context, ICalService.class));
+        track(FolderSubscriptionHelper.class, new RegistryCustomizer<FolderSubscriptionHelper>(context, FolderSubscriptionHelper.class));
 
         CommonResultConverterRegistry resultConverterRegistry = new CommonResultConverterRegistry(context);
         track(ResultConverter.class, resultConverterRegistry);
 
+        ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
+        ConfigurationService configService = getService(ConfigurationService.class);
+
+        // Permission checker
+        {
+            PermissionConfigurationCheckerImpl checker = new PermissionConfigurationCheckerImpl(configService);
+            checker.checkConfig(configService);
+            registerService(PermissionConfigurationChecker.class, checker);
+            registerService(Reloadable.class, checker);
+        }
+
         // Start up server the usual way
         starter.start();
+
         // Open service trackers
         for (final ServiceTracker<?, ?> tracker : serviceTrackerList) {
             tracker.open();
@@ -751,7 +776,6 @@ public final class ServerActivator extends HousekeepingActivator {
                 }
             });
         }
-        ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
         registerService(NoReplyConfigFactory.class, new DefaultNoReplyConfigFactory(contextService, configViewFactory));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());
@@ -961,6 +985,10 @@ public final class ServerActivator extends HousekeepingActivator {
         // http.registerServlet(prefix+"tasks", new com.openexchange.ajax.Tasks(), null, null);
         // http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
         // http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);
+        LeanConfigurationService leanConfigService = this.getService(LeanConfigurationService.class);
+        if (leanConfigService.getBooleanProperty(FreeBusyProperty.ENABLE_INTERNET_FREEBUSY)) {
+            http.registerServlet("/servlet/webdav.freebusy", new com.openexchange.webdav.FreeBusy(this), null, null);
+        }
 
         final String prefix = getService(DispatcherPrefixService.class).getPrefix();
         http.registerServlet(prefix + "mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);

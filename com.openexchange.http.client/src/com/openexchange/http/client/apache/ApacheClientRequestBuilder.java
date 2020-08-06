@@ -49,8 +49,7 @@
 
 package com.openexchange.http.client.apache;
 
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.HttpState;
+import org.apache.http.HttpResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.http.client.builder.HTTPDeleteRequestBuilder;
@@ -63,8 +62,6 @@ import com.openexchange.http.client.internal.AbstractBuilder;
 
 public class ApacheClientRequestBuilder extends AbstractBuilder implements
 		HTTPRequestBuilder {
-
-	private HttpState state;
 
 	private final ManagedFileManagement fileManager;
 
@@ -100,18 +97,8 @@ public class ApacheClientRequestBuilder extends AbstractBuilder implements
 		return new ApacheDeleteRequestBuilder(this);
 	}
 
-	public <R> R extractPayload(HttpMethodBase method, Class<R> type) throws OXException {
-		return client.extractPayload(method, type);
+	public <R> R extractPayload(HttpResponse resp, Class<R> type) throws OXException {
+		return client.extractPayload(resp, type);
 	}
-
-	HttpState getState() {
-		return state;
-	}
-
-	void setState(HttpState state) {
-		this.state = state;
-	}
-
-
 
 }

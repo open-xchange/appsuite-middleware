@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.storage.rdb;
 
-import static com.openexchange.chronos.common.CalendarUtils.shiftToUTC;
 import java.util.EnumMap;
 import java.util.TimeZone;
 import com.openexchange.chronos.AlarmTrigger;
@@ -278,7 +277,7 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
 
             @Override
             public void set(AlarmTrigger alarmTrigger, String value) {
-                alarmTrigger.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(shiftToUTC(CalendarUtils.decode(value))));
+                alarmTrigger.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(CalendarUtils.decode(value)));
             }
 
             @Override
@@ -289,7 +288,7 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
             @Override
             public String get(AlarmTrigger alarmTrigger) {
                 RecurrenceId value = alarmTrigger.getRecurrenceId();
-                return null == value ? null : shiftToUTC(value.getValue()).toString();
+                return null == value ? null : CalendarUtils.encode(value.getValue());
             }
 
             @Override

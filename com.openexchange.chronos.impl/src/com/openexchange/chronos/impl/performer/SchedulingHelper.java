@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
+import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getDateInTimeZone;
 import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
@@ -80,7 +81,6 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.SchedulingControl;
@@ -178,7 +178,7 @@ public class SchedulingHelper {
      */
     public void trackCreation(CalendarObjectResource createdResource, List<? extends CalendarUser> consideredRecipients) {
         try {
-            CalendarUser originator = getOriginator();
+            CalendarUser originator = getOriginator(lookupCalendarUser(createdResource));
             LOG.trace("Tracking 'create' scheduling messages and notifications [originator={}, createdResource={}]", originator, createdResource);
             if (false == shouldTrack(createdResource)) {
                 return;
@@ -198,12 +198,12 @@ public class SchedulingHelper {
                 /*
                  * prepare notifications and scheduling messages from attendee acting on behalf of the organizer to (newly added) attendees
                  */
-                CalendarUser organizer = session.getEntityResolver().applyEntityData(new Organizer(), createdResource.getOrganizer().getEntity());
+                CalendarUser organizer = new CalendarUser(createdResource.getOrganizer());
                 organizer.setSentBy(originator);
                 trackCreation(createdResource, organizer, consideredRecipients);
             }
         } catch (OXException e) {
-            session.addWarning(e);            
+            session.addWarning(e);
             LOG.warn("Unexpected error tracking 'create' scheduling messsages: {}", e.getMessage(), e);
         }
     }
@@ -298,7 +298,7 @@ public class SchedulingHelper {
      */
     private void trackUpdate(CalendarObjectResource updatedResource, Event seriesMaster, List<EventUpdate> eventUpdates, List<? extends CalendarUser> consideredRecipients) {
         try {
-            CalendarUser originator = getOriginator();
+            CalendarUser originator = getOriginator(lookupCalendarUser(updatedResource));
             LOG.trace("Tracking 'update' scheduling messages and notifications [originator={}, updatedResource={}, seriesMaster={}, eventUpdates={}]",
                 originator, updatedResource, seriesMaster, eventUpdates);
             if (false == shouldTrack(updatedResource, eventUpdates)) {
@@ -324,12 +324,12 @@ public class SchedulingHelper {
                 /*
                  * prepare notifications and scheduling messages from attendee acting on behalf of the organizer to attendees
                  */
-                CalendarUser organizer = session.getEntityResolver().applyEntityData(new Organizer(), updatedResource.getOrganizer().getEntity());
+                CalendarUser organizer = new CalendarUser(updatedResource.getOrganizer());
                 organizer.setSentBy(originator);
                 trackUpdate(updatedResource, seriesMaster, eventUpdates, organizer, consideredRecipients);
             }
         } catch (OXException e) {
-            session.addWarning(e);            
+            session.addWarning(e);
             LOG.warn("Unexpected error tracking 'update' scheduling messsages: {}", e.getMessage(), e);
         }
     }
@@ -428,7 +428,7 @@ public class SchedulingHelper {
      */
     public void trackDeletion(CalendarObjectResource deletedResource, Event seriesMaster, List<? extends CalendarUser> consideredRecipients) {
         try {
-            CalendarUser originator = getOriginator();
+            CalendarUser originator = getOriginator(lookupCalendarUser(deletedResource));
             LOG.trace("Tracking 'delete' scheduling messages and notifications [originator={}, deletedResource={}, seriesMaster={}]",
                 originator, deletedResource, seriesMaster);
             if (false == shouldTrack(deletedResource)) {
@@ -498,7 +498,7 @@ public class SchedulingHelper {
                 }
             }
         } catch (OXException e) {
-            session.addWarning(e);            
+            session.addWarning(e);
             LOG.warn("Unexpected error tracking 'delete' scheduling messsages: {}", e.getMessage(), e);
         }
     }
@@ -516,11 +516,11 @@ public class SchedulingHelper {
      * </ul>
      * 
      * @param updatedEvent The updated event
-     * @param originalAttendee The original attendee
-     * @param updatedAttendee The updated attendee
+     * @param originalAttendee The original attendee that replies
+     * @param updatedAttendee The updated attendee that replies
      */
     public void trackReply(Event updatedEvent, Attendee originalAttendee, Attendee updatedAttendee) {
-        trackReply(new DefaultCalendarObjectResource(updatedEvent), new AttendeeEventUpdate(updatedEvent, originalAttendee, updatedAttendee));
+        trackReply(updatedEvent, null, originalAttendee, updatedAttendee);
     }
 
     /**
@@ -537,12 +537,12 @@ public class SchedulingHelper {
      * 
      * @param updatedEvent The updated event
      * @param seriesMaster The series master event in case an instance of an event series is replied, or <code>null</code> if not available
-     * @param originalAttendee The original attendee
-     * @param updatedAttendee The updated attendee
+     * @param originalAttendee The original attendee that replies
+     * @param updatedAttendee The updated attendee that replies
      */
     public void trackReply(Event updatedEvent, Event seriesMaster, Attendee originalAttendee, Attendee updatedAttendee) {
         EventUpdate attendeeEventUpdate = new AttendeeEventUpdate(updatedEvent, originalAttendee, updatedAttendee);
-        trackReply(new DefaultCalendarObjectResource(updatedEvent), seriesMaster, Collections.singletonList(attendeeEventUpdate));
+        trackReply(updatedAttendee, new DefaultCalendarObjectResource(updatedEvent), seriesMaster, Collections.singletonList(attendeeEventUpdate));
     }
 
     /**
@@ -557,31 +557,13 @@ public class SchedulingHelper {
      * <li>{@link ChangeAction#REPLY} notifications to other internal attendees for an attendee scheduling resource</li>
      * </ul>
      * 
-     * @param updatedResource The updated calendar object resource
-     * @param attendeeEventUpdate The performed attendee event update
-     */
-    public void trackReply(CalendarObjectResource updatedResource, EventUpdate attendeeEventUpdate) {
-        trackReply(updatedResource, Collections.singletonList(attendeeEventUpdate));
-    }
-
-    /**
-     * Tracks notifications and scheduling messages for an updated calendar object resource in the underlying calendar folder, after the
-     * participation status was changed.
-     * <p/>
-     * This includes:
-     * <ul>
-     * <li>a {@link ChangeAction#REPLY} notification to the calendar owner if the current user acts on behalf of him</li>
-     * <li>a {@link ChangeAction#REPLY} notification to an internal organizer for an attendee scheduling resource</li>
-     * <li>a {@link SchedulingMethod#REPLY} message to an external organizer for an attendee scheduling resource</li>
-     * <li>{@link ChangeAction#REPLY} notifications to other internal attendees for an attendee scheduling resource</li>
-     * </ul>
-     * 
+     * @param attendee The attendee that replies
      * @param updatedResource The updated calendar object resource
      * @param seriesMaster The series master event in case an instance of an event series is replied, or <code>null</code> if not available
      * @param attendeeEventUpdate The performed attendee event update
      */
-    public void trackReply(CalendarObjectResource updatedResource, Event seriesMaster, EventUpdate attendeeEventUpdate) {
-        trackReply(updatedResource, seriesMaster, Collections.singletonList(attendeeEventUpdate));
+    public void trackReply(Attendee attendee, CalendarObjectResource updatedResource, Event seriesMaster, EventUpdate attendeeEventUpdate) {
+        trackReply(attendee, updatedResource, seriesMaster, Collections.singletonList(attendeeEventUpdate));
     }
     
     /**
@@ -596,11 +578,12 @@ public class SchedulingHelper {
      * <li>{@link ChangeAction#REPLY} notifications to other internal attendees for an attendee scheduling resource</li>
      * </ul>
      * 
+     * @param attendee The attendee that replies
      * @param updatedResource The updated calendar object resource
      * @param attendeeEventUpdates The list of performed attendee event updates
      */
-    public void trackReply(CalendarObjectResource updatedResource, List<EventUpdate> attendeeEventUpdates) {
-        trackReply(updatedResource, null, attendeeEventUpdates);
+    public void trackReply(Attendee attendee, CalendarObjectResource updatedResource, List<EventUpdate> attendeeEventUpdates) {
+        trackReply(attendee, updatedResource, null, attendeeEventUpdates);
     }
     
     /**
@@ -615,13 +598,14 @@ public class SchedulingHelper {
      * <li>{@link ChangeAction#REPLY} notifications to other internal attendees for an attendee scheduling resource</li>
      * </ul>
      * 
+     * @param attendee The attendee that replies
      * @param updatedResource The updated calendar object resource
      * @param seriesMaster The series master event in case an instance of an event series is replied, or <code>null</code> if not available
      * @param attendeeEventUpdates The list of performed attendee event updates
      */
-    public void trackReply(CalendarObjectResource updatedResource, Event seriesMaster, List<EventUpdate> attendeeEventUpdates) {
+    public void trackReply(Attendee attendee, CalendarObjectResource updatedResource, Event seriesMaster, List<EventUpdate> attendeeEventUpdates) {
         try {
-            CalendarUser originator = getOriginator();
+            CalendarUser originator = getOriginator(attendee);
             LOG.trace("Tracking 'reply' scheduling messages and notifications [originator={}, updatedResource={}, seriesMaster={}, attendeeEventUpdates={}]",
                 originator, updatedResource, seriesMaster, attendeeEventUpdates);
             if (false == shouldTrack(updatedResource, attendeeEventUpdates)) {
@@ -632,7 +616,7 @@ public class SchedulingHelper {
              */
             if (isCalendarOwner(calendarUser) && false == isActing(calendarUser) && isNotifyOnReply(calendarUser)) {
                 trackReplyNotification(updatedResource, attendeeEventUpdates, seriesMaster, originator, calendarUser);
-            }            
+            }
             /*
              * prepare notifications and scheduling messages from attendee to organizer
              */
@@ -665,8 +649,59 @@ public class SchedulingHelper {
                 }
             }
         } catch (OXException e) {
-            session.addWarning(e);            
+            session.addWarning(e);
             LOG.warn("Unexpected error tracking 'reply' scheduling messsages: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Tracks notifications for an updated calendar object resource in the underlying calendar folder, after the
+     * participation status of an external attendee was changed.
+     * <p/>
+     * This includes:
+     * <ul>
+     * <li>a {@link ChangeAction#REPLY} notification to the calendar owner if the current user acts on behalf of him</li>
+     * <li>a {@link ChangeAction#REPLY} notification to an internal organizer for an attendee scheduling resource</li>
+     * <li>{@link ChangeAction#REPLY} notifications to other internal attendees for an attendee scheduling resource</li>
+     * </ul>
+     * 
+     * @param updatedResource The updated calendar object resource
+     * @param seriesMaster The series master event in case an instance of an event series is replied, or <code>null</code> if not available
+     * @param eventUpdates The list of updated events
+     */
+    public void trackProcessedReply(CalendarObjectResource updatedResource, Event seriesMaster, List<EventUpdate> eventUpdates) {
+        try {
+            CalendarUser originator = getOriginator(updatedResource.getOrganizer());
+            LOG.trace("Tracking notifications after 'reply' has been applied [originator={}, updatedResource={}]", originator, updatedResource);
+            if (false == shouldTrack(updatedResource, null)) {
+                return;
+            }
+            /*
+             * prepare notification to calendar owner of updated resource when acting on behalf, if enabled
+             */
+            if (isCalendarOwner(calendarUser) && false == isActing(calendarUser) && isNotifyOnReply(calendarUser)) {
+                trackProcessedReplyMessage(updatedResource, seriesMaster, eventUpdates, originator, calendarUser);
+            }
+            /*
+             * prepare notification to internal organizer, if enabled
+             */
+            CalendarUser organizer = updatedResource.getOrganizer();
+            if (isInternal(organizer, CalendarUserType.INDIVIDUAL) && false == isActing(organizer) && isNotifyOnReply(organizer)) {
+                trackProcessedReplyMessage(updatedResource, seriesMaster, eventUpdates, getCalendarUser(session, folder), organizer);
+            }
+            /*
+             * prepare notifications for each individual internal attendee, if enabled
+             */
+            for (Entry<Attendee, CalendarObjectResource> entry : getResourcesPerAttendee(updatedResource, true).entrySet()) {
+                Attendee recipient = entry.getKey();
+                if (CalendarUserType.INDIVIDUAL.matches(recipient.getCuType()) && false == matches(updatedResource.getOrganizer(), recipient) &&
+                    false == isActing(recipient) && false == isCalendarOwner(recipient) && isNotifyOnReplyAsAttendee(recipient)) {
+                    trackProcessedReplyMessage(updatedResource, seriesMaster, eventUpdates, originator, recipient);
+                }
+            }
+        } catch (OXException e) {
+            session.addWarning(e);
+            LOG.warn("Unexpected error tracking notifications after 'reply' messsages: {}", e.getMessage(), e);
         }
     }
 
@@ -761,7 +796,7 @@ public class SchedulingHelper {
         tracker.trackSchedulingMessage(message);
         //@formatter:on
     }
-    
+
     private void trackUpdateMessage(CalendarObjectResource updatedResource, Event seriesMaster, List<EventUpdate> eventUpdates, CalendarUser originator, CalendarUser recipient) throws OXException {
         //@formatter:off
         SchedulingMessage message = new MessageBuilder()
@@ -787,6 +822,22 @@ public class SchedulingHelper {
             .setResource(deletedResource)
             .setScheduleChange(describeCancel(deletedResource, seriesMaster, originator, recipient))
             .setRecipientSettings(new DefaultRecipientSettings(services, session, originator, recipient, deletedResource))
+        .build();
+        LOG.trace("Tracking {}", message);
+        tracker.trackSchedulingMessage(message);
+        //@formatter:on
+    }
+
+    private void trackProcessedReplyMessage(CalendarObjectResource updatedResource, Event seriesMaster, List<EventUpdate> eventUpdates, CalendarUser originator, CalendarUser recipient) throws OXException {
+        //@formatter:off
+        SchedulingMessage message = new MessageBuilder()
+            .setMethod(SchedulingMethod.REQUEST)
+            .setOriginator(originator)
+            .setRecipient(recipient)
+            .setResource(updatedResource)
+            .setScheduleChange(describeProcessedReply(updatedResource, seriesMaster, eventUpdates, originator, recipient))
+            .setAttachmentDataProvider(getAttachmentDataProvider())
+            .setRecipientSettings(new DefaultRecipientSettings(services, session, originator, recipient, updatedResource))
         .build();
         LOG.trace("Tracking {}", message);
         tracker.trackSchedulingMessage(message);
@@ -841,6 +892,14 @@ public class SchedulingHelper {
             return getSchedulingChangeService().describeCancelInstance(originator, optSchedulingComment(), deletedResource, seriesMaster);
         }
         return getSchedulingChangeService().describeCancel(originator, optSchedulingComment(), deletedResource);
+    }
+
+    private ScheduleChange describeProcessedReply(CalendarObjectResource updatedResource, Event seriesMaster, List<EventUpdate> eventUpdates, CalendarUser originator, CalendarUser recipient) throws OXException {
+        List<Change> changeDescriptions = getChangeDescriptionsFor(eventUpdates, EventField.ATTENDEES);
+        if (null != seriesMaster && contains(seriesMaster.getAttendees(), recipient)) {
+            return getSchedulingChangeService().describeUpdateInstance(originator, optSchedulingComment(), updatedResource, seriesMaster, changeDescriptions);
+        }
+        return getSchedulingChangeService().describeUpdateRequest(originator, optSchedulingComment(), updatedResource, changeDescriptions);
     }
 
     private ScheduleChange describeReply(CalendarObjectResource updatedResource, List<EventUpdate> attendeeEventUpdates, Event seriesMaster, CalendarUser originator, CalendarUser recipient) throws OXException {
@@ -969,14 +1028,43 @@ public class SchedulingHelper {
         return requireService(SchedulingChangeService.class, services);
     }
 
-    private CalendarUser getOriginator() throws OXException {
-        CalendarUser originator = getCalendarUser(session, folder);
+    /**
+     * Looks up the effective calendar user matching the currently acting calendar user in a specific calendar object resource:
+     * <ul>
+     * <li>for <i>organizer scheduling resources</i>, this is the organizer</li>
+     * <li>for <i>attendee scheduling resources</i>, this is the matching attendee in the first event of the resource</li>
+     * <li>otherwise, this is the currently acting calendar user</li>
+     * </ul>
+     * 
+     * @param resource The calendar object resource to determine the effective calendar user for
+     * @return The effective calendar user
+     */
+    private CalendarUser lookupCalendarUser(CalendarObjectResource resource) {
+        if (isOrganizerSchedulingResource(resource, calendarUser.getEntity())) {
+            return resource.getOrganizer();
+        } else if (isAttendeeSchedulingResource(resource, calendarUser.getEntity())) {
+            return find(resource.getFirstEvent().getAttendees(), calendarUser);
+        } else {
+            return calendarUser;
+        }
+    }
+
+    /**
+     * Constructs a calendar user representing the originator of the scheduling message, based on the calendar user in the scheduling
+     * resource the action originates from, the underlying folder, and the current session's user.
+     *
+     * @param calendarUser The effective calendar user the action originates from, or <code>null</code> to fall back to the actual
+     *            calendar user based on the parent folder
+     * @return The originator for the resulting scheduling messages
+     */
+    private CalendarUser getOriginator(CalendarUser calendarUser) throws OXException {
+        CalendarUser originator = null != calendarUser ? new CalendarUser(calendarUser) : getCalendarUser(session, folder);
         if (session.getUserId() != originator.getEntity()) {
             originator.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }
         return originator;
     }
-    
+
     private boolean shouldTrack(CalendarObjectResource resource) {
         return shouldTrack(resource, null);
     }

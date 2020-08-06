@@ -94,17 +94,17 @@ public class ActionPerformerAction extends AbstractITipAction {
     protected Object process(List<ITipAnalysis> analysis, AJAXRequestData request, CalendarSession session, TimeZone tz) throws JSONException, OXException {
         ITipAnalysis analysisToProcess = analysis.get(0);
         ITipActionPerformerFactoryService factory = getFactory();
-        ITipAction action = ITipAction.valueOf(request.getParameter("action").toUpperCase());
+        ITipAction action = ITipAction.valueOf(request.getParameter("action", String.class).toUpperCase());
         ITipAttributes attributes = new ITipAttributes();
         if (request.containsParameter("message")) {
             String message = request.getParameter("message", String.class);
-            if (message != null && !message.trim().equals("")) {
+            if (!message.trim().equals("")) {
                 attributes.setConfirmationMessage(message);
             }
         }
         ITipActionPerformer performer = factory.getPerformer(action);
 
-        List<Event> list = performer.perform(action, analysisToProcess, session, attributes);
+        List<Event> list = performer.perform(request, action, analysisToProcess, session, attributes);
 
         if (list != null) {
             EventConverter eventConverter = getEventConverter(session);

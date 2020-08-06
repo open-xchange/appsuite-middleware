@@ -139,6 +139,11 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     // Your search took too long in order to be accomplished.
     public static final String SEARCH_TOOK_TOO_LONG_MSG_DISPLAY = "Your search took too long in order to be accomplished.";
 
+    // The folder you requested does not exist.
+    public static final String FOLDER_NOT_EXISTS_MSG = "The folder you requested does not exist.";
+
+    // The file contains too many permissions. Please reduce the number or use groups instead.
+    public static final String TOO_MANY_PERMISSIONS = "The file contains too many permissions. Please reduce the number of permissions or use group permissions instead.";
 
     private InfostoreExceptionMessages() {
         super();

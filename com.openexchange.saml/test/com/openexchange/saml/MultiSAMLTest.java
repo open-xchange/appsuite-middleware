@@ -6,14 +6,17 @@ import javax.servlet.ServletException;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opensaml.DefaultBootstrap;
+import org.mockito.MockitoAnnotations;
+import org.opensaml.core.config.InitializationService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.java.Strings;
 import com.openexchange.saml.osgi.SAMLBackendRegistry;
@@ -87,13 +90,15 @@ public class MultiSAMLTest {
     private static SimpleServiceLookup services;
     private static HttpService httpService;
     private SAMLBackendRegistry registry;
+    @Mock
+    private ConfigurationService configurationService;
 
     @Mock
     private BundleContext bundleContext;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        DefaultBootstrap.bootstrap();
+        InitializationService.initialize();
         testCredentials = new TestCredentials();
         credentialProvider = testCredentials.getSPCredentialProvider();
 
@@ -119,6 +124,11 @@ public class MultiSAMLTest {
 
     @Before
     public void before() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        services.add(ConfigurationService.class, configurationService);
+        Mockito.when(configurationService.getProperty(ArgumentMatchers.anyString())).thenReturn("bla");
+
         bundleContext = Mockito.mock(BundleContext.class);
         registry = new SAMLBackendRegistry(bundleContext, services);
     }

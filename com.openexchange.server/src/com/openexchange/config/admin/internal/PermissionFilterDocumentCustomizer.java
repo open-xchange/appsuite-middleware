@@ -49,7 +49,9 @@
 
 package com.openexchange.config.admin.internal;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.tools.iterator.Customizer;
 
@@ -65,7 +67,7 @@ public class PermissionFilterDocumentCustomizer implements Customizer<DocumentMe
 
     /**
      * Initializes a new {@link PermissionFilterDocumentCustomizer}.
-     * 
+     *
      * @param adminUserId The user id of the context admin
      */
     public PermissionFilterDocumentCustomizer(int adminUserId) {
@@ -75,10 +77,21 @@ public class PermissionFilterDocumentCustomizer implements Customizer<DocumentMe
 
     @Override
     public DocumentMetadata customize(DocumentMetadata thing) throws OXException {
-        if (null != thing.getObjectPermissions()) {
+        if (contains(thing.getObjectPermissions(), adminUserId)) {
             return new PermissionFilterDocumentMetadataImpl(adminUserId, thing);
         }
         return thing;
+    }
+
+    private static boolean contains(List<ObjectPermission> permissions, int entity) {
+        if (null != permissions) {
+            for (ObjectPermission permission : permissions) {
+                if (permission.getEntity() == entity) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

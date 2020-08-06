@@ -62,6 +62,7 @@ import java.util.UUID;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
@@ -110,18 +111,22 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         try {
-            doAuthHeaderLogin(req, resp);
+            doAuthHeaderLogin(req, resp, requestContext);
+            if(requestContext.getMetricProvider().isStateUnknown()) {
+                requestContext.getMetricProvider().recordSuccess();
+            }
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
             resp.addHeader("WWW-Authenticate", "NEGOTIATE");
             resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+            requestContext.getMetricProvider().recordException(e);
         }
     }
 
-    private void doAuthHeaderLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
+    private void doAuthHeaderLogin(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws OXException, IOException {
         /*
          * Try to lookup session by auto-login
          */
@@ -136,6 +141,7 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
                 resp.addHeader("WWW-Authenticate", "NEGOTIATE");
                 resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
+                requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
             final String version;
@@ -161,7 +167,7 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
                 String userAgent = LoginTools.parseUserAgent(req);
                 Map<String, List<String>> headers = copyHeaders(req);
                 com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
-                String httpSessionId = req.getSession(true).getId();
+                HttpSession httpSession = req.getSession(true);
                 String httpAuthAutoLogin = conf.getHttpAuthAutoLogin();
                 boolean staySignedIn = Strings.isNotEmpty(httpAuthAutoLogin) && Boolean.parseBoolean(httpAuthAutoLogin);
 
@@ -170,7 +176,7 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
                 b.hash(HashCalculator.getInstance().getHash(req, userAgent, client));
                 b.iface(HTTP_JSON).headers(headers).requestParameter(req.getParameterMap());
                 b.cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
-                b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
+                b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSession(httpSession);
                 b.staySignedIn(staySignedIn);
                 request = b.build();
             }

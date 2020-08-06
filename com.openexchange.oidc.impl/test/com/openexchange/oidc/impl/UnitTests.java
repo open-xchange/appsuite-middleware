@@ -8,13 +8,13 @@ import com.openexchange.oidc.impl.tests.OIDCPasswordGrantAuthenticationTest;
 import com.openexchange.oidc.impl.tests.OIDCSessionInspectorServiceTest;
 import com.openexchange.oidc.impl.tests.OIDCWebSSoProviderImplTest;
 import com.openexchange.oidc.spi.AbstractOIDCBackendConfigTest;
-import com.openexchange.oidc.spi.AbstractOIDCBackendTest;
+import com.openexchange.oidc.spi.OIDCBackendTest;
 import com.openexchange.oidc.tools.OIDCToolsTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
     OIDCToolsTest.class,
-    AbstractOIDCBackendTest.class,
+    OIDCBackendTest.class,
     OIDCWebSSoProviderImplTest.class,
     OIDCSessionInspectorServiceTest.class,
     OIDCPasswordGrantAuthenticationTest.class,

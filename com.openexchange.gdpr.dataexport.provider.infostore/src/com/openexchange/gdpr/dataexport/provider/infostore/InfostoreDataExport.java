@@ -575,7 +575,7 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
                 }
                 if (isPermissionDenied(e)) {
                     LOG.debug("Forbidden to export files from folder \"{}\" for user {} in context {}", folder.getName(), I(task.getUserId()), I(task.getContextId()), e);
-                    sink.addToReport(Message.builder().appendToMessage("Insufficient permissions to export files from folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_INFOSTORE).withTimeStamp(new Date()).build());
+                    sink.addToReport(Message.builderWithPermissionDeniedType().appendToMessage("Insufficient permissions to export files from folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_INFOSTORE).withTimeStamp(new Date()).build());
                 } else {
                     LOG.warn("Failed to export files from folder \"{}\" for user {} in context {}", folder.getName(), I(task.getUserId()), I(task.getContextId()), e);
                     sink.addToReport(Message.builder().appendToMessage("Failed to export files from folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_INFOSTORE).withTimeStamp(new Date()).build());

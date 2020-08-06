@@ -106,6 +106,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object currentVersion(final Object... args) {
+        md(args).setIsCurrentVersion(bool(1, args));
         return ret(args);
     }
 

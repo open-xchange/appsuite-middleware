@@ -64,9 +64,13 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.caching.Cache;
@@ -122,18 +126,18 @@ public final class OXFolderAdminHelper {
     /**
      * Checks if context's admin has administer permission on public folder(s).
      * <p>
-     * <b>Note</b>: Succeeds only of specified user ID denotes context's admin
+     * <b>Note</b>: Succeeds only of specified user identifier denotes context's admin
      *
-     * @param cid The context ID
-     * @param userId The ID of the user for whom the setting shall be checked
+     * @param contextId The context identifier
+     * @param userId The identifier of the user for whom the setting shall be checked
      * @param readCon A readable connection
      * @return <code>true</code> if context's admin has administer permission on public folder(s); otherwise <code>false</code>
      * @throws OXException If an error occurs
      */
-    public boolean isPublicFolderEditable(final int cid, final int userId, final Connection readCon) throws OXException {
+    public boolean isPublicFolderEditable(final int contextId, final int userId, final Connection readCon) throws OXException {
         final int admin;
         try {
-            admin = getContextAdminID(cid, readCon);
+            admin = getContextAdminID(contextId, readCon);
         } catch (OXException e) {
             LOG.error("", e);
             return false;
@@ -146,7 +150,7 @@ public final class OXFolderAdminHelper {
         try {
             stmt =
                 readCon.prepareStatement("SELECT admin_flag FROM oxfolder_permissions WHERE cid = ? AND permission_id = ? AND fuid IN " + StringCollection.getSqlInString(CHANGEABLE_PUBLIC_FOLDERS));
-            stmt.setInt(1, cid);
+            stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
             boolean editable = true;
@@ -166,18 +170,18 @@ public final class OXFolderAdminHelper {
     /**
      * Sets if context's admin has administer permission on public folder(s).
      * <p>
-     * <b>Note</b>: Succeeds only of specified user ID denotes context's admin
+     * <b>Note</b>: Succeeds only of specified user identifier denotes context's admin
      *
      * @param editable <code>true</code> if context's admin has administer permission on public folder(s); otherwise <code>false</code>
-     * @param cid The context ID
-     * @param userId The ID of the user for whom the option shall be set
+     * @param contextId The context identifier
+     * @param userId The identifier of the user for whom the option shall be set
      * @param writeCon A writable connection
      * @throws OXException If an error occurs
      */
-    public void setPublicFolderEditable(final boolean editable, final int cid, final int userId, final Connection writeCon) throws OXException {
+    public void setPublicFolderEditable(final boolean editable, final int contextId, final int userId, final Connection writeCon) throws OXException {
         final int admin;
         try {
-            admin = getContextAdminID(cid, writeCon);
+            admin = getContextAdminID(contextId, writeCon);
         } catch (OXException e) {
             LOG.error("", e);
             return;
@@ -187,8 +191,8 @@ public final class OXFolderAdminHelper {
                 /*
                  * Check if folder has already been created for given context
                  */
-                if (!checkFolderExistence(cid, id, writeCon)) {
-                    createPublicFolder(id, cid, admin, writeCon, System.currentTimeMillis());
+                if (!checkFolderExistence(contextId, id, writeCon)) {
+                    createPublicFolder(id, contextId, admin, writeCon, System.currentTimeMillis());
                 }
             } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -199,7 +203,7 @@ public final class OXFolderAdminHelper {
                 stmt =
                     writeCon.prepareStatement("SELECT permission_id, admin_flag, system FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
                 int pos = 1;
-                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, contextId);
                 stmt.setInt(pos++, id);
                 stmt.setInt(pos++, userId);
                 rs = stmt.executeQuery();
@@ -235,7 +239,7 @@ public final class OXFolderAdminHelper {
                     stmt.setInt(pos++, NO_PERMISSIONS); // owp
                     stmt.setInt(pos++, editable ? 1 : 0); // admin_flag
                     stmt.setInt(pos++, NO_PERMISSIONS); // odp
-                    stmt.setInt(pos++, cid);
+                    stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, id);
                     stmt.setInt(pos++, admin);
                     stmt.setInt(pos++, system);
@@ -244,7 +248,7 @@ public final class OXFolderAdminHelper {
                     stmt =
                         writeCon.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     pos = 1;
-                    stmt.setInt(pos++, cid); // cid
+                    stmt.setInt(pos++, contextId); // cid
                     stmt.setInt(pos++, id); // fuid
                     stmt.setInt(pos++, admin); // permission_id
                     stmt.setInt(pos++, CREATE_SUB_FOLDERS); // fp
@@ -261,7 +265,7 @@ public final class OXFolderAdminHelper {
                 /*
                  * Update last-modified of folder
                  */
-                final ContextImpl ctx = new ContextImpl(cid);
+                final ContextImpl ctx = new ContextImpl(contextId);
                 ctx.setMailadmin(admin);
                 OXFolderSQL.updateLastModified(id, System.currentTimeMillis(), admin, writeCon, ctx);
                 /*
@@ -273,7 +277,7 @@ public final class OXFolderAdminHelper {
                         FolderCacheManager.getInstance().removeFolderObject(id, ctx);
                     }
                     if (FolderQueryCacheManager.isInitialized()) {
-                        FolderQueryCacheManager.getInstance().invalidateContextQueries(cid);
+                        FolderQueryCacheManager.getInstance().invalidateContextQueries(contextId);
                     }
                 } catch (OXException e) {
                     LOG.error("", e);
@@ -289,87 +293,317 @@ public final class OXFolderAdminHelper {
     /**
      * Restores default permissions on global address book folder in given context.
      *
-     * @param cid The context ID
-     * @param enable Whether to enable or disable global address book access for each user
+     * @param contextId The context identifier
+     * @param gabMode The mode to use or <code>null</code>
+     * @param enable Whether to enable or disable global address book access
      * @throws OXException If an error occurs
      */
-    public void restoreDefaultGlobalAddressBookPermissions(final int cid, final boolean enable) throws OXException {
-        final Connection writeCon = Database.get(cid, true);
+    public void restoreDefaultGlobalAddressBookPermissions(final int contextId, final GABMode gabMode, final boolean enable) throws OXException {
+        final Connection writeCon = Database.get(contextId, true);
+        int rollback = 0;
         try {
-            /*
-             * Check if global permission is enabled for global address book folder in current context
-             */
-            try {
-                if (checkGlobalGABPermissionExistence(cid, writeCon)) {
-                    /*
-                     * Global permission enabled for global address book folder; nothing to be restored for this context.
-                     */
-                    LOG.warn("Cannot restore individual global address book permissions since global permission is active.");
-                    // updateGABWritePermission(cid, enable, writeCon);
-                    return;
-                }
-            } catch (SQLException e) {
-                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            boolean isGlobalGABPermission = checkGlobalGABPermissionExistence(contextId, writeCon);
+            GABMode mode = gabMode;
+            if (null == mode) {
+                mode = isGlobalGABPermission ? GABMode.GLOBAL : GABMode.INDIVIDUAL;
             }
-            /*
-             * Get context's users
-             */
-            final TIntList users;
-            {
-                PreparedStatement stmt = null;
-                ResultSet rs = null;
-                try {
-                    stmt = writeCon.prepareStatement("SELECT id FROM user WHERE cid = ?");
-                    final int pos = 1;
-                    stmt.setInt(pos, cid);
-                    rs = stmt.executeQuery();
-                    users = new TIntLinkedList();
-                    while (rs.next()) {
-                        users.add(rs.getInt(pos));
+
+            Databases.startTransaction(writeCon);
+            rollback = 1;
+
+            switch (mode) {
+                case GLOBAL:
+                    if (isGlobalGABPermission) {
+                        /*
+                         * Ensure correct permissions for default user group
+                         */
+                        restoreGABPermissionsGlobal(writeCon, contextId, enable);
+                    } else {
+                        /*
+                         * Mode is switched, delete individual entries and add default user group
+                         */
+                        switchToGlobalAccess(writeCon, contextId, enable);
                     }
-                } catch (SQLException e) {
-                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-                } finally {
-                    Databases.closeSQLStuff(rs, stmt);
+                    break;
+
+                case INDIVIDUAL:
+                    if (isGlobalGABPermission) {
+                        /*
+                         * Mode is switched, delete group permission and add all user individual
+                         */
+                        switchToIndividualAccess(writeCon, contextId, enable);
+                    } else {
+                        /*
+                         * Ensure correct permissions for all users
+                         */
+                        restoreGABPermissionsIndividual(writeCon, contextId, enable);
+                    }
+                    break;
+
+                default:
+                    throw OXFolderExceptionCode.RUNTIME_ERROR.create(new RuntimeException("Unkown mode for global adressbook"));
+            }
+
+            writeCon.commit();
+            rollback = 2;
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(writeCon);
                 }
+                Databases.autocommit(writeCon);
+            }
+            Database.back(contextId, true, writeCon);
+        }
+    }
+
+    /**
+     * Restores the "all users and groups" permissions for the global address book.
+     *
+     * @param writeCon The write connection to use
+     * @param contextId The context identifier
+     * @param enable Whether to enable or disable global address book access
+     */
+    private void restoreGABPermissionsGlobal(Connection writeCon, int contextId, boolean enable) throws SQLException, OXException {
+        int admin = getContextAdminID(contextId, writeCon);
+        for (OCLPermission permission : ImmutableList.of(getGABAdmin(writeCon, contextId, Optional.of(Integer.valueOf(admin))), getAllUserGABGroup(enable))) {
+            PreparedStatement stmt = null;
+            try {
+                stmt = writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, group_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?");
+                int pos = 1;
+                stmt.setInt(pos++, permission.getFolderPermission());
+                stmt.setInt(pos++, permission.getReadPermission());
+                stmt.setInt(pos++, permission.getWritePermission());
+                stmt.setInt(pos++, permission.isFolderAdmin() ? 1 : 0);
+                stmt.setInt(pos++, permission.isGroupPermission() ? 1 : 0);
+                stmt.setInt(pos++, NO_PERMISSIONS);
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                stmt.setInt(pos++, permission.getEntity());
+                stmt.executeUpdate();
+            } finally {
+                Databases.closeSQLStuff(stmt);
+            }
+        }
+        // Propagate change
+        {
+            ContextImpl ctx = new ContextImpl(contextId);
+            ctx.setMailadmin(admin);
+            OXFolderSQL.updateLastModified(FolderObject.SYSTEM_LDAP_FOLDER_ID, System.currentTimeMillis(), admin, writeCon, ctx);
+            /*
+             * Update caches
+             */
+            ConditionTreeMapManagement.dropFor(ctx.getContextId());
+            try {
+                if (FolderCacheManager.isEnabled()) {
+                    FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx);
+                }
+                CacheFolderStorage.getInstance().clearCache(-1, ctx.getContextId());
+                if (FolderQueryCacheManager.isInitialized()) {
+                    FolderQueryCacheManager.getInstance().invalidateContextQueries(contextId);
+                }
+                final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != service) {
+                    Cache cache = service.getCache("GlobalFolderCache");
+                    String sContextId = Integer.toString(contextId);
+                    String sGlobalAddressBookId = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                    for (String treeId : new String[] { FolderStorage.REAL_TREE_ID, OutlookFolderStorage.OUTLOOK_TREE_ID, "20" }) {
+                        CacheKey cacheKey = service.newCacheKey(1, treeId, sGlobalAddressBookId);
+                        cache.removeFromGroup(cacheKey, sContextId);
+                    }
+                }
+            } catch (OXException e) {
+                LOG.error("", e);
+            }
+        }
+    }
+
+    /**
+     * Switches the modus of the global address book from a per user permission to a permission for the all user group
+     *
+     * @param writeCon The write connection to use
+     * @param contextId The context identifier
+     * @param enable Whether to enable or disable global address book access
+     * @throws SQLException In case of a DB error
+     * @throws OXException In case of an error
+     */
+    private void switchToGlobalAccess(Connection writeCon, int contextId, boolean enable) throws SQLException, OXException {
+        int admin = getContextAdminID(contextId, writeCon);
+        deleteAllGABEntries(writeCon, contextId);
+        insertPermissionsForSystemFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, ImmutableList.of(getGABAdmin(writeCon, contextId, Optional.of(Integer.valueOf(admin))), getAllUserGABGroup(enable)), contextId, writeCon);
+        {
+            ContextImpl ctx = new ContextImpl(contextId);
+            ctx.setMailadmin(admin);
+            OXFolderSQL.updateLastModified(FolderObject.SYSTEM_LDAP_FOLDER_ID, System.currentTimeMillis(), admin, writeCon, ctx);
+            /*
+             * Update caches
+             */
+            ConditionTreeMapManagement.dropFor(ctx.getContextId());
+            try {
+                if (FolderCacheManager.isEnabled()) {
+                    FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx);
+                }
+                CacheFolderStorage.getInstance().clearCache(-1, ctx.getContextId());
+                if (FolderQueryCacheManager.isInitialized()) {
+                    FolderQueryCacheManager.getInstance().invalidateContextQueries(contextId);
+                }
+                final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != service) {
+                    Cache cache = service.getCache("GlobalFolderCache");
+                    String sContextId = Integer.toString(contextId);
+                    String sGlobalAddressBookId = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                    for (String treeId : new String[] { FolderStorage.REAL_TREE_ID, OutlookFolderStorage.OUTLOOK_TREE_ID, "20" }) {
+                        CacheKey cacheKey = service.newCacheKey(1, treeId, sGlobalAddressBookId);
+                        cache.removeFromGroup(cacheKey, sContextId);
+                    }
+                }
+            } catch (OXException e) {
+                LOG.error("", e);
+            }
+        }
+    }
+
+    /**
+     * Restores the per user permissions for the global address book
+     *
+     * @param writeCon The write connection to use
+     * @param contextId The context identifier
+     * @param enable Whether to enable or disable global address book access
+     */
+    private void restoreGABPermissionsIndividual(Connection writeCon, int contextId, boolean enable) throws OXException {
+        /*
+         * Get context's users, excluding guest users. Afterwards iterate over them
+         */
+        final TIntList users = getUsers(writeCon, contextId);
+        if (!users.isEmpty()) {
+            final Integer admin = Integer.valueOf(getContextAdminID(contextId, writeCon));
+            for (int i = 1; i < users.size(); i++) {
+                setGlobalAddressBookDisabled(contextId, users.get(i), !enable, GABMode.INDIVIDUAL, writeCon, admin, false);
             }
             /*
-             * Iterate users
+             * Propagate with last update
              */
-            if (!users.isEmpty()) {
-                final Integer admin = Integer.valueOf(getContextAdminID(cid, writeCon));
-                final int size = users.size();
-                for (int i = 1; i < size; i++) {
-                    setGlobalAddressBookDisabled(cid, users.get(i), !enable, writeCon, admin, false);
-                }
-                /*
-                 * Propagate with last update
-                 */
-                setGlobalAddressBookDisabled(cid, users.get(0), !enable, writeCon, admin, true);
-            }
-        } finally {
-            Database.back(cid, true, writeCon);
+            setGlobalAddressBookDisabled(contextId, users.get(0), !enable, GABMode.INDIVIDUAL, writeCon, admin, true);
         }
+    }
+
+    /**
+     * Switches the modus of the global address book from a global access permission to user individual permissions in the DB
+     *
+     * @param writeCon The write connection to use
+     * @param contextId The context identifier
+     * @param enable Whether to enable or disable global address book access for each user
+     * @throws OXException In case of error
+     * @throws SQLException In case of DB error
+     */
+    private void switchToIndividualAccess(Connection writeCon, int contextId, boolean enable) throws OXException, SQLException {
+        deleteAllGABEntries(writeCon, contextId);
+        restoreGABPermissionsIndividual(writeCon, contextId, enable);
+    }
+
+    /**
+     * Delete all permission entires on the global address book
+     *
+     * @param writeCon The connection to use
+     * @param contextId The context identifier
+     * @throws SQLException in case of an error
+     */
+    private void deleteAllGABEntries(Connection writeCon, int contextId) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement("DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            stmt.executeUpdate();
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * Get the users of a specific context, excluding guest users
+     *
+     * @param connection The connection to query the users from
+     * @param contextId The context identifier
+     * @return The users
+     * @throws OXException In case of an error
+     */
+    private TIntList getUsers(Connection connection, int contextId) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement("SELECT id FROM user WHERE cid = ? AND guestCreatedBy=0");
+            final int pos = 1;
+            stmt.setInt(pos, contextId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return new TIntArrayList(0);
+            }
+
+            TIntList users = new TIntLinkedList();
+            do {
+                users.add(rs.getInt(pos));
+            } while (rs.next());
+            return users;
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
+     * Get the permissions for the context administrator regarding the global address book
+     *
+     * @param connection The connection to query the administrator information from
+     * @param contextId The context identifier
+     * @param optionalAdminId The optional administrator identifier
+     * @return The permissions
+     * @throws OXException in case of an error
+     */
+    private OCLPermission getGABAdmin(Connection connection, int contextId, Optional<Integer> optionalAdminId) throws OXException {
+        OCLPermission adminPermission = new OCLPermission();
+        adminPermission.setEntity(optionalAdminId.isPresent() ? optionalAdminId.get().intValue() : getContextAdminID(contextId, connection));
+        adminPermission.setGroupPermission(false);
+        setGABPermissions(adminPermission);
+        adminPermission.setFolderAdmin(true);
+        return adminPermission;
+    }
+
+    /**
+     * Get permissions for the all user group
+     *
+     * @param enable Whether to enable or disable global address book access
+     * @return The permissions
+     */
+    private OCLPermission getAllUserGABGroup(boolean enable) {
+        OCLPermission allUserGroup = new OCLPermission(OCLPermission.ALL_GROUPS_AND_USERS, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        allUserGroup.setGroupPermission(true);
+        allUserGroup.setFolderAdmin(false);
+        setGABPermissions(allUserGroup, enable);
+        return allUserGroup;
     }
 
     /**
      * Checks whether global address book is enabled for specified user.
      *
-     * @param cid The context ID
-     * @param userId The user ID
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @param readCon A readable connection
      * @return <code>true</code> if global address book is disabled; otherwise <code>false</code>
      * @throws OXException If an error occurs
      */
-    public boolean isGlobalAddressBookDisabled(final int cid, final int userId, final Connection readCon) throws OXException {
+    public boolean isGlobalAddressBookDisabled(final int contextId, final int userId, final Connection readCon) throws OXException {
         /*
          * Check if global permission is enabled for global address book folder
          */
         final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
         try {
-            final int[] perms = getPermissionValue(cid, globalAddressBookId, ALL_GROUPS_AND_USERS, readCon);
+            final int[] perms = getPermissionValue(contextId, globalAddressBookId, ALL_GROUPS_AND_USERS, readCon);
             if (null != perms) {
-                LOG.warn("Cannot look-up individual user permission: Global permission is active on global address book folder.\nReturning global permission instead. user={}, context={}", I(userId), I(cid));
+                LOG.warn("Cannot look-up individual user permission: Global permission is active on global address book folder.\nReturning global permission instead. user={}, context={}", I(userId), I(contextId));
                 return (perms[0] == NO_PERMISSIONS);
             }
         } catch (SQLException e) {
@@ -380,7 +614,7 @@ public final class OXFolderAdminHelper {
         try {
             stmt = readCon.prepareStatement("SELECT fp, orp FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
             int pos = 1;
-            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, globalAddressBookId);
             stmt.setInt(pos++, userId);
             rs = stmt.executeQuery();
@@ -396,39 +630,43 @@ public final class OXFolderAdminHelper {
     }
 
     /**
-     * Enables/Disables specified user's global address book permission.
+     * Enables/disables specified user's global address book permission.
      *
-     * @param cid The context ID
-     * @param userId The user ID
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @param disable <code>true</code> to disable user's global address book permission; otherwise <code>false</code>
+     * @param gabMode The mode to use
      * @param writeCon A writable connection
      * @throws OXException If an error occurs
      */
-    public void setGlobalAddressBookDisabled(final int cid, final int userId, final boolean disable, final Connection writeCon) throws OXException {
-        setGlobalAddressBookDisabled(cid, userId, disable, writeCon, null, true);
-        LOG.debug("{} global address book for user {} in context {}", disable ? "Disabled" : "Enabled", Integer.valueOf(userId), Integer.valueOf(cid));
+    public void setGlobalAddressBookDisabled(final int contextId, final int userId, final boolean disable, final GABMode gabMode, final Connection writeCon) throws OXException {
+        setGlobalAddressBookDisabled(contextId, userId, disable, gabMode, writeCon, null, true);
+        LOG.debug("{} global address book for user {} in context {}", disable ? "Disabled" : "Enabled", Integer.valueOf(userId), Integer.valueOf(contextId));
     }
 
     /**
-     * Enables/Disables specified user's global address book permission.
+     * Enables/disables specified user's individual global address book permission.
      *
-     * @param cid The context ID
-     * @param userId The user ID
-     * @param disable <code>true</code> to enabled user's global address book permission; otherwise <code>false</code>
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param disable <code>true</code> to disable user's global address book permission; otherwise <code>false</code>
+     * @param gabMode The mode to use
      * @param writeCon A writable connection
+     * @param adminId The optional administrator identifier or <code>null</code>
+     * @param propagate <code>true</code> to propagate; otherwise <code>false</code>
      * @throws OXException If an error occurs
      */
-    private void setGlobalAddressBookDisabled(final int cid, final int userId, final boolean disable, final Connection writeCon, final Integer adminId, final boolean propagate) throws OXException {
-        final int admin = adminId == null ? getContextAdminID(cid, writeCon) : adminId.intValue();
-        final boolean isAdmin = (admin == userId);
-        final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
+    private void setGlobalAddressBookDisabled(final int contextId, final int userId, final boolean disable, final GABMode gabMode, final Connection writeCon, final Integer adminId, final boolean propagate) throws OXException {
+        int admin = adminId == null ? getContextAdminID(contextId, writeCon) : adminId.intValue();
+        boolean isAdmin = (admin == userId);
+        int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
+        /*
+         * Check if folder has already been created for given context in case context administrator is given
+         */
         if (isAdmin) {
             try {
-                /*
-                 * Check if folder has already been created for given context
-                 */
-                if (!checkFolderExistence(cid, globalAddressBookId, writeCon)) {
-                    createGlobalAddressBook(cid, admin, writeCon, System.currentTimeMillis());
+                if (!checkFolderExistence(contextId, globalAddressBookId, writeCon)) {
+                    createGlobalAddressBook(contextId, admin, gabMode, writeCon, System.currentTimeMillis());
                 }
             } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -438,23 +676,27 @@ public final class OXFolderAdminHelper {
          * Check if global permission is enabled for global address book folder
          */
         try {
-            if (checkGlobalGABPermissionExistence(cid, writeCon)) {
+            if (checkGlobalGABPermissionExistence(contextId, writeCon)) {
                 /*
                  * Global permission enabled for global address book folder
                  */
-                LOG.warn("Cannot update individual permission on global address book folder since global permission is active. user={}, context={}", I(userId), I(cid));
-                // updateGABWritePermission(cid, enable, writeCon);
+                if (GABMode.INDIVIDUAL.equals(gabMode)) {
+                    LOG.debug("Cannot update individual permission on global address book folder since global permission is active. user={}, context={}", I(userId), I(contextId));
+                }
                 return;
             }
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
+        /*
+         * Enable/disable user's individual global address book permission
+         */
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = writeCon.prepareStatement("SELECT permission_id,system FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
             int pos = 1;
-            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, globalAddressBookId);
             stmt.setInt(pos++, userId);
             rs = stmt.executeQuery();
@@ -480,7 +722,7 @@ public final class OXFolderAdminHelper {
                 }
                 stmt.setInt(pos++, isAdmin ? 1 : 0);
                 stmt.setInt(pos++, NO_PERMISSIONS);
-                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, contextId);
                 stmt.setInt(pos++, globalAddressBookId);
                 stmt.setInt(pos++, userId);
                 stmt.setInt(pos++, system);
@@ -488,7 +730,7 @@ public final class OXFolderAdminHelper {
             } else {
                 stmt = writeCon.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 pos = 1;
-                stmt.setInt(pos++, cid); // cid
+                stmt.setInt(pos++, contextId); // cid
                 stmt.setInt(pos++, globalAddressBookId); // fuid
                 stmt.setInt(pos++, userId); // permission_id
                 if (disable) {
@@ -512,7 +754,7 @@ public final class OXFolderAdminHelper {
              * Update last-modified of folder
              */
             if (propagate) {
-                final ContextImpl ctx = new ContextImpl(cid);
+                ContextImpl ctx = new ContextImpl(contextId);
                 ctx.setMailadmin(admin);
                 OXFolderSQL.updateLastModified(globalAddressBookId, System.currentTimeMillis(), admin, writeCon, ctx);
                 /*
@@ -525,15 +767,15 @@ public final class OXFolderAdminHelper {
                     }
                     CacheFolderStorage.getInstance().clearCache(-1, ctx.getContextId());
                     if (FolderQueryCacheManager.isInitialized()) {
-                        FolderQueryCacheManager.getInstance().invalidateContextQueries(cid);
+                        FolderQueryCacheManager.getInstance().invalidateContextQueries(contextId);
                     }
                     final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
                     if (null != service) {
-                        final Cache cache = service.getCache("GlobalFolderCache");
-                        final String sContextId = Integer.toString(cid);
-                        final String[] trees = new String[] { FolderStorage.REAL_TREE_ID, OutlookFolderStorage.OUTLOOK_TREE_ID, "20" };
-                        for (final String tid : trees) {
-                            final CacheKey cacheKey = service.newCacheKey(1, tid, Integer.toString(globalAddressBookId));
+                        Cache cache = service.getCache("GlobalFolderCache");
+                        String sContextId = Integer.toString(contextId);
+                        String sGlobalAddressBookId = Integer.toString(globalAddressBookId);
+                        for (String treeId : new String[] { FolderStorage.REAL_TREE_ID, OutlookFolderStorage.OUTLOOK_TREE_ID, "20" }) {
+                            CacheKey cacheKey = service.newCacheKey(1, treeId, sGlobalAddressBookId);
                             cache.removeFromGroup(cacheKey, sContextId);
                         }
                     }
@@ -554,27 +796,28 @@ public final class OXFolderAdminHelper {
      * Creates the standard system folders located in each context for given context in database and creates the default folders for
      * context's admin user by invoking <code>{@link #addUserToOXFolders(int, String, String, int, Connection)}</code>
      *
-     * @param cid The context ID
+     * @param contextId The context identifier
+     * @param gabMode The modus the global address book shall operate on
      * @param mailAdminDisplayName The display name of context's admin user
      * @param language The language conforming to syntax rules of locales
      * @param con A writeable connection
      * @throws OXException If system folder could not be created successfully or default folders for context's admin user could not be
      *             created
      */
-    public void addContextSystemFolders(final int cid, final String mailAdminDisplayName, final String language, final Connection con) throws OXException {
+    public void addContextSystemFolders(final int contextId, final GABMode gabMode, final String mailAdminDisplayName, final String language, final Connection con) throws OXException {
         try {
-            final int contextMalAdmin = getContextAdminID(cid, con);
-            addContextSystemFolders(cid, contextMalAdmin, mailAdminDisplayName, language, con);
+            final int contextMalAdmin = getContextAdminID(contextId, con);
+            addContextSystemFolders(contextId, contextMalAdmin, gabMode, mailAdminDisplayName, language, con);
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static int getContextAdminID(final int cid, final Connection readCon) throws OXException {
+    private static int getContextAdminID(final int contextId, final Connection readCon) throws OXException {
         try {
-            final int retval = OXFolderSQL.getContextAdminID(new ContextImpl(cid), readCon);
+            final int retval = OXFolderSQL.getContextAdminID(new ContextImpl(contextId), readCon);
             if (retval == -1) {
-                throw OXFolderExceptionCode.NO_ADMIN_USER_FOUND_IN_CONTEXT.create(Integer.valueOf(cid));
+                throw OXFolderExceptionCode.NO_ADMIN_USER_FOUND_IN_CONTEXT.create(Integer.valueOf(contextId));
             }
             return retval;
         } catch (SQLException e) {
@@ -582,7 +825,7 @@ public final class OXFolderAdminHelper {
         }
     }
 
-    private void addContextSystemFolders(final int cid, final int mailAdmin, final String mailAdminDisplayName, final String language, final Connection writeCon) throws SQLException, OXException {
+    private void addContextSystemFolders(final int contextId, final int mailAdmin, final GABMode gabMode, final String mailAdminDisplayName, final String language, final Connection writeCon) throws SQLException, OXException {
         final long creatingTime = System.currentTimeMillis();
         final OCLPermission systemPermission = new OCLPermission();
         systemPermission.setEntity(ALL_GROUPS_AND_USERS);
@@ -602,19 +845,19 @@ public final class OXFolderAdminHelper {
             creatingTime,
             mailAdmin,
             true,
-            cid,
+            contextId,
             writeCon);
         final OCLPermission guestPermission = new OCLPermission();
         guestPermission.setEntity(ALL_GUESTS);
         guestPermission.setGroupPermission(true);
         guestPermission.setFolderAdmin(false);
         guestPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
-        createSinglePermission(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, guestPermission, cid, writeCon);
+        createSinglePermission(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, guestPermission, contextId, writeCon);
         /*
          * Insert system public folder
          */
-        if (!checkFolderExistence(cid, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, writeCon)) {
-            createSystemPublicFolder(cid, mailAdmin, writeCon, creatingTime);
+        if (!checkFolderExistence(contextId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, writeCon)) {
+            createSystemPublicFolder(contextId, mailAdmin, writeCon, creatingTime);
         }
         /*
          * Insert system shared folder
@@ -631,10 +874,10 @@ public final class OXFolderAdminHelper {
             creatingTime,
             mailAdmin,
             true,
-            cid,
+            contextId,
             writeCon);
         guestPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
-        createSinglePermission(FolderObject.SYSTEM_SHARED_FOLDER_ID, guestPermission, cid, writeCon);
+        createSinglePermission(FolderObject.SYSTEM_SHARED_FOLDER_ID, guestPermission, contextId, writeCon);
         /*
          * Insert system system folder
          */
@@ -650,13 +893,13 @@ public final class OXFolderAdminHelper {
             creatingTime,
             mailAdmin,
             true,
-            cid,
+            contextId,
             writeCon);
         /*
          * Insert system infostore folder
          */
-        if (!checkFolderExistence(cid, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, writeCon)) {
-            createSystemInfostoreFolder(cid, mailAdmin, writeCon, creatingTime);
+        if (!checkFolderExistence(contextId, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, writeCon)) {
+            createSystemInfostoreFolder(contextId, mailAdmin, writeCon, creatingTime);
         }
         /*-
          * Insert system system_global folder aka 'Shared Address Book'
@@ -673,7 +916,7 @@ public final class OXFolderAdminHelper {
             creatingTime,
             mailAdmin,
             true,
-            cid,
+            contextId,
             writeCon);
         */
         /*
@@ -682,8 +925,8 @@ public final class OXFolderAdminHelper {
         // TODO: Whether to enable/disable internal-user-edit should be set by
         // caller (admin) as a parameter
         final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
-        if (checkFolderExistence(cid, globalAddressBookId, writeCon)) {
-            final ContextImpl ctx = new ContextImpl(cid);
+        if (checkFolderExistence(contextId, globalAddressBookId, writeCon)) {
+            final ContextImpl ctx = new ContextImpl(contextId);
             ctx.setMailadmin(mailAdmin);
             try {
                 OXFolderSQL.updateLastModified(globalAddressBookId, creatingTime, mailAdmin, writeCon, ctx);
@@ -692,7 +935,7 @@ public final class OXFolderAdminHelper {
                 LOG.error("", e);
             }
         } else {
-            createGlobalAddressBook(cid, mailAdmin, writeCon, creatingTime);
+            createGlobalAddressBook(contextId, mailAdmin, gabMode, writeCon, creatingTime);
         }
         /*
          * Insert system user folder
@@ -709,7 +952,7 @@ public final class OXFolderAdminHelper {
             creatingTime,
             mailAdmin,
             true,
-            cid,
+            contextId,
             writeCon);
         /*
          * Insert system userstore infostore folder
@@ -726,17 +969,17 @@ public final class OXFolderAdminHelper {
             creatingTime,
             mailAdmin,
             true,
-            cid,
+            contextId,
             writeCon);
         guestPermission.setAllPermission(READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        createSinglePermission(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, guestPermission, cid, writeCon);
+        createSinglePermission(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, guestPermission, contextId, writeCon);
         /*
          * Insert system public infostore folder
          */
-        if (!checkFolderExistence(cid, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, writeCon)) {
-            createSystemPublicInfostoreFolder(cid, mailAdmin, writeCon, creatingTime);
+        if (!checkFolderExistence(contextId, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, writeCon)) {
+            createSystemPublicInfostoreFolder(contextId, mailAdmin, writeCon, creatingTime);
         }
-        LOG.debug("All System folders successfully created for context {}", I(cid));
+        LOG.debug("All System folders successfully created for context {}", I(contextId));
         /*
          * Add mailadmin's folder rights to context's system folders and create his standard folders
          */
@@ -750,7 +993,7 @@ public final class OXFolderAdminHelper {
                 ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION,
                 ADMIN_PERMISSION },
             true,
-            cid,
+            contextId,
             writeCon);
          */
         /*-
@@ -761,7 +1004,7 @@ public final class OXFolderAdminHelper {
             mailAdmin,
             new int[] { ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION },
             true,
-            cid,
+            contextId,
             writeCon);
         */
         if (ADMIN_EDITABLE) {
@@ -773,7 +1016,7 @@ public final class OXFolderAdminHelper {
                 mailAdmin,
                 new int[] { CREATE_SUB_FOLDERS, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS },
                 true,
-                cid,
+                contextId,
                 writeCon);
             /*
              * Grant admin access for user infostore folder to admin
@@ -783,44 +1026,44 @@ public final class OXFolderAdminHelper {
                 mailAdmin,
                 new int[] { READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS },
                 true,
-                cid,
+                contextId,
                 writeCon);
         }
-        addUserToOXFolders(mailAdmin, mailAdminDisplayName, language, cid, writeCon, OXFolderDefaultMode.DEFAULT);
-        LOG.debug("Folder rights for mail admin successfully added for context {}", I(cid));
+        addUserToOXFolders(mailAdmin, mailAdminDisplayName, language, contextId, writeCon, OXFolderDefaultMode.DEFAULT);
+        LOG.debug("Folder rights for mail admin successfully added for context {}", I(contextId));
     }
 
     /**
      * Creates a public system folder with default permission for all-groups-and-users entity.
      *
-     * @param cid The context ID
+     * @param contextId The context identifier
      * @param mailAdmin The context admin
      * @param writeCon A writable connection
      * @param creatingTime The creation date
      * @throws SQLException If a SQL error occurs
      */
-    private static void createPublicFolder(final int folderId, final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+    private static void createPublicFolder(final int folderId, final int contextId, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
         if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
-            createSystemPublicFolder(cid, mailAdmin, writeCon, creatingTime);
+            createSystemPublicFolder(contextId, mailAdmin, writeCon, creatingTime);
         } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
-            createSystemInfostoreFolder(cid, mailAdmin, writeCon, creatingTime);
+            createSystemInfostoreFolder(contextId, mailAdmin, writeCon, creatingTime);
         } else if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
-            createSystemPublicInfostoreFolder(cid, mailAdmin, writeCon, creatingTime);
+            createSystemPublicInfostoreFolder(contextId, mailAdmin, writeCon, creatingTime);
         } else {
-            throw new IllegalArgumentException("Specified folder ID is not a public folder ID: " + folderId);
+            throw new IllegalArgumentException("Specified folder identifier is not a public folder identifier: " + folderId);
         }
     }
 
     /**
      * Creates the public folder with default permission for all-groups-and-users entity.
      *
-     * @param cid The context ID
+     * @param contextId The context identifier
      * @param mailAdmin The context admin
      * @param writeCon A writable connection
      * @param creatingTime The creation date
      * @throws SQLException If a SQL error occurs
      */
-    private static void createSystemPublicFolder(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+    private static void createSystemPublicFolder(final int contextId, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
         final OCLPermission systemPermission = new OCLPermission();
         systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         systemPermission.setGroupPermission(true);
@@ -836,27 +1079,27 @@ public final class OXFolderAdminHelper {
             creatingTime,
             mailAdmin,
             true,
-            cid,
+            contextId,
             writeCon);
         final OCLPermission guestPermission = new OCLPermission();
         guestPermission.setEntity(OCLPermission.ALL_GUESTS);
         guestPermission.setGroupPermission(true);
         guestPermission.setFolderAdmin(false);
         guestPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
-        createSinglePermission(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, guestPermission, cid, writeCon);
+        createSinglePermission(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, guestPermission, contextId, writeCon);
 
     }
 
     /**
      * Creates the infostore folder with default permission for all-groups-and-users entity.
      *
-     * @param cid The context ID
+     * @param contextId The context identifier
      * @param mailAdmin The context admin
      * @param writeCon A writable connection
      * @param creatingTime The creation date
      * @throws SQLException If a SQL error occurs
      */
-    private static void createSystemInfostoreFolder(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+    private static void createSystemInfostoreFolder(final int contextId, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
         final OCLPermission systemPermission = new OCLPermission();
         systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         systemPermission.setGroupPermission(true);
@@ -872,26 +1115,26 @@ public final class OXFolderAdminHelper {
             creatingTime,
             mailAdmin,
             true,
-            cid,
+            contextId,
             writeCon);
         final OCLPermission guestPermission = new OCLPermission();
         guestPermission.setEntity(OCLPermission.ALL_GUESTS);
         guestPermission.setGroupPermission(true);
         guestPermission.setFolderAdmin(false);
         guestPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
-        createSinglePermission(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, guestPermission, cid, writeCon);
+        createSinglePermission(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, guestPermission, contextId, writeCon);
     }
 
     /**
      * Creates the public infostore folder with default permission for all-groups-and-users entity.
      *
-     * @param cid The context ID
+     * @param contextId The context identifier
      * @param mailAdmin The context admin
      * @param writeCon A writable connection
      * @param creatingTime The creation date
      * @throws SQLException If a SQL error occurs
      */
-    private static void createSystemPublicInfostoreFolder(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+    private static void createSystemPublicInfostoreFolder(final int contextId, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
         final OCLPermission systemPermission = new OCLPermission();
         systemPermission.setEntity(ALL_GROUPS_AND_USERS);
         systemPermission.setGroupPermission(true);
@@ -907,44 +1150,44 @@ public final class OXFolderAdminHelper {
             creatingTime,
             mailAdmin,
             true,
-            cid,
+            contextId,
             writeCon);
         final OCLPermission guestPermission = new OCLPermission();
         guestPermission.setEntity(ALL_GUESTS);
         guestPermission.setGroupPermission(true);
         guestPermission.setFolderAdmin(false);
         guestPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
-        createSinglePermission(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, guestPermission, cid, writeCon);
+        createSinglePermission(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, guestPermission, contextId, writeCon);
     }
 
     /**
-     * Checks permission existence for all-groups-abd-users on GAB folder in given context.
+     * Checks permission existence for all-groups-and-users on GAB folder in given context.
      *
-     * @param cid The context ID
+     * @param contextId The context identifier
      * @param con A connection
      * @return <code>true</code> if a permission exists; otherwise <code>false</code>
      * @throws SQLException If a SQL error occurs
      */
-    private static boolean checkGlobalGABPermissionExistence(final int cid, final Connection con) throws SQLException {
-        return checkPermissionExistence(cid, FolderObject.SYSTEM_LDAP_FOLDER_ID, OCLPermission.ALL_GROUPS_AND_USERS, con);
+    private static boolean checkGlobalGABPermissionExistence(final int contextId, final Connection con) throws SQLException {
+        return checkPermissionExistence(contextId, FolderObject.SYSTEM_LDAP_FOLDER_ID, OCLPermission.ALL_GROUPS_AND_USERS, con);
     }
 
     /**
      * Checks permission existence in given folder in given context for given user.
      *
-     * @param cid The context ID
-     * @param folderId The folder ID
-     * @param userId The user ID
+     * @param contextId The context identifier
+     * @param folderId The folder identifier
+     * @param userId The user identifier
      * @param con A connection
      * @return <code>true</code> if a permission exists; otherwise <code>false</code>
      * @throws SQLException If a SQL error occurs
      */
-    private static boolean checkPermissionExistence(final int cid, final int folderId, final int userId, final Connection con) throws SQLException {
+    private static boolean checkPermissionExistence(final int contextId, final int folderId, final int userId, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT permission_id FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
-            stmt.setInt(1, cid);
+            stmt.setInt(1, contextId);
             stmt.setInt(2, folderId);
             stmt.setInt(3, userId);
             return (rs = stmt.executeQuery()).next();
@@ -956,20 +1199,20 @@ public final class OXFolderAdminHelper {
     /**
      * Checks permission values for folder, object-read, object-write and object-delete permission.
      *
-     * @param cid The context ID
-     * @param folderId The folder ID
-     * @param entityId The entity ID
+     * @param contextId The context identifier
+     * @param folderId The folder identifier
+     * @param entityId The entity identifier
      * @param con A connection
      * @return The permissions as an array or <code>null</code>
      * @throws SQLException If a SQL error occurs
      */
-    private static int[] getPermissionValue(final int cid, final int folderId, final int entityId, final Connection con) throws SQLException {
+    private static int[] getPermissionValue(final int contextId, final int folderId, final int entityId, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt =
                 con.prepareStatement("SELECT fp, orp, owp, odp FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
-            stmt.setInt(1, cid);
+            stmt.setInt(1, contextId);
             stmt.setInt(2, folderId);
             stmt.setInt(3, entityId);
             rs = stmt.executeQuery();
@@ -985,17 +1228,17 @@ public final class OXFolderAdminHelper {
     /**
      * Checks existence of given folder in given context.
      *
-     * @param cid The context ID
-     * @param folderId The folder ID
+     * @param contextId The context identifier
+     * @param folderId The folder identifier
      * @param con A connection
      * @return <code>true</code> if exists; otherwise <code>false</code>
      * @throws SQLException If a SQL error occurs
      */
-    private static boolean checkFolderExistence(final int cid, final int folderId, final Connection con) throws SQLException {
+    private static boolean checkFolderExistence(final int contextId, final int folderId, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid = ? AND fuid = ?");
-            stmt.setInt(1, cid);
+            stmt.setInt(1, contextId);
             stmt.setInt(2, folderId);
             return stmt.executeQuery().next();
         } finally {
@@ -1006,29 +1249,26 @@ public final class OXFolderAdminHelper {
     /**
      * Creates the global address book folder.
      *
-     * @param cid The context ID
-     * @param mailAdmin The ID of context's admin
+     * @param contextId The context identifier
+     * @param mailAdmin The identifier of context's administrator
+     * @param gabMode The modus to operate on
      * @param writeCon A writable connection
      * @param creatingTime The creating time
      * @throws SQLException If a SQL error occurs
+     * @throws OXException If context administrator can't be found
      */
-    private void createGlobalAddressBook(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
-        final OCLPermission adminPermission = new OCLPermission();
-        adminPermission.setEntity(mailAdmin);
-        adminPermission.setGroupPermission(false);
-        setGABPermissions(adminPermission);
-        adminPermission.setFolderAdmin(true);
+    private void createGlobalAddressBook(final int contextId, final int mailAdmin, final GABMode gabMode, final Connection writeCon, final long creatingTime) throws SQLException, OXException {
         createSystemFolder(
             FolderObject.SYSTEM_LDAP_FOLDER_ID,
             FolderObject.SYSTEM_LDAP_FOLDER_NAME,
-            adminPermission,
+            GABMode.GLOBAL.equals(gabMode) ? ImmutableList.of(getGABAdmin(writeCon, contextId, Optional.of(Integer.valueOf(mailAdmin))), getAllUserGABGroup(OXFolderProperties.isEnableInternalUsersEdit())) : ImmutableList.of(getGABAdmin(writeCon, contextId, Optional.of(Integer.valueOf(mailAdmin)))),
             FolderObject.SYSTEM_FOLDER_ID,
             FolderObject.CONTACT,
             true,
             creatingTime,
             mailAdmin,
             false,
-            cid,
+            contextId,
             writeCon);
     }
 
@@ -1040,12 +1280,16 @@ public final class OXFolderAdminHelper {
 
     private static final String SQL_INSERT_SPECIAL_FOLDER = "INSERT INTO oxfolder_specialfolders " + "(tag, cid, fuid) VALUES (?,?,?)";
 
-    private static void createSystemFolder(final int systemFolderId, final String systemFolderName, final OCLPermission systemPermission, final int parentId, final int module, final boolean insertIntoSpecialFolders, final long creatingTime, final int mailAdminId, final boolean isPublic, final int cid, final Connection writeCon) throws SQLException {
+    private static void createSystemFolder(final int systemFolderId, final String systemFolderName, final OCLPermission systemPermission, final int parentId, final int module, final boolean insertIntoSpecialFolders, final long creatingTime, final int mailAdminId, final boolean isPublic, final int contextId, final Connection writeCon) throws SQLException {
+        createSystemFolder(systemFolderId, systemFolderName, Collections.singleton(systemPermission), parentId, module, insertIntoSpecialFolders, creatingTime, mailAdminId, isPublic, contextId, writeCon);
+    }
+
+    private static void createSystemFolder(final int systemFolderId, final String systemFolderName, final Collection<OCLPermission> systemPermissions, final int parentId, final int module, final boolean insertIntoSpecialFolders, final long creatingTime, final int mailAdminId, final boolean isPublic, final int contextId, final Connection writeCon) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement(SQL_INSERT_SYSTEM_FOLDER);
             stmt.setInt(1, systemFolderId);
-            stmt.setInt(2, cid);
+            stmt.setInt(2, contextId);
             stmt.setInt(3, parentId);
             stmt.setString(4, systemFolderName);
             stmt.setInt(5, module);
@@ -1058,27 +1302,12 @@ public final class OXFolderAdminHelper {
             stmt.setInt(12, 1); // subfolder_flag
             stmt.executeUpdate();
             stmt.close();
-            stmt = writeCon.prepareStatement(SQL_INSERT_SYSTEM_PERMISSION);
-            stmt.setInt(1, cid);
-            stmt.setInt(2, systemFolderId); // fuid
-            stmt.setInt(3, systemPermission.getEntity()); // entity
-            stmt.setInt(4, systemPermission.getFolderPermission()); // folder
-            // permission
-            stmt.setInt(5, systemPermission.getReadPermission()); // read
-            // permission
-            stmt.setInt(6, systemPermission.getWritePermission()); // write
-            // permission
-            stmt.setInt(7, systemPermission.getDeletePermission()); // delete
-            // permission
-            stmt.setInt(8, systemPermission.isFolderAdmin() ? 1 : 0); // admin_flag
-            stmt.setInt(9, systemPermission.isGroupPermission() ? 1 : 0); // group_flag
-            stmt.executeUpdate();
-            stmt.close();
             stmt = null;
+            insertPermissionsForSystemFolder(systemFolderId, systemPermissions, contextId, writeCon);
             if (insertIntoSpecialFolders) {
                 stmt = writeCon.prepareStatement(SQL_INSERT_SPECIAL_FOLDER);
                 stmt.setString(1, systemFolderName); // tag
-                stmt.setInt(2, cid); // cid
+                stmt.setInt(2, contextId); // cid
                 stmt.setInt(3, systemFolderId); // fuid
                 stmt.executeUpdate();
                 stmt.close();
@@ -1092,11 +1321,40 @@ public final class OXFolderAdminHelper {
         }
     }
 
-    private void createSingleUserPermission(final int fuid, final int userId, final int[] allPerms, final boolean isFolderAdmin, final int cid, final Connection writeCon) throws SQLException {
+    private static void insertPermissionsForSystemFolder(final int systemFolderId, final Collection<OCLPermission> systemPermissions, final int contextId, final Connection writeCon) throws SQLException {
+        if (systemPermissions.isEmpty()) {
+            return;
+        }
+
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement(SQL_INSERT_SYSTEM_PERMISSION);
-            stmt.setInt(1, cid);
+            for (OCLPermission systemPermission : systemPermissions) {
+                stmt.setInt(1, contextId); // cid
+                stmt.setInt(2, systemFolderId); // fuid
+                stmt.setInt(3, systemPermission.getEntity()); // entity
+                stmt.setInt(4, systemPermission.getFolderPermission()); // folder permission
+                stmt.setInt(5, systemPermission.getReadPermission()); // read permission
+                stmt.setInt(6, systemPermission.getWritePermission()); // write permission
+                stmt.setInt(7, systemPermission.getDeletePermission()); // delete permission
+                stmt.setInt(8, systemPermission.isFolderAdmin() ? 1 : 0); // admin_flag
+                stmt.setInt(9, systemPermission.isGroupPermission() ? 1 : 0); // group_flag
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+                stmt = null;
+            }
+        }
+    }
+
+    private void createSingleUserPermission(final int fuid, final int userId, final int[] allPerms, final boolean isFolderAdmin, final int contextId, final Connection writeCon) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement(SQL_INSERT_SYSTEM_PERMISSION);
+            stmt.setInt(1, contextId);
             stmt.setInt(2, fuid);
             stmt.setInt(3, userId);
             stmt.setInt(4, allPerms[0]);
@@ -1116,12 +1374,12 @@ public final class OXFolderAdminHelper {
         }
     }
 
-    private static void createSinglePermission(final int fuid, final OCLPermission addMe, final int cid, final Connection writeCon) throws SQLException {
+    private static void createSinglePermission(final int fuid, final OCLPermission addMe, final int contextId, final Connection writeCon) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement(SQL_INSERT_SYSTEM_PERMISSION);
             int pos = 1;
-            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, fuid);
             stmt.setInt(pos++, addMe.getEntity());
             stmt.setInt(pos++, addMe.getFolderPermission());
@@ -1152,11 +1410,11 @@ public final class OXFolderAdminHelper {
     /**
      * Deletes all context associated folder in both working and backup tables from database
      *
-     * @param cid The context ID
+     * @param contextId The context identifier
      * @param readCon A readable connection
      * @param writeCon A writeable connection
      */
-    public void deleteAllContextFolders(final int cid, final Connection readCon, final Connection writeCon) {
+    public void deleteAllContextFolders(final int contextId, final Connection readCon, final Connection writeCon) {
         try {
             final Set<String> oxfolderTables = new HashSet<String>();
             final Set<String> delOxfolderTables = new HashSet<String>();
@@ -1200,7 +1458,7 @@ public final class OXFolderAdminHelper {
                 for (int i = 0; i < size; i++) {
                     final String tblName = iter.next();
                     stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_TABLE, tableReplaceLabel, tblName));
-                    stmt.setInt(1, cid);
+                    stmt.setInt(1, contextId);
                     stmt.executeUpdate();
                     stmt.close();
                     stmt = null;
@@ -1210,18 +1468,18 @@ public final class OXFolderAdminHelper {
                 for (int i = 0; i < size; i++) {
                     final String tblName = iter.next();
                     stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_TABLE, tableReplaceLabel, tblName));
-                    stmt.setInt(1, cid);
+                    stmt.setInt(1, contextId);
                     stmt.executeUpdate();
                     stmt.close();
                     stmt = null;
                 }
                 stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_TABLE, tableReplaceLabel, rootTable));
-                stmt.setInt(1, cid);
+                stmt.setInt(1, contextId);
                 stmt.executeUpdate();
                 stmt.close();
                 stmt = null;
                 stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_TABLE, tableReplaceLabel, delRootTable));
-                stmt.setInt(1, cid);
+                stmt.setInt(1, contextId);
                 stmt.executeUpdate();
                 stmt.close();
                 stmt = null;
@@ -1253,18 +1511,18 @@ public final class OXFolderAdminHelper {
     /**
      * Propagates that a group has been modified throughout affected folders by touching folder's last-modified timestamp.
      *
-     * @param group The affected group ID
+     * @param group The affected group identifier
      * @param readCon A readable connection to database
      * @param writeCon A writable connection to database
-     * @param cid The context ID
+     * @param contextId The context identifier
      * @return true in case the write connection has been used, otherwise false
      * @throws SQLException If a SQL related error occurs
      */
-    public static boolean propagateGroupModification(final int group, final Connection readCon, final Connection writeCon, final int cid) throws SQLException {
+    public static boolean propagateGroupModification(final int group, final Connection readCon, final Connection writeCon, final int contextId) throws SQLException {
         try {
-            final int[] members = ServerServiceRegistry.getServize(GroupService.class, true).getGroup(ContextStorage.getStorageContext(cid), group).getMember();
+            final int[] members = ServerServiceRegistry.getServize(GroupService.class, true).getGroup(ContextStorage.getStorageContext(contextId), group).getMember();
             for (final int member : members) {
-                CacheFolderStorage.getInstance().clearCache(member, cid);
+                CacheFolderStorage.getInstance().clearCache(member, contextId);
             }
         } catch (Exception e) {
             // Ignore
@@ -1282,8 +1540,8 @@ public final class OXFolderAdminHelper {
              */
             stmt =
                 readCon.prepareStatement(Strings.replaceSequenceWith(Strings.replaceSequenceWith(SQL_SELECT_FOLDER_IN_PERMISSIONS, "#FT#", STR_OXFOLDERTREE), "#PT#", STR_OXFOLDERPERMS));
-            stmt.setInt(1, cid);
-            stmt.setInt(2, cid);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, contextId);
             stmt.setInt(3, group);
             rs = stmt.executeQuery();
             final TIntList list = new TIntArrayList();
@@ -1298,7 +1556,7 @@ public final class OXFolderAdminHelper {
                 do {
                     final int fuid = list.removeAt(0);
                     stmt.setLong(1, lastModified);
-                    stmt.setInt(2, cid);
+                    stmt.setInt(2, contextId);
                     stmt.setInt(3, fuid);
                     stmt.addBatch();
                     if (FolderCacheManager.isInitialized()) {
@@ -1306,7 +1564,7 @@ public final class OXFolderAdminHelper {
                          * Remove from cache
                          */
                         try {
-                            FolderCacheManager.getInstance().removeFolderObject(fuid, new ContextImpl(cid));
+                            FolderCacheManager.getInstance().removeFolderObject(fuid, new ContextImpl(contextId));
                         } catch (OXException e) {
                             LOG.error("Folder could not be removed from cache", e);
                         }
@@ -1317,7 +1575,7 @@ public final class OXFolderAdminHelper {
             }
             return false;
         } finally {
-            closeResources(rs, stmt, null, true, cid);
+            closeResources(rs, stmt, null, true, contextId);
         }
     }
 
@@ -1327,13 +1585,13 @@ public final class OXFolderAdminHelper {
      * Load specified user's display name with given connection (which is possibly in non-auto-commit mode). Thus we obtain most up-to-date
      * data and do not read old value.
      *
-     * @param userId The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param con The connection
      * @return The user's display name or <code>null</code> if no such user exists
      * @throws OXException If user's display name cannot be loaded
      */
-    static String getUserDisplayName(final int userId, final int cid, final Connection con) throws OXException {
+    static String getUserDisplayName(final int userId, final int contextId, final Connection con) throws OXException {
         final PreparedStatement stmt;
         try {
             stmt = con.prepareStatement(SQL_SELECT_DISPLAY_NAME);
@@ -1342,7 +1600,7 @@ public final class OXFolderAdminHelper {
         }
         ResultSet rs = null;
         try {
-            stmt.setInt(1, cid);
+            stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
             if (rs.next()) {
@@ -1365,18 +1623,18 @@ public final class OXFolderAdminHelper {
     private static final String DEFAULT_INFOSTORE_TRASH_NAME = "Deleted files";
 
     /**
-     * Creates default folders for modules task, calendar, contact, and infostore for given user ID
+     * Creates default folders for modules task, calendar, contact, and infostore for given user identifier
      *
-     * @param userId The user ID
+     * @param userId The user identifier
      * @param displayName The display name which is taken as folder name for user's default infostore folder
      * @param language User's language which determines the translation of default folder names
-     * @param cid The context ID
+     * @param contextId The context identifier
      * @param writeCon A writable connection to (master) database
      * @throws OXException If user's default folders could not be created successfully
      */
-    public void addUserToOXFolders(final int userId, final String displayName, final String language, final int cid, final Connection writeCon, OXFolderDefaultMode folderDefaultMode) throws OXException {
+    public void addUserToOXFolders(final int userId, final String displayName, final String language, final int contextId, final Connection writeCon, OXFolderDefaultMode folderDefaultMode) throws OXException {
         try {
-            Context ctx = new ContextImpl(cid);
+            Context ctx = new ContextImpl(contextId);
             StringHelper strHelper = StringHelper.valueOf(LocaleTools.getLocale(language));
             /*
              * Check infostore sibling
@@ -1387,25 +1645,25 @@ public final class OXFolderAdminHelper {
                  */
                 ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
                 ConfigView view = null;
-                if (null == configViewFactory || null == (view = configViewFactory.getView(-1, cid)) || view.opt("com.openexchange.user.enforceUniqueDisplayName", Boolean.class, Boolean.TRUE).booleanValue()) {
-                    throw OXFolderExceptionCode.NO_DEFAULT_INFOSTORE_CREATE.create(displayName, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_NAME, Integer.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), Integer.valueOf(cid));
+                if (null == configViewFactory || null == (view = configViewFactory.getView(-1, contextId)) || view.opt("com.openexchange.user.enforceUniqueDisplayName", Boolean.class, Boolean.TRUE).booleanValue()) {
+                    throw OXFolderExceptionCode.NO_DEFAULT_INFOSTORE_CREATE.create(displayName, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_NAME, Integer.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), Integer.valueOf(contextId));
                 }
             }
             /*
              * Add user to global address book permissions if not present
              */
             final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
-            final boolean globalPermEnabled = checkGlobalGABPermissionExistence(cid, writeCon);
+            final boolean globalPermEnabled = checkGlobalGABPermissionExistence(contextId, writeCon);
             if (globalPermEnabled) {
-                LOG.warn("Individual user permission not added to global address book folder since global permission is active. user={}, context={}", I(userId), I(cid));
+                LOG.warn("Individual user permission not added to global address book folder since global permission is active. user={}, context={}", I(userId), I(contextId));
             } else {
-                if (!checkPermissionExistence(cid, globalAddressBookId, userId, writeCon)) {
+                if (!checkPermissionExistence(contextId, globalAddressBookId, userId, writeCon)) {
                     final OCLPermission p = new OCLPermission();
                     p.setEntity(userId);
                     p.setGroupPermission(false);
                     setGABPermissions(p);
                     p.setFolderAdmin(false);
-                    createSinglePermission(globalAddressBookId, p, cid, writeCon);
+                    createSinglePermission(globalAddressBookId, p, contextId, writeCon);
                 }
             }
             /*
@@ -1470,20 +1728,20 @@ public final class OXFolderAdminHelper {
              */
             switch (folderDefaultMode) {
                 case NORMAL:
-                    InfoStoreFolderAdminHelper.addDefaultFoldersDeletable(writeCon, cid, userId, LocaleTools.getLocale(language));
+                    InfoStoreFolderAdminHelper.addDefaultFoldersDeletable(writeCon, contextId, userId, LocaleTools.getLocale(language));
                     break;
                 case NONE:
-                    InfoStoreFolderAdminHelper.addDefaultFoldersNone(writeCon, cid, userId);
+                    InfoStoreFolderAdminHelper.addDefaultFoldersNone(writeCon, contextId, userId);
                     break;
                 default:
-                    InfoStoreFolderAdminHelper.addDefaultFolders(writeCon, cid, userId);
+                    InfoStoreFolderAdminHelper.addDefaultFolders(writeCon, contextId, userId);
             }
 
             LOG.debug("All user default folders were successfully created");
             /*
              * TODO: Set standard special folders (projects, ...) located beneath system user folder
              */
-            LOG.info("User {} successfully created in context {}", I(userId), I(cid));
+            LOG.info("User {} successfully created in context {}", I(userId), I(contextId));
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -1495,9 +1753,18 @@ public final class OXFolderAdminHelper {
      * @param p The permission instance whose permissions shall be set
      */
     private static void setGABPermissions(final OCLPermission p) {
-        p.setAllPermission(READ_FOLDER, READ_ALL_OBJECTS, OXFolderProperties.isEnableInternalUsersEdit() ? WRITE_OWN_OBJECTS : NO_PERMISSIONS, NO_PERMISSIONS);
+        setGABPermissions(p, OXFolderProperties.isEnableInternalUsersEdit());
     }
 
+    /**
+     * Sets the global address book permission
+     *
+     * @param p The permission instance whose permissions shall be set
+     * @param enable Whether to enable or disable global address book access
+     */
+    private static void setGABPermissions(final OCLPermission p, boolean enable) {
+        p.setAllPermission(READ_FOLDER, READ_ALL_OBJECTS, enable ? WRITE_OWN_OBJECTS : NO_PERMISSIONS, NO_PERMISSIONS);
+    }
 
     /**
      * Get the unique folder name for a user's default folder

@@ -29,6 +29,9 @@ properties:
     type: integer
     format: int64
     description: The optionally set expiry date for "anonymous" entities.
+  includeSubfolders:
+    type: boolean
+    description: The optionally set "include subfolders" option for "anonymous" entities.
   isInherited:
     type: boolean
     description: >-

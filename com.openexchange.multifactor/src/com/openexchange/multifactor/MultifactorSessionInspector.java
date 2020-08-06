@@ -95,7 +95,7 @@ public class MultifactorSessionInspector implements SessionInspectorService {
             !(Boolean.TRUE.equals(session.getParameter(Session.MULTIFACTOR_AUTHENTICATED)))) {
             // Multifactor required and not authenticated
             // Check if in whitelist
-            if (inWhitelist(request.getServletPath())) {
+            if (inWhitelist(request.getServletPath()) || session.containsParameter(Session.PARAM_RESTRICTED)) {
                 return Reply.NEUTRAL;
             }
             // Not authorized, throw error

@@ -54,17 +54,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.database.Databases;
 import com.openexchange.database.SchemaInfo;
 import com.openexchange.databaseold.Database;
@@ -160,7 +164,7 @@ public final class UpdateTaskToolkit {
         UpdateTaskV2 updateTask = getUpdateTask(className);
 
         // Get all available schemas
-        List<SchemaInfo> schemas = getAllSchemas(null);
+        Collection<SchemaInfo> schemas = getAllSchemas(Optional.empty());
 
         // ... and iterate them
         for (SchemaInfo schemaInfo : schemas) {
@@ -177,7 +181,7 @@ public final class UpdateTaskToolkit {
      */
     public static UpdateTaskToolkitJob<Void> runUpdateOnAllSchemas(final boolean throwExceptionOnFailure) throws OXException {
         // Get all available schemas
-        final List<SchemaInfo> schemas = getAllSchemas(null);
+        final Collection<SchemaInfo> schemas = getAllSchemas(Optional.empty());
         final int total = schemas.size();
 
         // Status text
@@ -295,20 +299,21 @@ public final class UpdateTaskToolkit {
 
     /**
      * Returns an unmodifiable {@link Set} with all registered update tasks
-     * 
+     *
      * @return an unmodifiable {@link Set} with all registered update tasks
      */
     public static Set<String> getRegisteredUpdateTasks() {
-        Set<String> registered = new HashSet<>();
-        for (UpdateTaskV2 updateTask : DynamicSet.getInstance().getTaskSet()) {
+        Set<UpdateTaskV2> tasks = DynamicSet.getInstance().getTaskSet();
+        ImmutableSet.Builder<String> registered = ImmutableSet.builderWithExpectedSize(tasks.size());
+        for (UpdateTaskV2 updateTask : tasks) {
             registered.add(updateTask.getClass().getName());
         }
-        return Collections.unmodifiableSet(registered);
+        return registered.build();
     }
 
     /**
      * Returns an unmodifiable {@link Set} with all excluded update tasks
-     * 
+     *
      * @return an unmodifiable {@link Set} with all excluded update tasks
      */
     public static Set<String> getExcludedUpdateTasks() {
@@ -318,21 +323,22 @@ public final class UpdateTaskToolkit {
     /**
      * Gets all available schemas.
      *
+     * @param optSchema The optional schema name to query; if absent all schemas are queried
      * @return A list containing schemas.
      * @throws OXException If an error occurs
      */
-    private static List<SchemaInfo> getAllSchemas(String optSchema) throws OXException {
+    private static Collection<SchemaInfo> getAllSchemas(Optional<String> optSchema) throws OXException {
         // Determine all DB schemas that are currently in use
         Connection con = Database.get(false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             // Grab database schemas
-            if (null == optSchema) {
-                stmt = con.prepareStatement("SELECT DISTINCT db_pool_id, schemaname FROM contexts_per_dbschema");
+            if (optSchema.isPresent()) {
+                stmt = con.prepareStatement("SELECT db_pool_id, schemaname FROM contexts_per_dbschema WHERE schemaname=?");
+                stmt.setString(1, optSchema.get());
             } else {
-                stmt = con.prepareStatement("SELECT DISTINCT db_pool_id, schemaname FROM contexts_per_dbschema WHERE schemaname=?");
-                stmt.setString(1, optSchema);
+                stmt = con.prepareStatement("SELECT db_pool_id, schemaname FROM contexts_per_dbschema");
             }
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -340,7 +346,7 @@ public final class UpdateTaskToolkit {
                 return Collections.emptyList();
             }
 
-            List<SchemaInfo> l = new LinkedList<>();
+            Set<SchemaInfo> l = new LinkedHashSet<>();
             do {
                 l.add(SchemaInfo.valueOf(rs.getInt(1), rs.getString(2)));
             } while (rs.next());
@@ -363,20 +369,14 @@ public final class UpdateTaskToolkit {
      * @throws OXException If schema information cannot be returned (none or multiple schemas found)
      */
     public static SchemaInfo getInfoBySchemaName(String schemaName) throws OXException {
-        List<SchemaInfo> schemas = getAllSchemas(schemaName);
+        Collection<SchemaInfo> schemas = getAllSchemas(Optional.of(schemaName));
 
         int size = schemas.size();
         if (size == 1) {
-            return schemas.get(0);
+            return schemas.iterator().next();
         }
 
-        if (size == 0) {
-            // No such schema
-            throw UpdateExceptionCodes.UNKNOWN_SCHEMA.create(schemaName);
-        }
-
-        // Multiple schemas for given name
-        throw UpdateExceptionCodes.FOUND_MULTIPLE_SCHEMAS.create(schemaName, schemas);
+        throw (size == 0 ? UpdateExceptionCodes.UNKNOWN_SCHEMA.create(schemaName) : UpdateExceptionCodes.FOUND_MULTIPLE_SCHEMAS.create(schemaName, schemas));
     }
 
     /**

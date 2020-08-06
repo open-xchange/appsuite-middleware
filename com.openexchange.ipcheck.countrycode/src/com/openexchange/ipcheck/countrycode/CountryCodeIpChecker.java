@@ -71,7 +71,6 @@ import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetricCollector;
 import com.openexchange.management.MetricAware;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link CountryCodeIpChecker}
@@ -84,8 +83,8 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CountryCodeIpChecker.class);
 
-    private IPCheckMetricCollector metricCollector;
-    private ServiceLookup services;
+    private final IPCheckMetricCollector metricCollector;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link CountryCodeIpChecker}.
@@ -180,19 +179,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             return;
         }
         LOGGER.debug("The IP change from '{}' to '{}' was accepted. Reason: '{}'", previous, current, acceptReason.getMessage());
-        switch (acceptReason) {
-            case PRIVATE_IPV4:
-                metricCollector.incrementAcceptedPrivateIP();
-                break;
-            case WHITE_LISTED:
-                metricCollector.incrementAcceptedWhiteListed();
-                break;
-            case ELIGIBLE:
-            default:
-                metricCollector.incrementAcceptedEligibleIPChange();
-        }
-        metricCollector.incrementAcceptedIPChanges();
-        metricCollector.incrementTotalIPChanges();
+        metricCollector.incrementAccepted(acceptReason);
     }
 
     /**
@@ -221,32 +208,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             LOGGER.debug("The IP change from '{}' to '{}' was denied. Reason: '{}', '{}'", previous, current, reason.getMessage(), t.getMessage());
         }
 
-        switch (reason) {
-            case EXCEPTION:
-                metricCollector.incrementDeniedException();
-                break;
-            case COUNTRY_CHANGE:
-                metricCollector.incrementDeniedCountryChange();
-                break;
-            default:
-                break;
-        }
-
-        SessiondService service = services.getService(SessiondService.class);
-        if (null == service) {
-            // Kick anyway to ensure the proper exception is thrown
-            IPCheckers.kick(current, session);
-            return;
-        }
-
-        String sessionId = session.getSessionID();
-        synchronized (sessionId) {
-            // Only increase metrics when the session was not previously kicked
-            if (null != service.getSession(sessionId)) {
-                metricCollector.incrementTotalIPChanges();
-                metricCollector.incrementDeniedIPChanges();
-            }
-        }
+        metricCollector.incrementDenied(reason);
         IPCheckers.kick(current, session);
     }
 

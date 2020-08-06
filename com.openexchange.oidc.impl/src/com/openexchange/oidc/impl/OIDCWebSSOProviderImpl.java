@@ -52,7 +52,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.Cookie;
@@ -94,10 +93,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.nimbusds.oauth2.sdk.http.send.HTTPSender;
 import com.openexchange.oidc.AuthenticationInfo;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
+import com.openexchange.oidc.http.outbound.OIDCHttpClientConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.osgi.Services;
@@ -107,6 +108,7 @@ import com.openexchange.oidc.state.StateManagement;
 import com.openexchange.oidc.state.impl.DefaultAuthenticationRequestInfo;
 import com.openexchange.oidc.state.impl.DefaultLogoutRequestInfo;
 import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
@@ -282,10 +284,11 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             }
             this.sendLoginRequestToServer(request, response, tokenResponse, storedRequestInformation);
         } catch (OXException e) {
-            if (e.getExceptionCode() != OIDCExceptionCode.IDTOKEN_GATHERING_ERROR) {
-                throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e, e.getMessage());
+            if (e.getExceptionCode() instanceof OIDCExceptionCode) {
+                throw e;
             }
-            throw e;
+
+            throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -304,8 +307,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             scope = null;
         }
 
-        TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, scope);
-        return this.backend.getTokenRequest(tokenRequest);
+        return this.backend.getTokenRequest(new TokenRequest(tokenEndpoint, clientAuth, codeGrant, scope));
     }
 
     private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws OXException {
@@ -313,7 +315,13 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         HTTPRequest httpRequest = this.backend.getHttpRequest(tokenReq.toHTTPRequest());
         HTTPResponse httpResponse = null;
         try {
-            httpResponse = httpRequest.send();
+            httpResponse = HTTPSender.send(httpRequest, () -> {
+                HttpClientService httpClientService = Services.getOptionalService(HttpClientService.class);
+                if (httpClientService == null) {
+                    throw new IllegalStateException("Missing service " + HttpClientService.class.getName());
+                }
+                return httpClientService.getHttpClient(OIDCHttpClientConfig.getClientIdOidc());
+            });
         } catch (IOException e) {
             throw OIDCExceptionCode.UNABLE_TO_SEND_REQUEST.create(e, GET_THE_ID_TOKEN);
         }
@@ -335,16 +343,23 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private void sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse, AuthenticationRequestInfo storedRequestInformation) throws OXException {
         LOG.trace("sendLoginRequestToServer(HttpServletRequest request: {}, HttpServletResponse response, OIDCTokenResponse tokenResponse: {}, AuthenticationRequestInfo storedRequestInformation: {})",
             request.getRequestURI(), tokenResponse.getOIDCTokens().toJSONObject().toJSONString(), storedRequestInformation);
+        BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
+        if (bearerAccessToken == null) {
+            // could occur, if token response contains access token of a different type than "bearer"
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_RESPONSE_FROM_IDP.create("get bearer access token");
+        }
+
         AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(request, tokenResponse);
         authInfo.setProperty(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString());
-        BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
+        authInfo.setProperty(OIDCTools.ACCESS_TOKEN, bearerAccessToken.getValue());
+        long expiresIn = bearerAccessToken.getLifetime();
+        if (expiresIn > 0) {
+            authInfo.setProperty(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(OIDCTools.expiresInToDate(expiresIn).getTime()));
+        }
+
         RefreshToken refreshToken = tokenResponse.getTokens().getRefreshToken();
-        if (bearerAccessToken != null && refreshToken != null) {
-            authInfo.setProperty(OIDCTools.ACCESS_TOKEN, bearerAccessToken.getValue());
+        if (refreshToken != null) {
             authInfo.setProperty(OIDCTools.REFRESH_TOKEN, refreshToken.getValue());
-            long expiryDate = new Date().getTime();
-            expiryDate += bearerAccessToken.getLifetime() * 1000;
-            authInfo.setProperty(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(expiryDate));
         }
 
         String domainName = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));

@@ -60,6 +60,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 
@@ -139,11 +140,11 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
                 LOG.debug("", x);
             }
         }
-        
+
         if (url.startsWith(req.getServletPath())) {
             url =  url.substring(req.getServletPath().length());
         }
-        
+
         try {
             String encoding = req.getCharacterEncoding();
             if (encoding == null) {

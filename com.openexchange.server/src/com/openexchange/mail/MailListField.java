@@ -240,7 +240,7 @@ public enum MailListField {
      *
      * @since v7.10.0
      */
-    AUTHENTICATION_OVERALL_RESULT(664, MailJSONField.AUTHENTICITY.getKey()),
+    AUTHENTICATION_OVERALL_RESULT(664, MailJSONField.AUTHENTICITY_PREVIEW.getKey()),
     /**
      * The message's authentication mechanism results (heavy version); maps to <code>"Authentication-Results"</code> header
      *

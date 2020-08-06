@@ -58,9 +58,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -69,9 +69,11 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.saml.oauth.service.OAuthAccessToken;
 import com.openexchange.saml.oauth.service.SAMLOAuthExceptionCodes;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AbstractOAuthAccessTokenRequest}
@@ -81,22 +83,20 @@ import com.openexchange.saml.oauth.service.SAMLOAuthExceptionCodes;
  */
 public abstract class AbstractOAuthAccessTokenRequest {
 
-    /** The HTTP client */
-    protected final CloseableHttpClient httpClient;
+    private final ServiceLookup services;
 
-    /** The config view factory */
-    protected final ConfigViewFactory configViewFactory;
+    private final String clientId;
 
     /**
      * Initializes a new {@link AbstractOAuthAccessTokenRequest}.
      *
-     * @param httpClient The HTTP client to use
-     * @param configViewFactory The config view factory
+     * @param services The service lookup to get the {@link ConfigViewFactory} and the {@link HttpClientService} from
+     * @param clientId The identifier of the HTTP client
      */
-    protected AbstractOAuthAccessTokenRequest(CloseableHttpClient httpClient, ConfigViewFactory configViewFactory) {
+    protected AbstractOAuthAccessTokenRequest(ServiceLookup services, String clientId) {
         super();
-        this.httpClient = httpClient;
-        this.configViewFactory = configViewFactory;
+        this.services = services;
+        this.clientId = clientId;
     }
 
     private static final String TOKEN_TYPE = "token_type";
@@ -124,7 +124,7 @@ public abstract class AbstractOAuthAccessTokenRequest {
         HttpPost requestAccessToken = null;
         HttpResponse validationResp = null;
         try {
-            OAuthConfiguration oAuthConfiguration = SAMLOAuthConfig.getConfig(userId, contextId, configViewFactory);
+            OAuthConfiguration oAuthConfiguration = SAMLOAuthConfig.getConfig(userId, contextId, services.getServiceSafe(ConfigViewFactory.class));
             if (oAuthConfiguration == null) {
                 throw SAMLOAuthExceptionCodes.OAUTH_NOT_CONFIGURED.create(I(userId), I(contextId));
             }
@@ -150,7 +150,7 @@ public abstract class AbstractOAuthAccessTokenRequest {
             requestAccessToken.setEntity(new UrlEncodedFormEntity(nvps, Charsets.UTF_8));
 
             // Execute POST
-            validationResp = httpClient.execute(requestAccessToken);
+            validationResp = getHttpClient().execute(requestAccessToken);
 
             // Get & parse response body
             HttpEntity entity = validationResp.getEntity();
@@ -193,6 +193,10 @@ public abstract class AbstractOAuthAccessTokenRequest {
         } finally {
             HttpClients.close(requestAccessToken, validationResp);
         }
+    }
+
+    private HttpClient getHttpClient() throws IllegalStateException, OXException {
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(clientId);
     }
 
     /**

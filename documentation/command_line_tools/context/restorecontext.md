@@ -2,6 +2,7 @@
 title: restorecontext
 icon: far fa-circle
 tags: Administration, Command Line tools, User
+package: open-xchange-admin
 ---
 
 # NAME

@@ -2,6 +2,7 @@
 title: creategroup
 icon: far fa-circle
 tags: Administration, Command Line tools, Group
+package: open-xchange-admin
 ---
 
 # NAME

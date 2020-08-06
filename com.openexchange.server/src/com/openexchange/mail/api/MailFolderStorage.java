@@ -104,7 +104,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
      */
     @Override
     public MailFolder getRootFolder() throws OXException {
-        return getFolder(MailFolder.DEFAULT_FOLDER_ID);
+        return getFolder(MailFolder.ROOT_FOLDER_ID);
     }
 
     @Override
@@ -146,7 +146,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
             throw MailExceptionCode.INVALID_FOLDER_NAME2.create(newName, Character.toString(folder.getSeparator()));
         }
         final String newPath;
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(folder.getParentFullname())) {
+        if (MailFolder.ROOT_FOLDER_ID.equals(folder.getParentFullname())) {
             newPath = newName;
         } else {
             newPath = new StringBuilder(folder.getParentFullname()).append(folder.getSeparator()).append(newName).toString();
@@ -172,7 +172,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
 
     @Override
     public MailFolder[] getPath2DefaultFolder(final String fullName) throws OXException {
-        if (fullName.equals(MailFolder.DEFAULT_FOLDER_ID)) {
+        if (fullName.equals(MailFolder.ROOT_FOLDER_ID)) {
             return new MailFolder[0];
         }
         MailFolder f = getFolder(fullName);
@@ -180,7 +180,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
         do {
             list.add(f);
             f = getFolder(f.getParentFullname());
-        } while (!f.getFullname().equals(MailFolder.DEFAULT_FOLDER_ID));
+        } while (!f.getFullname().equals(MailFolder.ROOT_FOLDER_ID));
         return list.toArray(new MailFolder[list.size()]);
     }
 

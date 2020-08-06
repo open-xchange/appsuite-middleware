@@ -59,7 +59,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -72,8 +71,6 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -85,6 +82,8 @@ import com.openexchange.subscribe.SubscriptionSource;
  * @since v7.10.0
  */
 public abstract class AbstractDAVSubscribeService extends AbstractSubscribeService {
+    
+    public final static String CLIENT_ID = "davsub"; 
 
     /** The service look-up */
     protected final ServiceLookup services;
@@ -143,26 +142,6 @@ public abstract class AbstractDAVSubscribeService extends AbstractSubscribeServi
     protected void setAuthorizationHeader(HttpRequestBase request, String login, String password) {
         String encodedCredentials = BaseEncoding.base64().encode((login + ":" + password).getBytes(Charsets.UTF_8));
         request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encodedCredentials);
-    }
-
-    /**
-     * Initializes the HTTP client to use
-     *
-     * @param maxTotalConnections The max. total connection; default is 20
-     * @param maxConnectionsPerRoute The max. connections per route; default is 10
-     * @param conntectTimeout The connect timeout in milliseconds; default is 30000
-     * @param readTimeout The read timeout in milliseconds; default is 30000
-     * @return The HTTP client instance
-     */
-    protected HttpClient initHttpClient(int maxTotalConnections, int maxConnectionsPerRoute, int conntectTimeout, int readTimeout) {
-        ClientConfig clientConfig = ClientConfig.newInstance("davsub")
-            .setUserAgent("Open-Xchange DAV Http Client")
-            .setMaxTotalConnections(maxTotalConnections > 0 ? maxTotalConnections : 20)
-            .setMaxConnectionsPerRoute(maxConnectionsPerRoute > 0 ? maxConnectionsPerRoute : 10)
-            .setConnectionTimeout(conntectTimeout > 0 ? conntectTimeout : 30000)
-            .setSocketReadTimeout(readTimeout > 0 ? readTimeout : 30000);
-
-        return HttpClients.getHttpClient(clientConfig);
     }
 
     /**
@@ -242,8 +221,12 @@ public abstract class AbstractDAVSubscribeService extends AbstractSubscribeServi
      */
     protected static URI buildUri(URI baseUri, List<NameValuePair> queryString, String optPath) {
         try {
-            URIBuilder builder = new URIBuilder();
-            builder.setScheme(baseUri.getScheme()).setHost(baseUri.getHost()).setPort(baseUri.getPort()).setPath(null == optPath ? baseUri.getPath() : optPath).setQuery(null == queryString ? null : URLEncodedUtils.format(queryString, "UTF-8"));
+            URIBuilder builder = new URIBuilder()
+                .setScheme(baseUri.getScheme())
+                .setHost(baseUri.getHost())
+                .setPort(baseUri.getPort())
+                .setPath(null == optPath ? baseUri.getPath() : optPath)
+                .setQuery(null == queryString ? null : URLEncodedUtils.format(queryString, "UTF-8"));
             return builder.build();
         } catch (URISyntaxException x) {
             throw new IllegalArgumentException("Failed to build URI", x);

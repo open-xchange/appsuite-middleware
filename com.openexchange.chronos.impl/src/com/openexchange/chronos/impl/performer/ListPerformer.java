@@ -143,7 +143,7 @@ public class ListPerformer extends AbstractQueryPerformer {
             Event event = find(events, eventID.getObjectID());
             if (null != event) {
                 event = postProcessor.process(event, folder).getFirstEvent();
-                postProcessor.clear();
+                postProcessor.reset();
             }
             if (null == event) {
                 continue; // skip
@@ -164,7 +164,7 @@ public class ListPerformer extends AbstractQueryPerformer {
                         throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), recurrenceId);
                     }
                     orderedEvents.add(occurrence);
-                } else if (recurrenceId.equals(event.getRecurrenceId())) {
+                } else if (recurrenceId.matches(event.getRecurrenceId())) {
                     orderedEvents.add(event);
                 } else {
                     throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), recurrenceId);

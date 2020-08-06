@@ -57,7 +57,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
  * Test suite for iCal tests.
  */
 @RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
+@Suite.SuiteClasses({ // @formatter:off
     ICalTaskExportTest.class,
     ICalAppointmentExportTest.class,
     ICalSeriesTests.class,
@@ -90,7 +90,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug56435Test_TaskStateRoundtrip.class,
     Bug8475Test_TaskAttendeeHandling.class,
     Bug8654Test_TaskImport.class,
-    Bug63867Test.class
-})
+    Bug63867Test.class,
+    MWB161Test.class
+}) // @formatter:on
 public final class ICalTestSuite {
 }

@@ -67,6 +67,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.external.account.ExternalAccountProvider;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.html.HtmlService;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
@@ -74,6 +75,7 @@ import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.oauth.AdministrativeOAuthAccountStorage;
 import com.openexchange.oauth.CallbackRegistry;
 import com.openexchange.oauth.OAuthAPIRegistry;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
@@ -89,10 +91,12 @@ import com.openexchange.oauth.impl.OAuthAPIRegistryImpl;
 import com.openexchange.oauth.impl.access.impl.OAuthAccessRegistryServiceImpl;
 import com.openexchange.oauth.impl.association.OAuthAccountAssociationServiceImpl;
 import com.openexchange.oauth.impl.httpclient.impl.scribe.ScribeHTTPClientFactoryImpl;
+import com.openexchange.oauth.impl.internal.AdministrativeOAuthAccountStorageSQLImpl;
 import com.openexchange.oauth.impl.internal.CallbackRegistryImpl;
 import com.openexchange.oauth.impl.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.impl.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.impl.internal.OAuthAccountStorageSQLImpl;
+import com.openexchange.oauth.impl.internal.OAuthExternalAccountProvider;
 import com.openexchange.oauth.impl.internal.OAuthServiceImpl;
 import com.openexchange.oauth.impl.internal.ReauthorizeListenerRegistry;
 import com.openexchange.oauth.impl.internal.hazelcast.PortableCallbackRegistryFetch;
@@ -225,12 +229,16 @@ public final class OAuthActivator extends HousekeepingActivator {
             registerService(CustomRedirectURLDetermination.class, cbRegistry);
             registerService(OAuthService.class, oauthService);
             registerService(OAuthAccountStorage.class, oauthAccountStorage);
+            registerService(AdministrativeOAuthAccountStorage.class, new AdministrativeOAuthAccountStorageSQLImpl(delegateServices.get(DBProvider.class), delegateServices.get(IDGeneratorService.class), registry, delegateServices.get(ContextService.class)));
+            registerService(ExternalAccountProvider.class, new OAuthExternalAccountProvider(this));
             registerService(OAuthServiceMetaDataRegistry.class, registry);
             registerService(OAuthAccountAssociationService.class, associationService);
             registerService(EncryptedItemDetectorService.class, oauthAccountStorage);
             registerService(SecretMigrator.class, oauthAccountStorage);
             registerService(EncryptedItemCleanUpService.class, oauthAccountStorage);
             registerService(OAuthAPIRegistry.class, OAuthAPIRegistryImpl.getInstance());
+
+            trackService(AdministrativeOAuthAccountStorage.class);
 
             org.scribe.model.RequestListener scribeRequestListener = new org.scribe.model.RequestListener() {
 

@@ -2,6 +2,7 @@
 title: extractLog4Modifications
 icon: far fa-circle
 tags: Administration, Command Line tools
+package: open-xchange-core
 ---
 
 # NAME

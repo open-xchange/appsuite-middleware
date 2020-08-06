@@ -167,8 +167,8 @@ public class ExifTool  {
 
     private static void displayMetadataNode(Node node, int level, PrintStream out) {
         indent(level, out);
-        System.out.print("<");
-        System.out.print(node.getNodeName());
+        out.print("<");
+        out.print(node.getNodeName());
 
         NamedNodeMap attributes = node.getAttributes();
         displayAttributes(attributes, out);
@@ -208,11 +208,13 @@ public class ExifTool  {
      */
     public static void dumpMetadata(IIOMetadata metadata, PrintStream out) {
         String[] names = metadata.getMetadataFormatNames();
-        int length = names == null ? 0 : names.length;
-        for (int i = 0; i < length; i++) {
-            indent(2, out);
-            out.println("Format name: " + names[i]);
-            displayMetadataNode(metadata.getAsTree(names[i]), 3, out);
+        if (names != null) {
+            int length = names.length;
+            for (int i = 0; i < length; i++) {
+                indent(2, out);
+                out.println("Format name: " + names[i]);
+                displayMetadataNode(metadata.getAsTree(names[i]), 3, out);
+            }
         }
     }
 

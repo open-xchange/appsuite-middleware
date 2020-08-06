@@ -72,7 +72,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import com.google.common.collect.Lists;
 import com.openexchange.database.Databases;
-import com.openexchange.database.JdbcProperties;
+import com.openexchange.database.internal.JdbcPropertiesImpl;
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.change.custom.CustomTaskRollback;
 import liquibase.database.Database;
@@ -764,12 +764,12 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             DriverManager.setLoginTimeout(120);
 
             String urlToUse = url;
-            Properties defaults = JdbcProperties.getInstance().getJdbcPropertiesCopy();
+            Properties defaults = JdbcPropertiesImpl.getInstance().getJdbcPropertiesCopy();
             if (null == defaults) {
                 defaults = new Properties();
                 defaults.setProperty("useSSL", "false");
             } else {
-                urlToUse = JdbcProperties.removeParametersFromJdbcUrl(urlToUse);
+                urlToUse = JdbcPropertiesImpl.doRemoveParametersFromJdbcUrl(urlToUse);
             }
             defaults.put("user", login);
             defaults.put("password", passwd);

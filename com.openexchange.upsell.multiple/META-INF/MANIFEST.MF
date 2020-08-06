@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Multiple upselll layer bundle
 Bundle-SymbolicName: com.openexchange.upsell.multiple
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.upsell.multiple.osgi.MyActivator
@@ -65,8 +65,6 @@ Import-Package: com.fasterxml.jackson.core,
  javax.naming,
  javax.servlet,
  javax.servlet.http,
- org.apache.commons.httpclient,
- org.apache.commons.httpclient.params,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,

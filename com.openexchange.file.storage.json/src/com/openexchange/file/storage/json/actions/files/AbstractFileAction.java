@@ -67,6 +67,7 @@ import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
 import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -90,16 +91,20 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@RestrictedAction(module = AbstractFileAction.MODULE, type = RestrictedAction.Type.READ)
 public abstract class AbstractFileAction implements AJAXActionService, EnqueuableAJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractFileAction.class);
 
     private static final List<File.Field> FILE_FIELDS = ImmutableList.of(File.Field.ID, File.Field.FILENAME, File.Field.FILE_SIZE, File.Field.FILE_MD5SUM);
 
+    public static final String MODULE = "files";
+
     /**
      * The parameter enumeration.
      */
     public static enum Param {
+
         /** The <code>"id"</code> parameter */
         ID("id"),
         /** The <code>"folder"</code> parameter */
@@ -398,7 +403,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
         }
         scan(isClosure, metadata.getFilename(), metadata.getFileId(), metadata.getFilesize());
     }
-    
+
     /**
      * Retrieves the optional pushToken parameter from the request and adds it to the session
      *
@@ -410,7 +415,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
             request.getSession().setParameter(Session.PARAM_PUSH_TOKEN, pushToken);
         }
     }
-    
+
     /**
      * Scans the items that are denoted with the specified {@link IdVersionPair}s (if a scan is requested by the specified
      * {@link InfostoreRequest}, i.e. via the <code>scan</code> URL parameter). If the <code>recursive</code> flag

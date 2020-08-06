@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: com.openexchange.appsuite.history
+Bundle-SymbolicName: com.openexchange.appsuite.history
+Bundle-Version: 7.10.4
+Automatic-Module-Name: test
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.annotation,
+ com.openexchange.apps.manifests,
+ com.openexchange.appsuite,
+ com.openexchange.config,
+ com.openexchange.config.lean,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.security.manager,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.apache.commons.io,
+ org.json,
+ org.osgi.framework,
+ org.slf4j
+Bundle-Vendor: OX Software GmbH
+Bundle-Activator: com.openexchange.appsuite.history.osgi.HistoryActivator

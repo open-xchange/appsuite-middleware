@@ -1045,7 +1045,7 @@ public final class OXFolderSQL {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
                 try {
-                    stmt = con.prepareStatement("SELECT 1 FROM oxfolder_permissions WHERE cid=? AND permission_id=? AND fuid=? AND system=?");
+                    stmt = con.prepareStatement("SELECT 1 FROM oxfolder_permissions WHERE cid=? AND permission_id=? AND fuid=? AND `system`=?");
                     int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
                     stmt.setInt(pos++, permissionId);
@@ -1062,7 +1062,7 @@ public final class OXFolderSQL {
                     if (alreadyExists) {
                         success = true;
                     } else {
-                        stmt = con.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, group_flag, fp, orp, owp, odp, admin_flag, system, type, sharedParentFolder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        stmt = con.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, group_flag, fp, orp, owp, odp, admin_flag, `system`, type, sharedParentFolder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                         pos = 1;
                         stmt.setInt(pos++, ctx.getContextId());
                         stmt.setInt(pos++, folderId);
@@ -1101,7 +1101,7 @@ public final class OXFolderSQL {
         return RetryingTransactionClosure.execute(addSinglePermissionClosure, 3, writeCon).booleanValue();
     }
 
-    private static final String SQL_REM_SINGLE_SYS_PERM = "DELETE FROM oxfolder_permissions " + "WHERE cid = ? AND fuid = ? AND permission_id = ? AND system = 1";
+    private static final String SQL_REM_SINGLE_SYS_PERM = "DELETE FROM oxfolder_permissions " + "WHERE cid = ? AND fuid = ? AND permission_id = ? AND `system` = 1";
 
     /**
      * Deletes a single system permission
@@ -1134,7 +1134,7 @@ public final class OXFolderSQL {
         }
     }
 
-    private static final String SQL_REM_ALL_SYS_PERM = "DELETE FROM oxfolder_permissions " + "WHERE cid = ? AND fuid = ? AND system = 1";
+    private static final String SQL_REM_ALL_SYS_PERM = "DELETE FROM oxfolder_permissions " + "WHERE cid = ? AND fuid = ? AND `system` = 1";
 
     /**
      * Deletes all system permission from specified folder
@@ -1770,7 +1770,7 @@ public final class OXFolderSQL {
         RetryingTransactionClosure.execute(markAsDefaultFolderClosure, 3, writeCon);
     }
 
-    private static final String SQL_DELETE_EXISTING_PERMISSIONS = "DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND system = 0";
+    private static final String SQL_DELETE_EXISTING_PERMISSIONS = "DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND `system` = 0";
 
     static void updateFolderSQL(final int userId, final FolderObject folder, final long lastModified, final Context ctx) throws SQLException, OXException {
         Connection writeCon = DBPool.pickupWriteable(ctx);
@@ -2381,7 +2381,7 @@ public final class OXFolderSQL {
 
     private static final String TMPL_IDS = "#IDS#";
 
-    private static final String SQL_DROP_SYS_PERMS = "DELETE FROM " + TMPL_PERM_TABLE + " WHERE cid = ? AND permission_id = ? AND system > 0";
+    private static final String SQL_DROP_SYS_PERMS = "DELETE FROM " + TMPL_PERM_TABLE + " WHERE cid = ? AND permission_id = ? AND `system` > 0";
 
     /**
      * Drops all system-permissions belonging to specified entity in given context

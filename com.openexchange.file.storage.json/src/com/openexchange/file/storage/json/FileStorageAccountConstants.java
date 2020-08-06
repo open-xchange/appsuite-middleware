@@ -63,4 +63,5 @@ public class FileStorageAccountConstants {
     public static final String QUALIFIED_ID = "qualifiedId";
     public static final String ROOT_FOLDER = "rootFolder";
     public static final String IS_DEFAULT_ACCOUNT = "isDefaultAccount";
+    public static final String CONNECTION_CHECK = "connectionCheck";
 }

@@ -2,6 +2,7 @@
 title: deletereason
 icon: far fa-circle
 tags: Administration, Command Line tools, Maintenance
+package: open-xchange-admin
 ---
 
 # NAME

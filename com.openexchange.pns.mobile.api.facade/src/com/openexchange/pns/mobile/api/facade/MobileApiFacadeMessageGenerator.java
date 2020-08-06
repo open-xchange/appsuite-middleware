@@ -49,8 +49,8 @@
 
 package com.openexchange.pns.mobile.api.facade;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Map;
-import org.json.JSONException;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -60,8 +60,7 @@ import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
-import javapns.notification.PushNotificationBigPayload;
-import javapns.notification.PushNotificationPayload;
+import com.turo.pushy.apns.util.ApnsPayloadBuilder;
 
 /**
  * {@link MobileApiFacadeMessageGenerator} - The message generator for Mobile API Facade.
@@ -73,6 +72,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
 
     private static final String TRANSPORT_ID_GCM = KnownTransport.GCM.getTransportId();
     private static final String TRANSPORT_ID_APNS = KnownTransport.APNS.getTransportId();
+    private static final String DEFAULT_NAMESPACE = "/";
 
     // ------------------------------------------------------------------------------------------------------------------------
 
@@ -126,8 +126,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
             };
         } else if (TRANSPORT_ID_APNS.equals(transportId)) {
             // Build APNS payload as expected by client
-
-            final PushNotificationPayload payload = new PushNotificationBigPayload();
+            ApnsPayloadBuilder builder = new ApnsPayloadBuilder();
             Map<String, Object> messageData = notification.getMessageData();
             try {
                 String subject = MessageDataUtil.getSubject(messageData);
@@ -146,43 +145,43 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                     sb.append(subject);
                     String alertMessage = sb.toString();
                     alertMessage = alertMessage.length() > ApnsConstants.APNS_MAX_ALERT_LENGTH ? alertMessage.substring(0, ApnsConstants.APNS_MAX_ALERT_LENGTH) : alertMessage;
-                    payload.addAlert(alertMessage);
+                    builder.setAlertTitle(subject);
+                    builder.setAlertBody(alertMessage);
 
                     MobileApiFacadePushConfiguration config = MobileApiFacadePushConfiguration.getConfigFor(notification.getUserId(), notification.getContextId(), viewFactory);
 
                     if (config.isApnBadgeEnabled() && unread >= 0) {
-                        payload.addBadge(unread);
+                        builder.setBadgeNumber(I(unread));
                     }
 
                     if (config.isApnSoundEnabled()) {
-                        payload.addSound(config.getApnSoundFile());
+                        builder.setSound(config.getApnSoundFile());
                     }
 
-                    payload.addCategory("new-message-category");
-                    payload.setContentAvailable(false);
+                    builder.setCategoryName("new-message-category");
+                    builder.setContentAvailable(false);
                 } else {
                     // Silent push
-                    payload.setContentAvailable(true);
+                    builder.setContentAvailable(true);
                 }
-
                 if (Strings.isEmpty(path) && Strings.isNotEmpty(folder) && Strings.isNotEmpty(id)) {
                     path = folder + "/" + id;
                 }
-
                 if (path.length() > 0) {
-                    payload.addCustomDictionary("cid", path);
+                    builder.addCustomProperty("cid", path);
                 } else if (folder.length() > 0) {
-                    payload.addCustomDictionary("folder", folder);
+                    builder.addCustomProperty("folder", folder);
                 }
-
-                return new Message<PushNotificationPayload>() {
+                builder.addCustomProperty("namespace", DEFAULT_NAMESPACE);
+                return new Message<String>() {
 
                     @Override
-                    public PushNotificationPayload getMessage() {
-                        return payload;
+                    public String getMessage() {
+                        return builder.buildWithMaximumLength(ApnsConstants.APNS_MAX_PAYLOAD_SIZE);
                     }
+
                 };
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create(e, e.getMessage());
             }
         }

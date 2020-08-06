@@ -52,7 +52,6 @@ package com.openexchange.xing.session;
 
 import java.util.Locale;
 import org.apache.http.HttpRequest;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.exception.XingException;
@@ -112,13 +111,6 @@ public interface Session {
      * port set.
      */
     public ProxyInfo getProxyInfo();
-
-    /**
-     * Will be called every time a request is made to Xing, in case you want
-     * to use a new client every time. However, it's highly recommended to
-     * create a client once and reuse it to take advantage of connection reuse.
-     */
-    public HttpClient getHttpClient();
 
     /**
      * Will be called every time right before a request is sent to Xing. It

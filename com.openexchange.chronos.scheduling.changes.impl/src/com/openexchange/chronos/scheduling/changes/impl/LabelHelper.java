@@ -89,7 +89,7 @@ public class LabelHelper {
 
     /**
      * Initializes a new {@link LabelHelper}.
-     * 
+     *
      * @param serviceLookup
      * @param update The {@link Event} to generate the mail for
      * @param seriesMaster The series master event if changes affect a recurrence instance, <code>null</code>, otherwise
@@ -240,6 +240,10 @@ public class LabelHelper {
         return new SentenceImpl(Messages.LABEL_WHERE).getMessage(messageContext);
     }
 
+    public String getConferencesLabel() {
+        return new SentenceImpl(Messages.LABEL_CONFERENCES).getMessage(messageContext);
+    }
+
     public String getParticipantsLabel() {
         return new SentenceImpl(Messages.LABEL_PARTICIPANTS).getMessage(messageContext);
     }
@@ -287,7 +291,7 @@ public class LabelHelper {
     public String getJustification() {
         //        if (recipient.hasRole(ITipRole.PRINCIPAL)) {
         //            return new Sentence(Messages.PRINCIPAL_JUSTIFICATION).getMessage(messageContext);
-        //        } else 
+        //        } else
         if (CalendarUtils.matches(recipient, update.getOrganizer())) {
             return new SentenceImpl(Messages.ORGANIZER_JUSTIFICATION).getMessage(messageContext);
         } else if (Attendee.class.isAssignableFrom(recipient.getClass()) && CalendarUserType.RESOURCE.matches(((Attendee) recipient).getCuType())) {
@@ -422,7 +426,11 @@ public class LabelHelper {
                 msg = Messages.NONE_ON_BEHALF_INTRO;
                 statusString = Messages.NONE;
             }
-            return new SentenceImpl(msg).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
+            return new SentenceImpl(msg)
+                .add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT)
+                .add(statusString, ArgumentType.STATUS, status)
+                .add(originator.getCn(), ArgumentType.PARTICIPANT)
+                .getMessage(messageContext);
         }
 
         @Override
@@ -443,14 +451,14 @@ public class LabelHelper {
                 statusString = Messages.NONE;
             }
             return new SentenceImpl(msg)
-                .add(originator.getCn(), ArgumentType.PARTICIPANT)
+                .add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT)
                 .add(statusString, ArgumentType.STATUS, status)
                 .add(ofSeries, ArgumentType.ITALIC)
-                .add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT)
+                .add(originator.getCn(), ArgumentType.PARTICIPANT)
                 .getMessage(messageContext)
             ;
         }
-        
+
         @Override
         public String getDeleteIntroduction() {
             return new SentenceImpl(Messages.DELETE_ON_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
@@ -538,7 +546,7 @@ public class LabelHelper {
                 .getMessage(messageContext)
             ;
         }
-        
+
         @Override
         public String getUpdateIntroduction() {
             return new SentenceImpl(Messages.UPDATE_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);

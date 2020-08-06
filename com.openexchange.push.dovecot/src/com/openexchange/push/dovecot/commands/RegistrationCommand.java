@@ -127,7 +127,7 @@ public class RegistrationCommand implements ProtocolCommand {
         Response[] r = IMAPCommandsCollection.performCommand(protocol, command);
         Response response = r[r.length - 1];
         if (response.isOK()) {
-            LOGGER.info("Registered push notification for {} using: {}", imapFolder.getStore(), command);
+            LOGGER.info("Registered push notifications for {} using: {}", imapFolder.getStore(), command);
             return Boolean.TRUE;
         } else if (response.isBAD()) {
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
@@ -145,6 +145,7 @@ public class RegistrationCommand implements ProtocolCommand {
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
             protocol.handleResult(response);
         }
+        LOGGER.warn("Failed to register push notifications for {} using: {}", imapFolder.getStore(), command);
         return Boolean.FALSE;
     }
 }

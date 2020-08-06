@@ -286,8 +286,9 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
     NOT_FOUND("The %1$s resource does not exist: %2$s", Category.CATEGORY_ERROR, 55, FileStorageExceptionMessages.NOT_FOUND_MSG),
     /**
      * Authentication failed for the file storage account with identifier %1$s (service: %2$s): %3$s
+     * Authentication failed. Please check the provided credentials and try again.
      */
-    AUTHENTICATION_FAILED("Authentication failed for the file storage account with identifier %1$s (service: %2$s): %3$s", Category.CATEGORY_CONFIGURATION, 56),
+    AUTHENTICATION_FAILED("Authentication failed for the file storage account with identifier %1$s (service: %2$s): %3$s", Category.CATEGORY_CONFIGURATION, 56, FileStorageExceptionMessages.AUTHENTICATION_FAILED_MSG),
     /**
      * The file %1$s doesn't have any content.
      */
@@ -364,6 +365,12 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * Restore from trash is not supported
      */
     NO_RESTORE_SUPPORT("Restore from trash is not supported", Category.CATEGORY_ERROR, 72, FileStorageExceptionMessages.NO_RESTORE_SUPPORT_MSG),
+
+    /**
+     * Invalid account name
+     */
+    ACCOUNT_NAME_TOO_LONG("Invalid account name.", Category.CATEGORY_ERROR, 73, FileStorageExceptionMessages.ACCOUNT_NAME_TO_LONG_MSG),
+
     ;
 
     /**

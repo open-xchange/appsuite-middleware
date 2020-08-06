@@ -57,6 +57,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.mail.FullnameArgument;
 
 /**
  * {@link GetRequest}
@@ -94,7 +95,7 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
 
     private GetRequest(String folder, String id, View view, boolean structure, boolean failOnError) {
         super();
-        this.folder = folder;
+        this.folder = new FullnameArgument(folder).getPreparedName();
         this.id = id;
         this.view = view;
         this.structure = structure;

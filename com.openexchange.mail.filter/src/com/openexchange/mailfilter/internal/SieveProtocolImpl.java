@@ -58,7 +58,7 @@ import java.util.Optional;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.export.SieveHandler;
-import com.openexchange.jsieve.export.SieveHandler.IMetricArguments;
+import com.openexchange.jsieve.export.SieveHandler.MetricHelper;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.NoResponseHandler;
@@ -96,7 +96,7 @@ public class SieveProtocolImpl implements SieveProtocol {
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final SieveHandler sieveHandler;
-    private IMetricArguments metricArgs;
+    private MetricHelper metricArgs;
     private final Credentials credentials;
     private final boolean useSIEVEResponseCodes;
 
@@ -119,7 +119,7 @@ public class SieveProtocolImpl implements SieveProtocol {
     public void write(String... commandLines) throws OXException {
         try {
             if (metricArgs == null) {
-                metricArgs = sieveHandler.createMetricArguments();
+                metricArgs = sieveHandler.createMetricHelper();
             }
 
             BufferedOutputStream bos_sieve = sieveHandler.getOutput();

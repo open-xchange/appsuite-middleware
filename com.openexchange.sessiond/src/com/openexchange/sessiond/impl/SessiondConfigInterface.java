@@ -50,7 +50,7 @@
 package com.openexchange.sessiond.impl;
 
 /**
- * 
+ *
  * {@link SessiondConfigInterface}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -89,4 +89,13 @@ public interface SessiondConfigInterface {
      * @return The obfuscation key
      */
     String getObfuscationKey();
+
+    /**
+     * Gets a value indicating whether sessions that were rotated out of the containers are implicitly also removed from the session
+     * storage or not. This may not be desired if a session is still in use by another node in the cluster.
+     *
+     * @return <code>true</code> if a session timeout should also remove the session from the distributed storage, <code>false</code>, otherwise
+     */
+    boolean isRemoveFromSessionStorageOnTimeout();
+
 }

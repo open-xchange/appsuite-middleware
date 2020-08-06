@@ -118,6 +118,28 @@ public class GlobalDbInit {
     }
 
     /**
+     * Gets the set of globaldb pool identifiers
+     *
+     * @param configurationService The configuration service
+     * @return A set of all gloabldb pool identifiers
+     */
+    static Set<Integer> getGlobalDBPoolIds(ConfigurationService configurationService) {
+        Object yaml = configurationService.getYaml(CONFIGFILE);
+
+        if (null != yaml && Map.class.isInstance(yaml)) {
+            Map<String, Object> map = (Map<String, Object>) yaml;
+            if (!map.isEmpty()) {
+                try {
+                    return getGroupsByPool(map, configurationService).keySet();
+                } catch (OXException e) {
+                    LOG.error("Unable to get global db pool identifiers", e);
+                }
+            }
+        }
+        return Collections.emptySet();
+    }
+
+    /**
      * Prepares one or more global database by ensuring that the database schemas and the table layouts exist, creating the missing parts
      * dynamically as needed.
      *

@@ -56,7 +56,6 @@ import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
@@ -98,7 +97,7 @@ public class NeedsActionAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        List<Event> events = calendarAccess.getEventsOfUser(null, new ParticipationStatus[] { ParticipationStatus.NEEDS_ACTION });
+        List<Event> events = calendarAccess.getEventsNeedingAction();
         return new AJAXRequestResult(events, getMaximumTimestamp(events), EventResultConverter.INPUT_FORMAT);
     }
 

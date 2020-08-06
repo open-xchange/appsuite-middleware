@@ -366,12 +366,12 @@ public class AvailableMapper extends DefaultDbMapper<Available, AvailableField> 
             }
 
             @Override
-            protected SortedSet<RecurrenceId> getRecurrenceIds(Available available) {
+            public SortedSet<RecurrenceId> get(Available available) {
                 return available.getDeleteExceptionDates();
             }
 
             @Override
-            protected void setRecurrenceIds(Available available, SortedSet<RecurrenceId> value) {
+            public void set(Available available, SortedSet<RecurrenceId> value) {
                 available.setDeleteExceptionDates(value);
             }
         });

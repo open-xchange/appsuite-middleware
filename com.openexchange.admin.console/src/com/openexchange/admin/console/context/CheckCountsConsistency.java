@@ -55,7 +55,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.rmi.OXContextInterface;
+import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 /**
@@ -89,7 +89,7 @@ public final class CheckCountsConsistency extends ContextAbstraction {
             parser.ownparse(args);
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
-            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
             final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
             Runnable runnbable = new Runnable() {
@@ -97,7 +97,7 @@ public final class CheckCountsConsistency extends ContextAbstraction {
                 @Override
                 public void run() {
                     try {
-                        oxres.checkCountsConsistency(true, true, auth);
+                        oxutil.checkCountsConsistency(true, true, auth);
                     } catch (Exception e) {
                         errorRef.set(e);
                     }

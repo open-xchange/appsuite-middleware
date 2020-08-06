@@ -51,8 +51,8 @@ package com.openexchange.apps.manifests.json.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
+import com.openexchange.apps.manifests.DefaultManifestBuilder;
 import com.openexchange.apps.manifests.ManifestContributor;
-import com.openexchange.apps.manifests.json.ManifestBuilder;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 
@@ -64,7 +64,7 @@ import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
  */
 public class ManifestContributorTracker extends RankingAwareNearRegistryServiceTracker<ManifestContributor> {
 
-    private final AtomicReference<ManifestBuilder> builderReference;
+    private final AtomicReference<DefaultManifestBuilder> builderReference;
 
     /**
      * Initializes a new {@link ManifestContributorTracker}.
@@ -73,7 +73,7 @@ public class ManifestContributorTracker extends RankingAwareNearRegistryServiceT
      */
     public ManifestContributorTracker(BundleContext context) {
         super(context, ManifestContributor.class);
-        builderReference = new AtomicReference<ManifestBuilder>();
+        builderReference = new AtomicReference<DefaultManifestBuilder>();
     }
 
     /**
@@ -81,7 +81,7 @@ public class ManifestContributorTracker extends RankingAwareNearRegistryServiceT
      *
      * @param manifestBuilder The manifest builder instance
      */
-    public void setManifestBuilder(ManifestBuilder manifestBuilder) {
+    public void setManifestBuilder(DefaultManifestBuilder manifestBuilder) {
         builderReference.set(manifestBuilder);
     }
 
@@ -98,7 +98,7 @@ public class ManifestContributorTracker extends RankingAwareNearRegistryServiceT
     }
 
     private void resetBuilder() {
-        ManifestBuilder manifestBuilder = builderReference.get();
+        DefaultManifestBuilder manifestBuilder = builderReference.get();
         if (null != manifestBuilder) {
             manifestBuilder.reset();
         }

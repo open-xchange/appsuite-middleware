@@ -66,20 +66,24 @@ public interface SessionMatcher {
      * The constant set indicating no flags.
      * <p>
      * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
-     * <b>Note</b>: Might be an expensive operation as both - long-term container and session storage - are considered.
+     * <b>Note</b>: Might be an expensive operation since beside short-term container both - long-term container and session storage - are considered.
      * </div>
      */
     public static final Set<Flag> NO_FLAGS = Collections.unmodifiableSet(EnumSet.noneOf(Flag.class));
 
     /**
-     * The constant set indicating all flags. Neither long-term container nor session storage are considered.
+     * The constant set indicating only short-term container is considered.
      */
-    public static final Set<Flag> ALL_FLAGS = Collections.unmodifiableSet(EnumSet.allOf(Flag.class));
+    public static final Set<Flag> ONLY_SHORT_TERM = Collections.unmodifiableSet(EnumSet.of(Flag.IGNORE_LONG_TERM, Flag.IGNORE_SESSION_STORAGE));
 
     /**
      * Flag enumeration for session matcher.
      */
     public static enum Flag {
+        /**
+         * Whether to ignore sessions kept in short-term container.
+         */
+        IGNORE_SHORT_TERM,
         /**
          * Whether to ignore sessions kept in long-term container.
          */
@@ -95,7 +99,7 @@ public interface SessionMatcher {
      *
      * @return The flags or <code>null</code> for no flags at all
      * @see #NO_FLAGS
-     * @see #ALL_FLAGS
+     * @see #ONLY_SHORT_TERM
      */
     Set<Flag> flags();
 

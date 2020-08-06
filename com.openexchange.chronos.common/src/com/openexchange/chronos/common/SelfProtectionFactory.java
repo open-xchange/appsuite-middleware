@@ -55,6 +55,7 @@ import java.util.Map;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Conference;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -74,9 +75,10 @@ public class SelfProtectionFactory {
 
     static final org.slf4j.Logger LOG = LoggerFactory.getLogger(SelfProtectionFactory.class);
 
-    private static final String PROPERTY_EVENT_LIMIT = "com.openexchange.calendar.maxEventResults";
-    private static final String PROPERTY_ATTENDEE_LIMIT = "com.openexchange.calendar.maxAttendeesPerEvent";
-    private static final String PROPERTY_ALARM_LIMIT = "com.openexchange.calendar.maxAlarmsPerEvent";
+    public static final Property PROPERTY_EVENT_LIMIT = DefaultProperty.valueOf("com.openexchange.calendar.maxEventResults", I(1000));
+    public static final Property PROPERTY_ATTENDEE_LIMIT = DefaultProperty.valueOf("com.openexchange.calendar.maxAttendeesPerEvent", I(1000));
+    public static final Property PROPERTY_ALARM_LIMIT = DefaultProperty.valueOf("com.openexchange.calendar.maxAlarmsPerEvent", I(100));
+    public static final Property PROPERTY_CONFERENCE_LIMIT = DefaultProperty.valueOf("com.openexchange.calendar.maxConferencesPerEvent", I(100));
 
     /**
      * Initializes a new {@link SelfProtectionFactory}.
@@ -94,6 +96,7 @@ public class SelfProtectionFactory {
         private final int eventLimit;
         private final int attendeeLimit;
         private final int alarmLimit;
+        private final int conferenceLimit;
 
         /**
          * Initializes a new {@link SelfProtectionFactory.SelfProtection}.
@@ -107,17 +110,14 @@ public class SelfProtectionFactory {
                 eventLimit = 1000;
                 attendeeLimit = 1000;
                 alarmLimit = 100;
+                conferenceLimit = 100;
                 return;
             }
 
-            Property prop = DefaultProperty.valueOf(PROPERTY_EVENT_LIMIT, I(1000));
-            eventLimit = leanConfigurationService.getIntProperty(prop);
-
-            prop = DefaultProperty.valueOf(PROPERTY_ATTENDEE_LIMIT, I(1000));
-            attendeeLimit = leanConfigurationService.getIntProperty(prop);
-
-            prop = DefaultProperty.valueOf(PROPERTY_ALARM_LIMIT, I(100));
-            alarmLimit = leanConfigurationService.getIntProperty(prop);
+            eventLimit = leanConfigurationService.getIntProperty(PROPERTY_EVENT_LIMIT);
+            attendeeLimit = leanConfigurationService.getIntProperty(PROPERTY_ATTENDEE_LIMIT);
+            alarmLimit = leanConfigurationService.getIntProperty(PROPERTY_ALARM_LIMIT);
+            conferenceLimit = leanConfigurationService.getIntProperty(PROPERTY_CONFERENCE_LIMIT);
         }
 
         /**
@@ -159,10 +159,10 @@ public class SelfProtectionFactory {
         }
 
         /**
-         * Checks if an {@link Event} contains too many {@link Alarm}s or too many {@link Attendee}s
+         * Checks if an {@link Event} contains too many {@link Alarm}s, {@link Conference}s, or too many {@link Attendee}s
          *
          * @param event The event to check
-         * @throws OXException if the event contains too many {@link Attendee}s or {@link Alarm}s
+         * @throws OXException if the event contains too many {@link Attendee}s, {@link Conference}s or {@link Alarm}s
          */
         public void checkEvent(Event event) throws OXException {
             if (event.getAlarms() != null && event.getAlarms().size() > alarmLimit) {
@@ -171,6 +171,7 @@ public class SelfProtectionFactory {
             if (event.getAttendees() != null && event.getAttendees().size() > attendeeLimit) {
                 throw CalendarExceptionCodes.TOO_MANY_ATTENDEES.create();
             }
+            checkConferenceCollection(event.getConferences());
         }
 
         /**
@@ -185,6 +186,17 @@ public class SelfProtectionFactory {
             }
         }
 
+        /**
+         * Checks if a collection of conferences of contains too many elements.
+         *
+         * @param attendees The conferences to check
+         * @throws OXException - {@link CalendarExceptionCodes#TOO_MANY_CONFERENCES}
+         */
+        public void checkConferenceCollection(Collection<Conference> conferences) throws OXException {
+            if (null != conferences && conferenceLimit < conferences.size()) {
+                throw CalendarExceptionCodes.TOO_MANY_CONFERENCES.create(I(conferenceLimit), I(conferences.size()));
+            }
+        }
 
         public void checkMap(Map<?, ? extends Collection<Event>> map) throws OXException {
             int sum = 0;

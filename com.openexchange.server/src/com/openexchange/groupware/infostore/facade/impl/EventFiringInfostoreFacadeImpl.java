@@ -52,7 +52,6 @@ package com.openexchange.groupware.infostore.facade.impl;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -67,7 +66,6 @@ import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.EventFiringInfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.arrays.Arrays;
@@ -153,8 +151,8 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
     }
 
     @Override
-    protected void removeDocuments(List<DocumentMetadata> allDocuments, List<DocumentMetadata> allVersions, long date, ServerSession sessionObj, List<DocumentMetadata> rejected) throws OXException {
-        super.removeDocuments(allDocuments, allVersions, date, sessionObj, rejected);
+    protected void removeDocuments(List<DocumentMetadata> allDocuments, long date, ServerSession sessionObj, List<DocumentMetadata> rejected, boolean hardDelete) throws OXException {
+        super.removeDocuments(allDocuments, date, sessionObj, rejected, hardDelete);
         if (!allDocuments.isEmpty()) {
             for (DocumentMetadata document : allDocuments) {
                 if (null != rejected && rejected.contains(document)) {
@@ -168,9 +166,9 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
 
     @Override
     protected List<DocumentMetadata> moveDocuments(ServerSession session, List<DocumentMetadata> documents, long destinationFolderID,
-        long sequenceNumber, boolean adjustFilenamesAsNeeded, Map<String, InfostoreFolderPath> originFolderPath) throws OXException {
+        long sequenceNumber, boolean adjustFilenamesAsNeeded) throws OXException {
         List<DocumentMetadata> rejectedDocuments = super.moveDocuments(
-            session, documents, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded, originFolderPath);
+            session, documents, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
         if (!documents.isEmpty()) {
             for (DocumentMetadata document : documents) {
                 if (null != rejectedDocuments && rejectedDocuments.contains(document)) {

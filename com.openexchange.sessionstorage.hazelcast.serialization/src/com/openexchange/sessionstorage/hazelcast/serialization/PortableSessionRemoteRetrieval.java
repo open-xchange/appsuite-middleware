@@ -58,7 +58,6 @@ import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
 
 /**
  * {@link PortableSessionRemoteRetrieval}
@@ -122,18 +121,7 @@ public class PortableSessionRemoteRetrieval extends AbstractCustomPortable imple
             return null;
         }
 
-        if (service instanceof SessiondServiceExtended) {
-            Session ses = ((SessiondServiceExtended) service).getSession(id, false);
-            if (null == ses) {
-                return null;
-            }
-
-            PortableSession portableSession = new PortableSession(ses);
-            portableSession.setPassword(OBFUSCATOR_REFERENCE.get().obfuscate(portableSession.getPassword()));
-            return portableSession;
-        }
-
-        Session ses = service.getSession(id);
+        Session ses = service.getSession(id, false);
         if (null == ses) {
             return null;
         }

@@ -56,6 +56,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.json.action.ChronosAction;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
@@ -75,9 +76,10 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @since v7.10.0
  */
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
+@RestrictedAction(module = ChronosAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class UpdateAlarmsAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_PUSH_TOKEN, PARAM_EXPAND, PARAM_SCHEDULING, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_FIELDS); 
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_PUSH_TOKEN, PARAM_EXPAND, PARAM_SCHEDULING, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_FIELDS);
 
     @Override
     protected Set<String> getOptionalParameters() {

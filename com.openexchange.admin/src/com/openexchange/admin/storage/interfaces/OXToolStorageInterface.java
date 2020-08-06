@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -368,6 +369,21 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException If existence check fails
      */
     public abstract boolean existsContextNameInServer(Context ctx) throws StorageException;
+
+    /**
+     * Checks that the context identifier of the context is valid and unique
+     * <p>
+     * Should be used in create method!
+     * <p>
+     * A valid context identifier begins at <code>1</code>. <code>0</code> is not allowed as this confuses many services that expect
+     * <code>0</code> to be a indicator for missing context.
+     *
+     * @param ctx The context
+     * @throws InvalidDataException If the context has a invalid identifier
+     * @throws StorageException If existence check fails
+     * @throws ContextExistsException If the context already exists
+     */
+    public abstract void checkContextIdentifier(Context ctx) throws InvalidDataException, StorageException, ContextExistsException;
 
     /**
      * Checks context existence and if there is no other context with the same name

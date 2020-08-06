@@ -116,10 +116,10 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
         Map<UserMailAccountMapper, ValueSetter> s = new HashMap<>();
         s.put(UserMailAccountMapper.PRIMARY_ACCOUNT_NAME, (account, user, setAttributes) -> {
             if (user.isPrimaryAccountNameSet()) {
-                account.setName(Strings.isEmpty(user.getPrimaryAccountName()) ? MailFolder.DEFAULT_FOLDER_NAME : user.getPrimaryAccountName());
+                account.setName(Strings.isEmpty(user.getPrimaryAccountName()) ? MailFolder.ROOT_FOLDER_NAME : user.getPrimaryAccountName());
                 setAttributes(setAttributes, UserMailAccountMapper.PRIMARY_ACCOUNT_NAME);
             } else {
-                account.setName(MailFolder.DEFAULT_FOLDER_NAME);
+                account.setName(MailFolder.ROOT_FOLDER_NAME);
             }
         });
         s.put(UserMailAccountMapper.IMAP_SERVER, (account, user, setAttributes) -> {

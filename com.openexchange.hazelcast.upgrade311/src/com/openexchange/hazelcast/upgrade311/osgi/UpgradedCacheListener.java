@@ -121,7 +121,9 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
          * Determine remote members
          */
         final Set<Member> remoteMembers = getRemoteMembers(client);
-        if (null != remoteMembers && false == remoteMembers.isEmpty()) {
+        if (null == remoteMembers || remoteMembers.isEmpty()) {
+            LOG.warn("Found no remote members in cluster");
+        } else {
             IExecutorService executor = client.getExecutorService("default");
             Map<Member, Future<Boolean>> futures = executor.submitToMembers(new PortableContextInvalidationCallable(parseSchemas(cacheEvent)), remoteMembers);
             LOG.info("Successfully submitted invalidation of schemas to remote members:{}{}", Strings.getLineSeparator(), getMembersString(remoteMembers));
@@ -170,8 +172,6 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
                     LOG.warn("Failed invalidation of schemas on member {}", member, e);
                 }
             }
-        } else {
-            LOG.warn("Found no remote members in cluster");
         }
 
         LOG.info("Shutting down client after {}ms...", Integer.valueOf(SHUTDOWN_DELAY));
@@ -229,8 +229,11 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
                 // Cache key
                 CacheKey ck = (CacheKey) key;
                 int poolId = ck.getContextId();
-                String schema = ck.getKeys()[0];
-                schemas.add(new PoolAndSchema(poolId, schema));
+                String[] keyz = ck.getKeys();
+                if (keyz.length > 0) {
+                    String schema = keyz[0];
+                    schemas.add(new PoolAndSchema(poolId, schema));
+                }
             } else {
                 LOG.warn("Skipping unexpected cache key: {}", key);
             }

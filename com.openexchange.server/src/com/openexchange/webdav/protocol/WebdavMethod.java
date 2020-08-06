@@ -57,23 +57,40 @@ package com.openexchange.webdav.protocol;
  */
 public enum WebdavMethod {
 
-    GET,
-    PUT,
-    MKCOL,
-    DELETE,
-    HEAD,
-    OPTIONS,
-    TRACE,
-    PROPPATCH,
-    PROPFIND,
-    MOVE,
-    COPY,
-    LOCK,
-    UNLOCK,
-    REPORT,
-    ACL,
-    MKCALENDAR,
-    POST
+    GET(true),
+    PUT(false),
+    MKCOL(false),
+    DELETE(false),
+    HEAD(true),
+    OPTIONS(true),
+    TRACE(true),
+    PROPPATCH(false),
+    PROPFIND(true),
+    MOVE(false),
+    COPY(false),
+    LOCK(false),
+    UNLOCK(false),
+    REPORT(true),
+    ACL(false),
+    MKCALENDAR(false),
+    POST(false),
+    ;
+
+    private boolean readOnly;
+
+    private WebdavMethod(boolean readOnly) {
+        this.readOnly = readOnly;
+    }
+
+    /**
+     * Gets a value indicating whether the supplied method is <i>read-only</i>, i.e. no changes will be performed on the server when
+     * being executed or not.
+     * 
+     * @return <code>true</code> if the method is considered as <i>read-only</i>, <code>false</code>, otherwise
+     */
+    public boolean isReadOnly() {
+        return readOnly;
+    }
 
 }
 

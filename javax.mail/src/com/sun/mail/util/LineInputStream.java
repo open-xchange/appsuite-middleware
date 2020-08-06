@@ -40,21 +40,27 @@
 
 package com.sun.mail.util;
 
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PushbackInputStream;
+import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.CharacterCodingException;
 
 /**
- * This class is to support reading CRLF terminated lines that
+ * LineInputStream supports reading CRLF terminated lines that
  * contain only US-ASCII characters from an input stream. Provides
  * functionality that is similar to the deprecated 
  * <code>DataInputStream.readLine()</code>. Expected use is to read
- * lines as String objects from a RFC822 stream.
+ * lines as String objects from an IMAP/SMTP/etc. stream. <p>
  *
- * It is implemented as a FilterInputStream, so one can just wrap 
- * this class around any input stream and read bytes from this filter.
+ * This class also supports UTF-8 data by calling the appropriate
+ * constructor.  Or, if the System property <code>mail.mime.allowutf8</code>
+ * is set to true, an attempt will be made to interpret the data as UTF-8,
+ * falling back to treating it as an 8-bit charset if that fails. <p>
+ *
+ * LineInputStream is implemented as a FilterInputStream, so one can just
+ * wrap it around any input stream and read bytes from this filter.
  * 
  * @author John Mani
  * @author Bill Shannon
@@ -64,6 +70,10 @@ public class LineInputStream extends FilterInputStream {
 
     private boolean allowutf8;
     private byte[] lineBuffer = null; // reusable byte buffer
+    private CharsetDecoder decoder;
+
+    private static boolean defaultutf8 =
+    PropUtil.getBooleanSystemProperty("mail.mime.allowutf8", false);
     private static int MAX_INCR = 1024*1024;	// 1MB
 
     public LineInputStream(InputStream in) {
@@ -78,6 +88,11 @@ public class LineInputStream extends FilterInputStream {
     public LineInputStream(InputStream in, boolean allowutf8) {
 	super(in);
 	this.allowutf8 = allowutf8;
+    if (!allowutf8 && defaultutf8) {
+        decoder = StandardCharsets.UTF_8.newDecoder();
+        decoder.onMalformedInput(CodingErrorAction.REPORT);
+        decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+    }
     }
 
     /**
@@ -164,7 +179,18 @@ public class LineInputStream extends FilterInputStream {
 
 	if (allowutf8)
 	    return new String(buf, 0, offset, StandardCharsets.UTF_8);
-	else
-	    return new String(buf, 0, 0, offset);
+	else {
+        if (defaultutf8) {
+        // try to decode it as UTF-8
+        try {
+            return decoder.decode(ByteBuffer.wrap(buf, 0, offset)).
+                        toString();
+        } catch (CharacterCodingException cex) {
+            // looks like it's not valid UTF-8 data,
+            // fall through and treat it as an 8-bit charset
+        }
+        }
+        return new String(buf, 0, 0, offset);
+    }
     }
 }

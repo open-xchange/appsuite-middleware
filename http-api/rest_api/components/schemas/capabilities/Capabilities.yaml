@@ -1,0 +1,13 @@
+type: array
+description: An array of capabilities
+items:
+  type: object
+  description: A capability
+  title: Capability
+  properties:
+    id:
+      type: string
+      description: The name of the capability
+    attributes:
+      type: string
+      description: An json object containing the attributes of the capability

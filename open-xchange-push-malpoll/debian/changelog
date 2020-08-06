@@ -1,98 +1,50 @@
-open-xchange-push-malpoll (7.10.3-19) stable; urgency=medium
+open-xchange-push-malpoll (7.10.4-7) stable; urgency=medium
 
-  * Build for patch 2020-07-27 (5821)
+  * Fifth candidate for 7.10.4 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 21 Jul 2020 10:09:29 +0000
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 05 Aug 2020 11:18:35 +0000
 
-open-xchange-push-malpoll (7.10.3-18) stable; urgency=medium
+open-xchange-push-malpoll (7.10.4-6) stable; urgency=medium
 
-  * Build for patch 2020-07-17 (5819)
+  * Fourth candidate for 7.10.4 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 15 Jul 2020 11:33:48 +0000
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 04 Aug 2020 14:08:10 +0000
 
-open-xchange-push-malpoll (7.10.3-17) stable; urgency=medium
+open-xchange-push-malpoll (7.10.4-5) stable; urgency=medium
 
-  * Build for patch  2020-07-13 (5804)
+  * Third candidate for 7.10.4 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 09 Jul 2020 10:16:19 +0000
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 04 Aug 2020 09:03:16 +0000
 
-open-xchange-push-malpoll (7.10.3-16) stable; urgency=medium
+open-xchange-push-malpoll (7.10.4-4) stable; urgency=medium
 
-  * Build for patch  2020-07-02 (5792)
+  * Second candidate for 7.10.4 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 26 Jun 2020 16:02:14 +0000
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 31 Jul 2020 17:27:43 +0000
 
-open-xchange-push-malpoll (7.10.3-15) stable; urgency=medium
+open-xchange-push-malpoll (7.10.4-3) stable; urgency=medium
 
-  * Build for patch 2020-06-30 (5781)
+  * First candidate for 7.10.4 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 24 Jun 2020 07:52:18 +0000
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 28 Jul 2020 10:24:56 +0000
 
-open-xchange-push-malpoll (7.10.3-14) stable; urgency=medium
+open-xchange-push-malpoll (7.10.4-2) stable; urgency=medium
 
-  * Build for patch 2020-06-15 (5765)
+  * Second preview of 7.10.4 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 15 Jun 2020 11:20:22 +0000
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 30 Jun 2020 11:18:43 +0000
 
-open-xchange-push-malpoll (7.10.3-13) stable; urgency=medium
+open-xchange-push-malpoll (7.10.4-1) stable; urgency=medium
 
-  * Build for patch 2020-05-26 (5742)
+  * First preview of 7.10.4 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 15 May 2020 14:15:12 +0000
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 20 May 2020 08:51:44 +0000
 
-open-xchange-push-malpoll (7.10.3-12) stable; urgency=medium
+open-xchange-push-malpoll (7.10.4-0) unstable; urgency=medium
 
-  * Build for patch 2020-05-11 (5720)
+  * prepare for 7.10.4 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 04 May 2020 14:55:05 +0000
-
-open-xchange-push-malpoll (7.10.3-11) stable; urgency=medium
-
-  * Build for patch 2020-04-30 (5702)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 23 Apr 2020 06:57:46 +0000
-
-open-xchange-push-malpoll (7.10.3-10) stable; urgency=medium
-
-  * Build for patch 2020-04-02 (5692)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 17 Apr 2020 08:58:04 +0000
-
-open-xchange-push-malpoll (7.10.3-9) stable; urgency=medium
-
-  * Build for patch 2020-04-14 (5677)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 06 Apr 2020 09:09:14 +0000
-
-open-xchange-push-malpoll (7.10.3-8) stable; urgency=medium
-
-  * Build for patch 2020-03-23 (5653)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 19 Mar 2020 14:51:21 +0000
-
-open-xchange-push-malpoll (7.10.3-7) stable; urgency=medium
-
-  * Build for patch 2020-03-02 (5623)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 28 Feb 2020 15:11:55 +0000
-
-open-xchange-push-malpoll (7.10.3-6) stable; urgency=medium
-
-  * Build for patch 2020-02-19 (5588)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 12 Feb 2020 16:42:01 +0000
-
-open-xchange-push-malpoll (7.10.3-5) stable; urgency=medium
-
-  * Build for patch 2020-02-10 (5572)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 12 Feb 2020 09:41:38 +0000
-
-open-xchange-push-malpoll (7.10.3-4) stable; urgency=medium
-
-  * Build for patch 2020-01-20 (5547)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 20 Jan 2020 16:38:51 +0100
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 16 Jan 2020 16:06:27 +0100
 
 open-xchange-push-malpoll (7.10.3-3) stable; urgency=medium
 

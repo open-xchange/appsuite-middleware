@@ -80,7 +80,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -414,7 +414,7 @@ public final class Tools {
      * @See {@link #isRemoveCachingHeader(HttpServletRequest)}, {@link #removeCachingHeader(HttpServletResponse)}, {@link #disableCaching(AJAXRequestResult)}
      */
     public static void updateCachingHeaders(final HttpServletRequest req, final HttpServletResponse resp) {
-        if(isRemoveCachingHeader(req)) {
+        if (isRemoveCachingHeader(req)) {
             removeCachingHeader(resp);
         } else {
             disableCaching(resp);
@@ -958,7 +958,7 @@ public final class Tools {
      * @return A simple error page
      */
     public static String getErrorPage(int statusCode, String msg, String desc) {
-        String msg0 = null == msg ? HttpStatus.getStatusText(statusCode) : msg;
+        String msg0 = null == msg ? EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode, null) : msg;
 
         StringBuilder sb = new StringBuilder(512);
         String lineSep = System.getProperty("line.separator");

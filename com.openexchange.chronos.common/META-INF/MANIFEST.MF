@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The chronos common bundle
 Bundle-SymbolicName: com.openexchange.chronos.common
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
- lib/vinnie-2.0.0.jar,
  lib/lib-recur-0.10.jar
-Import-Package: com.openexchange.chronos,
+Import-Package: com.openexchange.annotation,
+ com.openexchange.chronos,
  com.openexchange.chronos.exception,
  com.openexchange.chronos.scheduling,
  com.openexchange.chronos.service,
@@ -32,9 +32,7 @@ Import-Package: com.openexchange.chronos,
  org.json,
  org.osgi.framework,
  org.slf4j
-Export-Package: com.github.mangstadt.vinnie,
- com.github.mangstadt.vinnie.io,
- com.openexchange.chronos.common,
+Export-Package: com.openexchange.chronos.common,
  com.openexchange.chronos.common.mapping,
  org.dmfs.rfc5545.recur,
  org.dmfs.rfc5545.recurrenceset

@@ -58,6 +58,8 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
@@ -140,6 +142,11 @@ public class ITipEventUpdate implements EventUpdate {
         return delegate.getAttachmentUpdates();
     }
 
+    @Override
+    public CollectionUpdate<Conference, ConferenceField> getConferenceUpdates() {
+        return delegate.getConferenceUpdates();
+    }
+
     public boolean containsAllChangesOf(EventField[] fields) {
         return getUpdatedFields().containsAll(Arrays.asList(fields));
     }
@@ -209,6 +216,7 @@ public class ITipEventUpdate implements EventUpdate {
         for (ItemUpdate<Attendee, AttendeeField> updatedItem : updatedItems) {
             Set<AttendeeField> temp = new HashSet<>(updatedItem.getUpdatedFields());
             temp.remove(AttendeeField.PARTSTAT);
+            temp.remove(AttendeeField.TIMESTAMP);
             temp.remove(AttendeeField.COMMENT);
             temp.remove(AttendeeField.HIDDEN);
             temp.remove(AttendeeField.TRANSP);
@@ -222,7 +230,7 @@ public class ITipEventUpdate implements EventUpdate {
 
     /**
      * Check if the event diff contains only changes besides attendee update
-     * 
+     *
      * @return <code>false</code> if an attendee status was changes,<code>true</code> otherwise
      */
     public boolean isAboutDetailChangesOnly() {
@@ -277,6 +285,7 @@ public class ITipEventUpdate implements EventUpdate {
         }
         Set<AttendeeField> updatedFields = new HashSet<>(attendeeUpdate.getUpdatedFields());
         updatedFields.remove(AttendeeField.PARTSTAT);
+        updatedFields.remove(AttendeeField.TIMESTAMP);
         if (!updatedFields.isEmpty()) {
             return false;
         }

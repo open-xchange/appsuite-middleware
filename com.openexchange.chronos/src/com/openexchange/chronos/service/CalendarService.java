@@ -100,6 +100,14 @@ public interface CalendarService {
      * @return The calendar service utilities
      */
     CalendarServiceUtilities getUtilities();
+    
+    /**
+     * Provides access to additional utilities for scheduling.
+     * 
+     * @return The scheduling utilities
+     * @see com.openexchange.chronos.scheduling.SchedulingBroker
+     */
+    SchedulingUtilities getSchedulingUtilities();
 
     /**
      * Gets the sequence number of a calendar folder, which is the highest last-modification timestamp of the folder itself and his
@@ -280,6 +288,27 @@ public interface CalendarService {
     List<Event> getEventsOfUser(CalendarSession session, Boolean rsvp, ParticipationStatus[] partStats) throws OXException;
 
     /**
+     * Gets all events the session's user attends in and having the participation status NEEDS-ACTION in a <b>user prepared</b> way. This means only those events will be returned the user is required to change his status and technical exceptions (for
+     * instance based on participant status changes) are left out.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RIGHT_HAND_LIMIT}</li>
+     * <li>{@link CalendarParameters#PARAMETER_LEFT_HAND_LIMIT}</li>
+     * </ul>
+     * 
+     * @param session The calendar session
+     * 
+     * @return The events
+     */
+    List<Event> getEventsNeedingAction(CalendarSession session) throws OXException;
+
+    /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp in a folder.
      * <p/>
      * The following calendar parameters are evaluated:
@@ -419,7 +448,7 @@ public interface CalendarService {
      * @return The update result
      */
     CalendarResult updateAlarms(CalendarSession session, EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException;
-    
+
     /**
      * Updates the event's organizer to the new one.
      * <p>

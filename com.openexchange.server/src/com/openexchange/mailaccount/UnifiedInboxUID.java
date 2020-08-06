@@ -129,7 +129,7 @@ public final class UnifiedInboxUID {
         }
 
         String fn = nestedFullName.substring(beginIndex);
-        if (!fn.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+        if (!fn.startsWith(MailFolder.MAIL_PREFIX)) {
             return null;
         }
 

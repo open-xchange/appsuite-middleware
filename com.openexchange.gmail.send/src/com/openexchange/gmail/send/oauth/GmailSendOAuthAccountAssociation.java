@@ -131,7 +131,7 @@ public class GmailSendOAuthAccountAssociation implements OAuthAccountAssociation
 
     @Override
     public String getFolder() {
-        return MailFolderUtility.prepareFullname(account.getId(), MailFolder.DEFAULT_FOLDER_ID);
+        return MailFolderUtility.prepareFullname(account.getId(), MailFolder.ROOT_FOLDER_ID);
     }
 
     @Override

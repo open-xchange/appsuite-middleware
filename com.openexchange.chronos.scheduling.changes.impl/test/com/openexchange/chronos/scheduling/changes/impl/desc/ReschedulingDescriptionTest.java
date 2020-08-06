@@ -88,7 +88,7 @@ public class ReschedulingDescriptionTest extends AbstractDescriptionTestMocking 
     private DateTime timezoneEndDate1;
     private static final String TIMEZONE1 = "Europe/Berlin";
     private static final String TIMEZONE2 = "PST";
-    private static final TimeZone timezone = TimeZone.getDefault();
+    private static final TimeZone timezone = TimeZone.getTimeZone(TIMEZONE1);
     private static final TimeZone timezone2 = TimeZone.getTimeZone(TIMEZONE2);
     private static final String RESCHEDULING = "The appointment was rescheduled";
     private static final String UPDATE_TIMEZONESTARTDATE = "The timezone of the appointment's start date was changed";
@@ -257,9 +257,9 @@ public class ReschedulingDescriptionTest extends AbstractDescriptionTestMocking 
 
     private void checkMessageStart(Description description, int sentenceIndex, String message, String containee1, String containee2) {
         String messageDescription = getMessage(description, sentenceIndex);
-        assertTrue(messageDescription.startsWith(message));
-        assertTrue(messageDescription.contains(containee1));
-        assertTrue(messageDescription.contains(containee2));
+        assertTrue("The description \"" + description + "\" does not start with \"" + message + "\".", messageDescription.startsWith(message));
+        assertTrue("The description \"" + description + "\" does not contain \"" + containee1 + "\".", messageDescription.contains(containee1));
+        assertTrue("The description \"" + description + "\" does not contain \"" + containee2 + "\".", messageDescription.contains(containee2));
     }
 
     protected void testDescription(Description description) {

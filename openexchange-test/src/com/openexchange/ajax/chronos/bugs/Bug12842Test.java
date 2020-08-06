@@ -53,6 +53,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.factory.EventFactory;
@@ -60,6 +62,7 @@ import com.openexchange.ajax.chronos.factory.EventFactory.RecurringFrequency;
 import com.openexchange.ajax.chronos.factory.RRuleFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.testing.httpclient.models.ChronosConflictDataRaw;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 
@@ -237,7 +240,8 @@ public class Bug12842Test extends AbstractChronosTest {
         
         // create second event
         EventData conflictingEvent = event;
-        conflictingEvent.setSummary("ConflictingEvent");
+        String conflictingSummary = "ConflictingEvent";
+        conflictingEvent.setSummary(conflictingSummary);
         
         Calendar cal2 = Calendar.getInstance();
         cal2.setTime(calendar.getTime());
@@ -275,7 +279,9 @@ public class Bug12842Test extends AbstractChronosTest {
         if (shouldConflict) {
             assertFalse(response.getData().getConflicts().isEmpty());
         } else {
-            assertTrue(response.getData().getConflicts().isEmpty());
+            // Filter conflicts because some other tests might have created but not deleted event in the same period of time
+            List<ChronosConflictDataRaw> conflictsOfInteresst = response.getData().getConflicts().stream().filter(c -> c.getEvent().getSummary().equals(conflictingSummary)).collect(Collectors.toList());
+            assertTrue(conflictsOfInteresst.isEmpty());
             eventManager.handleCreation(response);
         }
         

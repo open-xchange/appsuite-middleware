@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.autoconfig.sources;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +73,15 @@ import com.openexchange.tools.net.URIDefaults;
 public class Guess extends AbstractConfigSource {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Guess.class);
+    
+    /** The property name for context identifier. Value is <code>java.lang.Integer</code> */
+    public static final String PROP_GENERAL_CONTEXT_ID = "general.context";
+    
+    /** The property name for user identifier. Value is <code>java.lang.Integer</code> */
+    public static final String PROP_GENERAL_USER_ID = "general.user";
+    
+    /** The property name for flag whether SMTP supports authentication. Value is <code>java.lang.Boolean</code> */
+    public static final String PROP_SMTP_AUTH_SUPPORTED = "smtp.auth-supported";
 
     private final ServiceLookup services;
 
@@ -100,7 +110,9 @@ public class Guess extends AbstractConfigSource {
 
         // Guess the configuration...
         DefaultAutoconfig config = new DefaultAutoconfig();
-        Map<String, Object> properties = new HashMap<String, Object>(2);
+        Map<String, Object> properties = new HashMap<String, Object>(4);
+        properties.put(PROP_GENERAL_USER_ID, I(userId));
+        properties.put(PROP_GENERAL_CONTEXT_ID, I(contextId));
 
         // Check mail access (first IMAP, then POP3)
         boolean imapSuccess = fillProtocol(Protocol.IMAP, emailLocalPart, emailDomain, password, config, properties, forceSecure);
@@ -116,7 +128,7 @@ public class Guess extends AbstractConfigSource {
 
         // Check for special SMTP that does not support authentication
         {
-            Boolean smtpAuthSupported = (Boolean) properties.get("smtp.auth-supported");
+            Boolean smtpAuthSupported = (Boolean) properties.get(PROP_SMTP_AUTH_SUPPORTED);
             if (null != smtpAuthSupported && !smtpAuthSupported.booleanValue() && !mailSuccess) {
                 // Neither IMAP nor POP3 reachable, but SMTP works as it does not support authentication
                 // Therefore return null
@@ -164,12 +176,12 @@ public class Guess extends AbstractConfigSource {
         for (String login : logins) {
             switch (protocol) {
                 case IMAP:
-                    if (MailValidator.validateImap(host, port, connectMode, login, password)) {
+                    if (MailValidator.validateImap(host, port, connectMode, login, password, properties)) {
                         return login;
                     }
                     break;
                 case POP3:
-                    if (MailValidator.validatePop3(host, port, connectMode, login, password)) {
+                    if (MailValidator.validatePop3(host, port, connectMode, login, password, properties)) {
                         return login;
                     }
                     break;

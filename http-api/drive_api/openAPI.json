@@ -8,7 +8,7 @@
       "email" : "info@open-xchange.com",
       "url" : "https://www.open-xchange.com/"
     },
-    "version" : "7.10.3"
+    "version" : "7.10.4"
   },
   "tags" : [ {
     "name" : "Drive",
@@ -363,6 +363,86 @@
         } ]
       }
     },
+    "/drive?action=syncfolders" : {
+      "put" : {
+        "operationId" : "syncFolders",
+        "tags" : [ "Drive" ],
+        "summary" : "Synchronizes folders.",
+        "description" : "This request performs the synchronization of all folders, resulting in different actions that should be\nexecuted on the client afterwards. This operation typically serves as an entry point for a synchronization\ncycle.\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamRoot"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryApiVersion"
+        }, {
+          "in" : "query",
+          "name" : "version",
+          "description" : "The current client version (matching the pattern `^[0-9]+(\\\\.[0-9]+)*$). If not set, the initial version 0 is assumed.",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "0"
+          }
+        }, {
+          "in" : "query",
+          "name" : "diagnostics",
+          "description" : "If set to `true`, an additional diagnostics trace is supplied in the response.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "quota",
+          "description" : "If set to `true`, additional quota information for the folder is supplied in the response.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "pushToken",
+          "description" : "The client's push registration token to associate it to generated events.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array of actions the client should execute for synchronization. If the\n`diagnostics` parameter was set, the array is wrapped into an additional JSON object in the field\n`actions` and the diagnostics trace is provided at `diagnostics`. In case of errors the responsible\nfields in the response are filled.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DriveSyncFolderResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : [ {
+          "Example1" : null,
+          "description" : "Basic example",
+          "example" : "==> PUT http://192.168.32.191/ajax/drive?action=syncfolders&root=56&session=5d0c1e8eb0964a3095438b450ff6810f\n> Content:\n{\n  \"clientVersions\" : [{\n      \"path\" : \"/\",\n      \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n    }, {\n      \"path\" : \"/test1\",\n      \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n    }, {\n      \"path\" : \"/test2\",\n      \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n    }, {\n      \"path\" : \"/test2/test3\",\n      \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n    }\n  ],\n  \"originalVersions\" : [{\n      \"path\" : \"/\",\n      \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n    }, {\n      \"path\" : \"/test2/test3\",\n      \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n    }, {\n      \"path\" : \"/test2\",\n      \"checksum\" : \"35d1b51fdefbee5bf81d7ae8167719b8\"\n    }, {\n      \"path\" : \"/test1\",\n      \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n    }\n  ]\n}\n\n<== HTTP 200 OK (8.0004 ms elapsed, 102 bytes received)\n<   Content: \n    {\n      \"data\" : [{\n          \"action\" : \"sync\",\n          \"version\" : {\n            \"path\" : \"/test2\",\n            \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n          }\n        }\n      ]\n    }\n"
+        }, {
+          "Example2" : null,
+          "description" : "Extended example",
+          "example" : "==> PUT http://192.168.32.191/ajax/drive?action=syncfolders&root=56&session=5d0c1e8eb0964a3095438b450ff6810f\n  > Content:\n    {\n      \"clientVersions\" : [{\n          \"path\" : \"/\",\n          \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n        }, {\n          \"path\" : \"/test1\",\n          \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n        }, {\n          \"path\" : \"/test2\",\n          \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n        }, {\n          \"path\" : \"/test2/test3\",\n          \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n        }\n      ],\n      \"originalVersions\" : [{\n          \"path\" : \"/\",\n          \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n        }, {\n          \"path\" : \"/test2/test3\",\n          \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n        }, {\n          \"path\" : \"/test2\",\n          \"checksum\" : \"35d1b51fdefbee5bf81d7ae8167719b8\"\n        }, {\n          \"path\" : \"/test1\",\n          \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n        }\n      ]\n      \"fileExclusions\" : [{\n          \"path\" : \"/\",\n          \"name\" : \"excluded.txt\",\n          \"type\" : \"exact\"\n        }\n      ], \"directoryExclusions\" : [{\n          \"path\" : \"/temp\",\n          \"type\" : \"exact\"\n        }, {\n          \"path\" : \"/temp/*\",\n          \"type\" : \"glob\"\n        }\n      ]\n    }\n  \n<== HTTP 200 OK (8.0004 ms elapsed, 102 bytes received)\n<   Content: \n    {\n      \"data\" : [{\n          \"action\" : \"sync\",\n          \"version\" : {\n            \"path\" : \"/test2\",\n            \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n          }\n        }\n      ]\n    }\n"
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DriveSyncFoldersBody"
+              }
+            }
+          },
+          "description" : "A JSON object containing the fields `clientVersions` and `originalVersions`, both representing JSON arrays.\nSince API version 2, the JSON object may also contain two arrays named `fileExclusions` and `directoryExclusions`.\n",
+          "required" : true
+        }
+      }
+    },
     "/drive?action=download" : {
       "put" : {
         "operationId" : "downloadFile",
@@ -445,86 +525,6 @@
             }
           },
           "description" : "Optionally, available since API version 3, the request body can contain a JSON object with file- and/or\ndirectory exclusion filters.\n"
-        }
-      }
-    },
-    "/drive?action=syncfolders" : {
-      "put" : {
-        "operationId" : "syncFolders",
-        "tags" : [ "Drive" ],
-        "summary" : "Synchronizes folders.",
-        "description" : "This request performs the synchronization of all folders, resulting in different actions that should be\nexecuted on the client afterwards. This operation typically serves as an entry point for a synchronization\ncycle.\n",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamRoot"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryApiVersion"
-        }, {
-          "in" : "query",
-          "name" : "version",
-          "description" : "The current client version (matching the pattern `^[0-9]+(\\\\.[0-9]+)*$). If not set, the initial version 0 is assumed.",
-          "required" : false,
-          "schema" : {
-            "type" : "string",
-            "default" : "0"
-          }
-        }, {
-          "in" : "query",
-          "name" : "diagnostics",
-          "description" : "If set to `true`, an additional diagnostics trace is supplied in the response.",
-          "required" : false,
-          "schema" : {
-            "type" : "boolean"
-          }
-        }, {
-          "in" : "query",
-          "name" : "quota",
-          "description" : "If set to `true`, additional quota information for the folder is supplied in the response.",
-          "required" : false,
-          "schema" : {
-            "type" : "boolean"
-          }
-        }, {
-          "in" : "query",
-          "name" : "pushToken",
-          "description" : "The client's push registration token to associate it to generated events.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array of actions the client should execute for synchronization. If the\n`diagnostics` parameter was set, the array is wrapped into an additional JSON object in the field\n`actions` and the diagnostics trace is provided at `diagnostics`. In case of errors the responsible\nfields in the response are filled.\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/DriveSyncFolderResponse"
-                }
-              }
-            }
-          }
-        },
-        "x-ox-examples" : [ {
-          "Example1" : null,
-          "description" : "Basic example",
-          "example" : "==> PUT http://192.168.32.191/ajax/drive?action=syncfolders&root=56&session=5d0c1e8eb0964a3095438b450ff6810f\n> Content:\n{\n  \"clientVersions\" : [{\n      \"path\" : \"/\",\n      \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n    }, {\n      \"path\" : \"/test1\",\n      \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n    }, {\n      \"path\" : \"/test2\",\n      \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n    }, {\n      \"path\" : \"/test2/test3\",\n      \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n    }\n  ],\n  \"originalVersions\" : [{\n      \"path\" : \"/\",\n      \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n    }, {\n      \"path\" : \"/test2/test3\",\n      \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n    }, {\n      \"path\" : \"/test2\",\n      \"checksum\" : \"35d1b51fdefbee5bf81d7ae8167719b8\"\n    }, {\n      \"path\" : \"/test1\",\n      \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n    }\n  ]\n}\n\n<== HTTP 200 OK (8.0004 ms elapsed, 102 bytes received)\n<   Content: \n    {\n      \"data\" : [{\n          \"action\" : \"sync\",\n          \"version\" : {\n            \"path\" : \"/test2\",\n            \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n          }\n        }\n      ]\n    }\n"
-        }, {
-          "Example2" : null,
-          "description" : "Extended example",
-          "example" : "==> PUT http://192.168.32.191/ajax/drive?action=syncfolders&root=56&session=5d0c1e8eb0964a3095438b450ff6810f\n  > Content:\n    {\n      \"clientVersions\" : [{\n          \"path\" : \"/\",\n          \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n        }, {\n          \"path\" : \"/test1\",\n          \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n        }, {\n          \"path\" : \"/test2\",\n          \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n        }, {\n          \"path\" : \"/test2/test3\",\n          \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n        }\n      ],\n      \"originalVersions\" : [{\n          \"path\" : \"/\",\n          \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n        }, {\n          \"path\" : \"/test2/test3\",\n          \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n        }, {\n          \"path\" : \"/test2\",\n          \"checksum\" : \"35d1b51fdefbee5bf81d7ae8167719b8\"\n        }, {\n          \"path\" : \"/test1\",\n          \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n        }\n      ]\n      \"fileExclusions\" : [{\n          \"path\" : \"/\",\n          \"name\" : \"excluded.txt\",\n          \"type\" : \"exact\"\n        }\n      ], \"directoryExclusions\" : [{\n          \"path\" : \"/temp\",\n          \"type\" : \"exact\"\n        }, {\n          \"path\" : \"/temp/*\",\n          \"type\" : \"glob\"\n        }\n      ]\n    }\n  \n<== HTTP 200 OK (8.0004 ms elapsed, 102 bytes received)\n<   Content: \n    {\n      \"data\" : [{\n          \"action\" : \"sync\",\n          \"version\" : {\n            \"path\" : \"/test2\",\n            \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n          }\n        }\n      ]\n    }\n"
-        } ],
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/DriveSyncFoldersBody"
-              }
-            }
-          },
-          "description" : "A JSON object containing the fields `clientVersions` and `originalVersions`, both representing JSON arrays.\nSince API version 2, the JSON object may also contain two arrays named `fileExclusions` and `directoryExclusions`.\n",
-          "required" : true
         }
       }
     },
@@ -613,7 +613,7 @@
         "x-ox-examples" : [ {
           "Example1" : null,
           "description" : "Basic example",
-          "example" : "==> GET http://192.168.32.191/ajax/drive?action=shares&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542\n\n<== HTTP 200 OK (191.2707 ms elapsed, 5339 bytes received)\n<   Content: \n    {\n      \"data\": {\n        \"directories\": [{\n          \"id\": \"316770\",\n          \"name\": \"test\",\n          \"checksum\": \"bef03e92c3c675c1a6efddc831ac21b9\",\n          \"localized_name\": \"test\",\n          \"path\": \"/test\",\n          \"created\": 1437989289761,\n          \"modified\": 1438176370780,\n          \"own_rights\": 403710016,\n          \"permissions\": [{\n            \"bits\": 403710016,\n            \"entity\": 182,\n            \"display_name\": \"Mander, Jens\",\n            \"email_address\": \"jens.mander@example.com\",\n            \"type\": \"user\"\n          },\n          {\n            \"bits\": 135274497,\n            \"entity\": 8340,\n            \"display_name\": \"Otto Example\",\n            \"email_address\": \"otto@example.com\",\n            \"type\": \"guest\"\n          },\n          {\n            \"bits\": 257,\n            \"entity\": 16175,\n            \"display_name\": \"Guest\",\n            \"type\": \"anonymous\"\n          }],\n          \"extended_permissions\": [{\n            \"entity\": 182,\n            \"bits\": 403710016,\n            \"type\": \"user\",\n            \"display_name\": \"Mander, Jens\",\n            \"contact\": {\n              \"email1\": \"jens.mander@example.com\",\n              \"last_name\": \"Mander\",\n              \"first_name\": \"Jens\"\n            }\n          },\n          {\n            \"entity\": 8340,\n            \"bits\": 135274497,\n            \"type\": \"guest\",\n            \"display_name\": \"Otto Example\",\n            \"contact\": {\n              \"email1\": \"otto@example.com\"\n            }\n          },\n          {\n            \"entity\": 16175,\n            \"bits\": 257,\n            \"type\": \"anonymous\",\n            \"share_url\": \"http://127.0.0.1/ajax/share/102b560404b3e96c9623be94b3d643829a46b117558d9ec9/31342f1f\"\n          }],\n          \"jump\": [\"permissions\"],\n          \"shared\": true,\n          \"shareable\": true\n        },\n        {\n          \"id\": \"300695\",\n          \"name\": \"sharetest\",\n          \"checksum\": \"cdfb5724f9614290a850ec507aea72a2\",\n          \"localized_name\": \"sharetest\",\n          \"path\": \"/sub1/check/sharetest\",\n          \"created\": 1430218822598,\n          \"modified\": 1430218833769,\n          \"own_rights\": 403710016,\n          \"permissions\": [{\n            \"bits\": 257,\n            \"entity\": 10,\n            \"display_name\": \"Klaus Mander\",\n            \"email_address\": \"klaus.mander@example.com\",\n            \"type\": \"user\"\n          },\n          {\n            \"bits\": 403710016,\n            \"entity\": 182,\n            \"display_name\": \"Mander, Jens\",\n            \"email_address\": \"jens.mander@example.com\",\n            \"type\": \"user\"\n          }],\n          \"extended_permissions\": [{\n            \"entity\": 10,\n            \"bits\": 257,\n            \"type\": \"user\",\n            \"display_name\": \"Klaus Mander\",\n            \"contact\": {\n              \"email1\": \"klaus.mander@example.com\",\n              \"title\": \"\",\n              \"last_name\": \"Mander\",\n              \"first_name\": \"Klaus\",\n              \"image1_url\": \"/ajax/image/user/picture?id=10&timestamp=1413376661353\"\n            }\n          },\n          {\n            \"entity\": 182,\n            \"bits\": 403710016,\n            \"type\": \"user\",\n            \"display_name\": \"Mander, Jens\",\n            \"contact\": {\n              \"email1\": \"jens.mander@example.com\",\n              \"last_name\": \"Mander\",\n              \"first_name\": \"Jens\"\n            }\n          }],\n          \"jump\": [\"permissions\"],\n          \"shared\": true,\n          \"shareable\": true\n        }],\n        \"files\": [{\n          \"name\": \"Chrysanthemum.jpg\",\n          \"created\": 1438177192835,\n          \"modified\": 1438177729597,\n          \"created_by\": {\n            \"entity\": 182,\n            \"display_name\": \"Mander, Jens\",\n            \"email_address\": \"jens.mander@example.com\",\n            \"type\": \"user\"\n          },\n          \"modified_by\": {\n            \"entity\": 182,\n            \"display_name\": \"Mander, Jens\",\n            \"email_address\": \"jens.mander@example.com\",\n            \"type\": \"user\"\n          },\n          \"preview\": \"http://127.0.0.1/ajax/files?action=document&folder=309373&id=309373/346541&version=1&delivery=download&scaleType=contain&width=800&height=800&rotate=true\",\n          \"thumbnail\": \"http://127.0.0.1/ajax/files?action=document&folder=309373&id=309373/346541&version=1&delivery=download&scaleType=contain&width=100&height=100&rotate=true\",\n          \"object_permissions\": [{\n            \"bits\": 1,\n            \"entity\": 16178,\n            \"display_name\": \"Guest\",\n            \"type\": \"anonymous\"\n          }],\n          \"extended_object_permissions\": [{\n            \"entity\": 16178,\n            \"bits\": 1,\n            \"type\": \"anonymous\",\n            \"share_url\": \"http://127.0.0.1/ajax/share/1224dd0b065f2076b6db0e665f1f441f89f1308ad2a8ad7f/167e4881\"\n          }],\n          \"shared\": true,\n          \"shareable\": true,\n          \"jump\": [\"preview\",\n          \"permissions\"],\n          \"path\": \"/Pictures\",\n          \"checksum\": \"076e3caed758a1c18c91a0e9cae3368f\"\n        },\n        {\n          \"name\": \"data.zip\",\n          \"created\": 1427291138800,\n          \"modified\": 1438593586254,\n          \"created_by\": {\n            \"entity\": 182,\n            \"display_name\": \"Mander, Jens\",\n            \"email_address\": \"jens.mander@example.com\",\n            \"type\": \"user\"\n          },\n          \"modified_by\": {\n            \"entity\": 182,\n            \"display_name\": \"Mander, Jens\",\n            \"email_address\": \"jens.mander@example.com\",\n            \"type\": \"user\"\n          },\n          \"object_permissions\": [{\n            \"bits\": 4,\n            \"entity\": 10,\n            \"display_name\": \"Klaus Mander\",\n            \"email_address\": \"klaus.mander@example.com\",\n            \"type\": \"user\"\n          },\n          {\n            \"bits\": 4,\n            \"entity\": 8338,\n            \"display_name\": \"Horst Example\",\n            \"email_address\": \"horst@example.com\",\n            \"type\": \"guest\"\n          },\n          {\n            \"bits\": 1,\n            \"entity\": 11224,\n            \"display_name\": \"Guest\",\n            \"type\": \"anonymous\"\n          }],\n          \"extended_object_permissions\": [{\n            \"entity\": 10,\n            \"bits\": 4,\n            \"type\": \"user\",\n            \"display_name\": \"Klaus Mander\",\n            \"contact\": {\n              \"email1\": \"klaus.mander@example.com\",\n              \"title\": \"\",\n              \"last_name\": \"Mander\",\n              \"first_name\": \"Klaus\",\n              \"image1_url\": \"/ajax/image/user/picture?id=10&timestamp=1413376661353\"\n            }\n          },\n          {\n            \"entity\": 8338,\n            \"bits\": 4,\n            \"type\": \"guest\",\n            \"display_name\": \"Horst Example\",\n            \"contact\": {\n              \"email1\": \"horst@example.com\"\n            }\n          },\n          {\n            \"entity\": 11224,\n            \"bits\": 1,\n            \"type\": \"anonymous\",\n            \"share_url\": \"http://127.0.0.1/ajax/share/1f74962e0b55529663dfbc3b55794ea59b753c9301c0da75/76c846ae\"\n          }],\n          \"shared\": true,\n          \"shareable\": true,\n          \"jump\": [\"permissions\"],\n          \"path\": \"/Projects/ACME\",\n          \"checksum\": \"d63540e8f986ec305b0dd1293d8a3276\"\n        }]\n      }\n    }\n"
+          "example" : "==> GET http://192.168.32.191/ajax/drive?action=shares&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542\n\n<== HTTP 200 OK (191.2707 ms elapsed, 5339 bytes received)\n<   Content: \n    {\n      \"data\": {\n        \"directories\": [{\n          \"id\": \"316770\",\n          \"name\": \"test\",\n          \"checksum\": \"bef03e92c3c675c1a6efddc831ac21b9\",\n          \"localized_name\": \"test\",\n          \"path\": \"/test\",\n          \"created\": 1437989289761,\n          \"modified\": 1438176370780,\n          \"own_rights\": 403710016,\n          \"permissions\": [{\n            \"bits\": 403710016,\n            \"entity\": 182,\n            \"display_name\": \"Mander, Jens\",\n            \"email_address\": \"jens.mander@example.com\",\n            \"type\": \"user\"\n          },\n          {\n            \"bits\": 135274497,\n            \"entity\": 8340,\n            \"display_name\": \"Otto Example\",\n            \"email_address\": \"otto@example.com\",\n            \"type\": \"guest\"\n          },\n          {\n            \"bits\": 257,\n            \"entity\": 16175,\n            \"display_name\": \"Guest\",\n            \"type\": \"anonymous\"\n          }],\n          \"extended_permissions\": [{\n            \"entity\": 182,\n            \"bits\": 403710016,\n            \"type\": \"user\",\n            \"display_name\": \"Mander, Jens\",\n            \"contact\": {\n              \"email1\": \"jens.mander@example.com\",\n              \"last_name\": \"Mander\",\n              \"first_name\": \"Jens\"\n            }\n          },\n          {\n            \"entity\": 8340,\n            \"bits\": 135274497,\n            \"type\": \"guest\",\n            \"display_name\": \"Otto Example\",\n            \"contact\": {\n              \"email1\": \"otto@example.com\"\n            }\n          },\n          {\n            \"entity\": 16175,\n            \"bits\": 257,\n            \"type\": \"anonymous\",\n            \"share_url\": \"http://127.0.0.1/ajax/share/102b560404b3e96c9623be94b3d643829a46b117558d9ec9/31342f1f\",\n            \"includeSubfolders\": true\n          }],\n          \"jump\": [\"permissions\"],\n          \"shared\": true,\n          \"shareable\": true\n        },\n        {\n          \"id\": \"300695\",\n          \"name\": \"sharetest\",\n          \"checksum\": \"cdfb5724f9614290a850ec507aea72a2\",\n          \"localized_name\": \"sharetest\",\n          \"path\": \"/sub1/check/sharetest\",\n          \"created\": 1430218822598,\n          \"modified\": 1430218833769,\n          \"own_rights\": 403710016,\n          \"permissions\": [{\n            \"bits\": 257,\n            \"entity\": 10,\n            \"display_name\": \"Klaus Mander\",\n            \"email_address\": \"klaus.mander@example.com\",\n            \"type\": \"user\"\n          },\n          {\n            \"bits\": 403710016,\n            \"entity\": 182,\n            \"display_name\": \"Mander, Jens\",\n            \"email_address\": \"jens.mander@example.com\",\n            \"type\": \"user\"\n          }],\n          \"extended_permissions\": [{\n            \"entity\": 10,\n            \"bits\": 257,\n            \"type\": \"user\",\n            \"display_name\": \"Klaus Mander\",\n            \"contact\": {\n              \"email1\": \"klaus.mander@example.com\",\n              \"title\": \"\",\n              \"last_name\": \"Mander\",\n              \"first_name\": \"Klaus\",\n              \"image1_url\": \"/ajax/image/user/picture?id=10&timestamp=1413376661353\"\n            }\n          },\n          {\n            \"entity\": 182,\n            \"bits\": 403710016,\n            \"type\": \"user\",\n            \"display_name\": \"Mander, Jens\",\n            \"contact\": {\n              \"email1\": \"jens.mander@example.com\",\n              \"last_name\": \"Mander\",\n              \"first_name\": \"Jens\"\n            }\n          }],\n          \"jump\": [\"permissions\"],\n          \"shared\": true,\n          \"shareable\": true\n        }],\n        \"files\": [{\n          \"name\": \"Chrysanthemum.jpg\",\n          \"created\": 1438177192835,\n          \"modified\": 1438177729597,\n          \"created_by\": {\n            \"entity\": 182,\n            \"display_name\": \"Mander, Jens\",\n            \"email_address\": \"jens.mander@example.com\",\n            \"type\": \"user\"\n          },\n          \"modified_by\": {\n            \"entity\": 182,\n            \"display_name\": \"Mander, Jens\",\n            \"email_address\": \"jens.mander@example.com\",\n            \"type\": \"user\"\n          },\n          \"preview\": \"http://127.0.0.1/ajax/files?action=document&folder=309373&id=309373/346541&version=1&delivery=download&scaleType=contain&width=800&height=800&rotate=true\",\n          \"thumbnail\": \"http://127.0.0.1/ajax/files?action=document&folder=309373&id=309373/346541&version=1&delivery=download&scaleType=contain&width=100&height=100&rotate=true\",\n          \"object_permissions\": [{\n            \"bits\": 1,\n            \"entity\": 16178,\n            \"display_name\": \"Guest\",\n            \"type\": \"anonymous\"\n          }],\n          \"extended_object_permissions\": [{\n            \"entity\": 16178,\n            \"bits\": 1,\n            \"type\": \"anonymous\",\n            \"share_url\": \"http://127.0.0.1/ajax/share/1224dd0b065f2076b6db0e665f1f441f89f1308ad2a8ad7f/167e4881\"\n          }],\n          \"shared\": true,\n          \"shareable\": true,\n          \"jump\": [\"preview\",\n          \"permissions\"],\n          \"path\": \"/Pictures\",\n          \"checksum\": \"076e3caed758a1c18c91a0e9cae3368f\"\n        },\n        {\n          \"name\": \"data.zip\",\n          \"created\": 1427291138800,\n          \"modified\": 1438593586254,\n          \"created_by\": {\n            \"entity\": 182,\n            \"display_name\": \"Mander, Jens\",\n            \"email_address\": \"jens.mander@example.com\",\n            \"type\": \"user\"\n          },\n          \"modified_by\": {\n            \"entity\": 182,\n            \"display_name\": \"Mander, Jens\",\n            \"email_address\": \"jens.mander@example.com\",\n            \"type\": \"user\"\n          },\n          \"object_permissions\": [{\n            \"bits\": 4,\n            \"entity\": 10,\n            \"display_name\": \"Klaus Mander\",\n            \"email_address\": \"klaus.mander@example.com\",\n            \"type\": \"user\"\n          },\n          {\n            \"bits\": 4,\n            \"entity\": 8338,\n            \"display_name\": \"Horst Example\",\n            \"email_address\": \"horst@example.com\",\n            \"type\": \"guest\"\n          },\n          {\n            \"bits\": 1,\n            \"entity\": 11224,\n            \"display_name\": \"Guest\",\n            \"type\": \"anonymous\"\n          }],\n          \"extended_object_permissions\": [{\n            \"entity\": 10,\n            \"bits\": 4,\n            \"type\": \"user\",\n            \"display_name\": \"Klaus Mander\",\n            \"contact\": {\n              \"email1\": \"klaus.mander@example.com\",\n              \"title\": \"\",\n              \"last_name\": \"Mander\",\n              \"first_name\": \"Klaus\",\n              \"image1_url\": \"/ajax/image/user/picture?id=10&timestamp=1413376661353\"\n            }\n          },\n          {\n            \"entity\": 8338,\n            \"bits\": 4,\n            \"type\": \"guest\",\n            \"display_name\": \"Horst Example\",\n            \"contact\": {\n              \"email1\": \"horst@example.com\"\n            }\n          },\n          {\n            \"entity\": 11224,\n            \"bits\": 1,\n            \"type\": \"anonymous\",\n            \"share_url\": \"http://127.0.0.1/ajax/share/1f74962e0b55529663dfbc3b55794ea59b753c9301c0da75/76c846ae\"\n          }],\n          \"shared\": true,\n          \"shareable\": true,\n          \"jump\": [\"permissions\"],\n          \"path\": \"/Projects/ACME\",\n          \"checksum\": \"d63540e8f986ec305b0dd1293d8a3276\"\n        }]\n      }\n    }\n"
         } ]
       }
     },
@@ -993,9 +993,9 @@
         "summary" : "Synchronizes a single folder.",
         "description" : "This request performs the selective synchronization of a single folder, resulting in different actions that should be\nexecuted on the client afterwards.\n",
         "parameters" : [ {
-          "$ref" : "#/parameters/gblQueryParamSession"
+          "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
-          "$ref" : "#/parameters/gblQueryParamRoot"
+          "$ref" : "#/components/parameters/gblQueryParamRoot"
         }, {
           "$ref" : "#/components/parameters/gblQueryApiVersion"
         }, {
@@ -1053,7 +1053,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/DriveSyncFoldersBody"
+                "$ref" : "#/components/schemas/DriveSyncFolderBody"
               }
             }
           },
@@ -1664,6 +1664,33 @@
         }
       }
     },
+    "/drive?action=directoryMetadata" : {
+      "get" : {
+        "operationId" : "getDirectoryMetadata",
+        "tags" : [ "Drive" ],
+        "summary" : "Gets directory metadata (**deprecated, available until API version 2**).",
+        "description" : "Additional metadata of synchronized directories is made available.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamRoot"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamPath"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the fields `path`, `checksum`, `directLink`, and `directLinkFragments`. In case of errors\nthe responsible fields in the response are filled.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DriveDirectoryMetadataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/drive?action=updateFolder" : {
       "put" : {
         "operationId" : "updateFolder",
@@ -1712,33 +1739,6 @@
           },
           "description" : "A JSON object containing the fields `folder` and `notification`. The JSON object in field `folder` describes\nthe updated directory metadata (currently only the property `permissions` is considered) and the JSON object `notification`\nmay include a message to notify added permission entities. To notify with a default message, an empty `notification`\nobject should still be added.\n",
           "required" : true
-        }
-      }
-    },
-    "/drive?action=directoryMetadata" : {
-      "get" : {
-        "operationId" : "getDirectoryMetadata",
-        "tags" : [ "Drive" ],
-        "summary" : "Gets directory metadata (**deprecated, available until API version 2**).",
-        "description" : "Additional metadata of synchronized directories is made available.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamRoot"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamPath"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the fields `path`, `checksum`, `directLink`, and `directLinkFragments`. In case of errors\nthe responsible fields in the response are filled.\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/DriveDirectoryMetadataResponse"
-                }
-              }
-            }
-          }
         }
       }
     },
@@ -2004,6 +2004,27 @@
           }
         }
       },
+      "DriveSyncFolderBody" : {
+        "type" : "object",
+        "required" : [ "clientVersion", "originalVersion" ],
+        "properties" : {
+          "clientVersion" : {
+            "$ref" : "#/components/schemas/DriveDirectoryVersion",
+            "description" : "The client version of the directory to synchronize."
+          },
+          "originalVersion" : {
+            "$ref" : "#/components/schemas/DriveDirectoryVersion",
+            "description" : "The previously synchronized and acknowledged version of the directoy."
+          },
+          "fileExclusions" : {
+            "type" : "array",
+            "description" : "Defines client-side exclusion filters for files (since API version 2). See [Client side filtering](#client-side-filtering) for further information.",
+            "items" : {
+              "$ref" : "#/components/schemas/DriveFilePattern"
+            }
+          }
+        }
+      },
       "DriveSyncFoldersBody" : {
         "type" : "object",
         "required" : [ "clientVersions", "originalVersions" ],
@@ -2226,13 +2247,17 @@
             "type" : "boolean",
             "description" : "The flag to indicate whether the versions need to be excluded from synchronization."
           },
+          "noChunks" : {
+            "type" : "boolean",
+            "description" : "The flag to indicate that no partial uploads are possible due to missing support for temporary files."
+          },
           "reset" : {
             "type" : "boolean",
             "description" : "The flag to indicate whether locally stored checksums should be invalidated."
           },
           "stop" : {
             "type" : "boolean",
-            "description" : "The flag to signal that the client should stop the current sychronization cycle."
+            "description" : "The flag to signal that the client should stop the current synchronization cycle."
           },
           "acknowledge" : {
             "type" : "boolean",
@@ -2244,7 +2269,7 @@
           },
           "previewLink" : {
             "type" : "string",
-            "description" : "A direct link to a medium-sized preview image of the file if available (deprected, available until API version 2)."
+            "description" : "A direct link to a medium-sized preview image of the file if available (deprecated, available until API version 2)."
           },
           "directLink" : {
             "type" : "string",
@@ -2423,6 +2448,10 @@
             "type" : "integer",
             "format" : "int64",
             "description" : "The optionally set expiry date for \"anonymous\" entities."
+          },
+          "includeSubfolders" : {
+            "type" : "boolean",
+            "description" : "The optionally set \"include subfolders\" option for \"anonymous\" entities."
           },
           "isInherited" : {
             "type" : "boolean",
@@ -3353,13 +3382,17 @@
             "type" : "boolean",
             "description" : "The flag to indicate whether the versions need to be excluded from synchronization."
           },
+          "noChunks" : {
+            "type" : "boolean",
+            "description" : "The flag to indicate that no partial uploads are possible due to missing support for temporary files."
+          },
           "reset" : {
             "type" : "boolean",
             "description" : "The flag to indicate whether locally stored checksums should be invalidated."
           },
           "stop" : {
             "type" : "boolean",
-            "description" : "The flag to signal that the client should stop the current sychronization cycle."
+            "description" : "The flag to signal that the client should stop the current synchronization cycle."
           },
           "acknowledge" : {
             "type" : "boolean",
@@ -3371,7 +3404,7 @@
           },
           "previewLink" : {
             "type" : "string",
-            "description" : "A direct link to a medium-sized preview image of the file if available (deprected, available until API version 2)."
+            "description" : "A direct link to a medium-sized preview image of the file if available (deprecated, available until API version 2)."
           },
           "directLink" : {
             "type" : "string",
@@ -3399,6 +3432,17 @@
               "pathToRoot" : {
                 "type" : "string",
                 "description" : "Path to internal 'real' root folder from given rootFolderId"
+              },
+              "diagnostics" : {
+                "type" : "string",
+                "description" : "The diagnostics log"
+              },
+              "quota" : {
+                "type" : "array",
+                "description" : "An array of quota objects showing the quota limits and usage. A size of zero represents unlimited quota.",
+                "items" : {
+                  "$ref" : "#/components/schemas/DriveQuota"
+                }
               }
             }
           },
@@ -3787,6 +3831,10 @@
           "redirectUrl" : {
             "type" : "string",
             "description" : "The direct link to the file/folder."
+          },
+          "appendClientToken" : {
+            "type" : "boolean",
+            "description" : "`true` if the client token needs to be appended, `false`, otherwise."
           }
         }
       },

@@ -49,19 +49,14 @@
 
 package com.openexchange.user.json.actions;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.json.dto.Me;
 
 /**
  * {@link MeAction} - Maps the action to a <tt>GET</tt> action.
@@ -83,43 +78,17 @@ public final class MeAction extends AbstractUserAction {
         super(services);
     }
 
+    @SuppressWarnings("null")
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        try {
-            int userId = session.getUserId();
-            Context context = session.getContext();
-
-            // Obtain user's contact
-            Contact contact = services.getService(ContactService.class).getUser(session, userId);
-
-            // Obtain mail login
-            String mailLogin = null;
-            {
-                MailService mailService = services.getOptionalService(MailService.class);
-                if (null != mailService) {
-                    mailLogin = mailService.getMailLoginFor(session.getUserId(), session.getContextId(), 0);
-                }
-            }
-
-            // Craft JSON result
-            JSONObject jReturn = new JSONObject(8);
-            jReturn.put("context_id", session.getContextId());
-            jReturn.put("user_id", session.getUserId());
-            jReturn.put("context_admin", context.getMailadmin());
-            String str = session.getLoginName();
-            jReturn.put("login_name", str == null ? "<unknown>" : str);
-            str = contact.getDisplayName();
-            jReturn.put("display_name", str == null ? "<unknown>" : str);
-            if (null != mailLogin) {
-                jReturn.put("mail_login", mailLogin);
-            }
-
-
-            // Return appropriate result
-            return new AJAXRequestResult(jReturn, contact.getLastModified(), "json");
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        // Obtain mail login
+        String mailLogin = null;
+        MailService mailService = services.getOptionalService(MailService.class);
+        if (null != mailService) {
+            mailLogin = mailService.getMailLoginFor(session.getUserId(), session.getContextId(), 0);
         }
+
+        return new AJAXRequestResult(new Me(session.getUser(), session.getContext(), session.getLoginName(), mailLogin), "user/me");
     }
 
 }

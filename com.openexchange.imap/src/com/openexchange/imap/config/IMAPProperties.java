@@ -78,13 +78,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.HostExtractingGreetingListener;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.commandexecutor.AbstractFailsafeCircuitBreakerCommandExecutor;
-import com.openexchange.imap.commandexecutor.AbstractMetricAwareCommandExecutor;
 import com.openexchange.imap.commandexecutor.FailsafeCircuitBreakerCommandExecutor;
 import com.openexchange.imap.commandexecutor.GenericFailsafeCircuitBreakerCommandExecutor;
 import com.openexchange.imap.commandexecutor.MonitoringCommandExecutor;
 import com.openexchange.imap.commandexecutor.PrimaryFailsafeCircuitBreakerCommandExecutor;
 import com.openexchange.imap.entity2acl.Entity2ACL;
-import com.openexchange.imap.osgi.MetricServiceTracker;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.CharsetDetector;
@@ -98,6 +96,7 @@ import com.openexchange.net.HostList;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.spamhandler.SpamHandler;
+import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.IMAPStore;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -425,6 +424,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean auditLogEnabled;
 
+    private boolean debugLogEnabled;
+
     private boolean overwritePreLoginCapabilities;
 
     private Set<String> propagateHostNames;
@@ -443,7 +444,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean enableAttachmentSearch;
 
-    private List<AbstractMetricAwareCommandExecutor> commandExecutors;
+    private List<CommandExecutor> commandExecutors;
 
     /**
      * Initializes a new {@link IMAPProperties}
@@ -453,6 +454,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         sContainerType = "boundary-aware";
         enableTls = true;
         auditLogEnabled = false;
+        debugLogEnabled = false;
         overwritePreLoginCapabilities = false;
         maxNumConnection = -1;
         newACLExtMap = new NonBlockingHashMap<String, Boolean>();
@@ -540,6 +542,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             auditLogEnabled = Boolean.parseBoolean(tmp);
             logBuilder.append("    Audit Log Enabled: {}{}");
             args.add(Boolean.valueOf(auditLogEnabled));
+            args.add(lineSeparator);
+        }
+
+        {
+            String tmp = configuration.getProperty("com.openexchange.imap.debugLog.enabled", STR_FALSE).trim();
+            debugLogEnabled = Boolean.parseBoolean(tmp);
+            logBuilder.append("    Debug Log Enabled: {}{}");
+            args.add(Boolean.valueOf(debugLogEnabled));
             args.add(lineSeparator);
         }
 
@@ -808,40 +818,40 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
-            List<AbstractMetricAwareCommandExecutor> commandExecutorList = initCircuitBreakers(configuration, logBuilder, args);
-            commandExecutorList.add(new MonitoringCommandExecutor());
+
+            MonitoringCommandExecutor monitoringCommandExecutor = initMonitoringCommandExecutor(configuration);
+            List<CommandExecutor> commandExecutorList = initCircuitBreakers(configuration, logBuilder, args, monitoringCommandExecutor);
+            commandExecutorList.add(monitoringCommandExecutor);
             commandExecutors = commandExecutorList;
-            for (AbstractMetricAwareCommandExecutor commandExecutor : commandExecutorList) {
+            for (CommandExecutor commandExecutor : commandExecutorList) {
                 IMAPStore.addCommandExecutor(commandExecutor);
             }
-            MetricServiceTracker.openMetricServiceTracker();
 
             IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
                 @Override
                 public Interests getInterests() {
-                    return Reloadables.interestsForProperties("com.openexchange.imap.breaker.*");
+                    return Reloadables.interestsForProperties("com.openexchange.imap.breaker.*", "com.openexchange.imap.metrics.*");
                 }
 
                 @SuppressWarnings("synthetic-access")
                 @Override
                 public void reloadConfiguration(ConfigurationService configService) {
-                    MetricServiceTracker.closeMetricServiceTracker();
-                    List<AbstractMetricAwareCommandExecutor> commandExecutorList = commandExecutors;
+                    List<CommandExecutor> commandExecutorList = commandExecutors;
                     if (null != commandExecutorList) {
-                        for (AbstractMetricAwareCommandExecutor commandExecutor : commandExecutorList) {
+                        for (CommandExecutor commandExecutor : commandExecutorList) {
                             IMAPStore.removeCommandExecutor(commandExecutor);
                         }
                     }
                     commandExecutors = null;
 
-                    commandExecutorList = initCircuitBreakers(configuration, logBuilder, args);
-                    commandExecutorList.add(new MonitoringCommandExecutor());
+                    MonitoringCommandExecutor monitoringCommandExecutor = initMonitoringCommandExecutor(configuration);
+                    commandExecutorList = initCircuitBreakers(configuration, logBuilder, args, monitoringCommandExecutor);
+                    commandExecutorList.add(monitoringCommandExecutor);
                     commandExecutors = commandExecutorList;
-                    for (AbstractMetricAwareCommandExecutor commandExecutor : commandExecutorList) {
+                    for (CommandExecutor commandExecutor : commandExecutorList) {
                         IMAPStore.addCommandExecutor(commandExecutor);
                     }
-                    MetricServiceTracker.openMetricServiceTracker();
                 }
 
             });
@@ -852,10 +862,41 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         LOG.info(logBuilder.toString(), args.toArray(new Object[args.size()]));
     }
 
-    private static List<AbstractMetricAwareCommandExecutor> initCircuitBreakers(ConfigurationService configuration, StringBuilder logBuilder, List<Object> args) {
+    /**
+     * Initializes and configures the command executor that wraps all performed IMAP commands with proper monitoring.
+     *
+     * @param configuration Current {@link ConfigurationService} instance
+     * @return The command executor
+     */
+    private static MonitoringCommandExecutor initMonitoringCommandExecutor(ConfigurationService configuration) {
+        MonitoringCommandExecutor.Config monitoringConfig = new MonitoringCommandExecutor.Config();
+        monitoringConfig.setEnabled(configuration.getBoolProperty("com.openexchange.imap.metrics.enabled", true));
+        monitoringConfig.setGroupByPrimaryHosts(configuration.getBoolProperty("com.openexchange.imap.metrics.groupByPrimaryHosts", false));
+        monitoringConfig.setGroupByPrimaryEndpoints(configuration.getBoolProperty("com.openexchange.imap.metrics.groupByPrimaryEndpoints", false));
+        monitoringConfig.setMeasureExternalAccounts(configuration.getBoolProperty("com.openexchange.imap.metrics.measureExternalAccounts", true));
+        monitoringConfig.setGroupByExternalHosts(configuration.getBoolProperty("com.openexchange.imap.metrics.groupByExternalHosts", false));
+        monitoringConfig.setGroupByCommands(configuration.getBoolProperty("com.openexchange.imap.metrics.groupByCommands", false));
+        monitoringConfig.setCommandWhitelist(configuration.getProperty("com.openexchange.imap.metrics.commandWhitelist", MonitoringCommandExecutor.Config.DEFAULT_COMMAND_WHITELIST_STRING, ","));
+
+
+        MonitoringCommandExecutor monitoringCommandExecutor = new MonitoringCommandExecutor(monitoringConfig);
+        return monitoringCommandExecutor;
+    }
+
+    /**
+     * Initializes IMAP circuit breakers and returns their respective command executors.
+     *
+     * @param configuration Current {@link ConfigurationService} instance
+     * @param logBuilder Log output {@link StringBuilder}
+     * @param args Log output format arguments
+     * @param monitoringCommandExecutor The monitoring command executor as delegate for the actual IMAP commands
+     * @return List of command executors in expected evaluation order
+     */
+    private static List<CommandExecutor> initCircuitBreakers(ConfigurationService configuration, StringBuilder logBuilder,
+            List<Object> args, MonitoringCommandExecutor monitoringCommandExecutor) {
         // Load generic breaker
         GenericFailsafeCircuitBreakerCommandExecutor genericBreaker = null;
-        Optional<AbstractFailsafeCircuitBreakerCommandExecutor> optionalGenericBreaker = initGenericCircuitBreaker(configuration);
+        Optional<AbstractFailsafeCircuitBreakerCommandExecutor> optionalGenericBreaker = initGenericCircuitBreaker(configuration, monitoringCommandExecutor);
         if (optionalGenericBreaker.isPresent()) {
             genericBreaker = (GenericFailsafeCircuitBreakerCommandExecutor) optionalGenericBreaker.get();
             logBuilder.append("    Added generic circuit breaker{}");
@@ -884,12 +925,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         // Iterate them
-        List<AbstractMetricAwareCommandExecutor> breakerList = new ArrayList<>(names.size() + 1);
+        List<CommandExecutor> breakerList = new ArrayList<>(names.size() + 1);
         if (genericBreaker != null) {
             breakerList.add(genericBreaker);
         }
         for (String name : names) {
-            Optional<AbstractFailsafeCircuitBreakerCommandExecutor> optBreaker = initCircuitBreakerForName(Optional.of(name), configuration, genericBreaker);
+            Optional<AbstractFailsafeCircuitBreakerCommandExecutor> optBreaker = initCircuitBreakerForName(Optional.of(name), configuration, genericBreaker, monitoringCommandExecutor);
             if (optBreaker.isPresent()) {
                 AbstractFailsafeCircuitBreakerCommandExecutor circuitBreaker = optBreaker.get();
                 breakerList.add(circuitBreaker);
@@ -899,7 +940,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 } else {
                     logBuilder.append("    Added \"{}\"  circuit breaker for hosts: {}{}");
                     args.add(name);
-                    args.add(circuitBreaker.getHostList().get().getHostString());
+                    args.add(circuitBreaker.getHostList().get().getHostList());
                     args.add(Strings.getLineSeparator());
                 }
             }
@@ -908,8 +949,9 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         return breakerList;
     }
 
-    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initGenericCircuitBreaker(ConfigurationService configuration) {
-        return initCircuitBreakerForName(Optional.empty(), configuration, null);
+    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initGenericCircuitBreaker(ConfigurationService configuration,
+            MonitoringCommandExecutor monitoringCommandExecutor) {
+        return initCircuitBreakerForName(Optional.empty(), configuration, null, monitoringCommandExecutor);
     }
 
     /**
@@ -918,124 +960,133 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
      * @param optionalInfix The optional circuit breaker name
      * @param configuration The configuration service to use
      * @param genericBreaker The already initialized generic circuit breaker or <code>null</code>
+     * @param monitoringCommandExecutor The delegate executor
      * @return An optional {@link AbstractFailsafeCircuitBreakerCommandExecutor}
      */
-    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initCircuitBreakerForName(Optional<String> optionalInfix, ConfigurationService configuration, GenericFailsafeCircuitBreakerCommandExecutor genericBreaker) {
+    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initCircuitBreakerForName(Optional<String> optionalInfix, ConfigurationService configuration,
+            GenericFailsafeCircuitBreakerCommandExecutor genericBreaker, MonitoringCommandExecutor monitoringCommandExecutor) {
         if (!optionalInfix.isPresent()) {
-            return initGenericCircuitBreakerInternal(configuration);
+            return initGenericCircuitBreakerInternal(configuration, monitoringCommandExecutor);
         } // End of generic
 
         String infix = optionalInfix.get();
+
+        if ("generic".equals(infix)) {
+            return initGenericCircuitBreakerInternal(configuration, monitoringCommandExecutor);
+        } // End of generic
+
         if ("primary".equals(infix)) {
-           return initPrimaryCircuitBreaker(configuration, genericBreaker);
+            return initPrimaryCircuitBreaker(configuration, genericBreaker, monitoringCommandExecutor);
         } // End of primary
 
-        return initSpecificCircuitBreaker(configuration, genericBreaker, infix);
+        return initSpecificCircuitBreaker(configuration, genericBreaker, infix, monitoringCommandExecutor);
     }
 
     /**
      * Initializes the generic circuit breaker.
      *
      * @param configuration The configuration service to use
+     * @param monitoringCommandExecutor
      * @return An optional generic circuit breaker
      */
-    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initGenericCircuitBreakerInternal(ConfigurationService configuration) {
-            // The generic IMAP circuit breaker
-            String propertyName = "com.openexchange.imap.breaker.enabled";
-            boolean enabled = configuration.getBoolProperty(propertyName, false);
-            if (!enabled) {
+    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initGenericCircuitBreakerInternal(ConfigurationService configuration,
+            MonitoringCommandExecutor monitoringCommandExecutor) {
+        // The generic IMAP circuit breaker
+        String propertyName = "com.openexchange.imap.breaker.enabled";
+        boolean enabled = configuration.getBoolProperty(propertyName, false);
+        if (!enabled) {
+            return Optional.empty();
+        }
+
+        int failures;
+        {
+            propertyName = "com.openexchange.imap.breaker.failureThreshold";
+            String sFailures = configuration.getProperty(propertyName, "5").trim();
+            if (Strings.isEmpty(sFailures)) {
+                LOG.warn("Missing value for property {}. Skipping generic breaker configuration", propertyName);
                 return Optional.empty();
             }
-
-            int failures;
-            {
-                propertyName = "com.openexchange.imap.breaker.failureThreshold";
-                String sFailures = configuration.getProperty(propertyName, "5").trim();
-                if (Strings.isEmpty(sFailures)) {
-                    LOG.warn("Missing value for property {}. Skipping generic breaker configuration", propertyName);
-                    return Optional.empty();
-                }
-                try {
-                    failures = Integer.parseInt(sFailures.trim());
-                } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                    LOG.warn("Invalid value for property {}. Not a number. Skipping generic breaker configuration", propertyName);
-                    return Optional.empty();
-                }
+            try {
+                failures = Integer.parseInt(sFailures.trim());
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                LOG.warn("Invalid value for property {}. Not a number. Skipping generic breaker configuration", propertyName);
+                return Optional.empty();
             }
-            int failureExecutions = failures;
-            {
-                propertyName = "com.openexchange.imap.breaker.failureExecutions";
-                String sFailures = configuration.getProperty(propertyName, "").trim();
-                if (Strings.isNotEmpty(sFailures)) {
-                    try {
-                        failureExecutions = Integer.parseInt(sFailures.trim());
-                        if (failureExecutions == 0) {
-                            LOG.warn("Invalid value for property {}, value must not be '0' to prevent division by zero", propertyName);
-                            return Optional.empty();
-                        }
-                    } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                        LOG.warn("Invalid value for property {}. Not a number. Skipping generic breaker configuration", propertyName);
+        }
+        int failureExecutions = failures;
+        {
+            propertyName = "com.openexchange.imap.breaker.failureExecutions";
+            String sFailures = configuration.getProperty(propertyName, "").trim();
+            if (Strings.isNotEmpty(sFailures)) {
+                try {
+                    failureExecutions = Integer.parseInt(sFailures.trim());
+                    if (failureExecutions == 0) {
+                        LOG.warn("Invalid value for property {}, value must not be '0' to prevent division by zero", propertyName);
                         return Optional.empty();
                     }
-                }
-            }
-            if (failureExecutions < failures) {
-                failureExecutions = failures;
-            }
-
-            int success;
-            {
-                propertyName = "com.openexchange.imap.breaker.successThreshold";
-                String sSuccess = configuration.getProperty(propertyName, "2").trim();
-                if (Strings.isEmpty(sSuccess)) {
-                    LOG.warn("Missing value for property {}. Skipping generic breaker configuration", propertyName);
-                    return Optional.empty();
-                }
-                try {
-                    success = Integer.parseInt(sSuccess.trim());
                 } catch (@SuppressWarnings("unused") NumberFormatException e) {
                     LOG.warn("Invalid value for property {}. Not a number. Skipping generic breaker configuration", propertyName);
                     return Optional.empty();
                 }
             }
-            int successExecutions = success;
-            {
-                propertyName = "com.openexchange.imap.breaker.successExecutions";
-                String sSuccess = configuration.getProperty(propertyName, "").trim();
-                if (Strings.isNotEmpty(sSuccess)) {
-                    try {
-                        successExecutions = Integer.parseInt(sSuccess.trim());
-                        if (successExecutions == 0) {
-                            LOG.warn("Invalid value for property {}, value must not be '0' to prevent division by zero", propertyName);
-                            return Optional.empty();
-                        }
-                    } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                        LOG.warn("Invalid value for property {}. Not a number. Skipping generic breaker configuration", propertyName);
+        }
+        if (failureExecutions < failures) {
+            failureExecutions = failures;
+        }
+
+        int success;
+        {
+            propertyName = "com.openexchange.imap.breaker.successThreshold";
+            String sSuccess = configuration.getProperty(propertyName, "2").trim();
+            if (Strings.isEmpty(sSuccess)) {
+                LOG.warn("Missing value for property {}. Skipping generic breaker configuration", propertyName);
+                return Optional.empty();
+            }
+            try {
+                success = Integer.parseInt(sSuccess.trim());
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                LOG.warn("Invalid value for property {}. Not a number. Skipping generic breaker configuration", propertyName);
+                return Optional.empty();
+            }
+        }
+        int successExecutions = success;
+        {
+            propertyName = "com.openexchange.imap.breaker.successExecutions";
+            String sSuccess = configuration.getProperty(propertyName, "").trim();
+            if (Strings.isNotEmpty(sSuccess)) {
+                try {
+                    successExecutions = Integer.parseInt(sSuccess.trim());
+                    if (successExecutions == 0) {
+                        LOG.warn("Invalid value for property {}, value must not be '0' to prevent division by zero", propertyName);
                         return Optional.empty();
                     }
-                }
-            }
-            if (successExecutions < success) {
-                successExecutions = success;
-            }
-
-            long delayMillis;
-            {
-                propertyName = "com.openexchange.imap.breaker.delayMillis";
-                String sDelayMillis = configuration.getProperty(propertyName, "60000").trim();
-                if (Strings.isEmpty(sDelayMillis)) {
-                    LOG.warn("Missing value for property {}. Skipping generic breaker configuration", propertyName);
-                    return Optional.empty();
-                }
-                try {
-                    delayMillis = Long.parseLong(sDelayMillis.trim());
                 } catch (@SuppressWarnings("unused") NumberFormatException e) {
                     LOG.warn("Invalid value for property {}. Not a number. Skipping generic breaker configuration", propertyName);
                     return Optional.empty();
                 }
             }
+        }
+        if (successExecutions < success) {
+            successExecutions = success;
+        }
 
-            return Optional.of(new GenericFailsafeCircuitBreakerCommandExecutor(new Ratio(failures, failureExecutions), new Ratio(success, successExecutions), delayMillis));
+        long delayMillis;
+        {
+            propertyName = "com.openexchange.imap.breaker.delayMillis";
+            String sDelayMillis = configuration.getProperty(propertyName, "60000").trim();
+            if (Strings.isEmpty(sDelayMillis)) {
+                LOG.warn("Missing value for property {}. Skipping generic breaker configuration", propertyName);
+                return Optional.empty();
+            }
+            try {
+                delayMillis = Long.parseLong(sDelayMillis.trim());
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                LOG.warn("Invalid value for property {}. Not a number. Skipping generic breaker configuration", propertyName);
+                return Optional.empty();
+            }
+        }
+
+        return Optional.of(new GenericFailsafeCircuitBreakerCommandExecutor(ratioOf(failures, failureExecutions), ratioOf(success, successExecutions), delayMillis, monitoringCommandExecutor));
     }
 
     /**
@@ -1044,9 +1095,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
      * @param configuration The configuration service to use
      * @param genericBreaker The already initialized generic circuit breaker or <code>null</code>
      * @param infix The name of the circuit breaker
+     * @param monitoringCommandExecutor
      * @return An optional specific circuit breaker
      */
-    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initSpecificCircuitBreaker(ConfigurationService configuration, GenericFailsafeCircuitBreakerCommandExecutor genericBreaker, String infix) {
+    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initSpecificCircuitBreaker(ConfigurationService configuration,
+            GenericFailsafeCircuitBreakerCommandExecutor genericBreaker, String infix, MonitoringCommandExecutor monitoringCommandExecutor) {
         // Specific
         String propertyName = "com.openexchange.imap.breaker." + infix + ".hosts";
         String hosts = configuration.getProperty(propertyName, "");
@@ -1174,7 +1227,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             }
         }
 
-        return Optional.of(new FailsafeCircuitBreakerCommandExecutor(hostList, portSet, new Ratio(failures, failureExecutions), new Ratio(success, successExecutions), delayMillis, 100));
+        return Optional.of(new FailsafeCircuitBreakerCommandExecutor(infix, hostList, portSet, ratioOf(failures, failureExecutions), ratioOf(success, successExecutions), delayMillis, 100, monitoringCommandExecutor));
     }
 
     /**
@@ -1182,9 +1235,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
      *
      * @param configuration The configuration service to use
      * @param genericBreaker The already initialized generic circuit breaker or <code>null</code>
+     * @param monitoringCommandExecutor
      * @return An optional primary account circuit breaker
      */
-    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initPrimaryCircuitBreaker(ConfigurationService configuration, GenericFailsafeCircuitBreakerCommandExecutor genericBreaker) {
+    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initPrimaryCircuitBreaker(ConfigurationService configuration,
+            GenericFailsafeCircuitBreakerCommandExecutor genericBreaker, MonitoringCommandExecutor monitoringCommandExecutor) {
         // The IMAP circuit breaker form primary account
         String propertyName = "com.openexchange.imap.breaker.primary.enabled";
         boolean enabled = configuration.getBoolProperty(propertyName, false);
@@ -1193,6 +1248,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 genericBreaker.excludePrimaryAccount();
             }
             return Optional.empty();
+        }
+
+        boolean applyPerEndpoint;
+        {
+            propertyName = "com.openexchange.imap.breaker.primary.applyPerEndpoint";
+            applyPerEndpoint = configuration.getBoolProperty(propertyName, true);
         }
 
         int failures;
@@ -1283,9 +1344,21 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             }
         }
 
-        return Optional.of(new PrimaryFailsafeCircuitBreakerCommandExecutor(new Ratio(failures, failureExecutions), new Ratio(success, successExecutions), delayMillis));
+        return Optional.of(new PrimaryFailsafeCircuitBreakerCommandExecutor(ratioOf(failures, failureExecutions), ratioOf(success, successExecutions), delayMillis, applyPerEndpoint, monitoringCommandExecutor));
     }
 
+    /**
+     * Creates a new {@link Ratio} object avoiding division by zero. If the
+     * denominator is zero then a new {@link Ratio} object will be created
+     * with numerator equals to 0 and denominator equals to 1.
+     *
+     * @param numerator The numerator
+     * @param denominator The denominator
+     * @return The new {@link Ratio} object
+     */
+    private static Ratio ratioOf(int numerator, int denominator) {
+        return denominator == 0 ? new Ratio(0, 1) : new Ratio(numerator, denominator);
+    }
 
     @Override
     protected void resetFields() {
@@ -1296,6 +1369,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         propagateClientIPAddress = false;
         enableTls = true;
         auditLogEnabled = false;
+        debugLogEnabled = false;
         overwritePreLoginCapabilities = false;
         propagateHostNames = Collections.emptySet();
         supportsACLs = null;
@@ -1313,11 +1387,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         cipherSuites = null;
         hostExtractingGreetingListener = null;
         enableAttachmentSearch = false;
-        MetricServiceTracker.closeMetricServiceTracker();
-        List<AbstractMetricAwareCommandExecutor> commandExecutorsList = commandExecutors;
+        List<CommandExecutor> commandExecutorsList = commandExecutors;
         commandExecutors = null;
         if (null != commandExecutorsList) {
-            for (AbstractMetricAwareCommandExecutor commandExecutor : commandExecutorsList) {
+            for (CommandExecutor commandExecutor : commandExecutorsList) {
                 IMAPStore.removeCommandExecutor(commandExecutor);
             }
         }
@@ -1355,7 +1428,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
      *
      * @return The command executors
      */
-    public List<AbstractMetricAwareCommandExecutor> getCommandExecutors() {
+    public List<CommandExecutor> getCommandExecutors() {
         return commandExecutors;
     }
 
@@ -1625,6 +1698,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean isAuditLogEnabled() {
         return auditLogEnabled;
+    }
+
+    @Override
+    public boolean isDebugLogEnabled() {
+        return debugLogEnabled;
     }
 
     @Override

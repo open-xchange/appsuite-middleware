@@ -6,6 +6,8 @@ tags: Mail, Configuration, OAuth
 
 This article contains exemplary configuration for Dovecot and Postfix. Dovecot will provide the SASL mechanisms [OAUTHBEARER](https://tools.ietf.org/html/rfc7628) and [XOAUTH2](https://developers.google.com/gmail/xoauth2_protocol) for IMAP and ManageSieve. It will also provide an Unix socket that is used by Postfix for SMTP authentication via SASL.
 
+A guide on how to configure App Suite to use these SASL mechanisms based on OAuth tokens provided by an external IDM/AM system, please refer to [this guide](../mail_access_via_xoauth2_or_oauthbearer.html).
+
 # Mail Backend Configuration
 
 ## Dovecot

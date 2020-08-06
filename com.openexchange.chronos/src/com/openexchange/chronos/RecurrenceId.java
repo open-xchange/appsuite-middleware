@@ -88,4 +88,13 @@ public interface RecurrenceId extends Comparable<RecurrenceId> {
      */
     int compareTo(RecurrenceId other, TimeZone timeZone);
 
+    /**
+     * Gets a value indicating whether this recurrence id <i>matches</i> another one, i.e. both are pointing to the same absolute timestamp
+     * (although possibly in different timezones for non-<i>floating</i> values, or decorated with a different recurrence range).
+     *
+     * @param other The recurrent identifier to match
+     * @return <code>true</code> if both recurrence ids match, <code>false</code> otherwise
+     */
+    boolean matches(RecurrenceId other);
+
 }

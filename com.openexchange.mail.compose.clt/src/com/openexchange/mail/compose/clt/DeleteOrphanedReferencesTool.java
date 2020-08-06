@@ -108,6 +108,7 @@ public class DeleteOrphanedReferencesTool extends AbstractRmiCLI<Void> {
                 System.err.println("Missing file storage identifiers");
                 printHelp();
                 System.exit(-1);
+                return null; // Keep IDE happy
             }
             fileStorageIds = new ArrayList<Integer>(values.length);
             for (String id : values) {

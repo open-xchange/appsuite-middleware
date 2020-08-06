@@ -49,13 +49,17 @@
 
 package com.openexchange.subscribe.dav.osgi;
 
+import static com.openexchange.subscribe.dav.AbstractDAVSubscribeService.CLIENT_ID;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpBasicConfig;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.threadpool.ThreadPoolService;
-
 
 /**
  * {@link DAVSubscribeActivator}
@@ -74,12 +78,21 @@ public class DAVSubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ThreadPoolService.class, ContextService.class, VCardService.class };
+        return new Class<?>[] { ThreadPoolService.class, ContextService.class, VCardService.class, HttpClientService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServices(this);
+
+        registerService(SpecificHttpClientConfigProvider.class, new DefaultHttpClientConfigProvider(CLIENT_ID, "Open-Xchange DAV Http Client") {
+
+            @Override
+            public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
+                return config.setMaxTotalConnections(10).setMaxConnectionsPerRoute(5).setConnectTimeout(5000).setSocketReadTimeout(10000);
+            }
+        });
+
         trackService(SubscriptionExecutionService.class);
         trackService(FolderUpdaterRegistry.class);
         openTrackers();

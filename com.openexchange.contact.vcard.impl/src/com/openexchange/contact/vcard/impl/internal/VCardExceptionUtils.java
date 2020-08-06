@@ -54,8 +54,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
+import ezvcard.ValidationWarning;
 import ezvcard.ValidationWarnings;
-import ezvcard.Warning;
+import ezvcard.io.ParseWarning;
 import ezvcard.property.VCardProperty;
 
 /**
@@ -65,11 +66,11 @@ import ezvcard.property.VCardProperty;
  */
 public class VCardExceptionUtils {
 
-    public static List<OXException> getParserWarnings(List<String> parserWarnings) {
+    public static List<OXException> getParserWarnings(List<ParseWarning> parserWarnings) {
         if (null != parserWarnings && 0 < parserWarnings.size()) {
             List<OXException> warnings = new ArrayList<OXException>();
-            for (String warning : parserWarnings) {
-                warnings.add(VCardExceptionCodes.PARSER_ERROR.create(warning));
+            for (ParseWarning warning : parserWarnings) {
+                warnings.add(VCardExceptionCodes.PARSER_ERROR.create(warning.toString()));
             }
             return warnings;
         }
@@ -79,12 +80,12 @@ public class VCardExceptionUtils {
     public static List<OXException> getValidationWarnings(ValidationWarnings validationWarnings) {
         if (null != validationWarnings && false == validationWarnings.isEmpty()) {
             List<OXException> warnings = new ArrayList<OXException>();
-            for (Entry<VCardProperty, List<Warning>> entry : validationWarnings) {
+            for (Entry<VCardProperty, List<ValidationWarning>> entry : validationWarnings) {
                 VCardProperty property = entry.getKey();
-                List<Warning> propViolations = entry.getValue();
+                List<ValidationWarning> propViolations = entry.getValue();
                 String propertyName = null != property ? property.getClass().getSimpleName() : "";
                 if (null != propViolations && 0 < propViolations.size()) {
-                    for (Warning propViolation : propViolations) {
+                    for (ValidationWarning propViolation : propViolations) {
                         warnings.add(VCardExceptionCodes.VALIDATION_FAILED.create(propertyName, propViolation.getMessage(), propViolation.getCode()));
                     }
                 }

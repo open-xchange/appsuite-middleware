@@ -89,7 +89,7 @@ public class GetAttachment extends ChronosAction {
         try {
             fileHolder = calendarAccess.getAttachment(eventId, managedId);
             ServerSession session = requestData.getSession();
-            if(session == null) {
+            if (session == null) {
                 throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Missing user session!");
             }
             int contextId = session.getContextId();

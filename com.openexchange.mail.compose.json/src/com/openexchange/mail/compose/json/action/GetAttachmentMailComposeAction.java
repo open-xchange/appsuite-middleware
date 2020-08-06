@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose.json.action;
 
+import static com.openexchange.mail.compose.Attachments.isNoImage;
 import java.util.UUID;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -56,11 +57,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.json.AttachmentFileHolder;
-import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -106,23 +105,6 @@ public class GetAttachmentMailComposeAction extends AbstractMailComposeAction {
 
         AttachmentFileHolder fileHolder = new AttachmentFileHolder(attachment);
         return new AJAXRequestResult(fileHolder, "file");
-    }
-
-    private boolean isNoImage(Attachment attachment) {
-        return false == isImage(attachment);
-    }
-
-    private boolean isImage(Attachment attachment) {
-        return (mimeTypeIndicatesImage(attachment.getMimeType()) || mimeTypeIndicatesImage(getMimeTypeByFileName(attachment.getName())));
-    }
-
-    private boolean mimeTypeIndicatesImage(String mimeType) {
-        // Starts with "image/"
-        return (null != mimeType && Strings.asciiLowerCase(mimeType).startsWith("image/"));
-    }
-
-    private String getMimeTypeByFileName(String fileName) {
-        return MimeType2ExtMap.getContentType(fileName, null);
     }
 
 }

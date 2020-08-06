@@ -107,12 +107,14 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         List<ActionCommand> actionCommands = ifCommand.getActionCommands();
         for (ActionCommand actionCommand : actionCommands) {
             JSONObject object = new JSONObject();
-            CommandParserRegistry<ActionCommand, ActionCommandParser<ActionCommand>> parserRegistry = services.getService(ActionCommandParserRegistry.class);
+            CommandParserRegistry<ActionCommand, ActionCommandParser<ActionCommand>> parserRegistry = services.getServiceSafe(ActionCommandParserRegistry.class);
             CommandParser<ActionCommand> parser = parserRegistry.get(actionCommand.getCommand().getJsonName());
             if (parser != null) {
                 parser.parse(object, actionCommand);
+                if (!object.isEmpty()) {
+                    array.put(object);
+                }
             }
-            array.put(object);
         }
         return array;
     }

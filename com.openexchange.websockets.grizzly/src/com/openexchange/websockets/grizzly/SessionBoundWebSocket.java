@@ -49,6 +49,10 @@
 
 package com.openexchange.websockets.grizzly;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import org.glassfish.grizzly.http.HttpRequestPacket;
@@ -62,7 +66,10 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.net.IPTools;
 import com.openexchange.session.Session;
 import com.openexchange.websockets.ConnectionId;
+import com.openexchange.websockets.IndividualWebSocketListener;
 import com.openexchange.websockets.grizzly.http.WebsocketServletRequestWrapper;
+import com.openexchange.websockets.grizzly.impl.IndividualWebSocketListenerAdapter;
+import com.openexchange.websockets.grizzly.impl.WebSocketListenerAdapter;
 
 /**
  * {@link SessionBoundWebSocket} - The Web Socket bound to a certain session.
@@ -79,6 +86,7 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
     private final String path;
     private final HttpServletRequest wrappedRequest;
     private final GrizzlyConfig config;
+    private final Map<Class<? extends IndividualWebSocketListener>, WebSocketListenerAdapter> individualWebSocketListeners;
 
     /**
      * Initializes a new {@link SessionBoundWebSocket}.
@@ -90,6 +98,31 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
         this.path = path;
         this.config = config;
         this.wrappedRequest = buildHttpServletRequestWrapper(this.servletRequest);
+        individualWebSocketListeners = initIndividualListenerState(getListeners());
+        LOG.debug("Initialized SessionBoundWebSocket '{}' with listeners: {}", connectionId, getListeners());
+    }
+
+    /**
+     * Checks all initial listeners whether they are {@link IndividualWebSocketListenerAdapter}s and if so,
+     * remembers them within a map by their {@link com.openexchange.websockets.WebSocketListener} runtime class.
+     *
+     * @return The map
+     */
+    private static Map<Class<? extends IndividualWebSocketListener>, WebSocketListenerAdapter> initIndividualListenerState(Collection<WebSocketListener> listeners) {
+        Map<Class<? extends IndividualWebSocketListener>, WebSocketListenerAdapter> map = new HashMap<>(8);
+        for (WebSocketListener l : listeners) {
+            if (l instanceof IndividualWebSocketListenerAdapter) {
+                IndividualWebSocketListenerAdapter il = (IndividualWebSocketListenerAdapter) l;
+                map.put(il.getListenerClass(), il);
+            } else if (l instanceof WebSocketListenerAdapter) {
+                WebSocketListenerAdapter la = (WebSocketListenerAdapter) l;
+                if (la.isIndividualInstance()) {
+                    map.put(la.getIndividualAdapter().getListenerClass(), la);
+                }
+            }
+        }
+
+        return map;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -112,6 +145,73 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
         return wrappedRequest;
     }
 
+    /**
+     * Adds specified listener to this Web Socket if no such listener is present.
+     *
+     * @param listenerToAdd The listener to add
+     */
+    public void addListenerIfAbsent(WebSocketListener listenerToAdd) {
+        if (listenerToAdd != null) {
+            addListenersIfAbsent(Collections.singletonList(listenerToAdd));
+        }
+    }
+
+    /**
+     * Adds specified listeners to this Web Socket. Each listener is only added if no such listener is present.
+     *
+     * @param listenersToAdd The listeners to add
+     */
+    public synchronized void addListenersIfAbsent(Collection<WebSocketListener> listenersToAdd) {
+        if (listenersToAdd == null) {
+            return;
+        }
+
+        Collection<WebSocketListener> listeners = getListeners();
+        for (WebSocketListener grizzlyWebSocketListener : listenersToAdd) {
+            if (grizzlyWebSocketListener instanceof IndividualWebSocketListenerAdapter) {
+                IndividualWebSocketListenerAdapter individualWebSocketListener = (IndividualWebSocketListenerAdapter) grizzlyWebSocketListener;
+                Class<? extends IndividualWebSocketListener> clazz = individualWebSocketListener.getListenerClass();
+                if (!individualWebSocketListeners.containsKey(clazz)) {
+                    // Pass individual instance
+                    WebSocketListenerAdapter listener = individualWebSocketListener.newAdapter();
+                    listeners.add(listener);
+                    individualWebSocketListeners.put(clazz, listener);
+                    LOG.debug("Added new instance for IndividualWebSocketListener to '{}': {}", connectionId, clazz);
+                }
+            } else {
+                if (!listeners.contains(grizzlyWebSocketListener)) {
+                    listeners.add(grizzlyWebSocketListener);
+                    LOG.debug("Added new WebSocketListener to '{}': {}", connectionId, grizzlyWebSocketListener);
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes specified listener from this Web Socket.
+     *
+     * @param listenerToRemove The listener to remove
+     * @return <code>true</code> if listener was removed; otherwise <code>false</code>
+     */
+    public synchronized boolean removeListener(WebSocketListener listenerToRemove) {
+        if (listenerToRemove == null) {
+            return false;
+        }
+
+        if (!(listenerToRemove instanceof IndividualWebSocketListenerAdapter)) {
+            LOG.debug("Removing WebSocketListener from '{}': {}", connectionId, listenerToRemove);
+            return super.remove(listenerToRemove);
+        }
+
+        IndividualWebSocketListenerAdapter individualWebSocketListener = (IndividualWebSocketListenerAdapter) listenerToRemove;
+        Class<? extends IndividualWebSocketListener> clazz = individualWebSocketListener.getListenerClass();
+        WebSocketListener removedListener = individualWebSocketListeners.remove(clazz);
+        if (removedListener == null) {
+            return false;
+        }
+        LOG.debug("Removing instance for IndividualWebSocketListener from '{}': {}", connectionId, removedListener);
+        return super.remove(removedListener);
+    }
 
     private WebsocketServletRequestWrapper buildHttpServletRequestWrapper(HttpServletRequest httpRequest) {
         if (!config.isConsiderXForwards()) {

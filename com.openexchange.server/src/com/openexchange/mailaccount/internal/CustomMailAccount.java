@@ -69,7 +69,7 @@ public final class CustomMailAccount extends AbstractMailAccount {
     public CustomMailAccount(int id) {
         super();
         this.id = id;
-        rootFolder = MailFolderUtility.prepareFullname(id, MailFolder.DEFAULT_FOLDER_ID);
+        rootFolder = MailFolderUtility.prepareFullname(id, MailFolder.ROOT_FOLDER_ID);
     }
 
     @Override

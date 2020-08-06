@@ -49,12 +49,14 @@
 
 package com.openexchange.rest.client.httpclient.internal;
 
-import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.getInterruptedCounter;
+import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.getPoolTimeoutCounter;
+import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.getRefusedCounter;
+import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.getConnectTimeoutCounter;
+import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.initPoolMetrics;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -66,41 +68,41 @@ import org.apache.http.conn.ConnectionRequest;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.pool.PoolStats;
 import org.apache.http.protocol.HttpContext;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
-import com.openexchange.metrics.noop.NoopCounter;
-import com.openexchange.metrics.types.Counter;
-import com.openexchange.rest.client.osgi.RestClientServices;
 
 /**
  *
- * {@link ClientConnectionManager}
+ * {@link ClientConnectionManager} - Wraps the {@link PoolingHttpClientConnectionManager} and adds monitoring functionality to it
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.10.3
  */
 public class ClientConnectionManager extends PoolingHttpClientConnectionManager {
 
-    private final MonitoringId monitoringId;
+    protected final String clientName;
+
     private final int keepAliveMonitorInterval;
     private final AtomicBoolean shuttingDown;
     private final AtomicBoolean metricsInitialized;
+    private final int defaultConnectTimeout;
+    private final int defaultConnectionRequestTimeout;
     private volatile IdleConnectionCloser idleConnectionCloser;
 
     /**
      * Initializes a new {@link ClientConnectionManager}.
      *
-     * @param monitoringId The monitoring identifier
-     * @param socketFactoryRegistry The socket factory registry to use
-     * @param keepAliveMonitorInterval The keep-alive monitor interval in seconds
+     * @param clientName A unique client name
+     * @param defaultConnectTimeout The default connect timeout to apply or <code>0</code> (zero) to have no connect timeout
+     * @param defaultConnectionRequestTimeout
+     * @param keepAliveMonitorInterval The amount of time to periodically run the {@link IdleConnectionCloser}
+     * @param socketFactoryRegistry For super class
      */
-    public ClientConnectionManager(MonitoringId monitoringId, Registry<ConnectionSocketFactory> socketFactoryRegistry, int keepAliveMonitorInterval) {
+    public ClientConnectionManager(String clientName, int defaultConnectTimeout, int defaultConnectionRequestTimeout, int keepAliveMonitorInterval, Registry<ConnectionSocketFactory> socketFactoryRegistry) {
         super(socketFactoryRegistry);
-        this.monitoringId = monitoringId;
+        this.clientName = clientName;
         this.keepAliveMonitorInterval = keepAliveMonitorInterval;
+        this.defaultConnectTimeout = defaultConnectTimeout;
+        this.defaultConnectionRequestTimeout = defaultConnectionRequestTimeout;
         shuttingDown = new AtomicBoolean(false);
         metricsInitialized = new AtomicBoolean(false);
     }
@@ -112,6 +114,15 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
      */
     public void setIdleConnectionCloser(IdleConnectionCloser idleConnectionCloser) {
         this.idleConnectionCloser = idleConnectionCloser;
+    }
+
+    /**
+     * Gets a value whether this connection manager has been shut down or not.
+     *
+     * @return <code>true</code> if the manager is shutting down, <code>false</code> if not
+     */
+    public boolean isShutdown() {
+        return shuttingDown.get();
     }
 
     @Override
@@ -140,14 +151,12 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
             };
         }
 
-        if (!metricsInitialized.get()) {
-            MetricService metrics = RestClientServices.getOptionalService(MetricService.class);
-            if (metrics != null && metricsInitialized.compareAndSet(false, true)) {
-                initPoolMetrics(metrics);
-            }
+        if (metricsInitialized.compareAndSet(false, true)) {
+            initPoolMetrics(clientName, this);
         }
 
         final ConnectionRequest connectionRequest = super.requestConnection(route, state);
+        final int defaultConnectionRequestTimeout = this.defaultConnectionRequestTimeout;
         return new ConnectionRequest() {
 
             @Override
@@ -158,12 +167,12 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
             @Override
             public HttpClientConnection get(long timeout, TimeUnit timeUnit) throws InterruptedException, ExecutionException, ConnectionPoolTimeoutException {
                 try {
-                    return connectionRequest.get(timeout, timeUnit);
+                    return connectionRequest.get(timeout > 0 ? timeout : defaultConnectionRequestTimeout, timeUnit);
                 } catch (ConnectionPoolTimeoutException e) {
-                    getErrorCounter("POOL_TIMEOUT").incement();
+                    getPoolTimeoutCounter(clientName).increment();
                     throw e;
                 } catch (InterruptedException e) {
-                    getErrorCounter("INTERRUPTED").incement();
+                    getInterruptedCounter(clientName).increment();
                     throw e;
                 }
             }
@@ -173,91 +182,25 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
     @Override
     public void connect(HttpClientConnection managedConn, HttpRoute route, int connectTimeout, HttpContext context) throws IOException {
         try {
-            super.connect(managedConn, route, connectTimeout, context);
+            super.connect(managedConn, route, connectTimeout > 0 ? connectTimeout : defaultConnectTimeout, context);
         } catch (ConnectTimeoutException e) {
-            getErrorCounter("TIMEOUT").incement();
+            getConnectTimeoutCounter(clientName).increment();
             throw e;
         } catch (ConnectException | NoRouteToHostException e) {
-            getErrorCounter("REFUSED").incement();
+            getRefusedCounter(clientName).increment();
             throw e;
         }
     }
 
     @Override
     public void shutdown() {
-        try {
-            IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
-            if (null != idleConnectionClose) {
-                this.idleConnectionCloser = null;
-                idleConnectionClose.stop();
-            }
-            shuttingDown.set(true);
-            super.shutdown();
-        } finally {
-            MonitoringRegistry.getInstance().unregisterInstance(monitoringId);
+        IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
+        if (null != idleConnectionClose) {
+            idleConnectionClose.stop();
+            this.idleConnectionCloser = null;
         }
-    }
-
-    private void initPoolMetrics(MetricService metrics) {
-        if (monitoringId == MonitoringId.getNoop()) {
-            return;
-        }
-
-        List<MetricDescriptor> descriptors = getPoolMetricDescriptors();
-        if (MonitoringRegistry.getInstance().hasInstance(monitoringId)) {
-            descriptors.forEach(d -> metrics.removeMetric(d));
-        }
-
-        descriptors.forEach(d -> metrics.getGauge(d));
-    }
-
-    private List<MetricDescriptor> getPoolMetricDescriptors() {
-        List<MetricDescriptor> descriptors = new ArrayList<>(6);
-        descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Max", MetricType.GAUGE)
-            .withDescription("The configured maximum number of allowed persistent connections for all routes.")
-            .withMetricSupplier(() -> I(getTotalStats().getMax()))
-            .build());
-
-        descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Route.Max", MetricType.GAUGE)
-            .withDescription("The configured maximum number of allowed persistent connections per route.")
-            .withMetricSupplier(() -> I(getDefaultMaxPerRoute()))
-            .build());
-
-        descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Available", MetricType.GAUGE)
-            .withDescription("The number of available persistent connections for all routes.")
-            .withMetricSupplier(() -> I(getTotalStats().getAvailable()))
-            .build());
-
-        descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Leased", MetricType.GAUGE)
-            .withDescription("The number of leased persistent connections for all routes.")
-            .withMetricSupplier(() -> I(getTotalStats().getLeased()))
-            .build());
-
-        descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Pending", MetricType.GAUGE)
-            .withDescription("The number of pending threads waiting for a connection.")
-            .withMetricSupplier(() -> I(getTotalStats().getPending()))
-            .build());
-
-        descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Total", MetricType.GAUGE)
-            .withDescription("The total number of pooled connections for all routes.")
-            .withMetricSupplier(() -> {
-                PoolStats stats = getTotalStats();
-                return I(stats.getLeased() + stats.getAvailable());
-            })
-            .build());
-        return descriptors;
-    }
-
-    Counter getErrorCounter(String reason) {
-        MetricService metrics = RestClientServices.getOptionalService(MetricService.class);
-        if (metrics == null || monitoringId == MonitoringId.getNoop()) {
-            return NoopCounter.getInstance();
-        }
-
-        return metrics.getCounter(monitoringId.newMetricBuilder("httpclient", "ConnectErrors", MetricType.COUNTER)
-            .withDescription("Number of errors while establishing connections")
-            .addDimension("reason", reason)
-            .build());
+        shuttingDown.set(true);
+        super.shutdown();
     }
 
 }

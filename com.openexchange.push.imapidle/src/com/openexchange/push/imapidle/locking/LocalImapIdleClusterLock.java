@@ -53,6 +53,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.UserAndContext;
 
 
 /**
@@ -62,7 +63,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class LocalImapIdleClusterLock extends AbstractImapIdleClusterLock {
 
-    private final ConcurrentMap<Key, String> locks;
+    private final ConcurrentMap<UserAndContext, String> locks;
 
     /**
      * Initializes a new {@link LocalImapIdleClusterLock}.
@@ -72,8 +73,8 @@ public class LocalImapIdleClusterLock extends AbstractImapIdleClusterLock {
         locks = new ConcurrentHashMap<>(2048, 0.9F, 1);
     }
 
-    private Key generateKey(SessionInfo sessionInfo) {
-        return new Key(sessionInfo.getUserId(), sessionInfo.getContextId());
+    private UserAndContext generateKey(SessionInfo sessionInfo) {
+        return UserAndContext.newInstance(sessionInfo.getUserId(), sessionInfo.getContextId());
     }
 
     @Override
@@ -83,7 +84,7 @@ public class LocalImapIdleClusterLock extends AbstractImapIdleClusterLock {
 
     @Override
     public AcquisitionResult acquireLock(SessionInfo sessionInfo) throws OXException {
-        Key key = generateKey(sessionInfo);
+        UserAndContext key = generateKey(sessionInfo);
 
         long now = System.currentTimeMillis();
         String previous = locks.putIfAbsent(key, generateValue(now, sessionInfo));
@@ -124,52 +125,6 @@ public class LocalImapIdleClusterLock extends AbstractImapIdleClusterLock {
     @Override
     public void releaseLock(SessionInfo sessionInfo) throws OXException {
         locks.remove(generateKey(sessionInfo));
-    }
-
-    // ------------------------------------------------------------------------------------------------
-
-    private static final class Key {
-
-        private final int userId;
-        private final int contextId;
-        private final int hash;
-
-        Key(int userId, int contextId) {
-            super();
-            this.userId = userId;
-            this.contextId = contextId;
-            int prime = 31;
-            int result = 1;
-            result = prime * result + contextId;
-            result = prime * result + userId;
-            this.hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            Key other = (Key) obj;
-            if (contextId != other.contextId) {
-                return false;
-            }
-            if (userId != other.userId) {
-                return false;
-            }
-            return true;
-        }
     }
 
 }

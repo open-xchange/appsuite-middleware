@@ -147,6 +147,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.BccTerm;
@@ -165,6 +166,7 @@ import com.openexchange.mail.search.SubjectTerm;
 import com.openexchange.mail.search.ToTerm;
 import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -238,10 +240,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
             @Override
             public Object[] call(MailServletInterface mailServletInterface, MailFolder folder) throws OXException {
-                Object[] vals = new Object[3];
+                Object[] vals = new Object[4];
                 vals[0] = folder;
                 vals[1] = prefixAvailable ? Boolean.valueOf(mailServletInterface.getMailConfig().getCapabilities().hasFileNameSearch()) : Boolean.FALSE;
                 vals[2] = Boolean.valueOf(mailServletInterface.getMailConfig().getCapabilities().hasAttachmentMarker());
+                vals[3] = mailServletInterface.getSentFolder(mailServletInterface.getAccountID());
                 return vals;
             }
         });
@@ -328,6 +331,10 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             mailServletInterface.openFor(MailFolderUtility.prepareFullname(fullnameArgument.getAccountId(), fullnameArgument.getFullname()));
             IMailFolderStorage folderStorage = mailServletInterface.getMailAccess().getFolderStorage();
             MailFolder folder = folderStorage.getFolder(fullnameArgument.getFullname());
+            if (!folder.containsDefaultFolderType() && folder.getFullname().equals(folderStorage.getSentFolder())) {
+                folder.setDefaultFolder(true);
+                folder.setDefaultFolderType(DefaultFolderType.SENT);
+            }
             return closure.call(mailServletInterface, folder);
         } finally {
             mailServletInterface.close(true);
@@ -347,6 +354,9 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             String allMessageFolder = getAllMessageFolder(session);
             if (Strings.isEmpty(allMessageFolder)) {
                 throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
+            }
+            if (!allMessageFolder.startsWith(MailFolder.MAIL_PREFIX)) {
+                allMessageFolder = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, allMessageFolder);
             }
             folderId = allMessageFolder;
         }

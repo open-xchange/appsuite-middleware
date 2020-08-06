@@ -70,9 +70,11 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
 
     private static final class FilteredUser implements User {
 
+        private static final long serialVersionUID = 910610141809461770L;
+
         private final User delegate;
 
-        private FilteredUser(final User delegate) {
+        FilteredUser(final User delegate) {
             super();
             this.delegate = delegate;
         }

@@ -268,7 +268,7 @@ public final class GetAction extends AbstractMailAction {
                                     final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
                                     DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
                                 }
-                                requestData.setResponseHeader("Content-Disposition",  sb.toString());
+                                requestData.setResponseHeader("Content-Disposition", sb.toString());
                                 requestData.removeCachingHeader();
                                 OutputStream directOutputStream = resp.getOutputStream();
                                 mail.writeTo(directOutputStream);
@@ -335,7 +335,7 @@ public final class GetAction extends AbstractMailAction {
                                     final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
                                     DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
                                 }
-                                requestData.setResponseHeader("Content-Disposition",  sb.toString());
+                                requestData.setResponseHeader("Content-Disposition", sb.toString());
                                 requestData.removeCachingHeader();
                                 final InputStream is = fileHolder.getStream();
                                 try {
@@ -532,7 +532,8 @@ public final class GetAction extends AbstractMailAction {
                     // Store to MIME message
                     MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), is);
                     // Clean-up
-                    Streams.close(is); is = null;
+                    Streams.close(is);
+                    is = null;
                     Streams.close(fileHolder);
                     // Filter MIME message
                     MimeMessageConverter.saveChanges(mimeMessage);
@@ -693,7 +694,8 @@ public final class GetAction extends AbstractMailAction {
                 AbstractPreviewResultConverter.triggerPreviewService(session, fileHolder, requestData, candidate, PreviewOutput.IMAGE);
                 LOG.debug("Triggered to create preview from file attachment {} of mail {} in folder {} for user {} in context {}", mailPart.getFileName(), mailId, folderId, I(session.getUserId()), I(session.getContextId()));
             } else {
-                LOG.debug("Found no suitable {} service to trigger preview creation from file attachment {} of mail {} in folder {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), mailPart.getFileName(), mailId, folderId, I(session.getUserId()), I(session.getContextId()));
+                LOG.debug("Found no suitable {} service to trigger preview creation from file attachment {} of mail {} in folder {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), mailPart.getFileName(), mailId,
+                    folderId, I(session.getUserId()), I(session.getContextId()));
             }
         }
     }

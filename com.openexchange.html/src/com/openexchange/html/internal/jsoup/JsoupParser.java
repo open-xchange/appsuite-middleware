@@ -144,9 +144,11 @@ public class JsoupParser {
      *
      * @param html The real-life HTML document
      * @param handler The handler
+     * @param checkSize Whether length of specified HTML content should be checked against {@link HtmlServices#htmlThreshold()}
+     * @param prettyPrint Whether resulting HTML content is supposed to be pretty-printed
      * @throws OXException If specified HTML content cannot be parsed
      */
-    public void parse(String html, JsoupHandler handler, boolean checkSize) throws OXException {
+    public void parse(String html, JsoupHandler handler, boolean checkSize, boolean prettyPrint) throws OXException {
         // Check size
         int maxLength = checkSize ? HtmlServices.htmlThreshold() : 0;
         if (maxLength > 0 && html.length() > maxLength) {
@@ -157,12 +159,12 @@ public class JsoupParser {
 
         int timeout = htmlParseTimeoutSec;
         if (timeout <= 0) {
-            doParse(html, handler);
+            doParse(html, handler, prettyPrint);
             return;
         }
 
         // Run as a monitored task
-        new JsoupParseTask(html, handler, timeout, this).call();
+        new JsoupParseTask(html, handler, timeout, prettyPrint, this).call();
     }
 
     /**
@@ -170,12 +172,18 @@ public class JsoupParser {
      *
      * @param html The real-life HTML document
      * @param handler The handler
+     * @param prettyPrint Whether resulting HTML content is supposed to be pretty-printed
      * @throws OXException If specified HTML content cannot be parsed
      */
-    public void doParse(String html, JsoupHandler handler) throws OXException {
+    public void doParse(String html, JsoupHandler handler, boolean prettyPrint) throws OXException {
         try {
             // Parse HTML input to a Jsoup document
             Document document = Parser.htmlParser().parseInput(new InterruptibleStringReader(html), "");
+
+            if (!prettyPrint) {
+                // Disable pretty-print: If disabled, the HTML output methods will not re-format the output, and the output will generally look like the input.
+                document.outputSettings().prettyPrint(false);
+            }
 
             // Check <style> tag sizes against threshold
             {

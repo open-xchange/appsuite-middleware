@@ -55,6 +55,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
@@ -64,7 +65,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
  * {@link UpdatesAction}
  *
@@ -72,10 +72,12 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = ContactAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class UpdatesAction extends ContactAction {
 
     /**
      * Initializes a new {@link UpdatesAction}.
+     * 
      * @param serviceLookup
      */
     public UpdatesAction(ServiceLookup serviceLookup) {
@@ -93,15 +95,13 @@ public class UpdatesAction extends ContactAction {
          * add modified contacts
          */
         List<Contact> modifiedContacts = new LinkedList<Contact>();
-        Date lastModified = addContacts(modifiedContacts, contactService.getModifiedContacts(
-            request.getSession(), request.getFolderID(), since, fields), excludedAdminID);
+        Date lastModified = addContacts(modifiedContacts, contactService.getModifiedContacts(request.getSession(), request.getFolderID(), since, fields), excludedAdminID);
         /*
          * add deleted contacts
          */
         List<Contact> deletedContacts = new LinkedList<Contact>();
         if (false == "deleted".equals(request.getIgnore())) {
-            Date lastModified2 = addContacts(deletedContacts, contactService.getDeletedContacts(
-                request.getSession(), request.getFolderID(), since, fields), excludedAdminID);
+            Date lastModified2 = addContacts(deletedContacts, contactService.getDeletedContacts(request.getSession(), request.getFolderID(), since, fields), excludedAdminID);
             if (0 < deletedContacts.size() && null != lastModified2 && lastModified2.after(lastModified)) {
                 lastModified = lastModified2;
             }

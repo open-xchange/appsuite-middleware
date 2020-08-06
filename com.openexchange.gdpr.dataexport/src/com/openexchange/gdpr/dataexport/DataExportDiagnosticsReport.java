@@ -67,7 +67,7 @@ public class DataExportDiagnosticsReport implements Iterable<Message> {
     /**
      * The immutable empty data export diagnostics report.
      */
-    private static final DataExportDiagnosticsReport EMPTY_REPORT = new DataExportDiagnosticsReport(ImmutableSet.of());
+    private static final DataExportDiagnosticsReport EMPTY_REPORT = new DataExportDiagnosticsReport(ImmutableSet.of(), DiagnosticsReportOptions.builder().build());
 
     /**
      * Gets the immutable empty data export diagnostics report.
@@ -81,44 +81,45 @@ public class DataExportDiagnosticsReport implements Iterable<Message> {
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final Set<Message> messages;
-
-    /**
-     * Initializes a new {@link DataExportDiagnosticsReport}.
-     */
-    public DataExportDiagnosticsReport() {
-        this(new LinkedHashSet<Message>());
-    }
-
-    /**
-     * Initializes a new {@link DataExportDiagnosticsReport}.
-     */
-    private DataExportDiagnosticsReport(Set<Message> messages) {
-        super();
-        this.messages = messages;
-    }
+    private final DiagnosticsReportOptions reportOptions;
 
     /**
      * Initializes a new {@link DataExportDiagnosticsReport}.
      *
-     * @param initialCapacity The initial capacity
-     * @throws IllegalArgumentException If given capacity is less than <code>0</code> (zero)
+     * @param reportOptions The report options
      */
-    public DataExportDiagnosticsReport(int initialCapacity) {
+    public DataExportDiagnosticsReport(DiagnosticsReportOptions reportOptions) {
+        this(new LinkedHashSet<Message>(), reportOptions);
+    }
+
+    /**
+     * Initializes a new {@link DataExportDiagnosticsReport}.
+     */
+    private DataExportDiagnosticsReport(Set<Message> messages, DiagnosticsReportOptions reportOptions) {
         super();
-        if (initialCapacity < 0) {
-            throw new IllegalArgumentException("Initial capacity must not be less than 0 (zero).");
-        }
-        this.messages = new LinkedHashSet<Message>();
+        this.messages = messages;
+        this.reportOptions = reportOptions;
     }
 
     /**
      * Initializes a new {@link DataExportDiagnosticsReport}.
      *
      * @param messages The initial messages
+     * @param reportOptions The report options
      */
-    public DataExportDiagnosticsReport(Collection<Message> messages) {
+    public DataExportDiagnosticsReport(Collection<Message> messages, DiagnosticsReportOptions reportOptions) {
         super();
         this.messages = messages == null || messages.isEmpty() ? new LinkedHashSet<Message>() : new LinkedHashSet<Message>(messages);
+        this.reportOptions = reportOptions;
+    }
+
+    /**
+     * Checks whether "permission denied" errors should be added to diagnostics report or not.
+     *
+     * @return <code>true</code> to add "permission denied" errors; otherwise <code>false</code>
+     */
+    public boolean isConsiderPermissionDeniedErrors() {
+        return reportOptions.isConsiderPermissionDeniedErrors();
     }
 
     /**

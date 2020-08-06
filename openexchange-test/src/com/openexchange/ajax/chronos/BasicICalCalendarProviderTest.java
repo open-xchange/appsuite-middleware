@@ -151,7 +151,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folder);
-        FolderUpdateResponse response = foldersApi.createFolder(CalendarFolderManager.DEFAULT_FOLDER_ID, defaultUserApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE, null);
+        FolderUpdateResponse response = foldersApi.createFolder(CalendarFolderManager.DEFAULT_FOLDER_ID, defaultUserApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE, null, null);
 
         assertNotNull(response.getError());
         assertEquals(response.getError(), "ICAL-PROV-4041", response.getCode());
@@ -185,7 +185,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folder);
-        FolderUpdateResponse response = foldersApi.createFolder(CalendarFolderManager.DEFAULT_FOLDER_ID, defaultUserApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE, null);
+        FolderUpdateResponse response = foldersApi.createFolder(CalendarFolderManager.DEFAULT_FOLDER_ID, defaultUserApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE, null, null);
 
         assertNotNull(response.getError());
         assertEquals(response.getError(), "ICAL-PROV-4041", response.getCode());

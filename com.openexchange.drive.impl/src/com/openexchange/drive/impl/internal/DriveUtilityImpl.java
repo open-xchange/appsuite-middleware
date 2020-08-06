@@ -97,7 +97,6 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.OriginAwareFileStorageFolder;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
-import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -599,13 +598,13 @@ public class DriveUtilityImpl implements DriveUtility {
         JSONObject result = new JSONObject(2);
 
         try {
-            FileStorageFolder[] subfolders = trashContent.getSubfolders();
+            FileStorageFolder[] subfolders = trashContent != null ? trashContent.getSubfolders() : null;
             if (subfolders != null && subfolders.length > 0) {
                 JSONArray folderArray = loadFolders(syncSession, subfolders);
                 result.put(DIRECTORIES, filterUnwantedFields(folderArray));
             }
 
-            SearchIterator<File> files = trashContent.getFiles();
+            SearchIterator<File> files = trashContent != null ? trashContent.getFiles() : null;
             if (files != null) {
                 JSONArray fileArray = loadFiles(syncSession, files);
                 if (fileArray.length() > 0) {

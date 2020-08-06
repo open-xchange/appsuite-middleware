@@ -55,6 +55,8 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CollectionUpdate;
@@ -97,6 +99,11 @@ public class IDManglingUpdateResult implements UpdateResult {
     @Override
     public SimpleCollectionUpdate<Attachment> getAttachmentUpdates() {
         return delegate.getAttachmentUpdates();
+    }
+
+    @Override
+    public CollectionUpdate<Conference, ConferenceField> getConferenceUpdates() {
+        return delegate.getConferenceUpdates();
     }
 
     @Override

@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.push.gcm;
 
+import static com.openexchange.dav.push.http.DavHttpClientConfiguration.HTTP_CLIENT_ID;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -62,12 +63,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,10 +83,8 @@ import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.version.VersionService;
 
 /**
  * {@link DavPushGateway}
@@ -97,9 +96,9 @@ public class DavPushGateway implements PushNotificationTransport {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DavPushGateway.class);
 
-    private final CloseableHttpClient httpClient;
     private final PushTransportOptions transportOptions;
     private final PushSubscribeFactory factory;
+
 
     /**
      * Initializes a new {@link DavPushGateway}.
@@ -110,7 +109,6 @@ public class DavPushGateway implements PushNotificationTransport {
     public DavPushGateway(PushSubscribeFactory factory, PushTransportOptions transportOptions) {
         super();
         this.factory = factory;
-        this.httpClient = initClient();
         this.transportOptions = transportOptions;
     }
 
@@ -244,12 +242,12 @@ public class DavPushGateway implements PushNotificationTransport {
      * @param clientData The client data to pass
      * @return The subscription token
      */
-    public String unsubscribe(Object clientData) throws OXException {
+    public String unsubscribe(Object clientData) {
         //TODO necessary?
         return transportOptions.getApplicationID(); //TODO: extract from or use response's "push-url"?
     }
 
-    private List<PushTransport> parsePushTransportsResponse(JSONObject responseObject) throws OXException {
+    private List<PushTransport> parsePushTransportsResponse(JSONObject responseObject) {
         if (null == responseObject) {
             return null;
         }
@@ -268,7 +266,7 @@ public class DavPushGateway implements PushNotificationTransport {
         return pushTransports;
     }
 
-    private void handlePushResponse(JSONObject responseObject) throws OXException {
+    private void handlePushResponse(JSONObject responseObject) {
         if (null == responseObject) {
             return;
         }
@@ -378,12 +376,12 @@ public class DavPushGateway implements PushNotificationTransport {
      */
     private JSONObject doPost(String uri, JSONObject body) throws OXException {
         HttpPost post = null;
-        CloseableHttpResponse response = null;
+        HttpResponse response = null;
         try {
             post = new HttpPost(uri);
             post.setEntity(new StringEntity(body.toString(), ContentType.APPLICATION_JSON));
             LOG.trace(">>> POST {}{}    {}", uri, System.lineSeparator(), body);
-            response = httpClient.execute(post);
+            response = getHttpClient().execute(post);
             StatusLine statusLine = response.getStatusLine();
             if (null != statusLine && HttpServletResponse.SC_OK == statusLine.getStatusCode()) {
                 JSONObject responseBody = parseJSONObject(response.getEntity());
@@ -395,7 +393,6 @@ public class DavPushGateway implements PushNotificationTransport {
             throw PushExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             close(post, response);
-            Streams.close(response);
         }
     }
 
@@ -418,6 +415,15 @@ public class DavPushGateway implements PushNotificationTransport {
         return null;
     }
 
+
+    private HttpClient getHttpClient() throws OXException {
+        HttpClientService httpClientService = Services.requireService(HttpClientService.class);
+        if (httpClientService == null) {
+            throw ServiceExceptionCode.absentService(HttpClientService.class);
+        }
+        return httpClientService.getHttpClient(HTTP_CLIENT_ID);
+    }
+
     /**
      * Closes the supplied HTTP request / response resources silently.
      *
@@ -434,6 +440,13 @@ public class DavPushGateway implements PushNotificationTransport {
                     LOG.debug("Error consuming HTTP response entity", e);
                 }
             }
+            if (response instanceof CloseableHttpResponse) {
+                try {
+                    ((CloseableHttpResponse) response).close();
+                } catch (Exception e) {
+                    LOG.debug("Error closing HTTP response", e);
+                }
+            }
         }
         if (null != request) {
             try {
@@ -443,22 +456,4 @@ public class DavPushGateway implements PushNotificationTransport {
             }
         }
     }
-
-    private static CloseableHttpClient initClient() {
-        VersionService optService = Services.optService(VersionService.class);
-        String versionString = null;
-        if (null == optService) {
-            versionString = "<unknown version>";
-        } else {
-            versionString = optService.getVersionString();
-        }
-        return HttpClients.getHttpClient(ClientConfig.newInstance("davpush")
-            .setUserAgent("OX DAV-Push Gateway Client v" + versionString)
-            .setMaxTotalConnections(100)
-            .setMaxConnectionsPerRoute(100)
-            .setConnectionTimeout(5000)
-            .setSocketReadTimeout(30000)
-        );
-    }
-
 }

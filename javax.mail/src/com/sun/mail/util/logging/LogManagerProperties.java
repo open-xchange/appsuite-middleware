@@ -1,69 +1,31 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * Copyright (c) 2009, 2019 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009, 2019 Jason Mehrens. All rights reserved.
  *
- * Copyright (c) 2009-2017 Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2009-2017 Jason Mehrens. All rights reserved.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0, which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
  *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common Development
- * and Distribution License("CDDL") (collectively, the "License").  You
- * may not use this file except in compliance with the License.  You can
- * obtain a copy of the License at
- * https://oss.oracle.com/licenses/CDDL+GPL-1.1
- * or LICENSE.txt.  See the License for the specific
- * language governing permissions and limitations under the License.
+ * This Source Code may also be made available under the following Secondary
+ * Licenses when the conditions for such availability set forth in the
+ * Eclipse Public License v. 2.0 are satisfied: GNU General Public License,
+ * version 2 with the GNU Classpath Exception, which is available at
+ * https://www.gnu.org/software/classpath/license.html.
  *
- * When distributing the software, include this License Header Notice in each
- * file and include the License file at LICENSE.txt.
- *
- * GPL Classpath Exception:
- * Oracle designates this particular file as subject to the "Classpath"
- * exception as provided by Oracle in the GPL Version 2 section of the License
- * file that accompanied this code.
- *
- * Modifications:
- * If applicable, add the following below the License Header, with the fields
- * enclosed by brackets [] replaced by your own identifying information:
- * "Portions Copyright [year] [name of copyright owner]"
- *
- * Contributor(s):
- * If you wish your version of this file to be governed by only the CDDL or
- * only the GPL Version 2, indicate your decision by adding "[Contributor]
- * elects to include this software in this distribution under the [CDDL or GPL
- * Version 2] license."  If you don't indicate a single choice of license, a
- * recipient has the option to distribute your version of this file under
- * either the CDDL, the GPL Version 2 or to extend the choice of license to
- * its licensees as provided above.  However, if you add GPL Version 2 code
- * and therefore, elected the GPL Version 2 license, then the option applies
- * only if the new code is made subject to such option by the copyright
- * holder.
+ * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
 package com.sun.mail.util.logging;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.ObjectStreamException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.logging.ErrorManager;
-import java.util.logging.Filter;
+import java.util.*;
+import java.util.logging.*;
 import java.util.logging.Formatter;
-import java.util.logging.Handler;
-import java.util.logging.LogManager;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-import java.util.logging.LoggingPermission;
 
 /**
  * An adapter class to allow the Mail API to access the LogManager properties.
@@ -135,9 +97,9 @@ final class LogManagerProperties extends Properties {
             if (!Comparable.class.isAssignableFrom(zdtoi.getReturnType())) {
                 throw new NoSuchMethodException(zdtoi.toString());
             }
-        } catch (RuntimeException ignore) {
-        } catch (Exception ignore) { //No need for specific catch.
-        } catch (LinkageError ignore) {
+        } catch (final RuntimeException ignore) {
+        } catch (final Exception ignore) { //No need for specific catch.
+        } catch (final LinkageError ignore) {
         } finally {
             if (lrgi == null || zisd == null || zdtoi == null) {
                 lrgi = null; //If any are null then clear all.
@@ -173,9 +135,9 @@ final class LogManagerProperties extends Properties {
         Object m;
         try {
             m = LogManager.getLogManager();
-        } catch (LinkageError restricted) {
+        } catch (final LinkageError restricted) {
             m = readConfiguration();
-        } catch (RuntimeException unexpected) {
+        } catch (final RuntimeException unexpected) {
             m = readConfiguration();
         }
         return m;
@@ -209,9 +171,9 @@ final class LogManagerProperties extends Properties {
                     in.close();
                 }
             }
-        } catch (RuntimeException permissionsOrMalformed) {
-        } catch (Exception ioe) {
-        } catch (LinkageError unexpected) {
+        } catch (final RuntimeException permissionsOrMalformed) {
+        } catch (final Exception ioe) {
+        } catch (final LinkageError unexpected) {
         }
         return props;
     }
@@ -235,7 +197,7 @@ final class LogManagerProperties extends Properties {
             if (m instanceof Properties) {
                 return ((Properties) m).getProperty(name);
             }
-        } catch (RuntimeException unexpected) {
+        } catch (final RuntimeException unexpected) {
         }
 
         if (m != null) {
@@ -243,8 +205,8 @@ final class LogManagerProperties extends Properties {
                 if (m instanceof LogManager) {
                     return ((LogManager) m).getProperty(name);
                 }
-            } catch (LinkageError restricted) {
-            } catch (RuntimeException unexpected) {
+            } catch (final LinkageError restricted) {
+            } catch (final RuntimeException unexpected) {
             }
         }
         return null;
@@ -266,12 +228,12 @@ final class LogManagerProperties extends Properties {
                     checked = true;
                     ((LogManager) m).checkAccess();
                 }
-            } catch (SecurityException notAllowed) {
+            } catch (final SecurityException notAllowed) {
                 if (checked) {
                     throw notAllowed;
                 }
-            } catch (LinkageError restricted) {
-            } catch (RuntimeException unexpected) {
+            } catch (final LinkageError restricted) {
+            } catch (final RuntimeException unexpected) {
             }
         }
 
@@ -305,7 +267,7 @@ final class LogManagerProperties extends Properties {
                 global.removeHandler((Handler) null);
                 checked = true;
             }
-        } catch (NullPointerException unexpected) {
+        } catch (final NullPointerException unexpected) {
         }
 
         if (!checked) {
@@ -348,10 +310,10 @@ final class LogManagerProperties extends Properties {
                 return (Comparable<?>) m.invoke((Object) null,
                         LR_GET_INSTANT.invoke(record),
                         ZI_SYSTEM_DEFAULT.invoke((Object) null));
-            } catch (RuntimeException ignore) {
+            } catch (final RuntimeException ignore) {
                 assert LR_GET_INSTANT != null
                         && ZI_SYSTEM_DEFAULT != null : ignore;
-            } catch (InvocationTargetException ite) {
+            } catch (final InvocationTargetException ite) {
                 final Throwable cause = ite.getCause();
                 if (cause instanceof Error) {
                     throw (Error) cause;
@@ -360,7 +322,7 @@ final class LogManagerProperties extends Properties {
                 } else { //Should never happen.
                     throw new UndeclaredThrowableException(ite);
                 }
-            } catch (Exception ignore) {
+            } catch (final Exception ignore) {
             }
         }
         return null;
@@ -391,9 +353,9 @@ final class LogManagerProperties extends Properties {
             } else {
                 throw new NoSuchMethodException(m.toString());
             }
-        } catch (ExceptionInInitializerError EIIE) {
+        } catch (final ExceptionInInitializerError EIIE) {
             throw wrapOrThrow(EIIE);
-        } catch (InvocationTargetException ite) {
+        } catch (final InvocationTargetException ite) {
             throw paramOrError(ite);
         }
     }
@@ -430,9 +392,9 @@ final class LogManagerProperties extends Properties {
                 throw new NoSuchMethodException(toMillis.toString());
             }
             return (Long) toMillis.invoke(parse.invoke(null, value));
-        } catch (ExceptionInInitializerError EIIE) {
+        } catch (final ExceptionInInitializerError EIIE) {
             throw wrapOrThrow(EIIE);
-        } catch (InvocationTargetException ite) {
+        } catch (final InvocationTargetException ite) {
             throw paramOrError(ite);
         }
     }
@@ -566,14 +528,14 @@ final class LogManagerProperties extends Properties {
                     && Comparator.class.isAssignableFrom(m.getReturnType())) {
                 try {
                     reverse = (Comparator<T>) m.invoke(c);
-                } catch (ExceptionInInitializerError eiie) {
+                } catch (final ExceptionInInitializerError eiie) {
                     throw wrapOrThrow(eiie);
                 }
             }
-        } catch (NoSuchMethodException ignore) {
-        } catch (IllegalAccessException ignore) {
-        } catch (RuntimeException ignore) {
-        } catch (InvocationTargetException ite) {
+        } catch (final NoSuchMethodException ignore) {
+        } catch (final IllegalAccessException ignore) {
+        } catch (final RuntimeException ignore) {
+        } catch (final InvocationTargetException ite) {
             paramOrError(ite); //Ignore invocation bugs (returned values).
         }
 
@@ -699,7 +661,7 @@ final class LogManagerProperties extends Properties {
                 }
             }
             return traces.toArray(new String[traces.size()]);
-        } catch (InvocationTargetException ITE) {
+        } catch (final InvocationTargetException ITE) {
             throw paramOrError(ITE);
         }
     }
@@ -731,21 +693,21 @@ final class LogManagerProperties extends Properties {
             if (type.isAssignableFrom(clazz)) {
                 try {
                     return type.cast(clazz.getConstructor().newInstance());
-                } catch (InvocationTargetException ITE) {
+                } catch (final InvocationTargetException ITE) {
                     throw paramOrError(ITE);
                 }
             } else {
                 throw new ClassCastException(clazz.getName()
                         + " cannot be cast to " + type.getName());
             }
-        } catch (NoClassDefFoundError NCDFE) {
+        } catch (final NoClassDefFoundError NCDFE) {
             //No class def found can occur on filesystems that are
             //case insensitive (BUG ID 6196068).  In some cases, we allow class
             //names or literal names, this code guards against the case where a
             //literal name happens to match a class name in a different case.
             //This is also a nice way to adapt this error for the error manager.
             throw new ClassNotFoundException(NCDFE.toString(), NCDFE);
-        } catch (ExceptionInInitializerError EIIE) {
+        } catch (final ExceptionInInitializerError EIIE) {
             throw wrapOrThrow(EIIE);
         }
     }
@@ -873,8 +835,8 @@ final class LogManagerProperties extends Properties {
      *
      * @param parent the parent properties.
      * @param prefix the namespace prefix.
-     * @throws NullPointerException if <tt>prefix</tt> or <tt>parent</tt> is
-     * <tt>null</tt>.
+     * @throws NullPointerException if <code>prefix</code> or
+     * <code>parent</code> is <code>null</code>.
      */
     LogManagerProperties(final Properties parent, final String prefix) {
         super(parent);

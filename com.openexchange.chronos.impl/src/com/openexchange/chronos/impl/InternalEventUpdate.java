@@ -63,6 +63,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
+import static com.openexchange.chronos.common.CalendarUtils.removeNonMatching;
 import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceId;
 import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceIds;
 import static com.openexchange.chronos.impl.Utils.asList;
@@ -92,6 +93,8 @@ import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.Conference;
+import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
@@ -104,6 +107,7 @@ import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DeltaEvent;
 import com.openexchange.chronos.common.EventOccurrence;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.common.mapping.ConferenceMapper;
 import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -129,15 +133,6 @@ public class InternalEventUpdate implements EventUpdate {
 
     private static final Logger LOG = LoggerFactory.getLogger(InternalEventUpdate.class);
 
-    /**
-     * Event fields that, when modified, indicate that a <i>re-scheduling</i> of the calendar object resource is assumed, usually leading
-     * to appropriate notifications and scheduling messages being sent out to the attendees.
-     */
-    private static final EventField[] RESCHEDULE_FIELDS = new EventField[] {
-        EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.ATTACHMENTS, EventField.GEO,
-        EventField.ORGANIZER, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_RULE
-    };
-
     private final CalendarSession session;
     private final CalendarUser calendarUser;
     private final CalendarFolder folder;
@@ -145,10 +140,12 @@ public class InternalEventUpdate implements EventUpdate {
     private final InternalAttendeeUpdates attendeeUpdates;
     private final SimpleCollectionUpdate<Attachment> attachmentUpdates;
     private final CollectionUpdate<Alarm, AlarmField> alarmUpdates;
+    private final CollectionUpdate<Conference, ConferenceField> conferenceUpdates;
     private final ItemUpdate<Event, EventField> eventUpdate;
     private final Event deltaEvent;
     private final List<Event> originalChangeExceptions;
     private final CollectionUpdate<Event, EventField> exceptionUpdates;
+    private final Date timestamp;
 
     /**
      * Initializes a new {@link InternalEventUpdate}.
@@ -168,20 +165,22 @@ public class InternalEventUpdate implements EventUpdate {
         this.folder = folder;
         this.calendarUser = Utils.getCalendarUser(session, folder);
         this.originalChangeExceptions = originalChangeExceptions;
+        this.timestamp = timestamp;
         /*
          * apply, check, adjust event update as needed
          */
         Event changedEvent = apply(originalEvent, updatedEvent, ignoredFields);
         checkIntegrity(originalEvent, changedEvent, originalSeriesMasterEvent);
-        ensureConsistency(originalEvent, changedEvent, timestamp);
+        ensureConsistency(originalEvent, changedEvent);
         List<Event> changedChangeExceptions = adjustExceptions(originalEvent, changedEvent, originalChangeExceptions);
         /*
          * derive & take over event update
          */
         Set<EventField> differentFields = EventMapper.getInstance().getDifferentFields(originalEvent, changedEvent, true);
         this.eventUpdate = new DefaultItemUpdate<Event, EventField>(originalEvent, changedEvent, differentFields);
-        this.attendeeUpdates = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalEvent, changedEvent);
+        this.attendeeUpdates = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalEvent, changedEvent, timestamp);
         this.attachmentUpdates = CalendarUtils.getAttachmentUpdates(originalEvent.getAttachments(), changedEvent.getAttachments());
+        this.conferenceUpdates = CalendarUtils.getConferenceUpdates(originalEvent.getConferences(), changedEvent.getConferences());
         this.alarmUpdates = AlarmUtils.getAlarmUpdates(originalEvent.getAlarms(), changedEvent.getAlarms());
         this.exceptionUpdates = CalendarUtils.getEventUpdates(originalChangeExceptions, changedChangeExceptions, EventField.ID);
         /*
@@ -202,7 +201,7 @@ public class InternalEventUpdate implements EventUpdate {
     /**
      * Gets a list of newly deleted exceptions within a recurring event series, which includes both deleted change exceptions, as well as
      * virtual event occurrences for newly indicated delete exception events.
-     * 
+     *
      * @return The deleted exceptions, or an empty list of there are none
      */
     public List<Event> getDeletedExceptions() {
@@ -229,7 +228,7 @@ public class InternalEventUpdate implements EventUpdate {
 
     /**
      * Gets the <i>original</i> calendar object resource, i.e. the calendar resource before any changes have been applied.
-     * 
+     *
      * @return The original calendar object resource
      */
     public CalendarObjectResource getOriginalResource() {
@@ -242,18 +241,12 @@ public class InternalEventUpdate implements EventUpdate {
      * <p/>
      * Besides changes to the event's recurrence, start- or end-time, this also includes further important event properties, or changes
      * in the attendee line-up.
-     * 
+     *
      * @return <code>true</code> if the calendar resource is re-scheduled along with the update, <code>false</code>, otherwise
+     * @throws OXException
      */
     public boolean isReschedule() {
-        if (containsAnyChangeOf(RESCHEDULE_FIELDS)) {
-            return true;
-        }
-        InternalAttendeeUpdates attendeeUpdates = getAttendeeUpdates();
-        if (0 < attendeeUpdates.getAddedItems().size() || 0 < attendeeUpdates.getRemovedItems().size()) {
-            return true;
-        }
-        return false;
+        return Utils.isReschedule(this);
     }
 
     @Override
@@ -292,9 +285,14 @@ public class InternalEventUpdate implements EventUpdate {
     }
 
     @Override
+    public CollectionUpdate<Conference, ConferenceField> getConferenceUpdates() {
+        return conferenceUpdates;
+    }
+
+    @Override
     public String toString() {
-        return "InternalEventUpdate [eventUpdate=" + eventUpdate + ", attendeeUpdates=" + attendeeUpdates + 
-            ", attachmentUpdates=" + attachmentUpdates + ", exceptionUpdates=" + exceptionUpdates + "]";
+        return "InternalEventUpdate [eventUpdate=" + eventUpdate + ", attendeeUpdates=" + attendeeUpdates +
+            ", attachmentUpdates=" + attachmentUpdates + ", conferenceUpdates=" + conferenceUpdates + ", exceptionUpdates=" + exceptionUpdates + "]";
     }
 
     /**
@@ -356,11 +354,11 @@ public class InternalEventUpdate implements EventUpdate {
         return changedChangeExceptions;
     }
 
-    private void ensureConsistency(Event originalEvent, Event updatedEvent, Date timestamp) throws OXException {
+    private void ensureConsistency(Event originalEvent, Event updatedEvent) throws OXException {
         Consistency.adjustAllDayDates(updatedEvent);
         Consistency.adjustTimeZones(session, calendarUser.getEntity(), updatedEvent, originalEvent);
         Consistency.adjustRecurrenceRule(updatedEvent);
-
+        Consistency.normalizeRecurrenceIDs(originalEvent.getStartDate(), updatedEvent);
         /*
          * adjust recurrence-related properties
          */
@@ -418,7 +416,7 @@ public class InternalEventUpdate implements EventUpdate {
                 /*
                  * deny different values for change exceptions
                  */
-                if (isSeriesException(originalEvent) && (null == originalSeriesMaster || 
+                if (isSeriesException(originalEvent) && (null == originalSeriesMaster ||
                     false == EventMapper.getInstance().get(EventField.ATTENDEE_PRIVILEGES).equals(originalSeriesMaster, updatedEvent))) {
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), updatedField);
                 }
@@ -447,7 +445,7 @@ public class InternalEventUpdate implements EventUpdate {
                     /*
                      * deny different values for change exceptions
                      */
-                    if (isSeriesException(originalEvent) && (null == originalSeriesMaster || 
+                    if (isSeriesException(originalEvent) && (null == originalSeriesMaster ||
                         false == EventMapper.getInstance().get(EventField.CLASSIFICATION).equals(originalSeriesMaster, updatedEvent))) {
                         throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(
                             String.valueOf(updatedEvent.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
@@ -567,7 +565,7 @@ public class InternalEventUpdate implements EventUpdate {
          * (virtually) apply & take over attendee updates in changed event
          */
         if (updatedFields.contains(EventField.ATTENDEES)) {
-            List<Attendee> changedAttendees = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalEvent, updatedEvent).previewChanges();
+            List<Attendee> changedAttendees = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalEvent, updatedEvent, timestamp).previewChanges();
             /*
              * only consider 'own' attendee in attendee scheduling resources as needed
              */
@@ -663,18 +661,17 @@ public class InternalEventUpdate implements EventUpdate {
      * @param originalEvent The original event
      * @param updatedEvent The updated event
      * @return <code>true</code> if the event's sequence number should be updated, <code>false</code>, otherwise
-     * @see com.openexchange.chronos.impl.performer.AbstractUpdatePerformer 
+     * @see com.openexchange.chronos.impl.performer.AbstractUpdatePerformer
      */
-    private static boolean needsSequenceNumberIncrement(Event originalEvent, Event updatedEvent) throws OXException {
+    private static boolean needsSequenceNumberIncrement(Event originalEvent, Event updatedEvent) {
         EventField[] relevantFields = new EventField[] {
             EventField.SUMMARY, EventField.LOCATION, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE,
-            EventField.RECURRENCE_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.TRANSP
+            EventField.RECURRENCE_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.TRANSP, EventField.CONFERENCES
         };
         if (false == EventMapper.getInstance().equalsByFields(originalEvent, updatedEvent, relevantFields)) {
             return true;
         }
-        CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = CalendarUtils.getAttendeeUpdates(originalEvent.getAttendees(), updatedEvent.getAttendees());
-        if (0 < attendeeUpdates.getAddedItems().size() || 0 < attendeeUpdates.getRemovedItems().size()) {
+        if (false == matches(originalEvent.getAttendees(), updatedEvent.getAttendees())) {
             //TODO: more distinct evaluation of attendee updates
             return true;
         }
@@ -721,8 +718,14 @@ public class InternalEventUpdate implements EventUpdate {
         /*
          * apply added & removed attendees
          */
-        InternalAttendeeUpdates attendeeUpdates = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalMaster, updatedMaster);
+        InternalAttendeeUpdates attendeeUpdates = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalMaster, updatedMaster, timestamp);
         changedChangeExceptions = propagateAttendeeUpdates(attendeeUpdates, changedChangeExceptions);
+        /*
+         * apply added & removed conferences
+         */
+        CollectionUpdate<Conference, ConferenceField> conferenceUpdates = CalendarUtils.getConferenceUpdates(originalMaster.getConferences(), updatedMaster.getConferences());
+        changedChangeExceptions = propagateConferenceUpdates(originalMaster.getConferences(), conferenceUpdates, changedChangeExceptions);
+
         return changedChangeExceptions;
     }
 
@@ -781,7 +784,53 @@ public class InternalEventUpdate implements EventUpdate {
         return changeExceptions;
     }
 
-    private List<Event> removeInvalidRecurrenceIds(Event seriesMaster, List<Event> changeExceptions) throws OXException {
+    /**
+     * Propagates any added and removed conferences found in a specific collection update to one or more events, i.e. added conferences are
+     * also added in each conference list of the supplied events, unless they do not already exist, and removed conferences are also removed
+     * from each attendee list if contained.
+     *
+     * @param originalSeriesConferences The original conferences of the series master event, or <code>null</code> if there were none
+     * @param conferenceUpdates The conference collection update to propagate
+     * @param changeExceptions The list of events to propagate the conference updates to
+     * @return The (possibly adjusted) list of events
+     */
+    private static List<Event> propagateConferenceUpdates(List<Conference> originalSeriesConferences, CollectionUpdate<Conference, ConferenceField> conferenceUpdates, List<Event> changeExceptions) throws OXException {
+        if (null == conferenceUpdates || conferenceUpdates.isEmpty() || isNullOrEmpty(changeExceptions)) {
+            return changeExceptions;
+        }
+        for (Event changeException : changeExceptions) {
+            /*
+             * propagate collection update if change exception's conference collection matches the original conferences of the series
+             */
+            if (false == CalendarUtils.getConferenceUpdates(originalSeriesConferences, changeException.getConferences()).isEmpty()) {
+                continue; // already diverged
+            }
+            for (Conference addedItem : conferenceUpdates.getAddedItems()) {
+                Conference conference = ConferenceMapper.getInstance().copy(addedItem, null, (ConferenceField[]) null);
+                conference.removeId();
+                if (null == changeException.getConferences()) {
+                    changeException.setConferences(new ArrayList<Conference>());
+                }
+                changeException.getConferences().add(addedItem);
+            }
+            for (Conference removedItem : conferenceUpdates.getRemovedItems()) {
+                Conference matchingConference = find(changeException.getConferences(), removedItem);
+                if (null != matchingConference) {
+                    changeException.getConferences().remove(matchingConference);
+                }
+            }
+            for (ItemUpdate<Conference, ConferenceField> updatedItem : conferenceUpdates.getUpdatedItems()) {
+                Conference matchingConference = find(changeException.getConferences(), updatedItem.getOriginal());
+                if (null != matchingConference) {
+                    ConferenceField[] updatedFields = updatedItem.getUpdatedFields().toArray(new ConferenceField[updatedItem.getUpdatedFields().size()]);
+                    ConferenceMapper.getInstance().copy(updatedItem.getUpdate(), matchingConference, updatedFields);
+                }
+            }
+        }
+        return changeExceptions;
+    }
+
+    protected List<Event> removeInvalidRecurrenceIds(Event seriesMaster, List<Event> changeExceptions) throws OXException {
         /*
          * build list of possible exception dates
          */
@@ -798,19 +847,19 @@ public class InternalEventUpdate implements EventUpdate {
          */
         if (false == isNullOrEmpty(seriesMaster.getDeleteExceptionDates())) {
             SortedSet<RecurrenceId> newDeleteExceptionDates = new TreeSet<RecurrenceId>(seriesMaster.getDeleteExceptionDates());
-            if (newDeleteExceptionDates.retainAll(possibleExceptionDates)) {
+            if (removeNonMatching(newDeleteExceptionDates, possibleExceptionDates)) {
                 seriesMaster.setDeleteExceptionDates(newDeleteExceptionDates);
             }
         }
         if (false == isNullOrEmpty(seriesMaster.getChangeExceptionDates())) {
             SortedSet<RecurrenceId> newChangeExceptionDates = new TreeSet<RecurrenceId>(seriesMaster.getChangeExceptionDates());
-            if (newChangeExceptionDates.retainAll(possibleExceptionDates)) {
+            if (removeNonMatching(newChangeExceptionDates, possibleExceptionDates)) {
                 seriesMaster.setChangeExceptionDates(newChangeExceptionDates);
             }
         }
         if (false == isNullOrEmpty(changeExceptions)) {
             List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions);
-            if (newChangeExceptions.removeIf(event -> false == possibleExceptionDates.contains(event.getRecurrenceId()))) {
+            if (newChangeExceptions.removeIf(event -> false == contains(possibleExceptionDates, event.getRecurrenceId()))) {
                 changeExceptions = newChangeExceptions;
             }
         }
@@ -829,25 +878,25 @@ public class InternalEventUpdate implements EventUpdate {
         if (false == isNullOrEmpty(seriesMaster.getDeleteExceptionDates())) {
             if (false == isNullOrEmpty(changeExceptions)) {
                 List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions);
-                if (newChangeExceptions.removeIf(event -> seriesMaster.getDeleteExceptionDates().contains(event.getRecurrenceId()))) {
+                if (newChangeExceptions.removeIf(event -> contains(seriesMaster.getDeleteExceptionDates(), event.getRecurrenceId()))) {
                     changeExceptions = newChangeExceptions;
                 }
             }
             if (false == isNullOrEmpty(seriesMaster.getChangeExceptionDates())) {
                 SortedSet<RecurrenceId> newChangeExceptionDates = new TreeSet<RecurrenceId>(seriesMaster.getChangeExceptionDates());
-                if (newChangeExceptionDates.removeAll(seriesMaster.getDeleteExceptionDates())) {
+                if (newChangeExceptionDates.removeIf(recurrenceId -> contains(seriesMaster.getDeleteExceptionDates(), recurrenceId))) {
                     seriesMaster.setChangeExceptionDates(newChangeExceptionDates);
                 }
             }
         }
         return changeExceptions;
     }
-    
+
     /**
      * Removes any <i>redundant</i> change exception events in case there are multiple defined for the same recurrence identifier so that
      * the series' consistency is guaranteed. In such a case, only the 'first' one is preserved in the list of change exception events.
      * Also, the series master event's list of change exception dates is updated accordingly.
-     * 
+     *
      * @param seriesMaster The series master event
      * @param changeExceptions The change exception events
      * @return The resulting list of (possibly adjusted) change exceptions
@@ -858,7 +907,7 @@ public class InternalEventUpdate implements EventUpdate {
              * ensure series master's change exception dates is empty, too
              */
             if (false == isNullOrEmpty(seriesMaster.getChangeExceptionDates())) {
-                LOG.warn("Inconsistent list of change exception dates in series master {}, correcting to {}.", 
+                LOG.warn("Inconsistent list of change exception dates in series master {}, correcting to {}.",
                     seriesMaster.getChangeExceptionDates(), Collections.emptyList());
                 seriesMaster.setChangeExceptionDates(null);
             }
@@ -871,13 +920,14 @@ public class InternalEventUpdate implements EventUpdate {
         List<Event> checkedChangeExceptions = new ArrayList<Event>(changeExceptions.size());
         SortedSet<RecurrenceId> checkedChangeExceptionDates = new TreeSet<RecurrenceId>();
         for (Event changeException : changeExceptions) {
-            if (checkedChangeExceptionDates.add(changeException.getRecurrenceId())) {
+            if (false == contains(checkedChangeExceptionDates, changeException.getRecurrenceId())) {
+                checkedChangeExceptionDates.add(changeException.getRecurrenceId());
                 checkedChangeExceptions.add(changeException);
             } else {
                 LOG.warn("Duplicate change exception event {}, skipping.", changeException);
             }
         }
-        if (false == checkedChangeExceptionDates.equals(seriesMaster.getChangeExceptionDates())) {
+        if (false == getExceptionDateUpdates(checkedChangeExceptionDates, seriesMaster.getChangeExceptionDates()).isEmpty()) {
             LOG.warn("Inconsistent list of change exception dates in series master {}, correcting to {}.", seriesMaster.getChangeExceptionDates(), checkedChangeExceptionDates);
             seriesMaster.setChangeExceptionDates(checkedChangeExceptionDates);
         }
@@ -935,7 +985,7 @@ public class InternalEventUpdate implements EventUpdate {
 
     /**
      * Resets the participation status of all individual attendees - excluding the current calendar user - to
-     * {@link ParticipationStatus#NEEDS_ACTION} for a specific event, including a previously set attendee comment.
+     * {@link ParticipationStatus#NEEDS_ACTION} for a specific event.
      *
      * @param attendees The event's attendees
      */
@@ -943,7 +993,7 @@ public class InternalEventUpdate implements EventUpdate {
         for (Attendee attendee : CalendarUtils.filter(attendees, null, CalendarUserType.INDIVIDUAL)) {
             if (calendarUser.getEntity() != attendee.getEntity()) {
                 attendee.setPartStat(ParticipationStatus.NEEDS_ACTION); //TODO: or reset to initial partstat based on folder type?
-                attendee.setComment(null);
+                attendee.setTimestamp(timestamp.getTime());
                 attendee.setHidden(false);
                 continue;
             }

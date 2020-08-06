@@ -2,6 +2,7 @@
 title: createcontext
 icon: far fa-circle
 tags: Administration, Command Line tools, Context
+package: open-xchange-admin
 ---
 
 # NAME
@@ -87,6 +88,9 @@ This command line tool creates create new contexts. A context is an independent 
 **--responsetimeout**
 : The optional response timeout in seconds when reading data from server (default: 0s; infinite).
 
+**--gabMode** *gabMode*
+: The optional modus the global address book shall operate on. Currently 'global' and 'individual' are known values. If the mode 'global' is chosen, the special "all users and groups" permission will grant access to the global address book for users. If the mode 'individual' is chosen, each user will have a dedicated permission for the global address book. 'individual' is the default. Please keep in mind that the modus will affect the response for folder requests regarding the global address book.
+
 # Importing CSV Files
 With the `--csv-import <CSV file>` option a full path to a CSV file with user data to import can be specified. This option makes mandatory command line options obsolete, except credential options (if needed). But they have to be set in the CSV file.
 
@@ -104,4 +108,4 @@ Creates a context.
 
 # SEE ALSO
 
-[deletecontext(1)](deletecontext), [listcontext(1)](listcontext), [changecontext(1)](changecontext), [enablecontext(1)](enablecontext), [disablecontext(1)](disablecontext), [disableallcontexts(1)](disableallcontexts), [enableallcontexts(1)](enableallcontexts), [getcontextcapabilities(1)](getcontextcapabilities)
+[deletecontext(1)](deletecontext), [listcontext(1)](listcontext), [changecontext(1)](changecontext), [enablecontext(1)](enablecontext), [disablecontext(1)](disablecontext), [disableallcontexts(1)](disableallcontexts), [enableallcontexts(1)](enableallcontexts), [getcontextcapabilities(1)](getcontextcapabilities), [restoregabdefaults](1)

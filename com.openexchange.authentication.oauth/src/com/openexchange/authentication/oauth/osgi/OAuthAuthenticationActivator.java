@@ -50,21 +50,26 @@
 package com.openexchange.authentication.oauth.osgi;
 
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.oauth.http.OAuthAuthenticationHttpClientConfig;
 import com.openexchange.authentication.oauth.impl.DefaultOAuthAuthenticationConfig;
 import com.openexchange.authentication.oauth.impl.OAuthAuthenticationConfig;
 import com.openexchange.authentication.oauth.impl.PasswordGrantAuthentication;
 import com.openexchange.authentication.oauth.impl.PasswordGrantAuthenticationFailedHandler;
 import com.openexchange.authentication.oauth.impl.PasswordGrantSessionInspector;
 import com.openexchange.authentication.oauth.impl.SessionParameters;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.oauth.SessionOAuthTokenService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
 import com.openexchange.user.UserService;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link OAuthAuthenticationActivator}
@@ -88,20 +93,37 @@ public class OAuthAuthenticationActivator extends HousekeepingActivator {
             ContextService.class,
             UserService.class,
             SessiondService.class,
-            SessionOAuthTokenService.class
+            SessionOAuthTokenService.class,
+            ConfigurationService.class
         };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        trackService(VersionService.class);
+        trackService(HttpClientService.class);
+        openTrackers();
+
+        // Initialize configuration for out-bound HTTP traffic
+        registerService(SpecificHttpClientConfigProvider.class, new OAuthAuthenticationHttpClientConfig(this));
+
         OAuthAuthenticationConfig config = new DefaultOAuthAuthenticationConfig(getService(LeanConfigurationService.class));
         PasswordGrantAuthentication passwordGrantAuthentication = new PasswordGrantAuthentication(config, this);
         registerService(AuthenticationService.class, passwordGrantAuthentication);
         registerService(SessionStorageParameterNamesProvider.class, new SessionParameters());
         PasswordGrantSessionInspector sessionInspector =
-            new PasswordGrantSessionInspector(getService(SessionOAuthTokenService.class), getService(SessiondService.class), config);
+            new PasswordGrantSessionInspector(config, this);
         registerService(SessionInspectorService.class, sessionInspector);
         registerService(AuthenticationFailedHandler.class, new PasswordGrantAuthenticationFailedHandler(), 100);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        HttpClientService httpClientService = getService(HttpClientService.class);
+        if (httpClientService != null) {
+            httpClientService.destroyHttpClient(OAuthAuthenticationHttpClientConfig.getClientIdOAuthAuthentication());
+        }
+        super.stopBundle();
     }
 
 }

@@ -91,6 +91,8 @@ public abstract class AbstractFolder implements Folder, Serializable {
     protected String[] subfolders;
 
     protected boolean subscribed;
+    
+    protected UsedForSync usedForSync;
 
     protected boolean subscribedSubfolders;
 
@@ -348,6 +350,16 @@ public abstract class AbstractFolder implements Folder, Serializable {
     @Override
     public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
         this.subscribedSubfolders = subscribedSubfolders;
+    }
+    
+    @Override
+    public void setUsedForSync(UsedForSync usedForSync) {
+        this.usedForSync = usedForSync;
+    }
+    
+    @Override
+    public UsedForSync getUsedForSync() {
+        return usedForSync == null ? UsedForSync.DEFAULT : usedForSync;
     }
 
     @Override

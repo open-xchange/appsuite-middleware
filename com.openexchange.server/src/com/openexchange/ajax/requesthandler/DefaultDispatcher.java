@@ -52,12 +52,14 @@ package com.openexchange.ajax.requesthandler;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ALLOW_ENQUEUE;
 import static com.openexchange.ajax.requesthandler.AJAXRequestDataTools.parseBoolParameter;
 import static com.openexchange.java.Autoboxing.I;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -93,6 +95,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 
 /**
  * {@link DefaultDispatcher} - The default {@link Dispatcher dispatcher} implementation.
@@ -101,7 +105,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DefaultDispatcher implements Dispatcher {
 
+    private static final String UNKNOWN_METRIC_RECORD = "UNKNOWN";
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultDispatcher.class);
+
+    private static final String OK_RECORD_STATUS = "OK";
 
     private final DispatcherListenerRegistry listenerRegistry;
 
@@ -161,7 +169,12 @@ public class DefaultDispatcher implements Dispatcher {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final AJAXState state, final ServerSession session) throws OXException {
+        final long startTime = System.currentTimeMillis();
+        String moduleToRecord = UNKNOWN_METRIC_RECORD;
+        String actionToRecord = UNKNOWN_METRIC_RECORD;
+
         if (null == session) {
+            recordRequest(moduleToRecord, actionToRecord, AjaxExceptionCodes.MISSING_PARAMETER.getCategory().toString(), System.currentTimeMillis() - startTime);
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_SESSION);
         }
 
@@ -176,15 +189,15 @@ public class DefaultDispatcher implements Dispatcher {
             RequestContextHolder.set(requestContext);
 
             // Determine action factory and yield an action executing the request
-            AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
-            if (factory == null) {
-                throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
-            }
+            FactoryAndModule factoryAndModule = optFactoryAndModule(modifiedRequestData.getModule()).orElseThrow(() -> AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule()));
+            AJAXActionServiceFactory factory = factoryAndModule.factory;
+            moduleToRecord = factoryAndModule.module;
 
             AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
             if (action == null) {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
             }
+            actionToRecord = modifiedRequestData.getAction();
 
             // Load request body if stream is not preferred
             if (false == preferStream(modifiedRequestData.getModule(), modifiedRequestData.getAction(), action)) {
@@ -244,7 +257,9 @@ public class DefaultDispatcher implements Dispatcher {
                         // Enqueue (if not computed in time)
                         try {
                             long maxRequestAgeMillis = jobQueue.getMaxRequestAgeMillis();
-                            return jobQueue.enqueueAndWait(job.build(), maxRequestAgeMillis, TimeUnit.MILLISECONDS).get(true);
+                            final AJAXRequestResult result = jobQueue.enqueueAndWait(job.build(), maxRequestAgeMillis, TimeUnit.MILLISECONDS).get(true);
+                            recordRequest(moduleToRecord, actionToRecord, OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
+                            return result;
                         } catch (InterruptedException e) {
                             // Keep interrupted state
                             Thread.currentThread().interrupt();
@@ -252,13 +267,16 @@ public class DefaultDispatcher implements Dispatcher {
                         } catch (EnqueuedException e) {
                             // Result not computed in time
                             LOG.debug("Action \"{}\" of module \"{}\" could not be executed in time for user {} in context {}.", requestData.getAction(), requestData.getModule(), I(session.getUserId()), I(session.getContextId()), e);
+                            recordRequest(moduleToRecord, actionToRecord, OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
                             return new AJAXRequestResult(e.getJobInfo(), "enqueued");
                         }
                     }
                 }
             }
 
-            return doPerform(action, factory, modifiedRequestData, state, customizers, session);
+            AJAXRequestResult result = doPerform(action, factory, modifiedRequestData, state, customizers, session);
+            recordRequest(moduleToRecord, actionToRecord, OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
+            return result;
         } catch (OXException e) {
             for (AJAXActionCustomizer customizer : customizers) {
                 if (customizer instanceof AJAXExceptionHandler) {
@@ -273,6 +291,7 @@ public class DefaultDispatcher implements Dispatcher {
                 UserAwareSSLConfigurationService userAwareSSLConfigurationService = ServerServiceRegistry.getInstance().getService(UserAwareSSLConfigurationService.class);
                 if (null != userAwareSSLConfigurationService) {
                     if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
+                        recordRequest(moduleToRecord, actionToRecord, SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.getCategory().toString(), System.currentTimeMillis() - startTime);
                         throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(e.getDisplayArgs());
                     }
                 }
@@ -282,21 +301,25 @@ public class DefaultDispatcher implements Dispatcher {
                 Throwable t = ExceptionUtils.getRootCause(e);
                 if (t instanceof OXException) {
                     OXException oxe = (OXException) t;
+                    recordRequest(moduleToRecord, actionToRecord, oxe.getCategory().toString(), System.currentTimeMillis() - startTime);
                     throw oxe;
                 }
             }
+            recordRequest(moduleToRecord, actionToRecord, e.getCategory().toString(), System.currentTimeMillis() - startTime);
             throw e;
         } catch (RuntimeException e) {
             if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
                 // Handle special Rhino wrapper error
                 Throwable wrapped = e.getCause();
                 if (wrapped instanceof OXException) {
+                    recordRequest(moduleToRecord, actionToRecord, ((OXException)wrapped).getCategory().toString(), System.currentTimeMillis() - startTime);
                     throw (OXException) wrapped;
                 }
             }
 
             // Wrap unchecked exception
             addLogProperties(requestData, true);
+            recordRequest(moduleToRecord, actionToRecord, AjaxExceptionCodes.UNEXPECTED_ERROR.getCategory().toString(), System.currentTimeMillis() - startTime);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             RequestContextHolder.reset();
@@ -508,6 +531,41 @@ public class DefaultDispatcher implements Dispatcher {
 
         return null;
     }
+
+    /**
+     * Records the duration of a request
+     *
+     * @param module The name of the action's module
+     * @param action The name of the action
+     * @param status The status code of the request
+     * @param durationMillis The duration in milliseconds
+     */
+    private static void recordRequest(String module, String action, String status, long durationMillis) {
+        if(module != null && action != null && status != null) {
+            Timer timer = Timer.builder("appsuite.httpapi.requests")
+                .tags("module", module, "action", action, "status", status)
+                .description("HTTP API request times")
+                .serviceLevelObjectives(
+                    Duration.ofMillis(50),
+                    Duration.ofMillis(100),
+                    Duration.ofMillis(150),
+                    Duration.ofMillis(200),
+                    Duration.ofMillis(250),
+                    Duration.ofMillis(300),
+                    Duration.ofMillis(400),
+                    Duration.ofMillis(500),
+                    Duration.ofMillis(750),
+                    Duration.ofSeconds(1),
+                    Duration.ofSeconds(2),
+                    Duration.ofSeconds(5),
+                    Duration.ofSeconds(10),
+                    Duration.ofSeconds(30),
+                    Duration.ofMinutes(1))
+                .register(Metrics.globalRegistry);
+            timer.record(durationMillis, TimeUnit.MILLISECONDS);
+        }
+    }
+
 
     // ------------------------------------------------ Execution stuff -------------------------------------------------------
 
@@ -745,27 +803,30 @@ public class DefaultDispatcher implements Dispatcher {
     }
 
     /**
-     * Looks-up denoted factory
+     * Searches for an AJAXActionServiceFactory with the given module.
+     * If none is found it tries to find one by removing the last path segment of the given module until one is found or until the last path segment is reached.
      *
-     * @param module The module to look-up for
-     * @return The factory or <code>null</code>
+     * E.g. mail/theAttachmentName -> mail
+     *
+     * @param module The module path (e.g. <code>mail/theAttachmentName</code> or <code>folders</code>)
+     * @return An optional {@link FactoryAndModule} if found
      */
-    @Override
-    public AJAXActionServiceFactory lookupFactory(final String module) {
-        AJAXActionServiceFactory serviceFactory = actionFactories.get(module);
+    private Optional<FactoryAndModule> optFactoryAndModule(String module) {
+        String candidate = module;
+        AJAXActionServiceFactory serviceFactory = actionFactories.get(candidate);
         if (null == serviceFactory) {
-            String candidate = module;
-            int index = candidate.lastIndexOf('/');
-            while (index > 0) {
+            for (int index; serviceFactory == null && (index = candidate.lastIndexOf('/')) > 0;) {
                 candidate = candidate.substring(0, index);
                 serviceFactory = actionFactories.get(candidate);
-                if (null != serviceFactory) {
-                    break;
-                }
-                index = candidate.lastIndexOf('/');
             }
         }
-        return serviceFactory;
+        return serviceFactory == null ? Optional.empty() : Optional.of(new FactoryAndModule(candidate, serviceFactory));
+    }
+
+    @Override
+    public AJAXActionServiceFactory lookupFactory(final String module) {
+        Optional<FactoryAndModule> optionalResult = optFactoryAndModule(module);
+        return optionalResult.isPresent() ? optionalResult.get().factory : null;
     }
 
     private DispatcherNotes getActionMetadata(final AJAXActionService action) {
@@ -988,6 +1049,29 @@ public class DefaultDispatcher implements Dispatcher {
             return true;
         }
 
-    }// End of class Strings
+    } // End of class StrPair
 
+    /**
+     * {@link FactoryAndModule} The result of a factory lookup. See {@link DefaultDispatcher#lookupFactory(String)}
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.4
+     */
+    private static final class FactoryAndModule {
+
+        final String module;
+        final AJAXActionServiceFactory factory;
+
+        /**
+         * Initializes a new {@link FactoryAndModule}.
+         *
+         * @param module The module of the factory
+         * @param factory The factory
+         */
+        FactoryAndModule(String module, AJAXActionServiceFactory factory) {
+            super();
+            this.module = module;
+            this.factory = factory;
+        }
+    }
 }

@@ -59,6 +59,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.optExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.removeExtendedProperties;
+import static com.openexchange.chronos.ical.ICalParameters.IGNORED_PROPERTY_PARAMETERS;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -186,8 +187,34 @@ public class EventPatches {
                  */
                 parameters.set(ICalParameters.IGNORED_PROPERTIES, new String[] { "X-MICROSOFT-CDO-ALLDAYEVENT", "X-MICROSOFT-CDO-BUSYSTATUS" });
             }
+            /*
+             * Per default attendee timestamp is suppressed when im- or exporting. Ensure that the timestamp is added.
+             */
+            unignoreAttendeeTimestamp(parameters);
         }
         return parameters;
+    }
+
+    private static void unignoreAttendeeTimestamp(ICalParameters parameters) {
+        if (null == parameters.get(IGNORED_PROPERTY_PARAMETERS, String[].class)) {
+            return;
+        }
+        String[] ignored = parameters.get(IGNORED_PROPERTY_PARAMETERS, String[].class);
+        if (ignored.length <= 0) {
+            parameters.set(IGNORED_PROPERTY_PARAMETERS, null);
+            return;
+        }
+        ArrayList<String> others = new ArrayList<>(ignored.length);
+        for (String ignoree : ignored) {
+            if (false == ignoree.equals("ATTENDEE:X-CALENDARSERVER-DTSTAMP")) {
+                others.add(ignoree);
+            }
+        }
+        if (others.isEmpty()) {
+            parameters.set(IGNORED_PROPERTY_PARAMETERS, null);
+        } else {
+            parameters.set(IGNORED_PROPERTY_PARAMETERS, others.toArray(new String[others.size()]));
+        }
     }
 
     /**
@@ -443,7 +470,8 @@ public class EventPatches {
                             EventUpdate eventUpdate = DefaultEventUpdate.builder()
                                 .originalEvent(originalOccurrence)
                                 .updatedEvent(newChangeException)
-                                .ignoredEventFields(EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.SEQUENCE, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.EXTENDED_PROPERTIES)
+                                .ignoredEventFields(EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.SEQUENCE, EventField.RECURRENCE_RULE, EventField.RECURRENCE_ID, EventField.CREATED, EventField.EXTENDED_PROPERTIES)
+                                .ignoredEventFields(AttendeeField.TIMESTAMP)
                                 .considerUnset(true)
                                 .ignoreDefaults(true)
                             .build();
@@ -460,7 +488,7 @@ public class EventPatches {
                                 patchedAlarms.add(snoozedAlarm);
                                 importedEvent.setAlarms(patchedAlarms);
                                 for (Iterator<Event> iter = importedChangeExceptions.iterator(); iter.hasNext();) {
-                                    if (newChangeException.getRecurrenceId().equals(iter.next().getRecurrenceId())) {
+                                    if (newChangeException.getRecurrenceId().matches(iter.next().getRecurrenceId())) {
                                         iter.remove();
                                         break;
                                     }
@@ -750,6 +778,7 @@ public class EventPatches {
                         Attendee originalAttendee = find(originalEvent.getAttendees(), originalEvent.getOrganizer());
                         if (null != updatedAttendee && null != originalAttendee && matches(updatedAttendee, originalAttendee)) {
                             updatedAttendee.setPartStat(originalAttendee.getPartStat());
+                            updatedAttendee.setTimestamp(originalAttendee.getTimestamp());
                         }
                         if (null != importedChangeExceptions) {
                             for (Event importedChangeException : importedChangeExceptions) {
@@ -759,6 +788,7 @@ public class EventPatches {
                                 originalAttendee = find(originalChangeException.getAttendees(), originalChangeException.getOrganizer());
                                 if (null != updatedAttendee && null != originalAttendee && matches(updatedAttendee, originalAttendee)) {
                                     updatedAttendee.setPartStat(originalAttendee.getPartStat());
+                                    updatedAttendee.setTimestamp(originalAttendee.getTimestamp());
                                 }
                             }
                         }
@@ -801,15 +831,16 @@ public class EventPatches {
                             return null;
                         }
                         for (RecurrenceId exceptionDate : originalSeriesMaster.getChangeExceptionDates()) {
-                            if (deleteExceptionDates.contains(exceptionDate) && now.after(exceptionDate.getValue())) {
+                            RecurrenceId matchingExceptionDate = find(deleteExceptionDates, exceptionDate);
+                            if (null != matchingExceptionDate && now.after(exceptionDate.getValue())) {
                                 Event originalChangeException = access.getEvent(
-                                    new EventID(resource.getEvent().getFolderId(), resource.getEvent().getId(), exceptionDate));
+                                    new EventID(resource.getEvent().getFolderId(), resource.getEvent().getId(), matchingExceptionDate));
                                 Attendee attendee = find(originalChangeException.getAttendees(), resource.getParent().getCalendarUser().getId());
                                 if (null != attendee && ParticipationStatus.DECLINED.matches(attendee.getPartStat())) {
                                     /*
                                      * restore original change exception; remove delete exception date
                                      */
-                                    deleteExceptionDates.remove(exceptionDate);
+                                    deleteExceptionDates.remove(matchingExceptionDate);
                                     importedChangeExceptions.add(exportAndImport(resource, originalChangeException));
                                 }
                             }
@@ -870,13 +901,13 @@ public class EventPatches {
          * @param exceptions The event exceptions
          */
         private void restoreParticipantStatus(EventResource resource, Event event) {
-            if (false == resource.exists() || false == DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent())) {
-                return;
-            }
-            try {
-                restoreParticipantStatus(event, resource.getEvent().getFolderId(), resource.getEvent().getId());
-            } catch (OXException e) {
-                LOG.warn("Error restoring the participant status", e);
+            DAVUserAgent userAgent = resource.getUserAgent();
+            if (resource.exists() && (DAVUserAgent.MAC_CALENDAR.equals(userAgent) || DAVUserAgent.IOS.equals(userAgent))) {
+                try {
+                    restoreParticipantStatus(event, resource.getEvent().getFolderId(), resource.getEvent().getId());
+                } catch (OXException e) {
+                    LOG.warn("Error restoring the participant status", e);
+                }
             }
         }
 

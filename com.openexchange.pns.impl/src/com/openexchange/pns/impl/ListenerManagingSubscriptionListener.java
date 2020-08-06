@@ -51,6 +51,7 @@ package com.openexchange.pns.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
+import java.util.Optional;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -61,6 +62,7 @@ import com.openexchange.pns.PushSubscriptionListener;
 import com.openexchange.pns.PushSubscriptionProvider;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.push.PushListenerService;
+import com.openexchange.push.PushUser;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 
@@ -114,7 +116,7 @@ public class ListenerManagingSubscriptionListener implements PushSubscriptionLis
                 return;
             }
 
-            Session session = sessiond.getSession(sessionId);
+            Session session = sessiond.peekSession(sessionId);
             if (null == session) {
                 // No such session
                 return;
@@ -139,13 +141,13 @@ public class ListenerManagingSubscriptionListener implements PushSubscriptionLis
                 return;
             }
 
-            Session session = sessiond.getSession(sessionId);
+            Session session = sessiond.peekSession(sessionId);
             if (null == session) {
                 // No such session
                 return;
             }
 
-            pushListenerService.unregisterPermanentListenerFor(session.getUserId(), session.getContextId(), subscription.getClient());
+            pushListenerService.unregisterPermanentListenerFor(new PushUser(session.getUserId(), session.getContextId(), Optional.of(session.getSessionID())), subscription.getClient());
         }
     }
 

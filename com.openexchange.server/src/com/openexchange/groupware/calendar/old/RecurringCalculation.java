@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionUtils;
 import com.openexchange.groupware.calendar.Constants;
@@ -67,7 +68,9 @@ import com.openexchange.java.Strings;
  * RecurringCalculation
  * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ * @deprecated since 7.10.4. Use {@link RecurrenceService} instead
  */
+@Deprecated
 public class RecurringCalculation {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RecurringCalculation.class);

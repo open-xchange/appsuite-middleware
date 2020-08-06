@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: com.openexchange.authentication.application
+Bundle-SymbolicName: com.openexchange.authentication.application
+Bundle-Version: 7.10.4
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.authentication.application
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: com.openexchange.authentication.application,
+ com.openexchange.authentication.application.ajax,
+ com.openexchange.authentication.application.exceptions,
+ com.openexchange.authentication.application.notification,
+ com.openexchange.authentication.application.storage,
+ com.openexchange.authentication.application.storage.history
+Import-Package: com.openexchange.authentication,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.osgi.annotation,
+ com.openexchange.session,
+ com.openexchange.tools.arrays

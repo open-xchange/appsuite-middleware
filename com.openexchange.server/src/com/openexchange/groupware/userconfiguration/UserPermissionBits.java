@@ -770,7 +770,9 @@ public class UserPermissionBits implements Serializable, Cloneable {
      * Checks if this user configuration indicates to enable publication.
      *
      * @return <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
+     * @deprecated Since v7.10.2
      */
+    @Deprecated
     public boolean isPublication() {
         return hasPermission(PUBLICATION);
     }
@@ -779,7 +781,6 @@ public class UserPermissionBits implements Serializable, Cloneable {
      * Sets if this user configuration indicates to enable publication.
      *
      * @param publication <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
-     * 
      * @deprecated Since v7.10.2
      */
     @Deprecated

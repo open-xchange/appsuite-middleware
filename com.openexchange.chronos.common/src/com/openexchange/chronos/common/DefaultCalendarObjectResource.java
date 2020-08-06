@@ -175,7 +175,7 @@ public class DefaultCalendarObjectResource implements CalendarObjectResource {
     @Override
     public Event getChangeException(RecurrenceId recurrenceId) {
         for (Event event : events) {
-            if (Objects.equals(event.getRecurrenceId(), recurrenceId)) {
+            if (matches(recurrenceId, event.getRecurrenceId())) {
                 return event;
             }
         }

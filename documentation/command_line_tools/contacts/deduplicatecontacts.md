@@ -2,6 +2,7 @@
 title: deduplicatecontacts
 icon: far fa-circle
 tags: Administration, Command Line tools, Contacts
+package: open-xchange-core
 ---
 
 # NAME

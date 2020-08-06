@@ -259,6 +259,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                         throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
                     }
                     LogProperties.putSessionProperties(session);
+                    request.markHttpSessionAuthenticated();
                 }
 
                 // Generate the login result
@@ -357,12 +358,13 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
     }
 
     @Override
-    public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         // Look-up necessary credentials
         try {
-            doLogin(req, resp);
+            doLogin(req, resp, requestContext);
         } catch (OXException e) {
             logAndSendException(resp, e);
+            requestContext.getMetricProvider().recordException(e);
         }
     }
 
@@ -371,10 +373,11 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      *
      * @param httpRequest The HTTP request
      * @param httpResponse The HTTP response
+     * @param requestContext The request context
      * @throws IOException If an I/O error occors
      * @throws OXException If an Open-Xchange Server error occurs
      */
-    protected void doLogin(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) throws IOException, OXException {
+    protected void doLogin(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse, LoginRequestContext requestContext) throws IOException, OXException {
         // Get the share's token & target
         final String token = httpRequest.getParameter("share");
         if (null == token) {
@@ -455,7 +458,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
         };
 
         // Do the login operation
-        loginOperation(httpRequest, httpResponse, loginClosure, cookiesSetter, conf);
+        loginOperation(httpRequest, httpResponse, loginClosure, cookiesSetter, conf, requestContext);
     }
 
     /**

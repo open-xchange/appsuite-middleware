@@ -49,20 +49,32 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.AlarmUtils.isInRange;
+import static com.openexchange.chronos.common.AlarmUtils.shiftIntoRange;
+import static com.openexchange.chronos.common.CalendarUtils.asDate;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
-import static com.openexchange.chronos.common.CalendarUtils.getOccurrence;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
+import static com.openexchange.chronos.impl.Utils.copy;
+import static com.openexchange.chronos.impl.Utils.extract;
 import static com.openexchange.chronos.impl.Utils.getFolder;
+import static com.openexchange.chronos.impl.Utils.getFrom;
 import static com.openexchange.chronos.impl.Utils.getUntil;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_EXPAND_OCCURRENCES;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_END;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -70,7 +82,9 @@ import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.CompositeSearchTerm;
@@ -107,7 +121,9 @@ public class AlarmTriggersPerformer extends AbstractQueryPerformer {
         /*
          * get pending alarm triggers from storage & filter by action type if required
          */
-        List<AlarmTrigger> triggers = storage.getAlarmTriggerStorage().loadTriggers(session.getUserId(), getUntil(session));
+        Date rangeFrom = getFrom(session);
+        Date rangeUntil = getUntil(session);
+        List<AlarmTrigger> triggers = storage.getAlarmTriggerStorage().loadTriggers(session.getUserId(), rangeFrom, rangeUntil);
         if (null != actions) {
             triggers = AlarmUtils.filter(triggers, actions.toArray(new String[actions.size()]));
         }
@@ -120,11 +136,16 @@ public class AlarmTriggersPerformer extends AbstractQueryPerformer {
         EventField[] requestedFields = getFields(new EventField[0], (EventField[]) null);
         EventField[] fields = getFieldsForStorage(requestedFields);
         List<Event> events = loadEvents(triggers, fields);
-        EventPostProcessor postProcessor = postProcessor(getObjectIDs(events), session.getUserId(), requestedFields, fields);
         /*
          * remove triggers where the targeted events are not or no longer accessible for the requesting user
          */
-        return filterInaccessible(triggers, events, postProcessor);
+        CalendarParameters oldParameters = extract(session, true, PARAMETER_EXPAND_OCCURRENCES, PARAMETER_RANGE_START, PARAMETER_RANGE_END);
+        try {
+            EventPostProcessor postProcessor = postProcessor(getObjectIDs(events), session.getUserId(), requestedFields, fields);
+            return filter(triggers, events, rangeFrom, rangeUntil, postProcessor);
+        } finally {
+            copy(oldParameters, session);
+        }
     }
 
     /**
@@ -132,10 +153,12 @@ public class AlarmTriggersPerformer extends AbstractQueryPerformer {
      *
      * @param triggers The list of triggers to filter the inaccessible ones from
      * @param events The referenced events as loaded from the storage
+     * @param rangeFrom The lower boundary of the range for the trigger as requested by the client
+     * @param rangeUntil The upper boundary of the range for the trigger as requested by the client
      * @param postProcessor The event post processor to use for userizing the loaded events
      * @return The filtered list of alarm triggers
      */
-    private List<AlarmTrigger> filterInaccessible(List<AlarmTrigger> triggers, List<Event> events, EventPostProcessor postProcessor) {
+    private List<AlarmTrigger> filter(List<AlarmTrigger> triggers, List<Event> events, Date rangeFrom, Date rangeUntil, EventPostProcessor postProcessor) {
         for (Iterator<AlarmTrigger> iterator = triggers.iterator(); iterator.hasNext();) {
             AlarmTrigger trigger = iterator.next();
             try {
@@ -143,7 +166,7 @@ public class AlarmTriggersPerformer extends AbstractQueryPerformer {
                 Event event = find(events, trigger.getEventId());
                 if (null != event) {
                     event = postProcessor.process(event, folder).getFirstEvent();
-                    postProcessor.clear();
+                    postProcessor.reset();
                 }
                 if (null == event) {
                     throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(trigger.getEventId());
@@ -152,11 +175,32 @@ public class AlarmTriggersPerformer extends AbstractQueryPerformer {
                 Check.eventIsInFolder(event, folder);
                 if (null != trigger.getRecurrenceId()) {
                     if (isSeriesMaster(event)) {
-                        event = getOccurrence(session.getRecurrenceService(), event, trigger.getRecurrenceId());
+                        /*
+                         * iterate recurrence set to get event occurrence targeted by trigger
+                         */
+                        RecurrenceIterator<Event> recurrenceIterator = session.getRecurrenceService().iterateEventOccurrences(
+                            event, asDate(trigger.getRecurrenceId().getValue()), null);
+                        event = getTargetedOccurrence(recurrenceIterator, trigger);
+                        if (null == event || false == trigger.getRecurrenceId().matches(event.getRecurrenceId())) {
+                            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(trigger.getEventId(), trigger.getRecurrenceId());
+                        }
+                        /*
+                         * shift the trigger to a more recent occurrence if trigger time is before requested range as needed
+                         */
+                        if (recurrenceIterator.hasNext() && null != rangeFrom && rangeFrom.after(new Date(l(trigger.getTime())))) {
+                            Alarm alarm = storage.getAlarmStorage().loadAlarm(i(trigger.getAlarm()));
+                            if (null == alarm) {
+                                throw CalendarExceptionCodes.ALARM_NOT_FOUND.create(trigger.getAlarm(), trigger.getEventId());
+                            }
+                            shiftIntoRange(trigger, alarm, recurrenceIterator, rangeFrom, rangeUntil);
+                        }
                     }
-                    if (null == event || false == trigger.getRecurrenceId().equals(event.getRecurrenceId())) {
-                        throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(trigger.getEventId(), trigger.getRecurrenceId());
-                    }
+                }
+                /*
+                 * re-check if trigger falls into requested range
+                 */
+                if (false == isInRange(trigger, rangeFrom, rangeUntil)) {
+                    iterator.remove();
                 }
             } catch (OXException e) {
                 LOG.debug("Skipping trigger for alarm {} of event {} ({}).", trigger.getAlarm(), trigger.getEventId(), e.getMessage(), e);
@@ -192,6 +236,25 @@ public class AlarmTriggersPerformer extends AbstractQueryPerformer {
             events = storage.getEventStorage().searchEvents(orTerm, null, fields);
         }
         return storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
+    }
+
+    private static Event getTargetedOccurrence(RecurrenceIterator<Event> iterator, AlarmTrigger trigger) throws OXException {
+        Event targetedOccurrence = null;
+        long recurrenceTimestamp = trigger.getRecurrenceId().getValue().getTimestamp();
+        while (iterator.hasNext()) {
+            Event occurrence = iterator.next();
+            if (trigger.getRecurrenceId().matches(occurrence.getRecurrenceId())) {
+                targetedOccurrence = occurrence;
+                break;
+            }
+            if (occurrence.getRecurrenceId().getValue().getTimestamp() > recurrenceTimestamp) {
+                break;
+            }
+        }
+        if (null == targetedOccurrence || false == trigger.getRecurrenceId().matches(targetedOccurrence.getRecurrenceId())) {
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(trigger.getEventId(), trigger.getRecurrenceId());
+        }
+        return targetedOccurrence;
     }
 
 }

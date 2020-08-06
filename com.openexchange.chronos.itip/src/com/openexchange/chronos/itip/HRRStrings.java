@@ -62,9 +62,13 @@ public class HRRStrings implements LocalizableStrings {
 
     public static final String DAILY = "Every %1$s day";
 
-    public static final String WEEKLY_EACH = "Every week on %1$s";
+    public static final String WEEKLY_EACH_1 = "Every week on %1$s";
+    
+    public static final String WEEKLY_EACH_2 = "Every week";
 
-    public static final String WEEKLY = "Every %1$s weeks on %2$s";
+    public static final String WEEKLY_1 = "Every %1$s weeks on %2$s";
+    
+    public static final String WEEKLY_2 = "Every %1$s weeks";
 
     public static final String MONTHLY_1 = "On %1$s. day every %2$s. month";
 

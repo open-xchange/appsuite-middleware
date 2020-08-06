@@ -108,6 +108,9 @@ public class DistListMember extends DistributionListEntryObject {
 		if (dleo.containsLastname()) {
 			member.setLastname(dleo.getLastname());
 		}
+        if (dleo.containsContactUid()) {
+            member.setContactUid(dleo.getContactUid());
+        }
 
 		return member;
 	}

@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi.impl;
 
-import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
@@ -70,11 +69,13 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.RecalculationScope;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
+import com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -83,6 +84,7 @@ import com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
@@ -102,7 +104,7 @@ import com.openexchange.snippet.QuotaAwareSnippetService;
  */
 public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXUtil.class);
+    private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXUtil.class);
 
     private final BasicAuthenticator basicauth;
     private final OXUtilStorageInterface oxutil;
@@ -113,6 +115,26 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         basicauth = BasicAuthenticator.createNonPluginAwareAuthenticator();
     }
 
+    private void logAndEnhanceException(Throwable t, final Credentials credentials) {
+        logAndEnhanceException(t, credentials, (String) null);
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final String contextId) {
+        if (t instanceof AbstractAdminRmiException) {
+            logAndReturnException(LOGGER, ((AbstractAdminRmiException) t), credentials, contextId);
+        } else if (t instanceof RemoteException) {
+            RemoteException remoteException = (RemoteException) t;
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId);
+        } else if (t instanceof Exception) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException((Exception) t);
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId);
+        }
+    }
+
     @Override
     public Filestore registerFilestore(final Filestore fstore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         try {
@@ -120,13 +142,13 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(fstore);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
 
             basicauth.doAuthentication(auth);
 
-            log.debug("{} - {}", fstore.getUrl(), fstore.getSize());
+            log(LogLevel.ERROR, LOGGER, credentials, null, "{} - {}", fstore.getUrl(), fstore.getSize());
 
             URI uri = checkValidStoreURI(fstore.getUrl());
             if (null == uri) {
@@ -162,11 +184,11 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             Integer response = I(oxutil.registerFilestore(fstore));
-            log.debug("RESPONSE {}", response);
+            log(LogLevel.ERROR, LOGGER, credentials, null, "RESPONSE {}", response);
             return new Filestore(response);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -177,12 +199,12 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(fstore);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
             basicauth.doAuthentication(auth);
 
-            log.debug("{} {} {} {}", fstore.getUrl(), fstore.getMaxContexts(), fstore.getSize(), fstore.getId());
+            log(LogLevel.DEBUG, LOGGER, credentials, null, "{} {} {} {}", fstore.getUrl(), fstore.getMaxContexts(), fstore.getSize(), fstore.getId());
 
             if (null != fstore.getUrl() && null == checkValidStoreURI(fstore.getUrl())) {
                 throw new InvalidDataException("Invalid store url " + fstore.getUrl());
@@ -193,9 +215,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             oxutil.changeFilestore(fstore);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -209,15 +231,15 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                     throw new InvalidDataException("Search pattern is an empty string.");
                 }
             } catch (InvalidDataException e) {
-                log.error("Client did not sent a search pattern.", e);
+                log(LogLevel.ERROR, LOGGER, credentials, e, "Client did not sent a search pattern.");
                 throw e;
             }
             basicauth.doAuthentication(myCreds);
-            log.debug(searchPattern);
+            log(LogLevel.DEBUG, LOGGER, credentials, null, searchPattern);
             return oxutil.listFilestores(searchPattern, omitUsage);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -239,13 +261,13 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 doNullCheck(store);
                 doNullCheck(store.getId());
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
 
             basicauth.doAuthentication(auth);
 
-            log.debug(store.toString());
+            log(LogLevel.DEBUG, LOGGER, credentials, null, store.toString());
 
             if (!tool.existsStore(store.getId().intValue())) {
                 throw new InvalidDataException("No such store");
@@ -255,9 +277,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 throw new InvalidDataException("Store " + store + " in use");
             }
             oxutil.unregisterFilestore(store.getId().intValue());
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -268,12 +290,12 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(reason);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
             basicauth.doAuthentication(auth);
 
-            log.debug(reason.toString());
+            log(LogLevel.DEBUG, LOGGER, credentials, null, reason.toString());
 
             if (reason.getText() == null || reason.getText().trim().length() == 0) {
                 throw new InvalidDataException("Invalid reason text!");
@@ -283,21 +305,21 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             return new MaintenanceReason(I(oxutil.createMaintenanceReason(reason)));
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
-    public MaintenanceReason[] listMaintenanceReasons(Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException {
+    public MaintenanceReason[] listMaintenanceReasons(Credentials credentials) throws StorageException, InvalidCredentialsException {
         try {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             basicauth.doAuthentication(auth);
 
             return oxutil.getAllMaintenanceReasons();
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -307,7 +329,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             doNullCheck(search_pattern);
         } catch (InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("The search_pattern is null");
-            log.error("", invalidDataException);
+            log(LogLevel.ERROR, LOGGER, auth, invalidDataException, "");
             throw invalidDataException;
         }
 
@@ -315,9 +337,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             basicauth.doAuthentication(auth);
 
             return oxutil.listMaintenanceReasons(search_pattern);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, auth);
+            throw e;
         }
     }
 
@@ -326,19 +348,19 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         return listMaintenanceReason("*", credentials);
     }
 
-    public void createDatabase(final Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void createDatabase(final Database db, Credentials credentials) throws StorageException, InvalidCredentialsException, InvalidDataException {
         try {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(db);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
 
             basicauth.doAuthentication(auth);
 
-            log.debug(db.toString());
+            log(LogLevel.DEBUG, LOGGER, credentials, null, db.toString());
 
             try {
                 if (!db.mandatoryCreateMembersSet()) {
@@ -354,9 +376,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             oxutil.createDatabase(db, null);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -367,13 +389,13 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(db);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
 
             basicauth.doAuthentication(auth);
 
-            log.debug(db.toString());
+            log(LogLevel.DEBUG, LOGGER, credentials, null, db.toString());
 
             try {
                 if (!db.mandatoryRegisterMembersSet()) {
@@ -384,7 +406,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 }
 
             } catch (EnforceableDataObjectException e) {
-                log.error("", e);
+                log(LogLevel.ERROR, LOGGER, credentials, e, "");
                 throw new InvalidDataException(e);
             }
 
@@ -419,9 +441,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             boolean bCreateSchemas = null != createSchemas && createSchemas.booleanValue();
             int iOptNumberOfSchemas = null != optNumberOfSchemas ? optNumberOfSchemas.intValue() : 0;
             return new Database(oxutil.registerDatabase(db, bCreateSchemas, iOptNumberOfSchemas));
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -433,13 +455,13 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(db);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
 
             basicauth.doAuthentication(auth);
 
-            log.debug(db.toString());
+            log(LogLevel.DEBUG, LOGGER, credentials, null, db.toString());
 
             try {
                 setIdOrGetIDFromNameAndIdObject(null, db);
@@ -452,9 +474,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             int iOptNumberOfSchemas = null != optNumberOfSchemas ? optNumberOfSchemas.intValue() : 0;
             List<String> createdSchemas = oxutil.createDatabaseSchemas(db, iOptNumberOfSchemas);
             return createdSchemas.toArray(new String[createdSchemas.size()]);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -498,9 +520,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 numDeleted += schemas.size();
             }
             return numDeleted;
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -512,13 +534,13 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 doNullCheck(srv);
                 doNullCheck(srv.getName());
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
 
             basicauth.doAuthentication(auth);
 
-            log.debug(srv.toString());
+            log(LogLevel.DEBUG, LOGGER, credentials, null, srv.toString());
 
             if (srv.getName().trim().length() == 0) {
                 throw new InvalidDataException("Invalid server name");
@@ -532,9 +554,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             sr.setName(srv.getName());
             sr.setId(I(oxutil.registerServer(srv.getName())));
             return sr;
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -544,12 +566,12 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(database);
             } catch (InvalidDataException e) {
-                log.error("Invalid data sent by client!", e);
+                log(LogLevel.ERROR, LOGGER, credentials, e, "Invalid data sent by client!");
                 throw e;
             }
             basicauth.doAuthentication(null == credentials ? new Credentials("", "") : credentials);
 
-            log.debug(database.toString());
+            log(LogLevel.DEBUG, LOGGER, credentials, null, database.toString());
             try {
                 setIdOrGetIDFromNameAndIdObject(null, database);
             } catch (NoSuchObjectException e) {
@@ -566,9 +588,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             oxutil.unregisterDatabase(i(database.getId()), isMaster);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -579,13 +601,13 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(server);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
 
             basicauth.doAuthentication(auth);
 
-            log.debug(server.toString());
+            log(LogLevel.DEBUG, LOGGER, credentials, null, server.toString());
 
             try {
                 setIdOrGetIDFromNameAndIdObject(null, server);
@@ -600,9 +622,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             oxutil.unregisterServer(server.getId().intValue());
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -614,12 +636,12 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 doNullCheck(server);
                 doNullCheck(schemaName);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
             basicauth.doAuthentication(auth);
 
-            log.debug("Server: {}, Schema Name: {}", server.toString(), schemaName);
+            log(LogLevel.DEBUG, LOGGER, credentials, null, "Server: {}, Schema Name: {}", server.toString(), schemaName);
 
             if (Strings.isEmpty(schemaName)) {
                 throw new InvalidDataException("Invalid schema name. The schema name can neither be 'null' nor empty.");
@@ -633,9 +655,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 throw new InvalidDataException("No such server " + server);
             }
             oxutil.changeServer(server.getId().intValue(), schemaName);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -646,12 +668,12 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(search_pattern);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
             basicauth.doAuthentication(auth);
 
-            log.debug(search_pattern);
+            log(LogLevel.DEBUG, LOGGER, credentials, null, search_pattern);
 
             if (search_pattern.length() == 0) {
                 throw new InvalidDataException("Invalid search pattern");
@@ -659,9 +681,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
             boolean bOnlyEmptySchemas = null != onlyEmptySchemas && onlyEmptySchemas.booleanValue();
             return oxutil.countDatabaseSchema(search_pattern, bOnlyEmptySchemas);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -672,12 +694,12 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(search_pattern);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
             basicauth.doAuthentication(auth);
 
-            log.debug(search_pattern);
+            log(LogLevel.DEBUG, LOGGER, credentials, null, search_pattern);
 
             if (search_pattern.length() == 0) {
                 throw new InvalidDataException("Invalid search pattern");
@@ -685,9 +707,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
             boolean bOnlyEmptySchemas = null != onlyEmptySchemas && onlyEmptySchemas.booleanValue();
             return oxutil.searchForDatabaseSchema(search_pattern, bOnlyEmptySchemas);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -703,21 +725,21 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(search_pattern);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
             basicauth.doAuthentication(auth);
 
-            log.debug(search_pattern);
+            log(LogLevel.DEBUG, LOGGER, credentials, null, search_pattern);
 
             if (search_pattern.length() == 0) {
                 throw new InvalidDataException("Invalid search pattern");
             }
 
             return oxutil.searchForDatabase(search_pattern);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -766,9 +788,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             return new Database[][] { needingUpdate, currentlyUpdating, outdatedUpdating };
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -779,7 +801,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(db);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
 
@@ -798,9 +820,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             OXToolStorageInterface oxtools = OXToolStorageInterface.getInstance();
             List<Database> unblockedDatabaseSchema = oxtools.unblockDatabaseSchema(db);
             return unblockedDatabaseSchema.toArray(new Database[unblockedDatabaseSchema.size()]);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -811,21 +833,21 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(search_pattern);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
             basicauth.doAuthentication(auth);
 
-            log.debug(search_pattern);
+            log(LogLevel.DEBUG, LOGGER, credentials, null, search_pattern);
 
             if (search_pattern.length() == 0) {
                 throw new InvalidDataException("Invalid search pattern");
             }
 
             return oxutil.searchForServer(search_pattern);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -841,13 +863,13 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(db);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
 
             basicauth.doAuthentication(auth);
 
-            log.debug(db.toString());
+            log(LogLevel.DEBUG, LOGGER, credentials, null, db.toString());
 
             try {
                 setIdOrGetIDFromNameAndIdObject(null, db);
@@ -865,9 +887,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             oxutil.changeDatabase(db);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -878,12 +900,12 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck((Object[]) reasons);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
             basicauth.doAuthentication(auth);
 
-            log.debug(Arrays.toString(reasons));
+            log(LogLevel.DEBUG, LOGGER, credentials, null, Arrays.toString(reasons));
 
             for (final MaintenanceReason element : reasons) {
                 if (!tool.existsReason(element.getId().intValue())) {
@@ -897,9 +919,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             oxutil.deleteMaintenanceReason(del_ids);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -930,9 +952,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             basicauth.doAuthentication(auth);
             return oxutil.createSchema(optDatabaseId);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -943,16 +965,16 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(contextId);
             } catch (InvalidDataException e1) {
-                log.error("Invalid data sent by client!", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "Invalid data sent by client!");
                 throw e1;
             }
 
             basicauth.doAuthentication(auth);
 
             doRecalculateFilestoreUsage(contextId, userId, true);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -1067,11 +1089,24 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 }
             }
         } catch (OXException e) {
-            throw StorageException.wrapForRMI(e);
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
+    @Override
+    public void checkCountsConsistency(boolean checkDatabaseCounts, boolean checkFilestoreCounts, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException {
+        try {
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
+
+            log(LogLevel.DEBUG, LOGGER, credentials, null, "Checking consistency for counters");
+
+            OXUtilStorageInterface.getInstance().checkCountsConsistency(checkDatabaseCounts, checkFilestoreCounts);
+        } catch (Exception e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials);
+        }
+    }
 }

@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -197,17 +198,31 @@ public final class ConditionTreeMap {
      * @throws OXException If initialization fails
      */
     public ConditionTree newTreeForEntity(int entity) throws OXException {
+        return newTreeForEntity(Optional.empty(), entity);
+    }
+
+    /**
+     * Initializes a new tree for given entity.
+     *
+     * @param optCon The optional connection to use
+     * @param entity The entity identifier
+     * @throws OXException If initialization fails
+     */
+    public ConditionTree newTreeForEntity(Optional<Connection> optCon, int entity) throws OXException {
         DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
 
-        Connection connection = null;
+        Connection connection = optCon.orElse(null);
+        boolean closeConnection = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            connection = service.getReadOnly(contextId);
-            stmt =
-                connection.prepareStatement("SELECT ot.fuid, op.admin_flag, op.fp, ot.module, ot.type, ot.created_from, ot.changing_date, ot.parent" +
-                    " FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op ON ot.cid = op.cid AND ot.fuid = op.fuid WHERE ot.cid=? AND op.permission_id=?"
-                /* + " ORDER BY default_flag DESC, fname" */);
+            if(connection == null) {
+                connection = service.getReadOnly(contextId);
+                closeConnection = true;
+            }
+            stmt = connection.prepareStatement("SELECT ot.fuid, op.admin_flag, op.fp, ot.module, ot.type, ot.created_from, ot.changing_date, ot.parent" +
+                                               " FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op ON ot.cid = op.cid AND ot.fuid = op.fuid WHERE ot.cid=? AND op.permission_id=?"
+                                          /* + " ORDER BY default_flag DESC, fname" */);
             stmt.setInt(1, contextId);
             stmt.setInt(2, entity);
             rs = stmt.executeQuery();
@@ -224,7 +239,7 @@ public final class ConditionTreeMap {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-            if (null != connection) {
+            if (null != connection && closeConnection) {
                 service.backReadOnly(contextId, connection);
             }
         }
@@ -525,7 +540,7 @@ public final class ConditionTreeMap {
      * @param module The module
      * @return The identifiers of visible folders
      */
-    public TIntSet getVisibleModuleForUser(int userId, int[] groups, int[] accessibleModules, int module) throws OXException {
+    public TIntSet getVisibleModuleForUser(Optional<Connection> optCon, int userId, int[] groups, int[] accessibleModules, int module) throws OXException {
         Condition condition;
         {
             if (null != accessibleModules) {
@@ -538,7 +553,7 @@ public final class ConditionTreeMap {
         }
         Future<ConditionTree> f = entity2tree.get(Integer.valueOf(userId));
         if (null == f) {
-            FutureTask<ConditionTree> ft = new FutureTask<ConditionTree>(new InitEntityCallable(userId, LOG));
+            FutureTask<ConditionTree> ft = new FutureTask<ConditionTree>(new InitEntityCallable(optCon, userId, LOG));
             f = entity2tree.putIfAbsent(Integer.valueOf(userId), ft);
             if (null == f) {
                 ft.run();
@@ -1011,17 +1026,40 @@ public final class ConditionTreeMap {
 
         private final int entity;
         private final org.slf4j.Logger logger;
+        private final Optional<Connection> con;
 
+        /**
+         * Initializes a new {@link InitEntityCallable}.
+         *
+         * @param optCon The optional connection to use
+         * @param entity The entity
+         * @param logger The logger
+         */
         protected InitEntityCallable(int entity, org.slf4j.Logger logger) {
             super();
             this.entity = entity;
             this.logger = logger;
+            this.con = Optional.empty();
+        }
+
+        /**
+         * Initializes a new {@link InitEntityCallable}.
+         *
+         * @param optCon The optional connection to use
+         * @param entity The entity
+         * @param logger The logger
+         */
+        protected InitEntityCallable(Optional<Connection> optCon, int entity, org.slf4j.Logger logger) {
+            super();
+            this.entity = entity;
+            this.logger = logger;
+            this.con = optCon;
         }
 
         @Override
         public ConditionTree call() throws OXException {
             try {
-                return newTreeForEntity(entity);
+                return newTreeForEntity(con, entity);
             } catch (OXException e) {
                 logger.warn("", e);
                 throw e;

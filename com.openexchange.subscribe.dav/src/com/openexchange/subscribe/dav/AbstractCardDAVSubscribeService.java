@@ -88,6 +88,7 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -139,43 +140,18 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
         final String login = (String) configuration.get("login");
         final String password = (String) configuration.get("password");
 
-        final HttpClient httpClient = initHttpClient(10, 5, 5000, 10000);
-        try {
-            String addressBookHome = getAddressBookHome(httpClient, login, password, subscription);
-            List<DisplayNameAndHref> addressbooks = getAvailableCollectionsInAddressbook(addressBookHome, httpClient, login, password, subscription);
+        final HttpClient httpClient = getHttpClient();
+        String addressBookHome = getAddressBookHome(httpClient, login, password, subscription);
+        List<DisplayNameAndHref> addressbooks = getAvailableCollectionsInAddressbook(addressBookHome, httpClient, login, password, subscription);
 
-            ThreadPoolService threadPool = Services.getOptionalService(ThreadPoolService.class);
-            FolderUpdaterRegistry folderUpdaterRegistry = Services.getOptionalService(FolderUpdaterRegistry.class);
+        ThreadPoolService threadPool = Services.getOptionalService(ThreadPoolService.class);
+        FolderUpdaterRegistry folderUpdaterRegistry = Services.getOptionalService(FolderUpdaterRegistry.class);
 
-            int chunkSize = getChunkSize(subscription.getSession());
-            if (null == threadPool || null == folderUpdaterRegistry) {
-                List<Contact> retval = new LinkedList<>();
-                boolean firstAddressBook = true;
-                for (DisplayNameAndHref addressBook : addressbooks) {
-                    FolderUpdaterService<Contact> folderUpdater = null;
-                    if (firstAddressBook) {
-                        firstAddressBook = false;
-                    } else {
-                        folderUpdater = updaterForNewFolder(addressBook, subscription, folderUpdaterRegistry);
-                    }
-
-                    List<String> contactHrefs = getContactHrefsFrom(addressBook.getHref(), httpClient, login, password, subscription);
-                    for (List<String> contactChunk : Lists.partition(contactHrefs, chunkSize)) {
-                        List<Contact> contacts = processAddressBookChunk(addressBook, contactChunk, httpClient, login, password, subscription, vcardService);
-                        if (null == folderUpdater) {
-                            retval.addAll(contacts);
-                        } else {
-                            folderUpdater.save(new SearchIteratorDelegator<Contact>(contacts), subscription);
-                        }
-                    }
-                }
-                return retval;
-            }
-
-            boolean first = true;
-            List<Contact> retval = null;
+        int chunkSize = getChunkSize(subscription.getSession());
+        if (null == threadPool || null == folderUpdaterRegistry) {
+            List<Contact> retval = new LinkedList<>();
             boolean firstAddressBook = true;
-            for (final DisplayNameAndHref addressBook : addressbooks) {
+            for (DisplayNameAndHref addressBook : addressbooks) {
                 FolderUpdaterService<Contact> folderUpdater = null;
                 if (firstAddressBook) {
                     firstAddressBook = false;
@@ -184,34 +160,54 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
                 }
 
                 List<String> contactHrefs = getContactHrefsFrom(addressBook.getHref(), httpClient, login, password, subscription);
-                for (final List<String> contactChunk : Lists.partition(contactHrefs, chunkSize)) {
-                    if (first) {
-                        retval = processAddressBookChunk(addressBook, contactChunk, httpClient, login, password, subscription, vcardService);
-                        first = false;
+                for (List<String> contactChunk : Lists.partition(contactHrefs, chunkSize)) {
+                    List<Contact> contacts = processAddressBookChunk(addressBook, contactChunk, httpClient, login, password, subscription, vcardService);
+                    if (null == folderUpdater) {
+                        retval.addAll(contacts);
                     } else {
-                        final FolderUpdaterService<Contact> updaterToUse = null == folderUpdater ? folderUpdaterRegistry.<Contact> getFolderUpdater(subscription) : folderUpdater;
-                        Task<Void> task = new AbstractTask<Void>() {
-
-                            @Override
-                            public Void call() {
-                                try {
-                                    List<Contact> contacts = processAddressBookChunk(addressBook, contactChunk, httpClient, login, password, subscription, vcardService);
-                                    updaterToUse.save(new SearchIteratorDelegator<Contact>(contacts), subscription);
-                                } catch (Exception e) {
-                                    LOG.error("Failed process vcard chunk", e);
-                                }
-                                return null;
-                            }
-                        };
-                        threadPool.submit(task);
+                        folderUpdater.save(new SearchIteratorDelegator<Contact>(contacts), subscription);
                     }
                 }
             }
-
-            return null== retval ? Collections.<Contact> emptyList() : retval;
-        } finally {
-            HttpClients.shutDown(httpClient);
+            return retval;
         }
+
+        boolean first = true;
+        List<Contact> retval = null;
+        boolean firstAddressBook = true;
+        for (final DisplayNameAndHref addressBook : addressbooks) {
+            FolderUpdaterService<Contact> folderUpdater = null;
+            if (firstAddressBook) {
+                firstAddressBook = false;
+            } else {
+                folderUpdater = updaterForNewFolder(addressBook, subscription, folderUpdaterRegistry);
+            }
+
+            List<String> contactHrefs = getContactHrefsFrom(addressBook.getHref(), httpClient, login, password, subscription);
+            for (final List<String> contactChunk : Lists.partition(contactHrefs, chunkSize)) {
+                if (first) {
+                    retval = processAddressBookChunk(addressBook, contactChunk, httpClient, login, password, subscription, vcardService);
+                    first = false;
+                } else {
+                    final FolderUpdaterService<Contact> updaterToUse = null == folderUpdater ? folderUpdaterRegistry.<Contact> getFolderUpdater(subscription) : folderUpdater;
+                    Task<Void> task = new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call() {
+                            try {
+                                List<Contact> contacts = processAddressBookChunk(addressBook, contactChunk, httpClient, login, password, subscription, vcardService);
+                                updaterToUse.save(new SearchIteratorDelegator<Contact>(contacts), subscription);
+                            } catch (Exception e) {
+                                LOG.error("Failed process vcard chunk", e);
+                            }
+                            return null;
+                        }
+                    };
+                    threadPool.submit(task);
+                }
+            }
+        }
+        return null == retval ? Collections.<Contact> emptyList() : retval;
     }
 
     private FolderUpdaterService<Contact> updaterForNewFolder(DisplayNameAndHref addressBook, final Subscription subscription, FolderUpdaterRegistry folderUpdaterRegistry) throws OXException {
@@ -249,6 +245,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
      */
     protected List<Contact> processAddressBookChunk(DisplayNameAndHref addressBook, List<String> contactHrefs, HttpClient httpClient, String login, String password, Subscription subscription, VCardService vcardService) throws OXException {
         HttpEntityMethod propfind = null;
+        HttpResponse httpResponse = null;
         try {
             propfind = new HttpEntityMethod("REPORT", buildUri(getBaseUrl(subscription.getSession()), null, addressBook.getHref()));
             setAuthorizationHeader(propfind, login, password);
@@ -268,7 +265,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
                 propfind.setEntity(new StringEntity(xmlBody.toString(), ContentType.TEXT_XML));
             }
 
-            HttpResponse httpResponse = httpClient.execute(propfind);
+            httpResponse = httpClient.execute(propfind);
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
@@ -315,7 +312,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
         } catch (RuntimeException e) {
             throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            reset(propfind);
+            HttpClients.close(propfind, httpResponse);
         }
     }
 
@@ -331,6 +328,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
      */
     protected String getAddressBookHome(HttpClient httpClient, String login, String password, Subscription subscription) throws OXException {
         HttpEntityMethod propfind = null;
+        HttpResponse httpResponse = null;
         try {
             propfind = new HttpEntityMethod("PROPFIND", getUserPrincipal(subscription.getSession()));
             setAuthorizationHeader(propfind, login, password);
@@ -346,7 +344,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
                 propfind.setEntity(new StringEntity(xmlBody, ContentType.TEXT_XML));
             }
 
-            HttpResponse httpResponse = httpClient.execute(propfind);
+            httpResponse = httpClient.execute(propfind);
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
@@ -390,7 +388,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
         } catch (RuntimeException e) {
             throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            reset(propfind);
+            HttpClients.close(propfind, httpResponse);
         }
     }
 
@@ -407,6 +405,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
      */
     protected List<String> getContactHrefsFrom(String addressBookHref, HttpClient httpClient, String login, String password, Subscription subscription) throws OXException {
         HttpEntityMethod propfind = null;
+        HttpResponse httpResponse = null;
         try {
             propfind = new HttpEntityMethod("PROPFIND", buildUri(getBaseUrl(subscription.getSession()), null, addressBookHref));
             setAuthorizationHeader(propfind, login, password);
@@ -423,7 +422,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
                 propfind.setEntity(new StringEntity(xmlBody, ContentType.TEXT_XML));
             }
 
-            HttpResponse httpResponse = httpClient.execute(propfind);
+            httpResponse = httpClient.execute(propfind);
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
@@ -469,7 +468,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
         } catch (RuntimeException e) {
             throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            reset(propfind);
+            HttpClients.close(propfind, httpResponse);
         }
     }
 
@@ -504,6 +503,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
      */
     protected List<DisplayNameAndHref> getAvailableCollectionsInAddressbook(String addressBookHomeHref, HttpClient httpClient, String login, String password, Subscription subscription) throws OXException {
         HttpEntityMethod propfind = null;
+        HttpResponse httpResponse = null;
         try {
             propfind = new HttpEntityMethod("PROPFIND", buildUri(getBaseUrl(subscription.getSession()), null, addressBookHomeHref));
             setAuthorizationHeader(propfind, login, password);
@@ -522,7 +522,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
                 propfind.setEntity(new StringEntity(xmlBody, ContentType.TEXT_XML));
             }
 
-            HttpResponse httpResponse = httpClient.execute(propfind);
+            httpResponse = httpClient.execute(propfind);
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
@@ -568,7 +568,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
         } catch (RuntimeException e) {
             throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            reset(propfind);
+            HttpClients.close(propfind, httpResponse);
         }
     }
 
@@ -612,6 +612,10 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
         }
 
         return ((Element) value).getTextContent();
+    }
+
+    private HttpClient getHttpClient() throws OXException {
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(CLIENT_ID);
     }
 
     /**

@@ -85,7 +85,7 @@ public interface ThreadPoolService {
      * <tt>result = pool.submit(aCallable).get();</tt>
      *
      * @param task The task to submit
-     * @return A PendingCompletion representing pending completion of the task
+     * @return A Future representing pending completion of the task
      * @throws RejectedExecutionException If task cannot be scheduled for execution and <tt>"abort"</tt> is the configured default behavior
      * @throws NullPointerException If task is <code>null</code>
      */
@@ -102,7 +102,7 @@ public interface ThreadPoolService {
      * @param task The task to submit
      * @param refusedExecutionBehavior The behavior to obey when execution is rejected or <code>null</code> to use pool's configured default
      *            behavior
-     * @return A PendingCompletion representing pending completion of the task
+     * @return A Future representing pending completion of the task
      * @throws RejectedExecutionException If task cannot be scheduled for execution
      * @throws NullPointerException If task is <code>null</code>
      */

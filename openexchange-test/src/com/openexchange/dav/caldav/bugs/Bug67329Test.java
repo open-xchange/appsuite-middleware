@@ -49,11 +49,14 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import java.rmi.Naming;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 import java.util.TimeZone;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
@@ -61,6 +64,11 @@ import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.admin.rmi.OXUserInterface;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
@@ -110,6 +118,49 @@ public class Bug67329Test extends CalDAVTest {
             dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             configuredMaxDateTime = dateFormat.parse(maxDateTime);
         }
+        /*
+         * ensure timerange checks are in "strict" mode
+         */
+        setAndCheckUserAttribute(getClient().getValues().getContextId(), getClient().getValues().getUserId(), "config", "com.openexchange.caldav.interval.strict", "true");
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        /*
+         * reset timerange check strictness to defaults
+         */
+        setAndCheckUserAttribute(getClient().getValues().getContextId(), getClient().getValues().getUserId(), "config", "com.openexchange.caldav.interval.strict", null);
+        super.tearDown();
+    }
+
+    private boolean setAndCheckUserAttribute(int contextId, int userId, String namespace, String attribute, String value) throws Exception {
+        long timeout = System.currentTimeMillis() + 5000L;
+        do {
+            setUserAttribute(contextId, userId, namespace, attribute, value);
+            if (Objects.equals(value, getUserAttribute(contextId, userId, namespace, attribute))) {
+                return true;
+            }
+            Thread.sleep(500);
+        } while (System.currentTimeMillis() < timeout);
+        return false;
+    }
+
+    private String getUserAttribute(int contextId, int userId, String namespace, String attribute) throws Exception {
+        com.openexchange.admin.rmi.dataobjects.Context context = new com.openexchange.admin.rmi.dataobjects.Context(I(contextId));
+        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(userId);
+        Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
+        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
+        User userData = iface.getData(context, user, credentials);
+        return userData.getUserAttribute(namespace, attribute);
+    }
+
+    private void setUserAttribute(int contextId, int userId, String namespace, String attribute, String value) throws Exception {
+        com.openexchange.admin.rmi.dataobjects.Context context = new com.openexchange.admin.rmi.dataobjects.Context(I(contextId));
+        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(userId);
+        Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
+        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
+        user.setUserAttribute(namespace, attribute, value);
+        iface.change(context, user, credentials);
     }
 
     @Test
@@ -136,7 +187,12 @@ public class Bug67329Test extends CalDAVTest {
             /*
              * attempt to create event, expecting to fail
              */
-            assertEquals("response code wrong", StatusCodes.SC_FORBIDDEN, putICal(uid, iCal));
+            int statusCode = putICal(uid, iCal);
+            if (StatusCodes.SC_FORBIDDEN != statusCode) {
+                String value = getUserAttribute(getClient().getValues().getContextId(), getClient().getValues().getUserId(), "config", "com.openexchange.caldav.interval.strict");
+                System.out.println("Bug67329Test fails with unexpected status code " + statusCode + ", \"com.openexchange.caldav.interval.strict\" is set to \"" + value + "\"");
+            }
+            assertEquals("response code wrong", StatusCodes.SC_FORBIDDEN, statusCode);
         } else {
             /*
              * attempt to create event
@@ -178,7 +234,12 @@ public class Bug67329Test extends CalDAVTest {
             /*
              * attempt to create event, expecting to fail
              */
-            assertEquals("response code wrong", StatusCodes.SC_FORBIDDEN, putICal(uid, iCal));
+            int statusCode = putICal(uid, iCal);
+            if (StatusCodes.SC_FORBIDDEN != statusCode) {
+                String value = getUserAttribute(getClient().getValues().getContextId(), getClient().getValues().getUserId(), "config", "com.openexchange.caldav.interval.strict");
+                System.out.println("Bug67329Test fails with unexpected status code " + statusCode + ", \"com.openexchange.caldav.interval.strict\" is set to \"" + value + "\"");
+            }
+            assertEquals("response code wrong", StatusCodes.SC_FORBIDDEN, statusCode);
         } else {
             /*
              * attempt to create event

@@ -51,18 +51,20 @@ package com.openexchange.sms.sipgate;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.rest.client.httpclient.util.HttpContextUtils.addAuthCache;
+import static com.openexchange.rest.client.httpclient.util.HttpContextUtils.addCredentialProvider;
 import java.io.IOException;
 import java.util.Locale;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
-import org.apache.http.auth.AuthScheme;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -76,8 +78,8 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sms.PhoneNumberParserService;
@@ -92,6 +94,10 @@ import com.openexchange.sms.SMSServiceSPI;
  */
 public class SipgateSMSService implements SMSServiceSPI {
 
+    private static final String HOST_ADDRESS = "api.sipgate.com";
+    private static final String USERNAME = "com.openexchange.sms.sipgate.username";
+    private static final String PASSWORD = "com.openexchange.sms.sipgate.password";
+
     private static final Logger LOG = LoggerFactory.getLogger(SipgateSMSService.class);
     private static final String URI = "https://api.sipgate.com/v2/sessions/sms";
 
@@ -99,8 +105,8 @@ public class SipgateSMSService implements SMSServiceSPI {
 
     /**
      * Initializes a new {@link SipgateSMSService}.
-     *
-     * @throws OXException
+     * 
+     * @param services The {@link ServiceLookup}
      */
     public SipgateSMSService(ServiceLookup services) {
         this.services = services;
@@ -113,8 +119,8 @@ public class SipgateSMSService implements SMSServiceSPI {
             throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
         }
         ConfigView view = configViewFactory.getView(userId, contextId);
-        String sipgateUsername = view.get("com.openexchange.sms.sipgate.username", String.class);
-        String sipgatePassword = view.get("com.openexchange.sms.sipgate.password", String.class);
+        String sipgateUsername = view.get(USERNAME, String.class);
+        String sipgatePassword = view.get(PASSWORD, String.class);
         Integer maxLength = view.get("com.openexchange.sms.sipgate.maxlength", Integer.class);
         if (Strings.isEmpty(sipgateUsername) || Strings.isEmpty(sipgatePassword)) {
             throw SipgateSMSExceptionCode.NOT_CONFIGURED.create(I(userId), I(contextId));
@@ -126,15 +132,15 @@ public class SipgateSMSService implements SMSServiceSPI {
         if (i(maxLength) > 0 && message.length() > i(maxLength)) {
             throw SMSExceptionCode.MESSAGE_TOO_LONG.create(I(message.length()), maxLength);
         }
-        ClientConfig config = ClientConfig.newInstance().setCredentials(sipgateUsername, sipgatePassword);
-        CloseableHttpClient client = HttpClients.getHttpClient(config);
+
         try {
+            HttpClient client = getHttpClient();
             for (int i = 0; i < recipients.length; i++) {
                 JSONObject jsonObject = new JSONObject(3);
                 jsonObject.put("smsId", "s0");
                 jsonObject.put("recipient", checkAndFormatPhoneNumber(recipients[i], null));
                 jsonObject.put("message", message);
-                sendMessage(client, jsonObject);
+                sendMessage(client, sipgateUsername, sipgatePassword, jsonObject);
             }
         } catch (JSONException e) {
             // will not happen
@@ -149,13 +155,19 @@ public class SipgateSMSService implements SMSServiceSPI {
         return sb.toString();
     }
 
-    private void sendMessage(CloseableHttpClient client, JSONObject message) throws OXException {
+    private void sendMessage(HttpClient client, String username, String password, JSONObject message) throws OXException {
         HttpPost request = new HttpPost(URI);
         request.setEntity(new InputStreamEntity(new JSONInputStream(message, Charsets.UTF_8_NAME), -1L, ContentType.APPLICATION_JSON));
-        CloseableHttpResponse response = null;
+        HttpResponse response = null;
+
+        /*
+         * Configure HTTP context
+         */
+        HttpHost targetHost = new HttpHost(HOST_ADDRESS, AuthScope.ANY_PORT, "https");
         HttpContext context = new BasicHttpContext();
-        AuthScheme basicAuth = new BasicScheme(Charsets.UTF_8);
-        context.setAttribute("preemptive-auth", basicAuth);
+        addCredentialProvider(context, username, password, targetHost);
+        addAuthCache(context, targetHost);
+
         try {
             response = client.execute(request, context);
             StatusLine statusLine = response.getStatusLine();
@@ -172,6 +184,10 @@ public class SipgateSMSService implements SMSServiceSPI {
         } finally {
             HttpClients.close(request, response);
         }
+    }
+
+    private HttpClient getHttpClient() throws OXException {
+        return services.getServiceSafe(HttpClientService.class).getHttpClient("sipgate");
     }
 
 }

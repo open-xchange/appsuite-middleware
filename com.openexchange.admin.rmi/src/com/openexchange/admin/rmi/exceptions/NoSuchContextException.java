@@ -55,7 +55,7 @@ package com.openexchange.admin.rmi.exceptions;
  * @author cutmasta
  *
  */
-public class NoSuchContextException extends Exception {
+public class NoSuchContextException extends AbstractAdminRmiException {
 
     private static final String MSG_WITH_PARAM = "Context %d does not exist";
     private static final String MSG = "Context does not exist";
@@ -65,13 +65,13 @@ public class NoSuchContextException extends Exception {
     private static final long serialVersionUID = 1991615694615324164L;
 
     /**
-     * 
+     *
      */
     public NoSuchContextException() {
         super(MSG);
     }
-    
-    
+
+
     /**
      * @param ctxId
      */

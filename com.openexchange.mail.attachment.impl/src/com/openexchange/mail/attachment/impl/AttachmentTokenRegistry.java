@@ -65,6 +65,7 @@ import com.openexchange.mail.attachment.impl.portable.PortableAttachmentToken;
 import com.openexchange.mail.attachment.impl.portable.PortableCheckTokenExistence;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -114,7 +115,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants, 
     // ------------------------------------------------------------------------------------------------------------------------
 
     private final ServiceLookup services;
-    private final ConcurrentMap<Key, ConcurrentMap<String, AttachmentToken>> map;
+    private final ConcurrentMap<UserAndContext, ConcurrentMap<String, AttachmentToken>> map;
     private final ConcurrentMap<String, AttachmentToken> tokens;
     private final ScheduledTimerTask timerTask;
 
@@ -124,7 +125,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants, 
     private AttachmentTokenRegistry(ServiceLookup services) {
         super();
         this.services = services;
-        map = new ConcurrentHashMap<Key, ConcurrentMap<String, AttachmentToken>>(256, 0.9f, 1);
+        map = new ConcurrentHashMap<UserAndContext, ConcurrentMap<String, AttachmentToken>>(256, 0.9f, 1);
         tokens = new ConcurrentHashMap<String, AttachmentToken>(512, 0.9f, 1);
         timerTask = services.getService(TimerService.class).scheduleWithFixedDelay(new CleanExpiredTokensRunnable(map, tokens), CLEANER_FREQUENCY, CLEANER_FREQUENCY);
     }
@@ -169,7 +170,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants, 
         /*
          * Clean from other map, too
          */
-        final Key key = keyFor(attachmentToken.getUserId(), attachmentToken.getContextId());
+        final UserAndContext key = keyFor(attachmentToken.getUserId(), attachmentToken.getContextId());
         final ConcurrentMap<String, AttachmentToken> userTokens = map.get(key);
         if (null != userTokens) {
             userTokens.remove(tokenId);
@@ -263,7 +264,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants, 
 
     @Override
     public void putToken(final AttachmentToken token, final Session session) {
-        final Key key = keyFor(session);
+        final UserAndContext key = keyFor(session);
         ConcurrentMap<String, AttachmentToken> userTokens = map.get(key);
         if (null == userTokens) {
             final ConcurrentMap<String, AttachmentToken> newmap = new ConcurrentHashMap<String, AttachmentToken>();
@@ -278,62 +279,20 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants, 
 
     // ------------------------------------------------------------------------------------------------------------------------------
 
-    private static Key keyFor(Session session) {
-        return keyFor(session.getUserId(), session.getContextId());
+    private static UserAndContext keyFor(Session session) {
+        return UserAndContext.newInstance(session);
     }
 
-    protected static Key keyFor(int user, int context) {
-        return new Key(user, context);
+    protected static UserAndContext keyFor(int user, int context) {
+        return UserAndContext.newInstance(user, context);
     }
-
-    private static final class Key {
-
-        private final int cid;
-        private final int user;
-        private final int hash;
-
-        Key(final int user, final int cid) {
-            super();
-            this.user = user;
-            this.cid = cid;
-
-            int prime = 31;
-            int result = prime * 1 + cid;
-            result = prime * result + user;
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (cid != other.cid) {
-                return false;
-            }
-            if (user != other.user) {
-                return false;
-            }
-            return true;
-        }
-
-    } // End of class Key
 
     private static final class CleanExpiredTokensRunnable implements Runnable {
 
-        private final ConcurrentMap<Key, ConcurrentMap<String, AttachmentToken>> rmap;
+        private final ConcurrentMap<UserAndContext, ConcurrentMap<String, AttachmentToken>> rmap;
         private final ConcurrentMap<String, AttachmentToken> rtokens;
 
-        CleanExpiredTokensRunnable(final ConcurrentMap<Key, ConcurrentMap<String, AttachmentToken>> rmap, final ConcurrentMap<String, AttachmentToken> rtokens) {
+        CleanExpiredTokensRunnable(final ConcurrentMap<UserAndContext, ConcurrentMap<String, AttachmentToken>> rmap, final ConcurrentMap<String, AttachmentToken> rtokens) {
             super();
             this.rmap = rmap;
             this.rtokens = rtokens;

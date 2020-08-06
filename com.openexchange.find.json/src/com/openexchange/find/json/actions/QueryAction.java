@@ -51,8 +51,13 @@ package com.openexchange.find.json.actions;
 
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
+import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
@@ -63,6 +68,8 @@ import com.openexchange.find.json.FindRequest;
 import com.openexchange.find.json.Offset;
 import com.openexchange.find.json.QueryResult;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link QueryAction}
@@ -71,7 +78,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public class QueryAction extends AbstractFindAction {
+public class QueryAction extends AbstractFindAction implements EnqueuableAJAXActionService {
 
     /**
      * Initializes a new {@link QueryAction}.
@@ -80,6 +87,30 @@ public class QueryAction extends AbstractFindAction {
      */
     public QueryAction(final ServiceLookup services) {
         super(services);
+    }
+
+    @Override
+    public EnqueuableAJAXActionService.Result isEnqueueable(AJAXRequestData request, ServerSession session) throws OXException {
+        try {
+            String module = request.requireParameter("module");
+
+            JSONObject data = (JSONObject) request.requireData();
+            long start = data.getLong("start");
+            long size = data.getLong("size");
+            JSONArray jFacets = data.getJSONArray("facets");
+
+            JSONObject jKeyDesc = new JSONObject(4);
+            jKeyDesc.put("module", "find");
+            jKeyDesc.put("action", "query");
+            jKeyDesc.put("findModule", module);
+            jKeyDesc.put("start", start);
+            jKeyDesc.put("size", size);
+            jKeyDesc.put("facets", jFacets);
+
+            return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
@@ -98,6 +129,5 @@ public class QueryAction extends AbstractFindAction {
         final SearchResult searchResult = searchService.search(searchRequest, module, request.getServerSession());
         return new AJAXRequestResult(new QueryResult(searchRequest, searchResult), QueryResult.class.getName());
     }
-
 
 }

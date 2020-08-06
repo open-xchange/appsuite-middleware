@@ -2,6 +2,7 @@
 title: runallupdate
 icon: far fa-circle
 tags: Administration, Command Line tools, Database, Schema, Update Task
+package: open-xchange-core
 ---
 
 # NAME

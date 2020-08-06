@@ -423,6 +423,42 @@ public class ChronosJsonFields {
     }
 
     /**
+     * The conferences of the event. See {@link Event#getConferences()}
+     */
+    public static final String CONFERENCES = "conferences";
+
+    /**
+     *
+     * {@link Conferene}
+     *
+     * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+     * @since v7.10.4
+     */
+    public static final class Conference {
+
+        /**
+         * The internal identifier of the conference. See {@link com.openexchange.chronos.Conference#getId()}
+         */
+        public static final String ID = "id";
+        /**
+         * The URI to access the conference. See {@link com.openexchange.chronos.Conference#getUri()}
+         */
+        public static final String URI = "uri";
+        /**
+         * The label used to convey additional details on the use of the URI. See {@link com.openexchange.chronos.Conference#getLabel()}
+         */
+        public static final String LABEL = "label";
+        /**
+         * The features describing the key capabilities of the conference system. See {@link com.openexchange.chronos.Conference#getFeatures()}
+         */
+        public static final String FEATURES = "features";
+        /**
+         * The the extended parameters of the conference. See {@link com.openexchange.chronos.Conference#getExtendedParameters()}
+         */
+        public static final String EXTENDED_PARAMETERS = "extendedParameters";
+    }
+
+    /**
      * The extended properties of the event. See {@link Event#getExtendedProperties()}
      */
     public static final String EXTENDED_PROPERTIES = "extendedProperties";

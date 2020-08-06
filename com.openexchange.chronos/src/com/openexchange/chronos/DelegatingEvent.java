@@ -484,7 +484,7 @@ public abstract class DelegatingEvent extends Event {
     public boolean containsGeo() {
         return delegate.containsGeo();
     }
-    
+
     @Override
     public AttendeePrivileges getAttendeePrivileges() {
         return delegate.getAttendeePrivileges();
@@ -783,6 +783,26 @@ public abstract class DelegatingEvent extends Event {
     @Override
     public boolean containsAlarms() {
         return delegate.containsAlarms();
+    }
+
+    @Override
+    public List<Conference> getConferences() {
+        return delegate.getConferences();
+    }
+
+    @Override
+    public void setConferences(List<Conference> value) {
+        delegate.setConferences(value);
+    }
+
+    @Override
+    public void removeConferences() {
+        delegate.removeConferences();
+    }
+
+    @Override
+    public boolean containsConferences() {
+        return delegate.containsConferences();
     }
 
     @Override

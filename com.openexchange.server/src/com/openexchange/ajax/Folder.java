@@ -1161,7 +1161,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         it.close();
                         it = null;
                         {
-                            final String preparedFullname = MailFolderUtility.prepareFullname(accountID, MailFolder.DEFAULT_FOLDER_ID);
+                            final String preparedFullname = MailFolderUtility.prepareFullname(accountID, MailFolder.ROOT_FOLDER_ID);
                             /*
                              * Write virtual folder "E-Mail"
                              */
@@ -2386,9 +2386,9 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         putter,
                         accountId,
                         rootFolder,
-                        (mailAccount.isDefaultAccount()) ? MailFolder.DEFAULT_FOLDER_NAME : mailAccount.getName(),
+                        (mailAccount.isDefaultAccount()) ? MailFolder.ROOT_FOLDER_NAME : mailAccount.getName(),
                         1,
-                        MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID),
+                        MailFolderUtility.prepareFullname(accountId, MailFolder.ROOT_FOLDER_ID),
                         FolderObject.SYSTEM_MODULE,
                         false);
                 }

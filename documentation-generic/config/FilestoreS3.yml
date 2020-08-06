@@ -14,6 +14,9 @@ feature_description: |
 properties:
     - key: com.openexchange.filestore.s3.[filestoreID].endpoint
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
         Specifies the endpoint (e.g. "ec2.amazonaws.com") or a full URL, including
         the protocol (e.g. "https://ec2.amazonaws.com") of the region specific AWS
         endpoint this client will communicate with.
@@ -24,15 +27,19 @@ properties:
       related: 
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].bucketName
       description: |
-        Specifies the name of the parent bucket to use. The bucket will be created
-        automatically if it not yet exists, however, it's still possible to use an
+        Specifies the name of the parent bucket to use.
+        In case the new com.openexchange.filestore.s3client.[clientID].* properties are used to configure the s3 client 
+        then this property is matched against the [[com.openexchange.filestore.s3client.[clientID].buckets]] property.
+        In case the filestoreID matches the bucket name this property can be omitted, otherwise this property is required. 
+
+        The bucket will be created automatically if it not yet exists, however, it's still possible to use an
         already existing one. There are some naming restrictions, please refer to
         [[http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html]] for
-        details. This property is required.
+        details.
       defaultValue: 
       version: 
       reloadable: true
@@ -40,10 +47,13 @@ properties:
       related: 
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].region
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
         Configures the Amazon S3 region to use when creating new buckets. This value
         is also used to pre-configure the client when no specific endpoint is set.  
         Possible values:
@@ -65,10 +75,13 @@ properties:
       related: 
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].pathStyleAccess
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
         Defines if path-style-access should be used when accessing the S3 API. If
         not set to <code>true</code>, virtual-hosted-style access is used. Please refer to
         [[http://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html]] for
@@ -80,10 +93,13 @@ properties:
       related: 
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].accessKey
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
         Configures the AWS access key to use.
         This property is required provided that property "com.openexchange.filestore.s3.[filestoreID].credentialsSource" is set to "static".
       defaultValue: 
@@ -93,10 +109,13 @@ properties:
       related: ["com.openexchange.filestore.s3.[filestoreID].credentialsSource"]
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].secretKey
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
         Configures the AWS secret key to use.
         This property is required provided that property "com.openexchange.filestore.s3.[filestoreID].credentialsSource" is set to "static".
       defaultValue: 
@@ -106,10 +125,13 @@ properties:
       related: ["com.openexchange.filestore.s3.[filestoreID].credentialsSource"]
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].encryption
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
         Optionally specifies which encryption mechanism(s) should be used. Current 
         options include:
           - <code>none</code>: no encryption
@@ -129,10 +151,13 @@ properties:
       related: 
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore", "Encryption"]
+      tags: ["Filestore", "Encryption","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].encryption.rsa.keyStore
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
         Specifies the path to the local keystore file (PKCS #12) containing the
         public-/private-key pair to use for encryption, e.g.
         "/opt/open-xchange/etc/cert/awss3.p12". Required if
@@ -144,10 +169,13 @@ properties:
       related: com.openexchange.filestore.s3.[filestoreID].encryption
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore", "Encryption"]
+      tags: ["Filestore", "Encryption","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].encryption.rsa.password
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
         Specifies the password used when creating the referenced keystore containing
         public-/private-key pair to use for encryption. Note that blank or null
         passwords are in violation of the PKCS #12 specifications. Required if
@@ -159,10 +187,13 @@ properties:
       related: com.openexchange.filestore.s3.[filestoreID].encryption
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore", "Encryption", "Credential"]
+      tags: ["Filestore", "Encryption", "Credential","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].signerOverride
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
         Optionally configures an override for the algorithm used to sign requests
         against the S3 interface. If left empty, the underlying client will choose a
         suitable signer type based on the actually used service and region
@@ -181,10 +212,13 @@ properties:
       related: 
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].chunkSize
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
         Defines the chunk size to use for multipart-uploads. Uploads larger than 
         this size are splitted and uploaded into multiple requests. The value can be
         specified with one of the units "B" (bytes), "kB" (kilobyte), "MB"
@@ -197,21 +231,44 @@ properties:
       related: 
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore","S3"]
 
     - key: com.openexchange.filestore.s3.metricCollection
-      description: Enables metric collection for the S3 storage
+      description: |
+        Enables metric collection for the S3 storage
       defaultValue: false
       version: 7.10.0
       reloadable: true
       configcascadeAware: false
       related:
+        - com.openexchange.filestore.s3.maxNumberOfMonitoredClients
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore", "Metrics"]
+      tags: ["Filestore", "Metrics","S3"]
+
+    - key: com.openexchange.filestore.s3.maxNumberOfMonitoredClients
+      description: |
+        The max. number of clients that might be configured to have per-client monitoring enabled. This has
+        an all-or-nothing semantics, i.e. if more clients are configured than this limit, no client is
+        monitored at all. Otherwise, all clients are monitored. Per-filestore clients
+        based on "com.openexchange.filestore.s3.[filestoreID]." properties alone are never monitored.
+        
+        This requires `com.openexchange.filestore.s3.metricCollection = true`.
+      defaultValue: 20
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.filestore.s3.metricCollection
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore", "Metrics","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].connectTimeout
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
         Defines the connect timeout in milliseconds when connecting to S3 end-point.
       defaultValue: 10000
       version: 7.10.2
@@ -220,10 +277,13 @@ properties:
       related: 
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].readTimeout
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
         Defines the socket read timeout in milliseconds when reading responses from to S3 end-point.
       defaultValue: 50000
       version: 7.10.2
@@ -232,10 +292,13 @@ properties:
       related: 
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].maxConnectionPoolSize
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
         Defines the maximum number of allowed open HTTP connections.
       defaultValue: 50
       version: 7.10.2
@@ -244,10 +307,14 @@ properties:
       related: 
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore","S3"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].credentialsSource
       description: |
+        <b>Deprecated:</b>
+        This property is still usable but for better control and monitoring use the corresponding com.openexchange.filestore.s3client.[clientID].* property instead.
+
+
         Defines from what source to take credentials from, which are used to authenticate against S3 end-point.
         Currently supported values are "static" and "iam".
         
@@ -263,4 +330,270 @@ properties:
       related: 
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore","S3"]
+
+
+    - key: com.openexchange.filestore.s3client.[clientID].endpoint
+      description: |
+        Specifies the endpoint (e.g. "ec2.amazonaws.com") or a full URL, including
+        the protocol (e.g. "https://ec2.amazonaws.com") of the region specific AWS
+        endpoint this client will communicate with.
+      defaultValue: s3.amazonaws.com
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].buckets
+      description: |
+        Specifies the names of the buckets this client serves. It is possible to apply wildcards and to specify multiple values as comma-separated list.
+
+        For example: 
+        <code>com.openexchange.filestore.s3client.myClient1.buckets=bucket1, bucket2</code>
+
+        You can also use wildcards instead. For example:
+        <code>com.openexchange.filestore.s3client.myClient1.buckets=bucket*</code>
+
+        It is also possible to use a combination of both:
+        <code>com.openexchange.filestore.s3client.myClient1.buckets=bucketA_*, bucketB_*</code>
+
+        This property is required.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].region
+      description: |
+        Configures the Amazon S3 region to use when creating new buckets. This value
+        is also used to pre-configure the client when no specific endpoint is set.  
+        Possible values:
+        <ul>
+          <li><code>us-gov-west-1</code></li>
+          <li><code>us-east-1</code></li>
+          <li><code>us-west-1</code></li> 
+          <li><code>us-west-2</code></li>
+          <li><code>eu-west-1</code></li>
+          <li><code>ap-southeast-1</code></li>
+          <li><code>ap-southeast-2</code></li>
+          <li><code>ap-northeast-1</code></li>
+          <li><code>sa-east-1</code></li>
+        </ul>
+      defaultValue: us-west-2
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].pathStyleAccess
+      description: |
+        Defines if path-style-access should be used when accessing the S3 API. If
+        not set to <code>true</code>, virtual-hosted-style access is used. Please refer to
+        [[http://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html]] for
+        details.
+      defaultValue: true
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].accessKey
+      description: |
+        Configures the AWS access key to use.
+        This property is required provided that property "com.openexchange.filestore.s3.[filestoreID].credentialsSource" is set to "static".
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: ["com.openexchange.filestore.s3client.[clientID].credentialsSource"]
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].secretKey
+      description: |
+
+        Configures the AWS secret key to use.
+        This property is required provided that property "com.openexchange.filestore.s3.[filestoreID].credentialsSource" is set to "static".
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: ["com.openexchange.filestore.s3client.[clientID].credentialsSource"]
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].encryption
+      description: |
+        Optionally specifies which encryption mechanism(s) should be used. Current 
+        options include:
+          - <code>none</code>: no encryption
+          - <code>rsa</code>: Client-Side Encryption with Client-Side Master Key based on RSA
+          - <code>sse-s3</code>: Server-Side Encryption with S3-Managed Keys (SSE-S3)
+        
+        One client-side and one server-side mechanism can be combined by specifying
+        both mechanisms separated by the "+" character. Example: "rsa+sse-s3".
+        
+        Please note that depending on the used key length and Java runtime, one 
+        might need to replace the so-called "JCE Unlimited Strength Jurisdiction 
+        Policy Files" accordingly.
+      defaultValue: none
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore", "Encryption", "S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].encryption.rsa.keyStore
+      description: |
+        Specifies the path to the local keystore file (PKCS #12) containing the
+        public-/private-key pair to use for encryption, e.g.
+        "/opt/open-xchange/etc/cert/awss3.p12". Required if
+        [[com.openexchange.filestore.s3.[filestoreID].encryption]] is set to <code>rsa</code>.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.filestore.s3client.[clientID]..encryption
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore", "Encryption","S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].encryption.rsa.password
+      description: |
+        Specifies the password used when creating the referenced keystore containing
+        public-/private-key pair to use for encryption. Note that blank or null
+        passwords are in violation of the PKCS #12 specifications. Required if
+        [[com.openexchange.filestore.s3.[filestoreID].encryption]] is set to <code>rsa</code>.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.filestore.s3client.[clientID].encryption
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore", "Encryption", "Credential","S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].signerOverride
+      description: |
+        Optionally configures an override for the algorithm used to sign requests
+        against the S3 interface. If left empty, the underlying client will choose a
+        suitable signer type based on the actually used service and region
+        automatically, however, auto-detection only works properly for the "vanilla"
+        Amazon S3, and may lead to unwanted results when targeting an S3
+        implementation where not all signature types are supported.
+        Possible values include <code>S3SignerType</code> to enforce the AWS signature v2, and
+        <code>AWSS3V4SignerType</code> for AWS signature v4.
+        For backwards compatibility, the setting defaults to <code>S3SignerType</code>, and
+        needs to be adjusted explicitly when targeting the newer "v4-only" regions
+        like Frankfurt or Beijing.
+      defaultValue: S3SignerType
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].chunkSize
+      description: |
+        Defines the chunk size to use for multipart-uploads. Uploads larger than 
+        this size are splitted and uploaded into multiple requests. The value can be
+        specified with one of the units "B" (bytes), "kB" (kilobyte), "MB"
+        (Megabyte) or "GB" (Gigabyte), e.g. "10 MB". For AWS, the minimum size is 
+        5 MB.
+      defaultValue: 5 MB
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].connectTimeout
+      description: |
+        Defines the connect timeout in milliseconds when connecting to S3 end-point.
+        
+        Note:
+        Please note that the configured connect timeout is reset for each retry attempt. If a retry policy with three retries is used then the request fails after 3 * timeout + X ms where X is the time used up by the exponential back-off. 
+      defaultValue: 10000
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.filestore.s3client.[clientID].maxRetries
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].readTimeout
+      description: |
+        Defines the socket read timeout in milliseconds when reading responses from to S3 end-point.
+      defaultValue: 50000
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].maxConnectionPoolSize
+      description: |
+        Defines the maximum number of allowed open HTTP connections.
+      defaultValue: 50
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]
+
+    - key: com.openexchange.filestore.s3client.[clientID].credentialsSource
+      description: |
+        Defines from what source to take credentials from, which are used to authenticate against S3 end-point.
+        Currently supported values are "static" and "iam".
+        
+        "static" refers to taking credentials from "com.openexchange.filestore.s3.[filestoreID].accessKey" property and
+        "com.openexchange.filestore.s3.[filestoreID].secretKey" property respectively.
+        
+        "iam" refers to using the integrated AWS Identity and Access Management (IAM); see also
+        https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html
+      defaultValue: static
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]
+      
+    - key: com.openexchange.filestore.s3client.[clientID].maxRetries
+      description: |
+        Per default the s3 client uses a retry policy with an exponential back-off strategy. This property configures the maximum amount of retries.
+      defaultValue: 3
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore","S3"]

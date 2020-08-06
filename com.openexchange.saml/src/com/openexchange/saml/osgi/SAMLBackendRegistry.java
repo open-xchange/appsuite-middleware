@@ -61,9 +61,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.xml.parsers.DocumentBuilderFactory;
-import org.opensaml.Configuration;
-import org.opensaml.DefaultBootstrap;
-import org.opensaml.xml.ConfigurationException;
+import org.opensaml.core.config.InitializationException;
+import org.opensaml.core.config.InitializationService;
+import org.opensaml.xmlsec.config.impl.JavaCryptoValidationInitializer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
@@ -76,7 +76,6 @@ import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.login.LoginRequestHandler;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentList;
@@ -88,7 +87,6 @@ import com.openexchange.saml.http.AssertionConsumerService;
 import com.openexchange.saml.http.InitService;
 import com.openexchange.saml.http.MetadataService;
 import com.openexchange.saml.http.SingleLogoutService;
-import com.openexchange.saml.impl.DefaultConfig;
 import com.openexchange.saml.impl.DefaultLoginConfigurationLookup;
 import com.openexchange.saml.impl.LoginConfigurationLookup;
 import com.openexchange.saml.impl.SAMLLoginRequestHandler;
@@ -130,18 +128,13 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
      */
     public SAMLBackendRegistry(BundleContext context, ServiceLookup services) throws BundleException {
         super(context, SAMLBackend.class, null);
-        try {
-            DefaultConfig.init(services.getServiceSafe(ConfigurationService.class));
-            this.openSAML = initOpenSAML();
-            this.loginConfigurationLookup = new DefaultLoginConfigurationLookup();
-            this.services = services;
-            this.backends = new ConcurrentList<SAMLBackend>();
-            this.backendServlets = new ConcurrentHashMap<SAMLBackend, Stack<String>>();
-            this.backendServiceRegistrations = new ConcurrentHashMap<SAMLBackend, Stack<ServiceRegistration<?>>>();
-            this.hzStateManagement = new HzStateManagement(services.getService(HazelcastInstance.class));
-        } catch (OXException e) {
-            throw new BundleException("Initialization of SAML back-end registry failed.", e);
-        }
+        this.openSAML = initOpenSAML();
+        this.loginConfigurationLookup = new DefaultLoginConfigurationLookup();
+        this.services = services;
+        this.backends = new ConcurrentList<SAMLBackend>();
+        this.backendServlets = new ConcurrentHashMap<SAMLBackend, Stack<String>>();
+        this.backendServiceRegistrations = new ConcurrentHashMap<SAMLBackend, Stack<ServiceRegistration<?>>>();
+        this.hzStateManagement = new HzStateManagement(services.getService(HazelcastInstance.class));
     }
 
     @Override
@@ -397,7 +390,9 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
     }
 
     private OpenSAML initOpenSAML() throws BundleException {
-        if (!Configuration.validateJCEProviders()) {
+        try {
+            new JavaCryptoValidationInitializer().init();
+        } catch (InitializationException e1) {
             LOG.error("The necessary JCE providers for OpenSAML could not be found. SAML 2.0 integration will be disabled!");
             throw new BundleException("The necessary JCE providers for OpenSAML could not be found.", BundleException.ACTIVATOR_ERROR);
         }
@@ -408,8 +403,8 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
         }
 
         try {
-            DefaultBootstrap.bootstrap();
-        } catch (ConfigurationException e) {
+            InitializationService.initialize();
+        } catch (InitializationException e) {
             LOG.error("Error while bootstrapping OpenSAML library", e);
             throw new BundleException("Error while bootstrapping OpenSAML library", BundleException.ACTIVATOR_ERROR, e);
         }

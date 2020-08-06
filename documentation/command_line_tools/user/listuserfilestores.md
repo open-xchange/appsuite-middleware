@@ -2,6 +2,7 @@
 title: listuserfilestores
 icon: far fa-circle
 tags: Administration, Command Line tools, User, Filestore
+package: open-xchange-admin
 ---
 
 # NAME

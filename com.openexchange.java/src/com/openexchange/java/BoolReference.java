@@ -65,7 +65,7 @@ public final class BoolReference {
     private boolean value;
 
     /**
-     * Initializes a new {@link BoolReference} with <code>false</code> booleabn value.
+     * Initializes a new {@link BoolReference} with <code>false</code> boolean value.
      */
     public BoolReference() {
         this(false);

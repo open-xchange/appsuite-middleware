@@ -55,6 +55,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.login.LoginRequestContext;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.internal.LoginPerformer;
@@ -79,7 +80,7 @@ public class OIDCLogoutRequestHandler implements LoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void handleRequest(HttpServletRequest request, HttpServletResponse response, LoginRequestContext requestContext) throws IOException {
         try {
             String sessionId = request.getParameter(LoginServlet.PARAMETER_SESSION);
             if (sessionId == null) {
@@ -96,8 +97,10 @@ public class OIDCLogoutRequestHandler implements LoginRequestHandler {
         } catch (OXException e) {
             LOG.error("Failed to logout local OX session with id", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
 
         this.backend.finishLogout(request, response);
+        requestContext.getMetricProvider().recordSuccess();
     }
 }

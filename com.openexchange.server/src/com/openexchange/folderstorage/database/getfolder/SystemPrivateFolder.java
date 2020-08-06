@@ -50,14 +50,9 @@
 package com.openexchange.folderstorage.database.getfolder;
 
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
 import com.openexchange.groupware.container.FolderObject;
@@ -66,7 +61,6 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.Collators;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.user.User;
 
@@ -113,57 +107,53 @@ public final class SystemPrivateFolder {
      * @throws OXException If the database folder cannot be returned
      */
     public static int[] getSystemPrivateFolderSubfoldersAsInt(final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
-        try {
+        /*
+         * The system private folder
+         */
+        List<FolderObject> list;
+        try (FolderObjectIterator foi = (FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, user.getId(), user.getGroups(), ctx, userPerm, null, con)) {
+            list = foi.asList();
+        }
+        StringHelper stringHelper = null;
+        for (final FolderObject folderObject : list) {
             /*
-             * The system private folder
+             * Check if folder is user's default folder and set locale-sensitive name
              */
-            List<FolderObject> list;
-            try (FolderObjectIterator foi = (FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, user.getId(), user.getGroups(), ctx, userPerm, null, con)) {
-                list = foi.asList();
-            }
-            StringHelper stringHelper = null;
-            for (final FolderObject folderObject : list) {
-                /*
-                 * Check if folder is user's default folder and set locale-sensitive name
-                 */
-                if (folderObject.isDefaultFolder()) {
-                    final int module = folderObject.getModule();
-                    if (FolderObject.CALENDAR == module) {
-                        {
-                            if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
-                            }
-                            folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
+            if (folderObject.isDefaultFolder()) {
+                final int module = folderObject.getModule();
+                if (FolderObject.CALENDAR == module) {
+                    {
+                        if (null == stringHelper) {
+                            stringHelper = StringHelper.valueOf(user.getLocale());
                         }
-                    } else if (FolderObject.CONTACT == module) {
-                        {
-                            if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
-                            }
-                            folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
+                    }
+                } else if (FolderObject.CONTACT == module) {
+                    {
+                        if (null == stringHelper) {
+                            stringHelper = StringHelper.valueOf(user.getLocale());
                         }
-                    } else if (FolderObject.TASK == module) {
-                        {
-                            if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
-                            }
-                            folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
+                    }
+                } else if (FolderObject.TASK == module) {
+                    {
+                        if (null == stringHelper) {
+                            stringHelper = StringHelper.valueOf(user.getLocale());
                         }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
                     }
                 }
             }
-            /*
-             * Extract IDs
-             */
-            final int[] ret = new int[list.size()];
-            int i = 0;
-            for (final FolderObject folderObject : list) {
-                ret[i++] = folderObject.getObjectID();
-            }
-            return ret;
-        } catch (SQLException e) {
-            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
+        /*
+         * Extract IDs
+         */
+        final int[] ret = new int[list.size()];
+        int i = 0;
+        for (final FolderObject folderObject : list) {
+            ret[i++] = folderObject.getObjectID();
+        }
+        return ret;
     }
 
     /**
@@ -177,71 +167,46 @@ public final class SystemPrivateFolder {
      * @throws OXException If the database folder cannot be returned
      */
     public static List<String[]> getSystemPrivateFolderSubfolders(final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
-        try {
+        /*
+         * The system private folder
+         */
+        List<FolderObject> list;
+        try (FolderObjectIterator foi = (FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, user.getId(), user.getGroups(), ctx, userPerm, null, con)) {
+            list = foi.asList();
+        }
+        StringHelper stringHelper = null;
+        for (final FolderObject folderObject : list) {
             /*
-             * The system private folder
+             * Check if folder is user's default folder and set locale-sensitive name
              */
-            List<FolderObject> list;
-            try (FolderObjectIterator foi = (FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, user.getId(), user.getGroups(), ctx, userPerm, null, con)) {
-                list = foi.asList();
-            }
-            StringHelper stringHelper = null;
-            for (final FolderObject folderObject : list) {
-                /*
-                 * Check if folder is user's default folder and set locale-sensitive name
-                 */
-                if (folderObject.isDefaultFolder()) {
-                    final int module = folderObject.getModule();
-                    if (FolderObject.CALENDAR == module) {
-                        if (null == stringHelper) {
-                            stringHelper = StringHelper.valueOf(user.getLocale());
-                        }
-                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
-                    } else if (FolderObject.CONTACT == module) {
-                        if (null == stringHelper) {
-                            stringHelper = StringHelper.valueOf(user.getLocale());
-                        }
-                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
-                    } else if (FolderObject.TASK == module) {
-                        if (null == stringHelper) {
-                            stringHelper = StringHelper.valueOf(user.getLocale());
-                        }
-                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
+            if (folderObject.isDefaultFolder()) {
+                final int module = folderObject.getModule();
+                if (FolderObject.CALENDAR == module) {
+                    if (null == stringHelper) {
+                        stringHelper = StringHelper.valueOf(user.getLocale());
                     }
+                    folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
+                } else if (FolderObject.CONTACT == module) {
+                    if (null == stringHelper) {
+                        stringHelper = StringHelper.valueOf(user.getLocale());
+                    }
+                    folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
+                } else if (FolderObject.TASK == module) {
+                    if (null == stringHelper) {
+                        stringHelper = StringHelper.valueOf(user.getLocale());
+                    }
+                    folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
                 }
             }
-            /*
-             * Extract IDs
-             */
-            final List<String[]> ret = new ArrayList<String[]>(list.size());
-            for (final FolderObject folderObject : list) {
-                ret.add(new String[] {String.valueOf(folderObject.getObjectID()),folderObject.getFolderName()});
-            }
-            return ret;
-        } catch (SQLException e) {
-            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
-    }
-
-    /**
-     * {@link NameComparator} - Sorts names with respect to a certain locale
-     *
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-     */
-    private static final class NameComparator implements Comparator<FolderObject> {
-
-        private final Collator collator;
-
-        public NameComparator(final Locale locale) {
-            super();
-            collator = Collators.getSecondaryInstance(locale);
+        /*
+         * Extract IDs
+         */
+        final List<String[]> ret = new ArrayList<String[]>(list.size());
+        for (final FolderObject folderObject : list) {
+            ret.add(new String[] {String.valueOf(folderObject.getObjectID()),folderObject.getFolderName()});
         }
-
-        @Override
-        public int compare(final FolderObject folder1, final FolderObject folder2) {
-            return collator.compare(folder1.getFolderName(), folder2.getFolderName());
-        }
-
+        return ret;
     }
 
 }

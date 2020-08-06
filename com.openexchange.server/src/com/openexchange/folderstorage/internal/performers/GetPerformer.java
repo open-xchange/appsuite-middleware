@@ -70,8 +70,6 @@ import com.openexchange.user.User;
  */
 public final class GetPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetPerformer.class);
-
     /**
      * Initializes a new {@link GetPerformer}.
      *
@@ -142,8 +140,7 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(getFolderInfo4Error(folder), getUserInfo4Error(), getContextInfo4Error());
             }
             // TODO: All or only subscribed subfolders?
-            final UserizedFolder userizedFolder =
-                getUserizedFolder(folder, ownPermission, treeId, true, true, storageParameters, openedStorages);
+            final UserizedFolder userizedFolder = getUserizedFolder(folder, ownPermission, treeId, true, true, storageParameters, openedStorages);
 
             /*
              * Commit

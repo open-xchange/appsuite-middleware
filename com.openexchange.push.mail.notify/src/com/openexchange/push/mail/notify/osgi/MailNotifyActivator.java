@@ -54,6 +54,7 @@ import java.util.concurrent.Future;
 import org.osgi.service.event.EventAdmin;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -126,7 +127,7 @@ public final class MailNotifyActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { MailService.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class,
             SessiondService.class, TimerService.class, PushListenerService.class, ContextService.class, UserService.class,
-            LockService.class };
+            LockService.class, ConfigViewFactory.class };
     }
 
     @Override

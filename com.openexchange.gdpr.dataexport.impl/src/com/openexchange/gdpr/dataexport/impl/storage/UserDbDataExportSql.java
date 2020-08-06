@@ -113,7 +113,7 @@ public class UserDbDataExportSql extends AbstractDataExportSql<Integer> {
     }
 
     @Override
-    protected Integer getSchemaReference(int contextId) throws OXException {
+    protected Integer getSchemaReference(int userId, int contextId) throws OXException {
         return I(contextId);
     }
 

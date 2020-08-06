@@ -59,6 +59,7 @@ import java.io.InputStreamReader;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -71,6 +72,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -94,12 +96,13 @@ import com.openexchange.mailfilter.internal.CircuitBreakerInfo;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.properties.PreferredSASLMech;
 import com.openexchange.mailfilter.services.Services;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
-import com.openexchange.metrics.types.Meter;
-import com.openexchange.metrics.types.Timer;
 import com.openexchange.tools.encoding.Base64;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
+import net.jodah.failsafe.CircuitBreaker;
+import net.jodah.failsafe.CircuitBreakerOpenException;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.FailsafeException;
 
 /**
  * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see
@@ -203,7 +206,6 @@ public class SieveHandler {
     private int userId = -1;
     private int contextId = -1;
     private final Optional<CircuitBreakerInfo> optionalCircuitBreaker;
-    protected final Optional<MetricService> optionalMetricService;
 
     /**
      * Initializes a new {@link SieveHandler}.
@@ -216,13 +218,11 @@ public class SieveHandler {
      * @param authEnc The encoding to use when transferring credential bytes to SIEVE end-point
      * @param oauthToken The optional OAuth token; relevant in case <code>"XOAUTH2"</code> or <code>"OAUTHBEARER"</code> SASL authentication is supposed to be performed
      * @param optionalCircuitBreaker The optional circuit breaker for mail filter access
-     * @param optionalMetricService The optional metric service to measure request/error rate
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public SieveHandler(String userName, String authUserName, String authUserPasswd, String host, int port, String authEnc, String oauthToken, Optional<CircuitBreakerInfo> optionalCircuitBreaker, Optional<MetricService> optionalMetricService, int userId, int contextId) {
+    public SieveHandler(String userName, String authUserName, String authUserPasswd, String host, int port, String authEnc, String oauthToken, Optional<CircuitBreakerInfo> optionalCircuitBreaker, int userId, int contextId) {
         super();
-        this.optionalMetricService = optionalMetricService;
         sieve_user = null == userName ? authUserName : userName;
         sieve_auth = authUserName;
         sieve_auth_enc = authEnc;
@@ -253,7 +253,6 @@ public class SieveHandler {
         onlyWelcome = true;
         this.oauthToken = null;
         optionalCircuitBreaker = Optional.empty();
-        optionalMetricService = Optional.empty();
     }
 
     /**
@@ -406,7 +405,7 @@ public class SieveHandler {
         {
             int effectiveConnectTimeout = getEffectiveConnectTimeout(configuredTimeout);
             try {
-                s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), effectiveConnectTimeout);
+                connectSocket(effectiveConnectTimeout);
             } catch (java.net.ConnectException e) {
                 // Connection refused remotely
                 throw new OXSieveHandlerException("Sieve server not reachable. Please disable Sieve service if not supported by mail backend.", sieve_host, sieve_host_port, null, e);
@@ -548,74 +547,110 @@ public class SieveHandler {
         }
     }
 
-    public IMetricArguments createMetricArguments() {
-        return optionalMetricService.isPresent() ? new MetricArguments(optionalMetricService.get(), this) : NOOP;
+    private void connectSocket(int connectTimeout) throws IOException {
+        if (optionalCircuitBreaker.isPresent()) {
+            CircuitBreakerInfo circuitBreakerInfo = optionalCircuitBreaker.get();
+            try {
+                Failsafe.with(circuitBreakerInfo.getCircuitBreaker()).get(new CircuitBreakerConnectCallable(s_sieve, new InetSocketAddress(sieve_host, sieve_host_port), connectTimeout));
+            } catch (CircuitBreakerOpenException e) {
+                // Circuit breaker is open
+                circuitBreakerInfo.incrementDenials();
+                throw new IOException("Denied connect attempt to SIEVE server since circuit breaker is open.");
+            } catch (FailsafeException e) {
+                // Runnable failed with a checked exception
+                Throwable failure = e.getCause();
+                if (failure instanceof IOException) {
+                    throw (IOException) failure;
+                }
+                if (failure instanceof Error) {
+                    throw (Error) failure;
+                }
+                throw new IOException(failure);
+            }
+        } else {
+            s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), connectTimeout);
+        }
+    }
+
+    /**
+     * Creates a helper for measuring metrics
+     *
+     * @return The {@link MetricHelper}
+     */
+    public MetricHelper createMetricHelper() {
+        return new MetricHelper(this);
     }
 
     private static final List<Class<? extends Exception>> NETWORK_COMMUNICATION_ERRORS = ImmutableList.of(
         java.net.SocketTimeoutException.class,
         java.io.EOFException.class);
 
-    public String readResponseLine(IMetricArguments metricArgs) throws IOException {
-        if (metricArgs == null || metricArgs.dontMeasureRead()) {
+    public String readResponseLine(MetricHelper helper) throws IOException {
+        if (helper == null || helper.dontMeasureRead()) {
             return bis_sieve.readLine();
         }
 
+        long start = System.nanoTime();
         try {
-            long start = System.nanoTime();
             String responseLine = bis_sieve.readLine();
             if (responseLine != null) {
-                metricArgs.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS, "OK");
             }
             return responseLine;
         } catch (IOException e) {
+            String status = "UNKNOWN_ERROR";
             if (isEitherOf(e, NETWORK_COMMUNICATION_ERRORS)) {
-                metricArgs.markError();
+                status = "COMMUNICATION_ERROR";
             }
+            helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS, status);
             throw e;
         }
     }
 
-    private int readResponseCharacter(IMetricArguments metricArgs) throws IOException {
-        return readResponseCharacter(bis_sieve, metricArgs);
+    private int readResponseCharacter(MetricHelper helper) throws IOException {
+        return readResponseCharacter(bis_sieve, helper);
     }
 
-    private int readResponseCharacter(Reader reader, IMetricArguments metricArgs) throws IOException {
-        if (metricArgs == null || metricArgs.dontMeasureRead()) {
+    private int readResponseCharacter(Reader reader, MetricHelper helper) throws IOException {
+        if (helper == null || helper.dontMeasureRead()) {
             return reader.read();
         }
 
+        long start = System.nanoTime();
         try {
-            long start = System.nanoTime();
             int responseCharacter = reader.read();
             if (responseCharacter >= 0) {
-                metricArgs.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS, "OK");
             }
             return responseCharacter;
         } catch (IOException e) {
+            String status = "UNKNOWN_ERROR";
             if (isEitherOf(e, NETWORK_COMMUNICATION_ERRORS)) {
-                metricArgs.markError();
+                status = "COMMUNICATION_ERROR";
             }
+            helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS, status);
             throw e;
         }
     }
 
-    private int readResponseCharacters(char[] buf, int len, IMetricArguments metricArgs) throws IOException {
-        if (metricArgs == null || metricArgs.dontMeasureRead()) {
+    private int readResponseCharacters(char[] buf, int len, MetricHelper helper) throws IOException {
+        if (helper == null || helper.dontMeasureRead()) {
             return bis_sieve.read(buf, 0, len);
         }
 
+        long start = System.nanoTime();
         try {
-            long start = System.nanoTime();
             int read = bis_sieve.read(buf, 0, len);
             if (read >= 0) {
-                metricArgs.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS, "OK");
             }
             return read;
         } catch (IOException e) {
+            String status = "UNKNOWN_ERROR";
             if (isEitherOf(e, NETWORK_COMMUNICATION_ERRORS)) {
-                metricArgs.markError();
+                status = "COMMUNICATION_ERROR";
             }
+            helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS, status);
             throw e;
         }
     }
@@ -630,7 +665,7 @@ public class SieveHandler {
             throw new OXSieveHandlerException("Capability not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
 
-        IMetricArguments metricArgs = createMetricArguments();
+        MetricHelper helper = createMetricHelper();
 
         final String capability = SIEVE_CAPABILITY;
         bos_sieve.write(capability.getBytes(UTF_8));
@@ -640,7 +675,7 @@ public class SieveHandler {
         capa = new Capabilities();
 
         while (true) {
-            final String temp = readResponseLine(metricArgs);
+            final String temp = readResponseLine(helper);
             if (null == temp) {
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
             }
@@ -719,7 +754,7 @@ public class SieveHandler {
         String put = commandBuilder.append(SIEVE_PUT).append('\"').append(script_name).append("\" {").append(script.length).append("+}").append(CRLF).toString();
         commandBuilder.setLength(0);
 
-        IMetricArguments metricArgs = createMetricArguments();
+        MetricHelper helper = createMetricHelper();
 
         bos_sieve.write(put.getBytes(UTF_8));
         bos_sieve.write(script);
@@ -727,11 +762,11 @@ public class SieveHandler {
         bos_sieve.write(CRLF.getBytes(UTF_8));
         bos_sieve.flush();
 
-        String currentLine = readResponseLine(metricArgs);
+        String currentLine = readResponseLine(helper);
         if (null != currentLine && currentLine.startsWith(SIEVE_OK)) {
             return;
         } else if (null != currentLine && currentLine.startsWith("NO ")) {
-            final String errorMessage = parseError(currentLine, metricArgs).replaceAll(CRLF, "\n");
+            final String errorMessage = parseError(currentLine, helper).replaceAll(CRLF, "\n");
             throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(currentLine, errorMessage)).setParseError(true);
         } else {
             throw new OXSieveHandlerException("Unknown response code", sieve_host, sieve_host_port, parseSIEVEResponse(currentLine, null));
@@ -770,7 +805,7 @@ public class SieveHandler {
             throw new OXSieveHandlerException("Get script not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
 
-        IMetricArguments metricArgs = createMetricArguments();
+        MetricHelper helper = createMetricHelper();
 
         final StringBuilder sb = new StringBuilder(32);
         bos_sieve.write(sb.append(SIEVE_GET_SCRIPT).append('"').append(script_name).append('"').append(CRLF).toString().getBytes(UTF_8));
@@ -789,7 +824,7 @@ public class SieveHandler {
          * S: OK
          */
         {
-            final String firstLine = readResponseLine(metricArgs);
+            final String firstLine = readResponseLine(helper);
             if (null == firstLine) {
                 // End of the stream reached
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
@@ -799,7 +834,7 @@ public class SieveHandler {
             if (OK == respCode) {
                 return "";
             } else if (NO == respCode) {
-                final String errorMessage = parseError(firstLine, metricArgs).replaceAll(CRLF, "\n");
+                final String errorMessage = parseError(firstLine, helper).replaceAll(CRLF, "\n");
                 throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(firstLine, errorMessage));
             }
             sb.setLength(0);
@@ -809,7 +844,7 @@ public class SieveHandler {
         boolean okStart = false;
         boolean inComment = false;
         while (true) {
-            int ch = readResponseCharacter(metricArgs);
+            int ch = readResponseCharacter(helper);
             switch (ch) {
                 case -1:
                     // End of stream
@@ -821,7 +856,7 @@ public class SieveHandler {
                     int limit = 0;
                     int index = 0;
                     do {
-                        ch = readResponseCharacter(metricArgs);
+                        ch = readResponseCharacter(helper);
                         if (ch == -1) {
                             // End of stream
                             throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
@@ -863,7 +898,7 @@ public class SieveHandler {
                 {
                     if (!inQuote && okStart && !inComment) {
                         sb.setLength(sb.length() - 1);
-                        consumeUntilCRLF(metricArgs); // OK "Getscript completed."\r\n
+                        consumeUntilCRLF(helper); // OK "Getscript completed."\r\n
                         return returnScript(sb);
                     }
                     okStart = false;
@@ -926,12 +961,12 @@ public class SieveHandler {
         return sb.toString();
     }
 
-    private void consumeUntilCRLF(IMetricArguments metricArgs) throws IOException, OXSieveHandlerException {
+    private void consumeUntilCRLF(MetricHelper helper) throws IOException, OXSieveHandlerException {
         Reader in = bis_sieve;
         boolean doRead = true;
         int c1 = -1;
 
-        while (doRead && (c1 = readResponseCharacter(in, metricArgs)) >= 0) {
+        while (doRead && (c1 = readResponseCharacter(in, helper)) >= 0) {
             if (c1 == '\n') {
                 doRead = false;
             } else if (c1 == '\r') {
@@ -940,11 +975,11 @@ public class SieveHandler {
                 if (in.markSupported()) {
                     in.mark(2);
                 }
-                int c2 = readResponseCharacter(in, metricArgs);
+                int c2 = readResponseCharacter(in, helper);
                 if (c2 == '\r') {
                     // Discard extraneous CR
                     twoCRs = true;
-                    c2 = readResponseCharacter(in, metricArgs);
+                    c2 = readResponseCharacter(in, helper);
                 }
                 if (c2 != '\n') {
                     // If the reader supports it (which we hope will always be the case), reset to after the first CR.
@@ -985,7 +1020,7 @@ public class SieveHandler {
             throw new OXSieveHandlerException("List scripts not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
 
-        IMetricArguments metricArgs = createMetricArguments();
+        MetricHelper helper = createMetricHelper();
         List<String> list = null;
 
         final String active = SIEVE_LIST;
@@ -993,7 +1028,7 @@ public class SieveHandler {
         bos_sieve.flush();
 
         while (true) {
-            final String temp = readResponseLine(metricArgs);
+            final String temp = readResponseLine(helper);
             if (null == temp) {
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
             }
@@ -1040,7 +1075,7 @@ public class SieveHandler {
             throw new OXSieveHandlerException("List scripts not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
 
-        IMetricArguments metricArgs = createMetricArguments();
+        MetricHelper helper = createMetricHelper();
         String scriptname = null;
 
         final String active = SIEVE_LIST;
@@ -1048,7 +1083,7 @@ public class SieveHandler {
         bos_sieve.flush();
 
         while (true) {
-            String temp = readResponseLine(metricArgs);
+            String temp = readResponseLine(helper);
             if (null == temp) {
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
             }
@@ -1062,7 +1097,7 @@ public class SieveHandler {
             int count = -1;
             if (temp.startsWith("{")) {
                 count = Integer.parseInt(temp.substring(1, temp.lastIndexOf('}')));
-                temp = readResponseLine(metricArgs);
+                temp = readResponseLine(helper);
                 if (null == temp) {
                     throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
                 }
@@ -1099,14 +1134,14 @@ public class SieveHandler {
             throw new OXSieveHandlerException("List scripts not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
 
-        IMetricArguments metricArgs = createMetricArguments();
+        MetricHelper helper = createMetricHelper();
         List<SieveScript> scrips = null;
 
         bos_sieve.write(SIEVE_LIST.getBytes(UTF_8));
         bos_sieve.flush();
 
         while (true) {
-            String temp = readResponseLine(metricArgs);
+            String temp = readResponseLine(helper);
             if (null == temp) {
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
             }
@@ -1124,7 +1159,7 @@ public class SieveHandler {
             } else if (temp.startsWith("{")) {
                 // Literal
                 int count = Integer.parseInt(temp.substring(1, temp.lastIndexOf('}')));
-                temp = readResponseLine(metricArgs);
+                temp = readResponseLine(helper);
                 if (null == temp) {
                     throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
                 }
@@ -1176,13 +1211,13 @@ public class SieveHandler {
         final String delete = commandBuilder.append(SIEVE_DELETE).append('"').append(script_name).append('"').append(CRLF).toString();
         commandBuilder.setLength(0);
 
-        IMetricArguments metricArgs = createMetricArguments();
+        MetricHelper helper = createMetricHelper();
 
         bos_sieve.write(delete.getBytes(UTF_8));
         bos_sieve.flush();
 
         while (true) {
-            final String temp = readResponseLine(metricArgs);
+            final String temp = readResponseLine(helper);
             if (null == temp) {
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
             }
@@ -1213,9 +1248,9 @@ public class SieveHandler {
     private boolean getServerWelcome() throws UnknownHostException, IOException, OXSieveHandlerException {
         capa = new Capabilities();
 
-        IMetricArguments metricArgs = createMetricArguments();
+        MetricHelper helper = createMetricHelper();
         while (true) {
-            final String test = readResponseLine(metricArgs);
+            final String test = readResponseLine(helper);
             if (null == test) {
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
             }
@@ -1244,14 +1279,14 @@ public class SieveHandler {
             bos_sieve.write(auth_mech_string.getBytes(UTF_8));
         }
 
-        IMetricArguments metricArgs = createMetricArguments();
+        MetricHelper helper = createMetricHelper();
 
         bos_sieve.write(irs.getBytes(UTF_8));
         bos_sieve.write(CRLF.getBytes(UTF_8));
         bos_sieve.flush();
 
         while (true) {
-            final String temp = readResponseLine(metricArgs);
+            final String temp = readResponseLine(helper);
             if (null != temp) {
                 if (temp.startsWith(SIEVE_OK)) {
                     AUTH = true;
@@ -1281,14 +1316,14 @@ public class SieveHandler {
             bos_sieve.write(auth_mech_string.getBytes());
         }
 
-        IMetricArguments metricArgs = createMetricArguments();
+        MetricHelper helper = createMetricHelper();
 
         bos_sieve.write(irs.getBytes());
         bos_sieve.write(CRLF.getBytes());
         bos_sieve.flush();
 
         while (true) {
-            final String temp = readResponseLine(metricArgs);
+            final String temp = readResponseLine(helper);
             if (null != temp) {
                 if (temp.startsWith(SIEVE_OK)) {
                     AUTH = true;
@@ -1328,7 +1363,7 @@ public class SieveHandler {
             byte[] response = sc.evaluateChallenge(new byte[0]);
             String b64resp = com.openexchange.tools.encoding.Base64.encode(response);
 
-            IMetricArguments metricArgs = createMetricArguments();
+            MetricHelper helper = createMetricHelper();
 
             bos_sieve.write(new String(SIEVE_AUTH + "\"GSSAPI\" {" + b64resp.length() + "+}").getBytes(UTF_8));
             bos_sieve.write(CRLF.getBytes(UTF_8));
@@ -1338,7 +1373,7 @@ public class SieveHandler {
             bos_sieve.flush();
 
             while (true) {
-                String temp = readResponseLine(metricArgs);
+                String temp = readResponseLine(helper);
                 if (null != temp) {
                     if (temp.startsWith(SIEVE_OK)) {
                         AUTH = true;
@@ -1357,7 +1392,7 @@ public class SieveHandler {
                         if (temp.startsWith("{")) {
                             int cnt = Integer.parseInt(temp.substring(1, temp.length() - 1));
                             char[] buf = new char[cnt];
-                            int read = readResponseCharacters(buf, cnt, metricArgs);
+                            int read = readResponseCharacters(buf, cnt, helper);
                             cont = com.openexchange.tools.encoding.Base64.decode(new String(buf, 0, read));
                         } else {
                             // dovecot managesieve sends quoted strings
@@ -1413,7 +1448,7 @@ public class SieveHandler {
         final String user_size = commandBuilder.append('{').append((user_auth_pass_64.length() - 2)).append("+}").append(CRLF).toString();
         commandBuilder.setLength(0);
 
-        IMetricArguments metricArgs = createMetricArguments();
+        MetricHelper helper = createMetricHelper();
 
         // We don't need to specify an encoding here because all strings contain only ASCII Text
         bos_sieve.write(auth_mech_string.getBytes(UTF_8));
@@ -1422,7 +1457,7 @@ public class SieveHandler {
         bos_sieve.flush();
 
         while (true) {
-            final String temp = readResponseLine(metricArgs);
+            final String temp = readResponseLine(helper);
             if (null != temp) {
                 if (temp.startsWith(SIEVE_OK)) {
                     AUTH = true;
@@ -1444,13 +1479,13 @@ public class SieveHandler {
         final String auth_mech_string = commandBuilder.append(SIEVE_AUTH).append("\"LOGIN\"").append(CRLF).toString();
         commandBuilder.setLength(0);
 
-        IMetricArguments metricArgs = createMetricArguments();
+        MetricHelper helper = createMetricHelper();
 
         bos_sieve.write(auth_mech_string.getBytes(UTF_8));
         bos_sieve.flush();
 
         while (true) {
-            final String temp = readResponseLine(metricArgs);
+            final String temp = readResponseLine(helper);
             if (null == temp) {
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
             }
@@ -1472,7 +1507,7 @@ public class SieveHandler {
         bos_sieve.flush();
 
         while (true) {
-            final String temp = readResponseLine(metricArgs);
+            final String temp = readResponseLine(helper);
             if (null == temp) {
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
             }
@@ -1494,7 +1529,7 @@ public class SieveHandler {
         bos_sieve.flush();
 
         while (true) {
-            final String temp = readResponseLine(metricArgs);
+            final String temp = readResponseLine(helper);
             if (null == temp) {
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
             }
@@ -1546,13 +1581,13 @@ public class SieveHandler {
         final String active = commandBuilder.append(SIEVE_ACTIVE).append('\"').append(sieve_script_name).append('\"').append(CRLF).toString();
         commandBuilder.setLength(0);
 
-        IMetricArguments metricArgs = createMetricArguments();
+        MetricHelper helper = createMetricHelper();
 
         bos_sieve.write(active.getBytes(UTF_8));
         bos_sieve.flush();
 
         while (true) {
-            final String temp = readResponseLine(metricArgs);
+            final String temp = readResponseLine(helper);
             if (null == temp) {
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
             }
@@ -1575,13 +1610,13 @@ public class SieveHandler {
         }
 
         if (scriptactive) {
-            IMetricArguments metricArgs = createMetricArguments();
+            MetricHelper helper = createMetricHelper();
 
             bos_sieve.write(SIEVE_DEACTIVE.getBytes(UTF_8));
             bos_sieve.flush();
 
             while (true) {
-                final String temp = readResponseLine(metricArgs);
+                final String temp = readResponseLine(helper);
                 if (null == temp) {
                     throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
                 }
@@ -1731,11 +1766,11 @@ public class SieveHandler {
      * Parses and gets the error text. Note this will be CRLF terminated.
      *
      * @param actualline
-     * @param metricArgs
+     * @param helper
      * @return
      * @throws IOException
      */
-    private String parseError(final String actualline, IMetricArguments metricArgs) throws IOException {
+    private String parseError(final String actualline, MetricHelper helper) throws IOException {
         final StringBuilder sb = new StringBuilder();
         final String answer = actualline.substring(3);
         final Matcher matcher = LITERAL_S2C_PATTERN.matcher(answer);
@@ -1743,7 +1778,7 @@ public class SieveHandler {
             final String group = matcher.group(1);
             final int octetsToRead = Integer.parseInt(group);
             final char[] buf = new char[octetsToRead];
-            final int octetsRead = readResponseCharacters(buf, octetsToRead, metricArgs);
+            final int octetsRead = readResponseCharacters(buf, octetsToRead, helper);
             if (octetsRead == octetsToRead) {
                 sb.append(buf);
             } else {
@@ -1751,15 +1786,15 @@ public class SieveHandler {
             }
             return sb.toString();
         }
-        return parseQuotedErrorMessage(answer, metricArgs);
+        return parseQuotedErrorMessage(answer, helper);
     }
 
-    private String parseQuotedErrorMessage(final String answer, IMetricArguments metricArgs) throws IOException {
+    private String parseQuotedErrorMessage(final String answer, MetricHelper helper) throws IOException {
         StringBuilder inputBuilder = new StringBuilder();
         String line = answer;
         while (line != null) {
             inputBuilder.append("\n").append(line);
-            line = readResponseLine(metricArgs);
+            line = readResponseLine(helper);
         }
 
         char[] msgChars = inputBuilder.toString().toCharArray();
@@ -1920,79 +1955,37 @@ public class SieveHandler {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    /** The group name for mail filter metrics */
-    private static final String METRICS_GROUP = "mailfilter";
+    public static class MetricHelper {
 
-    /** The name for request rate metric */
-    private static final String METRICS_REQUEST_RATE_NAME = "requestRate";
-
-    /** The name for error rate metric */
-    private static final String METRICS_ERROR_RATE_NAME = "errorRate";
-
-    /** The key for server dimension */
-    private static final String METRICS_DIMENSION_SERVER_KEY = "server";
-
-    public static interface IMetricArguments {
-
-        boolean measureRead();
-
-        boolean dontMeasureRead();
-
-        void markError();
-
-        void updateRequestTimer(long duration, TimeUnit timeUnit);
-    }
-
-    private static final IMetricArguments NOOP = new IMetricArguments() {
-
-        @Override
-        public boolean measureRead() {
-            return false;
-        }
-
-        @Override
-        public boolean dontMeasureRead() {
-            return true;
-        }
-
-        @Override
-        public void markError() {
-            // Nothing
-        }
-
-        @Override
-        public void updateRequestTimer(long duration, TimeUnit timeUnit) {
-            // Nothing
-        }
-    };
-
-    private static class MetricArguments implements IMetricArguments {
+        private final String host;
 
         private boolean firstRead;
-        private final Timer requestTimer;
-        private final Meter errorMeter;
+
+        MetricHelper(SieveHandler sieveHandler) {
+            this(sieveHandler, false);
+        }
 
         /**
-         * Initializes a new {@link SieveHandler.MetricArguments}.
+         * Initializes a new {@link SieveHandler.MetricHelper}.
          */
-        MetricArguments(MetricService metricService, SieveHandler sieveHandler) {
+        MetricHelper(SieveHandler sieveHandler, boolean groupByEndpoints) {
             super();
 
             firstRead = true;
 
-            String serverInfo = new StringBuilder(sieveHandler.sieve_host).append('@').append(sieveHandler.sieve_host_port).toString();
-            requestTimer = metricService.getTimer(MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_REQUEST_RATE_NAME, MetricType.TIMER)
-                .withDescription("Overall mail filter request timer per target server")
-                .addDimension(METRICS_DIMENSION_SERVER_KEY, serverInfo)
-                .build());
-
-            errorMeter = metricService.getMeter(MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_ERROR_RATE_NAME, MetricType.METER)
-                .withDescription("Failed mail filter request meter per target server")
-                .addDimension(METRICS_DIMENSION_SERVER_KEY, serverInfo)
-                .build());
+            String host = sieveHandler.sieve_host;
+            if (groupByEndpoints) {
+                String hostAddress;
+                try {
+                    hostAddress = InetAddress.getByName(sieveHandler.sieve_host).getHostAddress();
+                    host = hostAddress + ':' + sieveHandler.sieve_host_port;
+                } catch (UnknownHostException e) {
+                    // ignore;
+                }
+            }
+            this.host = host;
         }
 
-        @Override
         public boolean measureRead() {
             if (firstRead) {
                 firstRead = false;
@@ -2001,23 +1994,39 @@ public class SieveHandler {
             return false;
         }
 
-        @Override
         public boolean dontMeasureRead() {
             return !measureRead();
         }
 
-        @Override
-        public void markError() {
-            if (errorMeter != null) {
-                errorMeter.mark();
-            }
+        public void updateRequestTimer(long duration, TimeUnit timeUnit, String status) {
+            Timer.builder("appsuite.mailfilter.commands")
+            .description("Mail filter commands per host")
+            .tags("host", host, "status", status)
+            .register(Metrics.globalRegistry);
+        }
+    }
+
+    private static class CircuitBreakerConnectCallable implements Callable<Void> {
+
+        private final Socket socket;
+        private final InetSocketAddress socketAddress;
+        private final int connectTimeout;
+
+        CircuitBreakerConnectCallable(Socket socket, InetSocketAddress socketAddress,int connectTimeout) {
+            super();
+            this.socket = socket;
+            this.socketAddress = socketAddress;
+            this.connectTimeout = connectTimeout;
         }
 
         @Override
-        public void updateRequestTimer(long duration, TimeUnit timeUnit) {
-            if (requestTimer != null) {
-                requestTimer.update(duration, timeUnit);
+        public Void call() throws Exception {
+            if (connectTimeout >= 0) {
+                socket.connect(socketAddress, connectTimeout);
+            } else {
+                socket.connect(socketAddress);
             }
+            return null;
         }
     }
 

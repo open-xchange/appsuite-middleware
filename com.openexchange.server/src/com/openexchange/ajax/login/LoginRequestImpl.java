@@ -52,9 +52,11 @@ package com.openexchange.ajax.login;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpSession;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
+import com.openexchange.servlet.Constants;
 
 /**
  * {@link LoginRequestImpl}
@@ -84,6 +86,7 @@ public class LoginRequestImpl implements LoginRequest {
         protected String locale;
         protected boolean storeLocale;
         protected boolean staySignedIn;
+        protected HttpSession httpSession;
 
         public Builder() {
             super();
@@ -121,8 +124,10 @@ public class LoginRequestImpl implements LoginRequest {
         public Builder serverPort(int serverPort) {
             this.serverPort = serverPort; return this;
         }
-        public Builder httpSessionID(String httpSessionID) {
-            this.httpSessionID = httpSessionID; return this;
+        public Builder httpSession(HttpSession httpSession) {
+            this.httpSessionID = httpSession.getId();
+            this.httpSession = httpSession;
+            return this;
         }
         public Builder iface(Interface iface) {
             this.iface = iface; return this;
@@ -183,6 +188,7 @@ public class LoginRequestImpl implements LoginRequest {
     private final String serverName;
     private final int serverPort;
     private final String httpSessionID;
+    private final HttpSession httpSession;
     private boolean tranzient;
     private final String language;
     private final boolean storeLanguage;
@@ -213,6 +219,7 @@ public class LoginRequestImpl implements LoginRequest {
         this.serverName = builder.serverName;
         this.serverPort = builder.serverPort;
         this.httpSessionID = builder.httpSessionID;
+        this.httpSession = builder.httpSession;
         this.tranzient = builder.tranzient;
         this.language = builder.language;
         this.storeLanguage = builder.storeLanguage;
@@ -242,7 +249,7 @@ public class LoginRequestImpl implements LoginRequest {
      * @param serverPort The server port
      * @param httpSessionID The identifier of the associated HTTP session
      */
-    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID, String language, boolean storeLanguage, String locale, boolean storeLocale, boolean staySignedIn) {
+    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, HttpSession httpSession, String language, boolean storeLanguage, String locale, boolean storeLocale, boolean staySignedIn) {
         super();
         this.login = login;
         this.password = password;
@@ -259,7 +266,8 @@ public class LoginRequestImpl implements LoginRequest {
         this.secure = secure;
         this.serverName = serverName;
         this.serverPort = serverPort;
-        this.httpSessionID = httpSessionID;
+        this.httpSession = httpSession;
+        this.httpSessionID = httpSession != null ? httpSession.getId() : null;
         this.language = language;
         this.storeLanguage = storeLanguage;
         this.locale = locale;
@@ -267,16 +275,16 @@ public class LoginRequestImpl implements LoginRequest {
         this.staySignedIn = staySignedIn;
     }
 
-    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID, String language, String locale) {
-        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, requestParameters, cookies, secure, serverName, serverPort, httpSessionID, language, false, locale, false, false);
+    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, HttpSession httpSession, String language, String locale) {
+        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, requestParameters, cookies, secure, serverName, serverPort, httpSession, language, false, locale, false, false);
     }
 
-    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID, String language) {
-        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, requestParameters, cookies, secure, serverName, serverPort, httpSessionID, language, false, null, false, false);
+    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, HttpSession httpSession, String language) {
+        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, requestParameters, cookies, secure, serverName, serverPort, httpSession, language, false, null, false, false);
     }
 
-    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID) {
-        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, requestParameters, cookies, secure, serverName, serverPort, httpSessionID, null, null);
+    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, HttpSession httpSession) {
+        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, requestParameters, cookies, secure, serverName, serverPort, httpSession, null, null);
     }
 
     @Override
@@ -371,6 +379,16 @@ public class LoginRequestImpl implements LoginRequest {
     @Override
     public String getHttpSessionID() {
         return httpSessionID;
+    }
+
+    @Override
+    public boolean markHttpSessionAuthenticated() {
+        if (httpSession == null) {
+            return false;
+        }
+
+        httpSession.setAttribute(Constants.HTTP_SESSION_ATTR_AUTHENTICATED, Boolean.TRUE);
+        return true;
     }
 
     @Override

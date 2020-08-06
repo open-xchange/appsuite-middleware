@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
@@ -63,18 +64,19 @@ import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link DeleteAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
-*/
+ */
 @OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
+@RestrictedAction(module = ContactAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class DeleteAction extends ContactAction {
 
     /**
      * Initializes a new {@link DeleteAction}.
+     * 
      * @param serviceLookup
      */
     public DeleteAction(final ServiceLookup serviceLookup) {

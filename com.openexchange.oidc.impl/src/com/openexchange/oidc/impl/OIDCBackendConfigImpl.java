@@ -59,11 +59,11 @@ import com.openexchange.oidc.spi.AbstractOIDCBackendConfig;
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0
  */
-public class OIDCBackendConfigImpl extends AbstractOIDCBackendConfig{
+public class OIDCBackendConfigImpl extends AbstractOIDCBackendConfig {
 
     /**
      * Initializes a new {@link OIDCBackendConfigImpl}.
-     * 
+     *
      * @param leanConfigurationService - The {@link LeanConfigurationService} to use
      * @param backendName - If this {@link OIDCBackendConfig} has a custom configuration, the backendName property
      *      is used to construct the property name. See {@link AbstractOIDCBackendConfig} for more information.

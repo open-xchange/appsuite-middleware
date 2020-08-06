@@ -109,8 +109,7 @@ public final class CalendarFolderStorageActivator extends HousekeepingActivator 
          */
         Dictionary<String, String> serviceProperties = new Hashtable<String, String>(1);
         serviceProperties.put("tree", FolderStorage.REAL_TREE_ID);
-        DependentServiceRegisterer<FolderStorage> registerer = new DependentServiceRegisterer<FolderStorage>(
-            context, FolderStorage.class, CalendarFolderStorage.class, serviceProperties, IDBasedCalendarAccessFactory.class);
+        DependentServiceRegisterer<FolderStorage> registerer = new DependentServiceRegisterer<FolderStorage>(context, FolderStorage.class, CalendarFolderStorage.class, serviceProperties, IDBasedCalendarAccessFactory.class);
         try {
             tracker = new ServiceTracker<>(context, registerer.getFilter(), registerer);
         } catch (InvalidSyntaxException e) {

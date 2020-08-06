@@ -49,8 +49,6 @@
 
 package com.openexchange.tools.oxfolder;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -60,7 +58,6 @@ import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -219,44 +216,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             final boolean enableInternalUsersEdit = Boolean.parseBoolean(value.trim());
             this.enableInternalUsersEdit = enableInternalUsersEdit;
         }
-        /*
-         * Log info
-         */
-        logInfo();
-    }
-
-    private void logInfo() {
-        StringBuilder sb = new StringBuilder(512);
-        List<Object> args = new ArrayList<Object>(16);
-
-        sb.append("{}Folder Properties & Folder Cache Properties:{}");
-        args.add(Strings.getLineSeparator());
-        args.add(Strings.getLineSeparator());
-
-        sb.append("    ENABLE_SHARED_FOLDER_CACHING={}{}");
-        args.add(enableSharedFolderCaching ? Boolean.TRUE : Boolean.FALSE);
-        args.add(Strings.getLineSeparator());
-
-        sb.append("    ENABLE_DB_GROUPING={}{}");
-        args.add(enableDBGrouping ? Boolean.TRUE : Boolean.FALSE);
-        args.add(Strings.getLineSeparator());
-
-        sb.append("    ENABLE_FOLDER_CACHE={}{}");
-        args.add(enableFolderCache ? Boolean.TRUE : Boolean.FALSE);
-        args.add(Strings.getLineSeparator());
-
-        sb.append("   ENABLE_INTERNAL_USER_EDIT={}{}");
-        args.add(enableInternalUsersEdit ? Boolean.TRUE : Boolean.FALSE);
-        args.add(Strings.getLineSeparator());
-
-        /*-
-         *
-        sb.append("\tIGNORE_SHARED_ADDRESSBOOK={}{}");
-        args.add(ignoreSharedAddressbook);
-        args.add(Strings.getLineSeparator());
-        */
-
-        LOG.info(sb.toString(), args.toArray(new Object[args.size()]));
     }
 
     private static final String WARN_FOLDER_PROPERTIES_INIT = "Folder properties have not been started.";

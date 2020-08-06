@@ -123,7 +123,7 @@ public class NewTest extends AbstractMailFilterTest {
             expected = new Rule();
             expected.setName("");
 
-            expected.addAction(new Move("default.INBOX/Spam"));
+            expected.addAction(new Move("default0/INBOX/Spam"));
             expected.addAction(new Stop());
 
             Comparison<UserComparisonArgument> comparison = new UserComparison();

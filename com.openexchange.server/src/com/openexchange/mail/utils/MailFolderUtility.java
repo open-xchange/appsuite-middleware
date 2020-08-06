@@ -49,15 +49,12 @@
 
 package com.openexchange.mail.utils;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Optional;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
@@ -69,11 +66,18 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 public final class MailFolderUtility {
 
     /**
-     * Virtual full name of mailbox's root folder
+     * The static prefix used to quickly identify fully-qualified mail folder identifiers; e.g. <code>"default0/INBOX"</code>.
      *
      * @value "default"
      */
-    private static final String DEFAULT_FOLDER_ID = MailFolder.DEFAULT_FOLDER_ID;
+    private static final String MAIL_PREFIX = MailFolder.MAIL_PREFIX;
+
+    /**
+     * Virtual full name of mailbox's root folder
+     *
+     * @value "" (empty string)
+     */
+    public static final String ROOT_FOLDER_ID = MailFolder.ROOT_FOLDER_ID;
 
     /**
      * Initializes a new {@link MailFolderUtility}.
@@ -112,7 +116,10 @@ public final class MailFolderUtility {
         return BASE64MailboxDecoder.decode(encoded);
     }
 
-    private static final int LEN = DEFAULT_FOLDER_ID.length();
+    /**
+     * The length of the MAIL_PREFIX
+     */
+    private static final int LEN = MAIL_PREFIX.length();
 
     /**
      * Parses specified full name argument to an appropriate instance of {@link FullnameArgument}.
@@ -122,21 +129,70 @@ public final class MailFolderUtility {
      * Example:
      *
      * <pre>
-     * &quot;default/INBOX&quot; -&gt; &quot;INBOX&quot;
+     * &quot;default0/INBOX&quot; -&gt; &quot;INBOX&quot;
      * </pre>
      *
      * @param fullnameArgument The groupware's mail folder full name
      * @return The stripped mail folder full name argument
+     * @throws IllegalArgumentException If mail folder identifier is invalid
+     * @see #optPrepareMailFolderParam(String)
      */
     public static FullnameArgument prepareMailFolderParam(final String fullnameArgument) {
         if (fullnameArgument == null) {
             return null;
         }
-        if (!fullnameArgument.startsWith(DEFAULT_FOLDER_ID)) {
-            return new FullnameArgument(fullnameArgument);
+        Optional<FullnameArgument> optional = optPrepareMailFolderParam(fullnameArgument);
+        if (!optional.isPresent()) {
+            throw new IllegalArgumentException("Invalid fully-qualifying mail folder identifier: " + fullnameArgument);
         }
-        final int len = fullnameArgument.length();
-        final char separator = MailProperties.getInstance().getDefaultSeparator();
+        return optional.get();
+    }
+    /**
+     * Parses specified full name argument to an appropriate instance of {@link FullnameArgument} if possible. If parsing is applicable,
+     * the resulting full name of parsed {@link FullnameArgument} is returned; otherwise the given argument.
+     * <p>
+     * This is a convenience method for:
+     *
+     * <pre>
+     * Optional<FullnameArgument> optional = MailFolderUtility.optPrepareMailFolderParam(fullnameParameter);
+     * return optional.isPresent() ? optional.get().getFullName() : fullnameParameter;
+     * </pre>
+     *
+     * @param fullnameArgument The groupware's mail folder full name
+     * @return The account-specific full name argument
+     * @throws IllegalArgumentException If mail account identifier cannot be parsed to an integer
+     * @see #optPrepareMailFolderParam(String)
+     */
+    public static String prepareMailFolderParamOrElseReturn(String fullnameArgument) {
+        Optional<FullnameArgument> optional = MailFolderUtility.optPrepareMailFolderParam(fullnameArgument);
+        return optional.isPresent() ? optional.get().getFullName() : fullnameArgument;
+    }
+
+    /**
+     * Parses specified full name argument to an appropriate instance of {@link FullnameArgument}.
+     * <p>
+     * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator from specified folder full name argument only if
+     * full name argument is not <code>null</code> and is not equal to {@link MailFolder#DEFAULT_FOLDER_ID}.<br>
+     * Example:
+     *
+     * <pre>
+     * &quot;default0/INBOX&quot; -&gt; &quot;INBOX&quot;
+     * </pre>
+     *
+     * @param fullnameArgument The groupware's mail folder full name
+     * @return The stripped mail folder full name argument
+     * @throws IllegalArgumentException If mail account identifier cannot be parsed to an integer
+     */
+    public static Optional<FullnameArgument> optPrepareMailFolderParam(final String fullnameArgument) {
+        if (fullnameArgument == null) {
+            return Optional.empty();
+        }
+        if (!fullnameArgument.startsWith(MAIL_PREFIX)) {
+            return Optional.empty();
+        }
+
+        int len = fullnameArgument.length();
+        char separator = MailProperties.getInstance().getDefaultSeparator();
         int index = LEN;
         {
             char c = 0;
@@ -144,17 +200,30 @@ public final class MailFolderUtility {
                 index++;
             }
         }
-        // Parse account ID
+
+        if (index == LEN) {
+            // Only got "default"
+            return Optional.empty();
+        }
+
+        // Parse account identifier
         final int accountId;
         try {
-            accountId = (index == LEN ? MailAccount.DEFAULT_ID : Integer.parseInt(fullnameArgument.substring(LEN, index)));
+            accountId = Integer.parseInt(fullnameArgument.substring(LEN, index));
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Mail account identifier is not a number: " + fullnameArgument, e);
         }
+
         if (index >= len) {
-            return new FullnameArgument(accountId, DEFAULT_FOLDER_ID);
+            // Only got "default0"
+            return Optional.of(new FullnameArgument(accountId, ROOT_FOLDER_ID));
         }
-        return new FullnameArgument(accountId, fullnameArgument.substring(index + 1));
+
+        if (fullnameArgument.charAt(index) != separator) {
+            // Missing expected separator character
+            return Optional.empty();
+        }
+        return Optional.of(new FullnameArgument(accountId, fullnameArgument.substring(index + 1)));
     }
 
     /**
@@ -191,29 +260,28 @@ public final class MailFolderUtility {
         if (fullname == null) {
             return null;
         }
+        if (ROOT_FOLDER_ID.equals(fullname)) {
+            return new StringBuilder(MAIL_PREFIX).append(accountId).toString();
+        }
+
         int length = fullname.length();
-        if (DEFAULT_FOLDER_ID.equals(fullname) || (0 == length)) {
-            return new StringBuilder(length + 4).append(fullname).append(accountId).toString();
-        }
         char separator = MailProperties.getInstance().getDefaultSeparator();
-        if (false == fullname.startsWith(DEFAULT_FOLDER_ID)) {
-            return new StringBuilder(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(separator).append(fullname).toString();
+        if (false == fullname.startsWith(MAIL_PREFIX)) {
+            return new StringBuilder(LEN + length + 4).append(MAIL_PREFIX).append(accountId).append(separator).append(fullname).toString();
         }
-        /*
-         * Tricky case...
-         */
+
+        // Tricky case...
         int sepPos = fullname.indexOf(separator);
-        if (sepPos >= DEFAULT_FOLDER_ID.length()) {
-            int accId = optNumFor(fullname.substring(DEFAULT_FOLDER_ID.length(), sepPos));
+        if (sepPos >= LEN) {
+            int accId = optNumFor(fullname.substring(LEN, sepPos));
             if (accId >= 0) {
                 FullnameArgument fa = prepareMailFolderParam(fullname);
                 if (fa.getAccountId() == accountId) {
                     return fullname;
                 }
             }
-            return new StringBuilder(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(separator).append(fullname).toString();
         }
-        return new StringBuilder(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(separator).append(fullname).toString();
+        return new StringBuilder(LEN + length + 4).append(MAIL_PREFIX).append(accountId).append(separator).append(fullname).toString();
     }
 
     private static int optNumFor(String possibleNumber) {
@@ -222,57 +290,6 @@ public final class MailFolderUtility {
         } catch (NumberFormatException e) {
             return -1;
         }
-    }
-
-    private static final Pattern P_FOLDER;
-    static {
-        final StringBuilder sb = new StringBuilder(64);
-        // List of known folders
-        sb.append("(?:");
-        boolean first = true;
-        for (final String name : UnifiedInboxManagement.KNOWN_FOLDERS) {
-            if (first) {
-                first = false;
-            } else {
-                sb.append('|');
-            }
-            sb.append(name);
-        }
-        sb.append(')');
-        // Appendix: <sep> + "default" + <number> + <sep> + <rest>
-        sb.append("[./]").append(DEFAULT_FOLDER_ID).append("[0-9]+[./](.+)");
-        P_FOLDER = Pattern.compile(sb.toString());
-    }
-
-    /**
-     * Sanitizes given folder full name.
-     * <p>
-     * Common problem are messed-up folder full names like:
-     * <pre>
-     *   "INBOX/default0/actual/folder/path"
-     *     ==&gt;
-     *   "actual/folder/path"
-     * </pre>
-     *
-     * @param fullName The full name
-     * @return The possibly sanitized full name
-     */
-    public static String sanitizeFullName(final String fullName) {
-        if (null == fullName || fullName.indexOf(DEFAULT_FOLDER_ID) < 0) {
-            return fullName;
-        }
-        final Matcher m = P_FOLDER.matcher(fullName);
-        return m.matches() ? m.group(1) : fullName;
-    }
-
-    /**
-     * Checks if given full name is invalid.
-     *
-     * @param fullName The full name to check
-     * @return <code>true</code> if invalid; otherwise <code>false</code>
-     */
-    public static boolean isInvalidFullName(String fullName) {
-        return Strings.isEmpty(fullName) ? false : DEFAULT_FOLDER_ID.equals(fullName);
     }
 
 }

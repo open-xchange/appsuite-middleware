@@ -26,3 +26,13 @@ properties:
       pathToRoot:
         type: string
         description: Path to internal 'real' root folder from given rootFolderId
+      diagnostics:
+        type: string
+        description: The diagnostics log
+      quota:
+        type: array
+        description: >-
+          An array of quota objects showing the quota limits and usage. A size of
+          zero represents unlimited quota.
+        items:
+          $ref: '#/components/schemas/DriveQuota'

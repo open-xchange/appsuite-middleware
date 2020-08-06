@@ -71,6 +71,7 @@ import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
 import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
@@ -105,8 +106,10 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
+@RestrictedAction(type = RestrictedAction.Type.READ, module = ChronosAction.MODULE)
 public abstract class ChronosAction extends AbstractChronosAction {
 
+    public static final String MODULE = "calendar";
     protected static final String EVENT = "event";
 
     protected static final String EVENTS = "events";
@@ -160,7 +163,9 @@ public abstract class ChronosAction extends AbstractChronosAction {
         String timezoneId = requestData.getParameter("timezone");
         if (Strings.isEmpty(timezoneId)) {
             ServerSession session = requestData.getSession();
-            if( session != null) {
+
+            if (session != null) {
+
                 timezoneId = session.getUser().getTimeZone();
             }
         }

@@ -49,23 +49,18 @@
 
 package com.openexchange.saml.tools;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import org.opensaml.saml2.encryption.Decrypter;
-import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
-import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
-import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
-import org.opensaml.xml.encryption.SimpleKeyInfoReferenceEncryptedKeyResolver;
-import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
-import org.opensaml.xml.security.keyinfo.KeyInfoProvider;
-import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
-import org.opensaml.xml.security.keyinfo.provider.DEREncodedKeyValueProvider;
-import org.opensaml.xml.security.keyinfo.provider.DSAKeyValueProvider;
-import org.opensaml.xml.security.keyinfo.provider.InlineX509DataProvider;
-import org.opensaml.xml.security.keyinfo.provider.KeyInfoReferenceProvider;
-import org.opensaml.xml.security.keyinfo.provider.RSAKeyValueProvider;
+import org.opensaml.saml.saml2.encryption.Decrypter;
+import org.opensaml.saml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.ChainingEncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.EncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.InlineEncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.SimpleKeyInfoReferenceEncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.SimpleRetrievalMethodEncryptedKeyResolver;
+import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
+import org.opensaml.xmlsec.keyinfo.impl.StaticKeyInfoCredentialResolver;
 import com.openexchange.saml.spi.CredentialProvider;
-
 
 /**
  * Tools to en-/decrypt SAML XML elements.
@@ -85,20 +80,14 @@ public class CryptoHelper {
      * @return The decrypter
      */
     public static Decrypter getDecrypter(CredentialProvider credentialProvider) {
-        List<KeyInfoProvider> keyInfoProviders = new ArrayList<KeyInfoProvider>(4);
-        keyInfoProviders.add(new InlineX509DataProvider());
-        keyInfoProviders.add(new KeyInfoReferenceProvider());
-        keyInfoProviders.add(new DEREncodedKeyValueProvider());
-        keyInfoProviders.add(new RSAKeyValueProvider());
-        keyInfoProviders.add(new DSAKeyValueProvider());
+        List<EncryptedKeyResolver> keyResolver = Arrays.asList(
+            new InlineEncryptedKeyResolver(), 
+            new EncryptedElementTypeEncryptedKeyResolver(), 
+            new SimpleRetrievalMethodEncryptedKeyResolver(), 
+            new SimpleKeyInfoReferenceEncryptedKeyResolver());
+        ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver(keyResolver);
+        KeyInfoCredentialResolver kekCredentialResolver = new StaticKeyInfoCredentialResolver(credentialProvider.getDecryptionCredential());
 
-        ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver();
-        encryptedKeyResolver.getResolverChain().add(new InlineEncryptedKeyResolver());
-        encryptedKeyResolver.getResolverChain().add(new EncryptedElementTypeEncryptedKeyResolver());
-        encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
-        encryptedKeyResolver.getResolverChain().add(new SimpleKeyInfoReferenceEncryptedKeyResolver());
-
-        StaticKeyInfoCredentialResolver kekCredentialResolver = new StaticKeyInfoCredentialResolver(credentialProvider.getDecryptionCredential());
         Decrypter decrypter = new Decrypter(null, kekCredentialResolver, encryptedKeyResolver);
         decrypter.setRootInNewDocument(true);
         return decrypter;

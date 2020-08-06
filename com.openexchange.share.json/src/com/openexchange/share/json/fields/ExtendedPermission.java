@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.SubfolderAwareShareInfo;
 import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
@@ -168,6 +169,10 @@ public abstract class ExtendedPermission {
                 jsonObject.put("expiry_date", time);
             }
             jsonObject.putOpt("password", share.getGuest().getPassword());
+            if (share.getTarget().isFolder()) {
+                boolean includeSubfolders = SubfolderAwareShareInfo.class.isInstance(share) ? ((SubfolderAwareShareInfo) share).isIncludeSubfolders() : false;
+                jsonObject.putOpt("includeSubfolders", includeSubfolders);
+            }
         }
     }
 

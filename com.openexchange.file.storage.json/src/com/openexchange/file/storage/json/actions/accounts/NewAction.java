@@ -53,9 +53,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
+import com.openexchange.file.storage.json.actions.files.AbstractFileAction;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -66,6 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = AbstractFileAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class NewAction extends AbstractFileStorageAccountAction {
 
     public NewAction(final FileStorageServiceRegistry registry) {
@@ -74,12 +77,19 @@ public class NewAction extends AbstractFileStorageAccountAction {
 
     @Override
     protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-        final FileStorageAccount account = parser.parse((JSONObject) request.requireData());
-        if (account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
-            //test connection
-            ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
-        }
+        FileStorageAccount account = parser.parse((JSONObject) request.requireData());
         final String id = account.getFileStorageService().getAccountManager().addAccount(account, session);
+        if (account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
+            try {
+                //load account and test connection
+                account = account.getFileStorageService().getAccountManager().getAccount(id, session);
+                ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
+            }
+            catch(OXException e) {
+               account.getFileStorageService().getAccountManager().deleteAccount(account, session);
+               throw e;
+            }
+        }
         return new AJAXRequestResult(id);
     }
 

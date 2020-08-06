@@ -81,6 +81,7 @@ public class Alarm2ICalDataHandler extends Object2ICalDataHandler<VAlarm, Alarm>
     protected VAlarm export(Alarm object, ICalParameters parameters, List<OXException> warnings) throws OXException {
         VAlarm vAlarm = mapper.exportAlarm(object, parameters, warnings);
         ICalUtils.removeProperties(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        ICalUtils.removeParameters(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTY_PARAMETERS, String[].class));
         return vAlarm;
     }
 

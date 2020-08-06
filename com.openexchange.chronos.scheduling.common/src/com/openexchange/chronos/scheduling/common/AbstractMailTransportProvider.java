@@ -54,6 +54,7 @@ import java.util.Locale;
 import java.util.Map;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.authentication.application.AppPasswordUtils;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.itip.ContextSensitiveMessages.Context;
@@ -68,8 +69,10 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AbstractMailTransportProvider}
@@ -83,7 +86,7 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
 
     /**
      * Initializes a new {@link AbstractMailTransportProvider}.
-     * 
+     *
      * @param serviceLookup The {@link ServiceLookup}
      */
     public AbstractMailTransportProvider(@NonNull ServiceLookup serviceLookup) {
@@ -93,8 +96,14 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
 
     protected @NonNull ScheduleStatus transportMail(Session session, MimeMessage mime) throws OXException {
         saveChangesSafe(serviceLookup.getOptionalService(HostnameService.class), mime, session.getContextId(), session.getUserId());
+        MailTransport transport;
+        com.openexchange.mail.transport.TransportProvider provider = TransportProviderRegistry.getTransportProvider("smtp");
+        if (preferNoReplyAccount(session)) {
+            transport = provider.createNewNoReplyTransport(session.getContextId(), false);
+        } else {
+            transport = provider.createNewMailTransport(session);
+        }
 
-        final MailTransport transport = MailTransport.getInstance(session);
         try {
             transport.sendMailMessage(new ContentAwareComposedMailMessage(mime, session, null), ComposeType.NEW);
         } finally {
@@ -104,10 +113,32 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
         return ScheduleStatus.SENT;
     }
     
+    /**
+     * Gets a value indicating whether to prefer the <i>no-reply</i> transport account when sending notification mails, or to stick to
+     * the user's primary mail transport account instead.
+     * <p/>
+     * By default, the decisions is made based on the user's and session's capabilities. Override if applicable. 
+     *
+     * @param session The session to decide the preference for
+     * @return <code>true</code> if the no-reply account should be used, <code>false</code>, otherwise
+     */
+    protected boolean preferNoReplyAccount(Session session) throws OXException {
+        /*
+         * use no-reply if user has no mail module permission
+         */
+        if (null == session || false == ServerSessionAdapter.valueOf(session).getUserConfiguration().hasWebMail()) {
+            return true;
+        }
+        /*
+         * otherwise use no-reply if session is restricted and has no required scope
+         */
+        return AppPasswordUtils.isNotRestrictedOrHasScopes(session, "write_mail");
+    }
+
     protected Map<String, String> getAdditionalHeaders(ChangeNotification notification) {
         return notification.getAdditional(Constants.ADDITIONAL_HEADER_MAIL_HEADERS, Map.class);
     }
-    
+
     protected Map<String, String> getAdditionalHeaders(SchedulingMessage message) {
         return message.getAdditional(Constants.ADDITIONAL_HEADER_MAIL_HEADERS, Map.class);
     }
@@ -125,9 +156,9 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
         //@formatter:off
         StringHelper helper = StringHelper.valueOf(locale);
         return String.format(
-            helper.getString(Messages.SUBJECT_STATE_CHANGED), 
+            helper.getString(Messages.SUBJECT_STATE_CHANGED),
             Utils.getDisplayName(originator),
-            com.openexchange.chronos.itip.ContextSensitiveMessages.partStat(partStat, locale, Context.VERB), 
+            com.openexchange.chronos.itip.ContextSensitiveMessages.partStat(partStat, locale, Context.VERB),
             summary);
         //@formatter:on
     }

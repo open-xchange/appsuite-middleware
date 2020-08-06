@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.autoconfig.sources;
 
+import static com.openexchange.mail.autoconfig.tools.Utils.getHttpProxyIfEnabled;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -57,8 +58,8 @@ import javax.net.ssl.SSLHandshakeException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.cascade.ConfigView;
@@ -67,9 +68,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.IndividualAutoconfig;
+import com.openexchange.mail.autoconfig.tools.ProxyInfo;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
-import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -106,7 +108,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
 
     @Override
     public DefaultAutoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId, boolean forceSecure) throws OXException {
-        ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
+        ConfigViewFactory configViewFactory = services.getServiceSafe(ConfigViewFactory.class);
         ConfigView view = configViewFactory.getView(userId, contextId);
 
         String sUrl = view.get(PROPERTY_ISPDB_URL, String.class);
@@ -140,16 +142,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
         }
 
         ProxyInfo proxy = getHttpProxyIfEnabled(view);
-
-        CloseableHttpClient httpclient;
-        {
-            HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance("autoconfig-ispdb");
-            clientConfig.setUserAgent("Open-Xchange ISPDB Client");
-            if (null != proxy) {
-                clientConfig.setProxy(proxy.proxyUrl, proxy.proxyLogin, proxy.proxyPassword);
-            }
-            httpclient = HttpClients.getHttpClient(clientConfig);
-        }
+        HttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-ispdb");
         try {
             int port = url.getPort();
             if (port < 0) {
@@ -163,7 +156,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
             HttpGet req = new HttpGet(url.getPath());
 
             LOG.info("Executing request to retrieve config XML via {} using {}", target, null == proxy ? "no proxy" : proxy);
-            HttpResponse rsp = httpclient.execute(target, req);
+            HttpResponse rsp = httpclient.execute(target, req, httpContextFor(contextId, userId));
 
             int httpCode = rsp.getStatusLine().getStatusCode();
             if (httpCode != 200) {
@@ -195,15 +188,6 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
         } catch (IOException e) {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
-        } finally {
-            // When HttpClient instance is no longer needed,
-            // shut down the connection manager to ensure
-            // immediate deallocation of all system resources
-            try {
-                httpclient.close(); // <-- Performs 'getConnectionManager().shutdown();'
-            } catch (Exception x) {
-                // Ignore
-            }
         }
     }
 
@@ -214,6 +198,11 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
         retval.setMailStartTls(forceSecure);
         retval.setTransportStartTls(forceSecure);
         return retval;
+    }
+
+    @Override
+    protected String getAccountId() {
+        return "ispdb";
     }
 
 }

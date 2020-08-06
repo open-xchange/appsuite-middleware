@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.dropbox.access;
 
+import static com.openexchange.file.storage.dropbox.DropboxServices.getService;
+import static com.openexchange.file.storage.dropbox.http.DropboxHttpClientConfiguration.HTTP_CLIENT_DROPBOX;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,19 +69,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
 import com.dropbox.core.http.HttpRequestor;
-import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.version.VersionService;
 
 /**
  * {@link ApacheHttpClientHttpRequestor} - Implements the <code>HttpRequestor</code> from Dropbox SDK utilizing Apache HttpClient.
@@ -90,16 +91,11 @@ import com.openexchange.version.VersionService;
 public class ApacheHttpClientHttpRequestor extends HttpRequestor {
 
     /**
-     * Builds the default Apache HttpClient instance with the default settings for Dropbox SDK.
+     * Initializes a new {@link ApacheHttpClientHttpRequestor}.
      *
-     * @return The Apache HttpClient instance
      */
-    public static CloseableHttpClient defaultApacheHttpClient() {
-        HttpClients.ClientConfig config = HttpClients.ClientConfig.newInstance("dropbox");
-        config.setConnectionTimeout((int) DEFAULT_CONNECT_TIMEOUT_MILLIS);
-        config.setSocketReadTimeout((int) DEFAULT_READ_TIMEOUT_MILLIS);
-        config.setUserAgent("Open-Xchange Dropbox HttpClient v" + DropboxServices.getService(VersionService.class).getVersionString());
-        return HttpClients.getHttpClient(config);
+    public ApacheHttpClientHttpRequestor() {
+        super();
     }
 
     /**
@@ -127,25 +123,6 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
 
     // ------------------------------------------------------------------------------------------------------------
 
-    private final CloseableHttpClient httpClient;
-
-    /**
-     * Initializes a new {@link ApacheHttpClientHttpRequestor}.
-     */
-    public ApacheHttpClientHttpRequestor(CloseableHttpClient httpClient) {
-        super();
-        this.httpClient = httpClient;
-    }
-
-    /**
-     * Gets the Apache HttpClient instance
-     *
-     * @return The Apache HttpClient instance
-     */
-    public CloseableHttpClient getHttpClient() {
-        return httpClient;
-    }
-
     @Override
     public Response doGet(String url, Iterable<Header> headers) throws IOException {
         HttpGet request = null;
@@ -156,7 +133,7 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
             for (Header header : headers) {
                 request.setHeader(new BasicHeader(header.getKey(), header.getValue()));
             }
-            httpResponse = httpClient.execute(request);
+            httpResponse = getHttpClient().execute(request);
 
             // Response headers
             Map<String, List<String>> responseHeaders = fromApacheHttpHeaders(httpResponse.getAllHeaders());
@@ -178,6 +155,8 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
         } finally {
             if (error) {
                 HttpClients.close(request, httpResponse);
+            } else {
+                HttpClients.close(httpResponse, false);
             }
         }
     }
@@ -193,14 +172,13 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
     }
 
     private Uploader startUpload(Iterable<Header> headers, final HttpEntityEnclosingRequestBase request) {
-        return new HttpClientUploader(request, headers, httpClient);
+        return new HttpClientUploader(request, headers);
     }
 
     private static class HttpClientUploader extends HttpRequestor.Uploader {
 
         private static final int BUFFER_SIZE = 5 << 20; // 5MiB, the max size for JSON requests on server
 
-        final CloseableHttpClient httpClient;
         final HttpEntityEnclosingRequestBase httpRequest;
         private final long contentLength;
         private boolean closed;
@@ -208,7 +186,7 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
         private PipedStream body;
         private Future<HttpResponse> execution;
 
-        HttpClientUploader(HttpEntityEnclosingRequestBase httpRequest, Iterable<Header> headers, CloseableHttpClient httpClient) {
+        HttpClientUploader(HttpEntityEnclosingRequestBase httpRequest, Iterable<Header> headers) {
             super();
             long contentLength = -1L;
 
@@ -224,7 +202,6 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
 
             this.contentLength = contentLength;
             this.httpRequest = httpRequest;
-            this.httpClient = httpClient;
             this.closed = false;
             cancelled = false;
         }
@@ -262,7 +239,7 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
 
                 @Override
                 public HttpResponse call() throws Exception {
-                    return httpClient.execute(httpRequest);
+                    return getHttpClient().execute(httpRequest);
                 }
             });
 
@@ -290,8 +267,7 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
             {
                 Future<HttpResponse> execution = this.execution;
                 if (null == execution) {
-                    // Nothing written to output stream
-                    httpResponse = httpClient.execute(httpRequest);
+                    httpResponse = getHttpClient().execute(httpRequest);
                 } else {
                     try {
                         httpResponse = execution.get();
@@ -326,6 +302,10 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
 
             return new Response(httpResponse.getStatusLine().getStatusCode(), body, responseHeaders);
         }
+    }
+
+    static HttpClient getHttpClient() {
+        return getService(HttpClientService.class).getHttpClient(HTTP_CLIENT_DROPBOX);
     }
 
     private static final class PipedStream implements Closeable {
