@@ -297,7 +297,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 		return this.getFields(columnIDs, null, (E[])null);
 	}
 
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     @Override
     public E[] getFields(final int[] columnIDs, final E... mandatoryFields) throws OXException {
 		return this.getFields(columnIDs, null, mandatoryFields);
@@ -323,6 +323,18 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
         }
         return fields.toArray(newArray(fields.size()));
     }
+
+    @Override
+    public int[] getColumnIDs(E[] fields) throws OXException {
+	    if (null == fields) {
+	        return null;
+	    }
+        int[] columnIDs = new int[fields.length];
+        for (int i = 0; i < fields.length; i++) {
+            columnIDs[i] = get(fields[i]).getColumnID().intValue();
+        }
+        return columnIDs;
+	}
 
 	@Override
     public EnumMap<E, ? extends JsonMapping<? extends Object, O>> getMappings() {
