@@ -53,6 +53,7 @@ import static com.openexchange.osgi.Tools.withRanking;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
@@ -93,7 +94,7 @@ public class MimeSnippetActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, ContextService.class, CacheService.class, CryptoService.class, IDGeneratorService.class,
-            ConfigurationService.class, ManagedFileManagement.class, HtmlService.class, ConfigViewFactory.class };
+            ConfigurationService.class, ManagedFileManagement.class, HtmlService.class, ConfigViewFactory.class, LeanConfigurationService.class };
     }
 
     @Override
@@ -130,7 +131,7 @@ public class MimeSnippetActivator extends HousekeepingActivator {
              * Register
              */
             MimeSnippetQuotaProvider quotaProvider = new MimeSnippetQuotaProvider();
-            MimeSnippetService snippetService = new MimeSnippetService(quotaProvider);
+            MimeSnippetService snippetService = new MimeSnippetService(quotaProvider, getServiceSafe(LeanConfigurationService.class));
 
             registerService(SnippetService.class, snippetService, withRanking(10));
 

@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -80,7 +81,7 @@ public final class SnippetUtilsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HtmlService.class, ManagedFileManagement.class, ConfigViewFactory.class, CapabilityService.class };
+        return new Class<?>[] { HtmlService.class, ManagedFileManagement.class, ConfigViewFactory.class, CapabilityService.class, LeanConfigurationService.class };
     }
 
     @Override

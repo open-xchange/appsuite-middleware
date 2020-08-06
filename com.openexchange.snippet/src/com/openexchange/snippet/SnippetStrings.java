@@ -73,6 +73,9 @@ public class SnippetStrings implements LocalizableStrings {
     // Thrown if a user tries to create a snippet/signature referencing to an image which is too big
     public static final String MAXIMUM_IMAGE_SIZE_MSG = "The signature image exceeds the maximum allowed size of '%1$s'.";
 
+    // The signature size exceeds the maximum allowed size of '%1$s'.
+    public static final String MAXIMUM_SNIPPET_SIZE_MSG = "The signature size exceeds the maximum allowed size of '%1$s'.";
+
     // Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
     public static final String MAXIMUM_IMAGES_COUNT_MSG = "The maximum allowed number of '%1$s' images in the signature is reached.";
 
