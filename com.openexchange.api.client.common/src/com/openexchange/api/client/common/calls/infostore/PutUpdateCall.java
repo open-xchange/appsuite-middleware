@@ -49,7 +49,7 @@
 
 package com.openexchange.api.client.common.calls.infostore;
 
-import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.http.HttpEntity;
@@ -62,91 +62,70 @@ import com.openexchange.annotation.Nullable;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
-import com.openexchange.api.client.common.calls.AbstractPostCall;
+import com.openexchange.api.client.common.calls.AbstractPutCall;
 import com.openexchange.api.client.common.calls.infostore.mapping.DefaultFileMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.java.Strings;
 
 /**
- * {@link NewCall}
+ * {@link PutUpdateCall}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.2
+ * @since v7.10.5
  */
-public class NewCall extends AbstractPostCall<String> {
+public class PutUpdateCall extends AbstractPutCall<String> {
 
-    private final Boolean tryAddVersion;
-    private final String pushToken;
     private final DefaultFile file;
-    private final InputStream data;
+    private final long timestamp;
+    private final int[] columns;
+    private final String pushToken;
 
     /**
-     * Initializes a new {@link NewCall}.
+     * Initializes a new {@link PutUpdateCall}.
      *
-     * @param file The file meta data
-     * @param data THe file data
+     * @param file The file to update
+     * @param timestamp the last known timestamp/sequencenumber
+     * @param the column IDs of the file's fields to update
      */
-    public NewCall(DefaultFile file, InputStream data) {
-        this(file, data, null);
+    public PutUpdateCall(DefaultFile file, long timestamp, int[] columns) {
+        this(file, timestamp, columns, null);
     }
 
     /**
-     * Initializes a new {@link NewCall}.
+     * Initializes a new {@link PutUpdateCall}.
      *
-     * @param file The file meta data
-     * @param data THe file data
-     * @param tryAddVersion Add new file version if file name exists
+     * @param file The file to update
+     * @param timestamp the last known timestamp/sequencenumber
+     * @param the column IDs of the file's fields to update
+     * @param pushToken The drive push token
      */
-    public NewCall(DefaultFile file, InputStream data, Boolean tryAddVersion) {
-        this(file, data, tryAddVersion, null);
-    }
-
-    /**
-     * Initializes a new {@link NewCall}.
-     *
-     * @param file The file meta data
-     * @param data THe file data
-     * @param tryAddVersion Add new file version if file name exists
-     * @param pushToken The push token of the drive client
-     */
-    public NewCall(DefaultFile file, InputStream data, Boolean tryAddVersion, String pushToken) {
+    public PutUpdateCall(DefaultFile file, long timestamp, int[] columns, String pushToken) {
         this.file = Objects.requireNonNull(file, "file must not be null");
-        this.data = Objects.requireNonNull(data, "data must not be null");
-        this.tryAddVersion = tryAddVersion;
+        this.timestamp = timestamp;
+        this.columns = columns;
         this.pushToken = pushToken;
     }
 
     @Override
     @NonNull
-    public String getModule() {
+    public String getPath() {
         return "/infostore";
-    }
-
-    @Override
-    protected String getAction() {
-        return "new";
     }
 
     @Override
     @Nullable
     public HttpEntity getBody() throws OXException {
         try {
+            JSONObject json = new JSONObject();
             DefaultFileMapper mapper = new DefaultFileMapper();
-            JSONObject json = mapper.serialize(file, mapper.getAssignedFields(file));
-            return ApiClientUtils.createMultipartBody(json, data, file.getFileName(), file.getFileMIMEType());
+            Field[] fields = columns != null ? mapper.getMappedFields(columns) : mapper.getAssignedFields(file);
+            JSONObject fileObject = mapper.serialize(file, Arrays.stream(fields).filter(Objects::nonNull).toArray(Field[]::new));
+            json.put("file", fileObject);
+            return ApiClientUtils.createJsonBody(json);
         } catch (JSONException e) {
             throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    protected void fillParameters(Map<String, String> parameters) {
-        parameters.put("force_json_response", "true");
-        if (tryAddVersion != null) {
-            parameters.put("try_add_version", tryAddVersion.toString());
-        }
-        if (pushToken != null) {
-            parameters.put("pushToken", pushToken);
         }
     }
 
@@ -159,5 +138,19 @@ public class NewCall extends AbstractPostCall<String> {
                 return ApiClientUtils.parseDataString(response);
             }
         };
+    }
+
+    @Override
+    protected void fillParameters(Map<String, String> parameters) {
+        parameters.put("id", file.getId());
+        parameters.put("timestamp", String.valueOf(timestamp));
+        if (Strings.isNotEmpty(pushToken)) {
+            parameters.put("pushToken", pushToken);
+        }
+    }
+
+    @Override
+    protected String getAction() {
+        return "update";
     }
 }

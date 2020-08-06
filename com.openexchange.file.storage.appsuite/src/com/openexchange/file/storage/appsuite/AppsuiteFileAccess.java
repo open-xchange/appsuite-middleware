@@ -50,10 +50,15 @@
 package com.openexchange.file.storage.appsuite;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -72,6 +77,8 @@ import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
+
+import static com.openexchange.java.Autoboxing.L;
 
 /**
  * {@link AppsuiteFileAccess}
@@ -108,14 +115,43 @@ public class AppsuiteFileAccess implements ThumbnailAware, FileStorageVersionedF
         return client.getMetaData(folderId, id, version);
     }
 
+    /**
+     * Internal method to update a document meta- and binary data
+     *
+     * @param file The file metadata
+     * @param data The binary data
+     * @param sequenceNumber the sequence number
+     * @param modifiedFields The fields to update
+     * @param tryAddVersion True to add a new version if the filename already exists
+     * @return The {@link IDTuple} of the updated file
+     * @throws OXException
+     */
+    private IDTuple saveDocumentInternal(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, boolean tryAddVersion) throws OXException {
+        IDTuple ret = null;
+        if (file.getId() == NEW) { /* upload a new file */
+            if (file.getFileName() == null) {
+                throw FileStorageExceptionCodes.MISSING_FILE_NAME.create(file.getFileName());
+            }
+            if (data == null) {
+                throw FileStorageExceptionCodes.NO_CONTENT.create(file.getFileName());
+            }
+            ret = client.saveNewDocument(file, data, tryAddVersion);
+        } else { /* update an existing file */
+            List<Field> fieldsToUpdate = new ArrayList<Field>(null == modifiedFields ? Arrays.asList(Field.values()) : modifiedFields);
+            fieldsToUpdate = Field.reduceBy(fieldsToUpdate, Field.FOLDER_ID, Field.FILE_MIMETYPE, Field.FILE_SIZE, Field.FILENAME);
+            int[] modifiedColumns = fieldsToUpdate.stream().mapToInt(f -> f.getNumber()).toArray();
+            ret = client.updateDocument(file, data, sequenceNumber, modifiedColumns);
+        }
+        return ret;
+    }
+
     @Override
     public boolean exists(String folderId, String id, String version) throws OXException {
         try {
             getMetadata(folderId, id, version);
             return true;
-        }
-        catch(OXException e) {
-            if(e.similarTo(FileStorageExceptionCodes.FILE_NOT_FOUND)) {
+        } catch (OXException e) {
+            if (e.similarTo(FileStorageExceptionCodes.FILE_NOT_FOUND)) {
                 return false;
             }
             throw e;
@@ -129,26 +165,41 @@ public class AppsuiteFileAccess implements ThumbnailAware, FileStorageVersionedF
 
     @Override
     public IDTuple saveFileMetadata(File file, long sequenceNumber) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return saveFileMetadata(file, sequenceNumber, ALL_FIELDS);
     }
 
     @Override
     public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        if (file.getId() == NEW) {
+            return saveDocument(file, null, sequenceNumber, modifiedFields);
+        }
+        List<Field> fieldsToUpdate = new ArrayList<Field>(null == modifiedFields ? Arrays.asList(Field.values()) : modifiedFields);
+        int[] modifiedColumns = fieldsToUpdate.stream().mapToInt(f -> f.getNumber()).toArray();
+        return client.updateDocument(file, sequenceNumber, modifiedColumns);
     }
 
     @Override
     public IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFile, List<Field> modifiedFields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        DefaultFile fileToUpdate = new DefaultFile(update);
+        fileToUpdate.setFolderId(destFolder);
+        List<Field> fieldsToUpdate = new ArrayList<Field>(null == modifiedFields ? Arrays.asList(Field.values()) : modifiedFields);
+        fieldsToUpdate = Field.reduceBy(fieldsToUpdate, Field.ID); //The field ID must not be present in the meta of the destination object
+        int[] modifiedColumns = fieldsToUpdate.stream().mapToInt(f -> f.getNumber()).toArray();
+
+        return client.copyDocument(source.getId(), fileToUpdate, modifiedColumns, newFile);
     }
 
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        AppsuiteFile fileMetadata = getFileMetadata(source.getFolder(), source.getId(), CURRENT_VERSION);
+        IDTuple movedDocumentId = client.moveDocument(source.getId(), destFolder, sequenceNumber);
+        if (update != null) {
+            DefaultFile movedFileToUpdate = new DefaultFile(update);
+            movedFileToUpdate.setFolderId(movedDocumentId.getFolder());
+            movedFileToUpdate.setId(movedDocumentId.getId());
+            movedDocumentId = saveFileMetadata(movedFileToUpdate, DISTANT_FUTURE, modifiedFields);
+        }
+        return movedDocumentId;
     }
 
     @Override
@@ -170,52 +221,67 @@ public class AppsuiteFileAccess implements ThumbnailAware, FileStorageVersionedF
 
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
-        return saveDocument(file, data, sequenceNumber, null);
+        return saveDocumentInternal(file, data, sequenceNumber, null, false);
     }
 
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        return null;
+        return saveDocumentInternal(file, data, sequenceNumber, modifiedFields, false);
     }
 
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, boolean ignoreVersion) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        //@formatter:off
+        return ignoreVersion ?
+            saveDocumentInternal(file, data, sequenceNumber, modifiedFields, false) :
+            saveDocumentTryAddVersion(file, data, sequenceNumber, modifiedFields);
+        //@formatter:on
     }
 
     @Override
     public IDTuple saveDocumentTryAddVersion(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        if(file.getId() == NEW) {
-            AppsuiteFile newFile = client.saveDocument(file, data);
-            return new IDTuple(newFile.getFolderId(), newFile.getId());
+        return saveDocumentInternal(file, data, sequenceNumber, modifiedFields, false);
+    }
+
+    /**
+     * Removes all documents from the given folder
+     *
+     * @param folderId The ID of the folder to remove
+     * @param sequenceNumber The sequencenumber
+     * @param hardDelete The hardDelete flag
+     * @throws OXException
+     */
+    public void removeDocument(String folderId, long sequenceNumber, boolean hardDelete) throws OXException {
+        List<IDTuple> ids = new ArrayList<IDTuple>();
+        try (SearchIterator<File> iterator = getDocuments(folderId, Arrays.asList(Field.ID, Field.FOLDER_ID)).results()) {
+            while (iterator.hasNext()) {
+                File document = iterator.next();
+                ids.add(new IDTuple(document.getFolderId(), document.getId()));
+            }
         }
-        else {
-            //TODO: update meta data only
-            return null;
-        }
+        removeDocument(ids, sequenceNumber, hardDelete);
+
     }
 
     @Override
     public void removeDocument(String folderId, long sequenceNumber) throws OXException {
-        // TODO Auto-generated method stub
+        removeDocument(folderId, sequenceNumber, false);
     }
 
     @Override
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return removeDocument(ids, sequenceNumber, false);
     }
 
     @Override
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        client.removeDocuments(ids, sequenceNumber, hardDelete);
+        return Collections.emptyList();
     }
 
     @Override
     public void touch(String folderId, String id) throws OXException {
-        // TODO Auto-generated method stub
+        exists(folderId, folderId, CURRENT_VERSION);
     }
 
     @Override
@@ -270,8 +336,7 @@ public class AppsuiteFileAccess implements ThumbnailAware, FileStorageVersionedF
 
     @Override
     public InputStream getThumbnailStream(String folderId, String id, String version) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return getDocument(folderId, id, version);
     }
 
     @Override
@@ -333,19 +398,22 @@ public class AppsuiteFileAccess implements ThumbnailAware, FileStorageVersionedF
 
     @Override
     public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        HashMap<String, Long> ret = new HashMap<String, Long>(folderIds.size());
+        for (String folderId : folderIds) {
+            TimedResult<File> document = getDocuments(folderId, Arrays.asList(Field.SEQUENCE_NUMBER));
+            ret.put(folderId, L(document.sequenceNumber()));
+        }
+        return ret;
     }
 
     @Override
     public void unlock(String folderId, String id) throws OXException {
-        // TODO Auto-generated method stub
-
+        client.Unlock(id);
     }
 
     @Override
     public void lock(String folderId, String id, long diff) throws OXException {
-        // TODO Auto-generated method stub
+        client.lock(id, diff);
     }
 
     @Override

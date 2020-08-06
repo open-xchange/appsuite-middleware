@@ -49,7 +49,6 @@
 
 package com.openexchange.api.client.common.calls.infostore;
 
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.http.HttpEntity;
@@ -62,57 +61,59 @@ import com.openexchange.annotation.Nullable;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
-import com.openexchange.api.client.common.calls.AbstractPostCall;
+import com.openexchange.api.client.common.calls.AbstractPutCall;
 import com.openexchange.api.client.common.calls.infostore.mapping.DefaultFileMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.java.Strings;
 
 /**
- * {@link NewCall}
+ * {@link PutCopyCall}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.2
+ * @since v7.10.5
  */
-public class NewCall extends AbstractPostCall<String> {
+public class PutCopyCall extends AbstractPutCall<String> {
 
-    private final Boolean tryAddVersion;
-    private final String pushToken;
+    private final String id;
     private final DefaultFile file;
-    private final InputStream data;
+    private final String pushToken;
+    private final int[] columns;
 
     /**
-     * Initializes a new {@link NewCall}.
+     * Initializes a new {@link PutCopyCall}.
      *
-     * @param file The file meta data
-     * @param data THe file data
+     * @param id The ID of the file to copy
+     * @param file The file containing the modified fields of the destination infoitem.
      */
-    public NewCall(DefaultFile file, InputStream data) {
-        this(file, data, null);
+    public PutCopyCall(String id, DefaultFile file) {
+        this(id, file, null, null);
     }
 
     /**
-     * Initializes a new {@link NewCall}.
+     * Initializes a new {@link PutCopyCall}.
      *
-     * @param file The file meta data
-     * @param data THe file data
-     * @param tryAddVersion Add new file version if file name exists
+     * @param id The ID of the file to copy
+     * @param file The file to copy
+     * @param columns the modified columns to update, or null to update all
      */
-    public NewCall(DefaultFile file, InputStream data, Boolean tryAddVersion) {
-        this(file, data, tryAddVersion, null);
+    public PutCopyCall(String id, DefaultFile file, int[] columns) {
+        this(id, file, columns, null);
     }
 
     /**
-     * Initializes a new {@link NewCall}.
+     * Initializes a new {@link PutCopyCall}.
      *
-     * @param file The file meta data
-     * @param data THe file data
-     * @param tryAddVersion Add new file version if file name exists
-     * @param pushToken The push token of the drive client
+     * @param id The ID of the file to copy
+     * @param file The file to copy
+     * @param columns the modified columns to update, or null to update all
+     * @param pushToken The drive push token
      */
-    public NewCall(DefaultFile file, InputStream data, Boolean tryAddVersion, String pushToken) {
+    public PutCopyCall(String id, DefaultFile file, int[] columns, String pushToken) {
+        this.id = Objects.requireNonNull(id, "id must not be null");
         this.file = Objects.requireNonNull(file, "file must not be null");
-        this.data = Objects.requireNonNull(data, "data must not be null");
-        this.tryAddVersion = tryAddVersion;
+        this.columns = columns;
         this.pushToken = pushToken;
     }
 
@@ -123,30 +124,15 @@ public class NewCall extends AbstractPostCall<String> {
     }
 
     @Override
-    protected String getAction() {
-        return "new";
-    }
-
-    @Override
     @Nullable
     public HttpEntity getBody() throws OXException {
         try {
             DefaultFileMapper mapper = new DefaultFileMapper();
-            JSONObject json = mapper.serialize(file, mapper.getAssignedFields(file));
-            return ApiClientUtils.createMultipartBody(json, data, file.getFileName(), file.getFileMIMEType());
+            Field[] fields = columns != null ? mapper.getMappedFields(columns) : mapper.getAssignedFields(file);
+            JSONObject json = mapper.serialize(file, fields);
+            return ApiClientUtils.createJsonBody(json);
         } catch (JSONException e) {
             throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    protected void fillParameters(Map<String, String> parameters) {
-        parameters.put("force_json_response", "true");
-        if (tryAddVersion != null) {
-            parameters.put("try_add_version", tryAddVersion.toString());
-        }
-        if (pushToken != null) {
-            parameters.put("pushToken", pushToken);
         }
     }
 
@@ -159,5 +145,18 @@ public class NewCall extends AbstractPostCall<String> {
                 return ApiClientUtils.parseDataString(response);
             }
         };
+    }
+
+    @Override
+    protected void fillParameters(Map<String, String> parameters) {
+        parameters.put("id", id);
+        if (Strings.isNotEmpty(pushToken)) {
+            parameters.put("pushToken", pushToken);
+        }
+    }
+
+    @Override
+    protected String getAction() {
+        return "copy";
     }
 }

@@ -49,105 +49,59 @@
 
 package com.openexchange.api.client.common.calls.infostore;
 
-import java.io.InputStream;
 import java.util.Map;
-import java.util.Objects;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.annotation.Nullable;
-import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
-import com.openexchange.api.client.common.calls.AbstractPostCall;
-import com.openexchange.api.client.common.calls.infostore.mapping.DefaultFileMapper;
+import com.openexchange.api.client.common.calls.AbstractGetCall;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.java.Strings;
 
 /**
- * {@link NewCall}
+ * {@link MoveCall}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.2
+ * @since v7.10.5
  */
-public class NewCall extends AbstractPostCall<String> {
+public class MoveCall extends AbstractGetCall<String> {
 
-    private final Boolean tryAddVersion;
+    private final String id;
+    private final String folder;
     private final String pushToken;
-    private final DefaultFile file;
-    private final InputStream data;
+    private final long timestamp;
 
     /**
-     * Initializes a new {@link NewCall}.
+     * Initializes a new {@link MoveCall}.
      *
-     * @param file The file meta data
-     * @param data THe file data
+     * @param id The ID of the item to move
+     * @param folder The destination folder
+     * @param timestamp The sequencenumber/timestamp
      */
-    public NewCall(DefaultFile file, InputStream data) {
-        this(file, data, null);
+    public MoveCall(String id, String folder, long timestamp) {
+        this(id, folder, timestamp, null);
     }
 
     /**
-     * Initializes a new {@link NewCall}.
+     * Initializes a new {@link MoveCall}.
      *
-     * @param file The file meta data
-     * @param data THe file data
-     * @param tryAddVersion Add new file version if file name exists
+     * @param id The ID of the item to move
+     * @param folder The destination folder
+     * @param timestamp The sequencenumber/timestamp
+     * @param pushToken The push token
      */
-    public NewCall(DefaultFile file, InputStream data, Boolean tryAddVersion) {
-        this(file, data, tryAddVersion, null);
-    }
-
-    /**
-     * Initializes a new {@link NewCall}.
-     *
-     * @param file The file meta data
-     * @param data THe file data
-     * @param tryAddVersion Add new file version if file name exists
-     * @param pushToken The push token of the drive client
-     */
-    public NewCall(DefaultFile file, InputStream data, Boolean tryAddVersion, String pushToken) {
-        this.file = Objects.requireNonNull(file, "file must not be null");
-        this.data = Objects.requireNonNull(data, "data must not be null");
-        this.tryAddVersion = tryAddVersion;
+    public MoveCall(String id, String folder, long timestamp, String pushToken) {
+        this.id = id;
+        this.folder = folder;
         this.pushToken = pushToken;
+        this.timestamp = timestamp;
     }
 
     @Override
     @NonNull
     public String getModule() {
         return "/infostore";
-    }
-
-    @Override
-    protected String getAction() {
-        return "new";
-    }
-
-    @Override
-    @Nullable
-    public HttpEntity getBody() throws OXException {
-        try {
-            DefaultFileMapper mapper = new DefaultFileMapper();
-            JSONObject json = mapper.serialize(file, mapper.getAssignedFields(file));
-            return ApiClientUtils.createMultipartBody(json, data, file.getFileName(), file.getFileMIMEType());
-        } catch (JSONException e) {
-            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    protected void fillParameters(Map<String, String> parameters) {
-        parameters.put("force_json_response", "true");
-        if (tryAddVersion != null) {
-            parameters.put("try_add_version", tryAddVersion.toString());
-        }
-        if (pushToken != null) {
-            parameters.put("pushToken", pushToken);
-        }
     }
 
     @Override
@@ -159,5 +113,20 @@ public class NewCall extends AbstractPostCall<String> {
                 return ApiClientUtils.parseDataString(response);
             }
         };
+    }
+
+    @Override
+    protected void fillParameters(Map<String, String> parameters) {
+        parameters.put("id", id);
+        parameters.put("folder", folder);
+        parameters.put("timestamp", String.valueOf(timestamp));
+        if (Strings.isNotEmpty(pushToken)) {
+            parameters.put("pushToken", pushToken);
+        }
+    }
+
+    @Override
+    protected String getAction() {
+        return "move";
     }
 }

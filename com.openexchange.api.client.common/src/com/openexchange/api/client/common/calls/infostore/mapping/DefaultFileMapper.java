@@ -456,7 +456,7 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
             public void set(DefaultFile object, Date value) throws OXException {
                 //TODO: throws a date parsing error
                 //value = new Date(1596457482000L);
-                //object.setLockedUntil(value);
+                object.setLockedUntil(value);
             }
 
             @Override
@@ -692,7 +692,7 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
 
             @Override
             public String get(DefaultFile object) {
-                return object.getOrigin().toString();
+                return object.getOrigin() != null ? object.getOrigin().toString() : null;
             }
 
             @Override

@@ -55,6 +55,7 @@ import java.util.Objects;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageFolderType;
@@ -67,22 +68,24 @@ import com.openexchange.session.Session;
  * {@link AppsuiteFolderAccess}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
 public class AppsuiteFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess /* TODO-MW1380 check which marker interface to add here */ {
 
     private final Session session;
+    private final AppsuiteAccountAccess accountAccess;
     private final FileStorageAccount account;
     private final ShareClient client;
 
     /**
      * Initializes a new {@link AppsuiteFolderAccess}.
      *
-     * @param accountAccess The {@link AccountAccess}
-     * @param ShareClient The {@link ShareClient} for accessing the remote OX
+     * @param accountAccess The {@link AppsuiteAccountAccess}
+     * @param client The {@link ShareClient} for accessing the remote OX
      */
     public AppsuiteFolderAccess(AppsuiteAccountAccess accountAccess, ShareClient client) {
-        accountAccess = Objects.requireNonNull(accountAccess, "accountAccess must not be null");
+        this.accountAccess = Objects.requireNonNull(accountAccess, "accountAccess must not be null");
         this.client = Objects.requireNonNull(client, "client must not be null");
         this.session = accountAccess.getSession();
         this.account = accountAccess.getAccount();
@@ -189,13 +192,12 @@ public class AppsuiteFolderAccess implements FileStorageFolderAccess, UserCreate
 
     @Override
     public void clearFolder(String folderId) throws OXException {
-        // TODO Auto-generated method stub
+        clearFolder(folderId, false);
     }
 
     @Override
     public void clearFolder(String folderId, boolean hardDelete) throws OXException {
-        // TODO Auto-generated method stub
-
+        ((AppsuiteFileAccess)accountAccess.getFileAccess()).removeDocument(folderId, FileStorageFileAccess.DISTANT_FUTURE, hardDelete);
     }
 
     @Override
