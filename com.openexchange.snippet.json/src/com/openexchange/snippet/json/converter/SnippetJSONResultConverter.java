@@ -119,8 +119,10 @@ public class SnippetJSONResultConverter implements ResultConverter {
              */
             @SuppressWarnings("unchecked") final Collection<Snippet> snippets = (Collection<Snippet>) resultObject;
             final JSONArray jArray = new JSONArray();
-            for (final Snippet snippet : snippets) {
-                jArray.put(convertSnippet(snippet, requestData.getSession()));
+            if (snippets != null) {
+                for (final Snippet snippet : snippets) {
+                    jArray.put(convertSnippet(snippet, requestData.getSession()));
+                }
             }
             result.setResultObject(jArray, "json");
         } catch (JSONException e) {
@@ -130,6 +132,9 @@ public class SnippetJSONResultConverter implements ResultConverter {
 
     private JSONObject convertSnippet(Snippet snippet, Session session) throws JSONException, OXException {
         final JSONObject json = new JSONObject();
+        if (snippet.getError().isPresent()) {
+            json.put("error", snippet.getError().get());
+        }
         int itg = snippet.getAccountId();
         if (itg >= 0) {
             json.put(Property.ACCOUNT_ID.getPropName(), itg);

@@ -106,6 +106,14 @@ public enum SnippetExceptionCodes implements DisplayableOXExceptionCode {
      * Snippet %1$s must not be changed by user %2$s in context %3$s
      */
     UPDATE_DENIED("Snippet %1$s must not be changed by user %2$s in context %3$s", SnippetStrings.UPDATE_DENIED_MSG, CATEGORY_ERROR, 11),
+    /**
+     * The signature size exceeds the maximum allowed size of '%1$s' (%2$s bytes).
+     */
+    MAXIMUM_SNIPPET_SIZE("The signature size exceeds the maximum allowed size of '%1$s' (%2$s bytes).", SnippetStrings.MAXIMUM_SNIPPET_SIZE_MSG, CATEGORY_ERROR, 12),
+    /**
+     * Unable to process signature: the signature raw size exceeds the maximum allowed size of '%1$s' (%2$s bytes).
+     */
+    MAXIMUM_RAW_SNIPPET_SIZE("Unable to process signature: the signature raw size exceeds the maximum allowed size of '%1$s' (%2$s bytes).", CATEGORY_ERROR, 13),
 
     ;
 

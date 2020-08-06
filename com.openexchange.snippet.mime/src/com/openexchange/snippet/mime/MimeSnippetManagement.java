@@ -94,7 +94,10 @@ import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder.ThresholdFileHolderInputStream;
+import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -119,6 +122,7 @@ import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.utils.MaxBytesExceededMessagingException;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.Quota;
@@ -231,16 +235,18 @@ public final class MimeSnippetManagement implements SnippetManagement {
     private final int userId;
     private final Session session;
     private final QuotaProvider quotaProvider;
+    private final LeanConfigurationService leanConfigurationService;
 
     /**
      * Initializes a new {@link MimeSnippetManagement}.
      */
-    public MimeSnippetManagement(Session session, QuotaProvider quotaProvider) {
+    public MimeSnippetManagement(Session session, QuotaProvider quotaProvider, LeanConfigurationService leanConfigurationService) {
         super();
         this.session = session;
         this.userId = session.getUserId();
         this.contextId = session.getContextId();
         this.quotaProvider = quotaProvider;
+        this.leanConfigurationService = leanConfigurationService;
     }
 
     private AccountQuota getQuota() throws OXException {
@@ -430,7 +436,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
     }
 
-    protected static DefaultSnippet createSnippet(String identifier, final int creator, final String displayName, final String module, final String type, final boolean shared, MimeMessage mimeMessage) throws MessagingException, IOException, OXException {
+    protected DefaultSnippet createSnippet(String identifier, final int creator, final String displayName, final String module, final String type, final boolean shared, MimeMessage mimeMessage) throws MessagingException, IOException, OXException {
         final DefaultSnippet snippet = new DefaultSnippet().setId(identifier).setCreatedBy(creator);
         final String lcct;
         {
@@ -539,11 +545,30 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
     }
 
-    protected static void parseSnippet(MimeMessage mimeMessage, MimePart part, DefaultSnippet snippet) throws OXException, MessagingException {
+    private static final com.openexchange.config.lean.Property MAX_SNIPPET_SIZE = DefaultProperty.valueOf("com.openexchange.snippet.mime.maxSnippetSize", "10MB");
+
+    /**
+     * Returns the maximum allowed snippet size
+     *
+     * @return the maximum allowed snippet size
+     */
+    private long getMaxSnippetSize() {
+        return ConfigTools.parseBytes(leanConfigurationService.getProperty(session.getUserId(), session.getContextId(), MAX_SNIPPET_SIZE));
+    }
+
+    protected void parseSnippet(MimeMessage mimeMessage, MimePart part, DefaultSnippet snippet) throws OXException, MessagingException {
         // Read content from part
         final String header = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
         final ContentType contentType = isEmpty(header) ? ContentType.DEFAULT_CONTENT_TYPE : new ContentType(header);
-        snippet.setContent(MessageUtility.readMimePart(part, contentType));
+        try {
+            snippet.setContent(MessageUtility.readMimePart(part, contentType, getMaxSnippetSize()));
+        } catch (MessagingException e) {
+            if (e instanceof MaxBytesExceededMessagingException) {
+                snippet.setError(e.getMessage());
+            } else {
+                throw e;
+            }
+        }
         // Read message's headers
         Enumeration<Header> others = mimeMessage.getAllHeaders();
         while (others.hasMoreElements()) {
@@ -564,6 +589,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
 
     @Override
     public String createSnippet(Snippet snippet) throws OXException {
+        long maxSnippetSize = getMaxSnippetSize();
+        if (snippet.getContent().length() > maxSnippetSize) {
+            throw SnippetExceptionCodes.MAXIMUM_SNIPPET_SIZE.create(L(maxSnippetSize), L(snippet.getContent().length()));
+        }
         AccountQuota quota = getQuota();
         if (null != quota) {
             Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);

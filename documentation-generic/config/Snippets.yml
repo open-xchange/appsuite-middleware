@@ -56,3 +56,15 @@ properties:
       file: snippets.properties
       packageName: open-xchange-core
       tags: ["Snippet", "Limit"]
+    - key: com.openexchange.snippet.mime.maxSnippetSize
+      description: |
+        Specifies the maximum allowed snippet size in bytes. Supports specifying a value including an optional unit; e.g. <code>10 MB</code> or <code>17.5kB</code> (unit is ignore-case)
+        Supported units are: B, KB, MB, GB, and TB 
+      defaultValue: 10MB
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: snippets.properties
+      packageName: open-xchange-core
+      tags: ["Snippet", "Limit"]

@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.collect,
  com.openexchange.exception,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.session,
  org.json,
  org.slf4j
