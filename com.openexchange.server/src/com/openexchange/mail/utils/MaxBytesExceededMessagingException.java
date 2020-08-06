@@ -51,7 +51,6 @@ package com.openexchange.mail.utils;
 
 import javax.mail.MessagingException;
 
-
 /**
  * {@link MaxBytesExceededMessagingException} - Thrown if a specified maximum byte count is exceeded.
  *
@@ -62,11 +61,16 @@ public class MaxBytesExceededMessagingException extends MessagingException {
 
     private static final long serialVersionUID = 656229884485289184L;
 
+    private final long maxSize;
+    private final long size;
+
     /**
      * Initializes a new {@link MaxBytesExceededMessagingException}.
      */
     public MaxBytesExceededMessagingException() {
         super();
+        maxSize = -1;
+        size = -1;
     }
 
     /**
@@ -76,6 +80,8 @@ public class MaxBytesExceededMessagingException extends MessagingException {
      */
     public MaxBytesExceededMessagingException(String s) {
         super(s);
+        maxSize = -1;
+        size = -1;
     }
 
     /**
@@ -86,6 +92,77 @@ public class MaxBytesExceededMessagingException extends MessagingException {
      */
     public MaxBytesExceededMessagingException(String s, Exception e) {
         super(s, e);
+        maxSize = -1;
+        size = -1;
+    }
+
+    /**
+     * Initializes a new {@link MaxBytesExceededMessagingException}.
+     *
+     * @param e The cause
+     * @throws NullPointerException If given <code>MaxBytesExceededIOException</code> is <code>null</code>
+     */
+    public MaxBytesExceededMessagingException(MaxBytesExceededIOException e) {
+        super(e.getMessage(), e);
+        maxSize = e.getMaxSize();
+        size = e.getSize();
+    }
+
+    /**
+     * Initializes a new {@link MaxBytesExceededMessagingException}.
+     *
+     * @param maxSize The max. allowed size
+     * @param size The actual number of bytes
+     */
+    public MaxBytesExceededMessagingException(long maxSize, long size) {
+        super();
+        this.maxSize = maxSize;
+        this.size = size;
+    }
+
+    /**
+     * Initializes a new {@link MaxBytesExceededMessagingException}.
+     *
+     * @param s The detail message
+     * @param maxSize The max. allowed size
+     * @param size The actual number of bytes
+     */
+    public MaxBytesExceededMessagingException(String s, long maxSize, long size) {
+        super(s);
+        this.maxSize = maxSize;
+        this.size = size;
+    }
+
+    /**
+     * Initializes a new {@link MaxBytesExceededMessagingException}.
+     *
+     * @param s The detail message
+     * @param e The cause
+     * @param maxSize The max. allowed size
+     * @param size The actual number of bytes
+     */
+    public MaxBytesExceededMessagingException(String s, Exception e, long maxSize, long size) {
+        super(s, e);
+        this.maxSize = maxSize;
+        this.size = size;
+    }
+
+    /**
+     * Gets the max. allowed size.
+     *
+     * @return The max. allowed size or <code>-1</code> if unknown
+     */
+    public long getMaxSize() {
+        return maxSize;
+    }
+
+    /**
+     * Gets the actual size.
+     *
+     * @return The actual size or <code>-1</code> if unknown
+     */
+    public long getSize() {
+        return size;
     }
 
 }
