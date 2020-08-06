@@ -59,6 +59,7 @@ import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.http.client.AbstractHTTPClient;
@@ -94,7 +95,16 @@ public class ApacheHTTPClient extends AbstractHTTPClient implements HTTPClient {
 	public Reader extractReader(HttpResponse resp) throws OXException {
 		try {
             ContentType contentType = ContentType.getOrDefault(resp.getEntity());
-            return new InputStreamReader(resp.getEntity().getContent(), contentType.getCharset() == null ? Charset.defaultCharset() : contentType.getCharset());
+            Charset charset = contentType.getCharset();
+            if (charset == null) {
+                try {
+                    charset = Charset.forName(ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding));
+                } catch (Exception e) {
+                    // Failed to look-up charset
+                    charset = Charset.defaultCharset();
+                }
+            }
+            return new InputStreamReader(resp.getEntity().getContent(), charset);
 		} catch (IOException e) {
             throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		}
