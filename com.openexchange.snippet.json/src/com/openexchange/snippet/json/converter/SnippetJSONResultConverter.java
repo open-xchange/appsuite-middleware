@@ -233,41 +233,43 @@ public class SnippetJSONResultConverter implements ResultConverter {
         }
 
         Matcher imgMatcher = IMG_PATTERN.matcher(content);
-        StringBuffer sb = new StringBuffer(content.length());
-
-        if (imgMatcher.find()) {
-            StringBuilder linkBuilder = new StringBuilder(256);
-            /*
-             * Replace inline images with Content-ID
-             */
-            do {
-                String imgTag = imgMatcher.group();
-                {
-                    Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
-                    StringBuffer cidBuffer = new StringBuffer(imgTag.length());
-                    if (cidMatcher.find()) {
-                        do {
-                            // Extract Content-ID
-                            String cid = cidMatcher.group(2);
-                            if (cid == null) {
-                                cid = cidMatcher.group(1);
-                            }
-                            linkBuilder.setLength(0);
-
-                            // Build image location
-                            ImageLocation imageLocation = new ImageLocation.Builder(cid).id(snippetId).optImageHost(HtmlProcessing.imageHost()).build();
-                            SnippetImageDataSource imgSource = SnippetImageDataSource.getInstance();
-                            String imageURL = imgSource.generateUrl(imageLocation, session);
-                            linkBuilder.append("src=").append('"').append(imageURL).append('"').append(" id=\"").append(cid).append("\" ").append("onmousedown=\"return false;\" oncontextmenu=\"return false;\"");
-
-                            cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement( 0 == linkBuilder.length() ? cidMatcher.group() : linkBuilder.toString()));
-                        } while (cidMatcher.find());
-                    }
-                    cidMatcher.appendTail(cidBuffer);
-                    imgMatcher.appendReplacement(sb, Matcher.quoteReplacement(cidBuffer.toString()));
-                }
-            } while (imgMatcher.find());
+        if (false == imgMatcher.find()) {
+            // No <img> tag in content
+            return content;
         }
+
+        // Replace inline images with Content-ID
+        StringBuffer sb = new StringBuffer(content.length());
+        StringBuilder linkBuilder = new StringBuilder(256);
+        do {
+            String imgTag = imgMatcher.group();
+
+            Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
+            if (cidMatcher.find()) {
+                StringBuffer cidBuffer = new StringBuffer(imgTag.length());
+                do {
+                    // Extract Content-ID
+                    String cid = cidMatcher.group(2);
+                    if (cid == null) {
+                        cid = cidMatcher.group(1);
+                    }
+                    linkBuilder.setLength(0);
+
+                    // Build image location
+                    ImageLocation imageLocation = new ImageLocation.Builder(cid).id(snippetId).optImageHost(HtmlProcessing.imageHost()).build();
+                    SnippetImageDataSource imgSource = SnippetImageDataSource.getInstance();
+                    String imageURL = imgSource.generateUrl(imageLocation, session);
+                    linkBuilder.append("src=").append('"').append(imageURL).append('"').append(" id=\"").append(cid).append("\" ").append("onmousedown=\"return false;\" oncontextmenu=\"return false;\"");
+
+                    cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement( 0 == linkBuilder.length() ? cidMatcher.group() : linkBuilder.toString()));
+                } while (cidMatcher.find());
+                cidMatcher.appendTail(cidBuffer);
+                imgMatcher.appendReplacement(sb, Matcher.quoteReplacement(cidBuffer.toString()));
+            } else {
+                // Append as-is
+                imgMatcher.appendReplacement(sb, Matcher.quoteReplacement(imgTag));
+            }
+        } while (imgMatcher.find());
         imgMatcher.appendTail(sb);
         return sb.toString();
     }
