@@ -112,7 +112,7 @@ public class ZoomConferenceHandler implements CalendarHandler {
             // all new, nothing todo since this is already handled by the client (only appsuite UI adds conferences at this point)
         } else if (updateConferences.isEmpty()) {
             // all removed
-            delete(originalConferences, event);
+            delete(originalConferences, update.getUpdate(), event);
         } else {
             // calculate diffs. Again, "added" is not relevant
             List<Conference> removed = new ArrayList<>(originalConferences);
@@ -127,17 +127,18 @@ public class ZoomConferenceHandler implements CalendarHandler {
             if (timeHasChanged(update)) {
                 changed(changed, update.getUpdate(), event);
             }
-            delete(removed, event);
+            delete(removed, update.getUpdate(), event);
         }
     }
 
     private void handleDelete(DeleteResult delete, CalendarEvent event) {
-        if (hasExternalOrganizer(delete.getOriginal())) {
+        Event original = delete.getOriginal();
+        if (hasExternalOrganizer(original)) {
             return;
         }
 
-        List<Conference> zoomConferences = getZoomConferences(delete.getOriginal());
-        delete(zoomConferences, event);
+        List<Conference> zoomConferences = getZoomConferences(original);
+        delete(zoomConferences, original, event);
     }
 
     /**
@@ -170,11 +171,12 @@ public class ZoomConferenceHandler implements CalendarHandler {
      *
      * @param conferences The list of deleted conferences
      * @param event The event
+     * @param calendarEvent The calendarEvent
      */
-    private void delete(List<Conference> conferences, CalendarEvent event) {
-        Switchboard switchboard = new Switchboard(getConfig(event.getCalendarUser(), event.getContextId()));
+    private void delete(List<Conference> conferences, Event event, CalendarEvent calendarEvent) {
+        Switchboard switchboard = new Switchboard(getConfig(calendarEvent.getCalendarUser(), calendarEvent.getContextId()));
         for (Conference conf : conferences) {
-            switchboard.delete(conf, event.getTimestamp());
+            switchboard.delete(conf, event, calendarEvent.getTimestamp());
         }
     }
 

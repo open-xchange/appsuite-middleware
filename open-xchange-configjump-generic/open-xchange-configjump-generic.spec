@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -46,6 +46,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Wed Aug 05 2020 Carsten Hoeger <choeger@open-xchange.com>
+Fifth candidate for 7.10.4 release
 * Tue Aug 04 2020 Carsten Hoeger <choeger@open-xchange.com>
 Fourth candidate for 7.10.4 release
 * Tue Aug 04 2020 Carsten Hoeger <choeger@open-xchange.com>

@@ -1,3 +1,9 @@
+open-xchange-pns-impl (7.10.4-7) stable; urgency=medium
+
+  * Fifth candidate for 7.10.4 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 05 Aug 2020 11:18:31 +0000
+
 open-xchange-pns-impl (7.10.4-6) stable; urgency=medium
 
   * Fourth candidate for 7.10.4 release
