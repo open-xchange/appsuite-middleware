@@ -51,6 +51,7 @@ package com.openexchange.snippet.mime;
 
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.session.Session;
@@ -76,18 +77,20 @@ import com.openexchange.snippet.mime.groupware.QuotaMode;
 public final class MimeSnippetService implements QuotaAwareSnippetService {
 
     private final QuotaProvider quotaProvider;
+    private final LeanConfigurationService leanConfigurationService;
 
     /**
      * Initializes a new {@link MimeSnippetService}.
      */
-    public MimeSnippetService(QuotaProvider quotaProvider) {
+    public MimeSnippetService(QuotaProvider quotaProvider, LeanConfigurationService leanConfigurationService) {
         super();
         this.quotaProvider = quotaProvider;
+        this.leanConfigurationService = leanConfigurationService;
     }
 
     @Override
     public MimeSnippetManagement getManagement(final Session session) throws OXException {
-        return new MimeSnippetManagement(session, quotaProvider);
+        return new MimeSnippetManagement(session, quotaProvider, leanConfigurationService);
     }
 
     @Override
