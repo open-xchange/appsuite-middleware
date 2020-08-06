@@ -747,8 +747,7 @@ public final class InternalList {
         // Re-add accidentally removed com.openexchange.groupware.update.tasks.CreateSubscribeTableTask, see MWB-489
         list.add(new com.openexchange.groupware.update.tasks.CreateSubscribeTableTask());
 
-        // +++++++++++++++++++++++++++++++++ Version 7.12.0 starts here. +++++++++++++++++++++++++++++++++
-        // list.add(new com.openexchange.groupware.update.tasks.DropUWAWidgetsTask());
+        list.add(new com.openexchange.groupware.update.tasks.DropUWAWidgetsTask());
         // list.add(new com.openexchange.groupware.update.tasks.DropSwiftFilestoreTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
