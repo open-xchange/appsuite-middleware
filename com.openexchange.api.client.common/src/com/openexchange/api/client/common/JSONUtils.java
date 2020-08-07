@@ -129,8 +129,10 @@ public final class JSONUtils {
         if (Strings.isNotEmpty(body) && body.length() > 15 && body.substring(0, 14).equalsIgnoreCase("<!DOCTYPE HTML")) {
             final int pos1 = body.indexOf('{');
             final int pos2 = body.indexOf("})</script>");
-            body = body.substring(pos1, pos2 + 1);
-            return body;
+            if(pos1 > -1 && pos2 > -1) {
+                body = body.substring(pos1, pos2 + 1);
+                return body;
+            }
         }
         return null;
     }

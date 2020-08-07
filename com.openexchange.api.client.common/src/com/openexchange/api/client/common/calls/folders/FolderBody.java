@@ -47,23 +47,35 @@
  *
  */
 
-package com.openexchange.api.client.common.calls;
-
-import com.openexchange.annotation.NonNull;
-import com.openexchange.api.client.HttpMethods;
+package com.openexchange.api.client.common.calls.folders;
 
 /**
- * {@link AbstractPostCall} - Common abstract class for methods build on {@link HttpMethods#POST}
+ * {@link FolderBody}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @param <T> The class of the response
  * @since v7.10.5
  */
-public abstract class AbstractPostCall<T> extends AbstractApiCall<T> {
+public class FolderBody {
 
-    @Override
-    @NonNull
-    public HttpMethods getHttpMehtod() {
-        return HttpMethods.POST;
+    private final RemoteFolder folder;
+
+    /* TODO: Notification Object */
+
+    /**
+     * Initializes a new {@link FolderBody}.
+     *
+     * @param folder The remote folder
+     */
+    public FolderBody(RemoteFolder folder) {
+        this.folder = folder;
+    }
+
+    /**
+     * Gets the folder
+     *
+     * @return The folder
+     */
+    public RemoteFolder getFolder() {
+        return folder;
     }
 }

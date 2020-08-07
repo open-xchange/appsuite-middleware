@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite;
+package com.openexchange.file.storage.oxshare;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -81,23 +81,33 @@ import com.openexchange.tools.iterator.SearchIterator;
 import static com.openexchange.java.Autoboxing.L;
 
 /**
- * {@link AppsuiteFileAccess}
+ * {@link OXShareFileAccess}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class AppsuiteFileAccess implements ThumbnailAware, FileStorageVersionedFileAccess, FileStorageIgnorableVersionFileAccess, FileStorageSequenceNumberProvider, FileStorageEfficientRetrieval, FileStorageLockedFileAccess, FileStorageZippableFolderFileAccess, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess {
+public class OXShareFileAccess implements /*@formatter:off*/
+                                          ThumbnailAware,
+                                          FileStorageVersionedFileAccess,
+                                          FileStorageIgnorableVersionFileAccess,
+                                          FileStorageSequenceNumberProvider,
+                                          FileStorageEfficientRetrieval,
+                                          FileStorageLockedFileAccess,
+                                          FileStorageZippableFolderFileAccess,
+                                          FileStorageCaseInsensitiveAccess,
+                                          FileStorageAutoRenameFoldersAccess {
+                                          /*@formatter:on*/
 
-    private final AppsuiteAccountAccess accountAccess;
+    private final OXShareAccountAccess accountAccess;
     private final ShareClient client;
 
     /**
-     * Initializes a new {@link AppsuiteFileAccess}.
+     * Initializes a new {@link OXShareFileAccess}.
      *
      * @param accountAccess The {@link AccountAccess}
      * @param ShareClient The {@link ShareClient} for accessing the remote OX
      */
-    public AppsuiteFileAccess(AppsuiteAccountAccess accountAccess, ShareClient client) {
+    public OXShareFileAccess(OXShareAccountAccess accountAccess, ShareClient client) {
         this.accountAccess = Objects.requireNonNull(accountAccess, "accountAccess must not be null");
         this.client = Objects.requireNonNull(client, "client must not be null");
     }
@@ -111,7 +121,7 @@ public class AppsuiteFileAccess implements ThumbnailAware, FileStorageVersionedF
      * @return The file meta data
      * @throws OXException
      */
-    private AppsuiteFile getMetadata(String folderId, String id, String version) throws OXException {
+    private OXShareFile getMetadata(String folderId, String id, String version) throws OXException {
         return client.getMetaData(folderId, id, version);
     }
 
@@ -159,7 +169,7 @@ public class AppsuiteFileAccess implements ThumbnailAware, FileStorageVersionedF
     }
 
     @Override
-    public AppsuiteFile getFileMetadata(String folderId, String id, String version) throws OXException {
+    public OXShareFile getFileMetadata(String folderId, String id, String version) throws OXException {
         return getMetadata(folderId, id, version);
     }
 
@@ -191,7 +201,6 @@ public class AppsuiteFileAccess implements ThumbnailAware, FileStorageVersionedF
 
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
-        AppsuiteFile fileMetadata = getFileMetadata(source.getFolder(), source.getId(), CURRENT_VERSION);
         IDTuple movedDocumentId = client.moveDocument(source.getId(), destFolder, sequenceNumber);
         if (update != null) {
             DefaultFile movedFileToUpdate = new DefaultFile(update);
@@ -215,8 +224,8 @@ public class AppsuiteFileAccess implements ThumbnailAware, FileStorageVersionedF
     @Override
     public Document getDocumentAndMetadata(String folderId, String fileId, String version, String clientETag) throws OXException {
         //TODO: use e-tag
-        AppsuiteFile fileMetaData = getMetadata(folderId, fileId, version);
-        return new AppsuiteDocument(fileMetaData, () -> getDocument(folderId, fileId, version));
+        OXShareFile fileMetaData = getMetadata(folderId, fileId, version);
+        return new OXShareDocument(fileMetaData, () -> getDocument(folderId, fileId, version));
     }
 
     @Override
@@ -301,32 +310,27 @@ public class AppsuiteFileAccess implements ThumbnailAware, FileStorageVersionedF
 
     @Override
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return client.getDocuments(ids, fields);
     }
 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, boolean ignoreDeleted) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return getDelta(folderId, updateSince, fields, null, SortDirection.DEFAULT, ignoreDeleted);
     }
 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return client.getDelta(folderId, updateSince, fields, sort, order, ignoreDeleted);
     }
 
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return search(pattern, fields, folderId, false, sort, order, start, end);
     }
 
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return client.search(pattern, fields, folderId, includeSubfolders, sort, order, start, end);
     }
 
     @Override
@@ -418,14 +422,12 @@ public class AppsuiteFileAccess implements ThumbnailAware, FileStorageVersionedF
 
     @Override
     public String createFolder(FileStorageFolder toCreate, boolean autoRename) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return client.createaFolder(toCreate, autoRename);
     }
 
     @Override
     public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return client.moveFolder(folderId, newParentId, newName, DISTANT_FUTURE, autoRename);
     }
 
 }

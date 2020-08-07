@@ -57,7 +57,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
-import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractPostCall;
@@ -128,29 +127,21 @@ public class NewCall extends AbstractPostCall<String> {
 
     @Override
     @Nullable
-    public HttpEntity getBody() throws OXException {
-        try {
-            DefaultFileMapper mapper = new DefaultFileMapper();
-            JSONObject json = mapper.serialize(file, mapper.getAssignedFields(file));
-            return ApiClientUtils.createMultipartBody(json, data, file.getFileName(), file.getFileMIMEType());
-        } catch (JSONException e) {
-            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
+    public HttpEntity getBody() throws OXException, JSONException {
+        DefaultFileMapper mapper = new DefaultFileMapper();
+        JSONObject json = mapper.serialize(file, mapper.getAssignedFields(file));
+        return ApiClientUtils.createMultipartBody(json, data, file.getFileName(), file.getFileMIMEType());
     }
 
     @Override
     protected void fillParameters(Map<String, String> parameters) {
         parameters.put("force_json_response", "true");
-        if (tryAddVersion != null) {
-            parameters.put("try_add_version", tryAddVersion.toString());
-        }
-        if (pushToken != null) {
-            parameters.put("pushToken", pushToken);
-        }
+        putIfPresent(parameters, "try_add_version", tryAddVersion);
+        putIfPresent(parameters, "pushToken", pushToken);
     }
 
     @Override
-    public HttpResponseParser<String> getParser() throws OXException {
+    public HttpResponseParser<String> getParser() {
         return new StringParser();
     }
 }

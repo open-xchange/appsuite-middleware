@@ -53,9 +53,10 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.HttpMethods;
 
 /**
- * {@link AbstractPutCall}
+ * {@link AbstractPutCall} - Common abstract class for methods build on {@link HttpMethods#PUT}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @param <T> The class of the response
  * @since v7.10.5
  */
 public abstract class AbstractPutCall<T> extends AbstractApiCall<T> {

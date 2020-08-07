@@ -47,23 +47,45 @@
  *
  */
 
-package com.openexchange.api.client.common.calls;
-
-import com.openexchange.annotation.NonNull;
-import com.openexchange.api.client.HttpMethods;
+package com.openexchange.api.client.common.calls.infostore;
 
 /**
- * {@link AbstractPostCall} - Common abstract class for methods build on {@link HttpMethods#POST}
+ * {@link InfostoreTuple}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @param <T> The class of the response
  * @since v7.10.5
  */
-public abstract class AbstractPostCall<T> extends AbstractApiCall<T> {
+public class InfostoreTuple {
 
-    @Override
-    @NonNull
-    public HttpMethods getHttpMehtod() {
-        return HttpMethods.POST;
+    private final String id;
+    private final String folderId;
+
+    /**
+     * Initializes a new {@link InfostoreTuple}.
+     * 
+     * @param folderId The folder identifier the file belongs to
+     * @param id The file identifier
+     */
+    public InfostoreTuple(String folderId, String id) {
+        this.folderId = folderId;
+        this.id = id;
+    }
+
+    /**
+     * Gets the id
+     *
+     * @return The id
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Gets the folderId
+     *
+     * @return The folderId
+     */
+    public String getFolderId() {
+        return folderId;
     }
 }

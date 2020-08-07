@@ -57,7 +57,6 @@ import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
 import com.openexchange.api.client.common.parser.JsonArrayParser;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link ListFoldersCall} - The "list" action for the folders module
@@ -73,7 +72,7 @@ public class ListFoldersCall extends AbstractGetCall<List<RemoteFolder>> {
     /**
      * Initializes a new {@link ListFoldersCall}.
      *
-     * @param parent
+     * @param parent The ID of the parent folder to list 
      */
     public ListFoldersCall(String parent) {
         //@formatter:off
@@ -116,7 +115,7 @@ public class ListFoldersCall extends AbstractGetCall<List<RemoteFolder>> {
     }
 
     @Override
-    public HttpResponseParser<List<RemoteFolder>> getParser() throws OXException {
+    public HttpResponseParser<List<RemoteFolder>> getParser() {
         return new JsonArrayParser<>(new RemoteFolderMapper(), columns);
     }
 }

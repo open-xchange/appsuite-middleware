@@ -55,7 +55,6 @@ import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
 import com.openexchange.api.client.common.calls.infostore.mapping.DefaultFileMapper;
 import com.openexchange.api.client.common.parser.JsonObjectParser;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 
 /**
@@ -103,9 +102,7 @@ public class GetCall extends AbstractGetCall<DefaultFile> {
     protected void fillParameters(Map<String, String> parameters) {
         parameters.put("id", id);
         parameters.put("folder", folder);
-        if (version != null) {
-            parameters.put("version", version);
-        }
+        putIfPresent(parameters, "version", version);
     }
 
     @Override
@@ -114,7 +111,7 @@ public class GetCall extends AbstractGetCall<DefaultFile> {
     }
 
     @Override
-    public HttpResponseParser<DefaultFile> getParser() throws OXException {
+    public HttpResponseParser<DefaultFile> getParser() {
         return new JsonObjectParser<>(new DefaultFileMapper());
     }
 }

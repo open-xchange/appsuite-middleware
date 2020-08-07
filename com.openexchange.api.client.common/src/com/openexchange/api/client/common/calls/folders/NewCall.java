@@ -47,14 +47,12 @@
  *
  */
 
-package com.openexchange.api.client.common.calls.infostore;
+package com.openexchange.api.client.common.calls.folders;
 
 import static com.openexchange.java.Autoboxing.B;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.http.HttpEntity;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
@@ -62,114 +60,98 @@ import com.openexchange.annotation.Nullable;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractPutCall;
-import com.openexchange.api.client.common.parser.IgnonringParser;
+import com.openexchange.api.client.common.parser.StringParser;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link DeleteCall}
+ * {@link NewCall}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class DeleteCall extends AbstractPutCall<Void> {
+public class NewCall extends AbstractPutCall<String> {
 
-    private final List<InfostoreTuple> filesToDelete;
-    private final long timestamp;
-    private final Boolean hardDelete;
+    private final String parentFolder;
+    private final FolderBody folderBody;
+    private final String tree;
+    private final String[] allowedModules;
     private final String pushToken;
+    private final Boolean autoRename;
 
     /**
-     * Initializes a new {@link DeleteCall}.
+     * Initializes a new {@link NewCall}.
      *
-     * @param fileToDelete The file to delete
-     * @param timestamp The last known timestamp
+     * @param parentFolder The ID of the parent folder where the new folder should be created
+     * @param folderBody The folder data to apply
      */
-    public DeleteCall(InfostoreTuple fileToDelete, long timestamp) {
-        this(Arrays.asList(fileToDelete), timestamp, null, null);
+    public NewCall(String parentFolder, FolderBody folderBody) {
+        this(parentFolder, folderBody, null, null, null, null);
     }
 
     /**
-     * Initializes a new {@link DeleteCall}.
+     * Initializes a new {@link NewCall}.
      *
-     * @param filesToDelete A list of files to delete
-     * @param timestamp The last known timestamp
+     * @param parentFolder The ID of the parent folder where the new folder should be created
+     * @param folderBody The folder data to apply
+     * @param autoRename Whether to automatically rename the folder in case an folder with the same name already exists.
      */
-    public DeleteCall(List<InfostoreTuple> filesToDelete, long timestamp) {
-        this(filesToDelete, timestamp, null, null);
+    public NewCall(String parentFolder, FolderBody folderBody, boolean autoRename) {
+        this(parentFolder, folderBody, null, null, null, B(autoRename));
     }
 
     /**
-     * Initializes a new {@link DeleteCall}.
+     * Initializes a new {@link NewCall}.
      *
-     * @param fileToDelete The file to delete
-     * @param timestamp The last known timestamp
-     * @param hardDelete True in order to delete the document, false to move it into the trash bin
-     * @param pushToken The push token
+     * @param parentFolder The ID of the parent folder where the new folder should be created
+     * @param folderBody The folder data to apply
+     * @param tree The tree Identifier of the folder tree, or null to asume "0" as default
+     * @param allowedModules An array of modules (e.g. "tasks,calendar,contacts,mail") supported by requesting client. If missing, all available modules are considered.
+     * @param pushToken Drive push token
+     * @param autoRename Whether to automatically rename the folder in case an folder with the same name already exists.
      */
-    public DeleteCall(InfostoreTuple fileToDelete, long timestamp, boolean hardDelete, String pushToken) {
-        this(Arrays.asList(fileToDelete), timestamp, B(hardDelete), pushToken);
-    }
-
-    /**
-     * Initializes a new {@link DeleteCall}.
-     *
-     * @param filesToDelete A list of files to delete
-     * @param timestamp The last known timestamp
-     * @param hardDelete True in order to delete the document, false to move it into the trash bin
-     */
-    public DeleteCall(List<InfostoreTuple> filesToDelete, long timestamp, boolean hardDelete) {
-        this(filesToDelete, timestamp, B(hardDelete), null);
-    }
-
-    /**
-     * Initializes a new {@link DeleteCall}.
-     *
-     * @param filesToDelete A list of files to delete
-     * @param timestamp The last known timestamp
-     * @param hardDelete True in order to delete the document, false to move it into the trash bin
-     * @param pushToken The push token
-     */
-    public DeleteCall(List<InfostoreTuple> filesToDelete, long timestamp, Boolean hardDelete, String pushToken) {
-        this.filesToDelete = filesToDelete;
-        this.timestamp = timestamp;
-        this.hardDelete = hardDelete;
+    public NewCall(String parentFolder, FolderBody folderBody, String tree, String[] allowedModules, String pushToken, Boolean autoRename) {
+        this.parentFolder = parentFolder;
+        this.folderBody = Objects.requireNonNull(folderBody, "folderBody must not be null");
+        this.tree = tree;
+        this.allowedModules = allowedModules;
         this.pushToken = pushToken;
+        this.autoRename = autoRename;
+
+        Objects.requireNonNull(folderBody.getFolder(), "folder must not be null");
     }
 
     @Override
     @NonNull
     public String getModule() {
-        return "/infostore";
+        return "/folders";
     }
 
     @Override
     @Nullable
     public HttpEntity getBody() throws OXException, JSONException {
-        JSONArray array = new JSONArray(filesToDelete.size());
-        for (InfostoreTuple fileToDelete : filesToDelete) {
-            JSONObject json = new JSONObject();
-            json.put("id", fileToDelete.getId());
-            json.put("folder", fileToDelete.getFolderId());
-            array.put(json);
-        }
-        return ApiClientUtils.createJsonBody(array);
+        JSONObject json = new JSONObject();
+        RemoteFolderMapper mapper = new RemoteFolderMapper();
+        RemoteFolder folder = folderBody.getFolder();
+        json.put("folder", mapper.serialize(folder, mapper.getAssignedFields(folder)));
+        return ApiClientUtils.createJsonBody(json);
     }
 
     @Override
-    public HttpResponseParser<Void> getParser() {
-        return new IgnonringParser();
+    public HttpResponseParser<String> getParser() {
+        return new StringParser();
     }
 
     @Override
     protected void fillParameters(Map<String, String> parameters) {
-        parameters.put("timestamp", String.valueOf(timestamp));
-        putIfPresent(parameters, "hardDelete", String.valueOf(hardDelete));
+        parameters.put("folder_id", parentFolder);
+        putIfNotEmpty(parameters, "tree", tree);
+        putIfNotEmpty(parameters, "allowed_modules", ApiClientUtils.toCommaString(allowedModules));
         putIfNotEmpty(parameters, "pushToken", pushToken);
+        putIfNotEmpty(parameters, "pushToken", String.valueOf(autoRename));
     }
 
     @Override
     protected String getAction() {
-        return "delete";
+        return "new";
     }
-
 }

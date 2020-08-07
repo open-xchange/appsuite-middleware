@@ -53,7 +53,6 @@ import java.util.Map;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link LockCall}
@@ -70,9 +69,6 @@ public class LockCall extends AbstractGetCall<Void> {
      * Initializes a new {@link LockCall}.
      *
      * @param id The ID of the item to lock
-     * @param diff If present the value is added to the current time on the server (both in ms).
-     *            The document will be locked until that time. If this parameter is not present,
-     *            the document will be locked for a duration as configured on the server.
      */
     public LockCall(String id) {
         this(id, null);
@@ -98,16 +94,14 @@ public class LockCall extends AbstractGetCall<Void> {
     }
 
     @Override
-    public HttpResponseParser<Void> getParser() throws OXException {
+    public HttpResponseParser<Void> getParser() {
         return null;
     }
 
     @Override
     protected void fillParameters(Map<String, String> parameters) {
         parameters.put("id", id);
-        if (diff != null) {
-            parameters.put("diff", String.valueOf(diff));
-        }
+        putIfPresent(parameters, "diff", diff);
     }
 
     @Override

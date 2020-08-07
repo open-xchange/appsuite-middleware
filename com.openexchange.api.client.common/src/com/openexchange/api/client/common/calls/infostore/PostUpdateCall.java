@@ -57,7 +57,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
-import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractPostCall;
@@ -66,7 +65,6 @@ import com.openexchange.api.client.common.parser.StringParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.java.Strings;
 
 /**
  * {@link PostUpdateCall}
@@ -128,26 +126,21 @@ public class PostUpdateCall extends AbstractPostCall<String> {
 
     @Override
     @NonNull
-    public String getPath() {
+    public String getModule() {
         return "/infostore";
     }
 
     @Override
     @Nullable
-    public HttpEntity getBody() throws OXException {
-        try {
-            DefaultFileMapper mapper = new DefaultFileMapper();
-            Field[] fields = columns != null ? mapper.getMappedFields(columns) : mapper.getAssignedFields(file);
-            ;
-            JSONObject json = mapper.serialize(file, fields);
-            return ApiClientUtils.createMultipartBody(json, data, file.getFileName(), file.getFileMIMEType());
-        } catch (JSONException e) {
-            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
+    public HttpEntity getBody() throws OXException, JSONException {
+        DefaultFileMapper mapper = new DefaultFileMapper();
+        Field[] fields = columns != null ? mapper.getMappedFields(columns) : mapper.getAssignedFields(file);
+        JSONObject json = mapper.serialize(file, fields);
+        return ApiClientUtils.createMultipartBody(json, data, file.getFileName(), file.getFileMIMEType());
     }
 
     @Override
-    public HttpResponseParser<String> getParser() throws OXException {
+    public HttpResponseParser<String> getParser() {
         return new StringParser();
     }
 
@@ -159,9 +152,7 @@ public class PostUpdateCall extends AbstractPostCall<String> {
         if (offset > -1) {
             parameters.put("offset", String.valueOf(timestamp));
         }
-        if (Strings.isNotEmpty(pushToken)) {
-            parameters.put("pushToken", pushToken);
-        }
+        putIfNotEmpty(parameters, "pushToken", pushToken);
     }
 
     @Override

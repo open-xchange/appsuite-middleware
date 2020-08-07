@@ -172,9 +172,13 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object lockedUntil(final Object... args) {
-        Date date = date(1, args);
-        if (date != null) {
-            md(args).setLockedUntil(date);
+        if (1 > args.length || null == args[1]) {
+            md(args).setLockedUntil(null);
+        } else if (args[1] instanceof Number) {
+            long value = ((Number) args[1]).longValue();
+            md(args).setLockedUntil(0 < value ? new Date(value) : null);
+        } else {
+            md(args).setLockedUntil(date(1, args));
         }
         return ret(args);
     }

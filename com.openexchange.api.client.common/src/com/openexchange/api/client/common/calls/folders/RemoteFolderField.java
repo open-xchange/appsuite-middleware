@@ -57,6 +57,7 @@ package com.openexchange.api.client.common.calls.folders;
  */
 public enum RemoteFolderField {
 
+    // See com.openexchange.groupware.container.DataObject
     /**
      * The ID of the folder
      */
@@ -77,10 +78,27 @@ public enum RemoteFolderField {
      */
     LAST_MODIFIED(5, "last_modified"),
 
+    // See com.openexchange.groupware.container.FolderChildObject
+    /**
+     * The object ID of the parent folder
+     */
+    FODLER_ID(20, "folder_id"),
+
+    // See com.openexchange.groupware.container.FolderObject
     /**
      * The folder's title
      */
     TITLE(300, "title"),
+
+    /**
+     * The name of the module which implements this folder
+     */
+    MODULE(301, "module"),
+
+    /**
+     * The folder's permission
+     */
+    PERMISSIONS(306, "permissions"),
 
     ;
 

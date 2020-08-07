@@ -49,15 +49,18 @@
 
 package com.openexchange.api.client.common.calls.folders;
 
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.List;
+import com.openexchange.api.client.common.calls.folders.mapping.PermissionMapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.groupware.tools.mappings.json.DateMapping;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
-
-import static com.openexchange.java.Autoboxing.I;
 
 /**
  * {@link RemoteFolderMapper}
@@ -104,29 +107,6 @@ public class RemoteFolderMapper extends DefaultJsonMapper<RemoteFolder, RemoteFo
             @Override
             public String get(RemoteFolder object) {
                 return object.getID();
-            }
-        });
-
-        mappings.put(RemoteFolderField.TITLE, new StringMapping<RemoteFolder>(RemoteFolderField.TITLE.getName(), I(RemoteFolderField.TITLE.getColumn())) {
-
-            @Override
-            public void set(RemoteFolder object, String value) throws OXException {
-                object.setName(value);
-            }
-
-            @Override
-            public void remove(RemoteFolder object) {
-                object.setName(null);
-            }
-
-            @Override
-            public boolean isSet(RemoteFolder object) {
-                return object.getName() != null;
-            }
-
-            @Override
-            public String get(RemoteFolder object) {
-                return object.getName();
             }
         });
 
@@ -197,6 +177,98 @@ public class RemoteFolderMapper extends DefaultJsonMapper<RemoteFolder, RemoteFo
             @Override
             public void remove(RemoteFolder object) {
                 object.setLastModified(null);
+            }
+        });
+
+        mappings.put(RemoteFolderField.FODLER_ID, new StringMapping<RemoteFolder>(RemoteFolderField.FODLER_ID.getName(), I(RemoteFolderField.FODLER_ID.getColumn())) {
+
+            @Override
+            public boolean isSet(RemoteFolder object) {
+                return null != object.getParentID();
+            }
+
+            @Override
+            public void set(RemoteFolder object, String value) throws OXException {
+                object.setParentID("0".equals(value) ? null : value);
+            }
+
+            @Override
+            public String get(RemoteFolder object) {
+                return object.getParentID();
+            }
+
+            @Override
+            public void remove(RemoteFolder object) {
+                object.setParentID(null);
+            }
+        });
+        mappings.put(RemoteFolderField.TITLE, new StringMapping<RemoteFolder>(RemoteFolderField.TITLE.getName(), I(RemoteFolderField.TITLE.getColumn())) {
+
+            @Override
+            public void set(RemoteFolder object, String value) throws OXException {
+                object.setName(value);
+            }
+
+            @Override
+            public void remove(RemoteFolder object) {
+                object.setName(null);
+            }
+
+            @Override
+            public boolean isSet(RemoteFolder object) {
+                return object.getName() != null;
+            }
+
+            @Override
+            public String get(RemoteFolder object) {
+                return object.getName();
+            }
+        });
+
+        mappings.put(RemoteFolderField.MODULE, new StringMapping<RemoteFolder>(RemoteFolderField.MODULE.getName(), I(RemoteFolderField.MODULE.getColumn())) {
+
+            @Override
+            public boolean isSet(RemoteFolder object) {
+                return object.getModule() != null;
+            }
+
+            @Override
+            public void set(RemoteFolder object, String value) throws OXException {
+                object.setModule(value);
+            }
+
+            @Override
+            public String get(RemoteFolder object) {
+                return object.getModule();
+            }
+
+            @Override
+            public void remove(RemoteFolder object) {
+                object.setModule(null);
+            }
+        });
+
+        mappings.put(RemoteFolderField.PERMISSIONS, new PermissionMapper<RemoteFolder>(RemoteFolderField.PERMISSIONS.getName(), I(RemoteFolderField.PERMISSIONS.getColumn())) {
+
+            @Override
+            public boolean isSet(RemoteFolder object) {
+                return object.getPermissions() != null;
+            }
+
+            @Override
+            public void set(RemoteFolder object, List<Permission> value) throws OXException {
+                object.setPermissions(value.toArray(new Permission[value.size()]));
+            }
+
+            @Override
+            public List<Permission> get(RemoteFolder object) {
+                return Arrays.asList(object.getPermissions());
+            }
+
+            @Override
+            public void remove(RemoteFolder object) {
+                object.setPermissions(null);
+
             }
         });
 

@@ -101,4 +101,7 @@ public class ApiClientConstants {
     /** The content type for "text/javascript" */
     public static final ContentType TEXT_JAVA_SCRIPT = ContentType.create("text/javascript");
 
+    /** Error message when a JSON array was expected by the parser but not received by the client */
+    public static final String NOT_JSON_ARRAY_MSG = "Not an JSON array";
+
 }

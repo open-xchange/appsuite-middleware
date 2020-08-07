@@ -47,60 +47,91 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite;
+package com.openexchange.api.client.common.calls.infostore;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Objects;
+import java.util.List;
+import java.util.Map;
+import org.apache.http.HttpEntity;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.annotation.Nullable;
+import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.common.ApiClientUtils;
+import com.openexchange.api.client.common.calls.AbstractPutCall;
+import com.openexchange.api.client.common.parser.DefaultFileListParser;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Document;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.DefaultFile;
 
 /**
- * {@link AppsuiteDocument} - A document shared from another OX instance
+ * {@link ListCall} - Gets a list of infoitems
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class AppsuiteDocument extends Document {
+public class ListCall extends AbstractPutCall<List<DefaultFile>> {
 
-    @FunctionalInterface
-    interface InputStreamClosure {
-
-        InputStream newStream() throws OXException, IOException;
-    }
-
-    private final InputStreamClosure data;
+    private final List<InfostoreTuple> ids;
+    private final int[] columns;
+    private final Boolean pregeneratePreviews;
 
     /**
-     * Initializes a new {@link AppsuiteDocument}.
+     * Initializes a new {@link ListCall}.
      *
-     * @param file The meta data as {@link AppsuiteFile}
-     * @param data The data as {@link InputStreamClosure} which allows lazy loading
+     * @param ids The IDs of the items to list
+     * @param columns The columns to return
      */
-    public AppsuiteDocument(AppsuiteFile file, InputStreamClosure data) {
-        this.data = Objects.requireNonNull(data, "data must not be null");
-        if (file != null) {
-            setFile(file);
-            setMimeType(file.getFileMIMEType());
-            setName(file.getFileName());
-            if (file.getLastModified() != null) {
-                setLastModified(file.getLastModified().getTime());
-            }
-        }
+    public ListCall(List<InfostoreTuple> ids, int[] columns) {
+        this(ids, columns, null);
+    }
+
+    /**
+     * Initializes a new {@link ListCall}.
+     *
+     * @param ids The IDs of the items to list
+     * @param columns The columns to return
+     * @param pregeneratePreviews If set to "true" preview generation
+     *            is triggered in the background for all files in request result
+     */
+    public ListCall(List<InfostoreTuple> ids, int[] columns, Boolean pregeneratePreviews) {
+        this.ids = ids;
+        this.columns = columns;
+        this.pregeneratePreviews = pregeneratePreviews;
     }
 
     @Override
-    public boolean isRepetitive() {
-        return false;
+    @NonNull
+    public String getModule() {
+        return "/infostore";
     }
 
     @Override
-    public InputStream getData() throws OXException {
-        try {
-            return data.newStream();
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+    @Nullable
+    public HttpEntity getBody() throws OXException, JSONException {
+        JSONArray array = new JSONArray(ids.size());
+        for (InfostoreTuple id : ids) {
+            JSONObject json = new JSONObject();
+            json.put("id", id.getId());
+            json.put("folder", id.getFolderId());
+            array.put(json);
         }
+        return ApiClientUtils.createJsonBody(array);
+    }
+
+    @Override
+    public HttpResponseParser<List<DefaultFile>> getParser() {
+        return new DefaultFileListParser(columns);
+    }
+
+    @Override
+    protected void fillParameters(Map<String, String> parameters) {
+        parameters.put("columns", ApiClientUtils.toCommaString(columns));
+        putIfPresent(parameters, "columns", String.valueOf(pregeneratePreviews));
+    }
+
+    @Override
+    protected String getAction() {
+        return "list";
     }
 }

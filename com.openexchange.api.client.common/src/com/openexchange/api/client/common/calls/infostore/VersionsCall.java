@@ -56,7 +56,6 @@ import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
 import com.openexchange.api.client.common.parser.DefaultFileListParser;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 
@@ -64,7 +63,7 @@ import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
  * {@link VersionsCall}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.2
+ * @since v7.10.5
  */
 public class VersionsCall extends AbstractGetCall<List<DefaultFile>> {
 
@@ -111,7 +110,7 @@ public class VersionsCall extends AbstractGetCall<List<DefaultFile>> {
     }
 
     @Override
-    public HttpResponseParser<List<DefaultFile>> getParser() throws OXException {
+    public HttpResponseParser<List<DefaultFile>> getParser() {
         return new DefaultFileListParser(columns);
     }
 }

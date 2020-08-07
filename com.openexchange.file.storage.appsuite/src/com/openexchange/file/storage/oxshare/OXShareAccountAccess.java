@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite;
+package com.openexchange.file.storage.oxshare;
 
 import java.util.Map;
 import java.util.Objects;
@@ -68,29 +68,29 @@ import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
- * {@link AppsuiteAccountAccess}
+ * {@link OXShareAccountAccess}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class AppsuiteAccountAccess implements CapabilityAware {
+public class OXShareAccountAccess implements CapabilityAware {
 
     private final FileStorageAccount account;
     private final FileStorageService service;
     private final Session session;
     private final ApiClientService clientFactory;
 
-    private ShareClient appsuiteClient;
+    private ShareClient shareClient;
 
     /**
-     * Initializes a new {@link AppsuiteAccountAccess}.
+     * Initializes a new {@link OXShareAccountAccess}.
      *
      * @param service The {@link FileStorageService}
      * @param clientFactory The {@link ApiClientService}
      * @param account The {@link FileStorageAccount}
      * @param session The {@link Session}
      */
-    public AppsuiteAccountAccess(FileStorageService service, ApiClientService clientFactory, FileStorageAccount account, Session session) {
+    public OXShareAccountAccess(FileStorageService service, ApiClientService clientFactory, FileStorageAccount account, Session session) {
         this.service = Objects.requireNonNull(service, "service must not be null");
         this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory must not be null");
         this.account = Objects.requireNonNull(account, "account must not be null");
@@ -122,13 +122,13 @@ public class AppsuiteAccountAccess implements CapabilityAware {
 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
-        return new AppsuiteFileAccess(this, appsuiteClient);
+        return new OXShareFileAccess(this, shareClient);
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
         connect();
-        return new AppsuiteFolderAccess(this, appsuiteClient);
+        return new OXShareFolderAccess(this, shareClient);
     }
 
     @Override
@@ -149,32 +149,32 @@ public class AppsuiteAccountAccess implements CapabilityAware {
         }
 
         Map<String, Object> configuration = account.getConfiguration();
-        String shareUrl = (String) configuration.get(AppsuiteFileStorageConstants.SHARE_URL);
+        String shareUrl = (String) configuration.get(OXShareStorageConstants.SHARE_URL);
         if (Strings.isEmpty(shareUrl)) {
             throw FileStorageExceptionCodes.INVALID_URL.create("not provided", "empty");
         }
 
-        String password = (String) configuration.get(AppsuiteFileStorageConstants.PASSWORD);
+        String password = (String) configuration.get(OXShareStorageConstants.PASSWORD);
         Optional<Credentials> credentials = password != null ? Optional.of(new Credentials("", password)) : Optional.empty();
 
-        this.appsuiteClient = new ShareClient(session, clientFactory.getApiClient(session, shareUrl, credentials));
+        this.shareClient = new ShareClient(session, clientFactory.getApiClient(session, shareUrl, credentials));
     }
 
     @Override
     public boolean isConnected() {
-        return appsuiteClient != null;
+        return shareClient != null;
     }
 
     @Override
     public void close() {
-        appsuiteClient = null;
+        shareClient = null;
     }
 
     @Override
     public boolean ping() throws OXException {
         try {
             connect();
-            appsuiteClient.ping();
+            shareClient.ping();
             return true;
         } finally {
             close();
@@ -188,6 +188,6 @@ public class AppsuiteAccountAccess implements CapabilityAware {
 
     @Override
     public Boolean supports(FileStorageCapability capability) {
-        return FileStorageCapabilityTools.supportsByClass(AppsuiteFileAccess.class, capability);
+        return FileStorageCapabilityTools.supportsByClass(OXShareFileAccess.class, capability);
     }
 }

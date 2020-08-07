@@ -99,9 +99,7 @@ import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.AfterReadAwareFolderStorage;
@@ -173,7 +171,6 @@ import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.recipient.RecipientType;
-import com.openexchange.tools.id.IDMangler;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -1621,27 +1618,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     /*
                      * Add federal sharing folders
                      */
-                    try {
-                        FileStorageServiceRegistry registry = ServerServiceRegistry.getInstance().getService(FileStorageServiceRegistry.class);
-                        List<FileStorageService> allServices = registry.getAllServices();
-                        for (FileStorageService service : allServices) {
-                            //TODO: Caching?
-                            if (service instanceof AccountAware && service instanceof SharingFileStorageService) {
-                                List<FileStorageAccount> accounts = ((AccountAware) service).getAccounts(storageParameters.getSession());
-                                for (FileStorageAccount account : accounts) {
-                                    FileStorageAccountAccess access = account.getFileStorageService().getAccountAccess(account.getId(), storageParameters.getSession());
-                                    FileStorageFolderAccess folderAccess = access.getFolderAccess();
-                                    FileStorageFolder rootFolder = access.getRootFolder();
-                                    FileStorageFolder[] sharedFolders = folderAccess.getSubfolders(rootFolder.getId(), true);
-                                    for (FileStorageFolder sharedFolder : sharedFolders) {
-                                        String folderId = IDMangler.mangle(service.getId(), account.getId(), sharedFolder.getId());
-                                        ret.add(new FileStorageId(folderId, ordinal++, sharedFolder.getName()));
-                                    }
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
-                        LOG.error("Unable to list federate sharing folders", e);
+                    SortableId[] sharedFolders = FederateSharingFolder.getFolders(storageParameters.getSession());
+                    for(SortableId sharedFolder : sharedFolders){
+                        ret.add(new FileStorageId(sharedFolder.getId(), ordinal++, sharedFolder.getName()));
                     }
 
                     return ret.toArray(new SortableId[ret.size()]);

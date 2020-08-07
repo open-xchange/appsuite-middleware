@@ -47,10 +47,12 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite;
+package com.openexchange.file.storage.oxshare;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -58,45 +60,47 @@ import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.Permission;
 
 /**
- * {@link AppsuiteFolder} - A folde shared from another OX instance
+ * {@link OXShareFolder} - A folder shared from another OX instance
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class AppsuiteFolder extends DefaultFileStorageFolder implements TypeAware {
+public class OXShareFolder extends DefaultFileStorageFolder implements TypeAware {
 
     private FileStorageFolderType type;
 
     /**
-     * Initializes a new {@link AppsuiteFolder}.
+     * Initializes a new {@link OXShareFolder}.
      *
      * @param userId The ID of the owner
      */
-    public AppsuiteFolder(final int userId) {
-        this(userId, null, null, null, null, null);
+    public OXShareFolder(final int userId) {
+        this(userId, null, null, null, null, null,null);
     }
 
     /**
-     * Initializes a new {@link AppsuiteFolder}.
+     * Initializes a new {@link OXShareFolder}.
      *
      * @param userId The ID of the owner
      * @param other Another folder to copy value from
      */
-    public AppsuiteFolder(final int userId, Folder other) {
+    public OXShareFolder(final int userId, Folder other) {
         //@formatter:off
         this(userId,
             other.getID(),
-            null,
+            other.getParentID(),
             other.getName(),
             other.getCreationDate(),
-            other.getLastModified());
+            other.getLastModified(),
+            other.getPermissions() != null ? Arrays.asList(other.getPermissions()) : null);
         //@formatter:on
     }
 
     /**
-     * Initializes a new {@link AppsuiteFolder}.
+     * Initializes a new {@link OXShareFolder}.
      *
      * @param userId The ID of the owner
      * @param id the ID of the folder
@@ -104,19 +108,21 @@ public class AppsuiteFolder extends DefaultFileStorageFolder implements TypeAwar
      * @param name the name of the folder
      * @param creationDate the date of creation
      * @param lastModified the date of last modification
+     * @param permissino the folder permissions
      */
-    public AppsuiteFolder(final int userId, String id, String parentId, String name, Date creationDate, Date lastModified) {
+    public OXShareFolder(final int userId, String id, String parentId, String name, Date creationDate, Date lastModified, List<Permission> permissions) {
         type = FileStorageFolderType.NONE;
         holdsFiles = true;
         b_holdsFiles = true;
         holdsFolders = true;
         b_holdsFolders = true;
         exists = true;
-        subscribed = true;
-        b_subscribed = true;
+        subscribed = true; //TODO
+        b_subscribed = true; //TODO
+        //TODO: permission
         final DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
         permission.setEntity(userId);
-        permissions = Collections.<FileStoragePermission> singletonList(permission);
+        this.permissions = Collections.<FileStoragePermission> singletonList(permission);
         ownPermission = permission;
         createdBy = userId;
         this.creationDate = creationDate;
@@ -127,6 +133,7 @@ public class AppsuiteFolder extends DefaultFileStorageFolder implements TypeAwar
         setParentId(parentId == null ? FileStorageFolder.ROOT_FULLNAME : parentId);
         setSubfolders(true);
         setSubscribedSubfolders(true);
+        setCapabilities(FileStorageFolder.ALL_CAPABILITIES);
     }
 
     @Override
@@ -140,7 +147,7 @@ public class AppsuiteFolder extends DefaultFileStorageFolder implements TypeAwar
      * @param type The type to set
      * @return This folder with type applied
      */
-    public AppsuiteFolder setType(FileStorageFolderType type) {
+    public OXShareFolder setType(FileStorageFolderType type) {
         this.type = type;
         return this;
     }

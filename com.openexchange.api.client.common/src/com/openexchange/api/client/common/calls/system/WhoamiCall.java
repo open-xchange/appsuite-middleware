@@ -54,11 +54,10 @@ import org.apache.http.protocol.HttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
-import com.openexchange.api.client.common.parser.CommonApiResponse;
 import com.openexchange.api.client.common.parser.AbstractHttpResponseParser;
+import com.openexchange.api.client.common.parser.CommonApiResponse;
 import com.openexchange.exception.OXException;
 
 /**
@@ -84,23 +83,19 @@ public class WhoamiCall extends AbstractGetCall<WhoamiInformation> {
     protected void fillParameters(Map<String, String> parameters) {}
 
     @Override
-    public HttpResponseParser<WhoamiInformation> getParser() throws OXException {
+    public HttpResponseParser<WhoamiInformation> getParser() {
         return new AbstractHttpResponseParser<WhoamiInformation>() {
 
             @Override
-            public WhoamiInformation parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException {
-                try {
-                    JSONObject data = commonResponse.getJSONObject();
-                    String sessionId = data.getString("session");
-                    String user = data.getString("user");
-                    int userId = data.getInt("user_id");
-                    int contextId = data.getInt("context_id");
-                    String locale = data.getString("locale");
+            public WhoamiInformation parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException, JSONException {
+                JSONObject data = commonResponse.getJSONObject();
+                String sessionId = data.getString("session");
+                String user = data.getString("user");
+                int userId = data.getInt("user_id");
+                int contextId = data.getInt("context_id");
+                String locale = data.getString("locale");
 
-                    return new WhoamiInformation(sessionId, user, userId, contextId, locale);
-                } catch (JSONException e) {
-                    throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-                }
+                return new WhoamiInformation(sessionId, user, userId, contextId, locale);
             }
         };
 

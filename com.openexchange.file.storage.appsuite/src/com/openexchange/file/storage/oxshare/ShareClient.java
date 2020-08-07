@@ -47,26 +47,37 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite;
+package com.openexchange.file.storage.oxshare;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.api.client.ApiClient;
+import com.openexchange.api.client.common.calls.find.FindResponse;
+import com.openexchange.api.client.common.calls.find.QueryCall;
+import com.openexchange.api.client.common.calls.find.QueryCall.FacetFilter;
+import com.openexchange.api.client.common.calls.find.QueryCall.QueryBuilder;
+import com.openexchange.api.client.common.calls.folders.DeleteFolderCall;
+import com.openexchange.api.client.common.calls.folders.FolderBody;
 import com.openexchange.api.client.common.calls.folders.GetFolderCall;
 import com.openexchange.api.client.common.calls.folders.ListFoldersCall;
 import com.openexchange.api.client.common.calls.folders.RemoteFolder;
+import com.openexchange.api.client.common.calls.folders.UpdateCall;
 import com.openexchange.api.client.common.calls.infostore.DeleteCall;
-import com.openexchange.api.client.common.calls.infostore.DeleteCall.DeleteTuple;
 import com.openexchange.api.client.common.calls.infostore.DocumentCall;
 import com.openexchange.api.client.common.calls.infostore.GetAllCall;
 import com.openexchange.api.client.common.calls.infostore.GetCall;
+import com.openexchange.api.client.common.calls.infostore.InfostoreTuple;
+import com.openexchange.api.client.common.calls.infostore.ListCall;
 import com.openexchange.api.client.common.calls.infostore.LockCall;
 import com.openexchange.api.client.common.calls.infostore.MoveCall;
 import com.openexchange.api.client.common.calls.infostore.NewCall;
@@ -75,22 +86,37 @@ import com.openexchange.api.client.common.calls.infostore.PostUpdateCall;
 import com.openexchange.api.client.common.calls.infostore.PutCopyCall;
 import com.openexchange.api.client.common.calls.infostore.PutUpdateCall;
 import com.openexchange.api.client.common.calls.infostore.UnlockCall;
+import com.openexchange.api.client.common.calls.infostore.UpdatesCall;
+import com.openexchange.api.client.common.calls.infostore.UpdatesResponse;
 import com.openexchange.api.client.common.calls.infostore.VersionsCall;
+import com.openexchange.api.client.common.calls.infostore.mapping.DefaultFileMapper;
 import com.openexchange.api.client.common.calls.system.WhoamiCall;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileDelta;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageGuestPermission;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.folderstorage.BasicGuestPermission;
+import com.openexchange.folderstorage.BasicPermission;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Strings;
+import com.openexchange.quota.AccountQuota;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
- * {@link ShareClient} a client for accessing remote shared on other Appsuite instances
+ * {@link ShareClient} a client for accessing remote shares on other OX instances/installations
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
@@ -101,7 +127,14 @@ public class ShareClient {
     private final Session session;
 
     private static final String USER_INFOSTORE_FOLDER = "10";
+    private static final String TREE_ID = FolderStorage.REAL_TREE_ID;
     private static final List<Field> ALL_FIELDS;
+    private static final String MODULE_FILES = "files";
+    private static final String TIMEZONE_UTC = "UTC";
+    private static final String SEARCH_FACET_FOLDER = "folder";
+    private static final String SEARCH_FACET_ACCOUNT = "account";
+    private static final String INFOSTORE = "infostore";
+    private static final String INFOSTORE_ACCOUNT_ID = "com.openexchange.infostore://infostore";
 
     static {
         ALL_FIELDS = Arrays.asList(Field.values());
@@ -156,16 +189,50 @@ public class ShareClient {
     }
 
     /**
+     * Parses a list for {@link FileStoragePermissions} into a list of {@link Permission}
+     * parsePermission
+     *
+     * @param fileStoragePermissions The permissions to transform
+     * @return An array of transformed permissions
+     * @throws OXException
+     */
+    private static Permission[] parsePermission(List<FileStoragePermission> fileStoragePermissions) throws OXException {
+        if (null == fileStoragePermissions) {
+            return null;
+        }
+        List<Permission> permissions = new ArrayList<Permission>(fileStoragePermissions.size());
+        for (FileStoragePermission fileStoragePermission : fileStoragePermissions) {
+            Permission permission;
+            if (FileStorageGuestPermission.class.isInstance(fileStoragePermission)) {
+                BasicGuestPermission guestPermission = new BasicGuestPermission();
+                guestPermission.setRecipient(((FileStorageGuestPermission) fileStoragePermission).getRecipient());
+                permission = guestPermission;
+            } else {
+                permission = new BasicPermission();
+            }
+            permission.setEntity(fileStoragePermission.getEntity());
+            permission.setGroup(fileStoragePermission.isGroup());
+            permission.setAdmin(fileStoragePermission.isAdmin());
+            permission.setAllPermissions(fileStoragePermission.getFolderPermission(), fileStoragePermission.getReadPermission(), fileStoragePermission.getWritePermission(), fileStoragePermission.getDeletePermission());
+            permissions.add(permission);
+        }
+        return permissions.toArray(new Permission[fileStoragePermissions.size()]);
+    }
+
+    /**
      * Gets the folder identified through given identifier
      *
      * @param folderId The identifier
-     * @return The corresponding instance of {@link AppsuiteFolder}
+     * @return The corresponding instance of {@link OXShareFolder} or <code>null</code> if it doesn't exist
      * @throws OXException If either folder does not exist or could not be fetched
      */
-    public AppsuiteFolder getFolder(String folderId) throws OXException {
+    public OXShareFolder getFolder(String folderId) throws OXException {
+        if (Strings.isEmpty(folderId)) {
+            return null;
+        }
         RemoteFolder remoteFolder = ajaxClient.execute(new GetFolderCall(folderId));
         final int userId = session.getUserId();
-        return new AppsuiteFolder(userId, remoteFolder);
+        return new OXShareFolder(userId, remoteFolder);
     }
 
     /**
@@ -175,11 +242,11 @@ public class ShareClient {
      * @return An array of {@link FileStorageFolder} representing the subfolders
      * @throws OXException If either parent folder does not exist or its subfolders cannot be delivered
      */
-    public AppsuiteFolder[] getSubFolders(String parentId) throws OXException {
+    public OXShareFolder[] getSubFolders(String parentId) throws OXException {
         List<RemoteFolder> folders = ajaxClient.execute(new ListFoldersCall(getFolderId(parentId)));
         final int userId = session.getUserId();
-        List<AppsuiteFolder> ret = folders.stream().map(f -> new AppsuiteFolder(userId, f)).collect(Collectors.toList());
-        return ret.toArray(new AppsuiteFolder[ret.size()]);
+        List<OXShareFolder> ret = folders.stream().map(f -> new OXShareFolder(userId, f)).collect(Collectors.toList());
+        return ret.toArray(new OXShareFolder[ret.size()]);
     }
 
     /**
@@ -293,9 +360,9 @@ public class ShareClient {
      * @return The file
      * @throws OXException
      */
-    public AppsuiteFile getMetaData(String folderId, String id, @Nullable String version) throws OXException {
+    public OXShareFile getMetaData(String folderId, String id, @Nullable String version) throws OXException {
         DefaultFile file = ajaxClient.execute(new GetCall(folderId, id, version));
-        return new AppsuiteFile(file);
+        return new OXShareFile(file);
     }
 
     /**
@@ -325,6 +392,25 @@ public class ShareClient {
                           order));
         //@formatter:on
         return new FileTimedResult((List<File>) files);
+    }
+
+    /**
+     * Lists all given documents
+     *
+     * @param ids The IDs of the items to fetch
+     * @param fields The fields to fetch
+     * @return The result
+     * @throws OXException
+     */
+    public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
+        final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
+        if (ids != null && !ids.isEmpty()) {
+            List<InfostoreTuple> filesToQuery = ids.stream().map(t -> new InfostoreTuple(t.getFolder(), t.getId())).collect(Collectors.toList());
+            List<? extends File> result = ajaxClient.execute(new ListCall(filesToQuery, toIdList(fieldsToQuery)));
+            return new FileTimedResult((List<File>) result);
+        }
+
+        return new FileTimedResult(Collections.emptyList());
     }
 
     /**
@@ -358,8 +444,8 @@ public class ShareClient {
      * @throws OXException
      */
     public void removeDocuments(List<IDTuple> filesToDelete, long sequenceNumber, boolean hardDelete) throws OXException {
-        if (filesToDelete.isEmpty()) {
-            List<DeleteTuple> filesToDelete2 = filesToDelete.stream().map(t -> new DeleteCall.DeleteTuple(t.getFolder(), t.getId())).collect(Collectors.toList());
+        if (!filesToDelete.isEmpty()) {
+            List<InfostoreTuple> filesToDelete2 = filesToDelete.stream().map(t -> new InfostoreTuple(t.getFolder(), t.getId())).collect(Collectors.toList());
             ajaxClient.execute(new DeleteCall(filesToDelete2, sequenceNumber, hardDelete));
         }
     }
@@ -383,5 +469,164 @@ public class ShareClient {
      */
     public void Unlock(String id) throws OXException {
         ajaxClient.execute(new UnlockCall(id));
+    }
+
+    /**
+     * Creates a new folder
+     *
+     * @param parentFolder The ID of the parent folder to create the folder in
+     * @param autoRename <code>true</code> to rename the folder (e.g. adding <code>" (1)"</code> appendix) to avoid conflicts; otherwise <code>false</code>
+     * @return The ID of the new created folder
+     * @throws OXException
+     */
+    public String createaFolder(FileStorageFolder folder, boolean autoRename) throws OXException {
+        RemoteFolder newRemoteFolder = new RemoteFolder(INFOSTORE);
+        newRemoteFolder.setParentID(folder.getParentId());
+        newRemoteFolder.setID(folder.getId());
+        newRemoteFolder.setName(folder.getName());
+        FolderBody newFolder = new FolderBody(newRemoteFolder);
+        return ajaxClient.execute(new com.openexchange.api.client.common.calls.folders.NewCall(newRemoteFolder.getParentID(), newFolder, autoRename));
+    }
+
+    /**
+     * Moves a folder
+     *
+     * @param folderId The ID of the folder to move
+     * @param newParentId The ID of the parent folder, or null to keep the folder in the current folder
+     * @param newName The new name of the folder, or null to keep the name as it is
+     * @param timestamp The timestamp
+     * @param autoRename <code>true</code> to rename the folder (e.g. adding <code>" (1)"</code> appendix) to avoid conflicts; otherwise <code>false</code>
+     * @return The ID of the moved folder
+     * @throws OXException
+     */
+    public String moveFolder(String folderId, String newParentId, String newName, long timestamp, boolean autoRename) throws OXException {
+        RemoteFolder updatedFolder = new RemoteFolder(INFOSTORE);
+        updatedFolder.setName(newName);
+        updatedFolder.setParentID(newParentId);
+        return ajaxClient.execute(new UpdateCall(folderId, new FolderBody(updatedFolder), Boolean.FALSE, timestamp, B(autoRename)));
+    }
+
+    /**
+     * Updates a folders
+     *
+     * @param folderId The ID of the folder to move
+     * @param folder The new folder data
+     * @param timestamp The timestamp
+     * @param autoRename <code>true</code> to rename the folder (e.g. adding <code>" (1)"</code> appendix) to avoid conflicts; otherwise <code>false</code>
+     * @return The ID of the updated folder
+     * @throws OXException
+     */
+    public String updateFolder(String folderId, FileStorageFolder folder, long timestamp, boolean autoRename) throws OXException {
+        RemoteFolder updatedFolder = new RemoteFolder(INFOSTORE);
+        updatedFolder.setPermissions(parsePermission(folder.getPermissions()));
+        return ajaxClient.execute(new UpdateCall(folderId, new FolderBody(updatedFolder), timestamp, B(autoRename)));
+    }
+
+    /**
+     * Delete the folder
+     *
+     * @param folderId The folder ID
+     * @param hardDelete Whether to delete permanently or to backup into trash folder
+     * @return The folder ID of the deleted folder
+     * @throws OXException In case the folder can't be deleted
+     */
+    public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
+        long timestamp = System.currentTimeMillis();
+        List<String> notDeleted = ajaxClient.execute(new DeleteFolderCall(Collections.singletonList(folderId), TREE_ID, timestamp, null, null, hardDelete, true));
+        if (notDeleted.isEmpty()) {
+            return folderId;
+        }
+        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("Unable to delete folder {}", folderId);
+    }
+
+    /**
+     * Gets the filestorage / infostore quota
+     *
+     * @return The {@link AccountQuota} for module "filestorage" and account "infostore"
+     * @throws OXException
+     */
+    public AccountQuota getInfostoreQuota() throws OXException {
+        final String module = "filestorage";
+        final String account = INFOSTORE;
+        List<AccountQuota> accountQuota = ajaxClient.execute(new com.openexchange.api.client.common.calls.quota.GetCall(module, account));
+        return accountQuota.get(0);
+    }
+
+    /**
+     * Gets the changes in a directory since a given time
+     *
+     * @param folderId The ID of the folder to query for updates
+     * @param updateSince The timestamp
+     * @param fields The fields to return
+     * @param sort The sorting field
+     * @param order The sort order
+     * @param ignoreDeleted <code>true</code> in order to ignore deleted files, <code>false</code> to include deleted files.
+     * @return
+     * @throws OXException
+     */
+    @SuppressWarnings("unchecked")
+    public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
+
+        UpdatesCall.SortOrder sortOrder = null;
+        if (sort != null && order != null) {
+            sortOrder = order == SortDirection.DESC ? UpdatesCall.SortOrder.DESC : UpdatesCall.SortOrder.ASC;
+        }
+
+        //@formatter:off
+        UpdatesResponse response = ajaxClient.execute(new UpdatesCall(folderId,
+            toIdList(fields),
+            L(updateSince),
+            ignoreDeleted ? new UpdatesCall.UpdateType[] { UpdatesCall.UpdateType.DELETED } : null,
+            sort != null ? sort.getName() : null,
+            sortOrder,
+            null));
+        //@formatter:on
+
+        List<? extends File> newFiles = response.getNewFiles();
+        List<? extends File> modifiedFiles = response.getModifiedFiles();
+        List<? extends File> deletedFiles = response.getDeletedFiles();
+        return new FileDelta((List<File>) newFiles, (List<File>) modifiedFiles, (List<File>) deletedFiles, response.getSequenceNumber());
+    }
+
+    /**
+     * Searches for a given file.
+     *
+     * @param pattern The search pattern possibly containing wild-cards
+     * @param fields Which fields to load
+     * @param folderId In which folder to search. Pass ALL_FOLDERS to search in all folders.
+     * @param includeSubfolders <code>true</code> to include subfolders, <code>false</code>, otherwise
+     * @param sort Which field to sort by. May be <code>null</code>.
+     * @param order The order in which to sort
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @return The search results
+     * @throws OXException If operation fails
+     */
+    @SuppressWarnings("unchecked")
+    public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
+
+        //Build the query
+        //@formatter:off
+        final QueryBuilder builder = new QueryBuilder()
+            .withStart(start)
+            .withSize(end - start)
+            .withTimezone(TIMEZONE_UTC)
+            .withFacet(SEARCH_FACET_ACCOUNT, INFOSTORE_ACCOUNT_ID)
+            .withFacet(SEARCH_FACET_FOLDER, folderId)
+            .withFacet("file_name", "file_name:" + pattern,new FacetFilter().setFields(Field.FILENAME.getName()).setQueries(pattern))
+            .includeSubfolders(includeSubfolders);
+        //@formatter:on
+
+        //Add sorting
+        QueryCall.SortOrder sortOrder = null;
+        if (sort != null && order != null) {
+            sortOrder = order == SortDirection.DESC ? QueryCall.SortOrder.DESC : QueryCall.SortOrder.ASC;
+            builder.sortBy(sort.getNumber()).withSortOrder(sortOrder);
+        }
+
+        //Search
+        FindResponse<DefaultFile> result = ajaxClient.execute(new QueryCall<DefaultFile, File.Field>(MODULE_FILES, toIdList(fields), builder.build(), new DefaultFileMapper()));
+        List<? extends File> resultFiles = result.getResultObjects();
+        return new SearchIteratorAdapter<File>((Iterator<File>) resultFiles.iterator(), resultFiles.size());
     }
 }

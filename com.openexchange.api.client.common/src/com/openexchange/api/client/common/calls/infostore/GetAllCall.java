@@ -56,14 +56,13 @@ import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
 import com.openexchange.api.client.common.parser.DefaultFileListParser;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.groupware.container.DataObject;
 
 /**
- * {@link GetAllCall}
+ * {@link GetAllCall} - Gets all infoitems in a specified folder
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
@@ -128,7 +127,7 @@ public class GetAllCall extends AbstractGetCall<List<DefaultFile>> {
     }
 
     @Override
-    public HttpResponseParser<List<DefaultFile>> getParser() throws OXException {
+    public HttpResponseParser<List<DefaultFile>> getParser() {
         return new DefaultFileListParser(columns);
     }
 }

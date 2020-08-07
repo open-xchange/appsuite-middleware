@@ -47,23 +47,20 @@
  *
  */
 
-package com.openexchange.api.client.common.calls;
+package com.openexchange.file.storage.oxshare;
 
-import com.openexchange.annotation.NonNull;
-import com.openexchange.api.client.HttpMethods;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link AbstractPostCall} - Common abstract class for methods build on {@link HttpMethods#POST}
+ * {@link FormStrings}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @param <T> The class of the response
  * @since v7.10.5
  */
-public abstract class AbstractPostCall<T> extends AbstractApiCall<T> {
+public class FormStrings implements LocalizableStrings {
 
-    @Override
-    @NonNull
-    public HttpMethods getHttpMehtod() {
-        return HttpMethods.POST;
-    }
+    public static final String SHARE_LINK_LABEL = "OX share link";
+
+    public static final String PASSWORD = "OX share link password";
+
 }

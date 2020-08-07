@@ -84,8 +84,8 @@ public enum ApiClientExceptions implements DisplayableOXExceptionCode {
     /** Unexpected error [%1$s] */
     UNEXPECTED_ERROR("Unexpected error [%1$s]", Category.CATEGORY_ERROR, 7),
 
-    /** Unexpected error while building JSON [%1$s] */
-    JSON_ERROR("Unexpected error while building JSON [%1$s]", Category.CATEGORY_ERROR, 8),
+    /** JSON error: [%1$s] */
+    JSON_ERROR("JSON error: %1$s", Category.CATEGORY_ERROR, 8),
 
     /** A parameter for the request is missing. */
     MISSING_PARAMETER("A parameter for the request is missing.", Category.CATEGORY_ERROR, 9),

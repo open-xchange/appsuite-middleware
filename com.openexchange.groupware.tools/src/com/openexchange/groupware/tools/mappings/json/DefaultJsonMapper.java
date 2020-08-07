@@ -219,8 +219,16 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
     public List<O> deserialize(JSONArray jsonArray, E[] fields, TimeZone timeZone) throws OXException, JSONException {
         List<O> objects = new ArrayList<O>(jsonArray.length());
         List<E> nonNullFields = Arrays.stream(fields).filter( f -> f != null).collect(Collectors.toList());
-        for (int i = 0; i < jsonArray.length(); i++) {
-            objects.add(deserialize(asJsonObject(jsonArray.getJSONArray(i), fields), nonNullFields.toArray(newArray(nonNullFields.size())), timeZone));
+        boolean nestedArray = jsonArray.length() > 0 && jsonArray.get(0) instanceof JSONArray;
+        if(nestedArray) {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                objects.add(deserialize(asJsonObject(jsonArray.getJSONArray(i), fields), nonNullFields.toArray(newArray(nonNullFields.size())), timeZone));
+            }
+        }
+        else {
+            if(jsonArray.length() > 0) {
+                objects.add(deserialize(asJsonObject(jsonArray, fields), nonNullFields.toArray(newArray(nonNullFields.size())), timeZone));
+            }
         }
         return objects;
     }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite;
+package com.openexchange.file.storage.oxshare;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -56,21 +56,23 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link AppsuiteFileStorageExceptionCodes}
+ * {@link OXShareFileStorageExceptionCodes}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public enum AppsuiteFileStorageExceptionCodes implements DisplayableOXExceptionCode {
+public enum OXShareFileStorageExceptionCodes implements DisplayableOXExceptionCode {
 
-    PING_FAILED("The connection check failed.", CATEGORY_CONNECTIVITY, 1, AppsuiteFileStorageExceptionMessages.PING_FAILED),
+    PING_FAILED("The connection check failed.", CATEGORY_CONNECTIVITY, 1, OXShareFileStorageExceptionMessages.PING_FAILED),
+
+    MISSING_CAPABILITY("Missing capability for file storage %1$s", Category.CATEGORY_PERMISSION_DENIED, 2, OXShareFileStorageExceptionMessages.MISSING_CAP_MSG)
 
     ;
 
     /**
      * The prefix constant.
      */
-    public static final String PREFIX = "FILE_STORAGE_APPSUITE";
+    public static final String PREFIX = "FILE_STORAGE_OX_SHARE";
 
     private final Category category;
 
@@ -80,11 +82,11 @@ public enum AppsuiteFileStorageExceptionCodes implements DisplayableOXExceptionC
 
     private final String displayMessage;
 
-    private AppsuiteFileStorageExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private OXShareFileStorageExceptionCodes(final String message, final Category category, final int detailNumber) {
         this(message, category, detailNumber, null);
     }
 
-    private AppsuiteFileStorageExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
+    private OXShareFileStorageExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
