@@ -6,9 +6,9 @@ tags: Authentication, Session, Security
 
 # Introduction
 
-With version 7.10.4 App Suite introduces the ability to create passwords specific to client applications, such as Mobile Mail, CalDAV, and others. These passwords will have permissions limited to the requirements of the application. For example, passwords created for CalDAV would not have the ability to list a users inbox.
+With version 7.10.4 App Suite introduces the ability to create passwords specific to client applications, such as Mobile Mail, CalDAV, and others. These passwords will have permissions limited to the requirements of the application. For example, passwords created for CalDAV would not have the ability to list a user's inbox.
 
-The Application Password implementation if fully customizable, displaying only the applications that the installer has chosen to support, as well as the custom list of permissions for each type of application.
+The Application Password implementation is fully customizable, displaying only the applications that the installer has chosen to support, as well as the custom list of permissions for each type of application.
 
 # Limitations
 
@@ -23,17 +23,17 @@ The core functionality of the application password service is included in the `o
 
 ## Application Types
 
-The first thing to define is the list of available applications, each identified with a specific *type*, e.g. ``caldav``, ``carddav``, ``mail``, ``eas``, etc. The property ``com.openexchange.com.openexchange.authentication.application.appTypes`` defines these applications, as a comma separated list of available types. The used identifier types here are not displayed to the user. Example:
+The first thing to define is the list of available applications, each identified with a specific *type*, e.g. ``caldav``, ``carddav``, ``mail``, ``eas``, etc. The property ``com.openexchange.authentication.application.appTypes`` defines these applications, as a comma separated list of available types. The used identifiers types here are not displayed to the user. Example:
 
 ```
-com.openexchange.authentication.application.appTypes=mail,caldav,carddav,drive,dav,eas
+com.openexchange.authentication.application.appTypes=mail,caldav,carddav,drive,webdav,eas
 ```
 
 The property can be defined using the config-cascade. Users must have at least one application defined, otherwise the service will be disabled for that user.
 
 ## Application Details
 
-The details and restrictions of the applications are then defined in a ``yml`` file. There is a sample yml shipped with the installation (default in /usr/share/doc/open-xchange-core/examples), `app-password-apps-template.yml` This file should contain the specifics of the various applications and should be placed in the /opt/open-xchange/etc directory. These include the translatable display title, the permission scopes, and the order in which they are offered to the User. Example:
+The details and restrictions of the applications are then defined in a ``yml`` file. There is a sample yml shipped with the installation (default in /usr/share/doc/open-xchange-core-$VERSION/examples), `app-password-apps-template.yml` This file should contain the specifics of the various applications and needs to be placed in the /opt/open-xchange/etc directory as `app-password-apps.yml`. This includes the translatable display title, the permission scopes, and the order in which they are offered to the User. Example:
 
 ```
 drive:
@@ -70,7 +70,7 @@ Here, *read_webdav* / *write_webdav* are used to grant access to the user's Driv
 Application passwords should really not be used to log into the App Suite UI, as there will be failures due to the permission restrictions. A blacklist defines the client identifiers where application passwords should not be used.
 
 ```
-com.openexchange.com.openexchange.authentication.application.blacklistedClients=open-xchange-appsuite,com.openexchange.ajax.framework.AJAXClient
+com.openexchange.authentication.application.blacklistedClients=open-xchange-appsuite,com.openexchange.ajax.framework.AJAXClient
 ```
 
 ## Enabling
@@ -78,10 +78,10 @@ com.openexchange.com.openexchange.authentication.application.blacklistedClients=
 Application passwords must be enabled globally by setting
 
 ```
-com.openexchange.com.openexchange.authentication.application.enabled=true
+com.openexchange.authentication.application.enabled=true
 ```
 
-Enabling/disabling at the user or context level is done by configuring the above `com.openexchange.com.openexchange.authentication.application.appTypes` setting.  Users must have at least one application defined.  If this is empty, then the service will not be enabled for that user.
+Enabling/disabling at the user or context level is done by configuring the above `com.openexchange.authentication.application.appTypes` setting.  Users must have at least one application defined.  If this is empty, then the service will not be enabled for that user.
 
 
 # Application Password Storage
