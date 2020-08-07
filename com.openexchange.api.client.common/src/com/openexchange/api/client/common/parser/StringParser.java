@@ -47,34 +47,22 @@
  *
  */
 
-package com.openexchange.api.client;
+package com.openexchange.api.client.common.parser;
+
+import org.apache.http.protocol.HttpContext;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link HttpMethods} - Used and supported HTTP method of the {@link ApiClient}
+ * {@link StringParser} - For responses that contain only one string in the <code>data</code> field
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public enum HttpMethods {
+public class StringParser extends AbstractHttpResponseParser<String> {
 
-    /** The <code>DELETE</code> HTTP methods */
-    DELETE,
-
-    /** The <code>GET</code> HTTP methods */
-    GET,
-
-    /** The <code>PATCH</code> HTTP methods */
-    PATCH,
-
-    /** The <code>PUT</code> HTTP methods */
-    PUT,
-
-    /** The <code>POST</code> HTTP methods */
-    POST,
-
-    /** The <code>OPTIONS</code> HTTP methods */
-    OPTIONS
-
-    ;
+    @Override
+    public String parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException {
+        return commonResponse.getData(String.class);
+    }
 
 }

@@ -52,8 +52,6 @@ package com.openexchange.api.client.common.calls.infostore;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
@@ -63,6 +61,7 @@ import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractPutCall;
 import com.openexchange.api.client.common.calls.infostore.mapping.DefaultFileMapper;
+import com.openexchange.api.client.common.parser.StringParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File.Field;
@@ -138,13 +137,7 @@ public class PutCopyCall extends AbstractPutCall<String> {
 
     @Override
     public HttpResponseParser<String> getParser() throws OXException {
-        return new HttpResponseParser<String>() {
-
-            @Override
-            public String parse(HttpResponse response, HttpContext httpContext) throws OXException {
-                return ApiClientUtils.parseDataString(response);
-            }
-        };
+        return new StringParser();
     }
 
     @Override

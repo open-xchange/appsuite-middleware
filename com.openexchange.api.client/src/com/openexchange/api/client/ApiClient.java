@@ -63,16 +63,16 @@ import com.openexchange.exception.OXException;
 public interface ApiClient {
 
     /**
-     * Get the local context identifier the client belongs to
+     * Get the context identifier that belongs to the local server
      *
-     * @return The context ID
+     * @return The local context ID
      */
     int getContextId();
 
     /**
-     * Get the local user identifier the access belongs to
+     * Get the user identifier that belongs to the local server
      *
-     * @return The user ID
+     * @return The local user ID
      */
     int getUserId();
 
@@ -101,12 +101,12 @@ public interface ApiClient {
     /**
      * Performs a logout on the remote system.
      * <p>
-     * Any error during the logout process will be logged
+     * <b>Note:</b> Any error during the logout process will be logged
      */
     void logout();
 
     /**
-     * Gets a value indicating whether this client is closed and or if it can serve requests.
+     * Gets a value indicating whether this client is closed, meaning if it can serve requests or not.
      * <p>
      * If the client is closed, any call of {@link #execute(HttpRequestBase, HttpResponseParser)} will fail
      * with an exception.
@@ -116,23 +116,23 @@ public interface ApiClient {
     boolean isClosed();
 
     /**
-     * Executes the given request and parses it to the desired object
+     * Executes the given call using the parser provided with it.
      *
-     * @param <T> The type of the return value
-     * @param request The request to execute
+     * @param <T> The type of the return value defined by the call's parser
+     * @param call The {@link ApiCall} to execute
      * @return The parsed object
-     * @throws OXException In case request can't be executed or parsing fails
+     * @throws OXException In case request can't be executed, parsing fails or client is closed
      */
-    <T> T execute(ApiCall<T> request) throws OXException;
+    <T> T execute(ApiCall<T> call) throws OXException;
 
     /**
      * Executes the given request and parses it to the desired object
      *
      * @param <T> The type of the return value
-     * @param request The request to execute. The request will be closed by this method.
-     * @param parser The parser for the response, nor null if no parsing should be done
-     * @return The parsed object
-     * @throws OXException In case request can't be executed or parsing fails
+     * @param request The request to execute. <b>Note:</b> The request will be <i>closed</i> by this method.
+     * @param parser The parser for the response or <code>null</code> if no parsing should be done
+     * @return The parsed object or <code>null</code> in case the parser was not set
+     * @throws OXException In case request can't be executed, parsing fails or client is closed
      */
     <T> T execute(HttpRequestBase request, HttpResponseParser<T> parser) throws OXException;
 }

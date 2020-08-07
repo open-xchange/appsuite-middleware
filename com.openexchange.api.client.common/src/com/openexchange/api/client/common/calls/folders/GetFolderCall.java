@@ -51,15 +51,11 @@ package com.openexchange.api.client.common.calls.folders;
 
 import java.util.Locale;
 import java.util.Map;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
+import com.openexchange.api.client.common.parser.JsonObjectParser;
 import com.openexchange.exception.OXException;
 
 /**
@@ -123,18 +119,6 @@ public class GetFolderCall extends AbstractGetCall<RemoteFolder> {
 
     @Override
     public HttpResponseParser<RemoteFolder> getParser() throws OXException {
-        return new HttpResponseParser<RemoteFolder>() {
-
-            @Override
-            public RemoteFolder parse(HttpResponse response, HttpContext httpContext) throws OXException {
-                try {
-                    JSONObject json = ApiClientUtils.parseDataObject(response);
-                    RemoteFolderMapper mapper = new RemoteFolderMapper();
-                    return mapper.deserialize(json, mapper.getMappedFields());
-                } catch (JSONException e) {
-                    throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-                }
-            }
-        };
+        return new JsonObjectParser<>(new RemoteFolderMapper());
     }
 }

@@ -53,7 +53,6 @@ import java.util.Map;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link LogoutCall}
@@ -85,7 +84,10 @@ public class LogoutCall extends AbstractGetCall<Void> {
     protected void fillParameters(Map<String, String> parameters) {}
 
     @Override
-    public HttpResponseParser<Void> getParser() throws OXException {
+    public HttpResponseParser<Void> getParser() {
+        /*
+         * no-op. Don't check anything here
+         */
         return null;
     }
 }

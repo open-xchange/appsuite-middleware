@@ -49,6 +49,8 @@
 
 package com.openexchange.api.client.common;
 
+import org.apache.http.entity.ContentType;
+
 /**
  * {@link ApiClientConstants}
  *
@@ -95,5 +97,8 @@ public class ApiClientConstants {
 
     /** Static string for {@value #TARGET} */
     public final static String TARGET = "target";
+
+    /** The content type for "text/javascript" */
+    public static final ContentType TEXT_JAVA_SCRIPT = ContentType.create("text/javascript");
 
 }

@@ -52,7 +52,11 @@ package com.openexchange.api.client;
 import com.openexchange.annotation.Nullable;
 
 /**
- * {@link LoginInformation}
+ * {@link LoginInformation} - Information that are obtained by logging in into a remote OX server.
+ * <p>
+ * <b>Note:</b> All data that can be obtained by this class comes from the remote server. Thus all
+ * identifier are from the remote server and do not belong to any context, user or share in this
+ * local server.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5

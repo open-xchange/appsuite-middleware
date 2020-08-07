@@ -60,11 +60,11 @@ import static com.openexchange.api.client.common.ApiClientConstants.SHARE;
 import static com.openexchange.api.client.common.ApiClientConstants.STAY_SIGNED_IN;
 import static com.openexchange.api.client.common.ApiClientConstants.TARGET;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.http.HttpEntity;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.annotation.Nullable;
-import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -90,15 +90,15 @@ public class AnonymousLoginCall extends AbstractLoginCall {
      * @param credentials The credentials
      * @param share The token of the share to access
      * @param target The path to a specific share target
-     * @throws OXException In case parameters are missing
+     * @throws NullPointerException In case parameters are missing
      */
-    public AnonymousLoginCall(ServiceLookup services, Credentials credentials, String share, String target) throws OXException {
+    public AnonymousLoginCall(ServiceLookup services, Credentials credentials, String share, String target) throws NullPointerException {
         super(credentials);
         this.services = services;
 
-        checkParameters(credentials.getPassword(), share, target);
-        this.share = share;
-        this.target = target;
+        Objects.requireNonNull(credentials.getPassword());
+        this.share = Objects.requireNonNull(share);
+        this.target = Objects.requireNonNull(target);
     }
 
     @Override
@@ -114,36 +114,32 @@ public class AnonymousLoginCall extends AbstractLoginCall {
 
     @Override
     @Nullable
-    public HttpEntity getBody() throws OXException {
+    public HttpEntity getBody() throws OXException, JSONException {
         /*
          * Build body
          */
         JSONObject json = new JSONObject();
-        try {
-            json.put(ACTION, ANONYMOUS);
-            json.put(NAME, null == credentials.getLogin() ? "" : credentials.getLogin());
-            json.put(PASSWORD, credentials.getPassword());
-            json.put(CLIENT, CLIENT_VALUE);
-            json.put("locale", "en_US");
-            json.put("timeout", 10000);
-            json.put(RAMP_UP, false);
-            json.put(SHARE, share);
-            json.put(TARGET, target);
-            json.put(STAY_SIGNED_IN, true);
-            addVersion(json);
+        json.put(ACTION, ANONYMOUS);
+        json.put(NAME, null == credentials.getLogin() ? "" : credentials.getLogin());
+        json.put(PASSWORD, credentials.getPassword());
+        json.put(CLIENT, CLIENT_VALUE);
+        json.put("locale", "en_US");
+        json.put("timeout", 10000);
+        json.put(RAMP_UP, false);
+        json.put(SHARE, share);
+        json.put(TARGET, target);
+        json.put(STAY_SIGNED_IN, true);
+        addVersion(json);
 
-            return toHttpEntity(json);
-        } catch (JSONException e) {
-            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
+        return toHttpEntity(json);
     }
 
     private void addVersion(JSONObject json) throws JSONException {
         VersionService versionService = services.getOptionalService(VersionService.class);
         if (null != versionService) {
             String version = versionService.getVersionString();
-            version.replace("Rev", "");
-            json.put("version", versionService.getVersionString());
+            version = version.replace("Rev", "");
+            json.put("version", version);
         }
     }
 

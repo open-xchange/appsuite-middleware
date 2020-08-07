@@ -50,12 +50,10 @@
 package com.openexchange.api.client.common.calls.infostore;
 
 import java.util.Map;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.HttpResponseParser;
-import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
+import com.openexchange.api.client.common.parser.StringParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -106,13 +104,7 @@ public class MoveCall extends AbstractGetCall<String> {
 
     @Override
     public HttpResponseParser<String> getParser() throws OXException {
-        return new HttpResponseParser<String>() {
-
-            @Override
-            public String parse(HttpResponse response, HttpContext httpContext) throws OXException {
-                return ApiClientUtils.parseDataString(response);
-            }
-        };
+        return new StringParser();
     }
 
     @Override

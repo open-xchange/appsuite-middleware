@@ -47,34 +47,35 @@
  *
  */
 
-package com.openexchange.api.client;
+package com.openexchange.api.client.common.parser;
+
+import java.io.IOException;
+import java.io.InputStream;
+import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
+import com.openexchange.api.client.ApiClientExceptions;
+import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.common.Checks;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link HttpMethods} - Used and supported HTTP method of the {@link ApiClient}
+ * {@link InputStreamParser} - A parser that retrieves an input stream from the response
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public enum HttpMethods {
+public class InputStreamParser implements HttpResponseParser<InputStream> {
 
-    /** The <code>DELETE</code> HTTP methods */
-    DELETE,
-
-    /** The <code>GET</code> HTTP methods */
-    GET,
-
-    /** The <code>PATCH</code> HTTP methods */
-    PATCH,
-
-    /** The <code>PUT</code> HTTP methods */
-    PUT,
-
-    /** The <code>POST</code> HTTP methods */
-    POST,
-
-    /** The <code>OPTIONS</code> HTTP methods */
-    OPTIONS
-
-    ;
+    @Override
+    public InputStream parse(HttpResponse response, HttpContext httpContext) throws OXException {
+        Checks.checkStatusError(response);
+        try {
+            return response.getEntity().getContent();
+        } catch (UnsupportedOperationException e) {
+            throw ApiClientExceptions.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw ApiClientExceptions.IO_ERROR.create(e, e.getMessage());
+        }
+    }
 
 }

@@ -52,15 +52,11 @@ package com.openexchange.api.client.common.calls.folders;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
-import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
+import com.openexchange.api.client.common.parser.JsonArrayParser;
 import com.openexchange.exception.OXException;
 
 /**
@@ -121,18 +117,6 @@ public class ListFoldersCall extends AbstractGetCall<List<RemoteFolder>> {
 
     @Override
     public HttpResponseParser<List<RemoteFolder>> getParser() throws OXException {
-        return new HttpResponseParser<List<RemoteFolder>>() {
-
-            @Override
-            public List<RemoteFolder> parse(HttpResponse response, HttpContext httpContext) throws OXException {
-                try {
-                    JSONArray data = ApiClientUtils.parseDataArray(response);
-                    RemoteFolderMapper mapper = new RemoteFolderMapper();
-                    return mapper.deserialize(data, columns);
-                } catch (JSONException e) {
-                    throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-                }
-            }
-        };
+        return new JsonArrayParser<>(new RemoteFolderMapper(), columns);
     }
 }

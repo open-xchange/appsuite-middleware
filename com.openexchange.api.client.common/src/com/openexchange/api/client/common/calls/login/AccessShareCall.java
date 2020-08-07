@@ -49,10 +49,10 @@
 
 package com.openexchange.api.client.common.calls.login;
 
-import static com.openexchange.api.client.common.ApiClientUtils.checkSameOrigin;
 import static com.openexchange.api.client.common.ApiClientUtils.getHeaderValue;
 import static com.openexchange.api.client.common.ApiClientUtils.getSessionCookie;
 import static com.openexchange.api.client.common.ApiClientUtils.parseParameters;
+import static com.openexchange.api.client.common.Checks.checkSameOrigin;
 import static com.openexchange.rest.client.httpclient.util.HttpContextUtils.getCookieStore;
 import java.net.URL;
 import java.util.Map;
@@ -126,7 +126,7 @@ public class AccessShareCall extends AbstractGetCall<ShareLoginInformation> {
     }
 
     @Override
-    public HttpResponseParser<ShareLoginInformation> getParser() throws OXException {
+    public HttpResponseParser<ShareLoginInformation> getParser() {
         return new HttpResponseParser<ShareLoginInformation>() {
 
             @Override

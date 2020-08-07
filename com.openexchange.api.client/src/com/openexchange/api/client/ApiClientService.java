@@ -55,7 +55,7 @@ import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
- * {@link ApiClientService}
+ * {@link ApiClientService} - Service to obtain an {@link ApiClient}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
@@ -69,7 +69,7 @@ public interface ApiClientService {
      * @param session The user's session
      * @param loginLink The link to the login endpoint
      * @param credentials The optional credentials to access the share
-     * @return A client
+     * @return An {@link ApiClient}
      * @throws OXException In case an access can't be generated
      */
     ApiClient getApiClient(Session session, String loginLink, Optional<Credentials> credentials) throws OXException;
@@ -81,7 +81,7 @@ public interface ApiClientService {
      * @param userId The user identifier
      * @param loginLink The link to the login endpoint
      * @param credentials The optional credentials to access the share
-     * @return A client
+     * @return An {@link ApiClient}
      * @throws OXException In case an access can't be generated
      */
     ApiClient getApiClient(int contextId, int userId, String loginLink, Optional<Credentials> credentials) throws OXException;

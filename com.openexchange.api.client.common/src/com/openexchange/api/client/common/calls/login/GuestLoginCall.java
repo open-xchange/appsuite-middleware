@@ -57,11 +57,11 @@ import static com.openexchange.api.client.common.ApiClientConstants.SHARE;
 import static com.openexchange.api.client.common.ApiClientConstants.STAY_SIGNED_IN;
 import static com.openexchange.api.client.common.ApiClientConstants.TARGET;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.http.HttpEntity;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.annotation.Nullable;
-import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.api.client.common.ApiClientConstants;
 import com.openexchange.exception.OXException;
@@ -86,15 +86,14 @@ public class GuestLoginCall extends AbstractLoginCall {
      * @param optLoginName The optional login name the user has on the remote server as received by it
      * @param share The token of the share to access
      * @param target The path to a specific share target
-     * @throws OXException In case parameter is missing
+     * @throws NullPointerException In case parameter is missing
      */
-    public GuestLoginCall(Credentials credentials, String optLoginName, String share, String target) throws OXException {
+    public GuestLoginCall(Credentials credentials, String optLoginName, String share, String target) throws NullPointerException {
         super(credentials);
-        checkParameters(share, target);
 
         this.optLoginName = optLoginName;
-        this.share = share;
-        this.target = target;
+        this.share = Objects.requireNonNull(share);
+        this.target = Objects.requireNonNull(target);
     }
 
     @Override
@@ -112,22 +111,18 @@ public class GuestLoginCall extends AbstractLoginCall {
 
     @Override
     @Nullable
-    public HttpEntity getBody() throws OXException {
-        try {
-            JSONObject json = new JSONObject();
-            String login;
-            if (Strings.isNotEmpty(credentials.getLogin())) {
-                login = credentials.getLogin();
-            } else {
-                login = null == optLoginName ? "" : optLoginName;
-            }
-
-            json.put(LOGIN, login);
-            json.put(PASSWORD, null == credentials.getPassword() ? "" : credentials.getPassword());
-            return toHttpEntity(json);
-        } catch (JSONException e) {
-            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
+    public HttpEntity getBody() throws OXException, JSONException {
+        JSONObject json = new JSONObject();
+        String login;
+        if (Strings.isNotEmpty(credentials.getLogin())) {
+            login = credentials.getLogin();
+        } else {
+            login = null == optLoginName ? "" : optLoginName;
         }
+
+        json.put(LOGIN, login);
+        json.put(PASSWORD, null == credentials.getPassword() ? "" : credentials.getPassword());
+        return toHttpEntity(json);
     }
 
 }

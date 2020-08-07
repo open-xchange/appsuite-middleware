@@ -49,9 +49,7 @@
 
 package com.openexchange.api.client.common.calls.system;
 
-import static com.openexchange.api.client.common.ApiClientUtils.parseJSONObject;
 import java.util.Map;
-import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,6 +57,8 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
+import com.openexchange.api.client.common.parser.CommonApiResponse;
+import com.openexchange.api.client.common.parser.AbstractHttpResponseParser;
 import com.openexchange.exception.OXException;
 
 /**
@@ -85,13 +85,12 @@ public class WhoamiCall extends AbstractGetCall<WhoamiInformation> {
 
     @Override
     public HttpResponseParser<WhoamiInformation> getParser() throws OXException {
-        return new HttpResponseParser<WhoamiInformation>() {
+        return new AbstractHttpResponseParser<WhoamiInformation>() {
 
             @Override
-            public WhoamiInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
-                JSONObject responseObject = parseJSONObject(response);
+            public WhoamiInformation parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException {
                 try {
-                    JSONObject data = responseObject.getJSONObject("data");
+                    JSONObject data = commonResponse.getJSONObject();
                     String sessionId = data.getString("session");
                     String user = data.getString("user");
                     int userId = data.getInt("user_id");
@@ -104,5 +103,6 @@ public class WhoamiCall extends AbstractGetCall<WhoamiInformation> {
                 }
             }
         };
+
     }
 }

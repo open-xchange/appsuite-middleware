@@ -52,7 +52,7 @@ package com.openexchange.api.client;
 import com.openexchange.java.Strings;
 
 /**
- * {@link Credentials}
+ * {@link Credentials} - Credentials to use for a login on a remote OX server
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
