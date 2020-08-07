@@ -47,20 +47,72 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite;
+package com.openexchange.api.client.common.calls.find;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.List;
 
 /**
- * {@link FormStrings}
+ * {@link FindResponse}
  *
+ * @param <O> The type of the result objects
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class FormStrings implements LocalizableStrings {
+public class FindResponse<O> {
 
-    public static final String SHARE_LINK_LABEL = "OX AppSuite share link";
+    private final int found;
+    private final int start;
+    private final int size;
+    private final List<O> resultObjects;
 
-    public static final String PASSWORD = "OX AppSuite share link password";
+    /**
+     * Initializes a new {@link FindResponse}.
+     *
+     * @param found The number of found items
+     * @param start The start of the pagination
+     * @param size The page size
+     * @param resultObjects The result objects
+     */
+    public FindResponse(int found, int start, int size, List<O> resultObjects) {
+        this.found = found;
+        this.start = start;
+        this.size = size;
+        this.resultObjects = resultObjects;
+    }
 
+    /**
+     * Gets the number of found items
+     *
+     * @return The number of found items
+     */
+    public int getFound() {
+        return found;
+    }
+
+    /**
+     * Gets the start of the pagination
+     *
+     * @return The start of the pagination
+     */
+    public int getStart() {
+        return start;
+    }
+
+    /**
+     * Gets the size of the page
+     *
+     * @return The size of the page
+     */
+    public int getSize() {
+        return size;
+    }
+
+    /**
+     * Gets the result objects
+     *
+     * @return The list of result objects
+     */
+    public List<O> getResultObjects() {
+        return resultObjects;
+    }
 }

@@ -47,9 +47,10 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite;
+package com.openexchange.file.storage.oxshare;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import com.openexchange.exception.OXException;
@@ -61,30 +62,32 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.QuotaType;
 import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.session.Session;
 
 /**
- * {@link AppsuiteFolderAccess}
+ * {@link OXShareFolderAccess}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class AppsuiteFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess /* TODO-MW1380 check which marker interface to add here */ {
+public class OXShareFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess /* TODO-MW1380 check which marker interface to add here */ {
 
     private final Session session;
-    private final AppsuiteAccountAccess accountAccess;
+    private final OXShareAccountAccess accountAccess;
     private final FileStorageAccount account;
     private final ShareClient client;
 
     /**
-     * Initializes a new {@link AppsuiteFolderAccess}.
+     * Initializes a new {@link OXShareFolderAccess}.
      *
-     * @param accountAccess The {@link AppsuiteAccountAccess}
+     * @param accountAccess The {@link OXShareAccountAccess}
      * @param client The {@link ShareClient} for accessing the remote OX
      */
-    public AppsuiteFolderAccess(AppsuiteAccountAccess accountAccess, ShareClient client) {
+    public OXShareFolderAccess(OXShareAccountAccess accountAccess, ShareClient client) {
         this.accountAccess = Objects.requireNonNull(accountAccess, "accountAccess must not be null");
         this.client = Objects.requireNonNull(client, "client must not be null");
         this.session = accountAccess.getSession();
@@ -99,6 +102,44 @@ public class AppsuiteFolderAccess implements FileStorageFolderAccess, UserCreate
      */
     protected static boolean isRoot(String folderId) {
         return FileStorageFolder.ROOT_FULLNAME.equals(folderId);
+    }
+
+    /**
+     * Internal method to extract the storage quota from the given remote quota data.
+     *
+     * @param accountQuota The {@link AccountQuota} fetched from the remote
+     * @return The {@link Quota} of type {@link Quota.Type.STORAGE} for the given account quota data
+     */
+    private Quota getStorageQuota(AccountQuota quota) {
+        com.openexchange.quota.Quota storageQuota = quota.getQuota(QuotaType.SIZE);
+        if (storageQuota != null) {
+            return new Quota(storageQuota.getLimit(), storageQuota.getUsage(), Quota.Type.STORAGE);
+        }
+        return Quota.Type.STORAGE.getUnlimited();
+    }
+
+    /**
+     * Internal method to extract the file quota from the given remote quota data.
+     *
+     * @param accountQuota The {@link AccountQuota} fetched from the remote
+     * @return The {@link Quota} of type {@link Quota.Type.File} for the given account quota data
+     */
+    private Quota getFileQuota(AccountQuota accountQuota) {
+        com.openexchange.quota.Quota fileQuota = accountQuota.getQuota(QuotaType.AMOUNT);
+        if (fileQuota != null) {
+            return new Quota(fileQuota.getLimit(), fileQuota.getUsage(), Quota.Type.FILE);
+        }
+        return Quota.Type.FILE.getUnlimited();
+    }
+
+    /**
+     * Internal method to get the remote infostore {@link AccountQuota}
+     *
+     * @return The {@link AccountQuota} for module "filestorage" and account "infostore"
+     * @throws OXException
+     */
+    private AccountQuota getInfostoreAccountQuota() throws OXException {
+        return client.getInfostoreQuota();
     }
 
     @Override
@@ -138,7 +179,7 @@ public class AppsuiteFolderAccess implements FileStorageFolderAccess, UserCreate
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        AppsuiteFolder rootFolder = new AppsuiteFolder(session.getUserId());
+        OXShareFolder rootFolder = new OXShareFolder(session.getUserId());
         //TODO: created by get from remote
         rootFolder.setRootFolder(true);
         rootFolder.setHoldsFiles(true);
@@ -150,44 +191,37 @@ public class AppsuiteFolderAccess implements FileStorageFolderAccess, UserCreate
 
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
-        // TODO IMPLEMENT
-        return "";
+        return ((OXShareFileAccess) accountAccess.getFileAccess()).createFolder(toCreate, true);
     }
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
-        // TODO IMPLEMENT
-        return "";
+        return client.updateFolder(identifier, toUpdate, FileStorageFileAccess.DISTANT_FUTURE, true);
     }
 
     @Override
     public String moveFolder(String folderId, String newParentId) throws OXException {
-        // TODO IMPLEMENT
-        return "";
+        return moveFolder(folderId, newParentId, null);
     }
 
     @Override
     public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
-        // TODO IMPLEMENT
-        return "";
+        return ((OXShareFileAccess) accountAccess.getFileAccess()).moveFolder(folderId, newParentId, newName, true);
     }
 
     @Override
     public String renameFolder(String folderId, String newName) throws OXException {
-        // TODO IMPLEMENT
-        return "";
+        return ((OXShareFileAccess) accountAccess.getFileAccess()).moveFolder(folderId, null, newName, true);
     }
 
     @Override
     public String deleteFolder(String folderId) throws OXException {
-        // TODO IMPLEMENT
-        return "";
+        return deleteFolder(folderId, false);
     }
 
     @Override
     public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
-        // TODO IMPLEMENT
-        return "";
+        return client.deleteFolder(folderId, hardDelete);
     }
 
     @Override
@@ -197,7 +231,7 @@ public class AppsuiteFolderAccess implements FileStorageFolderAccess, UserCreate
 
     @Override
     public void clearFolder(String folderId, boolean hardDelete) throws OXException {
-        ((AppsuiteFileAccess)accountAccess.getFileAccess()).removeDocument(folderId, FileStorageFileAccess.DISTANT_FUTURE, hardDelete);
+        ((OXShareFileAccess) accountAccess.getFileAccess()).removeDocument(folderId, FileStorageFileAccess.DISTANT_FUTURE, hardDelete);
     }
 
     @Override
@@ -206,7 +240,7 @@ public class AppsuiteFolderAccess implements FileStorageFolderAccess, UserCreate
         FileStorageFolder folder = getFolder(folderId);
         folders.add(folder);
         while (false == isRoot(folder.getId())) {
-            folder = getFolder(folder.getParentId());
+            folder = isRoot(folder.getParentId()) ? getRootFolder() : getFolder(folder.getParentId());
             folders.add(folder);
         }
         return folders.toArray(new FileStorageFolder[folders.size()]);
@@ -214,22 +248,36 @@ public class AppsuiteFolderAccess implements FileStorageFolderAccess, UserCreate
 
     @Override
     public Quota getStorageQuota(String folderId) throws OXException {
-        // TODO: IMPLEMENT
-        return Quota.Type.STORAGE.getUnlimited();
+        return getStorageQuota(getInfostoreAccountQuota());
     }
 
     @Override
     public Quota getFileQuota(String folderId) throws OXException {
-        // TODO: IMPLEMENT
-        return Quota.Type.FILE.getUnlimited();
+        return getFileQuota(getInfostoreAccountQuota());
     }
 
     @Override
     public Quota[] getQuotas(String folder, Type[] types) throws OXException {
-        // TODO: IMPLEMENT
-        List<Quota> ret = new ArrayList<Quota>(types.length);
-        for (Type t : types) {
-            ret.add(t.getUnlimited());
+        if (null == types) {
+            return null;
+        }
+        final List<Quota> ret = new ArrayList<Quota>(types.length);
+        final List<Type> quotaTypes = Arrays.asList(types);
+        if (quotaTypes.contains(Type.FILE) || quotaTypes.contains(Type.STORAGE)) {
+            //Fetch quota information from remote
+            final AccountQuota accountQuota = getInfostoreAccountQuota();
+            for (Type t : quotaTypes) {
+                switch (t) {
+                    case FILE:
+                        ret.add(getFileQuota(accountQuota));
+                        break;
+                    case STORAGE:
+                        ret.add(getStorageQuota(accountQuota));
+                        break;
+                    default:
+                        throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Quota " + t);
+                }
+            }
         }
         return ret.toArray(new Quota[ret.size()]);
     }

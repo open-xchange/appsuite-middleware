@@ -65,6 +65,12 @@ import com.openexchange.session.Session;
  */
 public abstract class MediaStatusMapping<O> extends DefaultJsonMapping<MediaStatus, O> {
 
+    /**
+     * Initializes a new {@link MediaStatusMapping}.
+     * 
+     * @param ajaxName The name of object ID in the JSON response
+     * @param columnID The The column ID in the request
+     */
     public MediaStatusMapping(String ajaxName, Integer columnID) {
         super(ajaxName, columnID);
     }

@@ -47,23 +47,72 @@
  *
  */
 
-package com.openexchange.api.client.common.calls;
+package com.openexchange.api.client.common.calls.infostore;
 
-import com.openexchange.annotation.NonNull;
-import com.openexchange.api.client.HttpMethods;
+import java.util.List;
+import com.openexchange.file.storage.DefaultFile;
 
 /**
- * {@link AbstractPostCall} - Common abstract class for methods build on {@link HttpMethods#POST}
+ * {@link UpdatesResponse} - The response from an "updates" call.
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @param <T> The class of the response
  * @since v7.10.5
  */
-public abstract class AbstractPostCall<T> extends AbstractApiCall<T> {
+public class UpdatesResponse {
 
-    @Override
-    @NonNull
-    public HttpMethods getHttpMehtod() {
-        return HttpMethods.POST;
+    private final List<DefaultFile> newFiles;
+    private final List<DefaultFile> modifiedFiles;
+    private final List<DefaultFile> deletedFiles;
+    private final long sequenceNumber;
+
+    /**
+     * Initializes a new {@link UpdatesResponse}.
+     *
+     * @param newFiles A list of new files
+     * @param modifiedFiles A list of modified files
+     * @param deletedFiles A list of deleted files
+     * @param sequenceNumber The sequence number of the item
+     */
+    public UpdatesResponse(List<DefaultFile> newFiles, List<DefaultFile> modifiedFiles, List<DefaultFile> deletedFiles, long sequenceNumber) {
+        this.newFiles = newFiles;
+        this.modifiedFiles = modifiedFiles;
+        this.deletedFiles = deletedFiles;
+        this.sequenceNumber = sequenceNumber;
+    }
+
+    /**
+     * Gets the newFiles
+     *
+     * @return The newFiles
+     */
+    public List<DefaultFile> getNewFiles() {
+        return newFiles;
+    }
+
+    /**
+     * Gets the modifiedFiles
+     *
+     * @return The modifiedFiles
+     */
+    public List<DefaultFile> getModifiedFiles() {
+        return modifiedFiles;
+    }
+
+    /**
+     * Gets the deletedFiles
+     *
+     * @return The deletedFiles
+     */
+    public List<DefaultFile> getDeletedFiles() {
+        return deletedFiles;
+    }
+
+    /**
+     * Gets the sequenceNumber
+     *
+     * @return The sequenceNumber
+     */
+    public long getSequenceNumber() {
+        return sequenceNumber;
     }
 }

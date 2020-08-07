@@ -66,11 +66,11 @@ public class WhoamiInformation {
     /**
      * Initializes a new {@link WhoamiInformation}.
      *
-     * @param sessionId
-     * @param user
-     * @param userId
-     * @param contextId
-     * @param locale
+     * @param sessionId The session ID
+     * @param user The user
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param locale The locale
      */
     public WhoamiInformation(String sessionId, String user, int userId, int contextId, String locale) {
         super();

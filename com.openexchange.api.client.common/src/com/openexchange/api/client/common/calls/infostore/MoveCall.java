@@ -54,8 +54,6 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
 import com.openexchange.api.client.common.parser.StringParser;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 
 /**
  * {@link MoveCall}
@@ -103,7 +101,7 @@ public class MoveCall extends AbstractGetCall<String> {
     }
 
     @Override
-    public HttpResponseParser<String> getParser() throws OXException {
+    public HttpResponseParser<String> getParser() {
         return new StringParser();
     }
 
@@ -112,9 +110,7 @@ public class MoveCall extends AbstractGetCall<String> {
         parameters.put("id", id);
         parameters.put("folder", folder);
         parameters.put("timestamp", String.valueOf(timestamp));
-        if (Strings.isNotEmpty(pushToken)) {
-            parameters.put("pushToken", pushToken);
-        }
+        putIfNotEmpty(parameters, "pushToken", pushToken);
     }
 
     @Override

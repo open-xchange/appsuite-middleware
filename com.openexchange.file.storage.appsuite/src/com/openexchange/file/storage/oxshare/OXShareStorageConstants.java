@@ -47,23 +47,35 @@
  *
  */
 
-package com.openexchange.api.client.common.calls;
+package com.openexchange.file.storage.oxshare;
 
-import com.openexchange.annotation.NonNull;
-import com.openexchange.api.client.HttpMethods;
+import com.openexchange.file.storage.FileStorageConstants;
 
 /**
- * {@link AbstractPostCall} - Common abstract class for methods build on {@link HttpMethods#POST}
+ * {@link OXShareStorageConstants}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @param <T> The class of the response
  * @since v7.10.5
  */
-public abstract class AbstractPostCall<T> extends AbstractApiCall<T> {
+public final class OXShareStorageConstants implements FileStorageConstants {
 
-    @Override
-    @NonNull
-    public HttpMethods getHttpMehtod() {
-        return HttpMethods.POST;
-    }
+    /**
+     * The unique ID of the OX share file storage implementation
+     */
+    public static final String ID = "oxshare";
+
+    /**
+     * The display name of the the OX share file storage implementation
+     */
+    public static final String DISPLAY_NAME = "OX AppSuite Share";
+
+    /**
+     * The share link to the other OX
+     */
+    public static final String SHARE_URL = "url";
+
+    /**
+     * The password to the user's share if any
+     */
+    public static final String PASSWORD = "password";
 }

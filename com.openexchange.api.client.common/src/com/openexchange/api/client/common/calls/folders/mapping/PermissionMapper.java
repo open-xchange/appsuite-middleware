@@ -47,23 +47,55 @@
  *
  */
 
-package com.openexchange.api.client.common.calls;
+package com.openexchange.api.client.common.calls.folders.mapping;
 
-import com.openexchange.annotation.NonNull;
-import com.openexchange.api.client.HttpMethods;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
+import com.openexchange.groupware.tools.mappings.json.ListItemMapping;
 
 /**
- * {@link AbstractPostCall} - Common abstract class for methods build on {@link HttpMethods#POST}
+ * {@link PermissionMapper}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @param <T> The class of the response
+ * @param <O> The class of list element
  * @since v7.10.5
  */
-public abstract class AbstractPostCall<T> extends AbstractApiCall<T> {
+public abstract class PermissionMapper<O> extends ListItemMapping<Permission, O, JSONObject> {
+
+    /**
+     * Initializes a new {@link PermissionMapper}.
+     *
+     * @param ajaxName The mapped ajax name
+     * @param columnID the mapped column identifier
+     */
+    public PermissionMapper(String ajaxName, Integer columnID) {
+        super(ajaxName, columnID);
+    }
 
     @Override
-    @NonNull
-    public HttpMethods getHttpMehtod() {
-        return HttpMethods.POST;
+    protected Permission deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
+        JSONObject jsonObject = array.getJSONObject(index);
+        return deserialize(jsonObject, timeZone);
+    }
+
+    @Override
+    public Permission deserialize(JSONObject from, TimeZone timeZone) throws JSONException {
+        //@formatter:off
+        return Permissions.createPermission(
+            from.has("entity") ? from.getInt("entity") : 0,
+            from.has("group") && from.getBoolean("group"),
+            from.has("bits") ? from.getInt("bits") : 0);
+        //@formatter:on
+    }
+
+    @Override
+    public JSONObject serialize(Permission from, TimeZone timeZone) throws JSONException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

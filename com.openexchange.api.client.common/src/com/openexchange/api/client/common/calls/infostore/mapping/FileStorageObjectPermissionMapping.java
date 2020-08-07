@@ -69,6 +69,7 @@ import com.openexchange.share.recipient.ShareRecipient;
  * {@link FileStorageObjectPermissionMapping}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @param <O> Thy type of the list elements
  * @since v7.10.5
  */
 public abstract class FileStorageObjectPermissionMapping<O> extends ListItemMapping<FileStorageObjectPermission, O, JSONObject> {

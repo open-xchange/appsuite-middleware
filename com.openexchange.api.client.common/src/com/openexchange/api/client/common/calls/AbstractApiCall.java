@@ -57,17 +57,16 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.ApiCall;
-import com.openexchange.api.client.ApiClientExceptions;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 
 /**
- * {@link AbstractApiCall}
+ * {@link AbstractApiCall} - Common abstract class for {@link ApiCall}s
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -77,6 +76,21 @@ import com.openexchange.java.Strings;
 public abstract class AbstractApiCall<T> implements ApiCall<T> {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractApiCall.class);
+
+    /**
+     * The sort order
+     */
+    public enum SortOrder {
+        /**
+         * Sort in ascending order
+         */
+        ASC,
+
+        /**
+         * Sort in descending order
+         */
+        DESC
+    }
 
     /**
      * Initializes a new {@link AbstractApiCall}.
@@ -110,27 +124,46 @@ public abstract class AbstractApiCall<T> implements ApiCall<T> {
      */
 
     /**
-     * Checks that the given objects are not <code>null</code>
-     *
-     * @param objects The objects to check
-     * @throws OXException {@link ApiClientExceptions#MISSING_PARAMETER} in case a object is missing
-     */
-    protected void checkParameters(Object... objects) throws OXException {
-        for (Object object : objects) {
-            if (null == object) {
-                throw ApiClientExceptions.MISSING_PARAMETER.create("Missing parameter for login request");
-            }
-        }
-    }
-
-    /**
      * Transforms a {@link JSONObject} into an {@link HttpEntity}
      *
      * @param json The JSON to transform
      * @return The {@link HttpEntity}
      */
-    protected HttpEntity toHttpEntity(JSONObject json) {
+    protected HttpEntity toHttpEntity(JSONValue json) {
         return new InputStreamEntity(new JSONInputStream(json, Charsets.UTF_8_NAME), -1L, ContentType.APPLICATION_JSON);
+    }
+
+    /**
+     * Puts the given value into the map if it is not <code>null</code>.
+     *
+     * @param parameters The parameters to set the value in
+     * @param key The key to set
+     * @param object The value to set
+     * @return <code>true</code> if the value has been set, false otherwise
+     */
+    protected boolean putIfPresent(Map<String, String> parameters, String key, Object object) {
+        if (null != object) {
+            parameters.put(key, String.valueOf(object));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Puts the given {@link String} value into the map if it is not the String <code>"null"</code>
+     * and is not empty as per {@link Strings#isNotEmpty(String)}.
+     *
+     * @param parameters The parameters to set the value in
+     * @param key The key to set
+     * @param object The value to set
+     * @return <code>true</code> if the value has been set, false otherwise
+     */
+    protected boolean putIfNotEmpty(Map<String, String> parameters, String key, String value) {
+        if (Strings.isNotEmpty(value) && false == "null".equals(value)) {
+            parameters.put(key, value);
+            return true;
+        }
+        return false;
     }
 
 }

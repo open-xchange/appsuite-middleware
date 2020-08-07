@@ -56,7 +56,6 @@ import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
 import com.openexchange.api.client.common.parser.JsonObjectParser;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link GetFolderCall}
@@ -71,6 +70,12 @@ public class GetFolderCall extends AbstractGetCall<RemoteFolder> {
     private final String[] allowedModules;
     private final Locale language;
 
+    /**
+     * 
+     * Initializes a new {@link GetFolderCall}.
+     * 
+     * @param id The identifier of the folder to get
+     */
     public GetFolderCall(String id) {
         this(id, null, null, null);
     }
@@ -84,7 +89,6 @@ public class GetFolderCall extends AbstractGetCall<RemoteFolder> {
      * @param language the locale to use
      */
     public GetFolderCall(String id, String tree, String[] allowedModules, Locale language) {
-        super();
         this.id = id;
         this.tree = tree;
         this.allowedModules = allowedModules;
@@ -100,16 +104,11 @@ public class GetFolderCall extends AbstractGetCall<RemoteFolder> {
     @Override
     protected void fillParameters(Map<String, String> parameters) {
         parameters.put("id", id);
-        if (tree != null) {
-            parameters.put("tree", tree);
-        }
-        if (allowedModules != null) {
-            parameters.put("allowed_modules", ApiClientUtils.toCommaString(allowedModules));
-        }
+        putIfPresent(parameters, "tree", tree);
+        putIfPresent(parameters, "allowed_modules", ApiClientUtils.toCommaString(allowedModules));
         if (language != null) {
-            parameters.put("language", language.toLanguageTag());
+            putIfNotEmpty(parameters, "language", language.toLanguageTag());
         }
-
     }
 
     @Override
@@ -118,7 +117,7 @@ public class GetFolderCall extends AbstractGetCall<RemoteFolder> {
     }
 
     @Override
-    public HttpResponseParser<RemoteFolder> getParser() throws OXException {
+    public HttpResponseParser<RemoteFolder> getParser() {
         return new JsonObjectParser<>(new RemoteFolderMapper());
     }
 }

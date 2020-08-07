@@ -55,7 +55,6 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
 import com.openexchange.api.client.common.parser.InputStreamParser;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link DocumentCall}
@@ -103,9 +102,7 @@ public class DocumentCall extends AbstractGetCall<InputStream> {
     protected void fillParameters(Map<String, String> parameters) {
         parameters.put("id", id);
         parameters.put("folder", folderId);
-        if (version != null) {
-            parameters.put("version", version);
-        }
+        putIfPresent(parameters, "version", version);
     }
 
     @Override
@@ -114,7 +111,7 @@ public class DocumentCall extends AbstractGetCall<InputStream> {
     }
 
     @Override
-    public HttpResponseParser<InputStream> getParser() throws OXException {
+    public HttpResponseParser<InputStream> getParser() {
         return new InputStreamParser();
     }
 }

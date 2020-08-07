@@ -61,10 +61,23 @@ public class RemoteFolder extends AbstractFolder {
 
     private static final long serialVersionUID = -5400694241155511852L;
 
-    /**
-     * The RemoteFolder.java.
-     */
+    protected String module;
     protected boolean global;
+
+    /**
+     * Initializes a new {@link RemoteFolder}.
+     *
+     */
+    public RemoteFolder() {}
+
+    /**
+     * Initializes a new {@link RemoteFolder}.
+     *
+     * @param module The module of the folder
+     */
+    public RemoteFolder(String module) {
+        this.module = module;
+    }
 
     @Override
     public boolean isGlobalID() {
@@ -87,5 +100,23 @@ public class RemoteFolder extends AbstractFolder {
      */
     public void setGlobal(boolean global) {
         this.global = global;
+    }
+
+    /**
+     * Gets the module
+     *
+     * @return The module
+     */
+    public String getModule() {
+        return module;
+    }
+
+    /**
+     * Sets the module
+     *
+     * @param module the module
+     */
+    public void setModule(String module) {
+        this.module = module;
     }
 }

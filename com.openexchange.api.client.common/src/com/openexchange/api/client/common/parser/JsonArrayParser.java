@@ -54,6 +54,7 @@ import org.apache.http.protocol.HttpContext;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.api.client.ApiClientExceptions;
+import com.openexchange.api.client.common.ApiClientConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 
@@ -88,7 +89,7 @@ public class JsonArrayParser<T, E extends Enum<E>> extends AbstractHttpResponseP
             JSONArray jsonArray = commonResponse.getJSONArray();
             return mapper.deserialize(jsonArray, fields);
         }
-        throw ApiClientExceptions.JSON_ERROR.create("Not an JSON array");
+        throw ApiClientExceptions.JSON_ERROR.create(ApiClientConstants.NOT_JSON_ARRAY_MSG);
     }
 
 }

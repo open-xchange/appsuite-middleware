@@ -47,18 +47,60 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite;
+package com.openexchange.file.storage.oxshare;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Document;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 
 /**
- * {@link AppsuiteFileStorageExceptionMessages}
+ * {@link OXShareDocument} - A document shared from another OX instance
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class AppsuiteFileStorageExceptionMessages implements LocalizableStrings {
+public class OXShareDocument extends Document {
 
-    // The connection check failed
-    public static final String PING_FAILED = "The connection check failed.";
+    @FunctionalInterface
+    interface InputStreamClosure {
+
+        InputStream newStream() throws OXException, IOException;
+    }
+
+    private final InputStreamClosure data;
+
+    /**
+     * Initializes a new {@link OXShareDocument}.
+     *
+     * @param file The meta data as {@link OXShareFile}
+     * @param data The data as {@link InputStreamClosure} which allows lazy loading
+     */
+    public OXShareDocument(OXShareFile file, InputStreamClosure data) {
+        this.data = Objects.requireNonNull(data, "data must not be null");
+        if (file != null) {
+            setFile(file);
+            setMimeType(file.getFileMIMEType());
+            setName(file.getFileName());
+            if (file.getLastModified() != null) {
+                setLastModified(file.getLastModified().getTime());
+            }
+        }
+    }
+
+    @Override
+    public boolean isRepetitive() {
+        return false;
+    }
+
+    @Override
+    public InputStream getData() throws OXException {
+        try {
+            return data.newStream();
+        } catch (IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
 }

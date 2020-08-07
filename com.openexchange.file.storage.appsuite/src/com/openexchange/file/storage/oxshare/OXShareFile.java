@@ -47,30 +47,30 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite;
+package com.openexchange.file.storage.oxshare;
 
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 
 /**
- * {@link AppsuiteFile} - A File shared from another OX instance
+ * {@link OXShareFile} - A File shared from another OX instance
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class AppsuiteFile extends DefaultFile {
+public class OXShareFile extends DefaultFile {
 
     /**
-     * Initializes a new {@link AppsuiteFile}.
+     * Initializes a new {@link OXShareFile}.
      */
-    public AppsuiteFile() {}
+    public OXShareFile() {}
 
     /**
-     * Initializes a new {@link AppsuiteFile}.
+     * Initializes a new {@link OXShareFile}.
      *
      * @param file The other file to copy information from
      */
-    public AppsuiteFile(File file) {
+    public OXShareFile(File file) {
         super(file);
     }
 }

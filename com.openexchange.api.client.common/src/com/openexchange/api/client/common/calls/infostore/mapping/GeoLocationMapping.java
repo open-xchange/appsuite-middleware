@@ -63,12 +63,19 @@ import com.openexchange.session.Session;
  * {@link GeoLocationMapping}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @param <O> The object type
  * @since v7.10.5
  */
 public abstract class GeoLocationMapping<O> extends DefaultJsonMapping<GeoLocation, O> {
 
     private static Pattern pattern = Pattern.compile("\\((.*),(.*)\\)");
 
+    /**
+     * Initializes a new {@link GeoLocationMapping}.
+     * 
+     * @param ajaxName The name of object ID in the JSON response
+     * @param columnID The The column ID in the request
+     */
     public GeoLocationMapping(String ajaxName, Integer columnID) {
         super(ajaxName, columnID);
     }

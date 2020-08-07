@@ -53,7 +53,7 @@ import java.util.Map;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
-import com.openexchange.exception.OXException;
+import com.openexchange.api.client.common.parser.IgnonringParser;
 
 /**
  * {@link UnlockCall}
@@ -81,8 +81,8 @@ public class UnlockCall extends AbstractGetCall<Void> {
     }
 
     @Override
-    public HttpResponseParser<Void> getParser() throws OXException {
-        return null;
+    public HttpResponseParser<Void> getParser() {
+        return new IgnonringParser();
     }
 
     @Override

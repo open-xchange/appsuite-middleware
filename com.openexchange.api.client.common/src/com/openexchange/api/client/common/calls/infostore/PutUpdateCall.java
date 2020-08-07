@@ -57,7 +57,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
-import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractPutCall;
@@ -66,7 +65,6 @@ import com.openexchange.api.client.common.parser.StringParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.java.Strings;
 
 /**
  * {@link PutUpdateCall}
@@ -86,7 +84,7 @@ public class PutUpdateCall extends AbstractPutCall<String> {
      *
      * @param file The file to update
      * @param timestamp the last known timestamp/sequencenumber
-     * @param the column IDs of the file's fields to update
+     * @param columns the column IDs of the file's fields to update
      */
     public PutUpdateCall(DefaultFile file, long timestamp, int[] columns) {
         this(file, timestamp, columns, null);
@@ -97,7 +95,7 @@ public class PutUpdateCall extends AbstractPutCall<String> {
      *
      * @param file The file to update
      * @param timestamp the last known timestamp/sequencenumber
-     * @param the column IDs of the file's fields to update
+     * @param columns the column IDs of the file's fields to update
      * @param pushToken The drive push token
      */
     public PutUpdateCall(DefaultFile file, long timestamp, int[] columns, String pushToken) {
@@ -109,27 +107,23 @@ public class PutUpdateCall extends AbstractPutCall<String> {
 
     @Override
     @NonNull
-    public String getPath() {
+    public String getModule() {
         return "/infostore";
     }
 
     @Override
     @Nullable
-    public HttpEntity getBody() throws OXException {
-        try {
-            JSONObject json = new JSONObject();
-            DefaultFileMapper mapper = new DefaultFileMapper();
-            Field[] fields = columns != null ? mapper.getMappedFields(columns) : mapper.getAssignedFields(file);
-            JSONObject fileObject = mapper.serialize(file, Arrays.stream(fields).filter(Objects::nonNull).toArray(Field[]::new));
-            json.put("file", fileObject);
-            return ApiClientUtils.createJsonBody(json);
-        } catch (JSONException e) {
-            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
+    public HttpEntity getBody() throws OXException, JSONException {
+        JSONObject json = new JSONObject();
+        DefaultFileMapper mapper = new DefaultFileMapper();
+        Field[] fields = columns != null ? mapper.getMappedFields(columns) : mapper.getAssignedFields(file);
+        JSONObject fileObject = mapper.serialize(file, Arrays.stream(fields).filter(Objects::nonNull).toArray(Field[]::new));
+        json.put("file", fileObject);
+        return ApiClientUtils.createJsonBody(json);
     }
 
     @Override
-    public HttpResponseParser<String> getParser() throws OXException {
+    public HttpResponseParser<String> getParser() {
         return new StringParser();
     }
 
@@ -137,9 +131,7 @@ public class PutUpdateCall extends AbstractPutCall<String> {
     protected void fillParameters(Map<String, String> parameters) {
         parameters.put("id", file.getId());
         parameters.put("timestamp", String.valueOf(timestamp));
-        if (Strings.isNotEmpty(pushToken)) {
-            parameters.put("pushToken", pushToken);
-        }
+        putIfNotEmpty(parameters,"pushToken", pushToken);
     }
 
     @Override

@@ -47,35 +47,41 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite;
+package com.openexchange.file.storage.oxshare.osgi;
 
-import com.openexchange.file.storage.FileStorageConstants;
+import com.openexchange.api.client.ApiClientService;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.oxshare.OXShareFileStorageService;
+import com.openexchange.osgi.HousekeepingActivator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * {@link AppsuiteFileStorageConstants}
+ * {@link Activator}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.5
+ * @since v7.10.4
  */
-public final class AppsuiteFileStorageConstants implements FileStorageConstants {
+public class Activator extends HousekeepingActivator {
 
-    /**
-     * The unique ID of the AppSuite share file storage implementation
-     */
-    public static final String ID = "appsuiteshare";
+    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
-    /**
-     * The display name of the the AppSuite share file storage implementation
-     */
-    public static final String DISPLAY_NAME = "OX AppSuite Share";
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+    }
 
-    /**
-     * The share link to the other OX AppSuite
-     */
-    public static final String SHARE_URL = "url";
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
 
-    /**
-     * The password to the user's share if any
-     */
-    public static final String PASSWORD = "password";
+        registerService(FileStorageService.class, new OXShareFileStorageService(this));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
+        super.stopBundle();
+    }
 }

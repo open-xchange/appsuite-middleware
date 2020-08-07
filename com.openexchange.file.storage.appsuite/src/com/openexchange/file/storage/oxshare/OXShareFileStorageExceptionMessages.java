@@ -47,41 +47,21 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite.osgi;
+package com.openexchange.file.storage.oxshare;
 
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.appsuite.AppsuiteFileStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link Activator}
+ * {@link OXShareFileStorageExceptionMessages}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public class OXShareFileStorageExceptionMessages implements LocalizableStrings {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    // The connection check failed
+    public static final String PING_FAILED = "The connection check failed.";
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        registerService(FileStorageService.class, new AppsuiteFileStorageService(this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
-    }
+    //Missing capability for file storage
+    public static final String MISSING_CAP_MSG = "Missing capability for file storage %1$s";
 }

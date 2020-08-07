@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.appsuite;
+package com.openexchange.file.storage.oxshare;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import com.openexchange.api.client.ApiClientService;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
@@ -71,12 +72,14 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link AppsuiteFileStorageService} - The AppSuite file storage service to access OX shares on other installations
+ * {@link OXShareFileStorageService} - The file storage service to access OX shares on other installations
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class AppsuiteFileStorageService implements AccountAware, SharingFileStorageService, LoginAwareFileStorageServiceExtension {
+public class OXShareFileStorageService implements AccountAware, SharingFileStorageService, LoginAwareFileStorageServiceExtension {
+
+    private static final String FILESTORAGE_OXSHARE_CAPABILITY = "filestorage_oxshare";
 
     private static final Object LOCK = new Object();
 
@@ -86,19 +89,25 @@ public class AppsuiteFileStorageService implements AccountAware, SharingFileStor
     private volatile FileStorageAccountManager accountManger;
 
     /**
-     * Initializes a new {@link AppsuiteFileStorageService}.
+     * Initializes a new {@link OXShareFileStorageService}.
      *
      * @param services The {@link ServiceLookup} instance
      */
-    public AppsuiteFileStorageService(ServiceLookup services) {
+    public OXShareFileStorageService(ServiceLookup services) {
         this.services = Objects.requireNonNull(services, "services must not be null");
 
         DynamicFormDescription description = new DynamicFormDescription();
-        description.add(FormElement.link(AppsuiteFileStorageConstants.SHARE_URL, FormStrings.SHARE_LINK_LABEL));
-        description.add(FormElement.password(AppsuiteFileStorageConstants.PASSWORD, FormStrings.PASSWORD, false, ""));
+        description.add(FormElement.link(OXShareStorageConstants.SHARE_URL, FormStrings.SHARE_LINK_LABEL));
+        description.add(FormElement.password(OXShareStorageConstants.PASSWORD, FormStrings.PASSWORD, false, ""));
         formDescription = new ReadOnlyDynamicFormDescription(description);
     }
 
+    /**
+     * Gets the account manager
+     *
+     * @return The account manager
+     * @throws OXException
+     */
     private FileStorageAccountManager getAccountManager0() throws OXException {
         FileStorageAccountManager m = accountManger;
         if (null == m) {
@@ -114,22 +123,48 @@ public class AppsuiteFileStorageService implements AccountAware, SharingFileStor
         return m;
     }
 
-    private ApiClientService getClientFactory() throws OXException {
+    /**
+     * Gets the client {@link ApiClientService} for accessing the remote server
+     *
+     * @return The {@link ApiClientService}
+     * @throws OXException
+     */
+    private ApiClientService getApiClientService() throws OXException {
         return this.services.getServiceSafe(ApiClientService.class);
     }
 
+    /**
+     * Gets a list of accounts for the given session
+     *
+     * @param session The session to get the accounts for
+     * @return A list of accounts for the given session
+     * @throws OXException
+     */
     private List<FileStorageAccount> getAccounts0(Session session) throws OXException {
         return getAccountManager0().getAccounts(session);
     }
 
+    /**
+     * Checks if the given session has the appropriate capability for using this file storage
+     *
+     * @param session The session to check
+     * @throws OXException in case the session does not have the appropriatead capability to use this file storage
+     */
+    private void assertCapability(Session session) throws OXException {
+        CapabilityService capabilityService = services.getServiceSafe(CapabilityService.class);
+        if (!capabilityService.getCapabilities(session).contains(FILESTORAGE_OXSHARE_CAPABILITY)) {
+            throw OXShareFileStorageExceptionCodes.MISSING_CAPABILITY.create(getId());
+        }
+    }
+
     @Override
     public String getId() {
-        return AppsuiteFileStorageConstants.ID;
+        return OXShareStorageConstants.ID;
     }
 
     @Override
     public String getDisplayName() {
-        return AppsuiteFileStorageConstants.DISPLAY_NAME;
+        return OXShareStorageConstants.DISPLAY_NAME;
     }
 
     @Override
@@ -139,7 +174,7 @@ public class AppsuiteFileStorageService implements AccountAware, SharingFileStor
 
     @Override
     public Set<String> getSecretProperties() {
-        return Collections.singleton(AppsuiteFileStorageConstants.PASSWORD);
+        return Collections.singleton(OXShareStorageConstants.PASSWORD);
     }
 
     @Override
@@ -149,12 +184,13 @@ public class AppsuiteFileStorageService implements AccountAware, SharingFileStor
 
     @Override
     public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
+        assertCapability(session);
         FileStorageAccountManager manager = getAccountManager();
         if (null == manager) {
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId(), I(session.getUserId()), I(session.getContextId()));
         }
         FileStorageAccount account = manager.getAccount(accountId, session);
-        return new AppsuiteAccountAccess(this, getClientFactory(), account, session);
+        return new OXShareAccountAccess(this, getApiClientService(), account, session);
     }
 
     @Override
@@ -166,7 +202,7 @@ public class AppsuiteFileStorageService implements AccountAware, SharingFileStor
     public void testConnection(FileStorageAccount account, Session session) throws OXException {
         final boolean ping = getAccountAccess(account.getId(), session).ping();
         if (!ping) {
-            throw AppsuiteFileStorageExceptionCodes.PING_FAILED.create();
+            throw OXShareFileStorageExceptionCodes.PING_FAILED.create();
         }
     }
 }
