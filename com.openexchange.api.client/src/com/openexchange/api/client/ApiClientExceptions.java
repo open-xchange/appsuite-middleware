@@ -72,8 +72,8 @@ public enum ApiClientExceptions implements DisplayableOXExceptionCode {
     /** The link %1$s is invalid */
     INVALID_TARGET("The link \"%1$s\" is invalid.", Category.CATEGORY_ERROR, 3, OXExceptionStrings.BAD_REQUEST),
 
-    /** A functional necessary cookie is missing */
-    MISSING_COOKIE("A functional necessary cookie is missing.", Category.CATEGORY_ERROR, 4),
+    /** A necessary cookie is missing */
+    MISSING_COOKIE("A necessary cookie is missing.", Category.CATEGORY_ERROR, 4),
 
     /** The targeted host %1$s is not covered by the same origin policy for %2$s . */
     NOT_SAME_ORIGIN("The targeted host %1$s is not covered by the same origin policy for %2$s.", Category.CATEGORY_ERROR, 5),

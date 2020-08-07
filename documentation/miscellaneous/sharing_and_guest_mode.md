@@ -516,3 +516,25 @@ The following configuration will check the count limit for named guests and the 
 
 It is possible to reload an adapted configuration by using reloadconfiguration command line tool.
 
+
+# Integrating shares from other Open Xchange Server
+
+Starting with the version 7.10.5 of the Open Xchange Server the so called "Federated Sharing" feature is introduced. With this feature it is possible for users to integrate shares from foreign OX servers into the App Suite. Efficiently external shares from other OX servers will look and behave like shared internally.
+
+## Technical mechanism
+
+Once the share is integrated into the App Suite, the UI will send request as usual to the Middleware. The Middleware is in charge to provide the data.
+To access the content provided within the share the local server needs to request this data. Therefore the data from the remote server will be requested via the HTTP API. Internally, a proper client will take care of the session lifecycle on the remote system.
+Once validation on the server has finished the response will be returned to the UI.
+
+### Administrator Notes:
+
+The following properties should be checked to guarantee a the functionality of the feature:
+
+* <code>com.openexchange.capability.filestorage_oxshare=true</code>
+
+Furthermore there are properties that influences the communication channel to the remote server. A administrator can adjust:
+
+* <code>com.openexchange.api.client.blacklistedHosts="127.0.0.1-127.255.255.255,localhost"</code>
+* <code>com.openexchange.api.client.allowedPorts=""</code>
+* <code>com.openenexchange.httpclient.apiClient*</code>, see [here]({{ site.baseurl }}/middleware/administration/http_client_configuration.html) for more details.

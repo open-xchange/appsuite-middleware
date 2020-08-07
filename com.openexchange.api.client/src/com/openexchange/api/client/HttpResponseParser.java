@@ -54,7 +54,7 @@ import org.apache.http.protocol.HttpContext;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link HttpResponseParser}
+ * {@link HttpResponseParser} - Parser for HTTP responses.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @param <T> The type of the parsed object
@@ -68,8 +68,11 @@ public interface HttpResponseParser<T> {
      *
      * @param response The HTTP response to parse
      * @param httpContext The HTTP context with additional information
-     * @return The desired object
-     * @throws OXException
+     * @return The desired response object
+     * @throws OXException In multiple cases. Error can be thrown cases:
+     *             <li>the status code is <code>400</code> or higher</li>
+     *             <li>the response contains an {@link OXException}</li>
+     *             <li>serialization fails</li>
      */
     T parse(HttpResponse response, HttpContext httpContext) throws OXException;
 

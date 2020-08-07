@@ -47,13 +47,48 @@
  *
  */
 
-package com.openexchange.api.client;
+package com.openexchange.api.client.common.parser;
+
+import java.util.List;
+import org.apache.http.protocol.HttpContext;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.api.client.ApiClientExceptions;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 
 /**
- * {@link AutoLoginClient} - Marker interface to signal that the client shall be logged in after creation
+ * {@link JsonArrayParser} - Utilizes a mapper for parsing a JSON array
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @param <T> The type of the object to return
+ * @param <E> The enum
  * @since v7.10.5
  */
-public interface AutoLoginClient {
+public class JsonArrayParser<T, E extends Enum<E>> extends AbstractHttpResponseParser<List<T>> {
+
+    private final DefaultJsonMapper<T, E> mapper;
+    private final E[] fields;
+
+    /**
+     * Initializes a new {@link JsonArrayParser}.
+     * 
+     * @param mapper The mapper to deserialize the JSON
+     * @param fields An array of fields to parse
+     */
+    public JsonArrayParser(DefaultJsonMapper<T, E> mapper, E[] fields) {
+        super();
+        this.mapper = mapper;
+        this.fields = fields;
+    }
+
+    @Override
+    public List<T> parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException, JSONException {
+        if (commonResponse.isJSONArray()) {
+            JSONArray jsonArray = commonResponse.getJSONArray();
+            return mapper.deserialize(jsonArray, fields);
+        }
+        throw ApiClientExceptions.JSON_ERROR.create("Not an JSON array");
+    }
+
 }

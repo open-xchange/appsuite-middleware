@@ -50,8 +50,6 @@
 package com.openexchange.api.client.impl;
 
 import static com.openexchange.api.client.ApiCall.SESSION;
-import static com.openexchange.api.client.common.ApiClientUtils.checkSameOrigin;
-import static com.openexchange.api.client.common.ApiClientUtils.parseJSONObject;
 import static com.openexchange.api.client.common.OXExceptionParser.matches;
 import static com.openexchange.api.client.common.OXExceptionParser.parseException;
 import static com.openexchange.api.client.impl.osgi.ApiClientWildcardProvider.HTTP_CLIENT_IDENTIFIER;
@@ -87,6 +85,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.BasicHttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.api.client.ApiCall;
@@ -95,6 +94,8 @@ import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.LoginInformation;
 import com.openexchange.api.client.common.ApiClientUtils;
+import com.openexchange.api.client.common.Checks;
+import com.openexchange.api.client.common.JSONUtils;
 import com.openexchange.api.client.common.ResourceReleasingInputStream;
 import com.openexchange.api.client.common.calls.login.LogoutCall;
 import com.openexchange.exception.OXException;
@@ -107,7 +108,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessionExceptionCodes;
 
 /**
- * {@link AbstractApiClient}
+ * {@link AbstractApiClient} - Abstract API client that handles the remote lifecycle of 
+ * a session on another OX server, besides the login.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
@@ -187,7 +189,7 @@ public abstract class AbstractApiClient implements ApiClient {
         if (isClosed.get()) {
             throw ApiClientExceptions.UNEXPECTED_ERROR.create("Client is closing.");
         }
-        checkSameOrigin(request, loginLink);
+        Checks.checkSameOrigin(request, loginLink);
 
         HttpResponse response = null;
         try {
@@ -197,27 +199,12 @@ public abstract class AbstractApiClient implements ApiClient {
             response = getHttpClient().execute(request, httpContext);
 
             /*
-             * Log response if necessary
+             * Log response if possible and necessary
              */
             if (canBuffer(response)) {
                 response = ensureRepeatability(response);
             }
             log(request, response);
-
-            /*
-             * Check that session related cookies are set
-             */
-            //            LoginInformation infos = getLoginInformation();
-            //            if (null != infos && Strings.isNotEmpty(infos.getRemoteSessionId())) {
-            //                AppsuiteClientUtils.checkJSESSIONCookie(cookieStore, loginLink);
-            //                AppsuiteClientUtils.checkPublicSessionCookie(cookieStore, loginLink);
-            //                AppsuiteClientUtils.checkSecretCookie(cookieStore, loginLink);
-            //            }
-
-            /*
-             * Check status code
-             */
-            handleStatusError(response, response.getStatusLine().getStatusCode());
 
             /*
              * Check response for exceptions, try to re-login if session expired
@@ -292,7 +279,7 @@ public abstract class AbstractApiClient implements ApiClient {
      */
 
     private ManagedHttpClient getHttpClient() throws OXException {
-        return services.getServiceSafe(HttpClientService.class).getHttpClient(HTTP_CLIENT_IDENTIFIER + loginLink.getHost());
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(HTTP_CLIENT_IDENTIFIER + "-" + loginLink.getHost());
     }
 
     /**
@@ -357,9 +344,13 @@ public abstract class AbstractApiClient implements ApiClient {
          * Set body if necessary
          */
         if (request instanceof HttpEntityEnclosingRequestBase) {
-            HttpEntity body = call.getBody();
-            if (null != body) {
-                ((HttpEntityEnclosingRequestBase) request).setEntity(body);
+            try {
+                HttpEntity body = call.getBody();
+                if (null != body) {
+                    ((HttpEntityEnclosingRequestBase) request).setEntity(body);
+                }
+            } catch (JSONException e) {
+                throw ApiClientExceptions.JSON_ERROR.create(e.getMessage(), e);
             }
         }
 
@@ -393,37 +384,6 @@ public abstract class AbstractApiClient implements ApiClient {
             }
         }
         return prefix + call.getModule();
-    }
-
-    /**
-     * Handles a status error. Either will throw the transmitted exception
-     * or will generate an appropriated exception.
-     *
-     * @param response The response
-     * @param statusCode The current status code
-     * @throws OXException The OXException to throw for the status code
-     */
-    private void handleStatusError(HttpResponse response, int statusCode) throws OXException {
-        if (statusCode < HttpStatus.SC_BAD_REQUEST) {
-            // Nothing to do, pass response to caller
-            return;
-        }
-        OXException parsedException = null;
-        try {
-            JSONObject jsonObject = parseJSONObject(response);
-            parsedException = parseException(jsonObject);
-        } catch (Exception e) {
-            LOGGER.debug("Error while getting error stack", e);
-        }
-
-        if (null != parsedException) {
-            throw parsedException;
-        }
-
-        if (statusCode < HttpStatus.SC_INTERNAL_SERVER_ERROR) {
-            throw ApiClientExceptions.CLIENT_ERROR.create(I(statusCode));
-        }
-        throw ApiClientExceptions.REMOTE_SERVER_ERROR.create(I(statusCode));
     }
 
     /**
@@ -484,26 +444,13 @@ public abstract class AbstractApiClient implements ApiClient {
      * @return A {@link OXException} In case a exception is found in the response or <code>null</code>
      */
     private static OXException getNestedOXException(HttpResponse response) {
-        String contentType = ApiClientUtils.getHeaderValue(response, "Content-Type");
-        if (Strings.isEmpty(contentType)) {
-            return null;
-        }
-        try {
-            JSONObject jsonObject = null;
-            if (contentType.indexOf(TEXT_JAVA_SCRIPT.getMimeType()) > -1 || contentType.indexOf(APPLICATION_JSON.getMimeType()) > -1) {
-                jsonObject = parseJSONObject(response);
+        JSONValue json = JSONUtils.getJSON(response);
+        if (null != json && json instanceof JSONObject) {
+            try {
+                return parseException((JSONObject) json);
+            } catch (JSONException e) {
+                LOGGER.debug("Unable to parse content", e);
             }
-            if (contentType.indexOf(TEXT_HTML.getMimeType()) > -1) {
-                String json = ApiClientUtils.getJSONFromBody(response);
-                if (Strings.isNotEmpty(json)) {
-                    jsonObject = parseJSONObject(json);
-                }
-            }
-            if (null != jsonObject) {
-                return parseException(jsonObject);
-            }
-        } catch (OXException | JSONException e) {
-            LOGGER.debug("Unable to parse content", e);
         }
         return null;
     }

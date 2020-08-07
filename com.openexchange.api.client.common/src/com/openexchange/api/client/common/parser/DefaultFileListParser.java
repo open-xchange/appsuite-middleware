@@ -47,16 +47,12 @@
  *
  */
 
-package com.openexchange.api.client.common.calls.infostore.parser;
+package com.openexchange.api.client.common.parser;
 
 import java.util.List;
-import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.api.client.ApiClientExceptions;
-import com.openexchange.api.client.HttpResponseParser;
-import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.infostore.mapping.DefaultFileMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -67,7 +63,7 @@ import com.openexchange.file.storage.DefaultFile;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class DefaultFileListParser implements HttpResponseParser<List<DefaultFile>> {
+public class DefaultFileListParser extends AbstractHttpResponseParser<List<DefaultFile>> {
 
     private final int[] columns;
 
@@ -77,19 +73,16 @@ public class DefaultFileListParser implements HttpResponseParser<List<DefaultFil
      * @param columns The columns to parse
      */
     public DefaultFileListParser(int[] columns) {
+        super();
         this.columns = columns;
     }
 
     @Override
-    public List<DefaultFile> parse(HttpResponse response, HttpContext httpContext) throws OXException {
-        JSONArray data = ApiClientUtils.parseDataArray(response);
+    public List<DefaultFile> parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException, JSONException {
+        JSONArray data = commonResponse.getJSONArray();
         DefaultFileMapper mapper = new DefaultFileMapper();
-        try {
-            List<DefaultFile> files = mapper.deserialize(data, mapper.getMappedFields(columns));
-            return files;
-        } catch (JSONException e) {
-            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
+        List<DefaultFile> files = mapper.deserialize(data, mapper.getMappedFields(columns));
+        return files;
     }
 
 }

@@ -55,7 +55,7 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
-import com.openexchange.api.client.common.calls.infostore.parser.DefaultFileListParser;
+import com.openexchange.api.client.common.parser.DefaultFileListParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;

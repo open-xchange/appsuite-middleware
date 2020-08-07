@@ -89,6 +89,8 @@ Additionally to the specific HTTP client identifier above the server is capable 
 | Service name | Identifier |
 |--------------|:----------:|
 | SProxyD | sproxyd-[filestoreID] |
+| HTTP API client | apiClient-[hostname] |
+
 
 The difference to the specific identifier is that you can either A) configure the complete group of HTTP clients by removing the wildcard from the identifier or B) specify configuration for each client of the group explicit. For an example see below.
 

@@ -62,8 +62,8 @@ import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
  */
 public class ApiClientWildcardProvider extends AbstractHttpClientModifer implements WildcardHttpClientConfigProvider {
 
-    /** The identifier for HTTP clients regarding federated sharing */
-    public static final String HTTP_CLIENT_IDENTIFIER = "AppsuiteHttpClient";
+    /** The identifier for HTTP clients that are used to communicate with other OX nodes */
+    public static final String HTTP_CLIENT_IDENTIFIER = "apiClient";
 
     /**
      * Initializes a new {@link ApiClientWildcardProvider}.

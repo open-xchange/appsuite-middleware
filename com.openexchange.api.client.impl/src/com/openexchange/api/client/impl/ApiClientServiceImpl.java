@@ -70,7 +70,6 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.ApiClient;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.ApiClientService;
-import com.openexchange.api.client.AutoLoginClient;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.api.client.impl.share.ApiShareClient;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -89,7 +88,7 @@ public class ApiClientServiceImpl implements ApiClientService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiClientServiceImpl.class);
 
-    private final Cache<Integer, ApiClient> cachedClients;
+    private final Cache<String, ApiClient> cachedClients;
 
     private ServiceLookup services;
 
@@ -106,7 +105,7 @@ public class ApiClientServiceImpl implements ApiClientService {
             .initialCapacity(30)
             .maximumSize(512)
             .expireAfterAccess(1, TimeUnit.HOURS)
-            .removalListener((RemovalListener<Integer, ApiClient>) notification -> {
+            .removalListener((RemovalListener<String, ApiClient>) notification -> {
                 notification.getValue().logout();
              })
             .build();
@@ -123,7 +122,7 @@ public class ApiClientServiceImpl implements ApiClientService {
         URL url = generateURL(loginLink);
         checkBlackList(url, contextId, userId);
 
-        Integer cacheKey = generateCacheKey(contextId, userId, url);
+        String cacheKey = generateCacheKey(contextId, userId, url);
         try {
             ApiClient client = cachedClients.get(cacheKey, () -> {
                 LOGGER.debug("Creating share access for remote system {} in context {} for user {}.", url.getHost(), I(contextId), I(userId));
@@ -137,6 +136,7 @@ public class ApiClientServiceImpl implements ApiClientService {
                 close(client);
                 return getApiClient(contextId, userId, loginLink, credentials);
             }
+            client.login();
             return client;
         } catch (ExecutionException e) {
             throw ApiClientExceptions.NO_ACCESS.create(e, loginLink);
@@ -168,7 +168,7 @@ public class ApiClientServiceImpl implements ApiClientService {
         /*
          * Revoke all user associated accesses
          */
-        List<Integer> removeable = new ArrayList<>();
+        List<String> removeable = new ArrayList<>();
         for (ApiClient clientAccess : cachedClients.asMap().values()) {
             if (clientAccess.getContextId() == contextId && clientAccess.getUserId() == userId) {
                 removeable.add(generateCacheKey(clientAccess));
@@ -208,7 +208,7 @@ public class ApiClientServiceImpl implements ApiClientService {
      * @param access The access
      * @return The cache key
      */
-    private static Integer generateCacheKey(ApiClient client) {
+    private static String generateCacheKey(ApiClient client) {
         return generateCacheKey(client.getContextId(), client.getUserId(), client.getLoginLink());
     }
 
@@ -220,17 +220,9 @@ public class ApiClientServiceImpl implements ApiClientService {
      * @param host The host to connect to
      * @return The cache key
      */
-    private static Integer generateCacheKey(int contextId, int userId, URL host) {
-        final int prime = 2027;
-        int result = 1;
-        result = prime * result + contextId;
-        result = prime * result + userId;
-
-        String key = host.getHost();
-        result = prime * result + ((key == null) ? 0 : key.hashCode());
-        key = getBaseToken(host.getPath());
-        result = prime * result + ((key == null) ? 0 : key.hashCode());
-        return I(result);
+    private static String generateCacheKey(int contextId, int userId, URL host) {
+        String baseToken = getBaseToken(host.getPath());
+        return Strings.concat("-", I(contextId), I(userId), host.getHost(), Strings.isEmpty(baseToken) ? host.getPath() : baseToken);
     }
 
     /**
@@ -250,9 +242,6 @@ public class ApiClientServiceImpl implements ApiClientService {
         }
         if (null == client) {
             throw ApiClientExceptions.UNKOWN_API.create();
-        }
-        if (client instanceof AutoLoginClient) {
-            client.login();
         }
         return client;
     }

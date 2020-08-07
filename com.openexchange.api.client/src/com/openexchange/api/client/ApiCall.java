@@ -51,6 +51,7 @@ package com.openexchange.api.client;
 
 import java.util.Map;
 import org.apache.http.HttpEntity;
+import org.json.JSONException;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
@@ -126,26 +127,16 @@ public interface ApiCall<T> {
      *
      * @return The body as {@link HttpEntity}
      * @throws OXException In case body can't be generated
+     * @throws JSONException In case JSON parsing fails
      */
     @Nullable
-    HttpEntity getBody() throws OXException;
-
-    /**
-     * Parses a HTTP response to the desired object
-     *
-     * @param response The HTTP response to parse
-     * @param httpContext The HTTP context with additional information
-     * @return The desired object
-     * @throws OXException
-     */
-    //T parse(HttpResponse response, HttpContext httpContext) throws OXException;
+    HttpEntity getBody() throws OXException, JSONException;
 
     /**
      * Returns a parser to parse the HTTP response
      *
      * @return The parser
-     * @throws OXException
      */
-    HttpResponseParser<T> getParser() throws OXException;
+    HttpResponseParser<T> getParser();
 
 }

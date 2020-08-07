@@ -49,22 +49,19 @@
 
 package com.openexchange.api.client.common.calls.infostore;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
+import com.openexchange.api.client.common.parser.InputStreamParser;
 import com.openexchange.exception.OXException;
 
 /**
  * {@link DocumentCall}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.2
+ * @since v7.10.5
  */
 public class DocumentCall extends AbstractGetCall<InputStream> {
 
@@ -118,19 +115,6 @@ public class DocumentCall extends AbstractGetCall<InputStream> {
 
     @Override
     public HttpResponseParser<InputStream> getParser() throws OXException {
-
-        return new HttpResponseParser<InputStream>() {
-
-            @Override
-            public InputStream parse(HttpResponse response, HttpContext httpContext) throws OXException {
-                try {
-                    return response.getEntity().getContent();
-                } catch (UnsupportedOperationException e) {
-                    throw ApiClientExceptions.UNEXPECTED_ERROR.create(e, e.getMessage());
-                } catch (IOException e) {
-                    throw ApiClientExceptions.IO_ERROR.create(e, e.getMessage());
-                }
-            }
-        };
+        return new InputStreamParser();
     }
 }

@@ -49,11 +49,11 @@
 
 package com.openexchange.api.client.common.calls.infostore;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,10 +64,10 @@ import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractPutCall;
+import com.openexchange.api.client.common.parser.AbstractHttpResponseParser;
+import com.openexchange.api.client.common.parser.CommonApiResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-
-import static com.openexchange.java.Autoboxing.B;
 
 /**
  * {@link DeleteCall}
@@ -176,14 +176,14 @@ public class DeleteCall extends AbstractPutCall<Void> {
 
     @Override
     public HttpResponseParser<Void> getParser() throws OXException {
-        // TODO Auto-generated method stub
-        return new HttpResponseParser<Void>() {
+        return new AbstractHttpResponseParser<Void>() {
 
             @Override
-            public Void parse(HttpResponse response, HttpContext httpContext) throws OXException {
-                JSONArray parseDataArray = ApiClientUtils.parseDataArray(response);
+            public Void parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException {
+                commonResponse.getJSONObject();
                 return null;
             }
+
         };
     }
 

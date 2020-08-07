@@ -53,7 +53,6 @@ import java.net.URL;
 import java.util.Optional;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.api.client.ApiClientExceptions;
-import com.openexchange.api.client.AutoLoginClient;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.api.client.LoginInformation;
 import com.openexchange.api.client.common.calls.login.AccessShareCall;
@@ -72,7 +71,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class ApiShareClient extends AbstractApiClient implements AutoLoginClient {
+public class ApiShareClient extends AbstractApiClient {
 
     private LoginInformation information;
     private final Optional<Credentials> credentials;

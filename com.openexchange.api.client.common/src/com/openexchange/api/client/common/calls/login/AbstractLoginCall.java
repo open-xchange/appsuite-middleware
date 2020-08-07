@@ -49,10 +49,8 @@
 
 package com.openexchange.api.client.common.calls.login;
 
-import static com.openexchange.api.client.common.ApiClientUtils.parseJSONObject;
-import org.apache.http.HttpResponse;
+import java.util.Objects;
 import org.apache.http.protocol.HttpContext;
-import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.api.client.HttpMethods;
@@ -60,6 +58,8 @@ import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.LoginInformation;
 import com.openexchange.api.client.common.DefaultLoginInformation;
 import com.openexchange.api.client.common.calls.AbstractApiCall;
+import com.openexchange.api.client.common.parser.AbstractHttpResponseParser;
+import com.openexchange.api.client.common.parser.CommonApiResponse;
 import com.openexchange.exception.OXException;
 
 /**
@@ -76,13 +76,11 @@ public abstract class AbstractLoginCall extends AbstractApiCall<LoginInformation
      * Initializes a new {@link AbstractLoginCall}.
      *
      * @param credentials The credentials to login with
-     * @throws OXException In case parameter is missing
+     * @throws NullPointerException In case credentials are missing
      */
-    public AbstractLoginCall(Credentials credentials) throws OXException {
+    public AbstractLoginCall(Credentials credentials) throws NullPointerException {
         super();
-        checkParameters(credentials);
-
-        this.credentials = credentials;
+        this.credentials = Objects.requireNonNull(credentials);
     }
 
     @Override
@@ -98,13 +96,12 @@ public abstract class AbstractLoginCall extends AbstractApiCall<LoginInformation
     }
 
     @Override
-    public HttpResponseParser<LoginInformation> getParser() throws OXException {
-        return new HttpResponseParser<LoginInformation>() {
+    public HttpResponseParser<LoginInformation> getParser() {
+        return new AbstractHttpResponseParser<LoginInformation>() {
 
             @Override
-            public LoginInformation parse(HttpResponse response, HttpContext httpContext) throws OXException {
-                JSONObject json = parseJSONObject(response);
-                return DefaultLoginInformation.parse(json.asMap());
+            public LoginInformation parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException {
+                return DefaultLoginInformation.parse(commonResponse.getJSONObject().asMap());
             }
         };
     }

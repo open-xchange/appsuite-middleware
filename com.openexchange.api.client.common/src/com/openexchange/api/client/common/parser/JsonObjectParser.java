@@ -47,35 +47,44 @@
  *
  */
 
-package com.openexchange.api.client.common.calls.infostore.parser;
+package com.openexchange.api.client.common.parser;
 
-import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.api.client.ApiClientExceptions;
-import com.openexchange.api.client.HttpResponseParser;
-import com.openexchange.api.client.common.ApiClientUtils;
-import com.openexchange.api.client.common.calls.infostore.mapping.DefaultFileMapper;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 
 /**
- * {@link DefaultFileParser}
+ * {@link JsonObjectParser} - Utilizes a mapper for parsing a JSON object
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @param <T> The type of the object to return
+ * @param <E> The enum
  * @since v7.10.5
  */
-public class DefaultFileParser implements HttpResponseParser<DefaultFile> {
+public class JsonObjectParser<T, E extends Enum<E>> extends AbstractHttpResponseParser<T> {
+
+    private final DefaultJsonMapper<T, E> mapper;
+
+    /**
+     * Initializes a new {@link JsonObjectParser}.
+     * 
+     * @param mapper The mapper to deserialize the JSON
+     */
+    public JsonObjectParser(DefaultJsonMapper<T, E> mapper) {
+        super();
+        this.mapper = mapper;
+    }
 
     @Override
-    public DefaultFile parse(HttpResponse response, org.apache.http.protocol.HttpContext httpContext) throws OXException {
-        JSONObject json = ApiClientUtils.parseDataObject(response);
-        DefaultFileMapper mapper = new DefaultFileMapper();
-        try {
-            DefaultFile file = mapper.deserialize(json, mapper.getMappedFields());
-            return file;
-        } catch (JSONException e) {
-            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
+    public T parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException, JSONException {
+        if (commonResponse.isJSONObject()) {
+            JSONObject jsonObject = commonResponse.getJSONObject();
+            return mapper.deserialize(jsonObject, mapper.getMappedFields());
         }
+        throw ApiClientExceptions.JSON_ERROR.create("Not an JSON object");
     }
+
 }

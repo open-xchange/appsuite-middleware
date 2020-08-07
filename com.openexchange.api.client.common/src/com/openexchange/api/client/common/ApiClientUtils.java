@@ -51,12 +51,9 @@ package com.openexchange.api.client.common;
 
 import static com.openexchange.share.core.ShareConstants.SHARE_SERVLET;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -70,14 +67,11 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
@@ -89,10 +83,10 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.StringAppender;
 import com.openexchange.java.Strings;
 import com.openexchange.share.core.tools.ShareToken;
-import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * {@link ApiClientUtils}
+ * {@link ApiClientUtils} - Util class with functions for serialization and deserialization
+ * of HTTP requests and responses
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
@@ -182,94 +176,6 @@ public final class ApiClientUtils {
     }
 
     /**
-     * Check that the request targets the same origin as the given URL
-     *
-     * @param request The HTTP request
-     * @param target The desired target
-     * @throws OXException In case the domain doesn't match
-     */
-    public static void checkSameOrigin(HttpRequestBase request, URL target) throws OXException {
-        if (null == request.getURI() || false == request.getURI().getHost().equals(target.getHost())) {
-            throw ApiClientExceptions.NOT_SAME_ORIGIN.create(request.getURI(), target.getHost());
-        }
-    }
-
-    /**
-     * Checks that the redirect target is still on the same server
-     *
-     * @param originHost The original targeted host
-     * @param redirectTarget The redirect to follow
-     * @throws OXException In case the new target is invalid or redirects to another host
-     */
-    public static void checkSameOrigin(URL originHost, String redirectTarget) throws OXException {
-        try {
-            //relative or absolute redirect?
-            URL redirect = redirectTarget.startsWith("/") ? new URL(originHost, redirectTarget) : new URL(redirectTarget);
-            if (null != redirect.getHost()) {
-                if (false == originHost.getHost().equals(redirect.getHost())) {
-                    throw ApiClientExceptions.NOT_SAME_ORIGIN.create(redirect.getHost(), originHost.getHost());
-                }
-            }
-        } catch (MalformedURLException e) {
-            throw ApiClientExceptions.INVALID_TARGET.create(e, redirectTarget);
-        }
-    }
-
-    /**
-     * Checks that the JSESSION cookie is set
-     *
-     * @param cookieStore The cookie store to get the cookies from
-     * @param target The target URL for logging
-     * @throws OXException In case the cookie is missing
-     */
-    public static void checkJSESSIONCookie(CookieStore cookieStore, URL target) throws OXException {
-        checkCookieSet(Tools.JSESSIONID_COOKIE, cookieStore, target);
-    }
-
-    /**
-     * Checks that the secret cookie is set
-     *
-     * @param cookieStore The cookie store to get the cookies from
-     * @param target The target URL for logging
-     * @throws OXException In case the cookie is missing
-     */
-    public static void checkSecretCookie(CookieStore cookieStore, URL target) throws OXException {
-        checkCookieSet(LoginServlet.SECRET_PREFIX, cookieStore, target);
-    }
-
-    /**
-     * Checks that the public session cookie is set
-     *
-     * @param cookieStore The cookie store to get the cookies from
-     * @param target The target URL for logging
-     * @throws OXException In case the cookie is missing
-     */
-    public static void checkPublicSessionCookie(CookieStore cookieStore, URL target) throws OXException {
-        checkCookieSet(LoginServlet.PUBLIC_SESSION_PREFIX, cookieStore, target);
-    }
-
-    /**
-     * Checks that a certain cookie with a dedicated name is set
-     *
-     * @param cookiePrefix The name prefix of the cookie, e.g. {@value LoginServlet#SECRET_PREFIX}
-     * @param cookieStore The cookie store to get the cookies from
-     * @param target The target URL for logging
-     * @throws OXException In case the cookie is missing
-     */
-    public static void checkCookieSet(String cookiePrefix, CookieStore cookieStore, URL target) throws OXException {
-        List<Cookie> cookies = cookieStore.getCookies();
-        if (null == cookies || cookies.isEmpty()) {
-            throw ApiClientExceptions.MISSING_COOKIE.create(target);
-        }
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().startsWith(cookiePrefix)) {
-                return;
-            }
-        }
-        throw ApiClientExceptions.MISSING_COOKIE.create(target);
-    }
-
-    /**
      * Gets the session cookie from the cookie store
      *
      * @param cookieStore The cookie store to search in
@@ -321,11 +227,11 @@ public final class ApiClientUtils {
      * <code>/appsuite/api/share/04b29644047397444b29645473974b7ba433980a88b9aacd/1/8/Mzk</code>
      * the prefix is <code>/appsuite/api</code>
      *
+     * See also <code>com.openexchange.share.core.tools.ShareLinks.serverPath(HostData, String)</code> on how the link is build
      *
      * @param loginLinkPath The login link to access
      * @return The prefix
      * @throws OXException In case exceptions of the path aren't met
-     * @see com.openexchange.share.core.tools.ShareLinks.serverPath(HostData, String) on how the link is build
      */
     public static String parseDispatcherPrefix(String loginLinkPath) throws OXException {
         String sharePrefix = ApiClientUtils.getSharePrefix();
@@ -426,118 +332,15 @@ public final class ApiClientUtils {
     }
 
     /**
-     * Parses the response to a {@link JSONObject}
-     *
-     * @param response The response
-     * @return A {@link JSONObject}
-     * @throws OXException In case the response is not parsable
-     */
-    public static JSONObject parseJSONObject(HttpResponse response) throws OXException {
-        return toJSONObject(parse(response));
-    }
-
-    /**
-     * Parses the response to a {@link JSONObject}
-     *
-     * @param body The response body
-     * @return A {@link JSONObject}
-     * @throws OXException In case the response is not parsable
-     */
-    public static JSONObject parseJSONObject(String body) throws OXException {
-        return toJSONObject(parse(body));
-    }
-
-    private static JSONObject toJSONObject(JSONValue jsonValue) throws OXException {
-        if (null != jsonValue && jsonValue instanceof JSONObject) {
-            return (JSONObject) jsonValue;
-        }
-        throw ApiClientExceptions.JSON_ERROR.create("Response not parsable");
-    }
-
-    /**
-     * Parses the "data" field as array from the given JSON response body
-     *
-     * @param response The response containing the JSON body
-     * @return The data field parsed from the given response
-     * @throws OXException
-     */
-    public static JSONArray parseDataArray(HttpResponse response) throws OXException {
-        try {
-            JSONObject json = parseJSONObject(response);
-            return json.getJSONArray("data");
-        } catch (JSONException e) {
-            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Parses the "data" field as JSOObject from the given JSON response body
-     *
-     * @param response The response containing the JSON body
-     * @return The data field parsed from the given response
-     * @throws OXException
-     */
-    public static JSONObject parseDataObject(HttpResponse response) throws OXException {
-        try {
-            JSONObject json = parseJSONObject(response);
-            return json.getJSONObject("data");
-        } catch (JSONException e) {
-            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Parses the "data" field as String from the given JSON response body
-     *
-     * @param response The response containing the JSON body
-     * @return The data field parsed as string
-     * @throws OXException
-     */
-    public static String parseDataString(HttpResponse response) throws OXException {
-        try {
-            JSONObject json = parseJSONObject(response);
-            return json.getString("data");
-        } catch (JSONException e) {
-            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Parses the response to a {@link JSONArray}
-     *
-     * @param response The response
-     * @return A {@link JSONArray}
-     * @throws OXException In case the response is not parsable
-     */
-    public static JSONArray parseJSONArray(HttpResponse response) throws OXException {
-        return toJSONArray(parse(response));
-    }
-
-    /**
-     * Parses the response to a {@link JSONArray}
-     *
-     * @param body The response body
-     * @return A {@link JSONArray}
-     * @throws OXException In case the response is not parsable
-     */
-    public static JSONArray parseJSONArray(String body) throws OXException {
-        return toJSONArray(parse(body));
-    }
-
-    private static JSONArray toJSONArray(JSONValue jsonValue) throws OXException {
-        if (null != jsonValue && jsonValue instanceof JSONArray) {
-            return (JSONArray) jsonValue;
-        }
-        throw ApiClientExceptions.JSON_ERROR.create("Response not parsable");
-    }
-
-    /**
      * Internal method to create a comma separated string from the given list
      *
      * @param items The items to create a comma separated list from
-     * @return A comma separated list built from the given items
+     * @return A comma separated list built from the given items or <code>null</code> if items was empty
      */
     public static String toCommaString(String... items) {
+        if(null == items || items.length == 0) {
+            return null;
+        }
         StringAppender appender = new StringAppender(",");
         for (String s : items) {
             appender.append(s);
@@ -549,9 +352,12 @@ public final class ApiClientUtils {
      * Internal method to create a comma separated string from the given list
      *
      * @param items The items to create a comma separated list from
-     * @return A comma separated list built from the given items
+     * @return A comma separated list built from the given items or <code>null</code> if items was empty
      */
     public static String toCommaString(int... items) {
+        if(null == items || items.length == 0) {
+            return null;
+        }
         StringAppender appender = new StringAppender(",");
         for (int i : items) {
             appender.append(i);
@@ -560,60 +366,20 @@ public final class ApiClientUtils {
     }
 
     /**
-     * Parses the response to a {@link JSONValue}
+     * Internal method to create a comma separated string from the given list
      *
-     * @param response The response
-     * @return A {@link JSONValue}
-     * @throws OXException In case the response is not parsable
+     * @param items The items to create a comma separated list from
+     * @return A comma separated list built from the given items
      */
-    private static JSONValue parse(HttpResponse response) throws OXException {
-        if (null == response.getEntity()) {
-            throw ApiClientExceptions.UNEXPECTED_ERROR.create("Response is not set!");
-        }
-        try {
-            return parse(response.getEntity().getContent());
-        } catch (IOException e) {
-            throw ApiClientExceptions.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Parses the response to a {@link JSONValue}
-     *
-     * @param body The response body
-     * @return A {@link JSONValue}
-     * @throws OXException In case the response is not parsable
-     */
-    private static JSONValue parse(String body) throws OXException {
-        if (Strings.isEmpty(body)) {
+    public static String toCommaString(Object... items) {
+        if(null == items || items.length == 0) {
             return null;
         }
-        InputStream in = null;
-        try {
-            in = new ByteArrayInputStream(body.getBytes());
-            return parse(in);
-        } finally {
-            Streams.close(in);
+        StringAppender appender = new StringAppender(",");
+        for (Object i : items) {
+            appender.append(i);
         }
-    }
-
-    /**
-     * Parses the response to a {@link JSONValue}
-     *
-     * @param inputStream The input Stream to parse
-     * @return A {@link JSONValue}
-     * @throws OXException In case the response is not parsable
-     */
-    private static JSONValue parse(InputStream inputStream) throws OXException {
-        InputStreamReader reader = null;
-        try {
-            reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-            return JSONObject.parse(reader);
-        } catch (JSONException e) {
-            throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(reader);
-        }
+        return appender.toString();
     }
 
     /**
@@ -639,31 +405,13 @@ public final class ApiClientUtils {
     }
 
     /**
-     * Tries to extract JSON from a HTML callback. Body must begin with
-     * <code><!DOCTYPE HTML</code>
-     *
-     * @param response The response to get the JSON from
-     * @return The JSON as {@link String} or <code>null</code>
-     */
-    public static String getJSONFromBody(HttpResponse response) {
-        String body = getBody(response);
-        if (Strings.isNotEmpty(body) && body.length() > 15 && body.substring(0, 14).equalsIgnoreCase("<!DOCTYPE HTML")) {
-            final int pos1 = body.indexOf('{');
-            final int pos2 = body.indexOf("})</script>");
-            body = body.substring(pos1, pos2 + 1);
-            return body;
-        }
-        return null;
-    }
-
-    /**
      * Creates a common multipart/form-data body
      *
      * @param json The JSON part of the body, or null to omit the JSON part
      * @param data The file/data part of the body, or null to omit the data part
      * @param filename The name of of the file
      * @param contentType The content type of the file
-     * @return
+     * @return A multipart/form-data body as {@link HttpEntity}
      */
     public static HttpEntity createMultipartBody(JSONObject json, InputStream data, String filename, String contentType) {
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
@@ -682,17 +430,7 @@ public final class ApiClientUtils {
      * @param json The JSON to use
      * @return The JSON body
      */
-    public static HttpEntity createJsonBody(JSONObject json) {
-        return new StringEntity(json.toString(), ContentType.APPLICATION_JSON);
-    }
-
-    /**
-     * Creates a JSON body
-     *
-     * @param json The JSON to use
-     * @return The JSON body
-     */
-    public static HttpEntity createJsonBody(JSONArray json) {
+    public static HttpEntity createJsonBody(JSONValue json) {
         return new StringEntity(json.toString(), ContentType.APPLICATION_JSON);
     }
 }
