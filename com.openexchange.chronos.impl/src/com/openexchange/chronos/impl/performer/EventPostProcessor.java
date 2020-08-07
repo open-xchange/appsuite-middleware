@@ -282,7 +282,14 @@ public class EventPostProcessor {
      */
     public EventPostProcessor process(Collection<Event> events, int forUser) throws OXException {
         for (Event event : events) {
-            doProcess(event, getFolder(session, getFolderView(injectUserAttendeeData(event), forUser), false));
+            CalendarFolder folder;
+            try {
+                folder = getFolder(session, getFolderView(injectUserAttendeeData(event), forUser), false);
+            } catch (OXException e) {
+                LOG.warn("Unexpected error determining folder view for user {} in event {}", I(forUser), event, e);
+                continue;
+            }
+            doProcess(event, folder);
             checkResultSizeNotExceeded();
         }
         return this;
