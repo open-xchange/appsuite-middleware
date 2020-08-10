@@ -372,15 +372,18 @@ public class CompositionSpaces {
             return future.get(60, TimeUnit.SECONDS).booleanValue() ? Optional.of(matcher) : Optional.empty();
         } catch (InterruptedException e) {
             // Keep interrupted status
+            LoggerHolder.LOG.warn("Interrupted while trying to parse: {}", input, e);
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
+            LoggerHolder.LOG.warn("Failed to parse: {}", input, cause == null ? e : cause);
             if (cause instanceof Error) {
                 throw (Error) cause;
             }
             throw (cause instanceof RuntimeException) ? ((RuntimeException) cause) : new RuntimeException(e);
         } catch (TimeoutException e) {
+            LoggerHolder.LOG.warn("Timed out while trying to parse: {}", input);
             future.cancel(true);
             return Optional.empty();
         }
