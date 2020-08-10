@@ -363,13 +363,7 @@ public final class DatabaseFolderConverter {
                     retval = new DatabaseFolder(fo);
                 }
             } else {
-                int contactCollectorFolder;
-                if (session != null) {
-                    contactCollectorFolder = getContactCollectorFolder(session, con);
-                } else {
-                    contactCollectorFolder = getContactCollectorFolder(user.getId(), ctx.getContextId(), con);
-                }
-                if (folderId == contactCollectorFolder) {
+                if (isContactCollectorFolder(ctx.getContextId(), fo, session, con)) {
                     // "Collected addresses" folder
                     retval = new LocalizedDatabaseFolder(fo);
                     retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
@@ -412,6 +406,37 @@ public final class DatabaseFolderConverter {
         } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Gets a value indicating whether the supplied folder represents the special "contact collector" folder (of the folder's creator).
+     *
+     * @param contextId The context identifier
+     * @param folder The folder to check
+     * @param optSession The current session, or <code>null</code> if not available
+     * @param optConnection An optional connection to the database, or <code>null</code> if not available
+     * @return <code>true</code> if the folder represents the special "contact collector" folder, <code>false</code>, otherwise
+     */
+    private static boolean isContactCollectorFolder(int contextId, FolderObject folder, Session optSession, Connection optConnection) throws OXException {
+        if (null == folder || FolderObject.CONTACT != folder.getModule() || FolderObject.PUBLIC == folder.getType()) {
+            return false;
+        }
+        /*
+         * check via flag in folder metadata
+         */
+        if (null != folder.getMeta() && Boolean.TRUE.equals(folder.getMeta().get("__ccf#"))) {
+            return true;
+        }
+        /*
+         * check via cached identifier in session if session user is owner
+         */
+        if (null != optSession && optSession.getUserId() == folder.getCreatedBy()) {
+            return folder.getObjectID() == getContactCollectorFolder(optSession, optConnection);
+        }
+        /*
+         * check via server user setting of owner
+         */
+        return folder.getObjectID() == getContactCollectorFolder(folder.getCreatedBy(), contextId, optConnection);
     }
 
     private static DatabaseFolder handleDatabaseFolder(final DatabaseFolder databaseFolder, final int folderId, final FolderObject fo, final Session session, final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException, SQLException {
