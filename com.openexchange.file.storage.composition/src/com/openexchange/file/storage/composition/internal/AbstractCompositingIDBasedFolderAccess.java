@@ -386,9 +386,9 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
             throw FileStorageExceptionCodes.DELETE_DENIED.create(folderID.getService(), folderId);
         }
 
+        FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
         folderAccess.deleteFolder(folderID.getFolderId(), hardDelete);
 
-        FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
         Dictionary<String, Object> eventProperties = getEventProperties(session, folderID, path);
         eventProperties.put(FileStorageEventConstants.HARD_DELETE, Boolean.valueOf(hardDelete));
         fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, eventProperties));
