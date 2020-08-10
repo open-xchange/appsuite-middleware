@@ -62,6 +62,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
+import com.openexchange.mailmapping.MailResolverService;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
@@ -251,7 +252,15 @@ public abstract class AbstractAppPasswordStorage {
         }
         int contextId = getContextService().getContextId(loginContextInfo);
         if (-1 == contextId) {
-            throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(loginContextInfo);
+            if (NamePart.FULL.equals(namePart) && "mail".equals(getConfigService().getProperty(AppPasswordStorageProperty.LOGIN_NAME_SOURCE))) {
+                MailResolverService mailResolver = lookup.getOptionalService(MailResolverService.class);
+                if (null != mailResolver) {
+                    contextId = mailResolver.resolve(loginContextInfo).getContextID();
+                }
+            }
+            if (-1 == contextId) {
+                throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(loginContextInfo);
+            }
         }
         return contextId;
     }
