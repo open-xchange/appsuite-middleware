@@ -61,6 +61,7 @@ import org.jdom2.output.XMLOutputter;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 import com.openexchange.webdav.xml.resources.PropfindAllPropsMarshaller;
@@ -99,8 +100,12 @@ public class WebdavPropfindAction extends AbstractAction {
 		Document requestBody = null;
 		try {
 			requestBody = req.getBodyAsDocument();
-        } catch (IOException | JDOMException e) {
-            throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST, e);
+		} catch (JDOMException e1) {
+
+			forceAllProp = true; //Assume All Prop, if all else fails
+
+		} catch (IOException e1) {
+			throw WebdavProtocolException.Code.GENERAL_ERROR.create(new WebdavPath(), HttpServletResponse.SC_BAD_REQUEST);
 		}
 
         final LoadingHints loadingHints = new LoadingHints();
