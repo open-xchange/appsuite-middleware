@@ -203,6 +203,7 @@ public class MailAlarmNotificationGenerator {
             df = CalendarUtils.isAllDay(event) ? regionalSettingsService.getDateFormat(ctx.getContextId(), user.getId(), locale, DateFormat.LONG) :
                                                  regionalSettingsService.getDateTimeFormat(ctx.getContextId(), user.getId(), locale, DateFormat.LONG, DateFormat.SHORT);
         }
+        df.setTimeZone(TimeZone.getTimeZone(CalendarUtils.isFloating(event) ? "UTC" : user.getTimeZone()));
         String formattedStartDate = df.format(new Date(event.getStartDate().getTimestamp()));
 
         return translator.translate(MailAlarmMailStrings.REMINDER).concat(": ").concat(summary).concat(" - ").concat(formattedStartDate);

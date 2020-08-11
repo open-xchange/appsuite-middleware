@@ -908,6 +908,10 @@ public final class MimeMessageUtility {
             if (bodystructure.dParams != null && bodystructure.dParams.get("filename") != null) {
                 return true;
             }
+
+            if (bodystructure.disposition == null && bodystructure.cParams != null && bodystructure.cParams.get("name") != null) {
+                return true;
+            }
         }
         return MimeTypes.isConsideredAttachment(bodystructure.type + "/" + bodystructure.subtype);
     }

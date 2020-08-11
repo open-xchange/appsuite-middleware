@@ -276,7 +276,7 @@ public class S3FileStorage implements DestroyAwareFileStorage {
 
     @Override
     public long getFileSize(final String name) throws OXException {
-        return getMetadata(addPrefix(name)).getContentLength();
+        return getContentLength(getMetadata(addPrefix(name)));
     }
 
     @Override
@@ -374,7 +374,7 @@ public class S3FileStorage implements DestroyAwareFileStorage {
             SequenceInputStream inputStream = null;
             try {
                 s3Object = getObject(key);
-                long currentLength = s3Object.getObjectMetadata().getContentLength();
+                long currentLength = getContentLength(s3Object.getObjectMetadata());
                 if (currentLength != offset) {
                     throw FileStorageCodes.INVALID_OFFSET.create(Long.valueOf(offset), name, Long.valueOf(currentLength));
                 }
@@ -402,12 +402,11 @@ public class S3FileStorage implements DestroyAwareFileStorage {
             try {
                 String tempKey = addPrefix(tempName);
                 CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucketName, tempKey, bucketName, key);
-                ObjectMetadata metadata = new ObjectMetadata();
-                metadata = prepareMetadataForSSE(metadata);
+                ObjectMetadata metadata = prepareMetadataForSSE(getMetadata(tempKey).clone());
                 copyObjectRequest.setNewObjectMetadata(metadata);
                 amazonS3.copyObject(copyObjectRequest);
                 amazonS3.deleteObject(bucketName, tempKey);
-                return getMetadata(key).getContentLength();
+                return getContentLength(getMetadata(key));
             } catch (AmazonClientException e) {
                 throw wrap(e, key);
             }
@@ -432,8 +431,7 @@ public class S3FileStorage implements DestroyAwareFileStorage {
         String tempKey = generateKey(true);
         try {
             CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucketName, key, bucketName, tempKey);
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata = prepareMetadataForSSE(metadata);
+            ObjectMetadata metadata = prepareMetadataForSSE(getMetadata(key).clone());
             copyObjectRequest.setNewObjectMetadata(metadata);
             amazonS3.copyObject(copyObjectRequest);
             /*
@@ -611,4 +609,23 @@ public class S3FileStorage implements DestroyAwareFileStorage {
             Streams.close(chunk);
         }
     }
+
+    /**
+     * Extracts the effective content length from the supplied S3 object metadata, which is the length of the unencrypted content if specified, or the plain content length, otherwise.
+     *
+     * @param metadata The metadata to get the content length from
+     * @return The length of the unencrypted content if specified, or the plain content length, otherwise
+     */
+    private long getContentLength(ObjectMetadata metadata) throws OXException {
+        String unencryptedContentLength = metadata.getUserMetaDataOf(com.amazonaws.services.s3.Headers.UNENCRYPTED_CONTENT_LENGTH);
+        if (Strings.isNotEmpty(unencryptedContentLength)) {
+            try {
+                return Long.parseLong(unencryptedContentLength);
+            } catch (NumberFormatException e) {
+                throw FileStorageCodes.NO_NUMBER.create(e);
+            }
+        }
+        return metadata.getContentLength();
+    }
+
 }

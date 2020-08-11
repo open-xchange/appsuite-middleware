@@ -58,7 +58,6 @@ import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -120,6 +119,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
@@ -2519,6 +2519,21 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     throw new InvalidDataException("email1 not equal with primarymail!");
                 }
 
+                {
+                    Set<String> useraliasesAddresses = new HashSet<>(useraliases.size());
+                    for (String sAddr : useraliases) {
+                        try {
+                            QuotedInternetAddress addr = new QuotedInternetAddress(sAddr, false);
+                            useraliasesAddresses.add(addr.getIDNAddress());
+                            useraliasesAddresses.add(QuotedInternetAddress.toACE(addr.getAddress()));
+                        } catch (Exception e) {
+                            // Failed to parse as E-Mail address
+                            useraliasesAddresses.add(IDNA.toIDN(extractRealMailAddressFrom(sAddr)));
+                        }
+                    }
+                    useraliases = useraliasesAddresses;
+                }
+
                 String check_primary_mail;
                 String check_email1;
                 String check_default_sender_address;
@@ -2531,6 +2546,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     final String email = dbuser.getPrimaryEmail();
                     check_primary_mail = email == null ? email : IDNA.toIDN(email);
                 }
+                check_primary_mail = parseRealMailAddressFrom(check_primary_mail, true);
 
                 if (newEmail1 != null) {
                     check_email1 = IDNA.toIDN(newEmail1);
@@ -2538,17 +2554,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     final String s = dbuser.getEmail1();
                     check_email1 = s == null ? s : IDNA.toIDN(s);
                 }
+                check_email1 = parseRealMailAddressFrom(check_email1, true);
+
                 if (newDefaultSenderAddress != null) {
                     check_default_sender_address = IDNA.toIDN(newDefaultSenderAddress);
                 } else {
                     final String s = dbuser.getDefaultSenderAddress();
                     check_default_sender_address = s == null ? s : IDNA.toIDN(s);
                 }
+                check_default_sender_address = parseRealMailAddressFrom(check_default_sender_address, true);
 
-                List<String> realMailAddresses = extractRealMailAddresses(useraliases);
-                final boolean found_primary_mail = realMailAddresses.contains(check_primary_mail);
-                final boolean found_email1 = realMailAddresses.contains(check_email1);
-                final boolean found_default_sender_address = realMailAddresses.contains(check_default_sender_address);
+                final boolean found_primary_mail = useraliases.contains(check_primary_mail);
+                final boolean found_email1 = useraliases.contains(check_email1);
+                final boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
 
                 if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
                     throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
@@ -2565,17 +2583,32 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // TODO mail checks
     }
 
-    private List<String> extractRealMailAddresses(Collection<String> aliases) {
-        List<String> result = new ArrayList<>(aliases.size());
-        for (String mail : aliases) {
-            int indexOf = mail.indexOf('<');
-            if (indexOf >= 0) {
-                result.add(mail.substring(indexOf + 1, mail.indexOf('>')));
-            } else {
-                result.add(mail);
-            }
+    private static String parseRealMailAddressFrom(String sAddress, boolean idn) {
+        if (sAddress == null) {
+            return null;
         }
-        return result;
+
+        try {
+            QuotedInternetAddress addr = new QuotedInternetAddress(sAddress, false);
+            return idn ? addr.getIDNAddress() : QuotedInternetAddress.toACE(addr.getAddress());
+        } catch (Exception e) {
+            // Failed to parse as E-Mail address
+            String s = extractRealMailAddressFrom(sAddress);
+            return idn ? IDNA.toIDN(s) : s;
+        }
+    }
+
+    private static String extractRealMailAddressFrom(String sAddress) {
+        if (sAddress == null) {
+            return null;
+        }
+
+        int indexOf = sAddress.indexOf('<');
+        if (indexOf < 0) {
+            return sAddress;
+        }
+
+        return sAddress.substring(indexOf + 1, sAddress.indexOf('>'));
     }
 
     private static void checkContext(final Context ctx) throws InvalidDataException {

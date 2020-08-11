@@ -289,8 +289,6 @@ public class DeleteEvent extends EventObject {
                     globalDbConnection = null; // Nullify to avoid premature release
                 } catch (SQLException e) {
                     throw DeleteFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
-                } finally {
-                    databaseService.backWritableForGlobal(contextId, globalDbConnection);
                 }
             } else {
                 globalDbConnection = new Reference<Connection>(null);

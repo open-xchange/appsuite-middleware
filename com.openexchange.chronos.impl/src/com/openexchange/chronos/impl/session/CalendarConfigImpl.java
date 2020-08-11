@@ -166,6 +166,11 @@ public class CalendarConfigImpl implements CalendarConfig {
     }
 
     @Override
+    public boolean isNotifyResourceAttendees() {
+        return getConfigValue("com.openexchange.calendar.notifyResourceAttendees", Boolean.class, Boolean.FALSE).booleanValue();
+    }
+
+    @Override
     public int getMinimumSearchPatternLength() throws OXException {
         return ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
     }
