@@ -21,7 +21,7 @@ Also, some special care needs to be taken whenever an application-password enabl
 The core functionality of the application password service is included in the `open-xchange-core` package. How these passwords are stored and validated, however, is implemented in a separate package. For the default database storage, the package `open-xchange-authentication-application-storage-rdb` needs to be installed.
 
 
-## Application Types
+## Application Types
 
 The first thing to define is the list of available applications, each identified with a specific *type*, e.g. ``caldav``, ``carddav``, ``mail``, ``eas``, etc. The property ``com.openexchange.authentication.application.appTypes`` defines these applications, as a comma separated list of available types. The used identifiers types here are not displayed to the user. Example:
 
@@ -31,7 +31,7 @@ com.openexchange.authentication.application.appTypes=mail,caldav,carddav,drive,w
 
 The property can be defined using the config-cascade. Users must have at least one application defined, otherwise the service will be disabled for that user.
 
-## Application Details
+## Application Details
 
 The details and restrictions of the applications are then defined in a ``yml`` file. There is a sample yml shipped with the installation (default in /usr/share/doc/open-xchange-core-$VERSION/examples), `app-password-apps-template.yml` This file should contain the specifics of the various applications and needs to be placed in the /opt/open-xchange/etc directory as `app-password-apps.yml`. This includes the translatable display title, the permission scopes, and the order in which they are offered to the User. Example:
 
@@ -65,7 +65,7 @@ For WebDAV interfaces, the following scopes are available:
 Here, *read_webdav* / *write_webdav* are used to grant access to the user's Drive or Files module via WebDAV (at ``/servlet/webdav.infostore/`` or its aliases). Any CalDAV- and CardDAV-related endpoints (usually behind ``/servlet/dav/``) require the general scope *dav* for basic functionality, as well as the more concrete scopes *read_caldav*, *write_caldav* for CalDAV-, and *read_carddav*, *write_carddav*-specific actions.
 
 
-## Blacklists
+## Blacklists
 
 Application passwords should really not be used to log into the App Suite UI, as there will be failures due to the permission restrictions. A blacklist defines the client identifiers where application passwords should not be used.
 
@@ -73,7 +73,7 @@ Application passwords should really not be used to log into the App Suite UI, as
 com.openexchange.authentication.application.blacklistedClients=open-xchange-appsuite,com.openexchange.ajax.framework.AJAXClient
 ```
 
-## Enabling
+## Enabling
 
 Application passwords must be enabled globally by setting
 
@@ -90,12 +90,19 @@ Storage and authentication of application specific passwords is provided by addi
 
 The following section shows the configuration options for the default database storage.
 
-## Context Lookup
+## Login and Context Lookup
 
 When a user logs in using an application password, the provided login name is used to derive the user's context identifier and associated database schema. How this is done can be configured with the setting `com.openexchange.authentication.application.storage.rdb.contextLookupNamePart`, which defines the part of the login name used as context lookup source.  This can be full, just the domain, or just the local-part:
 ```
 com.openexchange.authentication.application.storage.rdb.contextLookupNamePart=domain
 ```
+
+The login name itself that is used in app-specific credentials can be controlled through the property `com.openexchange.authentication.application.storage.rdb.loginNameSource`, and should be aligned with the context lookup configuration so that the application can be authenticated properly. Possible options are `session` to use the login information from the actual regular session as-is, `mail` to take over the user's primary mail address, `username` to use the user's name, or `synthetic` to construct the name from the stored login mappings associated with the user and context, separated by the `@`-character:
+```
+com.openexchange.authentication.application.storage.rdb.loginNameSource=session
+```
+
+It defaults to `session`, while for some applications it might also be useful to forcibly use the mail address as login name. To aid the lookup of the context identifier and associated database schema for logins with mail addresses in theses scenarios, the registered mail resolver plugin is queried, too, whenever the login name source is configured to `mail`, and the context lookup name part is `full`. Unless using a custom mail resolver plugin, please check https://documentation.open-xchange.com/components/middleware/config/7.10.4/#mode=search&term=com.openexchange.mailmapping.lookUpByDomain for further details.
 
 ## Authentication against External Subsystems
 
@@ -107,7 +114,7 @@ A related use case where authentication against the mail transport server is reg
 
 If the system is set up for global password, then no additional configuration is required.
 
-### Session Password Authentication
+### Session Password Authentication
 
 If mail/transport authentication is based on the users main email/password, then the users regular password will need to be stored for use by the application passwords. The default storage package can do this, and will store the password in an encrypted format, only usable if the user properly authenticates with the application login.
 
@@ -117,6 +124,6 @@ To enable:
 com.openexchange.authentication.application.storage.rdb.storeUserPassword=true
 ```
 
-### OAuth Authentication
+### OAuth Authentication
 
 If the IMAP server uses OAuth tokens, then an additional package will need to be installed to perform authentication against an authentication server. This package registers an AppPasswordMailOauthService to get the required token.
