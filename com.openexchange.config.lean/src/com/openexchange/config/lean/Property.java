@@ -69,12 +69,18 @@ public interface Property {
     /**
      * Gets the fully qualified property name optionally replacing place-holders in brackets with values from given map (if any given).
      * <p>
-     * <b>Example</b>:<br>
-     * The fully qualified property name <code>"com.openexchange.test.[replaceMe]"</code> is returned as
-     * <code>"com.openexchange.test.success"</code> if the map contains a key called <code>"replaceMe"</code> with the value
-     * <code>"success"</code>. If the map does not contain such a key, <code>"com.openexchange.test.[replaceMe]"</code> is returned.
+     * <b>Example 1</b>:<br>
+     * The fully qualified property name <code>com.openexchange.test.[replaceMe]</code> is returned as
+     * <code>com.openexchange.test.success</code> if the map contains a key called <code>replaceMe</code> with the value
+     * <code>success</code>. If the map does not contain such a key, <code>com.openexchange.test.[replaceMe]</code> is returned.
+     * <p>
+     * <b>Example 2</b>:<br>
+     * The fully qualified property name <code>com.openexchange.test.[replaceMe].enabled</code> is returned as
+     * <code>com.openexchange.test.enabled</code> if the map contains a key called <code>replaceMe</code> with the value
+     * <code>""</code> (empty String). If the map does not contain such a key, <code>com.openexchange.test.[replaceMe]</code> is returned.
      *
-     * @param optionals A map containing values for optional parts in the fully qualified name
+     * 
+     * @param optionals A map containing values for optional parts in the fully qualified name. If the value is <code>""</code> the replacement will be removed, removing following dots, too.
      * @return The fully qualified property name with place-holders replaced
      */
     default String getFQPropertyName(Map<String, String> optionals) {
@@ -112,6 +118,10 @@ public interface Property {
                         }
                         builder.append(optValue);
                         i += toReplace.length() + 1;
+                        if ("".equals(optValue) && i < length && fqn.charAt(i + 1) == '.') {
+                            // Skip next "." when the replacement is empty
+                            i++;
+                        }
                     } else {
                         // Add '[' character as no replacement available in map
                         if (null != builder) {
@@ -146,6 +156,7 @@ public interface Property {
      *
      * @param clazz The type of the property's value to which it will be casted
      * @return The default value
+     * @param <T> The class to cast to
      * @throws IllegalArgumentException If specified type does not match the one of the default value
      */
     default <T extends Object> T getDefaultValue(Class<T> clazz) throws IllegalArgumentException {
@@ -165,7 +176,7 @@ public interface Property {
             try {
                 return clazz.cast(defaultValue);
             } catch (ClassCastException e) {
-                throw new IllegalArgumentException("The object '" + defaultValue + "' cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
+                throw new IllegalArgumentException("The object '" + defaultValue + "' cannot be converted to the specified type '" + clazz.getCanonicalName() + "'", e);
             }
         }
         throw new IllegalArgumentException("The object '" + defaultValue + "' cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");

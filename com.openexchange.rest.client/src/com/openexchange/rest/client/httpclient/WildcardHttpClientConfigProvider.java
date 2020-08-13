@@ -74,6 +74,18 @@ public interface WildcardHttpClientConfigProvider extends HttpClientConfigProvid
     String getClientIdPattern();
 
     /**
+     * Get the name of the group each client created with this provider belongs to.
+     * <p>
+     * Should be nearly the same value as per {@link #getClientIdPattern()} but without wild-cards.
+     * This name will be used in case no specific configuration for the client is set, but for the
+     * group of client represented by this provider.
+     *
+     * @return The group name
+     */
+    @NonNull
+    String getGroupName();
+
+    /**
      * Configures the {@link HttpBasicConfig}.
      * <p>
      * This method is for implementations that needs to set values based on additional properties.

@@ -58,8 +58,8 @@ import com.openexchange.config.Interests;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.utils.PropertyNameBuilder;
 import com.openexchange.rest.client.httpclient.AbstractHttpClientModifer;
-import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
+import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -70,6 +70,8 @@ import com.openexchange.server.ServiceLookup;
  */
 public class SproxydHttpClientConfig extends AbstractHttpClientModifer implements WildcardHttpClientConfigProvider {
 
+    private static final String HTTP_CLIENT_IDENTIFIER = "sproxyd";
+    
     private static final int DEF_READ_TIMEOUT = 15000;
     private static final int DEF_CON_TIMEOUT = 5000;
     private static final int DEF_MAX_CONNECTIONS_PER_HOST = 100;
@@ -89,7 +91,13 @@ public class SproxydHttpClientConfig extends AbstractHttpClientModifer implement
 
     @Override
     public @NonNull String getClientIdPattern() {
-        return "sproxyd*";
+        return HTTP_CLIENT_IDENTIFIER + "*";
+    }
+    
+    @Override
+    @NonNull
+    public String getGroupName() {
+        return HTTP_CLIENT_IDENTIFIER;
     }
 
     @Override

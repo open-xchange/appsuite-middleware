@@ -144,6 +144,12 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         public @NonNull String getClientIdPattern() {
             return "noop";
         }
+
+        @Override
+        public @NonNull String getGroupName() {
+            return "";
+        }
+
     };
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -456,26 +462,58 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
      * @return The adjusted configuration
      */
     HttpBasicConfig adjustConfig(String clientId, HttpBasicConfig httpBasicConfig) {
+        return adjustConfig(clientId, httpBasicConfig, null);
+    }
+
+    /**
+     * Adjusts configuration based on properties that start with
+     * {@value HttpClientProperty#PREFIX} and the given identifier.
+     * <p>
+     * If a value for a specified property is set, this will overwrite
+     * the set value in the configuration.
+     *
+     * @param clientId The identifier
+     * @param httpBasicConfig The configuration to adjust
+     * @param groupName The group name to retry a config load with if a specific configuration doesn't exists, or <code>null</code> to avoid a second try
+     * @return The adjusted configuration
+     */
+    HttpBasicConfig adjustConfig(String clientId, HttpBasicConfig httpBasicConfig, String groupName) {
         ConfigurationService configService = serviceLookup.getOptionalService(ConfigurationService.class);
-        if (null != configService) {
-            Map<String, String> optionals = Collections.singletonMap(HttpClientProperty.SERVICE_IDENTIFIER, clientId);
-            for (HttpClientProperty property : HttpClientProperty.values()) {
-                adjustConfig(property, httpBasicConfig, optionals, configService);
+        if (null == configService) {
+            return httpBasicConfig;
+        }
+        Map<String, String> specificReplacment = Collections.singletonMap(HttpClientProperty.SERVICE_IDENTIFIER, clientId);
+        Map<String, String> groupReplacement = Collections.singletonMap(HttpClientProperty.SERVICE_IDENTIFIER, groupName);
+        for (HttpClientProperty property : HttpClientProperty.values()) {
+            if (null != groupName && false == adjustConfig(property, httpBasicConfig, specificReplacment, configService)) {
+                adjustConfig(property, httpBasicConfig, groupReplacement, configService);
             }
         }
         return httpBasicConfig;
     }
 
-    private static void adjustConfig(HttpClientProperty property, HttpBasicConfig httpBasicConfig, Map<String, String> optionals, ConfigurationService configService) {
+    /**
+     * Set the value of the given property within the configuration.
+     *
+     * @param property The property to get a value from
+     * @param httpBasicConfig The config to set the value in
+     * @param optionals The map containing the identifier replacement
+     * @param configService The config service
+     * @return <code>true</code> If the value has been set, <code>false</code> if the config didn't change
+     */
+    private static boolean adjustConfig(HttpClientProperty property, HttpBasicConfig httpBasicConfig, Map<String, String> optionals, ConfigurationService configService) {
         String propertyName = property.getFQPropertyName(optionals);
         String value = configService.getProperty(propertyName);
         if (Strings.isNotEmpty(value)) {
             try {
                 property.setInConfig(httpBasicConfig, Integer.valueOf(value.trim()));
+                return true;
             } catch (NumberFormatException e) {
                 LOGGER.info("Unable to parse value {} for property {}", value, propertyName, e);
             }
         }
+        LOGGER.debug("No value defined for property \"{}\"", propertyName);
+        return false;
     }
 
     /**
@@ -598,7 +636,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         }
         activeClientIds.stream().filter(id -> wildcardProvider.getRegularExpressionPattern().matcher(id).matches()).forEach(id -> {
             HttpBasicConfig newClientConfig = wildcardProvider.configureHttpBasicConfig(id, createNewDefaultConfig(configService));
-            newClientConfig = adjustConfig(id, newClientConfig);
+            newClientConfig = adjustConfig(id, newClientConfig, wildcardProvider.getGroupName());
             reloadClient(id, newClientConfig, wildcardProvider, true);
         });
     }
@@ -685,6 +723,12 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         }
 
         @Override
+        @NonNull
+        public String getGroupName() {
+            return provider.getGroupName();
+        }
+
+        @Override
         public HttpBasicConfig configureHttpBasicConfig(String clientId, HttpBasicConfig config) {
             return provider.configureHttpBasicConfig(clientId, config);
         }
@@ -720,7 +764,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
                 }
                 final WildcardHttpClientConfigProvider wildcardProvider = tmp;
                 provider = wildcardProvider;
-                configSupplier = () -> adjustConfig(httpClientId, wildcardProvider.configureHttpBasicConfig(httpClientId, createNewDefaultConfig()));
+                configSupplier = () -> adjustConfig(httpClientId, wildcardProvider.configureHttpBasicConfig(httpClientId, createNewDefaultConfig()), wildcardProvider.getGroupName());
             }
         }
         /*
@@ -736,7 +780,6 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         LOGGER.trace("Initialized HTTP client for {} and put it into cache", httpClientId);
         return managedHttpClient;
     }
-
 
     WildcardHttpClientConfigProvider getWildcardProvider(String clientId) {
         WildcardHttpClientConfigProvider wildcardProvider = wildcardProvidersCache.getUnchecked(clientId);
