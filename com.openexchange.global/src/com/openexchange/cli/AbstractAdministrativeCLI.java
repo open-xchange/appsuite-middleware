@@ -88,15 +88,16 @@ public abstract class AbstractAdministrativeCLI<R, C, A> extends AbstractCLI<R, 
      * as command line options as such, i.e. as mandatory, optional or not at all.
      *
      * @return <code>true</code> if the administrative are required or configuration based; <code>false</code> otherwise
+     * @throws Exception
      */
-    protected boolean optAdministrativeOptions() {
+    protected boolean optAdministrativeOptions() throws Exception {
         Boolean requiresAdministrativePermission = requiresAdministrativePermission();
         if (requiresAdministrativePermission != null && false == requiresAdministrativePermission.booleanValue()) {
             return false;
         }
 
         // If not null, requiresAdministrativePermission is set to Boolean.TRUE at this location
-        boolean mandatory = (requiresAdministrativePermission != null);
+        boolean mandatory = (requiresAdministrativePermission != null && isAuthEnabled(getAuthenticator()));
         addAdministrativeOptions(options, mandatory);
         return true;
     }
