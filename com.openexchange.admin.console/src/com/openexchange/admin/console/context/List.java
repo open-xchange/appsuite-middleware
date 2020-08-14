@@ -61,15 +61,18 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
+/**
+ * {@link List}s all contexts
+ *
+ */
 public class List extends ListCore {
 
     public List(final String[] args2) {
-
         final AdminParser parser = new AdminParser("listcontext");
-
         commonfunctions(parser, args2);
     }
 
+    @SuppressWarnings("unused")
     public static void main(final String args[]) {
         new List(args);
     }
