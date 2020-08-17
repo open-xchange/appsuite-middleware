@@ -889,7 +889,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
              */
             if (null != listenerRegistry) {
                 for (IDBasedFileAccessListener listener : listenerRegistry) {
-                    listener.onBeforeNewFile(document, data, sequenceNumber, modifiedColumns, fileAccess, session);
+                    fileAccess = listener.onBeforeNewFile(document, data, sequenceNumber, modifiedColumns, fileAccess, session);
                 }
             }
 
@@ -949,7 +949,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
          */
         if (null != listenerRegistry) {
             for (IDBasedFileAccessListener listener : listenerRegistry) {
-                listener.onBeforeUpdateFile(document, data, sequenceNumber, modifiedColumns, isMove, fileAccess, session);
+                fileAccess = listener.onBeforeUpdateFile(document, data, sequenceNumber, modifiedColumns, isMove, fileAccess, session);
             }
         }
 
@@ -1314,7 +1314,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 IDBasedFileAccessListenerRegistry listenerRegistry = IDBasedFileAccessListenerRegistry.getInstance();
                 if (null != listenerRegistry) {
                     for (IDBasedFileAccessListener listener : listenerRegistry) {
-                        listener.onBeforeMoveFiles(sourceIds, sequenceNumber, destFolderId, fileAccess, session);
+                        fileAccess = listener.onBeforeMoveFiles(sourceIds, sequenceNumber, destFolderId, fileAccess, session);
                     }
                 }
 
@@ -1423,7 +1423,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             IDBasedFileAccessListenerRegistry listenerRegistry = IDBasedFileAccessListenerRegistry.getInstance();
             if (null != listenerRegistry) {
                 for (IDBasedFileAccessListener listener : listenerRegistry) {
-                    listener.onBeforeCopyFile(sourceId, version, destFolderId, update, newData, fields, fileAccess, session);
+                    fileAccess = listener.onBeforeCopyFile(sourceId, version, destFolderId, update, newData, fields, fileAccess, session);
                 }
             }
             IDTuple result = fileAccess.copy(new IDTuple(sourceID.getFolderId(), sourceID.getFileId()), version, destinationID.getFolderId(), metadata, newData, fields != null ? fields : Collections.emptyList());
