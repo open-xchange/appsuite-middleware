@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.EventField.ORGANIZER;
+import static com.openexchange.chronos.common.CalendarUtils.collectAttendees;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -194,9 +195,11 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
          */
         Check.recurrenceRangeMatches(recurrenceId, RecurrenceRange.THISANDFUTURE);
         Entry<CalendarObjectResource, CalendarObjectResource> splitResult = new SplitPerformer(this).split(originalEvent, recurrenceId.getValue(), null);
-        if (null != splitResult.getKey()) {
-            schedulingHelper.trackCreation(splitResult.getKey());
+        CalendarObjectResource detachedSeries = splitResult.getKey();
+        if (null != detachedSeries) {
+            schedulingHelper.trackCreation(detachedSeries, collectAttendees(detachedSeries, Boolean.FALSE, (CalendarUserType[]) null));
         }
+
         Event updatedSeriesMaster = splitResult.getValue().getSeriesMaster();
         if (null == updatedSeriesMaster) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Unable to track update. Reason: Nothing was changed.");
