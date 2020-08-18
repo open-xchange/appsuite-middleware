@@ -177,7 +177,7 @@ public class AllPerformer extends AbstractQueryPerformer {
         EventField[] fields = getFieldsForStorage(requestedFields);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, getSearchOptionsForStorage(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(folder.getCalendarUserId(), events, fields);
-        return postProcessor(getObjectIDs(events), folder.getCalendarUserId(), requestedFields, fields).process(events, folder.getCalendarUserId()).getEvents();
+        return postProcessor(getObjectIDs(events), folder.getCalendarUserId(), requestedFields, fields).process(events, folder).getEvents();
     }
 
     /**
@@ -383,7 +383,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          */
         SearchOptions searchOptions = new SearchOptions(session);
         if (null != searchOptions.getFrom() || null != searchOptions.getUntil()) {
-            queriedFields = Arrays.add(queriedFields, EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.START_DATE, EventField.END_DATE, 
+            queriedFields = Arrays.add(queriedFields, EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.START_DATE, EventField.END_DATE,
                 EventField.RECURRENCE_RULE, EventField.RECURRENCE_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES);
         }
         /*
@@ -448,7 +448,7 @@ public class AllPerformer extends AbstractQueryPerformer {
      * <p/>
      * In case the resulting events are <i>post-processed</i>, sorting is done by the {@link EventPostProcessor}, so that the storage does
      * not need to consider an <code>ORDER BY ...</code> clause.
-     * 
+     *
      * @param parameters The parameters to get the storage search options from
      * @return The search options to use for storage operations
      */
