@@ -19,7 +19,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 20
+%define        ox_release 21
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -864,6 +864,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Tue Aug 18 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-08-24 (5847)
 * Tue Aug 04 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-08-10 (5833)
 * Tue Jul 21 2020 Marcus Klein <marcus.klein@open-xchange.com>
