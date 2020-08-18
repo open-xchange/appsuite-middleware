@@ -52,6 +52,7 @@ package com.openexchange.switchboard.zoom;
 import static com.openexchange.chronos.common.CalendarUtils.calculateEnd;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
+import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
 import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.switchboard.zoom.Utils.getZoomConferences;
@@ -67,7 +68,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarInterceptor;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.RecurrenceIterator;
@@ -75,6 +75,7 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.switchboard.SwitchboardProperties;
+import com.openexchange.switchboard.exception.ZoomExceptionCodes;
 
 /**
  * {@link ZoomInterceptor}
@@ -125,8 +126,7 @@ public class ZoomInterceptor implements CalendarInterceptor {
              */
             for (Conference originalConference : getZoomConferences(originalEvent)) {
                 if (updatedConferences.stream().anyMatch(c -> matches(c, originalConference))) {
-                    Exception cause = new Exception("Cannot use original Zoom conference when switching from series to single event or vice-versa.");
-                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(cause, originalEvent.getId(), EventField.RECURRENCE_RULE);
+                    throw ZoomExceptionCodes.NO_SWITCH_TO_OR_FROM_SERIES.create(originalEvent.getId());
                 }
             }
         }
@@ -163,9 +163,10 @@ public class ZoomInterceptor implements CalendarInterceptor {
         /*
          * no zoom meetings with floating dates
          */
-        if (isFloating(event)) {
-            Exception cause = new Exception("No Zoom meetings with floating dates");
-            throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(cause, String.valueOf(event.getStartDate()), String.valueOf(event.getEndDate()));
+        if (isAllDay(event)) {
+            throw ZoomExceptionCodes.NO_ALL_DAY_APPOINTMENTS.create(event.getId());
+        } else if (isFloating(event)) {
+            throw ZoomExceptionCodes.NO_FLOATING_APPOINTMENTS.create(event.getId());
         }
         /*
          * no recurring zoom meeting that spans over more than a year
@@ -174,8 +175,7 @@ public class ZoomInterceptor implements CalendarInterceptor {
             DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
             RecurrenceRule rule = initRecurrenceRule(recurrenceData.getRecurrenceRule());
             if (null == rule.getCount() && null == rule.getUntil()) {
-                Exception cause = new Exception("No recurring Zoom meeting that spans over more than a year");
-                throw CalendarExceptionCodes.INVALID_RRULE.create(cause, recurrenceData.getRecurrenceRule());
+                throw ZoomExceptionCodes.NO_SERIES_LONGER_THAN_A_YEAR.create(event.getId(), String.valueOf(recurrenceData));
             }
             DateTime rangeStart = event.getStartDate();
             RecurrenceIterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(recurrenceData);
@@ -184,8 +184,7 @@ public class ZoomInterceptor implements CalendarInterceptor {
             while (iterator.hasNext()) {
                 rangeEnd = calculateEnd(event, iterator.next());
                 if (maxDuration < rangeEnd.getTimestamp() - rangeStart.getTimestamp()) {
-                    Exception cause = new Exception("No recurring Zoom meeting that spans over more than a year");
-                    throw CalendarExceptionCodes.INVALID_RRULE.create(cause, recurrenceData.getRecurrenceRule());
+                    throw ZoomExceptionCodes.NO_SERIES_LONGER_THAN_A_YEAR.create(event.getId(), String.valueOf(recurrenceData));
                 }
             }
         }

@@ -59,4 +59,12 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class ZoomExceptionMessages implements LocalizableStrings {
 
+    public static final String NO_ALL_DAY_APPOINTMENTS_MSG = "Zoom meetings cannot be used in all-day appointments. Please use a fixed start- and end-time and try again.";
+
+    public static final String NO_FLOATING_APPOINTMENTS_MSG = "Zoom meetings cannot be used in appointments with floating start- or end-times. Please use a fixed start- and end-time and try again.";
+
+    public static final String NO_SERIES_LONGER_THAN_A_YEAR_MSG = "Zoom meetings cannot be used in recurring appointment series spanning over more than one year. Please shorten the recurrence rule and try again.";
+
+    public static final String NO_SWITCH_TO_OR_FROM_SERIES_MSG = "The same Zoom meeting can't be re-used when switching from recurring to single appointments and vice versa. Please generate a new Zoom meeting and try again.";
+
 }

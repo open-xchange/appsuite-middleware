@@ -50,6 +50,10 @@
 package com.openexchange.switchboard.exception;
 
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
+import static com.openexchange.switchboard.exception.ZoomExceptionMessages.NO_ALL_DAY_APPOINTMENTS_MSG;
+import static com.openexchange.switchboard.exception.ZoomExceptionMessages.NO_FLOATING_APPOINTMENTS_MSG;
+import static com.openexchange.switchboard.exception.ZoomExceptionMessages.NO_SERIES_LONGER_THAN_A_YEAR_MSG;
+import static com.openexchange.switchboard.exception.ZoomExceptionMessages.NO_SWITCH_TO_OR_FROM_SERIES_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -67,6 +71,31 @@ public enum ZoomExceptionCodes implements DisplayableOXExceptionCode {
     SWITCHBOARD_ERROR("The switchboard returned with an error: %1$s", Category.CATEGORY_ERROR, 2),
     IO_ERROR("An IO error occured.", Category.CATEGORY_ERROR, 3),
     SWITCHBOARD_SERVER_ERROR("The switchboard server returned with an error: %1$s", Category.CATEGORY_ERROR, 4),
+
+    /**
+     * <li>Zoom meetings cannot be used in all-day appointments. Please use a fixed start- and end-time and try again.</li>
+     * <li>Can't save all-day event with zoom meeting [id %1$s]</li>
+     */
+    NO_ALL_DAY_APPOINTMENTS("Can't save all-day event with zoom meeting [id %1$s]", NO_ALL_DAY_APPOINTMENTS_MSG, CATEGORY_USER_INPUT, 5),
+
+    /**
+     * <li>Zoom meetings cannot be used in appointments with floating start- or end-times. Please use a fixed start- and end-time and try again.</li>
+     * <li>Can't save floating event with zoom meeting [id %1$s]</li>
+     */
+    NO_FLOATING_APPOINTMENTS("Can't save floating event with zoom meeting [id %1$s]", NO_FLOATING_APPOINTMENTS_MSG, CATEGORY_USER_INPUT, 6),
+
+    /**
+     * <li>Zoom meetings cannot be used in recurring appointment series spanning over more than one year. Please shorten the recurrence rule and try again.</li>
+     * <li>Can't save event series with zoom meeting spanning over more than a year [id %1$s, recurrence data %2$s]</li>
+     */
+    NO_SERIES_LONGER_THAN_A_YEAR("Can't save event series with zoom meeting spanning over more than a year [id %1$s, recurrence data %2$s]", NO_SERIES_LONGER_THAN_A_YEAR_MSG, CATEGORY_USER_INPUT, 7),
+
+    /**
+     * <li>The same Zoom meeting can't be re-used when switching from recurring to single appointments and vice versa. Please generate a new Zoom meeting and try again.</li>
+     * <li>Can't switch from/to series to single event with zoom meeting [id %1$s]</li>
+     */
+    NO_SWITCH_TO_OR_FROM_SERIES("Can't switch from/to series to single event with zoom meeting [id %1$s]", NO_SWITCH_TO_OR_FROM_SERIES_MSG, CATEGORY_USER_INPUT, 8),
+
     ;
 
     private static final String PREFIX = "ZOOM".intern();
