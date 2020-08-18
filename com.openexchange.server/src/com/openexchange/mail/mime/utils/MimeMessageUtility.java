@@ -789,7 +789,7 @@ public final class MimeMessageUtility {
 
         ContentDisposition contentDisposition = part.getContentDisposition();
         if (contentDisposition != null) {
-            if (contentDisposition.getFilenameParameter() != null) {
+            if (contentDisposition.getFilenameParameter() != null || part.getFileName() != null) {
                 return true;
             }
             String disposition = contentDisposition.getDisposition();
