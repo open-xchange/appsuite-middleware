@@ -115,6 +115,17 @@ public class OXShareAccountAccess implements CapabilityAware {
         return this.account;
     }
 
+    /**
+     * Internal method to ensure that the account access is connected
+     *
+     * @throws OXException If the account access is not connected
+     */
+    private void assertConnected() throws OXException {
+        if (!isConnected()) {
+            throw FileStorageExceptionCodes.NOT_CONNECTED.create();
+        }
+    }
+
     @Override
     public String getAccountId() {
         return account.getId();
@@ -122,12 +133,13 @@ public class OXShareAccountAccess implements CapabilityAware {
 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
+        assertConnected();
         return new OXShareFileAccess(this, shareClient);
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
-        connect();
+        assertConnected();
         return new OXShareFolderAccess(this, shareClient);
     }
 

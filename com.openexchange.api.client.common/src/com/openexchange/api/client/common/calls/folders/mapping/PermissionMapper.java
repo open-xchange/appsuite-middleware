@@ -95,7 +95,10 @@ public abstract class PermissionMapper<O> extends ListItemMapping<Permission, O,
 
     @Override
     public JSONObject serialize(Permission from, TimeZone timeZone) throws JSONException {
-        // TODO Auto-generated method stub
-        return null;
+        JSONObject json = new JSONObject();
+        json.put("entity", from.getEntity());
+        json.put("group", from.isGroup());
+        json.put("bits", Permissions.createPermissionBits(from));
+        return json;
     }
 }

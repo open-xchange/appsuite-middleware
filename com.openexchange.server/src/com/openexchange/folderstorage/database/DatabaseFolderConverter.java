@@ -515,10 +515,6 @@ public final class DatabaseFolderConverter {
                         final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
                         if (null != defaultAccount) {
                             /*
-                             * Enforce subfolders are retrieved from appropriate file storage
-                             */
-                            databaseFolder.setSubfolderIDs(null);
-                            /*
                              * Mark for user-sensitive cache
                              */
                             databaseFolder.setCacheable(true);
@@ -526,6 +522,11 @@ public final class DatabaseFolderConverter {
                             setChildren = false;
                         }
                     }
+                    /*
+                     * Enforce subfolders are retrieved from appropriate file storage
+                     */
+                    databaseFolder.setSubfolderIDs(null);
+                    setChildren = false;
                 }
                 if (setChildren) {
                     if (fo.containsSubfolderIds()) {

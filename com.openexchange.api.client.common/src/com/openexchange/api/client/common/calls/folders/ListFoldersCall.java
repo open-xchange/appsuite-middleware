@@ -72,17 +72,10 @@ public class ListFoldersCall extends AbstractGetCall<List<RemoteFolder>> {
     /**
      * Initializes a new {@link ListFoldersCall}.
      *
-     * @param parent The ID of the parent folder to list 
+     * @param parent The ID of the parent folder to list
      */
     public ListFoldersCall(String parent) {
-        //@formatter:off
-        this(parent, new RemoteFolderField[] {
-            RemoteFolderField.ID,
-            RemoteFolderField.TITLE,
-            RemoteFolderField.CREATED_BY,
-            RemoteFolderField.CREATION_DATE,
-            RemoteFolderField.LAST_MODIFIED});
-        //@formatter:on
+        this(parent, RemoteFolderField.values());
     }
 
     /**

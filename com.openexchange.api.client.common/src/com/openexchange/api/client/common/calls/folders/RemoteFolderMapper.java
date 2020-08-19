@@ -49,7 +49,6 @@
 
 package com.openexchange.api.client.common.calls.folders;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
@@ -57,10 +56,17 @@ import java.util.List;
 import com.openexchange.api.client.common.calls.folders.mapping.PermissionMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.json.DateMapping;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
+import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
+
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.b;
 
 /**
  * {@link RemoteFolderMapper}
@@ -268,7 +274,56 @@ public class RemoteFolderMapper extends DefaultJsonMapper<RemoteFolder, RemoteFo
             @Override
             public void remove(RemoteFolder object) {
                 object.setPermissions(null);
+            }
+        });
 
+        mappings.put(RemoteFolderField.SUBFOLDERS, new BooleanMapping<RemoteFolder>(RemoteFolderField.SUBFOLDERS.getName(), I(RemoteFolderField.SUBFOLDERS.getColumn())) {
+
+            @Override
+            public boolean isSet(RemoteFolder object) {
+                return object.containsHasSubfolders();
+            }
+
+            @Override
+            public void set(RemoteFolder object, Boolean value) throws OXException {
+                if(value != null) {
+                    object.setHasSubfolders(b(value));
+                }
+            }
+
+            @Override
+            public Boolean get(RemoteFolder object) {
+                return B(object.hasSubfolders());
+            }
+
+            @Override
+            public void remove(RemoteFolder object) {
+                object.removeHasSubfolders();
+            }
+        });
+
+        mappings.put(RemoteFolderField.OWN_RIGHTS, new IntegerMapping<RemoteFolder>(RemoteFolderField.OWN_RIGHTS.getName(), I(RemoteFolderField.OWN_RIGHTS.getColumn())) {
+
+            @Override
+            public boolean isSet(RemoteFolder object) {
+                return object.containsOwnRights();
+            }
+
+            @Override
+            public void set(RemoteFolder object, Integer value) throws OXException {
+                if (value != null) {
+                    object.setOwnRights(i(value));
+                }
+            }
+
+            @Override
+            public Integer get(RemoteFolder object) {
+                return I(object.getOwnRights());
+            }
+
+            @Override
+            public void remove(RemoteFolder object) {
+                object.removeOwnRights();
             }
         });
 

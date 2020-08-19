@@ -47,15 +47,25 @@
  *
  */
 
-package com.openexchange.api.client.common.calls.folders;
+package com.openexchange.file.storage.oxshare;
 
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ListFoldersResponse}
+ * {@link OXShareFileStorageExceptionMessages}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class ListFoldersResponse {
+public class OXShareFileStorageExceptionMessages implements LocalizableStrings {
 
+    /**
+     * The connection check failed
+     */
+    public static final String PING_FAILED = "The connection check failed.";
+
+    /**
+     * Missing capability for file storage %1$s
+     */
+    public static final String MISSING_CAP_MSG = "Missing capability for file storage %1$s";
 }

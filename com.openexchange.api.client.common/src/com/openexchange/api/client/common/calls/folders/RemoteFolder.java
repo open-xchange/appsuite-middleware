@@ -64,6 +64,12 @@ public class RemoteFolder extends AbstractFolder {
     protected String module;
     protected boolean global;
 
+    private int ownRights;
+    private boolean bOwnRights;
+
+    private boolean hasSubfolders;
+    private boolean bHasSubfolders;
+
     /**
      * Initializes a new {@link RemoteFolder}.
      *
@@ -118,5 +124,83 @@ public class RemoteFolder extends AbstractFolder {
      */
     public void setModule(String module) {
         this.module = module;
+    }
+
+    /**
+     * Gets the user's own permissions
+     *
+     * @return The permissions
+     */
+    public int getOwnRights() {
+        return ownRights;
+    }
+
+    /**
+     * Sets the user's own permission
+     *
+     * @param ownRights The permissions
+     */
+    public void setOwnRights(int ownRights) {
+        this.ownRights = ownRights;
+        bOwnRights = true;
+    }
+
+    /**
+     * Removes the ownRights
+     */
+    public void removeOwnRights() {
+        ownRights = 0;
+        bOwnRights = false;
+    }
+
+    /**
+     * Indicates whether the folder has the ownRights field set
+     *
+     * @return True, if the folder has the ownRights field set, false otherwise
+     */
+    public boolean containsOwnRights() {
+        return bOwnRights;
+    }
+
+    /**
+     * Gets whether the folder has sub folders
+     *
+     * @return True if the folder has sub folders, false otherwise
+     */
+    public boolean hasSubfolders() {
+       return hasSubfolders;
+    }
+
+    /**
+     * Sets whether the folder has sub folders
+     *
+     * @param hasSubfolders Whether the folder has sub folders or not
+     */
+    public void setHasSubfolders(boolean hasSubfolders) {
+       this.hasSubfolders = hasSubfolders;
+       bHasSubfolders = true;
+    }
+
+    /**
+     * Indicates whether the folder has the sub folders flag set
+     *
+     * @return true, if the folder has the sub folder flag set, false otherwise
+     */
+    public boolean containsHasSubfolders() {
+       return bHasSubfolders;
+    }
+
+    /**
+     * Removes the sub folders
+     */
+    public void removeHasSubfolders() {
+        setSubfolderIDs(null);
+        bHasSubfolders = false;
+    }
+
+    @Override
+    public void setSubfolderIDs(String[] subfolderIds) {
+        super.setSubfolderIDs(subfolderIds);
+        setHasSubfolders(subfolderIds != null && subfolderIds.length > 0);
     }
 }
