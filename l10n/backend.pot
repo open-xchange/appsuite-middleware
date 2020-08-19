@@ -3121,6 +3121,13 @@ msgstr ""
 msgid "Restore from trash is not supported"
 msgstr ""
 
+#. The account name is too long. Please limit the account name to a maximum of %1$s characters.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:193
+msgid ""
+"The account name is too long. Please limit the account name to a maximum of "
+"%1$s characters."
+msgstr ""
+
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -4225,19 +4232,21 @@ msgid "Updating attributes failed in context %1$d for user %2$d."
 msgstr ""
 
 #. *
-#. * Invalid password length. The password must be of minimum length %1$d.
+#. * Invalid password length. The password must have a minimum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
 msgid ""
-"Invalid password length. The password must have a minimum length of %1$d."
+"Invalid password length. The password must have a minimum length of %1$d "
+"characters."
 msgstr ""
 
 #. *
-#. * Invalid password length. The password must be of maximum length %1$d.
+#. * Invalid password length. The password must have a maximum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
 msgid ""
-"Invalid password length. The password must have a maximum length of %1$d."
+"Invalid password length. The password must have a maximum length of %1$d "
+"characters."
 msgstr ""
 
 #. *
@@ -10967,14 +10976,19 @@ msgstr ""
 msgid "The signature image exceeds the maximum allowed size of '%1$s'."
 msgstr ""
 
-#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#. The signature size exceeds the maximum allowed size of '%1$s'.
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
+msgid "The signature size exceeds the maximum allowed size of '%1$s'."
+msgstr ""
+
+#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
 msgid ""
 "The maximum allowed number of '%1$s' images in the signature is reached."
 msgstr ""
 
 #. Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
-#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:83
 msgid "You are not allowed to modify the signature"
 msgstr ""
 
@@ -11055,6 +11069,31 @@ msgstr ""
 #. You already have such a subscription.
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:92
 msgid "You already have such a subscription."
+msgstr ""
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:62
+msgid ""
+"Zoom meetings cannot be used in all-day appointments. Please use a fixed "
+"start- and end-time and try again."
+msgstr ""
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:64
+msgid ""
+"Zoom meetings cannot be used in appointments with floating start- or end-"
+"times. Please use a fixed start- and end-time and try again."
+msgstr ""
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:66
+msgid ""
+"Zoom meetings cannot be used in recurring appointment series spanning over "
+"more than one year. Please shorten the recurrence rule and try again."
+msgstr ""
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:68
+msgid ""
+"The same Zoom meeting can't be re-used when switching from recurring to "
+"single appointments and vice versa. Please generate a new Zoom meeting and "
+"try again."
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
