@@ -59,8 +59,6 @@ public class FolderBody {
 
     private final RemoteFolder folder;
 
-    /* TODO: Notification Object */
-
     /**
      * Initializes a new {@link FolderBody}.
      *

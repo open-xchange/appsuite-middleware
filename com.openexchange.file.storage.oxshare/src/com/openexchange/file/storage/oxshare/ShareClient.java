@@ -73,6 +73,7 @@ import com.openexchange.api.client.common.calls.folders.ListFoldersCall;
 import com.openexchange.api.client.common.calls.folders.RemoteFolder;
 import com.openexchange.api.client.common.calls.folders.UpdateCall;
 import com.openexchange.api.client.common.calls.infostore.DeleteCall;
+import com.openexchange.api.client.common.calls.infostore.DetachCall;
 import com.openexchange.api.client.common.calls.infostore.DocumentCall;
 import com.openexchange.api.client.common.calls.infostore.GetAllCall;
 import com.openexchange.api.client.common.calls.infostore.GetCall;
@@ -103,6 +104,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageGuestPermission;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.Range;
 import com.openexchange.folderstorage.BasicGuestPermission;
 import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.FolderStorage;
@@ -126,7 +128,7 @@ public class ShareClient {
     private final ApiClient ajaxClient;
     private final Session session;
 
-    private static final String USER_INFOSTORE_FOLDER = "10";
+    private static final String SYSTEM_ROOT_FOLDER_ID = "0";
     private static final String TREE_ID = FolderStorage.REAL_TREE_ID;
     private static final List<Field> ALL_FIELDS;
     private static final String MODULE_FILES = "files";
@@ -152,7 +154,7 @@ public class ShareClient {
     }
 
     private String getFolderId(String folderId) {
-        return Strings.isEmpty(folderId) ? USER_INFOSTORE_FOLDER : folderId;
+        return Strings.isEmpty(folderId) ? SYSTEM_ROOT_FOLDER_ID : folderId;
     }
 
     /**
@@ -194,9 +196,8 @@ public class ShareClient {
      *
      * @param fileStoragePermissions The permissions to transform
      * @return An array of transformed permissions
-     * @throws OXException
      */
-    private static Permission[] parsePermission(List<FileStoragePermission> fileStoragePermissions) throws OXException {
+    private static Permission[] parsePermission(List<FileStoragePermission> fileStoragePermissions) {
         if (null == fileStoragePermissions) {
             return null;
         }
@@ -256,10 +257,10 @@ public class ShareClient {
      * @param id The ID of the item to get the data from
      * @param version The version to get the data for, or null to get the data for the current version
      * @return The binary data as {@link InputStream}
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public InputStream getDocument(String folderId, String id, @Nullable String version) throws OXException {
-        return ajaxClient.execute(new DocumentCall(folderId, id, version));
+        return ajaxClient.execute(new DocumentCall(folderId, id, version, DocumentCall.DELIVERY_METHOD_DOWNLOAD));
     }
 
     /**
@@ -269,7 +270,7 @@ public class ShareClient {
      * @param data The new content to set
      * @param tryAddVersion whether or not to try adding the file as new version if such a file already exists
      * @return The {@link IDTuple} of the new created file
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public IDTuple saveNewDocument(File file, InputStream data, boolean tryAddVersion) throws OXException {
         String idTuple = ajaxClient.execute(new NewCall(new DefaultFile(file), data, B(tryAddVersion)));
@@ -284,7 +285,7 @@ public class ShareClient {
      * @param sequenceNumber The sequence number
      * @param columns The ID of the file's fields to update
      * @return The {@link IDTuple} of the updated file
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public IDTuple updateDocument(File file, InputStream data, long sequenceNumber, int[] columns) throws OXException {
         String idTuple = ajaxClient.execute(new PostUpdateCall(new DefaultFile(file), data, sequenceNumber, columns));
@@ -298,7 +299,7 @@ public class ShareClient {
      * @param sequenceNumber The sequence number
      * @param columns The ID of the file's fields to update
      * @return The {@link IDTuple} of the updated file
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public IDTuple updateDocument(File file, long sequenceNumber, int[] columns) throws OXException {
         String idTuple = ajaxClient.execute(new PutUpdateCall(new DefaultFile(file), sequenceNumber, columns));
@@ -312,7 +313,7 @@ public class ShareClient {
      * @param file The new meta data of the destination item
      * @param columns The columns to set
      * @return The {@link IDTuple} of the copied file
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public IDTuple copyDocument(String id, File file, int[] columns) throws OXException {
         return copyDocument(id, file, columns, null);
@@ -326,7 +327,7 @@ public class ShareClient {
      * @param columns The columns to set
      * @param data The new binary data to apply, or null to not apply any binary data
      * @return The {@link IDTuple} of the copied file
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public IDTuple copyDocument(String id, File file, int[] columns, @Nullable InputStream data) throws OXException {
         //@formatter:off
@@ -343,8 +344,8 @@ public class ShareClient {
      * @param id The ID of the file to move
      * @param destinationFolder The ID of the new destination folder
      * @param timestamp The timestamp
-     * @return
-     * @throws OXException
+     * @return The new folder/file tuple
+     * @throws OXException In case of error
      */
     public IDTuple moveDocument(String id, String destinationFolder, long timestamp) throws OXException {
         String newId = ajaxClient.execute(new MoveCall(id, destinationFolder, timestamp));
@@ -358,7 +359,7 @@ public class ShareClient {
      * @param id The ID of the file
      * @param version The version, or null to fetch the current version
      * @return The file
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public OXShareFile getMetaData(String folderId, String id, @Nullable String version) throws OXException {
         DefaultFile file = ajaxClient.execute(new GetCall(folderId, id, version));
@@ -373,9 +374,24 @@ public class ShareClient {
      * @param sort the field to use for sorting
      * @param order The sort order
      * @return The documents of the given folder
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
+        return getDocuments(folderId, fields, sort, order, null);
+    }
+
+    /**
+     * Gets all documents in the given folder
+     *
+     * @param folderId The ID of the folder
+     * @param fields The fields to get, or null to return all known fields
+     * @param sort the field to use for sorting
+     * @param order The sort order
+     * @param range the range
+     * @return The documents of the given folder
+     * @throws OXException
+     */
+    public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order, Range range) throws OXException {
 
         //TODO: refine
         //Folders in the first layer are not accessible for file listing (infostore?action=all)
@@ -389,7 +405,9 @@ public class ShareClient {
             new GetAllCall(getFolderId(folderId),
                           toIdList(fieldsToQuery),
                           sort != null ? I(sort.getNumber()) : null,
-                          order));
+                          order,
+                          range != null ? I(range.from) : null,
+                          range != null ? I(range.to) : null));
         //@formatter:on
         return new FileTimedResult((List<File>) files);
     }
@@ -400,7 +418,7 @@ public class ShareClient {
      * @param ids The IDs of the items to fetch
      * @param fields The fields to fetch
      * @return The result
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
         final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
@@ -421,7 +439,7 @@ public class ShareClient {
      * @param sort The sorting field
      * @param order The sort direction
      * @return A list of versions
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public TimedResult<File> getVersions(String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
         final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
@@ -436,12 +454,29 @@ public class ShareClient {
     }
 
     /**
+     * Deletes a given set of versions from a file
+     * deleteVersions
+     *
+     * @param id The ID of the file to delete the versions for
+     * @param folder The folder ID of the file
+     * @param timestamp The timestamp / sequencenumber
+     * @param versionsToDelete A list of versions to delta
+     * @return The a list of versions which could not get removed
+     * @throws OXException
+     */
+    public String[] deleteVersions(String id, String folder, long timestamp, String[] versionsToDelete) throws OXException {
+        int[] versions = Arrays.asList(versionsToDelete).stream().mapToInt(v -> Integer.parseInt(v)).toArray();
+        List<Integer> execute = ajaxClient.execute(new DetachCall(id, folder, timestamp, versions));
+        return execute.stream().map(v -> v.toString()).toArray(String[]::new);
+    }
+
+    /**
      * Removed a list of documents
      *
      * @param filesToDelete A list of IDs to removed
      * @param sequenceNumber The sequenceNumber
      * @param hardDelete The hardDelete flag
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public void removeDocuments(List<IDTuple> filesToDelete, long sequenceNumber, boolean hardDelete) throws OXException {
         if (!filesToDelete.isEmpty()) {
@@ -455,7 +490,7 @@ public class ShareClient {
      *
      * @param id The id of the item to lock
      * @param diff The amount of time to lock the item as diff related from the current server time
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public void lock(String id, long diff) throws OXException {
         ajaxClient.execute(new LockCall(id, L(diff)));
@@ -465,7 +500,7 @@ public class ShareClient {
      * Unlocks an item
      *
      * @param id The id of the item to lock
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public void Unlock(String id) throws OXException {
         ajaxClient.execute(new UnlockCall(id));
@@ -474,10 +509,10 @@ public class ShareClient {
     /**
      * Creates a new folder
      *
-     * @param parentFolder The ID of the parent folder to create the folder in
+     * @param folder The ID of the parent folder to create the folder in
      * @param autoRename <code>true</code> to rename the folder (e.g. adding <code>" (1)"</code> appendix) to avoid conflicts; otherwise <code>false</code>
      * @return The ID of the new created folder
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public String createaFolder(FileStorageFolder folder, boolean autoRename) throws OXException {
         RemoteFolder newRemoteFolder = new RemoteFolder(INFOSTORE);
@@ -497,7 +532,7 @@ public class ShareClient {
      * @param timestamp The timestamp
      * @param autoRename <code>true</code> to rename the folder (e.g. adding <code>" (1)"</code> appendix) to avoid conflicts; otherwise <code>false</code>
      * @return The ID of the moved folder
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public String moveFolder(String folderId, String newParentId, String newName, long timestamp, boolean autoRename) throws OXException {
         RemoteFolder updatedFolder = new RemoteFolder(INFOSTORE);
@@ -514,7 +549,7 @@ public class ShareClient {
      * @param timestamp The timestamp
      * @param autoRename <code>true</code> to rename the folder (e.g. adding <code>" (1)"</code> appendix) to avoid conflicts; otherwise <code>false</code>
      * @return The ID of the updated folder
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public String updateFolder(String folderId, FileStorageFolder folder, long timestamp, boolean autoRename) throws OXException {
         RemoteFolder updatedFolder = new RemoteFolder(INFOSTORE);
@@ -543,7 +578,7 @@ public class ShareClient {
      * Gets the filestorage / infostore quota
      *
      * @return The {@link AccountQuota} for module "filestorage" and account "infostore"
-     * @throws OXException
+     * @throws OXException In case of error
      */
     public AccountQuota getInfostoreQuota() throws OXException {
         final String module = "filestorage";
@@ -561,8 +596,8 @@ public class ShareClient {
      * @param sort The sorting field
      * @param order The sort order
      * @param ignoreDeleted <code>true</code> in order to ignore deleted files, <code>false</code> to include deleted files.
-     * @return
-     * @throws OXException
+     * @return The changes as delta
+     * @throws OXException In case of error
      */
     @SuppressWarnings("unchecked")
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
@@ -629,4 +664,5 @@ public class ShareClient {
         List<? extends File> resultFiles = result.getResultObjects();
         return new SearchIteratorAdapter<File>((Iterator<File>) resultFiles.iterator(), resultFiles.size());
     }
+
 }

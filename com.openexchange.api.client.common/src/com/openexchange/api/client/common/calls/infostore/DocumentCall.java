@@ -67,6 +67,9 @@ public class DocumentCall extends AbstractGetCall<InputStream> {
     private final String folderId;
     private final String id;
     private final String version;
+    private final String delivery;
+
+    public static final String DELIVERY_METHOD_DOWNLOAD = "download";
 
     /**
      * Initializes a new {@link DocumentCall}.
@@ -86,10 +89,22 @@ public class DocumentCall extends AbstractGetCall<InputStream> {
      * @param version The version to fetch
      */
     public DocumentCall(String folderId, String id, String version) {
-        super();
+        this(folderId, id, version, null);
+    }
+
+    /**
+     * Initializes a new {@link DocumentCall}.
+     *
+     * @param folderId The ID of the folder
+     * @param id The ID of the document
+     * @param version The version to fetch
+     * @param delivery The delivery method to use
+     */
+    public DocumentCall(String folderId, String id, String version, String delivery) {
         this.folderId = folderId;
         this.id = id;
         this.version = version;
+        this.delivery = delivery;
     }
 
     @Override
@@ -103,6 +118,7 @@ public class DocumentCall extends AbstractGetCall<InputStream> {
         parameters.put("id", id);
         parameters.put("folder", folderId);
         putIfPresent(parameters, "version", version);
+        putIfPresent(parameters, "delivery", delivery);
     }
 
     @Override

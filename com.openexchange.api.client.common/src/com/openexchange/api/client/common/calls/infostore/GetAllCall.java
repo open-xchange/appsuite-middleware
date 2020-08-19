@@ -73,6 +73,8 @@ public class GetAllCall extends AbstractGetCall<List<DefaultFile>> {
     private final int[] columns;
     private final Integer sortColumn;
     private final SortDirection sortDirection;
+    private final Integer leftHandLimit;
+    private final Integer rightHandLimit;
 
     /**
      * Initializes a new {@link GetAllCall}.
@@ -99,10 +101,26 @@ public class GetAllCall extends AbstractGetCall<List<DefaultFile>> {
      * @param sortDirection The sort direction, or null if not applying any sorting
      */
     public GetAllCall(String folderId, int[] columns, Integer sortColumn, SortDirection sortDirection) {
+        this(folderId, columns, sortColumn, sortDirection, null, null);
+    }
+
+    /**
+     * Initializes a new {@link GetAllCall}.
+     *
+     * @param folderId The ID of the folder to get the items for
+     * @param columns The columns of the items to fetch
+     * @param sortColumn The column to sort, or null to not apply any sorting
+     * @param sortDirection The sort direction, or null if not applying any sorting
+     * @param leftHandLimit A positive integer number to specify the "right-hand" limit of the range to return
+     * @param rightHandLimit A positive integer number to specify the "left-hand" limit of the range to return
+     */
+    public GetAllCall(String folderId, int[] columns, Integer sortColumn, SortDirection sortDirection, Integer leftHandLimit, Integer rightHandLimit) {
         this.folderId = folderId;
         this.columns = columns;
         this.sortColumn = sortColumn;
         this.sortDirection = sortDirection;
+        this.leftHandLimit = leftHandLimit;
+        this.rightHandLimit = rightHandLimit;
     }
 
     @Override
@@ -119,6 +137,8 @@ public class GetAllCall extends AbstractGetCall<List<DefaultFile>> {
             parameters.put("sort", sortColumn.toString());
             parameters.put("order", sortDirection.toString());
         }
+        putIfPresent(parameters, "left_hand_limit", leftHandLimit);
+        putIfPresent(parameters, "right_hand_limit", rightHandLimit);
     }
 
     @Override

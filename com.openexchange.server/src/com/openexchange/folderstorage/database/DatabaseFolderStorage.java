@@ -1618,7 +1618,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     /*
                      * Add federal sharing folders
                      */
-                    SortableId[] sharedFolders = FederateSharingFolder.getFolders(storageParameters.getSession());
+                    SortableId[] sharedFolders = FederateSharingFolder.getFolders(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, storageParameters.getSession());
                     for(SortableId sharedFolder : sharedFolders){
                         ret.add(new FileStorageId(sharedFolder.getId(), ordinal++, sharedFolder.getName()));
                     }
@@ -1652,6 +1652,27 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                         }
                     }
                 }
+
+                List<SortableId> ret = new ArrayList<SortableId>();
+                int ordinal = 0;
+
+                /*
+                 * User-sensitive loading of public infostore folder
+                 */
+                final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(parentId, storageParameters.getUserId(), user.getGroups(), getUserPermissionBits(con, storageParameters).getAccessibleModules(), ctx, con);
+                for (int i = 0; i < subfolders.size(); i++) {
+                    ret.add(new DatabaseId(subfolders.get(i), ordinal++, null));
+                }
+
+                /*
+                 * Add federal sharing folders
+                 */
+                SortableId[] sharedFolders = FederateSharingFolder.getFolders(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, storageParameters.getSession());
+                for (SortableId sharedFolder : sharedFolders) {
+                    ret.add(new FileStorageId(sharedFolder.getId(), ordinal++, sharedFolder.getName()));
+                }
+
+                return ret.toArray(new SortableId[ret.size()]);
             }
 
             /*-

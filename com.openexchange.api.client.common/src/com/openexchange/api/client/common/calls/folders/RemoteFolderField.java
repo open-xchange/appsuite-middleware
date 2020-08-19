@@ -96,6 +96,16 @@ public enum RemoteFolderField {
     MODULE(301, "module"),
 
     /**
+     * True, if this folder has subfolders
+     */
+    SUBFOLDERS(304, "subfolders"),
+
+    /*
+     * Permissions which apply to the current user
+     */
+    OWN_RIGHTS(305, "own_rights"),
+
+    /**
      * The folder's permission
      */
     PERMISSIONS(306, "permissions"),

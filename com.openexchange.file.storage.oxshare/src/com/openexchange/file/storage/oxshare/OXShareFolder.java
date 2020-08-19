@@ -49,18 +49,17 @@
 
 package com.openexchange.file.storage.oxshare;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.api.client.common.calls.folders.RemoteFolder;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
-import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 
 /**
  * {@link OXShareFolder} - A folder shared from another OX instance
@@ -78,62 +77,80 @@ public class OXShareFolder extends DefaultFileStorageFolder implements TypeAware
      * @param userId The ID of the owner
      */
     public OXShareFolder(final int userId) {
-        this(userId, null, null, null, null, null,null);
+        this(userId, null);
     }
 
     /**
      * Initializes a new {@link OXShareFolder}.
      *
      * @param userId The ID of the owner
-     * @param other Another folder to copy value from
+     * @param other The {@link RemoteFolder} to copy the values from
      */
-    public OXShareFolder(final int userId, Folder other) {
-        //@formatter:off
-        this(userId,
-            other.getID(),
-            other.getParentID(),
-            other.getName(),
-            other.getCreationDate(),
-            other.getLastModified(),
-            other.getPermissions() != null ? Arrays.asList(other.getPermissions()) : null);
-        //@formatter:on
-    }
+    public OXShareFolder(final int userId, final RemoteFolder other) {
 
-    /**
-     * Initializes a new {@link OXShareFolder}.
-     *
-     * @param userId The ID of the owner
-     * @param id the ID of the folder
-     * @param parentID the ID of the parent folder
-     * @param name the name of the folder
-     * @param creationDate the date of creation
-     * @param lastModified the date of last modification
-     * @param permissino the folder permissions
-     */
-    public OXShareFolder(final int userId, String id, String parentId, String name, Date creationDate, Date lastModified, List<Permission> permissions) {
+        id = other == null || other.getID() == null ? FileStorageFolder.ROOT_FULLNAME : other.getID();
+        name = other != null ? other.getName() : null;
         type = FileStorageFolderType.NONE;
+        exists = true;
+
         holdsFiles = true;
         b_holdsFiles = true;
+
         holdsFolders = true;
         b_holdsFolders = true;
-        exists = true;
+
         subscribed = true; //TODO
         b_subscribed = true; //TODO
-        //TODO: permission
-        final DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
-        permission.setEntity(userId);
-        this.permissions = Collections.<FileStoragePermission> singletonList(permission);
-        ownPermission = permission;
-        createdBy = userId;
-        this.creationDate = creationDate;
-        modifiedBy = userId;
-        this.lastModifiedDate = lastModified;
-        this.id = id == null ? FileStorageFolder.ROOT_FULLNAME : id;
-        this.name = name;
-        setParentId(parentId == null ? FileStorageFolder.ROOT_FULLNAME : parentId);
-        setSubfolders(true);
-        setSubscribedSubfolders(true);
+
+        creationDate = other != null ? other.getCreationDate() : null;
+        lastModifiedDate = other != null ? other.getLastModified() : null;
+
+        if (other != null && other.getParentID() != null) {
+            setParentId(other.getParentID());
+        }
+        if (other != null) {
+            setSubfolders(other.hasSubfolders());
+        } else {
+            setSubfolders(true);
+        }
         setCapabilities(FileStorageFolder.ALL_CAPABILITIES);
+        setSubscribedSubfolders(true);
+
+        //own permissions: Adopt the permissions the user has as guest
+        final DefaultFileStoragePermission ownFolderPermission = DefaultFileStoragePermission.newInstance();
+        ownFolderPermission.setEntity(userId);
+        if (other != null && other.containsOwnRights()) {
+            int[] permissionBits = Permissions.parsePermissionBits(other.getOwnRights());
+            ownFolderPermission.setFolderPermission(permissionBits[0]);
+            ownFolderPermission.setReadPermission(permissionBits[1]);
+            ownFolderPermission.setWritePermission(permissionBits[2]);
+            ownFolderPermission.setDeletePermission(permissionBits[3]);
+            ownFolderPermission.setAdmin(permissionBits[4] > 0 ? true : false);
+        }
+        ownPermission = ownFolderPermission;
+
+        //Set permissions for other entities
+        if (other != null && other.getPermissions() != null && other.getPermissions().length > 0) {
+            List<FileStoragePermission> remotePermissions = new ArrayList<>(other.getPermissions().length);
+            for (Permission p : other.getPermissions()) {
+                DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
+                //TODO MW-1380 MW-1401 Resolve remote entity
+                permission.setEntity(p.getEntity());
+                permission.setFolderPermission(p.getFolderPermission());
+                permission.setGroup(permission.isGroup());
+                remotePermissions.add(permission);
+            }
+            //TODO MW-1380 MW-1401 Set as extended permission
+        }
+
+        //ownPermission might get recalculated by the caller based on the existing permissions so we add the own permissions to the list
+        addPermission(ownPermission);
+
+        createdBy = 0;
+        //TODO MW1380 MW-1401 set extendedCreateBy
+
+        modifiedBy = 0;
+        //TODO MW1380 MW-1401 set extendedModifiedBy
     }
 
     @Override

@@ -200,9 +200,12 @@ public class OXShareFileStorageService implements AccountAware, SharingFileStora
 
     @Override
     public void testConnection(FileStorageAccount account, Session session) throws OXException {
-        final boolean ping = getAccountAccess(account.getId(), session).ping();
-        if (!ping) {
-            throw OXShareFileStorageExceptionCodes.PING_FAILED.create();
+        try {
+            if (!getAccountAccess(account.getId(), session).ping()) {
+                throw OXShareFileStorageExceptionCodes.PING_FAILED.create();
+            }
+        } catch (OXException e) {
+            throw OXShareFileStorageExceptionCodes.PING_FAILED.create(e.getCause(), (Object[]) null);
         }
     }
 }

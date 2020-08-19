@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.oxshare;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,15 +71,15 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
+import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileStorageZippableFolderFileAccess;
+import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
-
-import static com.openexchange.java.Autoboxing.L;
 
 /**
  * {@link OXShareFileAccess}
@@ -95,7 +96,8 @@ public class OXShareFileAccess implements /*@formatter:off*/
                                           FileStorageLockedFileAccess,
                                           FileStorageZippableFolderFileAccess,
                                           FileStorageCaseInsensitiveAccess,
-                                          FileStorageAutoRenameFoldersAccess {
+                                          FileStorageAutoRenameFoldersAccess,
+                                          FileStorageRangeFileAccess {
                                           /*@formatter:on*/
 
     private final OXShareAccountAccess accountAccess;
@@ -104,8 +106,8 @@ public class OXShareFileAccess implements /*@formatter:off*/
     /**
      * Initializes a new {@link OXShareFileAccess}.
      *
-     * @param accountAccess The {@link AccountAccess}
-     * @param ShareClient The {@link ShareClient} for accessing the remote OX
+     * @param accountAccess The {@link OXShareAccountAccess}
+     * @param client The {@link ShareClient} for accessing the remote OX
      */
     public OXShareFileAccess(OXShareAccountAccess accountAccess, ShareClient client) {
         this.accountAccess = Objects.requireNonNull(accountAccess, "accountAccess must not be null");
@@ -258,7 +260,7 @@ public class OXShareFileAccess implements /*@formatter:off*/
      * @param folderId The ID of the folder to remove
      * @param sequenceNumber The sequencenumber
      * @param hardDelete The hardDelete flag
-     * @throws OXException
+     * @throws OXException In case of an error
      */
     public void removeDocument(String folderId, long sequenceNumber, boolean hardDelete) throws OXException {
         List<IDTuple> ids = new ArrayList<IDTuple>();
@@ -311,6 +313,11 @@ public class OXShareFileAccess implements /*@formatter:off*/
     @Override
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
         return client.getDocuments(ids, fields);
+    }
+
+    @Override
+    public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order, Range range) throws OXException {
+        return client.getDocuments(folderId, fields, sort, order, range);
     }
 
     @Override
@@ -380,8 +387,7 @@ public class OXShareFileAccess implements /*@formatter:off*/
 
     @Override
     public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return client.deleteVersions(id, folderId, DISTANT_FUTURE, versions);
     }
 
     @Override

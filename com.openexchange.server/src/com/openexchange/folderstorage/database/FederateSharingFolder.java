@@ -102,10 +102,11 @@ public class FederateSharingFolder {
     /**
      * Gets a list of federated shared folders for the given {@link Session}
      *
+     * @param parentFolder the ID of the parent folder to get the subfolders for
      * @param session The {@link Session} to get the federated shared folders for
      * @return The list of federated shared folders for the given session
      */
-    public static SortableId[] getFolders(final Session session) {
+    public static SortableId[] getFolders(final int parentFolder, final Session session) {
         List<SortableId> ret = new ArrayList<>();
         int ordinal = 0;
         try {
@@ -117,9 +118,9 @@ public class FederateSharingFolder {
                     List<FileStorageAccount> accounts = ((AccountAware) service).getAccounts(session);
                     for (FileStorageAccount account : accounts) {
                         FileStorageAccountAccess access = account.getFileStorageService().getAccountAccess(account.getId(), session);
+                        access.connect();
                         FileStorageFolderAccess folderAccess = access.getFolderAccess();
-                        FileStorageFolder rootFolder = access.getRootFolder();
-                        FileStorageFolder[] sharedFolders = folderAccess.getSubfolders(rootFolder.getId(), true);
+                        FileStorageFolder[] sharedFolders = folderAccess.getSubfolders(String.valueOf(parentFolder), true);
                         for (FileStorageFolder sharedFolder : sharedFolders) {
                             String folderId = IDMangler.mangle(service.getId(), account.getId(), sharedFolder.getId());
                             ret.add(new FileStorageId(folderId, ordinal++, sharedFolder.getName()));
