@@ -27,6 +27,7 @@
       for a mapping of fields to CSV column titles.
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/glbQueryParamsAllowEnqueue'
       - in: query
         name: folder
         description: >-

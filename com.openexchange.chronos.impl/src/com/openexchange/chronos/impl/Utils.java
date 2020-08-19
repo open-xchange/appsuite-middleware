@@ -1584,34 +1584,53 @@ public class Utils {
      * @return The given result, unmodified.
      */
     public static <T extends InternalCalendarResult> T postProcess(ServiceLookup services, T result, boolean trackAttendeeUsage) {
+        return postProcess(services, Collections.singletonList(result), trackAttendeeUsage).get(0);
+    }
+
+    /**
+     * Processes {@link InternalCalendarResult}s. Tracks attendee usage, informs {@link CalendarHandler}s and triggers
+     * the {@link SchedulingBroker} to send messages.
+     *
+     * @param <T> The type of the {@link InternalCalendarResult}s
+     * @param services The {@link ServiceLookup} to obtain the {@link CalendarEventNotificationService} and the {@link SchedulingBroker} from
+     * @param results The actual results
+     * @param trackAttendeeUsage whether to track the attendee usage as per {@link #trackAttendeeUsage(CalendarSession, CalendarEvent)} or not.
+     * @return The given results, unmodified.
+     */
+    public static <T extends InternalCalendarResult> List<T> postProcess(ServiceLookup services, List<T> results, boolean trackAttendeeUsage) {
+        if (null == results || results.isEmpty()) {
+            return results;
+        }
         ThreadPools.submitElseExecute(ThreadPools.task(() -> {
-            /*
-             * track attendee usage as needed & notify registered calendar handlers
-             */
-            CalendarEvent calendarEvent = result.getCalendarEvent();
-            if (trackAttendeeUsage) {
-                trackAttendeeUsage(result.getSession(), calendarEvent);
-            }
-            CalendarEventNotificationService notificationService = services.getService(CalendarEventNotificationService.class);
-            if (null != notificationService) {
-                notificationService.notifyHandlers(calendarEvent, false);
-            }
-            /*
-             * handle pending scheduling messages
-             */
-            SchedulingBroker schedulingBroker = services.getService(SchedulingBroker.class);
-            if (null != schedulingBroker) {
-                List<SchedulingMessage> messages = result.getSchedulingMessages();
-                if (null != messages && 0 < messages.size()) {
-                    schedulingBroker.handleScheduling(result.getSession().getSession(), messages);
+            for (T result : results) {
+                /*
+                 * track attendee usage as needed & notify registered calendar handlers
+                 */
+                CalendarEvent calendarEvent = result.getCalendarEvent();
+                if (trackAttendeeUsage) {
+                    trackAttendeeUsage(result.getSession(), calendarEvent);
                 }
-                List<ChangeNotification> notifications = result.getChangeNotifications();
-                if (null != notifications && 0 < notifications.size()) {
-                    schedulingBroker.handleNotifications(result.getSession().getSession(), notifications);
+                CalendarEventNotificationService notificationService = services.getService(CalendarEventNotificationService.class);
+                if (null != notificationService) {
+                    notificationService.notifyHandlers(calendarEvent, false);
+                }
+                /*
+                 * handle pending scheduling messages
+                 */
+                SchedulingBroker schedulingBroker = services.getService(SchedulingBroker.class);
+                if (null != schedulingBroker) {
+                    List<SchedulingMessage> messages = result.getSchedulingMessages();
+                    if (null != messages && 0 < messages.size()) {
+                        schedulingBroker.handleScheduling(result.getSession().getSession(), messages);
+                    }
+                    List<ChangeNotification> notifications = result.getChangeNotifications();
+                    if (null != notifications && 0 < notifications.size()) {
+                        schedulingBroker.handleNotifications(result.getSession().getSession(), notifications);
+                    }
                 }
             }
         }));
-        return result;
+        return results;
     }
 
     /**
