@@ -4503,6 +4503,11 @@ msgstr ""
 msgid "Invalid OAuth account specified."
 msgstr ""
 
+#. The account configuration is invalid.
+#: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:103
+msgid "The account configuration is invalid."
+msgstr ""
+
 #. An error has occurred on the remote Microsoft end-point. There is nothing we can do about it. Try again later.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphClientExceptionMessages.java:63
 msgid ""
@@ -8821,6 +8826,13 @@ msgid ""
 "Please reauthorize the account %5$s to enable it again."
 msgstr ""
 
+#. User tried to send an email, which has been composed as a reply or forward referencing a message, which no longer exists
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:264
+msgid ""
+"As the original email no longer exists, your email has been sent as a new "
+"one."
+msgstr ""
+
 #. This error message is returned to the user in case he/she wants to apply a change to an in-compose message,
 #. which is only applicable in case a reply is generated, but in-compose message is not a reply
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:72
@@ -8879,6 +8891,11 @@ msgstr ""
 #. The user entered a very long Bcc addresses, which cannot be stored due to data truncation
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:102
 msgid "The entered \"bcc\" addresses are too long."
+msgstr ""
+
+#. The user entered a very long Reply-To address, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:105
+msgid "The entered \"Reply-To\" address is too long."
 msgstr ""
 
 #. The default name for a file
@@ -9203,6 +9220,16 @@ msgstr ""
 #. Access to mail server is not permitted due to a lack of privacy. E.g. client is supposed to switch to a connection with Transport Layer Security (TLS).
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:221
 msgid "Access to mail server is not permitted due to a lack of privacy."
+msgstr ""
+
+#. Message was blocked by outgoing SMTP server; e.g. due to triggering a filter such as a URL in the message being found in a domain black list.
+#: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:224
+msgid "Message could not be sent because it has been rejected."
+msgstr ""
+
+#. Message was blocked by outgoing SMTP server; e.g. due to triggering a filter such as a URL in the message being found in a domain black list.
+#: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:227
+msgid "Message could not be sent because it has been rejected (%1$s)."
 msgstr ""
 
 #. The message advertising that everything is fine with checked account
