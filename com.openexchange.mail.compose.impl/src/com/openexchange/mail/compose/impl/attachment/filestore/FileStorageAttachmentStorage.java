@@ -57,9 +57,11 @@ import java.net.URI;
 import java.util.Optional;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.java.util.Pair;
 import com.openexchange.mail.compose.AttachmentStorageIdentifier;
 import com.openexchange.mail.compose.AttachmentStorageIdentifier.KnownArgument;
+import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.mail.compose.SeekingDataProvider;
 import com.openexchange.mail.compose.impl.attachment.AbstractNonCryptoAttachmentStorage;
@@ -196,12 +198,26 @@ public abstract class FileStorageAttachmentStorage extends AbstractNonCryptoAtta
 
         @Override
         public InputStream getData() throws OXException {
-            return getFileStorage().getFile(storageIdentifier.getIdentifier());
+            try {
+                return getFileStorage().getFile(storageIdentifier.getIdentifier());
+            } catch (OXException e) {
+                if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                    throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_RESOURCE.create(e, storageIdentifier.getIdentifier());
+                }
+                throw e;
+            }
         }
 
         @Override
         public InputStream getData(long offset, long length) throws OXException {
-            return getFileStorage().getFile(storageIdentifier.getIdentifier(), offset, length);
+            try {
+                return getFileStorage().getFile(storageIdentifier.getIdentifier(), offset, length);
+            } catch (OXException e) {
+                if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                    throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_RESOURCE.create(e, storageIdentifier.getIdentifier());
+                }
+                throw e;
+            }
         }
     }
 
