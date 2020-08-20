@@ -49,10 +49,13 @@
 
 package com.openexchange.ajax.framework;
 
+import java.util.LinkedList;
+import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
 import com.openexchange.exception.OXException;
@@ -70,7 +73,13 @@ import com.openexchange.test.pool.TestUser;
 @Concurrent(count = 5)
 public class AbstractClientSession {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractClientSession.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractClientSession.class);
+    }
+
+    private List<TearDownOperation> operations;
 
     private AJAXClient client;
     private AJAXClient client2;
@@ -83,6 +92,7 @@ public class AbstractClientSession {
     public void setUp() throws Exception {
         ProvisioningSetup.init();
 
+        operations = new LinkedList<>();
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         Assert.assertNotNull("Unable to retrieve a context!", testContext);
         testUser = testContext.acquireUser();
@@ -98,6 +108,15 @@ public class AbstractClientSession {
         try {
             client = logoutClient(client, true);
             client2 = logoutClient(client2, true);
+
+            /*
+             * Call operations from last added item to first added item (LIFO)
+             * to avoid premature closing of e.g. API clients before all relevant
+             * operations for this client has been called
+             */
+            for (int i = operations.size() - 1; i >= 0; i--) {
+                operations.get(i).safeTearDown();
+            }
         } finally {
             TestContextPool.backContext(testContext);
         }
@@ -151,7 +170,7 @@ public class AbstractClientSession {
             }
         } catch (Exception e) {
             if (loggin) {
-                LOG.error("Unable to correctly tear down test setup.", e);
+                LoggerHolder.LOG.error("Unable to correctly tear down test setup.", e);
             }
         }
         return null;
@@ -212,7 +231,7 @@ public class AbstractClientSession {
      */
     protected final AJAXClient generateClient(String client, TestUser user) throws OXException {
         if (null == user) {
-            LOG.error("Can only create a client for an valid user");
+            LoggerHolder.LOG.error("Can only create a client for an valid user");
             throw new OXException();
         }
         AJAXClient newClient;
@@ -223,9 +242,55 @@ public class AbstractClientSession {
                 newClient = new AJAXClient(user, client);
             }
         } catch (Exception e) {
-            LOG.error("Could not generate new client for user {} in context {}.", user.getUser(), user.getContext(), e);
+            LoggerHolder.LOG.error("Could not generate new client for user {} in context {}.", user.getUser(), user.getContext(), e);
             throw new OXException(e);
         }
         return newClient;
+    }
+
+    /**
+     * Adds a new {@link TearDownOperation} to call in this classes {@link #tearDown()} method
+     * <p>
+     * Note: Operations will be remembered in order and will be executed with the last-in first-out (LIFO)
+     * principal. Therefore e.g. first add the logout of the test client afterwards the removal of a the calendar event
+     * that uses the client from before.
+     *
+     * @param operation A {@link TearDownOperation} to execute with {@link TearDownOperation#safeTearDown()}
+     */
+    protected void addTearDownOperation(TearDownOperation operation) {
+        if (null != operation) {
+            operations.add(operation);
+        }
+    }
+
+    /**
+     * 
+     * {@link TearDownOperation} - A tear down operation
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v7.10.4
+     */
+    @FunctionalInterface
+    public interface TearDownOperation {
+
+        /**
+         * A tear down operation
+         *
+         * @throws Exception
+         */
+        void tearDown() throws Exception;
+
+        /**
+         * Executes the tear down operation via {@link #tearDown()}
+         * with logging the error
+         *
+         */
+        default void safeTearDown() {
+            try {
+                tearDown();
+            } catch (Throwable t) {
+                LoggerHolder.LOG.debug("Unable to execute tear down operation", t);
+            }
+        }
     }
 }

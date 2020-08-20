@@ -47,59 +47,82 @@
  *
  */
 
-package com.openexchange.api.client;
+package com.openexchange.share.federated;
 
-import java.util.Optional;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.Ranked;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
- * {@link ApiClientService} - Service to obtain an {@link ApiClient}
- *
+ * {@link ShareLinkManager} - A manager that handles CRUD operations for s single module and a certain kind of share
+ * 
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
 @SingletonService
-public interface ApiClientService {
+public interface ShareLinkManager extends Ranked {
+
+    /** The ranking for the remote OX to OX file storage */
+    final static int XOX_REMOTE_RANK = 55;
 
     /**
-     * Gets a client that can execute requests to another OX server
+     * Get the module the manager supports
+     * <p>
+     * One of {@link com.openexchange.groupware.modules.Module}
      *
-     * @param session The user's session
-     * @param loginLink The link to the login endpoint
-     * @param credentials The optional credentials to access the share
-     * @return An {@link ApiClient}
-     * @throws OXException In case an access can't be generated
+     * @return The module the analyzing is supported for
      */
-    ApiClient getApiClient(Session session, String loginLink, Credentials credentials) throws OXException;
+    int getSupportedModule();
 
     /**
-     * Gets a client that can execute requests to another OX server
-     * 
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @param loginLink The link to the login endpoint
-     * @param credentials The optional credentials to access the share
-     * @return An {@link ApiClient}
-     * @throws OXException In case an access can't be generated
-     */
-    ApiClient getApiClient(int contextId, int userId, String loginLink, Credentials credentials) throws OXException;
-
-    /**
-     * Closes the client and logs out from the remote system
+     * Get the unique identifier of the manager
      *
-     * @param client The client to close
+     * @return The unique ID
      */
-    void close(ApiClient client);
+    @NonNull
+    String getId();
 
     /**
-     * Closes the client and logs out from the remote system
-     * 
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @param loginLink The optional login link the client was created with. If not set, all clients for the user will be removed
+     * Analyzes the given share link
+     *
+     * @param session The session representing the acting user
+     * @param shareLink The share link to access
+     * @return A result indicating the action that can be performed, or <code>null</code> if not applicable
+     * @throws OXException In case of an error
      */
-    void close(int contextId, int userId, Optional<String> loginLink);
+    ShareLinkState analyzeLink(Session session, String shareLink) throws OXException;
+
+    /**
+     * Binds a share link to the user by e.g. creating a storage account for the share
+     *
+     * @param session The user session to bind the share to
+     * @param shareLink The share link to add or rather bind
+     * @param password The optional password for the share
+     * @param shareName The name to set for the binded object
+     * @return The ID of the created object
+     * @throws OXException In case of error
+     */
+    String bindShare(Session session, String shareLink, String password, String shareName) throws OXException;
+
+    /**
+     * Updates a bound share link
+     *
+     * @param session The user session
+     * @param shareLink The share link to identify the bound object
+     * @param password The password
+     * @throws OXException In case of error
+     */
+    void updateShare(Session session, String shareLink, String password) throws OXException;
+
+    /**
+     * Unbinds a share and the associated resources of the share.
+     *
+     * @param session The user session
+     * @param shareLink The share link to remove
+     * @throws OXException In case of error
+     */
+    void unbindShare(Session session, String shareLink) throws OXException;
 
 }

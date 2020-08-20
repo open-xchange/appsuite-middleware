@@ -731,6 +731,12 @@ ShareLinkSendBody:
   $ref: ./sharemanagement/ShareLinkSendBody.yaml
 ShareLinkSendResponse:
   $ref: ./sharemanagement/ShareLinkSendResponse.yaml
+ShareLinkAnalyzeResponse:
+  $ref: ./sharemanagement/ShareLinkAnalyzeResponse.yaml
+AddShareResponse:
+  $ref: ./sharemanagement/AddShareResponse.yaml
+FederatedShareBody:
+  $ref: ./sharemanagement/FederatedShareBody.yaml
 # Module: passwordchange
 PasswordChangeBody:
   $ref: ./passwordchange/PasswordChangeBody.yaml

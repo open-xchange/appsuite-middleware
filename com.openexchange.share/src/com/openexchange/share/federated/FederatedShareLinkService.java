@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,56 +47,60 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.federated;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AddFederatedShareAction;
-import com.openexchange.share.json.actions.AnalyzeAction;
-import com.openexchange.share.json.actions.DeleteFederatedShareAction;
-import com.openexchange.share.json.actions.DeleteLinkAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.SendLinkAction;
-import com.openexchange.share.json.actions.UpdateFederatedShareAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
+import com.openexchange.session.Session;
 
 /**
- * {@link ShareActionFactory}
+ * {@link FederatedShareLinkService}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+public interface FederatedShareLinkService {
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * 
-     * @param services The services
+     * Analyzes the given share link
+     *
+     * @param session The session representing the acting user
+     * @param shareLink The share link to access
+     * @return A result indicating the action that can be performed, or <code>null</code> if not applicable
+     * @throws OXException In case of an error
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("deleteLink", new DeleteLinkAction(services));
-        actions.put("sendLink", new SendLinkAction(services));
+    ShareLinkAnalyzeResult analyzeLink(Session session, String shareLink) throws OXException;
 
-        // Federated Sharing
-        actions.put("analyze", new AnalyzeAction(services));
-        actions.put("addShare", new AddFederatedShareAction(services));
-        actions.put("deleteShare", new DeleteFederatedShareAction(services));
-        actions.put("updateShare", new UpdateFederatedShareAction(services));
-    }
+    /**
+     * Binds a share link to the user by e.g. creating a storage account for the share
+     *
+     * @param session The user session to bind the share to
+     * @param serviceId The service ID of the service that shall bind the link
+     * @param shareLink The share link to add or rather bind
+     * @param password The optional password for the share
+     * @param shareName The name to set for the binded object
+     * @return The ID of the created object
+     * @throws OXException In case of error
+     */
+    String bindShare(Session session, String serviceId, String shareLink, String password, String shareName) throws OXException;
 
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
+    /**
+     * Updates a bound share link
+     *
+     * @param session The user session
+     * @param serviceId The service ID of the service that shall bind the link
+     * @param shareLink The share link to identify the bound object
+     * @param password The password
+     * @throws OXException In case of error
+     */
+    void update(Session session, String serviceId,String shareLink, String password) throws OXException;
 
+    /**
+     * Unbinds a share and the associated resources of the share.
+     *
+     * @param session The user session
+     * @param serviceId The service ID of the service that shall bind the link
+     * @param shareLink The share link to remove
+     * @throws OXException In case of error
+     */
+    void unbindShare(Session session, String serviceId,String shareLink) throws OXException;
 }

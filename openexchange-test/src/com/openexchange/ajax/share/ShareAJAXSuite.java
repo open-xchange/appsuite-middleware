@@ -101,6 +101,7 @@ import com.openexchange.ajax.share.tests.ParallelGuestSessionsTest;
 import com.openexchange.ajax.share.tests.PasswordResetServletTest;
 import com.openexchange.ajax.share.tests.QuotaTest;
 import com.openexchange.ajax.share.tests.ResolveLegacyLinkTest;
+import com.openexchange.ajax.share.tests.ShareManagementAnalyzeTest;
 import com.openexchange.ajax.share.tests.SharedFilesFolderTest;
 import com.openexchange.test.concurrent.ParallelSuite;
 
@@ -162,6 +163,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     AnonymousGuestFoldersTest.class,
     Bug65805Test.class,
     LocalizedMessagesTest.class,
+    ShareManagementAnalyzeTest.class,
 })
 public class ShareAJAXSuite  {
 }

@@ -85,12 +85,14 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.core.ModuleAdjuster;
 import com.openexchange.share.core.ModuleHandler;
+import com.openexchange.share.federated.FederatedShareLinkService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.SharePasswordMech;
 import com.openexchange.share.impl.ShareRMIServiceImpl;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
+import com.openexchange.share.impl.federated.FederatedShareLinkServiceImpl;
 import com.openexchange.share.impl.groupware.FileStorageHandler;
 import com.openexchange.share.impl.groupware.MailModuleAdjuster;
 import com.openexchange.share.impl.groupware.ModuleExtensionRegistry;
@@ -123,12 +125,7 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            UserService.class, ContextService.class, TemplateService.class, ConfigurationService.class,
-            DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
-            ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
-            QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class,
-            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechRegistry.class, UserAliasStorage.class, SessiondService.class };
+        return new Class<?>[] { UserService.class, ContextService.class, TemplateService.class, ConfigurationService.class, DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class, ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class, QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class, DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechRegistry.class, UserAliasStorage.class, SessiondService.class };
     }
 
     @Override
@@ -199,6 +196,10 @@ public class ShareActivator extends HousekeepingActivator {
             serviceProperties.put("RMI_NAME", ShareRMIServiceImpl.RMI_NAME);
             registerService(Remote.class, new ShareRMIServiceImpl(shareService), serviceProperties);
         }
+
+        FederatedShareLinkServiceImpl linkService = new FederatedShareLinkServiceImpl(context);
+        rememberTracker(linkService);
+        registerService(FederatedShareLinkService.class, linkService);
 
         trackService(ModuleSupport.class);
         trackService(IDBasedFileAccessFactory.class);

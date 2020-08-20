@@ -313,6 +313,22 @@ public final class OXExceptionParser {
     }
 
     /**
+     * Compares if the actual {@link OXException} matches one of the given {@link OXExceptionCode}s
+     *
+     * @param actual The actual {@link OXException}
+     * @param expectedCodes A range of {@link OXExceptionCode} to compare to
+     * @return <code>true</code> if both exceptions matches, <code>false</code> otherwise
+     */
+    public static boolean matches(OXException actual, OXExceptionCode... expectedCodes) {
+        for (OXExceptionCode code : expectedCodes) {
+            if (matches(code, actual)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Compares if the two {@link OXException} matches each other
      *
      * @param expectedCode The {@link OXExceptionCode} to compare to

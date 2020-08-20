@@ -52,12 +52,16 @@ package com.openexchange.ajax.folder.manager;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderBody;
+import com.openexchange.testing.httpclient.models.FolderBodyNotification;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderResponse;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
+import com.openexchange.testing.httpclient.models.FoldersCleanUpResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityData;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
@@ -70,13 +74,19 @@ import com.openexchange.testing.httpclient.models.NewFolderBody;
  */
 public class FolderManager {
 
+    /** The {@value #INFOSTORE} module identifier */
+    public final static String INFOSTORE = "infostore";
+
     private final FolderApi folderApi;
-    private final List<String> foldersToDelete = new ArrayList<>();
+    private final Set<String> foldersToDelete = new HashSet<>();
     private Long lastTimestamp;
     private final String tree;
 
     /**
      * Initializes a new {@link FolderManager}.
+     * 
+     * @param api The API to use
+     * @param tree The tree ID to work on. Most likely you want <code>"1"</code>
      */
     public FolderManager(FolderApi api, String tree) {
         super();
@@ -85,24 +95,12 @@ public class FolderManager {
         this.lastTimestamp = Long.valueOf(0L);
     }
 
-    public String createFolder(String parent, String name, String module) throws ApiException {
-        NewFolderBody body = new NewFolderBody();
-        body.setFolder(FolderFactory.getSimpleFolder(name, module));
-        FolderUpdateResponse createFolder = folderApi.getFoldersApi().createFolder(parent, getSession(), body, tree, null, null, null);
-        checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
-        rememberFolder(createFolder.getData());
-        lastTimestamp = createFolder.getTimestamp();
-        return createFolder.getData();
-    }
-
-    public FoldersVisibilityData getAllFolders(String contentType, String columns, Boolean all) throws ApiException {
-        FoldersVisibilityResponse visibleFolders = folderApi.getFoldersApi().getVisibleFolders(getSession(), contentType, columns, tree, null, all);
-        checkResponse(visibleFolders.getError(), visibleFolders.getErrorDesc(), visibleFolders.getData());
-        return visibleFolders.getData();
-    }
-
     public String getSession() {
         return folderApi.getSession();
+    }
+
+    public void setLastTimestamp(Long timestamp) {
+        lastTimestamp = timestamp;
     }
 
     private void rememberFolder(String folderId) {
@@ -110,7 +108,7 @@ public class FolderManager {
     }
 
     public void cleanUp() throws ApiException {
-        folderApi.getFoldersApi().deleteFolders(folderApi.getSession(), foldersToDelete, tree, lastTimestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
+        deleteFolder(new ArrayList<>(foldersToDelete));
     }
 
     /**
@@ -127,11 +125,67 @@ public class FolderManager {
         return data;
     }
 
+    public String createFolder(String parent, String name, String module) throws ApiException {
+        NewFolderBody body = new NewFolderBody();
+        body.setFolder(FolderFactory.getSimpleFolder(name, module));
+        FolderUpdateResponse createFolder = folderApi.getFoldersApi().createFolder(parent, getSession(), body, tree, null, null, null);
+        checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
+        rememberFolder(createFolder.getData());
+        lastTimestamp = createFolder.getTimestamp();
+        return createFolder.getData();
+    }
+
+    public FoldersVisibilityData getAllFolders(String contentType, String columns, Boolean all) throws ApiException {
+        FoldersVisibilityResponse visibleFolders = folderApi.getFoldersApi().getVisibleFolders(getSession(), contentType, columns, tree, null, all);
+        return checkResponse(visibleFolders.getError(), visibleFolders.getErrorDesc(), visibleFolders.getData());
+    }
+
+    /**
+     * Updates a folder
+     *
+     * @param folderId The ID of the folder to update
+     * @param folder The folder data to change
+     * @param message The optional message to send to a recipient
+     * @return THe ID of the updated folder
+     * @throws ApiException In case of error
+     */
+    public String updateFolder(String folderId, FolderData folder, String message) throws ApiException {
+        FolderBody folderBody = new FolderBody();
+
+        FolderBodyNotification notification = new FolderBodyNotification();
+        notification.setTransport("mail");
+        notification.setMessage(message);
+
+        folderBody.setNotification(notification);
+        folderBody.setFolder(folder);
+
+        FolderUpdateResponse response = folderApi.getFoldersApi().updateFolder(folderApi.getSession(), folderId, folderBody, Boolean.FALSE, lastTimestamp, tree, null, Boolean.TRUE, null, Boolean.FALSE);
+        String updatedFolderId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+        rememberFolder(updatedFolderId);
+        lastTimestamp = response.getTimestamp();
+
+        return updatedFolderId;
+    }
+
+    /**
+     * Deletes the list of given folder IDs
+     *
+     * @param foldersToDelete The folders to delete represented by their IDs
+     * @return An array with object IDs of folders that could not be processed because of a concurrent modification or something else.
+     * @throws ApiException In case deletion fails
+     */
+    public List<String> deleteFolder(List<String> foldersToDelete) throws ApiException {
+        FoldersCleanUpResponse deleteFolders = folderApi.getFoldersApi().deleteFolders(folderApi.getSession(), foldersToDelete, tree, lastTimestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+        lastTimestamp = deleteFolders.getTimestamp();
+        return checkResponse(deleteFolders.getError(), deleteFolders.getErrorDesc(), deleteFolders.getData());
+    }
+
     /**
      * Gets the given folder
-     *
-     * @return {@link FolderData}
-     * @throws ApiException
+     * 
+     * @param id The ID of the folder to get
+     * @return {@link FolderData} The folder
+     * @throws ApiException In case of error
      */
     public FolderData getFolder(String id) throws ApiException {
         FolderResponse folderResponse = folderApi.getFoldersApi().getFolder(getSession(), id, tree, null, null);
@@ -155,8 +209,27 @@ public class FolderManager {
         lastTimestamp = updateFolder.getTimestamp();
     }
 
-    public void setLastTimestamp(Long timestamp) {
-        lastTimestamp = timestamp;
+    /**
+     * Finds the infostore root folder
+     * 
+     * @return The folder id of the infostore root
+     * @throws ApiException In case folder can't be catched
+     */
+    public String findInfostoreRoot() throws ApiException {
+        FoldersVisibilityData allFolders = getAllFolders(INFOSTORE, "1,20,300,301,302", Boolean.TRUE);
+        Object folders = allFolders.getPublic();
+        assertNotNull(folders);
+        @SuppressWarnings("unchecked") List<List<?>> folderArray = (List<List<?>>) folders;
+        // find parent
+        String parent = null;
+        for (List<?> o : folderArray) {
+            if (o.get(1).equals("10")) {
+                parent = (String) o.get(0);
+                break;
+            }
+        }
+        assertNotNull("Unable to find parent folder!", parent);
+        return parent;
     }
 
 }

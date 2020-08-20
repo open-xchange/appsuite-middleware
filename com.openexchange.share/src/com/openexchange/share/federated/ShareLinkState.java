@@ -1,3 +1,5 @@
+
+package com.openexchange.share.federated;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -8,7 +10,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,56 +49,38 @@
  *
  */
 
-package com.openexchange.share.json;
-
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AddFederatedShareAction;
-import com.openexchange.share.json.actions.AnalyzeAction;
-import com.openexchange.share.json.actions.DeleteFederatedShareAction;
-import com.openexchange.share.json.actions.DeleteLinkAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.SendLinkAction;
-import com.openexchange.share.json.actions.UpdateFederatedShareAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
-
 /**
- * {@link ShareActionFactory}
+ * {@link ShareLinkState} - States to indicate a possible usage of the link
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+public enum ShareLinkState {
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * 
-     * @param services The services
+     * State to indicate that the link belongs to a known share and is accessible. Nothing to do for the client.
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("deleteLink", new DeleteLinkAction(services));
-        actions.put("sendLink", new SendLinkAction(services));
+    SUBSCRIBED,
+    
+    /**
+     * State to indicate that the link belongs to a known share but is not accessible at the moment because the remote
+     * server indicates that credentials have been updated meanwhile. 
+     */
+    CREDENTIALS_REFRESH,
 
-        // Federated Sharing
-        actions.put("analyze", new AnalyzeAction(services));
-        actions.put("addShare", new AddFederatedShareAction(services));
-        actions.put("deleteShare", new DeleteFederatedShareAction(services));
-        actions.put("updateShare", new UpdateFederatedShareAction(services));
-    }
+    /**
+     * State to indicate that the link is valid and belongs to a share that is not yet subscribed an can be added as an account.
+     */
+    ADDABLE,
 
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
+    /**
+     * Equal state to {@link #ADDABLE} but in addition the user needs to enter a password to add the share.
+     */
+    ADDABLE_WITH_PASSWORD,
+
+    /**
+     * State to indicate that the share link is inaccessible and thus can't be subscribed.
+     */
+    INACCESSIBLE;
 
 }
