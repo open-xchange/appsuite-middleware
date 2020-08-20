@@ -58,6 +58,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.common.CalendarUtils.isLastNonHiddenUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
@@ -1252,6 +1253,30 @@ public class Utils {
             list.add(iterator.next());
         }
         return list;
+    }
+
+    /**
+     * Gets a value indicating whether a delete operation performed in the supplied folder from the calendar user's perspective would lead
+     * to a <i>real</i> deletion of the event from the storage, or if only the calendar user is removed from the attendee list, hence
+     * rather an update is performed.
+     * <p/>
+     * A deletion leads to a complete removal if
+     * <ul>
+     * <li>the event is located in a <i>public folder</i></li>
+     * <li>or the event is not <i>group-scheduled</i></li>
+     * <li>or the calendar user is the organizer of the event</li>
+     * <li>or the calendar user is the last <i>non-hidden</i> internal user attendee in the event</li>
+     * </ul>
+     * <p/>
+     * Note: Even if attendees are allowed to modify the event, deletion is out of scope.
+     *
+     * @param folder The calendar folder the event is located in
+     * @param originalEvent The original event to check
+     * @return <code>true</code> if a deletion would lead to a removal of the event, <code>false</code>, otherwise
+     */
+    public static boolean deleteRemovesEvent(CalendarFolder folder, Event originalEvent) {
+        return PublicType.getInstance().equals(folder.getType()) || false == isGroupScheduled(originalEvent) ||
+            isOrganizer(originalEvent, folder.getCalendarUserId()) || isLastNonHiddenUserAttendee(originalEvent.getAttendees(), folder.getCalendarUserId());
     }
 
     /**

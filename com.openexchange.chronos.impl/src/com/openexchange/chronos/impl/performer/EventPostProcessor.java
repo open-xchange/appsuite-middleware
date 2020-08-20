@@ -67,15 +67,18 @@ import static com.openexchange.chronos.impl.Utils.getUntil;
 import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
@@ -87,9 +90,11 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.groupware.StorageUpdater;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventsResult;
@@ -98,6 +103,8 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
@@ -281,17 +288,26 @@ public class EventPostProcessor {
      * @return A self reference
      */
     public EventPostProcessor process(Collection<Event> events, int forUser) throws OXException {
+        List<Entry<Event, OXException>> warnings = null;
         for (Event event : events) {
+            String folderId = getFolderView(injectUserAttendeeData(event), forUser);
             CalendarFolder folder;
             try {
-                folder = getFolder(session, getFolderView(injectUserAttendeeData(event), forUser), false);
+                folder = getFolder(session, folderId, false);
             } catch (OXException e) {
-                LOG.warn("Unexpected error determining folder view for user {} in event {}", I(forUser), event, e);
-                continue;
+                if (CalendarExceptionCodes.FOLDER_NOT_FOUND.equals(e)) {
+                    if (null == warnings) {
+                        warnings = new ArrayList<Map.Entry<Event,OXException>>();
+                    }
+                    warnings.add(new AbstractMap.SimpleEntry<Event, OXException>(event, e));
+                    continue;
+                }
+                throw e;
             }
             doProcess(event, folder);
             checkResultSizeNotExceeded();
         }
+        resolveWarnings(warnings);
         return this;
     }
 
@@ -583,6 +599,79 @@ public class EventPostProcessor {
             }
         }
         return event;
+    }
+
+    /**
+     * Tries to recover from warnings that occurred when processing certain events.
+     *
+     * @param warnings The warnings to resolve
+     */
+    private void resolveWarnings(List<Entry<Event, OXException>> warnings) {
+        if (null == warnings || warnings.isEmpty()) {
+            return;
+        }
+        Set<CalendarFolder> staleFolders = null;
+        for (Entry<Event, OXException> entry : warnings) {
+            OXException e = entry.getValue();
+            Event event = entry.getKey();
+            if (CalendarExceptionCodes.FOLDER_NOT_FOUND.equals(e) && null != e.getLogArgs() && 0 < e.getLogArgs().length) {
+                /*
+                 * stale folder, remember placeholder folder for further processing
+                 */
+                if (null == staleFolders) {
+                    staleFolders = new HashSet<CalendarFolder>();
+                }
+                staleFolders.add(getPlaceholderFolder(event, String.valueOf(e.getLogArgs()[0])));
+            }
+        }
+        if (null != staleFolders) {
+            /*
+             * purge event data with references to stale calendar folders
+             */
+            for (CalendarFolder staleFolder : staleFolders) {
+                try {
+                    int deleted = StorageUpdater.removeEventsInFolder(staleFolder);
+                    LOG.info("Purged data for {} events with references to stale calendar folder {}.", I(deleted), staleFolder.getId());
+                } catch (OXException e) {
+                    LOG.error("Error removing events with stale references to folder {}", staleFolder, e);
+                    session.addWarning(e);
+                }
+            }
+        }
+    }
+
+    private CalendarFolder getPlaceholderFolder(Event event, String folderId) {
+        try {
+            FolderObject folder;
+            if (folderId.equals(event.getFolderId())) {
+                folder = new FolderObject("", Integer.parseInt(folderId), FolderObject.CALENDAR, FolderObject.PUBLIC, session.getUserId());
+            } else {
+                Attendee attendee = getAttendeeByFolder(event.getAttendees(), folderId);
+                if (null == attendee) {
+                    throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Can't find attendee with folder " + folderId);
+                }
+                folder = new FolderObject("", Integer.parseInt(folderId), FolderObject.CALENDAR, FolderObject.PRIVATE, attendee.getEntity());
+            }
+            OCLPermission permission = new OCLPermission(session.getUserId(), 0);
+            permission.setFolderAdmin(true);
+            permission.setGroupPermission(false);
+            permission.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+            return new CalendarFolder(session.getSession(), folder, permission);
+        } catch (Exception e) {
+            LOG.warn("Unexpected error preparing placeholder folder", e);
+            return null;
+        }
+    }
+
+    private static Attendee getAttendeeByFolder(List<Attendee> attendees, String folderId) {
+        if (null != attendees && 0 < attendees.size()) {
+            for (Attendee attendee : attendees) {
+                if (folderId.equals(attendee.getFolderId())) {
+                    return attendee;
+                }
+            }
+        }
+        return null;
     }
 
 }

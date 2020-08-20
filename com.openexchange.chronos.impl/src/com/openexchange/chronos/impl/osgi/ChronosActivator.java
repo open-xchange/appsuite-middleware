@@ -158,10 +158,14 @@ public class ChronosActivator extends HousekeepingActivator {
                 props.put("RMIName", ChronosRMIService.RMI_NAME);
                 registerService(Remote.class, new ChronosRMIServiceImpl(calendarUtilities), props);
             }
-            registerService(CalendarService.class, new CalendarServiceImpl(this, calendarInterceptors));
+            CalendarServiceImpl calendarService = new CalendarServiceImpl(this, calendarInterceptors);
+            registerService(CalendarService.class, calendarService);
+            addService(CalendarService.class, calendarService);
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(AdministrativeFreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, calendarUtilities);
+            addService(CalendarUtilities.class, calendarUtilities);
+
             // Availability disabled until further notice
             //registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());
             registerService(DeleteListener.class, new CalendarDeleteListener(this, calendarUtilities, notificationService));

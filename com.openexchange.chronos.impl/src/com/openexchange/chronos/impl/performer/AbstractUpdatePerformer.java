@@ -1112,7 +1112,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @return <code>true</code> if a deletion would lead to a removal of the event, <code>false</code>, otherwise
      */
     protected boolean deleteRemovesEvent(Event originalEvent) {
-        return PublicType.getInstance().equals(folder.getType()) || false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUserId) || isLastNonHiddenUserAttendee(originalEvent.getAttendees(), calendarUserId);
+        return Utils.deleteRemovesEvent(folder, originalEvent);
     }
 
     /**

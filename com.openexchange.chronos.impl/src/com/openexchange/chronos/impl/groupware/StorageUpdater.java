@@ -49,11 +49,22 @@
 
 package com.openexchange.chronos.impl.groupware;
 
+import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getFields;
+import static com.openexchange.chronos.impl.Utils.ACCOUNT_ID;
+import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
@@ -63,14 +74,22 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.impl.session.CalendarUserSettings;
+import com.openexchange.chronos.impl.session.DefaultCalendarSession;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.search.SearchTerm;
@@ -84,7 +103,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-class StorageUpdater {
+public class StorageUpdater {
 
     private static final EventField[] SEARCH_FIELDS = { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY,
         EventField.CALENDAR_USER, EventField.ORGANIZER, EventField.ATTENDEES };
@@ -400,6 +419,130 @@ class StorageUpdater {
                 return;
             }
             throw e;
+        }
+    }
+
+    /**
+     * Purges all event data within a specific folder.
+     *
+     * @param folder The calendar folder to delete the contained events in
+     * @return The number of deleted events
+     */
+    public static int removeEventsInFolder(CalendarFolder folder) throws OXException {
+        /*
+         * prepare search term to lookup events associated with the folder
+         */
+        CalendarSession session = new DefaultCalendarSession(folder.getSession(), Services.getService(CalendarService.class, true));
+        SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
+        /*
+         * search & remove any found event data
+         */
+        final int BATCH_SIZE = 500;
+        SearchOptions searchOptions = new SearchOptions().setLimits(0, BATCH_SIZE);
+        return new OSGiCalendarStorageOperation<Integer>(Services.getServiceLookup(), session.getContextId(), ACCOUNT_ID) {
+
+            @Override
+            protected Integer call(CalendarStorage storage) throws OXException {
+                int totalDeleted = 0;
+                int deleted;
+                do {
+                    deleted = removeEventsInFolder(storage, searchTerm, searchOptions, folder);
+                    totalDeleted += deleted;
+                } while (0 < deleted);
+                return I(totalDeleted);
+            }
+        }.executeUpdate().intValue();
+    }
+
+    private static int removeEventsInFolder(CalendarStorage storage, SearchTerm<?> searchTerm, SearchOptions searchOptions, CalendarFolder folder) throws OXException {
+        /*
+         * load necessary data from original events in folder
+         */
+        EventField[] fields = getFields((EventField[]) null, (EventField[]) null);
+        List<Event> originalEvents = storage.getEventStorage().searchEvents(searchTerm, searchOptions, fields);
+        if (null == originalEvents || 0 == originalEvents.size()) {
+            return 0;
+        }
+        originalEvents = storage.getUtilities().loadAdditionalEventData(-1, originalEvents, null);
+        /*
+         * derive kind of deletion for each event
+         */
+        List<Event> eventsToDelete = new ArrayList<Event>(originalEvents.size());
+        List<Entry<Event, Attendee>> attendeesToDeleteByEvent = new ArrayList<Entry<Event, Attendee>>();
+        for (Event originalEvent : originalEvents) {
+            if (Utils.deleteRemovesEvent(folder, originalEvent)) {
+                /*
+                 * deletion of not group-scheduled event / by organizer / last user attendee
+                 */
+                eventsToDelete.add(originalEvent);
+            } else {
+                /*
+                 * deletion as one of the attendees
+                 */
+                Attendee userAttendee = find(originalEvent.getAttendees(), folder.getCalendarUserId());
+                if (null != userAttendee) {
+                    attendeesToDeleteByEvent.add(new AbstractMap.SimpleEntry<Event, Attendee>(originalEvent, userAttendee));
+                }
+            }
+        }
+        /*
+         * perform deletion & return number of processed events
+         */
+        if (0 < eventsToDelete.size()) {
+            deleteEvents(storage, folder, eventsToDelete);
+        }
+        if (0 < attendeesToDeleteByEvent.size()) {
+            deleteAttendees(storage, attendeesToDeleteByEvent);
+        }
+        return eventsToDelete.size() + attendeesToDeleteByEvent.size();
+    }
+
+    private static void deleteEvents(CalendarStorage storage, CalendarFolder folder, List<Event> eventsToDelete) throws OXException {
+        /*
+         * collect data to delete
+         */
+        List<String> eventIds = new ArrayList<String>(eventsToDelete.size());
+        Map<String, List<Attachment>> attachmentsByEventId = new HashMap<String, List<Attachment>>();
+        for (Event originalEvent : eventsToDelete) {
+            eventIds.add(originalEvent.getId());
+            if (null != originalEvent.getAttachments() && 0 < originalEvent.getAttachments().size()) {
+                attachmentsByEventId.put(originalEvent.getId(), originalEvent.getAttachments());
+            }
+        }
+        /*
+         * perform deletions
+         */
+        storage.getAlarmStorage().deleteAlarms(eventIds);
+        storage.getAlarmTriggerStorage().deleteTriggers(eventIds);
+        storage.getConferenceStorage().deleteConferences(eventIds);
+        storage.getAttendeeStorage().deleteAttendees(eventIds);
+        storage.getEventStorage().deleteEvents(eventIds);
+        if (0 < attachmentsByEventId.size()) {
+            storage.getAttachmentStorage().deleteAttachments(folder.getSession(), Collections.singletonMap(folder.getId(), attachmentsByEventId));
+        }
+    }
+
+    private static void deleteAttendees(CalendarStorage storage, List<Entry<Event, Attendee>> attendeesToDeleteByEvent) throws OXException {
+        /*
+         * collect data to delete
+         */
+        Map<Integer, List<String>> eventIdsByUserId = new HashMap<Integer, List<String>>();
+        for (Entry<Event, Attendee> attendeeToDeleteByEvent : attendeesToDeleteByEvent) {
+            Event event = attendeeToDeleteByEvent.getKey();
+            Attendee attendee = attendeeToDeleteByEvent.getValue();
+            com.openexchange.tools.arrays.Collections.put(eventIdsByUserId, I(attendee.getEntity()), event.getId());
+        }
+        /*
+         * perform deletions
+         */
+        for (Entry<Event, Attendee> attendeeToDeleteByEvent : attendeesToDeleteByEvent) {
+            Event event = attendeeToDeleteByEvent.getKey();
+            Attendee attendee = attendeeToDeleteByEvent.getValue();
+            storage.getAttendeeStorage().deleteAttendees(event.getId(), Collections.singletonList(attendee));
+            storage.getAlarmStorage().deleteAlarms(event.getId(), attendee.getEntity());
+        }
+        for (Entry<Integer, List<String>> entry : eventIdsByUserId.entrySet()) {
+            storage.getAlarmTriggerStorage().deleteTriggers(entry.getValue(), i(entry.getKey()));
         }
     }
 
