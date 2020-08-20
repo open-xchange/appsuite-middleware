@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.oxshare;
 
+import com.openexchange.annotation.NonNull;
 import com.openexchange.file.storage.FileStorageConstants;
 
 /**
@@ -62,20 +63,24 @@ public final class OXShareStorageConstants implements FileStorageConstants {
     /**
      * The unique ID of the OX share file storage implementation
      */
-    public static final String ID = "oxshare";
+    @NonNull
+    public static final String ID = "xox" + Module.INFOSTORE.getFolderConstant();
 
     /**
      * The display name of the the OX share file storage implementation
      */
+    @NonNull
     public static final String DISPLAY_NAME = "OX AppSuite Share";
 
     /**
      * The share link to the other OX
      */
+    @NonNull
     public static final String SHARE_URL = "url";
 
     /**
      * The password to the user's share if any
      */
+    @NonNull
     public static final String PASSWORD = "password";
 }

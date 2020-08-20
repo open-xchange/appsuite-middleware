@@ -51,7 +51,6 @@ package com.openexchange.file.storage.oxshare;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.exception.OXException;
@@ -167,7 +166,7 @@ public class OXShareAccountAccess implements CapabilityAware {
         }
 
         String password = (String) configuration.get(OXShareStorageConstants.PASSWORD);
-        Optional<Credentials> credentials = password != null ? Optional.of(new Credentials("", password)) : Optional.empty();
+        Credentials credentials = new Credentials("", password);
 
         this.shareClient = new ShareClient(session, clientFactory.getApiClient(session, shareUrl, credentials));
     }

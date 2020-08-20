@@ -108,7 +108,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessionExceptionCodes;
 
 /**
- * {@link AbstractApiClient} - Abstract API client that handles the remote lifecycle of 
+ * {@link AbstractApiClient} - Abstract API client that handles the remote lifecycle of
  * a session on another OX server, besides the login.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -243,6 +243,8 @@ public abstract class AbstractApiClient implements ApiClient {
             return;
         }
 
+        HttpRequestBase request = null;
+        HttpResponse response = null;
         try {
             /*
              * Check if there is a session to remove on the remote system
@@ -257,17 +259,50 @@ public abstract class AbstractApiClient implements ApiClient {
             /*
              * Execute the logout request manually to avoid constrains from execute method (cookies, shutdown flag, etc.)
              */
-            HttpResponse response = getHttpClient().execute(buildRequest(new LogoutCall()));
+            request = buildRequest(new LogoutCall());
+
+            response = getHttpClient().execute(request);
             int status = response.getStatusLine().getStatusCode();
             if (HttpStatus.SC_OK != status) {
-                LOGGER.info("Unable to logout user {} in context {} from host {} with error code", I(userId), I(contextId), loginLink.getHost(), I(status));
+                OXException oxException = getNestedOXException(response);
+                LOGGER.info("Unable to logout user {} in context {} from host {} with error code", I(userId), I(contextId), loginLink.getHost(), I(status), oxException);
             }
         } catch (Exception e) {
             LOGGER.error("Unable to logout client", e);
         } finally {
+            HttpClients.close(request, response);
             clean();
         }
     }
+
+    @Override
+    public void login() throws OXException {
+        if (isClosed.get()) {
+            LOGGER.debug("Client is closed, login will not be perfomed.");
+            return;
+        }
+
+        /*
+         * Is already initialized?
+         */
+        LoginInformation infos = getLoginInformation();
+        if (null != infos && Strings.isNotEmpty(infos.getRemoteSessionId())) {
+            LOGGER.debug("Client has a session. Won't login again.");
+            return;
+        }
+
+        /*
+         * Finally perform login
+         */
+        doLogin();
+    }
+
+    /**
+     * Performs the login
+     *
+     * @throws OXException In case login is not possible
+     */
+    protected abstract void doLogin() throws OXException;
 
     @Override
     public boolean isClosed() {
@@ -486,7 +521,8 @@ public abstract class AbstractApiClient implements ApiClient {
         for (int retryCount = 0; retryCount <= DEFAULT_RETRIES; retryCount++) {
             try {
                 clean();
-                login();
+                doLogin();
+                return;
             } catch (OXException e) {
                 if (false == matches(ApiClientExceptions.NO_ACCESS, e)) {
                     throw e;
@@ -520,5 +556,6 @@ public abstract class AbstractApiClient implements ApiClient {
     private void clean() {
         this.cookieStore.clear();
         this.httpContext.clear();
+        HttpContextUtils.addCookieStore(httpContext, cookieStore);
     }
 }

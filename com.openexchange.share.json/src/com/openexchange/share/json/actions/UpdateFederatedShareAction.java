@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,56 +47,49 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.json.actions;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AddFederatedShareAction;
-import com.openexchange.share.json.actions.AnalyzeAction;
-import com.openexchange.share.json.actions.DeleteFederatedShareAction;
-import com.openexchange.share.json.actions.DeleteLinkAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.SendLinkAction;
-import com.openexchange.share.json.actions.UpdateFederatedShareAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
+import com.openexchange.share.federated.FederatedShareLinkService;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ShareActionFactory}
+ * {@link UpdateFederatedShareAction}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+public class UpdateFederatedShareAction extends AbstractFederatedShareAction {
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
+     * Initializes a new {@link UpdateFederatedShareAction}.
      * 
-     * @param services The services
+     * @param services The service lookup
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("deleteLink", new DeleteLinkAction(services));
-        actions.put("sendLink", new SendLinkAction(services));
-
-        // Federated Sharing
-        actions.put("analyze", new AnalyzeAction(services));
-        actions.put("addShare", new AddFederatedShareAction(services));
-        actions.put("deleteShare", new DeleteFederatedShareAction(services));
-        actions.put("updateShare", new UpdateFederatedShareAction(services));
+    public UpdateFederatedShareAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, String shareLink) throws OXException {
+        FederatedShareLinkService service = services.getServiceSafe(FederatedShareLinkService.class);
+        String serviceId = getServiceId(requestData);
+        JSONObject json = (JSONObject) requestData.requireData();
+        String password;
+        try {
+            password = json.getString("password");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        }
+        service.update(session, serviceId, shareLink, password);
+        return new AJAXRequestResult(null, new Date(System.currentTimeMillis()));
     }
 
 }

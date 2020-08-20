@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,56 +47,51 @@
  *
  */
 
-package com.openexchange.share.json;
-
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AddFederatedShareAction;
-import com.openexchange.share.json.actions.AnalyzeAction;
-import com.openexchange.share.json.actions.DeleteFederatedShareAction;
-import com.openexchange.share.json.actions.DeleteLinkAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.SendLinkAction;
-import com.openexchange.share.json.actions.UpdateFederatedShareAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
+package com.openexchange.share.federated;
 
 /**
- * {@link ShareActionFactory}
+ * {@link ShareLinkAnalyzeResult}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
+public class ShareLinkAnalyzeResult {
 
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+    /** Result that indicate some preconditions weren't met */
+    public static final ShareLinkAnalyzeResult NONE = new ShareLinkAnalyzeResult(null, ShareLinkState.INACCESSIBLE);
+
+    private final String serviceId;
+
+    private final ShareLinkState state;
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
+     * Initializes a new {@link ShareLinkAnalyzeResult}.
      * 
-     * @param services The services
+     * @param serviceId The ID of the service that created the result
+     * @param state The state of the result
      */
-    public ShareActionFactory(ServiceLookup services) {
+    public ShareLinkAnalyzeResult(String serviceId, ShareLinkState state) {
         super();
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("deleteLink", new DeleteLinkAction(services));
-        actions.put("sendLink", new SendLinkAction(services));
-
-        // Federated Sharing
-        actions.put("analyze", new AnalyzeAction(services));
-        actions.put("addShare", new AddFederatedShareAction(services));
-        actions.put("deleteShare", new DeleteFederatedShareAction(services));
-        actions.put("updateShare", new UpdateFederatedShareAction(services));
+        this.serviceId = serviceId;
+        this.state = state;
     }
 
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    /**
+     * Gets the serviceId
+     *
+     * @return The serviceId
+     */
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    /**
+     * Gets the state
+     *
+     * @return The state
+     */
+    public ShareLinkState getState() {
+        return state;
     }
 
 }

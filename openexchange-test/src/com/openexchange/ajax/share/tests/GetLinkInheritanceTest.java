@@ -49,10 +49,9 @@
 
 package com.openexchange.ajax.share.tests;
 
-import static org.junit.Assert.assertNotNull;
+import static com.openexchange.ajax.folder.manager.FolderManager.INFOSTORE;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.folder.manager.FolderApi;
@@ -62,7 +61,6 @@ import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderExtendedPermission;
-import com.openexchange.testing.httpclient.models.FoldersVisibilityData;
 import com.openexchange.testing.httpclient.models.ShareLinkResponse;
 import com.openexchange.testing.httpclient.models.ShareTargetData;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
@@ -78,7 +76,6 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
     private FolderManager folderManager;
     private ShareManagementApi shareManagementApi;
     private String infostoreRoot;
-    private final String MODULE = "infostore";
 
     private String A, B, C, D, E;
 
@@ -89,22 +86,22 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         rememberClient(client);
         folderManager = new FolderManager(new FolderApi(client, testUser), "1");
         shareManagementApi = new ShareManagementApi(client);
-        infostoreRoot = findInfostoreRoot();
+        infostoreRoot = folderManager.findInfostoreRoot();
 
         /*
          * Create the following folder structure:
          * root
-         *  - A
-         *    - B
-         *      - C
-         *  - D
-         *    - E
+         * - A
+         * - B
+         * - C
+         * - D
+         * - E
          */
-        A = folderManager.createFolder(infostoreRoot, "A_" + UUID.randomUUID(), MODULE);
-        B = folderManager.createFolder(A, "B_" + UUID.randomUUID(), MODULE);
-        C = folderManager.createFolder(B, "C_" + UUID.randomUUID(), MODULE);
-        D = folderManager.createFolder(infostoreRoot, "D_" + UUID.randomUUID(), MODULE);
-        E = folderManager.createFolder(D, "E_" + UUID.randomUUID(), MODULE);
+        A = folderManager.createFolder(infostoreRoot, "A_" + UUID.randomUUID(), INFOSTORE);
+        B = folderManager.createFolder(A, "B_" + UUID.randomUUID(), INFOSTORE);
+        C = folderManager.createFolder(B, "C_" + UUID.randomUUID(), INFOSTORE);
+        D = folderManager.createFolder(infostoreRoot, "D_" + UUID.randomUUID(), INFOSTORE);
+        E = folderManager.createFolder(D, "E_" + UUID.randomUUID(), INFOSTORE);
     }
 
     @Override
@@ -271,34 +268,11 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
     private Integer createShareLink(String folder) throws ApiException {
         ShareTargetData data = new ShareTargetData();
         data.setFolder(folder);
-        data.setModule("infostore");
+        data.setModule(INFOSTORE);
         ShareLinkResponse shareLink = shareManagementApi.getShareLink(folderManager.getSession(), data);
         checkResponse(shareLink.getError(), shareLink.getErrorDesc(), shareLink.getData());
         folderManager.setLastTimestamp(shareLink.getTimestamp());
         return shareLink.getData().getEntity();
-    }
-
-    /**
-     * Finds the infostore root folder
-     *
-     * @return The folder id of the infostore root
-     * @throws ApiException
-     */
-    private String findInfostoreRoot() throws ApiException {
-        FoldersVisibilityData allFolders = folderManager.getAllFolders("infostore", "1,20,300,301,302", Boolean.TRUE);
-        Object folders = allFolders.getPublic();
-        assertNotNull(folders);
-        @SuppressWarnings("unchecked") List<List<?>> folderArray = (List<List<?>>) folders;
-        // find parent
-        String parent = null;
-        for (List<?> o : folderArray) {
-            if (o.get(1).equals("10")) {
-                parent = (String) o.get(0);
-                break;
-            }
-        }
-        assertNotNull("Unable to find parent folder!", parent);
-        return parent;
     }
 
 }

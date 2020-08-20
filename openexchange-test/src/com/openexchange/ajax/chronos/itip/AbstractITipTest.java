@@ -57,8 +57,6 @@ import static org.junit.Assert.assertThat;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.jdom2.IllegalDataException;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
@@ -166,8 +164,6 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
 
     protected EnhancedApiClient enhancedApiClientC2;
 
-    private final List<TearDownOperation> operations = new LinkedList<>();
-
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -207,14 +203,6 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
     @Override
     public void tearDown() throws Exception {
         try {
-            /*
-             * Call operations from last added item to first added item (FIFO)
-             * to avoid premature closing of e.g. API clients before all relevant
-             * operations for this client has been called
-             */
-            for (int i = operations.size() - 1; i >= 0; i--) {
-                operations.get(i).safeTearDown();
-            }
             eventManagerC2.cleanUp();
         } finally {
             super.tearDown();
@@ -357,7 +345,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         MailListElement elm = new MailListElement();
         elm.setId(data.getId());
         elm.setFolder(data.getFolderId());
-        operations.add(() -> {
+        addTearDownOperation(() -> {
             mailApi.deleteMails(apiClient.getSession(), Collections.singletonList(elm), now(), Boolean.TRUE, Boolean.FALSE);
         });
     }
@@ -370,7 +358,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         MailListElement elm = new MailListElement();
         elm.setId(data.getId());
         elm.setFolder(data.getFolderId());
-        operations.add(() -> {
+        addTearDownOperation(() -> {
             mailApi.deleteMails(apiClient.getSession(), Collections.singletonList(elm), now(), Boolean.TRUE, Boolean.FALSE);
         });
     }
@@ -392,34 +380,5 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
             body.addEventsItem(eventId);
             new ChronosApi(apiClient).deleteEvent(apiClient.getSession(), now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, "none");
         });
-    }
-
-    /**
-     * Adds a new {@link TearDownOperation} to call in this classes {@link #tearDown()} method
-     * <p>
-     * Note: Operations will be remembered in order and will be executed with the first-in first-out (FIFO)
-     * principal. Therefore e.g. first add removal the test client afterwards the calendar event to remove.
-     *
-     * @param operation A {@link TearDownOperation} to execute with {@link TearDownOperation#safeTearDown()}
-     */
-    protected void addTearDownOperation(TearDownOperation operation) {
-        if (null != operation) {
-            operations.add(operation);
-        }
-    }
-
-    @FunctionalInterface
-    public interface TearDownOperation {
-
-        void tearDown() throws Exception;
-
-        default void safeTearDown() {
-            try {
-                tearDown();
-            } catch (Exception e) {
-                // Ignore
-            }
-        }
-
     }
 }

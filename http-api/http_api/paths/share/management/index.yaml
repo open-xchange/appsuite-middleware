@@ -3,3 +3,4 @@ requests:
   - GetLinkRequest.yaml
   - SendLinkRequest.yaml
   - UpdateLinkRequest.yaml
+  - AnalyzeLinkRequest.yaml

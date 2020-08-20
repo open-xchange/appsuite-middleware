@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.api.client;
+package com.openexchange.share.federated;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -56,57 +56,44 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link ApiClientExceptions}
+ * {@link FederatedShareLinkExceptions}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public enum ApiClientExceptions implements DisplayableOXExceptionCode {
-
-    /** Can not access the link %1$s */
-    NO_ACCESS("Can not access the link %1$s", Category.CATEGORY_ERROR, 1),
-
-    /** Credentials to access the link are missing. */
-    MISSING_CREDENTIALS("Credentials to access the link are missing.", Category.CATEGORY_ERROR, 2),
-
-    /** An I/O error occurred: %1$s */
-    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 3),
-
-    /** The link %1$s is invalid */
-    INVALID_TARGET("The link \"%1$s\" is invalid.", Category.CATEGORY_ERROR, 4, OXExceptionStrings.BAD_REQUEST),
-
-    /** A necessary cookie is missing */
-    MISSING_COOKIE("A necessary cookie is missing.", Category.CATEGORY_ERROR, 5),
-
-    /** The targeted host %1$s is not covered by the same origin policy for %2$s . */
-    NOT_SAME_ORIGIN("The targeted host %1$s is not covered by the same origin policy for %2$s.", Category.CATEGORY_ERROR, 6),
-
-    /** The requested URL doesn't contain characteristics that identifies a certain API module. Can't communicate with unknown API module. */
-    UNKOWN_API("The requested URL doesn't contain characteristics that identifies a certain API module. Can't communicate with unknown API module.", Category.CATEGORY_ERROR, 7),
+public enum FederatedShareLinkExceptions implements DisplayableOXExceptionCode {
 
     /** Unexpected error [%1$s] */
-    UNEXPECTED_ERROR("Unexpected error [%1$s]", Category.CATEGORY_ERROR, 8),
+    UNEXPECTED_ERROR("Unexpected error [%1$s]", Category.CATEGORY_ERROR, 1),
 
-    /** JSON error: [%1$s] */
-    JSON_ERROR("JSON error: %1$s", Category.CATEGORY_ERROR, 9),
+    /**
+     * <code>The service ID is missing</code>
+     * {@value OXExceptionStrings#BAD_REQUEST}
+     */
+    MISSING_SERVICE_ID("The service ID is missing", Category.CATEGORY_ERROR, 2, OXExceptionStrings.BAD_REQUEST),
 
-    /** A parameter for the request is missing. */
-    MISSING_PARAMETER("A parameter for the request is missing.", Category.CATEGORY_ERROR, 10),
+    /**
+     * The service with ID \"%1$s\" can't be found
+     */
+    SERVICE_NOT_FOUND("The service with ID \"%1$s\" can't be found", Category.CATEGORY_ERROR, 3),
 
-    /** The access to the share was revoked */
-    ACCESS_REVOKED("The access to the share was revoked", Category.CATEGORY_ERROR, 11),
+    /**
+     * <code>The link is missing</code>
+     * {@value OXExceptionStrings#BAD_REQUEST}
+     */
+    MISSING_LINK("The link is missing", Category.CATEGORY_ERROR, 4, OXExceptionStrings.BAD_REQUEST),
 
-    /** The remote server responded with a client error code of %1$d. */
-    CLIENT_ERROR("The remote server responded with a client error code of %1$d.", Category.CATEGORY_USER_INPUT, 400),
+    /**
+     * The provided share link \"%1$s\" can't be used: [%2$s]
+     */
+    NOT_USABLE("The provided share link \"%1$s\" can't be used: [%2$s]", Category.CATEGORY_ERROR, 5),
 
-    /** The remote server responded with a server error code of %1$d. */
-    REMOTE_SERVER_ERROR("A parameter for the request is missing.", Category.CATEGORY_SERVICE_DOWN, 500),
     ;
 
     /**
      * The error code prefix for password-change module.
      */
-    public static final String PREFIX = "ACE";
+    public static final String PREFIX = "FSLE";
 
     private final Category category;
 
@@ -126,7 +113,7 @@ public enum ApiClientExceptions implements DisplayableOXExceptionCode {
      * @param category The category
      * @param detailNumber The exception number
      */
-    private ApiClientExceptions(final String message, final Category category, final int detailNumber) {
+    private FederatedShareLinkExceptions(final String message, final Category category, final int detailNumber) {
         this(message, category, detailNumber, null);
     }
 
@@ -138,7 +125,7 @@ public enum ApiClientExceptions implements DisplayableOXExceptionCode {
      * @param detailNumber The exception number
      * @param displayMessage The display message to send to the client
      */
-    private ApiClientExceptions(final String message, final Category category, final int detailNumber, final String displayMessage) {
+    private FederatedShareLinkExceptions(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;

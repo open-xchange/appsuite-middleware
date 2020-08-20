@@ -65,6 +65,7 @@ import org.apache.http.HttpEntity;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.annotation.Nullable;
+import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -90,15 +91,17 @@ public class AnonymousLoginCall extends AbstractLoginCall {
      * @param credentials The credentials
      * @param share The token of the share to access
      * @param target The path to a specific share target
-     * @throws NullPointerException In case parameters are missing
+     * @throws OXException In case credentials are missing
      */
-    public AnonymousLoginCall(ServiceLookup services, Credentials credentials, String share, String target) throws NullPointerException {
+    public AnonymousLoginCall(ServiceLookup services, Credentials credentials, String share, String target) throws OXException {
         super(credentials);
         this.services = services;
-
-        Objects.requireNonNull(credentials.getPassword());
         this.share = Objects.requireNonNull(share);
         this.target = Objects.requireNonNull(target);
+
+        if (null == credentials.getPassword()) {
+            throw ApiClientExceptions.MISSING_CREDENTIALS.create();
+        }
     }
 
     @Override

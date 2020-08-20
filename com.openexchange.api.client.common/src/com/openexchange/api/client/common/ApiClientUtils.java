@@ -82,7 +82,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAppender;
 import com.openexchange.java.Strings;
-import com.openexchange.share.core.tools.ShareToken;
 
 /**
  * {@link ApiClientUtils} - Util class with functions for serialization and deserialization
@@ -95,85 +94,6 @@ public final class ApiClientUtils {
 
     private static final String SESSION = "session";
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiClientUtils.class);
-
-    /**
-     * Checks if the path looks like an OX share link
-     *
-     * @param path The path to check
-     * @return <code>true</code> if an OX instance generated the string, <code>false</code> otherwise
-     */
-    public static boolean isShare(String path) {
-        return null != getShareToken(path);
-    }
-
-    /**
-     * Parses the given path for a base token.
-     *
-     * @param path The path to get the base token from
-     * @return The token or <code>null</code> if not applicable
-     */
-    public static String getBaseToken(String path) {
-        ShareToken shareToken = getShareToken(path);
-        if (null == shareToken) {
-            return null;
-        }
-        return shareToken.getToken();
-    }
-
-    /**
-     * Get a share token from a path
-     *
-     * @param path The path the share token is in
-     * @return The token or <code>null</code> if not applicable
-     */
-    private static ShareToken getShareToken(String path) {
-        String token = extractBaseToken(path);
-        if (null == token) {
-            return null;
-        }
-        try {
-            ShareToken shareToken = new ShareToken(token);
-            if (shareToken.getContextID() < 0 || shareToken.getUserID() < 0) {
-                /*
-                 * No context ID mean no OX share
-                 */
-                return null;
-            }
-            return shareToken;
-        } catch (OXException e) {
-            LOGGER.debug("Error while parsing: {}", e.getMessage(), e);
-            return null;
-        }
-    }
-
-    /**
-     * Extracts the share base token from a path.
-     *
-     * @param path The path to extract the token from
-     * @return The token or <code>null</code> if no token is embedded in the path
-     */
-    private static String extractBaseToken(String path) {
-        if (Strings.isEmpty(path)) {
-            return null;
-        }
-        String prefix = SHARE_SERVLET + '/';
-        int beginIndex = path.lastIndexOf(prefix);
-        if (-1 == beginIndex) {
-            return null;
-        }
-        beginIndex += prefix.length();
-        int endIndex = path.indexOf('/', beginIndex);
-        return -1 == endIndex ? path.substring(beginIndex) : path.substring(beginIndex, endIndex);
-    }
-
-    /**
-     * Get the identifier that is used for shares
-     *
-     * @return The share identifier
-     */
-    public static String getSharePrefix() {
-        return SHARE_SERVLET;
-    }
 
     /**
      * Gets the session cookie from the cookie store
@@ -234,7 +154,7 @@ public final class ApiClientUtils {
      * @throws OXException In case exceptions of the path aren't met
      */
     public static String parseDispatcherPrefix(String loginLinkPath) throws OXException {
-        String sharePrefix = ApiClientUtils.getSharePrefix();
+        String sharePrefix = SHARE_SERVLET;
         if (false == loginLinkPath.contains(sharePrefix)) {
             throw ApiClientExceptions.INVALID_TARGET.create(loginLinkPath);
         }
@@ -338,7 +258,7 @@ public final class ApiClientUtils {
      * @return A comma separated list built from the given items or <code>null</code> if items was empty
      */
     public static String toCommaString(String... items) {
-        if(null == items || items.length == 0) {
+        if (null == items || items.length == 0) {
             return null;
         }
         StringAppender appender = new StringAppender(",");
@@ -355,7 +275,7 @@ public final class ApiClientUtils {
      * @return A comma separated list built from the given items or <code>null</code> if items was empty
      */
     public static String toCommaString(int... items) {
-        if(null == items || items.length == 0) {
+        if (null == items || items.length == 0) {
             return null;
         }
         StringAppender appender = new StringAppender(",");
@@ -372,7 +292,7 @@ public final class ApiClientUtils {
      * @return A comma separated list built from the given items
      */
     public static String toCommaString(Object... items) {
-        if(null == items || items.length == 0) {
+        if (null == items || items.length == 0) {
             return null;
         }
         StringAppender appender = new StringAppender(",");

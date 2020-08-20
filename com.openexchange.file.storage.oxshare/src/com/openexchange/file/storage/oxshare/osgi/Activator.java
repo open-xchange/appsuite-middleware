@@ -49,13 +49,16 @@
 
 package com.openexchange.file.storage.oxshare.osgi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.oxshare.OXShareFileStorageService;
+import com.openexchange.file.storage.oxshare.analyzer.XOXShareLinkManager;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.openexchange.share.federated.ShareLinkManager;
 
 /**
  * {@link Activator}
@@ -69,14 +72,16 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class };
+        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class, FileStorageServiceRegistry.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
 
-        registerService(FileStorageService.class, new OXShareFileStorageService(this));
+        OXShareFileStorageService fileStorageService = new OXShareFileStorageService(this);
+        registerService(FileStorageService.class, fileStorageService);
+        registerService(ShareLinkManager.class, new XOXShareLinkManager(this, fileStorageService));
     }
 
     @Override

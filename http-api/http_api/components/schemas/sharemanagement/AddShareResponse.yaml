@@ -1,0 +1,9 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+      type: object
+      properties:
+        account:
+          type: string
+          description: The account ID of the newly created account

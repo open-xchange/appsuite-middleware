@@ -49,8 +49,6 @@
 
 package com.openexchange.api.client.impl;
 
-import static com.openexchange.api.client.common.ApiClientUtils.getBaseToken;
-import static com.openexchange.api.client.common.ApiClientUtils.isShare;
 import static com.openexchange.api.client.impl.ApiClientBlacklist.isBlacklisted;
 import static com.openexchange.api.client.impl.ApiClientBlacklist.isPortAllowed;
 import static com.openexchange.java.Autoboxing.I;
@@ -77,6 +75,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.core.tools.ShareTool;
 
 /**
  * {@link ApiClientServiceImpl} - Caching layer that manages the creation, too
@@ -113,22 +112,18 @@ public class ApiClientServiceImpl implements ApiClientService {
     }
 
     @Override
-    public ApiClient getApiClient(Session session, String loginLink, Optional<Credentials> credentials) throws OXException {
+    public ApiClient getApiClient(Session session, String loginLink, Credentials credentials) throws OXException {
         return getApiClient(session.getContextId(), session.getUserId(), loginLink, credentials);
     }
 
     @Override
-    public ApiClient getApiClient(int contextId, int userId, String loginLink, Optional<Credentials> credentials) throws OXException {
+    public ApiClient getApiClient(int contextId, int userId, String loginLink, Credentials credentials) throws OXException {
         URL url = generateURL(loginLink);
         checkBlackList(url, contextId, userId);
 
         String cacheKey = generateCacheKey(contextId, userId, url);
         try {
-            ApiClient client = cachedClients.get(cacheKey, () -> {
-                LOGGER.debug("Creating share access for remote system {} in context {} for user {}.", url.getHost(), I(contextId), I(userId));
-                return chooseClient(contextId, userId, url, credentials);
-            });
-
+            ApiClient client = cachedClients.get(cacheKey, () -> chooseClient(contextId, userId, url, credentials));
             if (client.isClosed()) {
                 /*
                  * Remove from cache and create a new instance
@@ -139,12 +134,21 @@ public class ApiClientServiceImpl implements ApiClientService {
             client.login();
             return client;
         } catch (ExecutionException e) {
+            /*
+             * Throw OXException as-is if possible
+             */
+            if (null != e.getCause() && e.getCause() instanceof OXException) {
+                throw (OXException) e.getCause();
+            }
             throw ApiClientExceptions.NO_ACCESS.create(e, loginLink);
         }
     }
 
     @Override
     public void close(ApiClient client) {
+        if (null == client) {
+            return;
+        }
         /*
          * Access will be closed via RemoveListener
          */
@@ -153,6 +157,9 @@ public class ApiClientServiceImpl implements ApiClientService {
 
     @Override
     public void close(int contextId, int userId, Optional<String> loginLink) {
+        if (contextId < 1 || userId < 1) {
+            return;
+        }
         if (loginLink.isPresent()) {
             /*
              * Revoke single access
@@ -221,7 +228,7 @@ public class ApiClientServiceImpl implements ApiClientService {
      * @return The cache key
      */
     private static String generateCacheKey(int contextId, int userId, URL host) {
-        String baseToken = getBaseToken(host.getPath());
+        String baseToken = ShareTool.getBaseToken(host.getPath());
         return Strings.concat("-", I(contextId), I(userId), host.getHost(), Strings.isEmpty(baseToken) ? host.getPath() : baseToken);
     }
 
@@ -235,9 +242,11 @@ public class ApiClientServiceImpl implements ApiClientService {
      * @return The client
      * @throws OXException If no fitting client can be chosen
      */
-    protected ApiClient chooseClient(int contextId, int userId, URL url, Optional<Credentials> credentials) throws OXException {
+    protected ApiClient chooseClient(int contextId, int userId, URL url, Credentials credentials) throws OXException {
+        LOGGER.debug("Creating share access for remote system {} in context {} for user {}.", url.getHost(), I(contextId), I(userId));
+
         ApiClient client = null;
-        if (isShare(url.getPath())) {
+        if (ShareTool.isShare(url.getPath())) {
             client = new ApiShareClient(services, contextId, userId, url, credentials);
         }
         if (null == client) {

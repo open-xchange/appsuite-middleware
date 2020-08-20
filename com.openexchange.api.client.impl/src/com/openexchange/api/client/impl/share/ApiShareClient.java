@@ -50,7 +50,6 @@
 package com.openexchange.api.client.impl.share;
 
 import java.net.URL;
-import java.util.Optional;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.Credentials;
@@ -66,7 +65,9 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ApiShareClient}
+ * {@link ApiShareClient} - Logins the client for a share.
+ * <p>
+ * For possible login types, see com.openexchange.share.servlet.utils.LoginType
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
@@ -74,7 +75,7 @@ import com.openexchange.server.ServiceLookup;
 public class ApiShareClient extends AbstractApiClient {
 
     private LoginInformation information;
-    private final Optional<Credentials> credentials;
+    private final Credentials credentials;
 
     /**
      * Initializes a new {@link ApiShareClient}.
@@ -85,9 +86,9 @@ public class ApiShareClient extends AbstractApiClient {
      * @param loginTarget The link to the target to log in into
      * @param credentials The credentials to access the targets resources
      */
-    public ApiShareClient(ServiceLookup services, int contextId, int userId, URL loginTarget, Optional<Credentials> credentials) {
+    public ApiShareClient(ServiceLookup services, int contextId, int userId, URL loginTarget, Credentials credentials) {
         super(services, contextId, userId, loginTarget);
-        this.credentials = credentials;
+        this.credentials = null == credentials ? new Credentials("") : credentials;
     }
 
     @Override
@@ -97,30 +98,31 @@ public class ApiShareClient extends AbstractApiClient {
     }
 
     @Override
-    public synchronized void login() throws OXException {
+    protected synchronized void doLogin() throws OXException {
         AccessShareCall accessCall = new AccessShareCall(loginLink);
         ShareLoginInformation shareLoginInfos = execute(accessCall);
 
         String loginType = shareLoginInfos.getLoginType();
+        if ("message".equals(loginType)) {
+            throw ApiClientExceptions.NO_ACCESS.create(loginType);
+        }
+        if ("message_continue".equals(loginType)) {
+            throw ApiClientExceptions.ACCESS_REVOKED.create();
+        }
+
         if ("anonymous_password".equals(loginType)) {
             /*
              * Perform anonymous login
              */
-            if (false == credentials.isPresent()) {
-                throw ApiClientExceptions.NO_ACCESS.create(loginLink);
-            }
             shareLoginInfos = execute(new RedeemTokenCall(shareLoginInfos.getToken()));
             /*
              * Perform login with password
              */
-            AnonymousLoginCall loginCall = new AnonymousLoginCall(services, credentials.get(), shareLoginInfos.getShare(), shareLoginInfos.getTarget());
+            AnonymousLoginCall loginCall = new AnonymousLoginCall(services, credentials, shareLoginInfos.getShare(), shareLoginInfos.getTarget());
             this.information = execute(loginCall);
 
         } else if ("guest".equals(loginType) || "guest_password".equals(loginType)) {
-            if (false == credentials.isPresent()) {
-                throw ApiClientExceptions.NO_ACCESS.create(loginLink);
-            }
-            GuestLoginCall loginCall = new GuestLoginCall(credentials.get(), shareLoginInfos.getLoginName(), shareLoginInfos.getShare(), shareLoginInfos.getTarget());
+            GuestLoginCall loginCall = new GuestLoginCall(credentials, shareLoginInfos.getLoginName(), shareLoginInfos.getShare(), shareLoginInfos.getTarget());
             this.information = execute(loginCall);
         } else {
             /*

@@ -7,6 +7,7 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.base,
  com.google.common.io;version="18.0.0",
+ com.openexchange.annotation,
  com.openexchange.config.lean,
  com.openexchange.exception,
  com.openexchange.groupware.notify.hostname,
@@ -22,6 +23,7 @@ Import-Package: com.google.common.base,
  org.osgi.service.event,
  org.slf4j
 Export-Package: com.openexchange.share,
+ com.openexchange.share.federated,
  com.openexchange.share.groupware,
  com.openexchange.share.groupware.spi,
  com.openexchange.share.notification,

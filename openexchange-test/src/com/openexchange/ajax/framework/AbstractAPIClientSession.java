@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.modules.LoginApi;
 
 /**
@@ -240,6 +241,26 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
             protocol = "http";
         }
         newClient.setBasePath(protocol + "://" + hostname + "/ajax");
+    }
+
+    /**
+     * Checks if a response doesn't contain any errors
+     *
+     * @param error The error element of the response
+     * @param errorDesc The error description element of the response
+     */
+    protected void checkResponse(CommonResponse response) {
+        assertNull(response.getError(), response.getErrorDesc());
+    }
+
+    /**
+     * Checks if a response doesn't contain any errors
+     *
+     * @param error The error element of the response
+     * @param errorDesc The error description element of the response
+     */
+    protected void checkResponse(String error, String errorDesc) {
+        assertNull(errorDesc, error);
     }
 
     /**

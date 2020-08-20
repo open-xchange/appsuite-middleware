@@ -62,9 +62,12 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.protocol.HttpContext;
+import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.common.JSONUtils;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -135,21 +138,22 @@ public class AccessShareCall extends AbstractGetCall<ShareLoginInformation> {
                  * Check that we got a redirect and that the redirect is set
                  */
                 if (HttpStatus.SC_MOVED_TEMPORARILY != response.getStatusLine().getStatusCode()) {
-                    throw ApiClientExceptions.NO_ACCESS.create(loginLink);
+                    handleError(response, loginLink);
                 }
                 String location = getHeaderValue(response, HttpHeaders.LOCATION);
                 if (Strings.isEmpty(location)) {
-                    throw ApiClientExceptions.NO_ACCESS.create(loginLink);
+                    handleError(response, loginLink);
                 }
 
                 /*
                  * Check if the redirect is still on the same server.
                  */
                 checkSameOrigin(loginLink, location);
-                ShareLoginInformation infos = parseLocationHeader(location);
+
                 /*
                  * Parse prefix from location header
                  */
+                ShareLoginInformation infos = parseLocationHeader(location);
                 if (Strings.isEmpty(infos.getRemoteSessionId())) {
                     Optional<Cookie> sessionCookie = getSessionCookie(getCookieStore(httpContext));
                     if (sessionCookie.isPresent()) {
@@ -158,6 +162,19 @@ public class AccessShareCall extends AbstractGetCall<ShareLoginInformation> {
                 }
                 return infos;
             }
+
         };
+    }
+
+    protected static void handleError(HttpResponse response, URL loginLink) throws OXException {
+        JSONValue jsonValue = JSONUtils.getJSON(response);
+        if (null != jsonValue && jsonValue instanceof JSONObject) {
+            JSONObject jsonObject = (JSONObject) jsonValue;
+            String status = jsonObject.optString("status");
+            if (Strings.isNotEmpty(status) && status.startsWith("not_found")) {
+                throw ApiClientExceptions.ACCESS_REVOKED.create();
+            }
+        }
+        throw ApiClientExceptions.NO_ACCESS.create(loginLink);
     }
 }
