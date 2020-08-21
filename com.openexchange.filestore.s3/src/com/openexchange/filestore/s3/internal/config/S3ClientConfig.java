@@ -63,6 +63,7 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import com.amazonaws.services.s3.internal.BucketNameUtils;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -156,16 +157,40 @@ public class S3ClientConfig {
         String defaultValue = defaultValueObj == null ? null : defaultValueObj.toString();
         Map<String, String> clientQualifier = getClientQualifier(getClientID());
         if (getClientScope().isShared()) {
-            return new ConfigProperty(property.getFQPropertyName(clientQualifier), configService.getProperty(property, clientQualifier));
+            return new ConfigProperty(property.getFQPropertyName(clientQualifier), getProperty(configService, property, clientQualifier));
         }
 
         Optional<S3Property> filestoreProperty = S3Property.of(property);
         if (filestoreProperty.isPresent()) {
             Map<String, String> filestoreQualifier = getFilestoreQualifier(filestoreID);
-            return new ConfigProperty(filestoreProperty.get().getFQPropertyName(filestoreQualifier), configService.getProperty(filestoreProperty.get(), filestoreQualifier));
+            return new ConfigProperty(filestoreProperty.get().getFQPropertyName(filestoreQualifier), getProperty(configService, filestoreProperty.get(), filestoreQualifier));
         }
 
         return new ConfigProperty(property.getFQPropertyName(clientQualifier), defaultValue);
+    }
+
+    /**
+     * Gets the property values based on the default type and parses it to string
+     *
+     * @param configService The {@link LeanConfigurationService} to use
+     * @param prop The {@link Property} to get
+     * @param optionals The optionals
+     * @return The property value
+     */
+    private static String getProperty(LeanConfigurationService configService, Property prop, Map<String, String> optionals) {
+        if (prop.getDefaultValue() != null) {
+            Class<? extends Object> coerce = prop.getDefaultValue().getClass();
+            if (coerce.isAssignableFrom(Boolean.class)) {
+                return String.valueOf(configService.getBooleanProperty(prop, optionals));
+            } else if (coerce.isAssignableFrom(Integer.class)) {
+                return String.valueOf(configService.getIntProperty(prop, optionals));
+            } else if (coerce.isAssignableFrom(Long.class)) {
+                return String.valueOf(configService.getLongProperty(prop, optionals));
+            } else if (coerce.isAssignableFrom(Float.class)) {
+                return String.valueOf(configService.getFloatProperty(prop, optionals));
+            }
+        }
+        return configService.getProperty(prop, optionals);
     }
 
     /**
@@ -289,10 +314,10 @@ public class S3ClientConfig {
         contributors.add(I(configService.getIntProperty(S3Property.MAX_NUMBER_OF_MONITORED_CLIENTS)));
         for (S3ClientProperty property : S3ClientProperty.values()) {
             if (scope == S3ClientScope.SHARED) {
-                contributors.add(configService.getProperty(property, qualifierMap));
+                contributors.add(getProperty(configService, property, qualifierMap));
             } else {
                 contributors.add(S3Property.of(property)
-                    .map(p -> (Object) configService.getProperty(p, qualifierMap))
+                    .map(p -> (Object) getProperty(configService, p, qualifierMap))
                     .orElse(property.getDefaultValue()));
             }
         }
