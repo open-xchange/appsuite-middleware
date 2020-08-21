@@ -89,6 +89,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -170,7 +171,7 @@ public class ModuleSupportImpl implements ModuleSupport {
             requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, folder, user, context, null);
             return true;
         } catch (OXException e) {
-            if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
+            if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e) || UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                 return false;
             }
             throw e;

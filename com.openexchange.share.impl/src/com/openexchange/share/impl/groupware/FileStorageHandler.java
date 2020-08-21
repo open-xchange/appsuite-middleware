@@ -82,6 +82,7 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.HandlerParameters;
 import com.openexchange.share.core.ModuleHandler;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -206,10 +207,7 @@ public class FileStorageHandler implements ModuleHandler {
 
         IDBasedAdministrativeFileAccess fileAccess = getAdministrativeFileAccess(context);
         File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
-        ShareTarget shareTarget = new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
-        if (guestID > 0) {
-            shareTarget = adjustTarget(shareTarget, context.getContextId(), context.getMailadmin(), guestID);
-        }
+        ShareTarget shareTarget = getFileTarget(file, context.getContextId(), guestID);
         return new FileTargetProxy(file, shareTarget);
     }
 
@@ -379,13 +377,62 @@ public class FileStorageHandler implements ModuleHandler {
 
     @Override
     public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException {
-        if (requestUserId == targetUserId) {
+        /*
+         * use target as-is if possible
+         */
+        if (requestUserId == targetUserId || isVisible(contextId, targetUserId, target.getFolder())) {
             return target;
         }
+        /*
+         * fall back to shared files folder, otherwise
+         */
         FolderID folderID = new FolderID(SHARED_FILES_FOLDER_ID);
         FileID fileID = new FileID(target.getItem());
         fileID.setFolderId(folderID.getFolderId());
         return new ShareTarget(target.getModule(), folderID.toUniqueID(), fileID.toUniqueID());
+    }
+
+    /**
+     * Gets a share target for a file, for a certain user.
+     * <p/>
+     * If the user is able to see the file in its original / physical parent folder, this folder is used in the target, too. Othwerise,
+     * the special {@link #SHARED_FILES_FOLDER_ID} is used.
+     *
+     * @param file The file to get the target for
+     * @param contextId The context identifier
+     * @param userId The identifier of the user for whom the target should be generated
+     * @return The share target
+     */
+    private ShareTarget getFileTarget(File file, int contextId, int userId) throws OXException {
+        /*
+         * get physical file/folder identifiers as needed
+         */
+        String folderId;
+        String fileId;
+        if (UserizedFile.class.isInstance(file)) {
+            folderId = ((UserizedFile) file).getOriginalFolderId();
+            fileId = ((UserizedFile) file).getOriginalId();
+        } else {
+            folderId = file.getFolderId();
+            fileId = file.getId();
+        }
+        /*
+         * check if user can access file in its physical location, otherwise fall back to virtual shared files folder
+         */
+        if (false == isVisible(contextId, userId, folderId)) {
+            folderId = SHARED_FILES_FOLDER_ID;
+        }
+        FolderID folderID = new FolderID(folderId);
+        FileID fileID = new FileID(fileId);
+        fileID.setFolderId(folderID.getFolderId());
+        return new ShareTarget(FolderObject.INFOSTORE, folderID.toUniqueID(), fileID.toUniqueID());
+    }
+
+    private boolean isVisible(int contextId, int userId, String folderId) throws OXException {
+        if (SHARED_FILES_FOLDER_ID.equals(folderId)) {
+            return true; // always visible in shared files
+        }
+        return requireService(ModuleSupport.class, services).isVisible(FolderObject.INFOSTORE, folderId, null, contextId, userId);
     }
 
 }
