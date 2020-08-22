@@ -103,7 +103,7 @@ public class GetAttachmentMailComposeAction extends AbstractMailComposeAction {
             }
         }
 
-        AttachmentFileHolder fileHolder = new AttachmentFileHolder(attachment);
+        AttachmentFileHolder fileHolder = new AttachmentFileHolder(attachment, compositionSpaceService, session);
         return new AJAXRequestResult(fileHolder, "file");
     }
 
