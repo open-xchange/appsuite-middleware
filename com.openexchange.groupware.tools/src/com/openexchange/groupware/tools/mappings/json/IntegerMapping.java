@@ -67,12 +67,17 @@ public abstract class IntegerMapping<O> extends DefaultJsonMapping<Integer, O> {
 
 	@Override
 	public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
-		final long value = from.getLong(getAjaxName());
-		final int intValue = (int)value;
-	    if (intValue != value) {
-	        throw new IllegalArgumentException(value + " cannot be cast to int without changing its value.");
+	    if(from.hasAndNotNull(getAjaxName())) {
+	        final long value = from.getLong(getAjaxName());
+	        final int intValue = (int)value;
+	        if (intValue != value) {
+	            throw new IllegalArgumentException(value + " cannot be cast to int without changing its value.");
+	        }
+	        this.set(to, Integer.valueOf(intValue));
 	    }
-		this.set(to, Integer.valueOf(intValue));
+	    else {
+	        this.set(to, null);
+	    }
 	}
 
 }

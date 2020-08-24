@@ -116,7 +116,12 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
 
             @Override
             public void set(Available object, Integer value) throws OXException {
-                object.setId(Integer.toString(value.intValue()));
+                if(value != null) {
+                    object.setId(Integer.toString(value.intValue()));
+                }
+                else {
+                    remove(object);
+                }
             }
 
             @Override
@@ -139,7 +144,12 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
 
             @Override
             public void set(Available object, Integer value) throws OXException {
-                object.setCalendarUser(value.intValue());
+                if(value != null) {
+                    object.setCalendarUser(value.intValue());
+                }
+                else {
+                   remove(object);
+                }
             }
 
             @Override

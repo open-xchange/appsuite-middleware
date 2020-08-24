@@ -53,6 +53,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 
+import static com.openexchange.java.Autoboxing.B;
+
 /**
  * {@link BooleanMapping} - JSON specific mapping implementation for Booleans.
  *
@@ -62,12 +64,13 @@ import com.openexchange.exception.OXException;
 public abstract class BooleanMapping<O> extends DefaultJsonMapping<Boolean, O> {
 
     public BooleanMapping(final String ajaxName, final Integer columnID) {
-		super(ajaxName, columnID);
-	}
+        super(ajaxName, columnID);
+    }
 
-	@Override
-	public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
-		this.set(to, Boolean.valueOf(from.getBoolean(getAjaxName())));
-	}
+    @Override
+    public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
+        Boolean value = from.hasAndNotNull(getAjaxName()) ? B(from.getBoolean(getAjaxName())) : null;
+        this.set(to, value);
+    }
 
 }

@@ -53,6 +53,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 
+import static com.openexchange.java.Autoboxing.L;
+
 /**
  * {@link LongMapping} - JSON specific mapping implementation for Longs.
  *
@@ -62,13 +64,12 @@ import com.openexchange.exception.OXException;
 public abstract class LongMapping<O> extends DefaultJsonMapping<Long, O> {
 
     public LongMapping(final String ajaxName, final Integer columnID) {
-		super(ajaxName, columnID);
-	}
+        super(ajaxName, columnID);
+    }
 
-	@Override
-	public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
-		final long value = from.getLong(getAjaxName());
-        this.set(to, Long.valueOf(value));
-	}
-
+    @Override
+    public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
+        final Long value = from.hasAndNotNull(getAjaxName()) ? L(from.getLong(getAjaxName())) : null;
+        this.set(to, value);
+    }
 }
