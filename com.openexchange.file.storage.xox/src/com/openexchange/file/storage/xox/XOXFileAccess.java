@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox;
 
 import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
@@ -82,12 +82,12 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link OXShareFileAccess}
+ * {@link XOXFileAccess}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class OXShareFileAccess implements /*@formatter:off*/
+public class XOXFileAccess implements /*@formatter:off*/
                                           ThumbnailAware,
                                           FileStorageVersionedFileAccess,
                                           FileStorageIgnorableVersionFileAccess,
@@ -100,16 +100,16 @@ public class OXShareFileAccess implements /*@formatter:off*/
                                           FileStorageRangeFileAccess {
                                           /*@formatter:on*/
 
-    private final OXShareAccountAccess accountAccess;
+    private final XOXAccountAccess accountAccess;
     private final ShareClient client;
 
     /**
-     * Initializes a new {@link OXShareFileAccess}.
+     * Initializes a new {@link XOXFileAccess}.
      *
-     * @param accountAccess The {@link OXShareAccountAccess}
+     * @param accountAccess The {@link XOXAccountAccess}
      * @param client The {@link ShareClient} for accessing the remote OX
      */
-    public OXShareFileAccess(OXShareAccountAccess accountAccess, ShareClient client) {
+    public XOXFileAccess(XOXAccountAccess accountAccess, ShareClient client) {
         this.accountAccess = Objects.requireNonNull(accountAccess, "accountAccess must not be null");
         this.client = Objects.requireNonNull(client, "client must not be null");
     }
@@ -123,7 +123,7 @@ public class OXShareFileAccess implements /*@formatter:off*/
      * @return The file meta data
      * @throws OXException
      */
-    private OXShareFile getMetadata(String folderId, String id, String version) throws OXException {
+    private XOXFile getMetadata(String folderId, String id, String version) throws OXException {
         return client.getMetaData(folderId, id, version);
     }
 
@@ -171,7 +171,7 @@ public class OXShareFileAccess implements /*@formatter:off*/
     }
 
     @Override
-    public OXShareFile getFileMetadata(String folderId, String id, String version) throws OXException {
+    public XOXFile getFileMetadata(String folderId, String id, String version) throws OXException {
         return getMetadata(folderId, id, version);
     }
 
@@ -226,8 +226,8 @@ public class OXShareFileAccess implements /*@formatter:off*/
     @Override
     public Document getDocumentAndMetadata(String folderId, String fileId, String version, String clientETag) throws OXException {
         //TODO: use e-tag
-        OXShareFile fileMetaData = getMetadata(folderId, fileId, version);
-        return new OXShareDocument(fileMetaData, () -> getDocument(folderId, fileId, version));
+        XOXFile fileMetaData = getMetadata(folderId, fileId, version);
+        return new XOXDocument(fileMetaData, () -> getDocument(folderId, fileId, version));
     }
 
     @Override

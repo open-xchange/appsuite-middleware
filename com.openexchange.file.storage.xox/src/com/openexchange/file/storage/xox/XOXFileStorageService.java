@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
@@ -72,14 +72,14 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link OXShareFileStorageService} - The file storage service to access OX shares on other installations
+ * {@link XOXFileStorageService} - The file storage service to access OX shares on other installations
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class OXShareFileStorageService implements AccountAware, SharingFileStorageService, LoginAwareFileStorageServiceExtension {
+public class XOXFileStorageService implements AccountAware, SharingFileStorageService, LoginAwareFileStorageServiceExtension {
 
-    private static final String FILESTORAGE_OXSHARE_CAPABILITY = "filestorage_oxshare";
+    private static final String FILESTORAGE_OXSHARE_CAPABILITY = "filestorage_xox";
 
     private static final Object LOCK = new Object();
 
@@ -89,16 +89,16 @@ public class OXShareFileStorageService implements AccountAware, SharingFileStora
     private volatile FileStorageAccountManager accountManger;
 
     /**
-     * Initializes a new {@link OXShareFileStorageService}.
+     * Initializes a new {@link XOXFileStorageService}.
      *
      * @param services The {@link ServiceLookup} instance
      */
-    public OXShareFileStorageService(ServiceLookup services) {
+    public XOXFileStorageService(ServiceLookup services) {
         this.services = Objects.requireNonNull(services, "services must not be null");
 
         DynamicFormDescription description = new DynamicFormDescription();
-        description.add(FormElement.link(OXShareStorageConstants.SHARE_URL, FormStrings.SHARE_LINK_LABEL));
-        description.add(FormElement.password(OXShareStorageConstants.PASSWORD, FormStrings.PASSWORD, false, ""));
+        description.add(FormElement.link(XOXStorageConstants.SHARE_URL, FormStrings.SHARE_LINK_LABEL));
+        description.add(FormElement.password(XOXStorageConstants.PASSWORD, FormStrings.PASSWORD, false, ""));
         formDescription = new ReadOnlyDynamicFormDescription(description);
     }
 
@@ -153,18 +153,18 @@ public class OXShareFileStorageService implements AccountAware, SharingFileStora
     private void assertCapability(Session session) throws OXException {
         CapabilityService capabilityService = services.getServiceSafe(CapabilityService.class);
         if (!capabilityService.getCapabilities(session).contains(FILESTORAGE_OXSHARE_CAPABILITY)) {
-            throw OXShareFileStorageExceptionCodes.MISSING_CAPABILITY.create(getId());
+            throw XOXFileStorageExceptionCodes.MISSING_CAPABILITY.create(getId());
         }
     }
 
     @Override
     public String getId() {
-        return OXShareStorageConstants.ID;
+        return XOXStorageConstants.ID;
     }
 
     @Override
     public String getDisplayName() {
-        return OXShareStorageConstants.DISPLAY_NAME;
+        return XOXStorageConstants.DISPLAY_NAME;
     }
 
     @Override
@@ -174,7 +174,7 @@ public class OXShareFileStorageService implements AccountAware, SharingFileStora
 
     @Override
     public Set<String> getSecretProperties() {
-        return Collections.singleton(OXShareStorageConstants.PASSWORD);
+        return Collections.singleton(XOXStorageConstants.PASSWORD);
     }
 
     @Override
@@ -190,7 +190,7 @@ public class OXShareFileStorageService implements AccountAware, SharingFileStora
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId(), I(session.getUserId()), I(session.getContextId()));
         }
         FileStorageAccount account = manager.getAccount(accountId, session);
-        return new OXShareAccountAccess(this, getApiClientService(), account, session);
+        return new XOXAccountAccess(this, getApiClientService(), account, session);
     }
 
     @Override
@@ -202,10 +202,10 @@ public class OXShareFileStorageService implements AccountAware, SharingFileStora
     public void testConnection(FileStorageAccount account, Session session) throws OXException {
         try {
             if (!getAccountAccess(account.getId(), session).ping()) {
-                throw OXShareFileStorageExceptionCodes.PING_FAILED.create();
+                throw XOXFileStorageExceptionCodes.PING_FAILED.create();
             }
         } catch (OXException e) {
-            throw OXShareFileStorageExceptionCodes.PING_FAILED.create(e.getCause(), (Object[]) null);
+            throw XOXFileStorageExceptionCodes.PING_FAILED.create(e.getCause(), (Object[]) null);
         }
     }
 }

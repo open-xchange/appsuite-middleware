@@ -47,25 +47,20 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link OXShareFileStorageExceptionMessages}
+ * {@link FormStrings}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class OXShareFileStorageExceptionMessages implements LocalizableStrings {
+public class FormStrings implements LocalizableStrings {
 
-    /**
-     * The connection check failed
-     */
-    public static final String PING_FAILED = "The connection check failed.";
+    public static final String SHARE_LINK_LABEL = "OX share link";
 
-    /**
-     * Missing capability for file storage %1$s
-     */
-    public static final String MISSING_CAP_MSG = "Missing capability for file storage %1$s";
+    public static final String PASSWORD = "OX share link password";
+
 }

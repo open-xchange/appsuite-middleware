@@ -47,40 +47,46 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox.osgi;
 
-import com.openexchange.annotation.NonNull;
-import com.openexchange.file.storage.FileStorageConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.api.client.ApiClientService;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.file.storage.xox.XOXFileStorageService;
+import com.openexchange.file.storage.xox.analyzer.XOXShareLinkManager;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.share.federated.ShareLinkManager;
 
 /**
- * {@link OXShareStorageConstants}
+ * {@link Activator}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.5
+ * @since v7.10.4
  */
-public final class OXShareStorageConstants implements FileStorageConstants {
+public class Activator extends HousekeepingActivator {
 
-    /**
-     * The unique ID of the OX share file storage implementation
-     */
-    @NonNull
-    public static final String ID = "xox" + Module.INFOSTORE.getFolderConstant();
+    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
-    /**
-     * The display name of the the OX share file storage implementation
-     */
-    @NonNull
-    public static final String DISPLAY_NAME = "OX AppSuite Share";
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class, FileStorageServiceRegistry.class };
+    }
 
-    /**
-     * The share link to the other OX
-     */
-    @NonNull
-    public static final String SHARE_URL = "url";
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
 
-    /**
-     * The password to the user's share if any
-     */
-    @NonNull
-    public static final String PASSWORD = "password";
+        XOXFileStorageService fileStorageService = new XOXFileStorageService(this);
+        registerService(FileStorageService.class, fileStorageService);
+        registerService(ShareLinkManager.class, new XOXShareLinkManager(this, fileStorageService));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
+        super.stopBundle();
+    }
 }

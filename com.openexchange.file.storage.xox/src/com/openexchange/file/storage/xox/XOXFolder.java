@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,31 +62,31 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 
 /**
- * {@link OXShareFolder} - A folder shared from another OX instance
+ * {@link XOXFolder} - A folder shared from another OX instance
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class OXShareFolder extends DefaultFileStorageFolder implements TypeAware {
+public class XOXFolder extends DefaultFileStorageFolder implements TypeAware {
 
     private FileStorageFolderType type;
 
     /**
-     * Initializes a new {@link OXShareFolder}.
+     * Initializes a new {@link XOXFolder}.
      *
      * @param userId The ID of the owner
      */
-    public OXShareFolder(final int userId) {
+    public XOXFolder(final int userId) {
         this(userId, null);
     }
 
     /**
-     * Initializes a new {@link OXShareFolder}.
+     * Initializes a new {@link XOXFolder}.
      *
      * @param userId The ID of the owner
      * @param other The {@link RemoteFolder} to copy the values from
      */
-    public OXShareFolder(final int userId, final RemoteFolder other) {
+    public XOXFolder(final int userId, final RemoteFolder other) {
 
         id = other == null || other.getID() == null ? FileStorageFolder.ROOT_FULLNAME : other.getID();
         name = other != null ? other.getName() : null;
@@ -164,7 +164,7 @@ public class OXShareFolder extends DefaultFileStorageFolder implements TypeAware
      * @param type The type to set
      * @return This folder with type applied
      */
-    public OXShareFolder setType(FileStorageFolderType type) {
+    public XOXFolder setType(FileStorageFolderType type) {
         this.type = type;
         return this;
     }

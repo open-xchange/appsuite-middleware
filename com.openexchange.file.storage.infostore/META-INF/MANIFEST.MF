@@ -57,4 +57,5 @@ Import-Package: com.google.common.base;version="23.0.0",
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.file.storage.infostore.osgi.InfostoreFileStorageActivator
-Export-Package: com.openexchange.file.storage.infostore
+Export-Package: com.openexchange.file.storage.infostore,
+ com.openexchange.file.storage.infostore.folder

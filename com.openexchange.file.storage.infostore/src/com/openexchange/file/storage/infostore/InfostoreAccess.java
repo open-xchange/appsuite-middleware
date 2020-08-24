@@ -47,12 +47,14 @@
  *
  */
 
-package com.openexchange.file.storage.infostore.internal;
+package com.openexchange.file.storage.infostore;
 
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.infostore.internal.Utils;
+import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;

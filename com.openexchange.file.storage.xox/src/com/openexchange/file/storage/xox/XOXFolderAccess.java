@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,32 +62,33 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.QuotaType;
-import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
- * {@link OXShareFolderAccess}
+ * {@link XOXFolderAccess}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class OXShareFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess /* TODO-MW1380 check which marker interface to add here */ {
+public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess /* TODO-MW1380 check which marker interface to add here */ {
 
     private final Session session;
-    private final OXShareAccountAccess accountAccess;
+    private final XOXAccountAccess accountAccess;
     private final FileStorageAccount account;
     private final ShareClient client;
 
     /**
-     * Initializes a new {@link OXShareFolderAccess}.
+     * Initializes a new {@link XOXFolderAccess}.
      *
-     * @param accountAccess The {@link OXShareAccountAccess}
+     * @param accountAccess The {@link XOXAccountAccess}
      * @param client The {@link ShareClient} for accessing the remote OX
      */
-    public OXShareFolderAccess(OXShareAccountAccess accountAccess, ShareClient client) {
+    public XOXFolderAccess(XOXAccountAccess accountAccess, ShareClient client) {
         this.accountAccess = Objects.requireNonNull(accountAccess, "accountAccess must not be null");
         this.client = Objects.requireNonNull(client, "client must not be null");
         this.session = accountAccess.getSession();
@@ -101,7 +102,7 @@ public class OXShareFolderAccess implements FileStorageFolderAccess, UserCreated
      * @return <code>true</code> if the folder identifier represents the root folder, <code>false</code>, otherwise
      */
     protected static boolean isRoot(String folderId) {
-        return FileStorageFolder.ROOT_FULLNAME.equals(folderId);
+        return folderId == null || FileStorageFolder.ROOT_FULLNAME.equals(folderId);
     }
 
     /**
@@ -144,7 +145,19 @@ public class OXShareFolderAccess implements FileStorageFolderAccess, UserCreated
 
     @Override
     public boolean exists(String folderId) throws OXException {
-        return client.getFolder(folderId) != null;
+        if(isRoot(folderId)) {
+            return true;
+        }
+        try {
+            client.getFolder(folderId);
+            return true;
+        }
+        catch(OXException e) {
+            if(e.similarTo(OXFolderExceptionCode.NOT_EXISTS)) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -179,7 +192,7 @@ public class OXShareFolderAccess implements FileStorageFolderAccess, UserCreated
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        OXShareFolder rootFolder = new OXShareFolder(session.getUserId());
+        XOXFolder rootFolder = new XOXFolder(session.getUserId());
         //TODO: created by get from remote
         rootFolder.setRootFolder(true);
         rootFolder.setHoldsFiles(true);
@@ -191,7 +204,7 @@ public class OXShareFolderAccess implements FileStorageFolderAccess, UserCreated
 
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
-        return ((OXShareFileAccess) accountAccess.getFileAccess()).createFolder(toCreate, true);
+        return ((XOXFileAccess) accountAccess.getFileAccess()).createFolder(toCreate, true);
     }
 
     @Override
@@ -206,12 +219,12 @@ public class OXShareFolderAccess implements FileStorageFolderAccess, UserCreated
 
     @Override
     public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
-        return ((OXShareFileAccess) accountAccess.getFileAccess()).moveFolder(folderId, newParentId, newName, true);
+        return ((XOXFileAccess) accountAccess.getFileAccess()).moveFolder(folderId, newParentId, newName, true);
     }
 
     @Override
     public String renameFolder(String folderId, String newName) throws OXException {
-        return ((OXShareFileAccess) accountAccess.getFileAccess()).moveFolder(folderId, null, newName, true);
+        return ((XOXFileAccess) accountAccess.getFileAccess()).moveFolder(folderId, null, newName, true);
     }
 
     @Override
@@ -231,7 +244,7 @@ public class OXShareFolderAccess implements FileStorageFolderAccess, UserCreated
 
     @Override
     public void clearFolder(String folderId, boolean hardDelete) throws OXException {
-        ((OXShareFileAccess) accountAccess.getFileAccess()).removeDocument(folderId, FileStorageFileAccess.DISTANT_FUTURE, hardDelete);
+        ((XOXFileAccess) accountAccess.getFileAccess()).removeDocument(folderId, FileStorageFileAccess.DISTANT_FUTURE, hardDelete);
     }
 
     @Override
@@ -241,6 +254,9 @@ public class OXShareFolderAccess implements FileStorageFolderAccess, UserCreated
         folders.add(folder);
         while (false == isRoot(folder.getId())) {
             folder = isRoot(folder.getParentId()) ? getRootFolder() : getFolder(folder.getParentId());
+            if (null == folder) {
+                break;
+            }
             folders.add(folder);
         }
         return folders.toArray(new FileStorageFolder[folders.size()]);

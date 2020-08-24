@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -56,16 +56,16 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link OXShareFileStorageExceptionCodes}
+ * {@link XOXFileStorageExceptionCodes}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public enum OXShareFileStorageExceptionCodes implements DisplayableOXExceptionCode {
+public enum XOXFileStorageExceptionCodes implements DisplayableOXExceptionCode {
 
-    PING_FAILED("The connection check failed.", CATEGORY_CONNECTIVITY, 1, OXShareFileStorageExceptionMessages.PING_FAILED),
+    PING_FAILED("The connection check failed.", CATEGORY_CONNECTIVITY, 1, XOXFileStorageExceptionMessages.PING_FAILED),
 
-    MISSING_CAPABILITY("Missing capability for file storage %1$s", Category.CATEGORY_PERMISSION_DENIED, 2, OXShareFileStorageExceptionMessages.MISSING_CAP_MSG)
+    MISSING_CAPABILITY("Missing capability for file storage %1$s", Category.CATEGORY_PERMISSION_DENIED, 2, XOXFileStorageExceptionMessages.MISSING_CAP_MSG)
 
     ;
 
@@ -82,11 +82,11 @@ public enum OXShareFileStorageExceptionCodes implements DisplayableOXExceptionCo
 
     private final String displayMessage;
 
-    private OXShareFileStorageExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private XOXFileStorageExceptionCodes(final String message, final Category category, final int detailNumber) {
         this(message, category, detailNumber, null);
     }
 
-    private OXShareFileStorageExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
+    private XOXFileStorageExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;

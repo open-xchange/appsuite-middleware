@@ -47,30 +47,31 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox;
 
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 
 /**
- * {@link OXShareFile} - A File shared from another OX instance
+ * {@link XOXFile} - A File shared from another OX instance
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class OXShareFile extends DefaultFile {
+public class XOXFile extends DefaultFile {
 
     /**
-     * Initializes a new {@link OXShareFile}.
+     * Initializes a new {@link XOXFile}.
      */
-    public OXShareFile() {}
+    public XOXFile() {}
 
     /**
-     * Initializes a new {@link OXShareFile}.
+     * Initializes a new {@link XOXFile}.
      *
      * @param file The other file to copy information from
      */
-    public OXShareFile(File file) {
+    public XOXFile(File file) {
         super(file);
+        file.setShareable(false);
     }
 }

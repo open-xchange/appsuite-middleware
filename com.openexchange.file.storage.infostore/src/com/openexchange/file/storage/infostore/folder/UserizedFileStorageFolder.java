@@ -108,6 +108,7 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
         setOwnPermission(parsePermission(folder.getOwnPermission()));
         setRootFolder(folder.getParentID() == null);
         setSubscribed(folder.isSubscribed());
+        setSubscribedSubfolders(folder.hasSubscribedSubfolders());
         String[] subfolderIDs = folder.getSubfolderIDs();
         setSubfolders(subfolderIDs != null && subfolderIDs.length > 0);
         FolderID folderID = new FolderID(folder.getID());

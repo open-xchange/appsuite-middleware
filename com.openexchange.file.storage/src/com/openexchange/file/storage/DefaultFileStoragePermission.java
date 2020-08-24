@@ -68,6 +68,24 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
         return retval;
     }
 
+    /**
+     * Initializes a new {@link DefaultFileStoragePermission}, taking over all properties from another permission.
+     * 
+     * @param permission The permission to take over the property values from
+     * @return The new file storage permission
+     */
+    public static DefaultFileStoragePermission newInstance(FileStoragePermission permission) {
+        DefaultFileStoragePermission storagePermission = DefaultFileStoragePermission.newInstance();
+        storagePermission.setAllPermissions(permission.getFolderPermission(), permission.getReadPermission(), permission.getWritePermission(), permission.getDeletePermission());
+        storagePermission.setGroup(permission.isGroup());
+        storagePermission.setAdmin(permission.isAdmin());
+        storagePermission.setSystem(permission.getSystem());
+        storagePermission.setType(permission.getType());
+        storagePermission.setPermissionLegator(permission.getPermissionLegator());
+        storagePermission.setEntity(permission.getEntity());
+        return storagePermission;
+    }
+
     /*-
      * ----------------------------------------- Member section -----------------------------------------
      */

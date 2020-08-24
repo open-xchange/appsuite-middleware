@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,48 +47,25 @@
  *
  */
 
-package com.openexchange.file.storage.infostore.internal;
+package com.openexchange.file.storage.xox;
 
-import java.io.InputStream;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Document;
-import com.openexchange.file.storage.infostore.InfostoreFile;
-import com.openexchange.groupware.infostore.DocumentAndMetadata;
-import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link InfostoreDocument}
+ * {@link XOXFileStorageExceptionMessages}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v7.10.5
  */
-public class InfostoreDocument extends Document {
-
-    private final DocumentAndMetadata documentAndMetadata;
+public class XOXFileStorageExceptionMessages implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link InfostoreDocument}.
-     *
-     * @param documentAndMetadata The underlying document and metadata
+     * The connection check failed
      */
-    public InfostoreDocument(DocumentAndMetadata documentAndMetadata) {
-        super();
-        this.documentAndMetadata = documentAndMetadata;
-        setEtag(documentAndMetadata.getETag());
-        DocumentMetadata metadata = documentAndMetadata.getMetadata();
-        if (null != metadata) {
-            setFile(new InfostoreFile(metadata));
-            setMimeType(metadata.getFileMIMEType());
-            setName(metadata.getFileName());
-            setSize(metadata.getFileSize());
-            if (null != metadata.getLastModified()) {
-                setLastModified(metadata.getLastModified().getTime());
-            }
-        }
-    }
+    public static final String PING_FAILED = "The connection check failed.";
 
-    @Override
-    public InputStream getData() throws OXException {
-        return documentAndMetadata.getData();
-    }
-
+    /**
+     * Missing capability for file storage %1$s
+     */
+    public static final String MISSING_CAP_MSG = "Missing capability for file storage %1$s";
 }

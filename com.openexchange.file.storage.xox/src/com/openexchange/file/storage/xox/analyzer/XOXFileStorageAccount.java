@@ -47,16 +47,16 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare.analyzer;
+package com.openexchange.file.storage.xox.analyzer;
 
-import static com.openexchange.file.storage.oxshare.OXShareStorageConstants.PASSWORD;
-import static com.openexchange.file.storage.oxshare.OXShareStorageConstants.SHARE_URL;
+import static com.openexchange.file.storage.xox.XOXStorageConstants.PASSWORD;
+import static com.openexchange.file.storage.xox.XOXStorageConstants.SHARE_URL;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.ServiceAware;
-import com.openexchange.file.storage.oxshare.OXShareStorageConstants;
+import com.openexchange.file.storage.xox.XOXStorageConstants;
 import com.openexchange.java.Strings;
 
 /**
@@ -116,13 +116,13 @@ public class XOXFileStorageAccount implements FileStorageAccount, ServiceAware {
         this.fileStorageService = fileStorageService;
         this.shareLink = shareLink;
         this.password = Strings.isEmpty(password) ? null : password;
-        this.displayName = Strings.isEmpty(displayName) ? OXShareStorageConstants.DISPLAY_NAME : displayName;
+        this.displayName = Strings.isEmpty(displayName) ? XOXStorageConstants.DISPLAY_NAME : displayName;
         this.id = id;
     }
 
     @Override
     public String getServiceId() {
-        return OXShareStorageConstants.ID;
+        return XOXStorageConstants.ID;
     }
 
     @Override

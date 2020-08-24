@@ -59,7 +59,6 @@ import static com.openexchange.file.storage.composition.internal.idmangling.IDMa
 import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -85,12 +84,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageCapability;
@@ -113,12 +110,10 @@ import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageRestoringFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
-import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.Range;
-import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.UserizedIDTuple;
 import com.openexchange.file.storage.composition.FileID;
@@ -129,7 +124,6 @@ import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessListener;
 import com.openexchange.file.storage.composition.osgi.IDBasedFileAccessListenerRegistry;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.Results;
@@ -146,7 +140,6 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.MergingSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -173,9 +166,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     /** The service identifier for InfoStore. */
     protected static final String INFOSTORE_SERVICE_ID = "com.openexchange.infostore";
 
-    /** The ID of the User Infostore folder */
-    private static final String SYSTEM_USER_INFOSTORE_FOLDER_ID   = "10";
-
     /** A comparator for file accesses preferring the infostore */
     private static final Comparator<FileStorageFileAccess> INFOSTORE_FIRST_COMPARATOR = new Comparator<FileStorageFileAccess>() {
 
@@ -193,38 +183,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             return 0;
         }
     };
-
-    private static class CombinedTimedResult<T> implements TimedResult<T> {
-
-        private final List<TimedResult<T>> results;
-
-        public CombinedTimedResult(List<TimedResult<T>> results) {
-            this.results = results;
-        }
-
-        public CombinedTimedResult(TimedResult<T>... results) {
-            this.results = new ArrayList<TimedResult<T>>(Arrays.asList(results));
-        }
-
-        @Override
-        public SearchIterator<T> results() throws OXException {
-            List<SearchIterator<T>> iterators = new ArrayList<SearchIterator<T>>(results.size());
-            for (TimedResult<T> r : results) {
-                iterators.add(r.results());
-            }
-            SearchIterator<T>[] array = (SearchIterator<T>[]) iterators.toArray(new SearchIterator<?>[iterators.size()]);
-            return new CombinedSearchIterator<T>(array);
-        }
-
-        @Override
-        public long sequenceNumber() throws OXException {
-            long maxSequenceNumber = 0;
-            for (TimedResult<T> r : results) {
-                maxSequenceNumber = Math.max(maxSequenceNumber, r.sequenceNumber());
-            }
-            return maxSequenceNumber;
-        }
-    }
 
     /**
      * Sets the registry reference.
@@ -454,20 +412,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     @Override
     public TimedResult<File> getDocuments(final String folderId) throws OXException {
         final FolderID folderID = new FolderID(folderId);
-        TimedResult<File> result = getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(folderID.getFolderId());
-        TimedResult<File> federatedSharedDocuments = getFederatedSharedDocuments(folderId, session);
-        result = fixIDs(result, folderID.getService(), folderID.getAccountId());
-        return combineResults(result, federatedSharedDocuments);
+        final TimedResult<File> result = getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(folderID.getFolderId());
+        return fixIDs(result, folderID.getService(), folderID.getAccountId());
     }
 
     @Override
     public TimedResult<File> getDocuments(final String folderId, final List<Field> columns) throws OXException {
         FolderID folderID = new FolderID(folderId);
         TimedResult<File> result = getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(folderID.getFolderId(), addIDColumns(columns));
-        TimedResult<File> federatedSharedDocuments = getFederatedSharedDocuments(folderId, session, columns);
-        result = fixIDs(result, folderID.getService(), folderID.getAccountId());
-        return combineResults(result, federatedSharedDocuments);
-
+        return fixIDs(result, folderID.getService(), folderID.getAccountId());
     }
 
     @Override
@@ -477,12 +430,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         String accountId = folderID.getAccountId();
 
         try {
-            TimedResult<File> federatedSharedDocuments = getFederatedSharedDocuments(folderId, session, columns);
-
             TimedResult<File> result = getFileAccess(service, accountId).getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order);
-            result = fixIDs(result, service, accountId);
-
-            return combineResults(result, federatedSharedDocuments, sort, order);
+            return fixIDs(result, service, accountId);
         } catch (OXException e) {
             if (!FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.equals(e) || !INFOSTORE_SERVICE_ID.equals(service)) {
                 throw e;
@@ -503,26 +452,19 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
         try {
             TimedResult<File> result;
-            TimedResult<File> federatedSharedDocuments = getFederatedSharedDocuments(folderId, session, columns);
-            FileStorageFileAccess fileAccess = getFileAccess(service, accountId);
 
-            if (federatedSharedDocuments != EMPTY_TIMED_RESULT) {
-                //We have to do sorting and paging on the combined result in memory
-                result = ((FileStorageRangeFileAccess) fileAccess).getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order);
+            FileStorageFileAccess fileAccess = getFileAccess(service, accountId);
+            if (FileStorageTools.supports(fileAccess, FileStorageCapability.RANGES)) {
+                result = ((FileStorageRangeFileAccess) fileAccess).getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order, range);
             } else {
-                if (FileStorageTools.supports(fileAccess, FileStorageCapability.RANGES)) {
-                    result = ((FileStorageRangeFileAccess) fileAccess).getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order, range);
-                } else {
-                    result = fileAccess.getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order);
-                    if (result == null) {
-                        return EMPTY_TIMED_RESULT;
-                    }
-                    result = slice(result, range);
+                result = fileAccess.getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order);
+                if (result == null) {
+                    return EMPTY_TIMED_RESULT;
                 }
+                result = slice(result, range);
             }
 
-            result = fixIDs(result, service, accountId);
-            return combineResults(result, federatedSharedDocuments, sort, order, range);
+            return fixIDs(result, service, accountId);
         } catch (OXException e) {
             if (!FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.equals(e) || !INFOSTORE_SERVICE_ID.equals(service)) {
                 throw e;
@@ -2196,28 +2138,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         }
     }
 
-    private TimedResult<File> sort(TimedResult<File> documents, Field sort, SortDirection order) throws OXException {
-        if (null != sort) {
-            @SuppressWarnings("resource") List<File> files = SearchIterators.asList(documents.results());
-            sort(files, sort, order);
-            return new ListBasedTimedResult(files, documents.sequenceNumber());
-        }
-        return documents;
-    }
-
-    /**
-     * Sorts the supplied list of files if needed.
-     *
-     * @param files The files to sort
-     * @param sort The sort order, or <code>null</code> if not specified
-     * @param order The sort direction
-     */
-    private void sort(List<File> files, Field sort, SortDirection order) {
-        if (null != sort && 1 < files.size()) {
-            Collections.sort(files, order.comparatorBy(sort));
-        }
-    }
-
     /**
      * Checks if given file meta-data is <i><b>not</b></i> a new file to create.
      *
@@ -2286,135 +2206,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             }
         }
         return false;
-    }
-
-    /**
-     * Combines two results
-     *
-     * @param result1 The first result
-     * @param result2 The second result
-     * @return The combined result
-     * @throws OXException
-     */
-    private TimedResult<File> combineResults(TimedResult<File> result1, TimedResult<File> result2) throws OXException {
-        return combineResults(result1, result2, null, SortDirection.DEFAULT);
-    }
-
-    /**
-     * Combines and sorts two results
-     *
-     * @param result1 The first result
-     * @param result2 The second result
-     * @param sort The field to sort the new combined result for
-     * @param order The sort direction to use
-     * @return The combined result
-     * @throws OXException
-     */
-    private TimedResult<File> combineResults(TimedResult<File> result1, TimedResult<File> result2, Field sort, SortDirection order) throws OXException {
-        return combineResults(result1, result2, sort, order, null);
-    }
-
-    /**
-     * Combines, sorts and slices two results
-     *
-     * @param result1 The first result
-     * @param result2 The second result
-     * @param sort The field to sort the new combined result for
-     * @param order The sort direction to use
-     * @param range The range to use for slicing
-     * @return The combined result
-     * @throws OXException
-     */
-    private TimedResult<File> combineResults(TimedResult<File> result1, TimedResult<File> result2, Field sort, SortDirection order, Range range) throws OXException {
-
-        if (!result1.results().hasNext()) {
-            return result2;
-        }
-
-        if (!result2.results().hasNext()) {
-            return result1;
-        }
-
-        TimedResult<File> result = new CombinedTimedResult<File>(result1, result2);
-
-        if (sort != null) {
-            result = sort(result, sort, order);
-        }
-
-        if (range != null) {
-            result = slice(result, range);
-        }
-
-        return result;
-    }
-
-    /**
-     * Loads a list of "federated shared" documents from other OX installations
-     *
-     * @param folderId The folder ID to load the documents for
-     * @param session The session
-     * @return The result
-     * @throws OXException
-     */
-    private TimedResult<File> getFederatedSharedDocuments(String folderId, Session session) throws OXException {
-        return getFederatedSharedDocuments(folderId, session, FileStorageFileAccess.ALL_FIELDS, null, null);
-    }
-
-    /**
-     * Loads a list of "federated shared" documents from other OX installations
-     *
-     * @param folderId The folder ID to load the documents for
-     * @param session The session
-     * @columns The columns to load
-     * @return The result
-     * @throws OXException
-     */
-    private TimedResult<File> getFederatedSharedDocuments(String folderId, Session session, List<Field> columns) throws OXException {
-        return getFederatedSharedDocuments(folderId, session, columns, null, null);
-    }
-
-    /**
-     * Loads a list of "federated shared" documents from other OX installations
-     *
-     * @param folderId The folder ID to load the documents for
-     * @param session The session
-     * @columns The columns to load
-     * @sort The Field used for sorting
-     * @order The sort order to use
-     * @return The result
-     * @throws OXException
-     */
-    private TimedResult<File> getFederatedSharedDocuments(String folderId, Session session, List<Field> columns, Field sort, SortDirection order) throws OXException {
-        if (folderId.equals(SYSTEM_USER_INFOSTORE_FOLDER_ID)) {
-            //TODO MW-1409: error handling: an error must not cause loading other /regular files to "fail"
-            FileStorageServiceRegistry registry = getFileStorageServiceRegistry();
-            List<FileStorageService> allServices = registry.getAllServices();
-            List<TimedResult<File>> results = new ArrayList<>();
-            for (FileStorageService service : allServices) {
-                if (service instanceof AccountAware && service instanceof SharingFileStorageService) {
-                    List<FileStorageAccount> accounts = ((AccountAware) service).getAccounts(session);
-                    for (FileStorageAccount account : accounts) {
-                        FileStorageAccountAccess access = account.getFileStorageService().getAccountAccess(account.getId(), session);
-                        access.connect();
-                        TimedResult<File> result = null;
-                        if (sort != null) {
-                            result = access.getFileAccess().getDocuments(SYSTEM_USER_INFOSTORE_FOLDER_ID, columns, sort, order);
-                        } else {
-                            result = access.getFileAccess().getDocuments(SYSTEM_USER_INFOSTORE_FOLDER_ID);
-                        }
-
-                        if (result.results().hasNext()) {
-                            results.add(fixIDs(result, service.getId(), account.getId()));
-                        }
-                    }
-                }
-            }
-            if (!results.isEmpty()) {
-                TimedResult<File> result = new CombinedTimedResult<File>(results);
-                return result;
-            }
-        }
-        return EMPTY_TIMED_RESULT;
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------

@@ -594,7 +594,7 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
             }
         });
 
-        mappings.put(File.Field.NUMBER_OF_VERSIONS, new IntegerMapping<DefaultFile>(File.Field.NUMBER_OF_VERSIONS.getName(), I(File.Field.MODIFIED_BY.getNumber())) {
+        mappings.put(File.Field.NUMBER_OF_VERSIONS, new IntegerMapping<DefaultFile>(File.Field.NUMBER_OF_VERSIONS.getName(), I(File.Field.NUMBER_OF_VERSIONS.getNumber())) {
 
             @Override
             public boolean isSet(DefaultFile object) {

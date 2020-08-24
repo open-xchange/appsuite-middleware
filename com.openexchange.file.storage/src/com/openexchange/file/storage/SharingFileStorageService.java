@@ -51,7 +51,7 @@ package com.openexchange.file.storage;
 
 
 /**
- * {@link SharingFileStorageService} - A marker interface which will place the FileStorage content under folder 10
+ * {@link SharingFileStorageService} - A marker interface which will place the FileStorage content under folder 10 and 15
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5

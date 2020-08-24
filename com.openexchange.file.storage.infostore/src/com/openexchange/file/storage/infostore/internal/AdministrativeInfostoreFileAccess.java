@@ -66,6 +66,7 @@ import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.infostore.FileMetadata;
+import com.openexchange.file.storage.infostore.InfostoreAccess;
 import com.openexchange.file.storage.infostore.InfostoreFile;
 import com.openexchange.file.storage.infostore.osgi.Services;
 import com.openexchange.groupware.contexts.Context;

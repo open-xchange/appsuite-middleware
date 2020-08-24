@@ -2109,6 +2109,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @throws OXException
      */
     private boolean isBelowTrashFolder(int folderId, int trashFolderId, OXFolderAccess folderAccess) throws OXException {
+        if (-1 == trashFolderId) {
+            return false;
+        }
         while (-1 != folderId) {
             if (folderId == trashFolderId) {
                 return true;

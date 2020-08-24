@@ -50,12 +50,22 @@
 package com.openexchange.api.client.common.calls.infostore;
 
 import java.util.Map;
+import org.apache.http.protocol.HttpContext;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
 import com.openexchange.api.client.common.calls.infostore.mapping.DefaultFileMapper;
-import com.openexchange.api.client.common.parser.JsonObjectParser;
+import com.openexchange.api.client.common.parser.AbstractHttpResponseParser;
+import com.openexchange.api.client.common.parser.CommonApiResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.groupware.tools.mappings.json.JsonMapping;
+import com.openexchange.java.Strings;
 
 /**
  * {@link GetCall}
@@ -112,6 +122,33 @@ public class GetCall extends AbstractGetCall<DefaultFile> {
 
     @Override
     public HttpResponseParser<DefaultFile> getParser() {
-        return new JsonObjectParser<>(new DefaultFileMapper());
+        return new AbstractHttpResponseParser<DefaultFile>() {
+
+            private void setMedia(JSONObject json, DefaultFileMapper mapper, DefaultFile file) throws JSONException, OXException {
+                if (json.hasAndNotNull("media") && !mapper.getMappings().isEmpty()) {
+                    JSONObject jsonMedia = json.getJSONObject("media");
+                    for (Field mediaField : File.Field.MEDIA_FIELDS) {
+                        JsonMapping<? extends Object, DefaultFile> jsonMapping = mapper.getMappings().get(mediaField);
+                        if (jsonMapping != null && Strings.isNotEmpty(jsonMapping.getAjaxName()) && jsonMedia.has(jsonMapping.getAjaxName())) {
+                            jsonMapping.deserialize(jsonMedia, file);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public DefaultFile parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException, JSONException {
+
+                if (commonResponse.isJSONObject()) {
+                    JSONObject jsonObject = commonResponse.getJSONObject();
+                    DefaultFileMapper mapper = new DefaultFileMapper();
+                    DefaultFile file = mapper.deserialize(jsonObject, mapper.getMappedFields());
+                    //"media" is actually not a field but a nested object
+                    setMedia(jsonObject, mapper, file);
+                    return file;
+                }
+                throw ApiClientExceptions.JSON_ERROR.create("Not an JSON object");
+            }
+        };
     }
 }

@@ -56,30 +56,32 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link FolderWriter}
+ * {@link FolderConverter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.5
  */
-public final class FolderWriter {
+public class FolderConverter {
 
     /**
-     * Initializes a new {@link FolderWriter}.
+     * Initializes a new {@link FolderConverter}.
      */
-    private FolderWriter() {
+    public FolderConverter() {
         super();
     }
 
     /**
-     * Writes a folder.
+     * Converts a userized folder into its file storage folder equivalent.
      *
-     * @param folder The folder
-     * @return The written folder
+     * @param folder The userized folder to convert
+     * @return The file storage folder
      */
-    public static FileStorageFolder writeFolder(UserizedFolder folder) throws OXException {
+    public UserizedFileStorageFolder getStorageFolder(UserizedFolder folder) throws OXException {
         if (null == folder) {
             return null;
         }
@@ -91,13 +93,24 @@ public final class FolderWriter {
     }
 
     /**
+     * Parses a folder from given file storage folder.
+     *
+     * @param storageFolder The file storage folder
+     * @return The parsed folder
+     * @throws OXException If parsing folder fails
+     */
+    public Folder getFolder(FileStorageFolder storageFolder) throws OXException {
+        return FolderParser.parseFolder(storageFolder);
+    }
+
+    /**
      * Converts an array of userized folders into their file storage folder equivalents.
      *
      * @param folders The userized folders to convert
      * @return The file storage folders
      */
-    public static FileStorageFolder[] writeFolders(UserizedFolder[] folders) throws OXException {
-        return writeFolders(folders, true);
+    public FileStorageFolder[] getStorageFolders(UserizedFolder[] folders) throws OXException {
+        return getStorageFolders(folders, true);
     }
 
     /**
@@ -107,14 +120,14 @@ public final class FolderWriter {
      * @param infostoreOnly <code>true</code> to exclude folders from other modules, <code>false</code>, otherwise
      * @return The file storage folders
      */
-    public static FileStorageFolder[] writeFolders(UserizedFolder[] folders, boolean infostoreOnly) throws OXException {
+    public FileStorageFolder[] getStorageFolders(UserizedFolder[] folders, boolean infostoreOnly) throws OXException {
         if (null == folders) {
             return null;
         }
         List<FileStorageFolder> fileStorageFolders = new ArrayList<FileStorageFolder>(folders.length);
         for (UserizedFolder folder : folders) {
             if (false == infostoreOnly || false == isNotInfostore(folder)) {
-                fileStorageFolders.add(writeFolder(folder));
+                fileStorageFolders.add(getStorageFolder(folder));
             }
         }
         return fileStorageFolders.toArray(new FileStorageFolder[fileStorageFolders.size()]);
@@ -126,7 +139,7 @@ public final class FolderWriter {
      * @param folder The folder to check
      * @return <code>true</code> if the folder is no infostore-, file- or system-folder, <code>false</code>, otherwise
      */
-    private static boolean isNotInfostore(UserizedFolder folder) {
+    protected boolean isNotInfostore(UserizedFolder folder) {
         if (null != folder) {
             ContentType contentType = folder.getContentType();
             if (null != contentType) {
@@ -137,8 +150,7 @@ public final class FolderWriter {
                 if (FolderObject.SYSTEM_MODULE == module) {
                     try {
                         int numericalID = Utils.parseUnsignedInt(folder.getID());
-                        if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == numericalID || FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == numericalID ||
-                            FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == numericalID) {
+                        if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == numericalID || FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == numericalID || FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == numericalID) {
                             return false;
                         }
                     } catch (NumberFormatException e) {

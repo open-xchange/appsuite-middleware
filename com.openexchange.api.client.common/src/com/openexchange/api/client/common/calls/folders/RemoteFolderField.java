@@ -69,6 +69,11 @@ public enum RemoteFolderField {
     CREATED_BY(2, "created_by"),
 
     /**
+     * User ID of the user who last modified this object.
+     */
+    MODIFIED_BY(3, "modified_by"),
+
+    /**
      * The date of creation
      */
     CREATION_DATE(4, "creation_date"),

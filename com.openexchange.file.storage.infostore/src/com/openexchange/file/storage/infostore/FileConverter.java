@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,46 +47,57 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare.osgi;
+package com.openexchange.file.storage.infostore;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.oxshare.OXShareFileStorageService;
-import com.openexchange.file.storage.oxshare.analyzer.XOXShareLinkManager;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.share.federated.ShareLinkManager;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Document;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.infostore.internal.InfostoreDeltaWrapper;
+import com.openexchange.file.storage.infostore.internal.InfostoreDocument;
+import com.openexchange.file.storage.infostore.internal.InfostoreTimedResult;
+import com.openexchange.groupware.infostore.DocumentAndMetadata;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.results.Delta;
+import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link Activator}
+ * {@link FileConverter}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public class FileConverter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class, FileStorageServiceRegistry.class };
+    /**
+     * Initializes a new {@link FileConverter}.
+     */
+    public FileConverter() {
+        super();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        OXShareFileStorageService fileStorageService = new OXShareFileStorageService(this);
-        registerService(FileStorageService.class, fileStorageService);
-        registerService(ShareLinkManager.class, new XOXShareLinkManager(this, fileStorageService));
+    public File getFile(DocumentMetadata metadata) {
+        return new InfostoreFile(metadata);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
+    public Document getFileDocument(DocumentAndMetadata metadataDocument) {
+        return new InfostoreDocument(metadataDocument);
     }
+
+    public TimedResult<File> getFileTimedResult(TimedResult<DocumentMetadata> metadataTimedResult) {
+        return new InfostoreTimedResult(metadataTimedResult);
+    }
+
+    public Delta<File> getFileDelta(Delta<DocumentMetadata> metadataDelta) {
+        return new InfostoreDeltaWrapper(metadataDelta);
+    }
+
+    public SearchIterator<File> getFileSearchIterator(SearchIterator<DocumentMetadata> metadataSearchIterator) {
+        return new InfostoreSearchIterator(metadataSearchIterator);
+    }
+
+    public DocumentMetadata getMetadata(File file) throws OXException {
+        return new FileMetadata(file);
+    }
+
 }
