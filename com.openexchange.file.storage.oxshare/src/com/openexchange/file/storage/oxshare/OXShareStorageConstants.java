@@ -51,6 +51,7 @@ package com.openexchange.file.storage.oxshare;
 
 import com.openexchange.annotation.NonNull;
 import com.openexchange.file.storage.FileStorageConstants;
+import com.openexchange.groupware.modules.Module;
 
 /**
  * {@link OXShareStorageConstants}
@@ -63,7 +64,6 @@ public final class OXShareStorageConstants implements FileStorageConstants {
     /**
      * The unique ID of the OX share file storage implementation
      */
-    @NonNull
     public static final String ID = "xox" + Module.INFOSTORE.getFolderConstant();
 
     /**

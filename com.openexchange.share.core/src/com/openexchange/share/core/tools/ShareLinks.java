@@ -50,7 +50,10 @@
 package com.openexchange.share.core.tools;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.share.core.ShareConstants.SHARE_SERVLET;
 import static org.slf4j.LoggerFactory.getLogger;
+import java.net.URI;
+import java.net.URISyntaxException;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -144,6 +147,34 @@ public class ShareLinks {
             .addParameter("confirm", confirmToken)
         .toString();
     }
+
+    /**
+     * Extracts the share base token from a share URL.
+     *
+     * @param path The path to extract the token from
+     * @return The token or <code>null</code> if no token is embedded in the path
+     */
+    public static String extractBaseToken(String shareUrl) {
+        URI uri;
+        try {
+            uri = new URI(shareUrl);
+        } catch (URISyntaxException e) {
+            return null;
+        }
+        String path = uri.getPath();
+        if (Strings.isEmpty(path)) {
+            return null;
+        }
+        String prefix = SHARE_SERVLET + '/';
+        int beginIndex = path.lastIndexOf(prefix);
+        if (-1 == beginIndex) {
+            return null;
+        }
+        beginIndex += prefix.length();
+        int endIndex = path.indexOf('/', beginIndex);
+        return -1 == endIndex ? path.substring(beginIndex) : path.substring(beginIndex, endIndex);
+    }
+
 
     private static URIBuilder prepare(HostData hostData) {
         return new URIBuilder()

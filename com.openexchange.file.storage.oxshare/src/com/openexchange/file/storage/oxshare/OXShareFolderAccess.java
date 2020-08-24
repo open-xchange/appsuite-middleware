@@ -62,10 +62,11 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.QuotaType;
-import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
  * {@link OXShareFolderAccess}
@@ -101,7 +102,7 @@ public class OXShareFolderAccess implements FileStorageFolderAccess, UserCreated
      * @return <code>true</code> if the folder identifier represents the root folder, <code>false</code>, otherwise
      */
     protected static boolean isRoot(String folderId) {
-        return FileStorageFolder.ROOT_FULLNAME.equals(folderId);
+        return folderId == null || FileStorageFolder.ROOT_FULLNAME.equals(folderId);
     }
 
     /**
@@ -144,7 +145,19 @@ public class OXShareFolderAccess implements FileStorageFolderAccess, UserCreated
 
     @Override
     public boolean exists(String folderId) throws OXException {
-        return client.getFolder(folderId) != null;
+        if(isRoot(folderId)) {
+            return true;
+        }
+        try {
+            client.getFolder(folderId);
+            return true;
+        }
+        catch(OXException e) {
+            if(e.similarTo(OXFolderExceptionCode.NOT_EXISTS)) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -241,6 +254,9 @@ public class OXShareFolderAccess implements FileStorageFolderAccess, UserCreated
         folders.add(folder);
         while (false == isRoot(folder.getId())) {
             folder = isRoot(folder.getParentId()) ? getRootFolder() : getFolder(folder.getParentId());
+            if (null == folder) {
+                break;
+            }
             folders.add(folder);
         }
         return folders.toArray(new FileStorageFolder[folders.size()]);

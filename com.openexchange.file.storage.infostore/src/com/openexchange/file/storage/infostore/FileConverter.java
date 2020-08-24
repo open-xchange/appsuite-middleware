@@ -47,48 +47,57 @@
  *
  */
 
-package com.openexchange.file.storage.infostore.internal;
+package com.openexchange.file.storage.infostore;
 
-import java.io.InputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
-import com.openexchange.file.storage.infostore.InfostoreFile;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.infostore.internal.InfostoreDeltaWrapper;
+import com.openexchange.file.storage.infostore.internal.InfostoreDocument;
+import com.openexchange.file.storage.infostore.internal.InfostoreTimedResult;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.results.Delta;
+import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link InfostoreDocument}
+ * {@link FileConverter}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.5
  */
-public class InfostoreDocument extends Document {
-
-    private final DocumentAndMetadata documentAndMetadata;
+public class FileConverter {
 
     /**
-     * Initializes a new {@link InfostoreDocument}.
-     *
-     * @param documentAndMetadata The underlying document and metadata
+     * Initializes a new {@link FileConverter}.
      */
-    public InfostoreDocument(DocumentAndMetadata documentAndMetadata) {
+    public FileConverter() {
         super();
-        this.documentAndMetadata = documentAndMetadata;
-        setEtag(documentAndMetadata.getETag());
-        DocumentMetadata metadata = documentAndMetadata.getMetadata();
-        if (null != metadata) {
-            setFile(new InfostoreFile(metadata));
-            setMimeType(metadata.getFileMIMEType());
-            setName(metadata.getFileName());
-            setSize(metadata.getFileSize());
-            if (null != metadata.getLastModified()) {
-                setLastModified(metadata.getLastModified().getTime());
-            }
-        }
     }
 
-    @Override
-    public InputStream getData() throws OXException {
-        return documentAndMetadata.getData();
+    public File getFile(DocumentMetadata metadata) {
+        return new InfostoreFile(metadata);
+    }
+
+    public Document getFileDocument(DocumentAndMetadata metadataDocument) {
+        return new InfostoreDocument(metadataDocument);
+    }
+
+    public TimedResult<File> getFileTimedResult(TimedResult<DocumentMetadata> metadataTimedResult) {
+        return new InfostoreTimedResult(metadataTimedResult);
+    }
+
+    public Delta<File> getFileDelta(Delta<DocumentMetadata> metadataDelta) {
+        return new InfostoreDeltaWrapper(metadataDelta);
+    }
+
+    public SearchIterator<File> getFileSearchIterator(SearchIterator<DocumentMetadata> metadataSearchIterator) {
+        return new InfostoreSearchIterator(metadataSearchIterator);
+    }
+
+    public DocumentMetadata getMetadata(File file) throws OXException {
+        return new FileMetadata(file);
     }
 
 }

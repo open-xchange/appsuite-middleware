@@ -121,7 +121,9 @@ public class DetachCall extends AbstractPutCall<List<Integer>> {
     @Nullable
     public HttpEntity getBody() throws OXException, JSONException {
         JSONArray jsonArray = new JSONArray(versionsToDelete.length);
-        jsonArray.put(versionsToDelete);
+        for(int i=0; i < versionsToDelete.length; i++) {
+            jsonArray.put(versionsToDelete[i]);
+        }
         return ApiClientUtils.createJsonBody(jsonArray);
     }
 

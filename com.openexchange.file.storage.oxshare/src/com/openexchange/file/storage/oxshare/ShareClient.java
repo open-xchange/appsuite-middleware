@@ -224,13 +224,10 @@ public class ShareClient {
      * Gets the folder identified through given identifier
      *
      * @param folderId The identifier
-     * @return The corresponding instance of {@link OXShareFolder} or <code>null</code> if it doesn't exist
+     * @return The corresponding instance of {@link OXShareFolder}
      * @throws OXException If either folder does not exist or could not be fetched
      */
     public OXShareFolder getFolder(String folderId) throws OXException {
-        if (Strings.isEmpty(folderId)) {
-            return null;
-        }
         RemoteFolder remoteFolder = ajaxClient.execute(new GetFolderCall(folderId));
         final int userId = session.getUserId();
         return new OXShareFolder(userId, remoteFolder);
@@ -392,13 +389,6 @@ public class ShareClient {
      * @throws OXException
      */
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order, Range range) throws OXException {
-
-        //TODO: refine
-        //Folders in the first layer are not accessible for file listing (infostore?action=all)
-        //if(folderId.equals("44")) {
-        //    return new FileTimedResult(Collections.emptyList());
-        //}
-
         final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
         //@formatter:off
         List<? extends File> files = ajaxClient.execute(

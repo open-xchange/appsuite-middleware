@@ -87,6 +87,7 @@ public class OXShareDocument extends Document {
             if (file.getLastModified() != null) {
                 setLastModified(file.getLastModified().getTime());
             }
+            setSize(file.getFileSize());
         }
     }
 

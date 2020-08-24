@@ -412,7 +412,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * Permissions
          */
         userizedFolder.setOwnPermission(ownPermission);
-        CalculatePermission.calculateUserPermissions(userizedFolder, getContext());
         /*
          * Check parent
          */

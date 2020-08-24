@@ -497,6 +497,7 @@ public final class DatabaseFolderConverter {
                     }
                 }
                 databaseFolder.setSubfolderIDs(null);
+                databaseFolder.setSubscribedSubfolders(true);
                 /*
                  * Mark for user-sensitive cache
                  */
@@ -526,6 +527,7 @@ public final class DatabaseFolderConverter {
                      * Enforce subfolders are retrieved from appropriate file storage
                      */
                     databaseFolder.setSubfolderIDs(null);
+                    databaseFolder.setSubscribedSubfolders(true);
                     setChildren = false;
                 }
                 if (setChildren) {

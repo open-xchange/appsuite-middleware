@@ -125,7 +125,11 @@ public class RemoteFolderMapper extends DefaultJsonMapper<RemoteFolder, RemoteFo
 
             @Override
             public void set(RemoteFolder object, String value) throws OXException {
-                object.setCreatedBy(Integer.parseInt(value));
+                if (value != null) {
+                    object.setCreatedBy(Integer.parseInt(value));
+                } else {
+                    remove(object);
+                }
             }
 
             @Override
@@ -139,6 +143,36 @@ public class RemoteFolderMapper extends DefaultJsonMapper<RemoteFolder, RemoteFo
             }
         });
 
+        mappings.put(RemoteFolderField.MODIFIED_BY, new StringMapping<RemoteFolder>(RemoteFolderField.MODIFIED_BY.getName(), I(RemoteFolderField.MODIFIED_BY.getColumn())) {
+
+            @Override
+            public boolean isSet(RemoteFolder object) {
+                return object.getCreatedBy() != -1;
+            }
+
+            @Override
+            public void set(RemoteFolder object, String value) throws OXException {
+                if (value != null) {
+                    object.setModifiedBy(Integer.parseInt(value));
+                } else {
+                    remove(object);
+                }
+            }
+
+            @Override
+            public String get(RemoteFolder object) {
+                return String.valueOf(object.getCreatedBy());
+            }
+
+            @Override
+            public void remove(RemoteFolder object) {
+                object.setCreatedBy(-1);
+            }
+        });
+
+
+
+
         mappings.put(RemoteFolderField.CREATION_DATE, new DateMapping<RemoteFolder>(RemoteFolderField.CREATION_DATE.getName(), I(RemoteFolderField.CREATION_DATE.getColumn())) {
 
             @Override
@@ -149,7 +183,6 @@ public class RemoteFolderMapper extends DefaultJsonMapper<RemoteFolder, RemoteFo
             @Override
             public void set(RemoteFolder object, Date value) throws OXException {
                 object.setCreationDate(value);
-
             }
 
             @Override
