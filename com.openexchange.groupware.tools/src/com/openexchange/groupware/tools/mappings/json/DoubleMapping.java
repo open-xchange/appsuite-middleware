@@ -53,6 +53,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 
+import static com.openexchange.java.Autoboxing.D;
+
 /**
  * {@link DoubleMapping}
  *
@@ -70,7 +72,7 @@ public abstract class DoubleMapping<O> extends DefaultJsonMapping<Double, O> {
 
     @Override
     public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
-        final double value = from.getDouble(getAjaxName());
-        this.set(to, Double.valueOf(value));
+        final Double value = from.hasAndNotNull(getAjaxName()) ? D(from.getDouble(getAjaxName())) : null;
+        this.set(to, value);
     }
 }

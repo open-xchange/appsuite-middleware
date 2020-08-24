@@ -155,9 +155,7 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
 
             @Override
             public void set(DefaultFile object, Integer value) throws OXException {
-                if(object != null) {
-                    object.setModifiedBy(i(value));
-                }
+                object.setModifiedBy(value != null ? i(value) : 0);
             }
 
             @Override
@@ -272,7 +270,7 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
 
             @Override
             public void set(DefaultFile object, Long value) throws OXException {
-                if(object != null) {
+                if(value != null) {
                     object.setFileSize(l(value));
                 }
             }
@@ -343,9 +341,7 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
 
             @Override
             public void set(DefaultFile object, Integer value) throws OXException {
-                if (object != null) {
-                    object.setCreatedBy(i(value));
-                }
+                object.setCreatedBy(value != null ? i(value) : 0);
             }
 
             @Override
@@ -414,7 +410,7 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
 
             @Override
             public void set(DefaultFile object, Long value) throws OXException {
-                if(object != null) {
+                if(value != null) {
                     object.setSequenceNumber(l(value));
                 }
             }
@@ -531,7 +527,9 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
 
             @Override
             public void set(DefaultFile object, Boolean value) throws OXException {
-                object.setIsCurrentVersion(b(value));
+                if(value != null) {
+                    object.setIsCurrentVersion(b(value));
+                }
             }
 
             @Override
@@ -554,9 +552,7 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
 
             @Override
             public void set(DefaultFile object, Integer value) throws OXException {
-                if(object != null) {
-                    object.setColorLabel(i(value));
-                }
+                object.setColorLabel(value != null ? i(value) : 0);
             }
 
             @Override
@@ -603,9 +599,7 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
 
             @Override
             public void set(DefaultFile object, Integer value) throws OXException {
-                if (object != null) {
-                    object.setNumberOfVersions(i(value));
-                }
+                object.setNumberOfVersions(value != null ? i(value) : 0);
             }
 
             @Override
@@ -674,7 +668,9 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
 
             @Override
             public void set(DefaultFile object, Boolean value) throws OXException {
-                object.setShareable(b(value));
+                if(value != null) {
+                    object.setShareable(b(value));
+                }
             }
 
             @Override
@@ -766,7 +762,7 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
 
             @Override
             public void set(DefaultFile object, Long value) throws OXException {
-                if(object != null) {
+                if(value != null) {
                     object.setWidth(l(value));
                 }
             }
@@ -791,7 +787,7 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
 
             @Override
             public void set(DefaultFile object, Long value) throws OXException {
-                if(object != null) {
+                if(value != null) {
                     object.setHeight(l(value));
                 }
             }

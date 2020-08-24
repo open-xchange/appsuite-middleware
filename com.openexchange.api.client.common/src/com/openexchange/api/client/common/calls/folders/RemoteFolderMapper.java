@@ -319,8 +319,10 @@ public class RemoteFolderMapper extends DefaultJsonMapper<RemoteFolder, RemoteFo
 
             @Override
             public void set(RemoteFolder object, Boolean value) throws OXException {
-                if(value != null) {
+                if (value != null) {
                     object.setHasSubfolders(b(value));
+                } else {
+                    remove(object);
                 }
             }
 

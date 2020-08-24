@@ -134,7 +134,12 @@ public class AlarmMapper extends DefaultJsonMapper<Alarm, AlarmField> {
 
             @Override
             public void set(Alarm object, Integer value) throws OXException {
-                object.setId(i(value));
+                if(value != null) {
+                    object.setId(i(value));
+                }
+                else {
+                   remove(object);
+                }
             }
 
             @Override
@@ -224,7 +229,7 @@ public class AlarmMapper extends DefaultJsonMapper<Alarm, AlarmField> {
 
             @Override
             public void set(Alarm object, Long value) throws OXException {
-                object.setAcknowledged(new Date(value.longValue()));
+                object.setAcknowledged(value != null ? new Date(value.longValue()) : null);
             }
 
             @Override

@@ -290,7 +290,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void set(Event object, Long value) throws OXException {
-                object.setCreated(new Date(value.longValue()));
+                object.setCreated(value != null ? new Date(value.longValue()) : null);
             }
 
             @Override
@@ -312,7 +312,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void set(Event object, Long value) throws OXException {
-                object.setTimestamp(value.longValue());
+                object.setTimestamp(value != null ? value.longValue() : 0);
             }
 
             @Override
@@ -361,7 +361,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void set(Event object, Long value) throws OXException {
-                object.setLastModified(new Date(value.longValue()));
+                object.setLastModified(value != null ? new Date(value.longValue()) : null);
             }
 
             @Override
