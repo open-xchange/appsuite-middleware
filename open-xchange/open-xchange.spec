@@ -4,7 +4,7 @@ BuildArch:        noarch
 BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
 Version:          @OXVERSION@
-%define           ox_release 7
+%define           ox_release 8
 Release:          %{ox_release}_<CI_CNT>.<B_CNT>
 Group:            Applications/Productivity
 License:          GPL-2.0
@@ -85,6 +85,8 @@ systemctl daemon-reload &> /dev/null || :
 %doc docs/%{dropin_example}
 
 %changelog
+* Mon Aug 24 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-08-24 (5842)
 * Wed Aug 05 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth candidate for 7.10.4 release
 * Tue Aug 04 2020 Marcus Klein <marcus.klein@open-xchange.com>
