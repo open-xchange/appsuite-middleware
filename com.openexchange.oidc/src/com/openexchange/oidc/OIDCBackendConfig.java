@@ -169,7 +169,8 @@ public interface OIDCBackendConfig {
     String getJWSAlgortihm();
 
     /**
-     * The used OIDC scope.
+     * The scope to request during OIDC authorization flow. This is a space-separated list
+     * of scope values, e.g. <code>openid offline</<code>. Scope values are case-sensitive!
      *
      * @return the scope
      */
@@ -233,10 +234,30 @@ public interface OIDCBackendConfig {
     boolean isAutologinEnabled();
 
     /**
-     * How long before an Oauth Access token expires a new token is supposed to be
-     * requested. Time in milliseconds.
+     * How long before an OAuth access token expires a new token is supposed to be
+     * requested, usually by exchanging a refresh token. In case refresh tokens are
+     * not issued, this value should be 0 to align max. allowed session use time to
+     * access token expiry.
+     * <p>
+     * <strong>Note that OAuth tokens contained in token responses are always set
+     * as session parameters and internally validated on each request. If the
+     * Authorization Server issues at least an access token with expiry date, this
+     * date will determine how long the session can be used!</strong>
+     * <p>A session containing an access token will be terminated on the first request
+     * that happens after <code>expires_in - (getOauthRefreshTime() / 1000)</code>
+     * seconds.
+     * <p>
+     * If a refresh token is contained in the token response, access tokens will be
+     * refreshed during the first request that happens after <code>(expires_in - (getOauthRefreshTime() / 1000))</code>
+     * seconds. A failed refreshed due an invalid/revoked refresh token or an
+     * <code>invalid_grant</code> response will lead to the session being terminated.
+     * <p>
+     * If <code>expires_in</code> is not contained in the token response, the session
+     * will live as long as the configured short-term session lifetime, no matter
+     * if a refresh token is contained or not. The access token will never be refreshed
+     * in that case.
      *
-     * @return the time
+     * @return Time in milliseconds.
      */
     int getOauthRefreshTime();
 

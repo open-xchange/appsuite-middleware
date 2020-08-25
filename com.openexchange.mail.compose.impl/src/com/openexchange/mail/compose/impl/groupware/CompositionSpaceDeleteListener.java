@@ -203,7 +203,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                         if (fsAndUri != null) {
                             try {
                                 FileStorage fileStorage = fsAndUri.getFirst();
-                                Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
+                                Set<String> undeletedFiles = fileStorage.deleteFiles(new String[] { storageIdentifier.getIdentifier() });
                                 if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
                                     LoggerHolder.LOG.warn("Failed to delete the following files on filestore {}: {}", fsAndUri.getSecond(), undeletedFiles);
                                 }
@@ -292,7 +292,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                         Pair<FileStorage, URI> fsAndUri = getFileStorage(fileStorageId, contextId);
                         try {
                             FileStorage fileStorage = fsAndUri.getFirst();
-                            Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
+                            Set<String> undeletedFiles = fileStorage.deleteFiles(new String[] { storageIdentifier.getIdentifier() });
                             if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
                                 LoggerHolder.LOG.warn("Failed to delete the following files on filestore {}: {}", fsAndUri.getSecond(), undeletedFiles);
                             }
@@ -389,7 +389,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                         if (fsAndUri != null) {
                             try {
                                 FileStorage fileStorage = fsAndUri.getFirst();
-                                Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
+                                Set<String> undeletedFiles = fileStorage.deleteFiles(new String[] { storageIdentifier.getIdentifier() });
                                 if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
                                     LoggerHolder.LOG.warn("Failed to delete the following files on filestore {}: {}", fsAndUri.getSecond(), undeletedFiles);
                                 }
@@ -478,7 +478,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                         Pair<FileStorage, URI> fsAndUri = getFileStorage(fileStorageId, contextId);
                         try {
                             FileStorage fileStorage = fsAndUri.getFirst();
-                            Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
+                            Set<String> undeletedFiles = fileStorage.deleteFiles(new String[] { storageIdentifier.getIdentifier() });
                             if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
                                 LoggerHolder.LOG.warn("Failed to delete the following files on filestore {}: {}", fsAndUri.getSecond(), undeletedFiles);
                             }

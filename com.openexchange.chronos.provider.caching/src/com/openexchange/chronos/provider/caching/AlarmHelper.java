@@ -57,10 +57,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.AlarmTrigger;
@@ -105,8 +107,8 @@ public class AlarmHelper {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AlarmHelper.class);
 
-    private final ServiceLookup services;
-    private final Context context;
+    final ServiceLookup services;
+    final Context context;
     final CalendarAccount account;
 
     /**
@@ -619,6 +621,61 @@ public class AlarmHelper {
             }
 
         };
+    }
+
+    /**
+     * Loads alarm triggers for events in the underlying calendar account and filter them based on requested criteria.
+     * <p/>
+     *
+     * @param rangeUntil The upper (exclusive) boundary of the requested time range, or <code>null</code> if not limited
+     * @param actions The alarm actions to include, or <code>null</code> to consider any alarm action
+     * @param loadEventFunction A function to retrieve the event referenced by a specific alarm trigger
+     * @return The loaded alarm triggers, or an empty list if there are none
+     */
+    public List<AlarmTrigger> getAlarmTriggers(Date rangeUntil, Set<String> actions, BiFunction<CalendarStorage, AlarmTrigger, Event> loadEventFunction) throws OXException {
+        return new OSGiCalendarStorageOperation<List<AlarmTrigger>>(services, context.getContextId(), account.getAccountId()) {
+
+            @Override
+            protected List<AlarmTrigger> call(CalendarStorage storage) throws OXException {
+                /*
+                 * load trigger from storage & filter those that do not match the requested criteria
+                 */
+                List<AlarmTrigger> alarmTriggers = storage.getAlarmTriggerStorage().loadTriggers(account.getUserId(), rangeUntil);
+                for (Iterator<AlarmTrigger> iterator = alarmTriggers.iterator(); iterator.hasNext();) {
+                    AlarmTrigger trigger = iterator.next();
+                    /*
+                     * skip triggers with other actions
+                     */
+                    if (null != actions && false == actions.contains(trigger.getAction())) {
+                        iterator.remove();
+                        continue;
+                    }
+                    /*
+                     * skip if referenced event is no longer accessible & cleanup alarm trigger
+                     */
+                    Event event = loadEventFunction.apply(storage, trigger);
+                    if (null == event) {
+                        new OSGiCalendarStorageOperation<Void>(services, context.getContextId(), account.getAccountId()) {
+
+                            @Override
+                            protected Void call(CalendarStorage storage) throws OXException {
+                                try {
+                                    storage.getAlarmStorage().deleteAlarms(trigger.getEventId(), account.getUserId());
+                                    storage.getAlarmTriggerStorage().deleteTriggers(trigger.getEventId());
+                                    LOG.debug("Removed inaccessible alarm for event {} in account {}.", trigger.getEventId(), account);
+                                } catch (OXException e) {
+                                    LOG.warn("Error removing inaccessible alarm for event {} in account {}", trigger.getEventId(), account, e);
+                                }
+                                return null;
+                            }
+                        }.executeUpdate();
+                        iterator.remove();
+                        continue;
+                    }
+                }
+                return alarmTriggers;
+            }
+        }.executeQuery();
     }
 
 }

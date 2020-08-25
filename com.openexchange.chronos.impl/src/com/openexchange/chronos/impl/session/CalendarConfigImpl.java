@@ -167,7 +167,7 @@ public class CalendarConfigImpl implements CalendarConfig {
 
     @Override
     public boolean isNotifyResourceAttendees() {
-        return getConfigValue("com.openexchange.calendar.notifyResourceAttendees", Boolean.class, Boolean.FALSE).booleanValue();
+        return getConfigValue("com.openexchange.calendar.notifyResourceAttendees", Boolean.class, Boolean.TRUE).booleanValue();
     }
 
     @Override

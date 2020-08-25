@@ -52,7 +52,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.Cookie;
@@ -215,7 +214,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     private String getRedirectLocationForSession(HttpServletRequest request, Session session) {
         LOG.trace("getRedirectLocationForSession(HttpServletRequest request: {}, Session session: {})", request.getRequestURI(), session.getSessionID());
-        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), request.getParameter(OIDCTools.PARAM_DEEP_LINK));
+        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), OIDCTools.getDeepLink(request));
     }
 
     private String buildLoginRequest(State state, Nonce nonce, HttpServletRequest request) throws OXException {
@@ -238,7 +237,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     private void addAuthRequestToStateManager(State state, Nonce nonce, HttpServletRequest request)  throws OXException {
         LOG.trace("addAuthRequestToStateManager(State state: {}, Nonce nonce: {}, HttpServletRequest request: {})", state.getValue(), nonce.getValue(), request.getRequestURI());
-        String deepLink = request.getParameter("hash");
+        String deepLink = OIDCTools.getDeepLink(request);
         String uiClientID = OIDCTools.getUiClient(request);
         String hostname = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
         Map<String, String> additionalClientInformation = Collections.emptyMap();
@@ -282,10 +281,11 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             }
             this.sendLoginRequestToServer(request, response, tokenResponse, storedRequestInformation);
         } catch (OXException e) {
-            if (e.getExceptionCode() != OIDCExceptionCode.IDTOKEN_GATHERING_ERROR) {
-                throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e, e.getMessage());
+            if (e.getExceptionCode() instanceof OIDCExceptionCode) {
+                throw e;
             }
-            throw e;
+
+            throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -335,16 +335,23 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private void sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse, AuthenticationRequestInfo storedRequestInformation) throws OXException {
         LOG.trace("sendLoginRequestToServer(HttpServletRequest request: {}, HttpServletResponse response, OIDCTokenResponse tokenResponse: {}, AuthenticationRequestInfo storedRequestInformation: {})",
             request.getRequestURI(), tokenResponse.getOIDCTokens().toJSONObject().toJSONString(), storedRequestInformation);
+        BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
+        if (bearerAccessToken == null) {
+            // could occur, if token response contains access token of a different type than "bearer"
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_RESPONSE_FROM_IDP.create("get bearer access token");
+        }
+
         AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(request, tokenResponse);
         authInfo.setProperty(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString());
-        BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
+        authInfo.setProperty(OIDCTools.ACCESS_TOKEN, bearerAccessToken.getValue());
+        long expiresIn = bearerAccessToken.getLifetime();
+        if (expiresIn > 0) {
+            authInfo.setProperty(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(OIDCTools.expiresInToDate(expiresIn).getTime()));
+        }
+
         RefreshToken refreshToken = tokenResponse.getTokens().getRefreshToken();
-        if (bearerAccessToken != null && refreshToken != null) {
-            authInfo.setProperty(OIDCTools.ACCESS_TOKEN, bearerAccessToken.getValue());
+        if (refreshToken != null) {
             authInfo.setProperty(OIDCTools.REFRESH_TOKEN, refreshToken.getValue());
-            long expiryDate = new Date().getTime();
-            expiryDate += bearerAccessToken.getLifetime() * 1000;
-            authInfo.setProperty(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(expiryDate));
         }
 
         String domainName = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
@@ -409,7 +416,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     private String getResumeURL(HttpServletRequest request, HttpServletResponse response, String domainName, Session session) {
         String redirectURI = "";
-        String path = OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), request.getParameter("hash"));
+        String path = OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), OIDCTools.getDeepLink(request));
         URIBuilder redirectLocation = new URIBuilder()
             .setScheme(OIDCTools.getRedirectScheme(request))
             .setHost(domainName)

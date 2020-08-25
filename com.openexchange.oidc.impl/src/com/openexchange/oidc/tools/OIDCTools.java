@@ -140,7 +140,10 @@ public class OIDCTools {
 
     public static final String DEFAULT_BACKEND_PATH = "oidc";
 
-    public static final String PARAM_DEEP_LINK = "hash";
+    public static final String PARAM_DEEP_LINK = "uriFragment";
+
+    @Deprecated
+    public static final String PARAM_DEEP_LINK_ALT = "hash";
 
     public static final String PARAM_SHARD = "shard";
 
@@ -396,6 +399,21 @@ public class OIDCTools {
     }
 
     /**
+     * Gets a deep link (URI fragment hash to be appended to final UI redirect) from
+     * the client request.
+     *
+     * @param request The request
+     * @return The value to preserve or <code>null</code>
+     */
+    public static String getDeepLink(HttpServletRequest request) {
+        String value = request.getParameter(PARAM_DEEP_LINK);
+        if (value == null) {
+            value = request.getParameter(PARAM_DEEP_LINK_ALT);
+        }
+        return value;
+    }
+
+    /**
      * Load a session from the given {@link Cookie}.
      *
      * @param oidcAtologinCookie The cookie where the session is stored.
@@ -478,7 +496,7 @@ public class OIDCTools {
      * <ul>
      *   <li>access token: {@link OIDCTools#ACCESS_TOKEN}</li>
      *   <li>refresh token: {@link OIDCTools#REFRESH_TOKEN}</li>
-     *   <li>access token expiry: {@link OIDCTools#ACCESS_TOKEN_EXPIRY}</li>
+     *   <li>access token expiry: {@link OIDCTools#ACCESS_TOKEN_EXPIRY} - milliseconds since January 1, 1970, 00:00:00 GMT</li>
      * </ul>
      *
      * @param params
@@ -488,18 +506,18 @@ public class OIDCTools {
         String expiryString = params.get(OIDCTools.ACCESS_TOKEN_EXPIRY);
         String refreshToken = params.get(OIDCTools.REFRESH_TOKEN);
 
+        if (accessToken == null) {
+            return Optional.empty();
+        }
+
         Date expiryDate = null;
         if (expiryString != null) {
             try {
                 long expiryMillis = Long.parseLong(expiryString);
                 expiryDate = new Date(expiryMillis);
             } catch (NumberFormatException e) {
-                LOG.warn("Illegal format of session parameter '{}': {}", Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE, expiryString);
+                LOG.warn("Invalid entry in OAuth parameter map: {} => \"{}\"", OIDCTools.ACCESS_TOKEN_EXPIRY, expiryString);
             }
-        }
-
-        if (accessToken == null) {
-            return Optional.empty();
         }
 
         return Optional.of(new OAuthTokens(accessToken, expiryDate, refreshToken));
@@ -579,6 +597,16 @@ public class OIDCTools {
             .setRefreshThreshold(config.getOauthRefreshTime(), TimeUnit.MILLISECONDS)
             .setTryRecoverStoredTokens(config.tryRecoverStoredTokens())
             .build();
+    }
+
+    /**
+     * Converts an OAuth access tokens <code>expires_in</code> property to a {@link Date}.
+     *
+     * @param expiresIn The <code>expires_in</code> value in seconds
+     * @return The date
+     */
+    public static Date expiresInToDate(long expiresIn) {
+        return new Date(System.currentTimeMillis() + (expiresIn * 1000));
     }
 
 }

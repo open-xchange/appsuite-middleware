@@ -102,6 +102,7 @@ public class PasswordGrantSessionInspector implements SessionInspectorService {
                     .build();
                 RefreshResult result = tokenService.checkOrRefreshTokens(session, refresher, refreshConfig);
                 if (result.isSuccess()) {
+                    LOG.debug("Returning neutral reply for session '{}' due to successful token refresh result: {}", session.getSessionID(), result.getSuccessReason().name());
                     return Reply.NEUTRAL;
                 }
 
@@ -123,7 +124,11 @@ public class PasswordGrantSessionInspector implements SessionInspectorService {
     private Reply handleErrorResult(Session session, RefreshResult result) throws OXException {
         RefreshResult.FailReason failReason = result.getFailReason();
         if (failReason == FailReason.INVALID_REFRESH_TOKEN || failReason == FailReason.PERMANENT_ERROR) {
-            LOG.info("Terminating session '{}' due to oauth token refresh error: {}", session.getSessionID(), failReason.name());
+            if (result.hasException()) {
+                LOG.info("Terminating session '{}' due to oauth token refresh error: {} ({})", session.getSessionID(), failReason.name(), result.getErrorDesc(), result.getException());
+            } else {
+                LOG.info("Terminating session '{}' due to oauth token refresh error: {} ({})", session.getSessionID(), failReason.name(), result.getErrorDesc());
+            }
             sessiondService.removeSession(session.getSessionID());
             throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
         }

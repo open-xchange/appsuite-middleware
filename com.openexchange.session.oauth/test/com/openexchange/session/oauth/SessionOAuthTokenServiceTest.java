@@ -287,14 +287,14 @@ public class SessionOAuthTokenServiceTest {
         RefreshThread other = new RefreshThread(tokenService, session, new BlockingSucceedRefresher(200L, barrier), refreshConfig);
         other.start();
 
+        // the other thread is now holding the lock
         barrier.await(1L, TimeUnit.SECONDS);
 
-        // the other thread is now holding the lock
         RefreshResult result = tokenService.checkOrRefreshTokens(session, new AlwaysSucceedRefresher(), refreshConfig);
-        assertFailureResult(FailReason.LOCK_TIMEOUT, result);
-
         RefreshResult otherResult = other.awaitResult();
+
         assertSuccessResult(SuccessReason.REFRESHED, otherResult);
+        assertFailureResult(FailReason.LOCK_TIMEOUT, result);
     }
 
     /**
@@ -394,9 +394,9 @@ public class SessionOAuthTokenServiceTest {
     }
 
     private static void assertFailureResult(FailReason reason, RefreshResult result) {
-        assertNotNull(result);
-        assertFalse(result.isSuccess());
-        assertTrue(result.isFail());
+        assertNotNull("Expected failure result " + reason + " but was null", result);
+        assertFalse("Expected failure result " + reason + " but was " + result.getSuccessReason(), result.isSuccess());
+        assertTrue("Expected failure result " + reason + " but was " + result.getSuccessReason(), result.isFail());
         assertEquals(reason, result.getFailReason());
         assertNull(result.getSuccessReason());
     }

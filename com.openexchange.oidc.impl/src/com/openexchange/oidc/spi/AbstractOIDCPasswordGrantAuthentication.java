@@ -197,17 +197,25 @@ public abstract class AbstractOIDCPasswordGrantAuthentication implements Authent
             throw LoginExceptionCodes.LOGIN_DENIED.create();
         }
 
+        BearerAccessToken bearerAccessToken = oidcTokenResponse.getTokens().getBearerAccessToken();
+        if (bearerAccessToken == null) {
+            LOG.error("Missing OAuth bearer access token in token response for user '{}': {}", username, oidcTokenResponse.toJSONObject().toJSONString());
+            throw LoginExceptionCodes.LOGIN_DENIED.create();
+        }
+
         AuthenticationInfo authInfo = backend.resolveAuthenticationResponse(loginInfo, oidcTokenResponse);
         authInfo.setProperty(OIDCTools.IDTOKEN, oidcTokenResponse.getOIDCTokens().getIDTokenString());
-        BearerAccessToken bearerAccessToken = oidcTokenResponse.getTokens().getBearerAccessToken();
-        RefreshToken refreshToken = oidcTokenResponse.getTokens().getRefreshToken();
-        long now = System.currentTimeMillis();
-        if (bearerAccessToken != null && refreshToken != null) {
-            authInfo.setProperty(OIDCTools.ACCESS_TOKEN, bearerAccessToken.getValue());
-            authInfo.setProperty(OIDCTools.REFRESH_TOKEN, refreshToken.getValue());
-            long expiryDate = now + (bearerAccessToken.getLifetime() * 1000l);
-            authInfo.setProperty(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(expiryDate));
+        authInfo.setProperty(OIDCTools.ACCESS_TOKEN, bearerAccessToken.getValue());
+        long expiresIn = bearerAccessToken.getLifetime();
+        if (expiresIn > 0) {
+            authInfo.setProperty(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(OIDCTools.expiresInToDate(expiresIn).getTime()));
         }
+
+        RefreshToken refreshToken = oidcTokenResponse.getTokens().getRefreshToken();
+        if (refreshToken != null) {
+            authInfo.setProperty(OIDCTools.REFRESH_TOKEN, refreshToken.getValue());
+        }
+
         authInfo.setProperty(OIDCTools.BACKEND_PATH, backend.getPath());
 
         LOG.debug("Got success token response to password grant request for user '{}'", username);

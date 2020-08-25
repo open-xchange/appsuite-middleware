@@ -91,9 +91,10 @@ public enum OIDCBackendProperty implements Property {
      */
     jwsAlgorithm(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
-     * scope - The used scope
+     * scope - The scope to request during OIDC authorization flow. This is a space-separated list
+     * of scope values, e.g. <code>openid offline</code>. Scope values are case-sensitive!
      */
-    scope(OIDCProperty.PREFIX,"openid"),
+    scope(OIDCProperty.PREFIX, "openid"),
     /**
      * issuer - The OPs issuer path
      */

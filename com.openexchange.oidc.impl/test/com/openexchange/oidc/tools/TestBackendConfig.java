@@ -49,7 +49,10 @@
 
 package com.openexchange.oidc.tools;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import com.openexchange.authentication.NamePart;
 import com.openexchange.oidc.OIDCBackendConfig;
@@ -69,14 +72,22 @@ public class TestBackendConfig implements OIDCBackendConfig {
 
     static String RP_BASE_URI = "https://mail.example.com/appsuite/api/oidc";
 
-    private final Properties properties;
+    private final Map<String, Object> properties;
 
     public TestBackendConfig() {
-        this(new Properties());
+        properties = new HashMap<>();
     }
 
-    public TestBackendConfig(Properties properties) {
+    public TestBackendConfig(Map<String, Object> properties) {
         this.properties = properties;
+    }
+
+    @Deprecated
+    public TestBackendConfig(Properties properties) {
+        this.properties = new HashMap<>();
+        for (Entry<Object, Object> entry : properties.entrySet()) {
+            this.properties.put(entry.getKey().toString(), entry.getValue());
+        }
     }
 
     @Override
@@ -141,7 +152,7 @@ public class TestBackendConfig implements OIDCBackendConfig {
 
     @Override
     public boolean isSSOLogout() {
-        return getOrDefault(OIDCBackendProperty.rpRedirectURIPostSSOLogout);
+        return getOrDefault(OIDCBackendProperty.ssoLogout);
     }
 
     @Override
@@ -217,6 +228,10 @@ public class TestBackendConfig implements OIDCBackendConfig {
     @Override
     public boolean tryRecoverStoredTokens() {
         return getOrDefault(OIDCBackendProperty.tryRecoverStoredTokens);
+    }
+
+    public void setProperty(OIDCBackendProperty property, Object value) {
+        properties.put(property.getFQPropertyName(), value);
     }
 
     @SuppressWarnings("unchecked")
