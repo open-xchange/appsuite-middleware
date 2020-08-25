@@ -153,7 +153,7 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
      * @param history The {@link History} to check
      * @throws IOException
      */
-    private void checkHistory(LeanConfigurationService configService, History history) throws IOException, SecurityException {
+    private synchronized void checkHistory(LeanConfigurationService configService, History history) throws IOException, SecurityException {
         String path;
         String installed;
         switch (history) {
