@@ -55,6 +55,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +101,12 @@ public class HistoryUtil {
      * @throws IOException
      */
     public static Optional<String> readVersion(Path path) throws IOException {
-        return path.toFile().exists() ? Files.lines(path).findFirst() : Optional.empty();
+        if (path.toFile().exists()) {
+            try (Stream<String> str = Files.lines(path)) {
+                return str.findFirst();
+            }
+        }
+        return Optional.empty();
     }
 
     /**
