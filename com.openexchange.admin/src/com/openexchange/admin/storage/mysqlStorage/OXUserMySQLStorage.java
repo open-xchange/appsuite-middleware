@@ -2399,7 +2399,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 LOG.error("SQL Error", sqle);
                 throw new StorageException(sqle.toString());
             }
-            LOG.error("Delete contact yielded groupware API error");
+            LOG.error("Delete user yielded groupware API error", e);
             throw new StorageException(e.toString());
         } catch (IOException e) {
             LOG.error("", e);
