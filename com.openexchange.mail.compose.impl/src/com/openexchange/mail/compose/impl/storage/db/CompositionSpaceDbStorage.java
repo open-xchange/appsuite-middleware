@@ -150,6 +150,17 @@ public class CompositionSpaceDbStorage {
         }
     }
 
+    public boolean exists(UUID compositionSpaceId) throws OXException {
+        Connection connection = dbProvider.getReadConnection(context);
+        try {
+            return exists(connection, compositionSpaceId);
+        } catch (SQLException e) {
+            throw handleException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
     public CompositionSpaceContainer select(UUID compositionSpaceId) throws OXException {
         Connection connection = dbProvider.getReadConnection(context);
         try {
@@ -419,6 +430,18 @@ public class CompositionSpaceDbStorage {
                 }
 
                 return rs.getBoolean(1);
+            }
+        }
+    }
+
+    private boolean exists(Connection connection, UUID compositionSpaceId) throws SQLException {
+        String sql = "SELECT 1 FROM compositionSpace WHERE cid=? AND user=? AND uuid=?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setBytes(3, UUIDs.toByteArray(compositionSpaceId));
+            try (ResultSet rs = stmt.executeQuery()) {
+                return (rs.next());
             }
         }
     }

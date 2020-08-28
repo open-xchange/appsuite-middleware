@@ -183,6 +183,12 @@ public class InMemoryCompositionSpaceStorageService implements NonCryptoComposit
     }
 
     @Override
+    public boolean existsCompositionSpace(Session session, UUID id) throws OXException {
+        InMemoryCompositionSpace compositionSpace = spacesById.get(id);
+        return !isInvalid(compositionSpace, session);
+    }
+
+    @Override
     public CompositionSpace getCompositionSpace(Session session, UUID id) throws OXException {
         InMemoryCompositionSpace compositionSpace = spacesById.get(id);
         if (isInvalid(compositionSpace, session)) {

@@ -170,12 +170,24 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
             return existent;
         }
 
-        boolean encrypted = optionalEncrypt.isPresent() ? optionalEncrypt.get().booleanValue() : hasEncryptedContent(attachment.getCompositionSpaceId(), session);
+        boolean exists = compositionSpaceStorage.existsCompositionSpace(session, attachment.getCompositionSpaceId());
+
+        boolean encrypted;
+        if (optionalEncrypt.isPresent()) {
+            encrypted = optionalEncrypt.get().booleanValue();
+        } else {
+            if (exists) {
+                encrypted = hasEncryptedContent(attachment.getCompositionSpaceId(), session);
+            } else {
+                // Composition space does not yet exist. Thus encryption is determined by configuration/capabilities.
+                encrypted = needsEncryption(session);
+            }
+        }
         if (encrypted == false) {
             return new FlagAndKey(false, null);
         }
 
-        Optional<Key> optionalKey = getKeyFor(attachment.getCompositionSpaceId(), false, session);
+        Optional<Key> optionalKey = getKeyFor(attachment.getCompositionSpaceId(), !exists, session);
         if (!optionalKey.isPresent()) {
             throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(attachment.getCompositionSpaceId()));
         }

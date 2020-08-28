@@ -129,6 +129,12 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
     }
 
     @Override
+    public boolean existsCompositionSpace(Session session, UUID id) throws OXException {
+        CompositionSpaceDbStorage dbStorage = newDbStorageFor(session);
+        return dbStorage.exists(id);
+    }
+
+    @Override
     public CompositionSpace getCompositionSpace(Session session, UUID id) throws OXException {
         CompositionSpaceDbStorage dbStorage = newDbStorageFor(session);
 

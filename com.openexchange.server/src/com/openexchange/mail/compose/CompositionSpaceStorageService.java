@@ -77,6 +77,16 @@ public interface CompositionSpaceStorageService {
     boolean isContentEncrypted(Session session, UUID id) throws OXException;
 
     /**
+     * Checks if such a composition space associated with given identifier exists.
+     *
+     * @param session The session providing user data
+     * @param id The composition space identifier
+     * @return <code>true</code> if such a composition space exists; otherwise <code>false</code>
+     * @throws OXException If composition space cannot be returned
+     */
+    boolean existsCompositionSpace(Session session, UUID id) throws OXException;
+
+    /**
      * Gets the composition space associated with given identifier.
      *
      * @param session The session providing user data
