@@ -56,7 +56,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -156,16 +155,16 @@ public class ApiClientServiceImpl implements ApiClientService {
     }
 
     @Override
-    public void close(int contextId, int userId, Optional<String> loginLink) {
+    public void close(int contextId, int userId, String loginLink) {
         if (contextId < 1 || userId < 1) {
             return;
         }
-        if (loginLink.isPresent()) {
+        if (Strings.isNotEmpty(loginLink)) {
             /*
              * Revoke single access
              */
             try {
-                URL host = generateURL(loginLink.get());
+                URL host = generateURL(loginLink);
                 cachedClients.invalidate(generateCacheKey(contextId, userId, host));
             } catch (OXException e) {
                 LOGGER.warn("Unable to revoke access for user {} in context {}.", I(userId), I(contextId), e);

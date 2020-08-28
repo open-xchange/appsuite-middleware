@@ -112,17 +112,6 @@ public abstract class AbstractFederatedShareAction implements AJAXActionService 
      * Get the {@value #SERVICE_ID} parameter
      *
      * @param requestData The data to get the parameter from
-     * @return The parameter
-     * @throws OXException If parameter is unset
-     */
-    protected String getServiceId(AJAXRequestData requestData) throws OXException {
-        return requireParameter(requestData, SERVICE_ID);
-    }
-
-    /**
-     * Get the {@value #SERVICE_ID} parameter
-     *
-     * @param requestData The data to get the parameter from
      * @param The name of the parameter
      * @return The parameter
      * @throws OXException If parameter is unset

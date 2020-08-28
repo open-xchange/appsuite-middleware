@@ -50,36 +50,51 @@
 package com.openexchange.share.json.actions;
 
 import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.federated.FederatedShareLinkService;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DeleteFederatedShareAction}
+ * {@link AddShareAction} - Adds a share account that is associated with a specific share link from a remote server.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class DeleteFederatedShareAction extends AbstractFederatedShareAction {
+public class AddShareAction extends AbstractFederatedShareAction {
 
     /**
-     * Initializes a new {@link DeleteFederatedShareAction}.
+     * Initializes a new {@link AddShareAction}.
      * 
      * @param services The service lookup
      */
-    public DeleteFederatedShareAction(ServiceLookup services) {
+    public AddShareAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
     AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, String shareLink) throws OXException {
         FederatedShareLinkService service = services.getServiceSafe(FederatedShareLinkService.class);
-        String serviceId = getServiceId(requestData);
-        service.unbindShare(session, serviceId, shareLink);
-        return new AJAXRequestResult(null, new Date(System.currentTimeMillis()));
+        String shareName = requireParameter(requestData, "name");
+        JSONObject json = (JSONObject) requestData.requireData();
+        String password = json.optString("password");
+        String accountId = service.bindShare(session, shareLink, shareName, password);
+        return createResponse(accountId);
+    }
+
+    private AJAXRequestResult createResponse(String accountId) throws OXException {
+        JSONObject jsonObject = new JSONObject(1);
+        try {
+            jsonObject.put("account", accountId);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        }
+        return new AJAXRequestResult(jsonObject, new Date(System.currentTimeMillis()));
     }
 
 }

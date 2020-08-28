@@ -67,26 +67,21 @@ public enum FederatedShareLinkExceptions implements DisplayableOXExceptionCode {
     UNEXPECTED_ERROR("Unexpected error [%1$s]", Category.CATEGORY_ERROR, 1),
 
     /**
-     * <code>The service ID is missing</code>
-     * {@value OXExceptionStrings#BAD_REQUEST}
-     */
-    MISSING_SERVICE_ID("The service ID is missing", Category.CATEGORY_ERROR, 2, OXExceptionStrings.BAD_REQUEST),
-
-    /**
-     * The service with ID \"%1$s\" can't be found
-     */
-    SERVICE_NOT_FOUND("The service with ID \"%1$s\" can't be found", Category.CATEGORY_ERROR, 3),
-
-    /**
      * <code>The link is missing</code>
      * {@value OXExceptionStrings#BAD_REQUEST}
      */
-    MISSING_LINK("The link is missing", Category.CATEGORY_ERROR, 4, OXExceptionStrings.BAD_REQUEST),
+    MISSING_LINK("The link is missing", Category.CATEGORY_ERROR, 2, OXExceptionStrings.BAD_REQUEST),
 
     /**
-     * The provided share link \"%1$s\" can't be used: [%2$s]
+     * <code>The password is missing</code>
+     * {@value OXExceptionStrings#BAD_REQUEST}
      */
-    NOT_USABLE("The provided share link \"%1$s\" can't be used: [%2$s]", Category.CATEGORY_ERROR, 5),
+    MISSING_PASSWORD("The password is missing", Category.CATEGORY_ERROR, 3, OXExceptionStrings.BAD_REQUEST),
+
+    /**
+     * Unable to interpret the link \"%1$s\".
+     */
+    NOT_USABLE("Unable to interpret the link \"%1$s\".", Category.CATEGORY_ERROR, 4),
 
     ;
 

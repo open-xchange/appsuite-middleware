@@ -61,41 +61,36 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AddFederatedShareAction}
+ * {@link UpdateShareAction} - Updates an existing share account that is associated with a specific share link from a remote server
+ * <p>
+ * Currently only refreshing of the password is supported.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class AddFederatedShareAction extends AbstractFederatedShareAction {
+public class UpdateShareAction extends AbstractFederatedShareAction {
 
     /**
-     * Initializes a new {@link AddFederatedShareAction}.
+     * Initializes a new {@link UpdateShareAction}.
      * 
      * @param services The service lookup
      */
-    public AddFederatedShareAction(ServiceLookup services) {
+    public UpdateShareAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
     AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, String shareLink) throws OXException {
         FederatedShareLinkService service = services.getServiceSafe(FederatedShareLinkService.class);
-        String serviceId = getServiceId(requestData);
-        String shareName = requireParameter(requestData, "name");
         JSONObject json = (JSONObject) requestData.requireData();
-        String password = json.optString("password");
-        String accountId = service.bindShare(session, serviceId, shareLink, password, shareName);
-        return createResponse(accountId);
-    }
-
-    private AJAXRequestResult createResponse(String accountId) throws OXException {
-        JSONObject jsonObject = new JSONObject(1);
+        String password;
         try {
-            jsonObject.put("account", accountId);
+            password = json.getString("password");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
-        return new AJAXRequestResult(jsonObject, new Date(System.currentTimeMillis()));
+        service.update(session, shareLink, password);
+        return new AJAXRequestResult(null, new Date(System.currentTimeMillis()));
     }
 
 }

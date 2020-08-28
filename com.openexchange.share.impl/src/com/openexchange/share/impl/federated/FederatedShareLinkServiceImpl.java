@@ -85,44 +85,84 @@ public class FederatedShareLinkServiceImpl extends RankingAwareNearRegistryServi
 
     @Override
     public ShareLinkAnalyzeResult analyzeLink(Session session, String shareLink) throws OXException {
-        if (false == ShareTool.isShare(shareLink)) {
-            throw FederatedShareLinkExceptions.UNEXPECTED_ERROR.create("Not a share link");
-        }
-
-        for (ShareLinkManager manager : getManager(shareLink)) {
+        checkLink(shareLink);
+        for (ShareLinkManager manager : getManagers(shareLink)) {
             ShareLinkState state = manager.analyzeLink(session, shareLink);
             if (null != state) {
                 return new ShareLinkAnalyzeResult(manager.getId(), state);
             }
         }
-        throw FederatedShareLinkExceptions.NOT_USABLE.create(shareLink, "Don't know how to analyze");
+        throw FederatedShareLinkExceptions.NOT_USABLE.create(shareLink);
     }
 
     @Override
-    public String bindShare(Session session, String serviceId, String shareLink, String password, String shareName) throws OXException {
+    public String bindShare(Session session, String shareLink, String shareName, String password) throws OXException {
         checkLink(shareLink);
-        return getManagerById(serviceId).bindShare(session, shareLink, password, shareName);
+        for (ShareLinkManager manager : getManagers(shareLink)) {
+            ShareLinkState state = manager.analyzeLink(session, shareLink);
+            if (null != state) {
+                if (ShareLinkState.ADDABLE_WITH_PASSWORD.equals(state)) {
+                    checkPassword(password);
+                    return manager.bindShare(session, shareLink, shareName, password);
+                }
+                if (ShareLinkState.ADDABLE.equals(state)) {
+                    return manager.bindShare(session, shareLink, shareName, password);
+                }
+                break;
+            }
+        }
+        throw FederatedShareLinkExceptions.NOT_USABLE.create(shareLink);
     }
 
     @Override
-    public void update(Session session, String serviceId, String shareLink, String password) throws OXException {
+    public void update(Session session, String shareLink, String password) throws OXException {
         checkLink(shareLink);
-        getManagerById(serviceId).updateShare(session, shareLink, password);
+        for (ShareLinkManager manager : getManagers(shareLink)) {
+            ShareLinkState state = manager.analyzeLink(session, shareLink);
+            if (null != state) {
+                if (ShareLinkState.CREDENTIALS_REFRESH.equals(state)) {
+                    checkPassword(password);
+                    manager.updateShare(session, shareLink, password);
+                    return;
+                }
+                break;
+            }
+        }
+        throw FederatedShareLinkExceptions.NOT_USABLE.create(shareLink);
     }
 
     @Override
-    public void unbindShare(Session session, String serviceId, String shareLink) throws OXException {
+    public void unbindShare(Session session, String shareLink) throws OXException {
         checkLink(shareLink);
-        getManagerById(serviceId).unbindShare(session, shareLink);
+        for (ShareLinkManager manager : getManagers(shareLink)) {
+            ShareLinkState state = manager.analyzeLink(session, shareLink);
+            if (null != state) {
+                if (ShareLinkState.SUBSCRIBED.equals(state)) {
+                    manager.unbindShare(session, shareLink);
+                    return;
+                }
+                break;
+            }
+        }
+        throw FederatedShareLinkExceptions.NOT_USABLE.create(shareLink);
     }
 
     /*
-     * =============== HELPER ===============
+     * ============================== HELPERS ==============================
      */
 
     private void checkLink(String shareLink) throws OXException {
-        if (false == ShareTool.isShare(shareLink)) {
+        if (Strings.isEmpty(shareLink)) {
             throw FederatedShareLinkExceptions.MISSING_LINK.create();
+        }
+        if (false == ShareTool.isShare(shareLink)) {
+            throw FederatedShareLinkExceptions.NOT_USABLE.create(shareLink);
+        }
+    }
+
+    private void checkPassword(String password) throws OXException {
+        if (Strings.isEmpty(password)) {
+            throw FederatedShareLinkExceptions.MISSING_PASSWORD.create();
         }
     }
 
@@ -132,7 +172,7 @@ public class FederatedShareLinkServiceImpl extends RankingAwareNearRegistryServi
      * @param shareLink The share link
      * @return A list of managers in order or an empty list
      */
-    private List<ShareLinkManager> getManager(String shareLink) {
+    private List<ShareLinkManager> getManagers(String shareLink) {
         if (false == ShareTool.isShare(shareLink)) {
             return Collections.emptyList();
         }
@@ -151,27 +191,6 @@ public class FederatedShareLinkServiceImpl extends RankingAwareNearRegistryServi
             }
         }
         return managers;
-    }
-
-    /**
-     * get the manager fitting to the ID
-     *
-     * @param id The ID to get the manager for
-     * @return The manager
-     * @throws OXException If no manager can be obtained
-     */
-    private ShareLinkManager getManagerById(String id) throws OXException {
-        if (Strings.isEmpty(id)) {
-            throw FederatedShareLinkExceptions.MISSING_SERVICE_ID.create(id);
-        }
-
-        for (Iterator<ShareLinkManager> iterator = iterator(); iterator.hasNext();) {
-            ShareLinkManager manager = iterator.next();
-            if (manager.getId().equals(id)) {
-                return manager;
-            }
-        }
-        throw FederatedShareLinkExceptions.SERVICE_NOT_FOUND.create(id);
     }
 
 }

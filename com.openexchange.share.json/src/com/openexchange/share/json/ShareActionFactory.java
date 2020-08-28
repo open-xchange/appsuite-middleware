@@ -55,13 +55,13 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AddFederatedShareAction;
+import com.openexchange.share.json.actions.AddShareAction;
 import com.openexchange.share.json.actions.AnalyzeAction;
-import com.openexchange.share.json.actions.DeleteFederatedShareAction;
+import com.openexchange.share.json.actions.DeleteShareAction;
 import com.openexchange.share.json.actions.DeleteLinkAction;
 import com.openexchange.share.json.actions.GetLinkAction;
 import com.openexchange.share.json.actions.SendLinkAction;
-import com.openexchange.share.json.actions.UpdateFederatedShareAction;
+import com.openexchange.share.json.actions.UpdateShareAction;
 import com.openexchange.share.json.actions.UpdateLinkAction;
 
 /**
@@ -89,9 +89,9 @@ public class ShareActionFactory implements AJAXActionServiceFactory {
 
         // Federated Sharing
         actions.put("analyze", new AnalyzeAction(services));
-        actions.put("addShare", new AddFederatedShareAction(services));
-        actions.put("deleteShare", new DeleteFederatedShareAction(services));
-        actions.put("updateShare", new UpdateFederatedShareAction(services));
+        actions.put("addShare", new AddShareAction(services));
+        actions.put("deleteShare", new DeleteShareAction(services));
+        actions.put("updateShare", new UpdateShareAction(services));
     }
 
     @Override
