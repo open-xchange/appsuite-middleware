@@ -93,7 +93,7 @@ public class HttpsAwareWSDLGetInterceptor extends WSDLGetInterceptor {
                 ConfigurationService configService = Services.optService(ConfigurationService.class);
                 boolean forceHTTPS = configService != null && configService.getBoolProperty("com.openexchange.forceHTTPS", false);
                 if (forceHTTPS) {
-                    baseUri = new URI("https", uri.getUserInfo(), uri.getHost(), -1, uri.getPath(), uri.getQuery(), uri.getFragment()).toString();
+                    baseUri = new URI("https", uri.getUserInfo(), uri.getHost(), 443, uri.getPath(), uri.getQuery(), uri.getFragment()).toString();
                     message.put(Message.REQUEST_URL, baseUri);
                 }
             }
