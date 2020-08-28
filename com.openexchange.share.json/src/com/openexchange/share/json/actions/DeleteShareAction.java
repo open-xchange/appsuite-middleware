@@ -50,45 +50,34 @@
 package com.openexchange.share.json.actions;
 
 import java.util.Date;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.federated.FederatedShareLinkService;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link UpdateFederatedShareAction}
+ * {@link DeleteShareAction} - Deletes a share account that is associated with a specific share link from a remote server
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class UpdateFederatedShareAction extends AbstractFederatedShareAction {
+public class DeleteShareAction extends AbstractFederatedShareAction {
 
     /**
-     * Initializes a new {@link UpdateFederatedShareAction}.
+     * Initializes a new {@link DeleteShareAction}.
      * 
      * @param services The service lookup
      */
-    public UpdateFederatedShareAction(ServiceLookup services) {
+    public DeleteShareAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
     AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, String shareLink) throws OXException {
         FederatedShareLinkService service = services.getServiceSafe(FederatedShareLinkService.class);
-        String serviceId = getServiceId(requestData);
-        JSONObject json = (JSONObject) requestData.requireData();
-        String password;
-        try {
-            password = json.getString("password");
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
-        }
-        service.update(session, serviceId, shareLink, password);
+        service.unbindShare(session, shareLink);
         return new AJAXRequestResult(null, new Date(System.currentTimeMillis()));
     }
 

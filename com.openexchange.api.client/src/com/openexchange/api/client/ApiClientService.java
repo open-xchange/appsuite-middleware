@@ -49,7 +49,6 @@
 
 package com.openexchange.api.client;
 
-import java.util.Optional;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
@@ -100,6 +99,6 @@ public interface ApiClientService {
      * @param userId The user identifier
      * @param loginLink The optional login link the client was created with. If not set, all clients for the user will be removed
      */
-    void close(int contextId, int userId, Optional<String> loginLink);
+    void close(int contextId, int userId, String loginLink);
 
 }

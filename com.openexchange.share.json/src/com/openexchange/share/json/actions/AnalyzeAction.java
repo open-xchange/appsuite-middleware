@@ -62,7 +62,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AnalyzeAction}
+ * {@link AnalyzeAction} - Analyzes a share link from a remote server and returns a state indicating on the operation for the link
+ * and which service can handle the link
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5

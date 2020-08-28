@@ -74,33 +74,30 @@ public interface FederatedShareLinkService {
      * Binds a share link to the user by e.g. creating a storage account for the share
      *
      * @param session The user session to bind the share to
-     * @param serviceId The service ID of the service that shall bind the link
      * @param shareLink The share link to add or rather bind
-     * @param password The optional password for the share
      * @param shareName The name to set for the binded object
+     * @param password The optional password for the share
      * @return The ID of the created object
      * @throws OXException In case of error
      */
-    String bindShare(Session session, String serviceId, String shareLink, String password, String shareName) throws OXException;
+    String bindShare(Session session, String shareLink, String shareName, String password) throws OXException;
 
     /**
      * Updates a bound share link
      *
      * @param session The user session
-     * @param serviceId The service ID of the service that shall bind the link
      * @param shareLink The share link to identify the bound object
      * @param password The password
      * @throws OXException In case of error
      */
-    void update(Session session, String serviceId,String shareLink, String password) throws OXException;
+    void update(Session session, String shareLink, String password) throws OXException;
 
     /**
      * Unbinds a share and the associated resources of the share.
      *
      * @param session The user session
-     * @param serviceId The service ID of the service that shall bind the link
      * @param shareLink The share link to remove
      * @throws OXException In case of error
      */
-    void unbindShare(Session session, String serviceId,String shareLink) throws OXException;
+    void unbindShare(Session session, String shareLink) throws OXException;
 }

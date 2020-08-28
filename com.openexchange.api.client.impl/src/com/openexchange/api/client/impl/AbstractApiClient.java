@@ -243,19 +243,19 @@ public abstract class AbstractApiClient implements ApiClient {
             return;
         }
 
+        /*
+         * Check if there is a session to remove on the remote system
+         */
+        LoginInformation infos = getLoginInformation();
+        if (null == infos || Strings.isEmpty(infos.getRemoteSessionId())) {
+            LOGGER.debug("Unable to logout client due missing session ID.");
+            return;
+        }
+
+        LOGGER.debug("Client is closed. Logging out user {} in context {} on host {}", I(userId), I(contextId), loginLink.getHost());
         HttpRequestBase request = null;
         HttpResponse response = null;
         try {
-            /*
-             * Check if there is a session to remove on the remote system
-             */
-            LoginInformation infos = getLoginInformation();
-            if (null == infos || Strings.isEmpty(infos.getRemoteSessionId())) {
-                LOGGER.debug("Unable to logout client due missing session ID.");
-                return;
-            }
-            LOGGER.debug("Client is closed. Logging out user {} in context {} on host {}", I(userId), I(contextId), loginLink.getHost());
-
             /*
              * Execute the logout request manually to avoid constrains from execute method (cookies, shutdown flag, etc.)
              */

@@ -58,7 +58,6 @@ import static com.openexchange.share.federated.ShareLinkState.INACCESSIBLE;
 import static com.openexchange.share.federated.ShareLinkState.SUBSCRIBED;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.NonNull;
@@ -162,9 +161,9 @@ public class XOXShareLinkManager implements ShareLinkManager {
     }
 
     @Override
-    public String bindShare(Session session, String shareLink, String password, String shareName) throws OXException {
+    public String bindShare(Session session, String shareLink, String shareName, String password) throws OXException {
         XOXFileStorageAccount account = new XOXFileStorageAccount(fileStorageService, shareLink, password, shareName, null);
-        return fileStorageService.getAccountManager().addAccount(account, session);
+        return fileStorageService.getAccountManager().addAccount(account, session); // TODO enhance with "xox" ID ?
     }
 
     @Override
@@ -187,7 +186,13 @@ public class XOXShareLinkManager implements ShareLinkManager {
     }
 
     /*
-     * =============== HELPER ===============
+     * ============================== HELPERS ==============================
+     */
+
+    /**
+     * Logs the given {@link OXException}
+     * 
+     * @param e The exception to log
      */
     private void handleExcpetion(OXException e) {
         LOGGER.debug("Resource is not accessible: {}", e.getMessage(), e);
@@ -329,7 +334,7 @@ public class XOXShareLinkManager implements ShareLinkManager {
      */
     private void clearRemoteSessions(Session session, String shareLink, FileStorageAccount storageAccount) throws OXException {
         fileStorageService.getAccountAccess(storageAccount.getId(), session).close();
-        services.getServiceSafe(ApiClientService.class).close(session.getContextId(), session.getUserId(), Optional.of(shareLink));
+        services.getServiceSafe(ApiClientService.class).close(session.getContextId(), session.getUserId(), shareLink);
     }
 
 }

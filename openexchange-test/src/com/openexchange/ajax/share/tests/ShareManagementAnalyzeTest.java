@@ -101,7 +101,6 @@ import com.openexchange.testing.httpclient.models.ShareLinkData;
 import com.openexchange.testing.httpclient.models.ShareLinkResponse;
 import com.openexchange.testing.httpclient.models.ShareLinkUpdateBody;
 import com.openexchange.testing.httpclient.models.ShareTargetData;
-import com.openexchange.testing.httpclient.modules.FilestorageApi;
 import com.openexchange.testing.httpclient.modules.MailApi;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 
@@ -174,7 +173,6 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
         ShareLinkAnalyzeResponse analyzeShareLink = smApiC2.analyzeShareLink(apiClientC2.getSession(), "https://example.org/no/share/link");
         assertNull(analyzeShareLink.getData());
         assertNotNull(analyzeShareLink.getError(), analyzeShareLink.getErrorDesc());
-        assertTrue(analyzeShareLink.getErrorDesc().startsWith("Unexpected error"));
     }
 
     @Test
@@ -234,7 +232,7 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
         /*
          * Add share and verify analyze changed
          */
-        String accountId = addOXShareAccount(shareLink);
+        addOXShareAccount(shareLink);
 
         /*
          * Remove guest from folder permission
@@ -251,7 +249,7 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
         /*
          * Delete account and check again
          */
-        new FilestorageApi(apiClientC2).deleteFileAccount(apiClientC2.getSession(), FILESTORE_SERVICE, accountId);
+        deleteOXShareAccount(shareLink);
         analyze(shareLink, StateEnum.ADDABLE);
     }
 
@@ -304,7 +302,7 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
          */
         FederatedShareBody body = new FederatedShareBody();
         body.setPassword(password);
-        smApiC2.updateShare(apiClientC2.getSession(), shareLink, FILESTORE_SERVICE, body);
+        smApiC2.updateShare(apiClientC2.getSession(), shareLink, body);
         analyze(shareLink, StateEnum.SUBSCRIBED);
 
         /*
@@ -436,7 +434,7 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
         FederatedShareBody body = new FederatedShareBody();
         body.setPassword(password);
 
-        AddShareResponse addShare = smApiC2.addShare(apiClientC2.getSession(), shareLink, FILESTORE_SERVICE, "Share from " + testUser.getLogin(), body);
+        AddShareResponse addShare = smApiC2.addShare(apiClientC2.getSession(), shareLink, "Share from " + testUser.getLogin(), body);
         AddShareResponseData data = checkResponse(addShare.getError(), addShare.getErrorDesc(), addShare.getData());
 
         String accountId = data.getAccount();
@@ -448,7 +446,7 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
     }
 
     private void deleteOXShareAccount(String shareLink) throws Exception {
-        CommonResponse response = smApiC2.deleteShare(apiClientC2.getSession(), shareLink, FILESTORE_SERVICE);
+        CommonResponse response = smApiC2.deleteShare(apiClientC2.getSession(), shareLink);
         checkResponse(response);
     }
 

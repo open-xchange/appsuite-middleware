@@ -104,7 +104,7 @@ public interface ShareLinkManager extends Ranked {
      * @return The ID of the created object
      * @throws OXException In case of error
      */
-    String bindShare(Session session, String shareLink, String password, String shareName) throws OXException;
+    String bindShare(Session session, String shareLink, String shareName, String password) throws OXException;
 
     /**
      * Updates a bound share link
