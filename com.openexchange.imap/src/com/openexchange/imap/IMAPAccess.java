@@ -428,6 +428,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 this.imapStore = null;
             }
         } finally {
+            LogProperties.remove(LogProperties.Name.MAIL_HOST_REMOTE_ADDRESS);
             reset();
         }
     }
