@@ -3395,10 +3395,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             } catch (OXException e) {
                 if (Entity2ACLExceptionCode.UNKNOWN_USER.equals(e)) {
                     // Obviously the user is not known, skip
-                    LOG.debug("User {} is not known on IMAP server \"{}\"", Integer.valueOf(aclPermission.getEntity()), imapConfig.getImapServerAddress());
+                    LOG.debug("User {} is not known on IMAP server \"{}\"", Integer.valueOf(aclPermission.getEntity()), imapConfig.getServer());
                 } else if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                     // Obviously the user is not known, skip
-                    LOG.debug("User 0} is not known on IMAP server \"{}\"", Integer.valueOf(aclPermission.getEntity()), imapConfig.getImapServerAddress());
+                    LOG.debug("User {} is not known on IMAP server \"{}\"", Integer.valueOf(aclPermission.getEntity()), imapConfig.getServer());
                 } else {
                     throw e;
                 }
