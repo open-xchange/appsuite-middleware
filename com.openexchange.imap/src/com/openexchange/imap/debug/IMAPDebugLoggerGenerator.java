@@ -56,7 +56,6 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.ISO8601Utils;
 import com.openexchange.java.Strings;
@@ -155,10 +154,17 @@ public class IMAPDebugLoggerGenerator {
             int fileCount = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.debugLog.file.count", 99, view);
             String layoutPattern = Strings.unquote(ConfigViews.getDefinedStringPropertyFrom("com.openexchange.imap.debugLog.file.pattern", "%message%n", view).trim());
 
-            org.slf4j.Logger slf4jLogger = org.slf4j.LoggerFactory.getLogger(IMAPAccess.class);
+            LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
 
-            ch.qos.logback.classic.Logger templateLogger = (ch.qos.logback.classic.Logger) slf4jLogger;
-            LoggerContext context = templateLogger.getLoggerContext();
+            /*-
+             * From https://jira.qos.ch/browse/LOGBACK-1359 to avoid possible ConcurrentModificationException when invoking logback
+             * configurations concurrently:
+             *
+             * context .putObject(CoreConstants.FA_FILENAME_COLLISION_MAP, null);
+             * context .putObject(CoreConstants.RFA_FILENAME_PATTERN_COLLISION_MAP, null);
+             *
+             * or serialize logger configuration
+             */
 
             String sHashCode = toPositiveString(imapSession.hashCode());
             StringBuilder filePatternBase = new StringBuilder(filePath).append("imaptrace_").append(ISO8601Utils.format(new Date(), false)).append('_').append(sHashCode).append(".log");
@@ -166,70 +172,72 @@ public class IMAPDebugLoggerGenerator {
             String filePattern = filePatternBase.append(".0").toString();
             filePatternBase.setLength(reslen);
 
-            ExtendedPatternLayoutEncoder encoder = new ExtendedPatternLayoutEncoder();
-            encoder.setContext(context);
-            encoder.setPattern(layoutPattern);
+            synchronized (INSTANCE) {
+                ExtendedPatternLayoutEncoder encoder = new ExtendedPatternLayoutEncoder();
+                encoder.setContext(context);
+                encoder.setPattern(layoutPattern);
 
-            SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<ILoggingEvent>();
-            triggeringPolicy.setContext(context);
-            triggeringPolicy.setMaxFileSize(FileSize.valueOf(Integer.toString(fileSize)));
+                SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<ILoggingEvent>();
+                triggeringPolicy.setContext(context);
+                triggeringPolicy.setMaxFileSize(FileSize.valueOf(Integer.toString(fileSize)));
 
-            FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
-            rollingPolicy.setContext(context);
-            rollingPolicy.setFileNamePattern(filePatternBase.append(".%i").toString());
-            filePatternBase = null;
-            rollingPolicy.setMinIndex(1);
-            rollingPolicy.setMaxIndex(fileCount);
+                FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
+                rollingPolicy.setContext(context);
+                rollingPolicy.setFileNamePattern(filePatternBase.append(".%i").toString());
+                filePatternBase = null;
+                rollingPolicy.setMinIndex(1);
+                rollingPolicy.setMaxIndex(fileCount);
 
-            RollingFileAppender<ILoggingEvent> rollingFileAppender = new RollingFileAppender<ILoggingEvent>();
-            rollingFileAppender.setAppend(true);
-            rollingFileAppender.setContext(context);
-            rollingFileAppender.setEncoder(encoder);
-            rollingFileAppender.setFile(filePattern);
-            rollingFileAppender.setName(new StringBuilder("IMAPDebugLogAppender_").append(contextId).append('_').append(userId).append('_').append(server).append('_').append(sHashCode).toString());
-            rollingFileAppender.setPrudent(false);
-            rollingFileAppender.setRollingPolicy(rollingPolicy);
-            rollingFileAppender.setTriggeringPolicy(triggeringPolicy);
+                RollingFileAppender<ILoggingEvent> rollingFileAppender = new RollingFileAppender<ILoggingEvent>();
+                rollingFileAppender.setAppend(true);
+                rollingFileAppender.setContext(context);
+                rollingFileAppender.setEncoder(encoder);
+                rollingFileAppender.setFile(filePattern);
+                rollingFileAppender.setName(new StringBuilder("IMAPDebugLogAppender_").append(contextId).append('_').append(userId).append('_').append(server).append('_').append(sHashCode).toString());
+                rollingFileAppender.setPrudent(false);
+                rollingFileAppender.setRollingPolicy(rollingPolicy);
+                rollingFileAppender.setTriggeringPolicy(triggeringPolicy);
 
-            rollingPolicy.setParent(rollingFileAppender);
+                rollingPolicy.setParent(rollingFileAppender);
 
-            encoder.start();
-            triggeringPolicy.start();
-            rollingPolicy.start();
-            rollingFileAppender.start();
+                encoder.start();
+                triggeringPolicy.start();
+                rollingPolicy.start();
+                rollingFileAppender.start();
 
-            List<Status> statuses = context.getStatusManager().getCopyOfStatusList();
-            if (null != statuses && false == statuses.isEmpty()) {
-                for (Status status : statuses) {
-                    if (rollingFileAppender.equals(status.getOrigin()) && (status instanceof ErrorStatus)) {
-                        ErrorStatus errorStatus = (ErrorStatus) status;
-                        Throwable throwable = errorStatus.getThrowable();
-                        if (null == throwable) {
-                            class FastThrowable extends Throwable {
+                List<Status> statuses = context.getStatusManager().getCopyOfStatusList();
+                if (null != statuses && false == statuses.isEmpty()) {
+                    for (Status status : statuses) {
+                        if (rollingFileAppender.equals(status.getOrigin()) && (status instanceof ErrorStatus)) {
+                            ErrorStatus errorStatus = (ErrorStatus) status;
+                            Throwable throwable = errorStatus.getThrowable();
+                            if (null == throwable) {
+                                class FastThrowable extends Throwable {
 
-                                private static final long serialVersionUID = -3677996474956999361L;
+                                    private static final long serialVersionUID = -3677996474956999361L;
 
-                                FastThrowable(String msg) {
-                                    super(msg);
+                                    FastThrowable(String msg) {
+                                        super(msg);
+                                    }
+
+                                    @Override
+                                    public synchronized Throwable fillInStackTrace() {
+                                        return this;
+                                    }
                                 }
-
-                                @Override
-                                public synchronized Throwable fillInStackTrace() {
-                                    return this;
-                                }
+                                throwable = new FastThrowable(errorStatus.getMessage());
                             }
-                            throwable = new FastThrowable(errorStatus.getMessage());
+                            throw createException(server, userId, contextId, throwable);
                         }
-                        throw createException(server, userId, contextId, throwable);
                     }
                 }
-            }
 
-            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(new StringBuilder("IMAPDebugLogger_").append(contextId).append('_').append(userId).append('_').append(server).append('_').append(sHashCode).toString());
-            logbackLogger.setLevel(ch.qos.logback.classic.Level.INFO);
-            logbackLogger.setAdditive(false);
-            logbackLogger.addAppender(rollingFileAppender);
-            return logbackLogger;
+                ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(new StringBuilder("IMAPDebugLogger_").append(contextId).append('_').append(userId).append('_').append(server).append('_').append(sHashCode).toString());
+                logbackLogger.setLevel(ch.qos.logback.classic.Level.INFO);
+                logbackLogger.setAdditive(false);
+                logbackLogger.addAppender(rollingFileAppender);
+                return logbackLogger;
+            }
         } catch (OXException e) {
             Throwable cause = e.getCause();
             throw createException(server, userId, contextId, cause == null ? e : cause);
