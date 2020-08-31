@@ -64,11 +64,11 @@ import java.util.concurrent.ConcurrentMap;
  */
 public abstract class AddressSelector {
 
-    /** The collection of shared <code>RoundRobinSelector</code> instances */
+    /** The collection of shared <code>FailoverSelector</code> instances */
     private static volatile ConcurrentMap<String, FailoverSelector> selectors;
 
     /**
-     * Gets the collection of shared <code>RoundRobinSelector</code> instances
+     * Gets the collection of shared <code>FailoverSelector</code> instances
      *
      * @return The collection
      */
