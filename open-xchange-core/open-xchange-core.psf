@@ -293,6 +293,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,net.fortuna.ical4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.felix.eventadmin.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.tika"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.kafka"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.fishwife.jrugged"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.yaml.snakeyaml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.javasimon"/>
