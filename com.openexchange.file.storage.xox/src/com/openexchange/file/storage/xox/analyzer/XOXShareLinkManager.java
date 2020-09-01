@@ -47,10 +47,10 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare.analyzer;
+package com.openexchange.file.storage.xox.analyzer;
 
 import static com.openexchange.api.client.common.OXExceptionParser.matches;
-import static com.openexchange.file.storage.oxshare.OXShareStorageConstants.SHARE_URL;
+import static com.openexchange.file.storage.xox.XOXStorageConstants.SHARE_URL;
 import static com.openexchange.share.federated.ShareLinkState.ADDABLE;
 import static com.openexchange.share.federated.ShareLinkState.ADDABLE_WITH_PASSWORD;
 import static com.openexchange.share.federated.ShareLinkState.CREDENTIALS_REFRESH;
@@ -69,8 +69,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageFolderAccess;
-import com.openexchange.file.storage.oxshare.OXShareFileStorageService;
-import com.openexchange.file.storage.oxshare.OXShareStorageConstants;
+import com.openexchange.file.storage.xox.XOXFileStorageService;
+import com.openexchange.file.storage.xox.XOXStorageConstants;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -92,7 +92,7 @@ public class XOXShareLinkManager implements ShareLinkManager {
 
     private final ServiceLookup services;
 
-    private OXShareFileStorageService fileStorageService;
+    private XOXFileStorageService fileStorageService;
 
     /**
      * Initializes a new {@link XOXShareLinkManager}.
@@ -100,7 +100,7 @@ public class XOXShareLinkManager implements ShareLinkManager {
      * @param services The services
      * @param fileStorageService The storage
      */
-    public XOXShareLinkManager(ServiceLookup services, OXShareFileStorageService fileStorageService) {
+    public XOXShareLinkManager(ServiceLookup services, XOXFileStorageService fileStorageService) {
         super();
         this.services = services;
         this.fileStorageService = fileStorageService;
@@ -119,7 +119,7 @@ public class XOXShareLinkManager implements ShareLinkManager {
     @Override
     @NonNull
     public String getId() {
-        return OXShareStorageConstants.ID;
+        return XOXStorageConstants.ID;
     }
 
     @Override

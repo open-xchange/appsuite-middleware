@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The OX share file storage bundle
-Bundle-SymbolicName: com.openexchange.file.storage.oxshare
+Bundle-SymbolicName: com.openexchange.file.storage.xox
 Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.file.storage.oxshare
@@ -42,4 +42,4 @@ Import-Package: com.openexchange.annotation,
  com.openexchange.tx,
  org.osgi.framework,
  org.slf4j
-Bundle-Activator: com.openexchange.file.storage.oxshare.osgi.Activator
+Bundle-Activator: com.openexchange.file.storage.xox.osgi.Activator

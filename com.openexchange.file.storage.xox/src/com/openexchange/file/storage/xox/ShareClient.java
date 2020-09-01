@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
@@ -224,13 +224,13 @@ public class ShareClient {
      * Gets the folder identified through given identifier
      *
      * @param folderId The identifier
-     * @return The corresponding instance of {@link OXShareFolder}
+     * @return The corresponding instance of {@link XOXFolder}
      * @throws OXException If either folder does not exist or could not be fetched
      */
-    public OXShareFolder getFolder(String folderId) throws OXException {
+    public XOXFolder getFolder(String folderId) throws OXException {
         RemoteFolder remoteFolder = ajaxClient.execute(new GetFolderCall(folderId));
         final int userId = session.getUserId();
-        return new OXShareFolder(userId, remoteFolder);
+        return new XOXFolder(userId, remoteFolder);
     }
 
     /**
@@ -240,11 +240,11 @@ public class ShareClient {
      * @return An array of {@link FileStorageFolder} representing the subfolders
      * @throws OXException If either parent folder does not exist or its subfolders cannot be delivered
      */
-    public OXShareFolder[] getSubFolders(String parentId) throws OXException {
+    public XOXFolder[] getSubFolders(String parentId) throws OXException {
         List<RemoteFolder> folders = ajaxClient.execute(new ListFoldersCall(getFolderId(parentId)));
         final int userId = session.getUserId();
-        List<OXShareFolder> ret = folders.stream().map(f -> new OXShareFolder(userId, f)).collect(Collectors.toList());
-        return ret.toArray(new OXShareFolder[ret.size()]);
+        List<XOXFolder> ret = folders.stream().map(f -> new XOXFolder(userId, f)).collect(Collectors.toList());
+        return ret.toArray(new XOXFolder[ret.size()]);
     }
 
     /**
@@ -358,9 +358,9 @@ public class ShareClient {
      * @return The file
      * @throws OXException In case of error
      */
-    public OXShareFile getMetaData(String folderId, String id, @Nullable String version) throws OXException {
+    public XOXFile getMetaData(String folderId, String id, @Nullable String version) throws OXException {
         DefaultFile file = ajaxClient.execute(new GetCall(folderId, id, version));
-        return new OXShareFile(file);
+        return new XOXFile(file);
     }
 
     /**

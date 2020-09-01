@@ -47,20 +47,46 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.api.client.ApiClientService;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.file.storage.xox.XOXFileStorageService;
+import com.openexchange.file.storage.xox.analyzer.XOXShareLinkManager;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.share.federated.ShareLinkManager;
 
 /**
- * {@link FormStrings}
+ * {@link Activator}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.5
+ * @since v7.10.4
  */
-public class FormStrings implements LocalizableStrings {
+public class Activator extends HousekeepingActivator {
 
-    public static final String SHARE_LINK_LABEL = "OX share link";
+    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
-    public static final String PASSWORD = "OX share link password";
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class, FileStorageServiceRegistry.class };
+    }
 
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
+
+        XOXFileStorageService fileStorageService = new XOXFileStorageService(this);
+        registerService(FileStorageService.class, fileStorageService);
+        registerService(ShareLinkManager.class, new XOXShareLinkManager(this, fileStorageService));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
+        super.stopBundle();
+    }
 }

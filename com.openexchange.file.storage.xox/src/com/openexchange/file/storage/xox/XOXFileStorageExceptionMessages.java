@@ -47,46 +47,25 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare.osgi;
+package com.openexchange.file.storage.xox;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.oxshare.OXShareFileStorageService;
-import com.openexchange.file.storage.oxshare.analyzer.XOXShareLinkManager;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.share.federated.ShareLinkManager;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link Activator}
+ * {@link XOXFileStorageExceptionMessages}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.4
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public class XOXFileStorageExceptionMessages implements LocalizableStrings {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    /**
+     * The connection check failed
+     */
+    public static final String PING_FAILED = "The connection check failed.";
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class, FileStorageServiceRegistry.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        OXShareFileStorageService fileStorageService = new OXShareFileStorageService(this);
-        registerService(FileStorageService.class, fileStorageService);
-        registerService(ShareLinkManager.class, new XOXShareLinkManager(this, fileStorageService));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
-    }
+    /**
+     * Missing capability for file storage %1$s
+     */
+    public static final String MISSING_CAP_MSG = "Missing capability for file storage %1$s";
 }

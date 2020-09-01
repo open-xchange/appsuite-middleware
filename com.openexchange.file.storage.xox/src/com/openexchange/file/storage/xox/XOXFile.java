@@ -47,40 +47,31 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox;
 
-import com.openexchange.annotation.NonNull;
-import com.openexchange.file.storage.FileStorageConstants;
-import com.openexchange.groupware.modules.Module;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 
 /**
- * {@link OXShareStorageConstants}
+ * {@link XOXFile} - A File shared from another OX instance
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public final class OXShareStorageConstants implements FileStorageConstants {
+public class XOXFile extends DefaultFile {
 
     /**
-     * The unique ID of the OX share file storage implementation
+     * Initializes a new {@link XOXFile}.
      */
-    public static final String ID = "xox" + Module.INFOSTORE.getFolderConstant();
+    public XOXFile() {}
 
     /**
-     * The display name of the the OX share file storage implementation
+     * Initializes a new {@link XOXFile}.
+     *
+     * @param file The other file to copy information from
      */
-    @NonNull
-    public static final String DISPLAY_NAME = "OX AppSuite Share";
-
-    /**
-     * The share link to the other OX
-     */
-    @NonNull
-    public static final String SHARE_URL = "url";
-
-    /**
-     * The password to the user's share if any
-     */
-    @NonNull
-    public static final String PASSWORD = "password";
+    public XOXFile(File file) {
+        super(file);
+        file.setShareable(false);
+    }
 }

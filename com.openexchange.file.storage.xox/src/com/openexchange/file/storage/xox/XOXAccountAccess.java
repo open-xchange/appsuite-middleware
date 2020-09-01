@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox;
 
 import java.util.Map;
 import java.util.Objects;
@@ -67,12 +67,12 @@ import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
- * {@link OXShareAccountAccess}
+ * {@link XOXAccountAccess}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class OXShareAccountAccess implements CapabilityAware {
+public class XOXAccountAccess implements CapabilityAware {
 
     private final FileStorageAccount account;
     private final FileStorageService service;
@@ -82,14 +82,14 @@ public class OXShareAccountAccess implements CapabilityAware {
     private ShareClient shareClient;
 
     /**
-     * Initializes a new {@link OXShareAccountAccess}.
+     * Initializes a new {@link XOXAccountAccess}.
      *
      * @param service The {@link FileStorageService}
      * @param clientFactory The {@link ApiClientService}
      * @param account The {@link FileStorageAccount}
      * @param session The {@link Session}
      */
-    public OXShareAccountAccess(FileStorageService service, ApiClientService clientFactory, FileStorageAccount account, Session session) {
+    public XOXAccountAccess(FileStorageService service, ApiClientService clientFactory, FileStorageAccount account, Session session) {
         this.service = Objects.requireNonNull(service, "service must not be null");
         this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory must not be null");
         this.account = Objects.requireNonNull(account, "account must not be null");
@@ -133,13 +133,13 @@ public class OXShareAccountAccess implements CapabilityAware {
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
         assertConnected();
-        return new OXShareFileAccess(this, shareClient);
+        return new XOXFileAccess(this, shareClient);
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
         assertConnected();
-        return new OXShareFolderAccess(this, shareClient);
+        return new XOXFolderAccess(this, shareClient);
     }
 
     @Override
@@ -160,12 +160,12 @@ public class OXShareAccountAccess implements CapabilityAware {
         }
 
         Map<String, Object> configuration = account.getConfiguration();
-        String shareUrl = (String) configuration.get(OXShareStorageConstants.SHARE_URL);
+        String shareUrl = (String) configuration.get(XOXStorageConstants.SHARE_URL);
         if (Strings.isEmpty(shareUrl)) {
             throw FileStorageExceptionCodes.INVALID_URL.create("not provided", "empty");
         }
 
-        String password = (String) configuration.get(OXShareStorageConstants.PASSWORD);
+        String password = (String) configuration.get(XOXStorageConstants.PASSWORD);
         Credentials credentials = new Credentials("", password);
 
         this.shareClient = new ShareClient(session, clientFactory.getApiClient(session, shareUrl, credentials));
@@ -199,6 +199,6 @@ public class OXShareAccountAccess implements CapabilityAware {
 
     @Override
     public Boolean supports(FileStorageCapability capability) {
-        return FileStorageCapabilityTools.supportsByClass(OXShareFileAccess.class, capability);
+        return FileStorageCapabilityTools.supportsByClass(XOXFileAccess.class, capability);
     }
 }

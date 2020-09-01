@@ -47,25 +47,61 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Document;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 
 /**
- * {@link OXShareFileStorageExceptionMessages}
+ * {@link XOXDocument} - A document shared from another OX instance
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class OXShareFileStorageExceptionMessages implements LocalizableStrings {
+public class XOXDocument extends Document {
+
+    @FunctionalInterface
+    interface InputStreamClosure {
+
+        InputStream newStream() throws OXException, IOException;
+    }
+
+    private final InputStreamClosure data;
 
     /**
-     * The connection check failed
+     * Initializes a new {@link XOXDocument}.
+     *
+     * @param file The meta data as {@link XOXFile}
+     * @param data The data as {@link InputStreamClosure} which allows lazy loading
      */
-    public static final String PING_FAILED = "The connection check failed.";
+    public XOXDocument(XOXFile file, InputStreamClosure data) {
+        this.data = Objects.requireNonNull(data, "data must not be null");
+        if (file != null) {
+            setFile(file);
+            setMimeType(file.getFileMIMEType());
+            setName(file.getFileName());
+            if (file.getLastModified() != null) {
+                setLastModified(file.getLastModified().getTime());
+            }
+            setSize(file.getFileSize());
+        }
+    }
 
-    /**
-     * Missing capability for file storage %1$s
-     */
-    public static final String MISSING_CAP_MSG = "Missing capability for file storage %1$s";
+    @Override
+    public boolean isRepetitive() {
+        return false;
+    }
+
+    @Override
+    public InputStream getData() throws OXException {
+        try {
+            return data.newStream();
+        } catch (IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
 }

@@ -47,30 +47,20 @@
  *
  */
 
-package com.openexchange.file.storage.oxshare;
+package com.openexchange.file.storage.xox;
 
-import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.File;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link OXShareFile} - A File shared from another OX instance
+ * {@link FormStrings}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class OXShareFile extends DefaultFile {
+public class FormStrings implements LocalizableStrings {
 
-    /**
-     * Initializes a new {@link OXShareFile}.
-     */
-    public OXShareFile() {}
+    public static final String SHARE_LINK_LABEL = "OX share link";
 
-    /**
-     * Initializes a new {@link OXShareFile}.
-     *
-     * @param file The other file to copy information from
-     */
-    public OXShareFile(File file) {
-        super(file);
-    }
+    public static final String PASSWORD = "OX share link password";
+
 }
