@@ -1,0 +1,148 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.file.storage.xctx;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAccountManager;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
+import com.openexchange.file.storage.SharingFileStorageService;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+
+/**
+ * {@link XctxFileStorageService}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.5
+ */
+public class XctxFileStorageService implements FileStorageService, AccountAware, SharingFileStorageService, LoginAwareFileStorageServiceExtension {
+
+    private final ServiceLookup services;
+    private final XctxSessionCache sessionCache;
+
+    /**
+     * Initializes a new {@link XctxFileStorageService}
+     * 
+     * @param services A service lookup reference
+     */
+    public XctxFileStorageService(ServiceLookup services) {
+        super();
+        this.services = services;
+        this.sessionCache = new XctxSessionCache(services);
+    }
+
+    /**
+     * Gets the cross-context session cache.
+     * 
+     * @return The session cache
+     */
+    public XctxSessionCache getSessionCache() {
+        return sessionCache;
+    }
+
+    @Override
+    public List<FileStorageAccount> getAccounts(Session session) throws OXException {
+        return getAccountManager().getAccounts(session);
+    }
+
+    @Override
+    public String getId() {
+        return "xctx" + Module.INFOSTORE.getFolderConstant();
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Cross-Context";
+    }
+
+    @Override
+    public DynamicFormDescription getFormDescription() {
+        return new ReadOnlyDynamicFormDescription(new DynamicFormDescription()
+            .add(FormElement.custom("url", "url", "Share Link:", true, ""))
+            .add(FormElement.custom("password", "password", "Password:"))
+        );
+    }
+
+    @Override
+    public Set<String> getSecretProperties() {
+        return Collections.singleton("password");
+    }
+
+    @Override
+    public FileStorageAccountManager getAccountManager() throws OXException {
+        return services.getServiceSafe(FileStorageAccountManagerLookupService.class).getAccountManagerFor(getId());
+    }
+
+    @Override
+    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
+        FileStorageAccount account = getAccountManager().getAccount(accountId, session);
+        return new XctxAccountAccess(services, account, session, sessionCache);
+    }
+
+    @Override
+    public void testConnection(FileStorageAccount account, Session session) throws OXException {
+        XctxAccountAccess accountAccess = new XctxAccountAccess(services, account, session, sessionCache);
+        accountAccess.connect();
+        accountAccess.close();
+    }
+
+}

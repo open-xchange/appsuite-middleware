@@ -97,6 +97,8 @@ public final class ShareExceptionMessages implements LocalizableStrings {
 
     public static final String SHARE_NOT_AVAILABLE_MSG = "The share you are looking for is currently not available. Please try again later.";
 
+    public static final String NO_SUBSCRIBE_SHARE_PERMISSION_MSG = "You don't have sufficient permissions to subscribe to a share.";
+
     /**
      * Prevent instantiation.
      */

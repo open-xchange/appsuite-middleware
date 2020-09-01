@@ -2484,7 +2484,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                      */
                     //@formatter:off
                     InfostoreFolderPath originFolderPath;
-                    if (isBelowTrashFolder((int) document.getFolderId(), trashFolderID, folderAccess)) {
+                    if (-1 == trashFolderID) {
+                        originFolderPath = null;
+                    } else if (isBelowTrashFolder((int) document.getFolderId(), trashFolderID, folderAccess)) {
                         // A move from a trash folder...
                         if (!isBelowTrashFolder((int) destinationFolderID, trashFolderID, folderAccess)) {
                             // ... to a non-trash folder. Drop origin path information
