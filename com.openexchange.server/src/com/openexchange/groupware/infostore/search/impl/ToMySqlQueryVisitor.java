@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.search.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -56,10 +57,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.search.AbstractStringSearchTerm;
 import com.openexchange.groupware.infostore.search.AndTerm;
@@ -102,6 +105,8 @@ import com.openexchange.groupware.infostore.search.VersionTerm;
 import com.openexchange.groupware.infostore.search.WidthTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -112,6 +117,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ToMySqlQueryVisitor.class);
     private static final String INFOSTORE = "infostore.";
     private static final String DOCUMENT = "infostore_document.";
     private static final String PREFIX = " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version";
@@ -127,6 +133,9 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     private final List<Integer> readAllFolders;
     private final List<Integer> readOwnFolders;
     private final ServerSession session;
+    private final boolean fulltextSearch;
+    private final int minimumPatternLength;
+    private String fulltextSearchPattern;
 
     /**
      * Initializes a new {@link ToMySqlQueryVisitor}.
@@ -153,18 +162,50 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         this.readAllFolders = readAllFolders;
         this.readOwnFolders = readOwnFolders;
         this.session = session;
+        this.fulltextSearch = false;
+        this.minimumPatternLength = -1;
     }
 
-    protected ToMySqlQueryVisitor(ServerSession session,  int[] allFolderIds, int[] ownFolderIds, String cols, Metadata sortedBy, int dir, int start, int end) {
-        this(session, null == allFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(allFolderIds)),
-            null == ownFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(ownFolderIds)),
-            cols, sortedBy, dir, start, end);
+    /**
+     * Initializes a new {@link ToMySqlQueryVisitor}.
+     *
+     * @param readAllFolders A collection of folder identifiers the user is able to read "all" items from
+     * @param readOwnFolders A collection of folder identifiers the user is able to read only "own" items from
+     * @param contextId The context identifier
+     * @param userId The identifier of the requesting user
+     * @param cols The metadata to include in the results
+     * @param sortedBy The field used to sort the results
+     * @param dir The sort direction
+     * @param start The start of the requested range
+     * @param end The end of the requested range
+     * @param fulltextSearch <code>true</code> to use FULLTEXT search, <code>false</code> otherwise
+     */
+    public ToMySqlQueryVisitor(ServerSession session, List<Integer> readAllFolders, List<Integer> readOwnFolders, String cols, Metadata sortedBy, int dir, int start, int end, boolean fulltextSearch, int minimumPatternLength) {
+        super();
+        this.filterBuilder = new StringBuilder(1024);
+        this.parameters = new ArrayList<Object>();
+        this.cols = cols;
+        this.sortedBy = sortedBy;
+        this.dir = dir;
+        this.start = start;
+        this.end = end;
+        this.readAllFolders = readAllFolders;
+        this.readOwnFolders = readOwnFolders;
+        this.session = session;
+        this.fulltextSearch = fulltextSearch;
+        this.minimumPatternLength = minimumPatternLength;
+    }
+
+    protected ToMySqlQueryVisitor(ServerSession session, int[] allFolderIds, int[] ownFolderIds, String cols, Metadata sortedBy, int dir, int start, int end) {
+        this(session, null == allFolderIds ? Collections.<Integer> emptyList() : Arrays.asList(Autoboxing.i2I(allFolderIds)), null == ownFolderIds ? Collections.<Integer> emptyList() : Arrays.asList(Autoboxing.i2I(ownFolderIds)), cols, sortedBy, dir, start, end);
+    }
+
+    protected ToMySqlQueryVisitor(ServerSession session, int[] allFolderIds, int[] ownFolderIds, String cols, Metadata sortedBy, int dir, int start, int end, boolean fulltextSearch, int minimumPatternLength) {
+        this(session, null == allFolderIds ? Collections.<Integer> emptyList() : Arrays.asList(Autoboxing.i2I(allFolderIds)), null == ownFolderIds ? Collections.<Integer> emptyList() : Arrays.asList(Autoboxing.i2I(ownFolderIds)), cols, sortedBy, dir, start, end, fulltextSearch, minimumPatternLength);
     }
 
     protected ToMySqlQueryVisitor(ServerSession session, int[] allFolderIds, int[] ownFolderIds, String cols) {
-        this(session, null == allFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(allFolderIds)),
-            null == ownFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(ownFolderIds)),
-            cols, null, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET);
+        this(session, null == allFolderIds ? Collections.<Integer> emptyList() : Arrays.asList(Autoboxing.i2I(allFolderIds)), null == ownFolderIds ? Collections.<Integer> emptyList() : Arrays.asList(Autoboxing.i2I(ownFolderIds)), cols, null, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET);
     }
 
     /**
@@ -181,7 +222,9 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
          * build query & inject DISTINCT keyword(s) as needed
          */
         StringBuilder queryBuilder = new StringBuilder(8192);
-        int filterCount = appendMySqlQuery(queryBuilder);        
+        Pair<Integer, Integer> filterAndSelectCount = appendMySqlQuery(queryBuilder);
+        int filterCount = filterAndSelectCount.getFirst().intValue();
+        int selectCount = filterAndSelectCount.getSecond().intValue();
         if (distinct) {
             queryBuilder = injectDistinctInQuery(queryBuilder);
         }
@@ -194,9 +237,22 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             stmt = connection.prepareStatement(queryBuilder.toString());
             close = true;
             int parameterIndex = 1;
-            for (int i = 0; i < filterCount; i++) {
-                for (Object parameter : parameters) {
-                    stmt.setObject(parameterIndex++, parameter);
+            if (fulltextSearch && Strings.isNotEmpty(fulltextSearchPattern)) {
+                String pattern = fulltextSearchPattern;
+                if (false == fulltextSearchPattern.endsWith("*")) {
+                    pattern += "*";
+                }
+                for (int i = 0; i < selectCount; i++) {
+                    stmt.setString(parameterIndex++, pattern);
+                    for (Object parameter : parameters) {
+                        stmt.setObject(parameterIndex++, parameter);
+                    }
+                }
+            } else {
+                for (int i = 0; i < filterCount; i++) {
+                    for (Object parameter : parameters) {
+                        stmt.setObject(parameterIndex++, parameter);
+                    }
                 }
             }
             close = false;
@@ -207,18 +263,29 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             }
         }
     }
-    
+
     /**
      * Constructs and appends this visitor's SQL query containing the prefix, the filters from the visited search terms, as well as further
      * clauses for the searched folders, limits and sort options.
      *
      * @param queryBuilder The string builder to append the query to
-     * @return The number of times the <i>filter</i> query from the visited search terms was actually appended
+     * @return Pair containing the number of times the passed <i>filter</i> query was actually appended as first element and number of union selects as second element
      */
-    private int appendMySqlQuery(StringBuilder queryBuilder) {
+    private Pair<Integer, Integer> appendMySqlQuery(StringBuilder queryBuilder) {
         queryBuilder.append(cols).append(PREFIX);
-        int filterCount = SearchEngineImpl.appendFoldersAsUnion(
-            session, queryBuilder, filterBuilder.length() > 0 ? filterBuilder.toString() : null, readAllFolders, readOwnFolders);
+        if (fulltextSearch) {
+            if (Strings.isNotEmpty(fulltextSearchPattern)) {
+                StringBuilder fulltextBuilder = new StringBuilder(256);
+                fulltextBuilder.append(" AND MATCH (");
+                for (String field : SearchEngineImpl.getSearchFields()) {
+                    fulltextBuilder.append(field).append(",");
+                }
+                fulltextBuilder.deleteCharAt(fulltextBuilder.length() - 1);
+                fulltextBuilder.append(") AGAINST (? IN BOOLEAN MODE)");
+                queryBuilder.append(fulltextBuilder.toString());
+            }
+        }
+        Pair<Integer, Integer> filterAndSelectCount = SearchEngineImpl.appendFoldersAsUnion(session, queryBuilder, filterBuilder.length() > 0 ? filterBuilder.toString() : null, readAllFolders, readOwnFolders);
         if (null != sortedBy && dir != InfostoreSearchEngine.NOT_SET) {
             queryBuilder.append(" ORDER BY ").append(sortedBy.getName());
             if (dir == InfostoreSearchEngine.ASC) {
@@ -230,7 +297,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         if (start >= 0 && end >= 0 && start < end) {
             queryBuilder.append(" LIMIT ").append(start).append(",").append(end);
         }
-        return filterCount;
+        return filterAndSelectCount;
     }
 
     private static StringBuilder injectDistinctInQuery(StringBuilder queryBuilder) {
@@ -247,8 +314,8 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
         List<SearchTerm<?>> retval = new ArrayList<SearchTerm<?>>(terms.size());
         for (SearchTerm<?> term : terms) {
-            if (!UNSUPPORTED.contains(term.getClass())) {
-               retval.add(term);
+            if (false == UNSUPPORTED.contains(term.getClass())) {
+                retval.add(term);
             }
         }
         return retval;
@@ -320,15 +387,13 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(NumberOfVersionsTerm numberOfVersionsTerm) {
         String comp = getComparionType(numberOfVersionsTerm.getPattern());
-        filterBuilder.append(INFOSTORE).append("version").append(comp).append("MAX(").append(numberOfVersionsTerm.getPattern().getPattern()).append(
-            ") ");
+        filterBuilder.append(INFOSTORE).append("version").append(comp).append("MAX(").append(numberOfVersionsTerm.getPattern().getPattern()).append(") ");
     }
 
     @Override
     public void visit(LastModifiedUtcTerm lastModifiedUtcTerm) {
         String comp = getComparionType(lastModifiedUtcTerm.getPattern());
-        filterBuilder.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedUtcTerm.getPattern().getPattern().getTime()).append(
-            " ");
+        filterBuilder.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedUtcTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
@@ -343,8 +408,11 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(VersionCommentTerm versionCommentTerm) {
+    public void visit(VersionCommentTerm versionCommentTerm) throws OXException {
         String field = "file_version_comment";
+        if (fulltextSearch) {
+            parseFulltextStringSearchTerm(versionCommentTerm);
+        }
         parseStringSearchTerm(versionCommentTerm, field);
     }
 
@@ -361,7 +429,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(CategoriesTerm categoriesTerm) {
+    public void visit(CategoriesTerm categoriesTerm) throws OXException {
         String field = "categories";
         parseStringSearchTerm(categoriesTerm, field);
     }
@@ -378,8 +446,11 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(FileNameTerm fileNameTerm) {
+    public void visit(FileNameTerm fileNameTerm) throws OXException {
         String field = "filename";
+        if (fulltextSearch) {
+            parseFulltextStringSearchTerm(fileNameTerm);
+        }
         parseStringSearchTerm(fileNameTerm, field);
     }
 
@@ -426,7 +497,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(TitleTerm titleTerm) {
+    public void visit(TitleTerm titleTerm) throws OXException {
         String field = "title";
         parseStringSearchTerm(titleTerm, field);
     }
@@ -484,13 +555,16 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(DescriptionTerm descriptionTerm) {
+    public void visit(DescriptionTerm descriptionTerm) throws OXException {
         String field = "description";
+        if (fulltextSearch) {
+            parseFulltextStringSearchTerm(descriptionTerm);
+        }
         parseStringSearchTerm(descriptionTerm, field);
     }
 
     @Override
-    public void visit(UrlTerm urlTerm) {
+    public void visit(UrlTerm urlTerm) throws OXException {
         String field = "url";
         parseStringSearchTerm(urlTerm, field);
     }
@@ -504,17 +578,17 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     private <T> String getComparionType(ComparablePattern<T> pattern) {
         String comp;
         switch (pattern.getComparisonType()) {
-        case LESS_THAN:
-            comp = "<";
-            break;
-        case GREATER_THAN:
-            comp = ">";
-            break;
-        case EQUALS:
-            comp = "=";
-            break;
-        default:
-            comp = "";
+            case LESS_THAN:
+                comp = "<";
+                break;
+            case GREATER_THAN:
+                comp = ">";
+                break;
+            case EQUALS:
+                comp = "=";
+                break;
+            default:
+                comp = "";
         }
         return comp;
     }
@@ -530,28 +604,40 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         for (int i = 0; i < length; i++) {
             final char c = pattern.charAt(i);
             switch (c) {
-            case '*':
-                sb.append('%');
-                break;
-            case '?':
-                sb.append('_');
-                break;
-            case '%':
-                sb.append("\\%");
-                break;
-            case '_':
-                sb.append("\\_");
-                break;
-            case '\\':
-                sb.append("\\\\");
-                break;
-            default:
-                sb.append(c);
-                break;
+                case '*':
+                    sb.append('%');
+                    break;
+                case '?':
+                    sb.append('_');
+                    break;
+                case '%':
+                    sb.append("\\%");
+                    break;
+                case '_':
+                    sb.append("\\_");
+                    break;
+                case '\\':
+                    sb.append("\\\\");
+                    break;
+                default:
+                    sb.append(c);
+                    break;
             }
         }
 
         return sb.toString();
+    }
+
+    private void parseFulltextStringSearchTerm(AbstractStringSearchTerm searchTerm) throws OXException {
+        String pattern = searchTerm.getPattern();
+        if (Strings.isNotEmpty(fulltextSearchPattern) && false == fulltextSearchPattern.equals(pattern)) {
+            LOG.warn("FULLTEXT search pattern changed while processing search term.");
+        }
+        if (Strings.isEmpty(pattern) || pattern.length() < minimumPatternLength) {
+            LOG.warn("Search pattern is too short to use FULLTEXT search.");
+            throw InfostoreExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.create(I(minimumPatternLength));
+        }
+        this.fulltextSearchPattern = pattern;
     }
 
     private void parseStringSearchTerm(AbstractStringSearchTerm searchTerm, String field) {
@@ -610,6 +696,17 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         StringBuilder queryBuilder = new StringBuilder();
         appendMySqlQuery(queryBuilder);
         return queryBuilder.toString();
+    }
+
+    /**
+     * Gets a preview of detected fulltext search pattern
+     * 
+     * <b>Note:</b> Only useful for tests.
+     *
+     * @return A preview of fulltext search pattern
+     */
+    protected String previewFulltextSearchPattern() {
+        return fulltextSearchPattern;
     }
 
 }

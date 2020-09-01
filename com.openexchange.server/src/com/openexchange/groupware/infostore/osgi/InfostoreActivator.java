@@ -77,6 +77,7 @@ import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.infostore.InfostoreAvailable;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.infostore.database.InfostoreFilestoreLocationUpdater;
+import com.openexchange.groupware.infostore.database.impl.InfostoreDocumentAddFulltextIndexUpdateTask;
 import com.openexchange.groupware.infostore.database.impl.InfostoreFilenameReservationsCreateTableTask;
 import com.openexchange.groupware.infostore.database.impl.InfostoreReservedPathsConvertUtf8ToUtf8mb4UpdateTask;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
@@ -88,6 +89,7 @@ import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.settings.tree.modules.infostore.autodelete.AutodeleteEditable;
 import com.openexchange.groupware.settings.tree.modules.infostore.autodelete.MaxVersionCount;
 import com.openexchange.groupware.settings.tree.modules.infostore.autodelete.RetentionDays;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.jslob.ConfigTreeEquivalent;
@@ -100,7 +102,6 @@ import com.openexchange.server.services.SharedInfostoreJSlob;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InfostoreActivator implements BundleActivator {
-
     /**
      * A flag that indicates whether InfoStore file storage bundle is available or not.
      *
@@ -112,6 +113,7 @@ public class InfostoreActivator implements BundleActivator {
     private ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker;
     private ServiceTracker<ConfigurationService, ConfigurationService> configTracker;
     private ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker;
+    private ServiceTracker<ConfigurationService, ConfigurationService> fulltextIndexUpdateTaskTracker;
     private List<ServiceRegistration<ConfigTreeEquivalent>> registeredSettings;
 
     @Override
@@ -221,6 +223,22 @@ public class InfostoreActivator implements BundleActivator {
             this.qfsTracker = qfsTracker;
             qfsTracker.open();
 
+            ServiceTracker<ConfigurationService, ConfigurationService> fulltextIndexUpdateTaskTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, null) {
+
+                @Override
+                public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
+                    ConfigurationService service = context.getService(reference);
+                    boolean fulltextSearch = service.getBoolProperty("com.openexchange.infostore.fulltextSearch", false);
+                    if (fulltextSearch) {
+                        context.registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new InfostoreDocumentAddFulltextIndexUpdateTask()), null);
+                    }
+                    return service;
+                }
+
+            };
+            this.fulltextIndexUpdateTaskTracker = fulltextIndexUpdateTaskTracker;
+            fulltextIndexUpdateTaskTracker.open();
+
             serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put("RMI_NAME", FileChecksumsRMIServiceImpl.RMI_NAME);
             context.registerService(Remote.class, new FileChecksumsRMIServiceImpl(), serviceProperties);
@@ -271,6 +289,12 @@ public class InfostoreActivator implements BundleActivator {
             if (null != configTracker) {
                 configTracker.close();
                 this.configTracker = null;
+            }
+
+            ServiceTracker<ConfigurationService, ConfigurationService> fulltextIndexUpdateTaskTracker = this.fulltextIndexUpdateTaskTracker;
+            if (null != fulltextIndexUpdateTaskTracker) {
+                fulltextIndexUpdateTaskTracker.close();
+                this.fulltextIndexUpdateTaskTracker = null;
             }
 
             Queue<ServiceRegistration<?>> registrations = this.registrations;

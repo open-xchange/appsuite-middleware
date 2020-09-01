@@ -126,3 +126,39 @@ properties:
       file: infostore.properties
       packageName: open-xchange-core
       tags: ["Infostore", "Limit", "Permission"]
+
+    - key: com.openexchange.infostore.fulltextSearch
+      description: |
+        Enables the FULLTEXT search support for searching files
+      defaultValue: false
+      version: 7.10.5
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.infostore.fulltextSearchMinimumPatternLength, com.openexchange.infostore.searchFields
+      file: infostore.properties
+      packageName: open-xchange-core
+      tags: ["Infostore", "Search", "Fulltext"]
+
+    - key: com.openexchange.infostore.fulltextSearchMinimumPatternLength
+      description: |
+        The minimum search pattern length to use the FULLTEXT index
+      defaultValue: 3
+      version: 7.10.5
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.infostore.fulltextSearch, com.openexchange.infostore.searchFields
+      file: infostore.properties
+      packageName: open-xchange-core
+      tags: ["Infostore", "Search", "Fulltext"]
+
+    - key: com.openexchange.infostore.searchFields
+      description: |
+        Specifies the fields to check when searching a file. The FULLTEXT index also gets generated for those fields.
+      defaultValue: title,description,filename,file_version_comment
+      version: 7.10.5
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.infostore.fulltextSearch, com.openexchange.infostore.fulltextSearchMinimumPatternLength
+      file: infostore.properties
+      packageName: open-xchange-core
+      tags: ["Infostore", "Search", "Fulltext"]

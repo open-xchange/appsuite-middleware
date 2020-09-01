@@ -51,12 +51,14 @@ package com.openexchange.groupware.infostore.search.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.search.AndTerm;
 import com.openexchange.groupware.infostore.search.ComparablePattern;
@@ -67,6 +69,7 @@ import com.openexchange.groupware.infostore.search.FileNameTerm;
 import com.openexchange.groupware.infostore.search.FileSizeTerm;
 import com.openexchange.groupware.infostore.search.OrTerm;
 import com.openexchange.groupware.infostore.search.SearchTerm;
+import com.openexchange.groupware.infostore.search.TitleTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
@@ -92,7 +95,7 @@ public class ToMySqlQueryVisitorTest {
     }
     
     @Test
-    public void testSqlPattern() {
+    public void testSqlPattern() throws Exception {
         DescriptionTerm dtz = new DescriptionTerm("*bluber blah?foo*", true, true);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, null, "SELECT field01");
         visitor.visit(dtz);
@@ -149,7 +152,7 @@ public class ToMySqlQueryVisitorTest {
     }
 
     @Test
-    public void testFolders() {
+    public void testFolders() throws Exception {
         DescriptionTerm dtz = new DescriptionTerm("*bluber blah?foo*", false, false);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] {120}, "SELECT field01");
         visitor.visit(dtz);
@@ -161,7 +164,7 @@ public class ToMySqlQueryVisitorTest {
     }
 
     @Test
-    public void testWithoutAllFolders() {
+    public void testWithoutAllFolders() throws Exception {
         DescriptionTerm dtz = new DescriptionTerm("*bluber blah?foo*", false, false);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, null, new int[] {120}, "SELECT field01");
         visitor.visit(dtz);
@@ -183,7 +186,7 @@ public class ToMySqlQueryVisitorTest {
     }
 
     @Test
-    public void testWithoutOwnFolders() {
+    public void testWithoutOwnFolders() throws Exception {
         DescriptionTerm dtz = new DescriptionTerm("*bluber blah?foo*", false, false);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, null, "SELECT field01");
         visitor.visit(dtz);
@@ -205,7 +208,7 @@ public class ToMySqlQueryVisitorTest {
     }
 
     @Test
-    public void testWithLimit() {
+    public void testWithLimit() throws Exception {
         FileNameTerm term = new FileNameTerm("test123");
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] { 120 }, "SELECT field01", null, InfostoreSearchEngine.NOT_SET, 0, 5);
         visitor.visit(term);
@@ -218,7 +221,7 @@ public class ToMySqlQueryVisitorTest {
     }
 
     @Test
-    public void testWithLimitAndOrder() {
+    public void testWithLimitAndOrder() throws Exception {
         FileNameTerm term = new FileNameTerm("test123");
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] { 120 }, "SELECT field01", Metadata.LAST_MODIFIED_LITERAL, InfostoreSearchEngine.ASC, 0, 5);
         visitor.visit(term);
@@ -263,6 +266,42 @@ public class ToMySqlQueryVisitorTest {
         result = visitor.previewMySqlQuery();
         assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
+    }
+
+    private final String FULLTEXT_SEARCH_PATTERN = "fulltextSearchPattern";
+    private final String MATCH_CLAUSE = "MATCH (title,description,filename,file_version_comment) AGAINST (? IN BOOLEAN MODE)";;
+    @Test
+    public void testFulltextSearch() throws Exception {
+        List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(2);
+        terms.add(new FileNameTerm(FULLTEXT_SEARCH_PATTERN));
+        terms.add(new TitleTerm(FULLTEXT_SEARCH_PATTERN, true, false));
+        AndTerm term = new AndTerm(terms);
+        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] { 120 }, "SELECT field01", Metadata.LAST_MODIFIED_LITERAL, InfostoreSearchEngine.ASC, 0, 5, true, 2);
+        visitor.visit(term);
+        String result = visitor.previewMySqlQuery();
+        assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
+        assertTrue("No MATCH clause found in query", result.contains(MATCH_CLAUSE));
+        int index = result.indexOf(MATCH_CLAUSE);
+        assertNotEquals("MATCH clause for first SELECT clause not found", -1, index);
+        index = result.indexOf(MATCH_CLAUSE, index + MATCH_CLAUSE.length());
+        assertNotEquals("MATCH clause for second SELECT clause not found", -1, index);
+        assertEquals("Fulltext search pattern in unexpected", FULLTEXT_SEARCH_PATTERN, visitor.previewFulltextSearchPattern());
+    }
+
+    private final String FULLTEXT_SEARCH_PATTERN_TOO_SHORT = "a";
+    @Test
+    public void testFulltextSearch_PatternTooShort() {
+        List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(2);
+        terms.add(new FileNameTerm(FULLTEXT_SEARCH_PATTERN_TOO_SHORT));
+        terms.add(new TitleTerm(FULLTEXT_SEARCH_PATTERN_TOO_SHORT, true, false));
+        AndTerm term = new AndTerm(terms);
+        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] { 120 }, "SELECT field01", Metadata.LAST_MODIFIED_LITERAL, InfostoreSearchEngine.ASC, 0, 5, true, 3);
+        try {
+            term.visit(visitor);
+        } catch (OXException e) {
+            assertTrue("Wrong exception thrown.", InfostoreExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.equals(e));
+        }
     }
 
 }

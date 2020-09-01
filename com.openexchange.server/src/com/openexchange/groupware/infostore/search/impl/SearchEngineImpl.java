@@ -63,6 +63,16 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.Databases;
 import com.openexchange.database.StringLiteralSQLException;
@@ -84,12 +94,17 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.GeoLocation;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadPools.ExpectedExceptionFactory;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.SearchStrings;
+import com.openexchange.tools.update.Tools;
 import com.openexchange.user.User;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -104,7 +119,9 @@ public class SearchEngineImpl extends DBService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchEngineImpl.class);
     private final InfostoreSecurityImpl security;
 
-    private static final String[] SEARCH_FIELDS = new String[] { "infostore_document.title", "infostore_document.url", "infostore_document.description", "infostore_document.categories", "infostore_document.filename", "infostore_document.file_version_comment" };
+    private static volatile Boolean fulltextSearch; 
+    private static final Cache<Integer, String> CACHE_SCHEMA_NAMES = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
+    private static final ConcurrentMap<String, Future<Boolean>> FULLTEXT_INDEX_SCHEMAS = new ConcurrentHashMap<String, Future<Boolean>>(32, 0.9F, 1);
 
     public SearchEngineImpl() {
         super(null);
@@ -127,7 +144,7 @@ public class SearchEngineImpl extends DBService {
     }
 
     /**
-     * Performs a term-based search.
+     * Performs a term-based search, uses fulltext index if enabled and available
      *
      * @param session The session
      * @param searchTerm The search term
@@ -141,14 +158,24 @@ public class SearchEngineImpl extends DBService {
      * @return The search results
      */
     public SearchIterator<DocumentMetadata> search(ServerSession session, SearchTerm<?> searchTerm, List<Integer> all, List<Integer> own, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
-        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, all, own, getResultFieldsSelect(cols), sortedBy, dir, start, end);
-        searchTerm.visit(visitor);
         boolean successful = false;
         PreparedStatement stmt = null;
         Connection con = null;
         InfostoreSearchIterator iter = null;
         try {
             con = getReadConnection(session.getContext());
+            ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, all, own, getResultFieldsSelect(cols), sortedBy, dir, start, end, isFulltextSearch(con, session.getContextId()), getMinimumPatternLength());
+            try {
+                searchTerm.visit(visitor);
+            } catch (OXException e) {
+                if (InfostoreExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.equals(e)) {
+                    // Search pattern too short to use fulltext search, fall back to pattern based search
+                    visitor = new ToMySqlQueryVisitor(session, all, own, getResultFieldsSelect(cols), sortedBy, dir, start, end);
+                    searchTerm.visit(visitor);
+                } else {
+                    throw e;
+                }
+            }
             stmt = visitor.prepareStatement(con, false);
             try {
                 if (start >= 0 && end >= 0 && start < end) {
@@ -170,7 +197,7 @@ public class SearchEngineImpl extends DBService {
         } catch (SQLException e) {
             if (e.getCause() instanceof java.net.SocketTimeoutException) {
                 // Communications link failure
-                throw InfostoreExceptionCodes.SEARCH_TOOK_TOO_LONG.create(e, session.getUserId(), session.getContextId(), String.valueOf(stmt));
+                throw InfostoreExceptionCodes.SEARCH_TOOK_TOO_LONG.create(e, I(session.getUserId()), I(session.getContextId()), String.valueOf(stmt));
             }
             LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, String.valueOf(stmt));
@@ -193,7 +220,7 @@ public class SearchEngineImpl extends DBService {
     }
 
     /**
-     * Performs a simple, pattern-based search.
+     * Performs a simple, pattern-based search, uses fulltext index if enabled and available
      *
      * @param session The session
      * @param query The pattern, or <code>null</code> / <code>*</code> to search for all items
@@ -226,42 +253,54 @@ public class SearchEngineImpl extends DBService {
             }
         }
 
-        final StringBuilder SQL_QUERY = new StringBuilder(512);
+        String[] SEARCH_FIELDS = getSearchFields();
+        Connection con = getReadConnection(session.getContext());
+        StringBuilder SQL_QUERY = new StringBuilder(512);
         SQL_QUERY.append(getResultFieldsSelect(cols));
         SQL_QUERY.append(" FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(session.getContextId());
 
         appendFolders(SQL_QUERY, session.getContextId(), session.getUserId(), all, own);
 
         boolean addQuery = false;
-        String q = query;
-        if (q.length() > 0 && !"*".equals(q)) {
-            checkPatternLength(q);
-            final boolean containsWildcard = q.indexOf('*') >= 0 || 0 <= q.indexOf('?');
-            addQuery = true;
 
-            q = q.replaceAll("\\\\", "\\\\\\\\");
-            q = q.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
-            q = q.replace('*', '%');
-            q = q.replace('?', '_');
-            q = q.replaceAll("'", "\\\\'"); // Escape \ twice, due to regexp parser in replaceAll
+        boolean fulltextSearch = isFulltextSearch(con, session.getContextId()) && patternAllowsFulltextIndexSearch(query);
+        if (query.length() > 0 && !"*".equals(query)) {
+            checkPatternLength(query);
+            if (fulltextSearch) {
+                SQL_QUERY.append(" AND MATCH (");
+                for (String field : SEARCH_FIELDS) {
+                    SQL_QUERY.append(field).append(",");
+                }
+                SQL_QUERY.deleteCharAt(SQL_QUERY.length() - 1);
+                SQL_QUERY.append(") AGAINST (? IN BOOLEAN MODE)");
+            } else {
+                final boolean containsWildcard = query.indexOf('*') >= 0 || 0 <= query.indexOf('?');
+                addQuery = true;
 
-            if (!containsWildcard) {
-                q = "%" + q + "%";
-            }
+                query = query.replaceAll("\\\\", "\\\\\\\\");
+                query = query.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
+                query = query.replace('*', '%');
+                query = query.replace('?', '_');
+                query = query.replaceAll("'", "\\\\'"); // Escape \ twice, due to regexp parser in replaceAll
 
-            final StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
-            for (final String currentField : SEARCH_FIELDS) {
-                if (SQL_QUERY_OBJECTS.length() > 0) {
-                    SQL_QUERY_OBJECTS.append(" OR ");
+                if (!containsWildcard) {
+                    query = "%" + query + "%";
                 }
 
-                SQL_QUERY_OBJECTS.append(currentField);
-                SQL_QUERY_OBJECTS.append(" LIKE (?)");
-            }
-            if (SQL_QUERY_OBJECTS.length() > 0) {
-                SQL_QUERY.append(" AND (");
-                SQL_QUERY.append(SQL_QUERY_OBJECTS);
-                SQL_QUERY.append(") ");
+                final StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
+                for (final String currentField : SEARCH_FIELDS) {
+                    if (SQL_QUERY_OBJECTS.length() > 0) {
+                        SQL_QUERY_OBJECTS.append(" OR ");
+                    }
+
+                    SQL_QUERY_OBJECTS.append(currentField);
+                    SQL_QUERY_OBJECTS.append(" LIKE (?)");
+                }
+                if (SQL_QUERY_OBJECTS.length() > 0) {
+                    SQL_QUERY.append(" AND (");
+                    SQL_QUERY.append(SQL_QUERY_OBJECTS);
+                    SQL_QUERY.append(") ");
+                }
             }
         }
 
@@ -269,15 +308,21 @@ public class SearchEngineImpl extends DBService {
         appendLimit(SQL_QUERY, start, end);
 
         {
-            Connection con = getReadConnection(session.getContext());
             boolean successful = false;
             PreparedStatement stmt = null;
             InfostoreSearchIterator iter = null;
             try {
                 stmt = con.prepareStatement(SQL_QUERY.toString());
-                if (addQuery) {
-                    for (int i = 0; i < SEARCH_FIELDS.length; i++) {
-                        stmt.setString(i + 1, q);
+                if (fulltextSearch) {
+                    if (false == query.endsWith("*")) {
+                        query += "*";
+                    }
+                    stmt.setString(1, query);
+                } else {
+                    if (addQuery) {
+                        for (int i = 0; i < SEARCH_FIELDS.length; i++) {
+                            stmt.setString(i + 1, query);
+                        }
                     }
                 }
                 try {
@@ -291,12 +336,11 @@ public class SearchEngineImpl extends DBService {
                     stmt = con.prepareStatement(injectDistinctInQuery(SQL_QUERY.toString()));
                     if (addQuery) {
                         for (int i = 0; i < SEARCH_FIELDS.length; i++) {
-                            stmt.setString(i + 1, q);
+                            stmt.setString(i + 1, query);
                         }
                     }
                     iter = InfostoreSearchIterator.createIteratorWithNoopOnDuplicate(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
                 }
-
 
                 // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
                 successful = true;
@@ -332,16 +376,17 @@ public class SearchEngineImpl extends DBService {
      * @param filter An optional filter expression that is supposed to be appended to WHERE clause
      * @param readAllFolders A collection of folder identifiers the user is able to read "all" items from
      * @param readOwnFolders A collection of folder identifiers the user is able to read only "own" items from
-     * @return The number of times the passed <i>filter</i> query was actually appended
+     * @return Pair containing the number of times the passed <i>filter</i> query was actually appended as first element and number of union selects as second element
      */
-    protected static int appendFoldersAsUnion(ServerSession session, StringBuilder sqlQuery, String filter, List<Integer> readAllFolders, List<Integer> readOwnFolders) {
+    protected static Pair<Integer, Integer> appendFoldersAsUnion(ServerSession session, StringBuilder sqlQuery, String filter, List<Integer> readAllFolders, List<Integer> readOwnFolders) {
         int filterCount = 0;
+        int selectCount = 1;
         if (readAllFolders.isEmpty() && readOwnFolders.isEmpty()) {
             if (null != filter) {
                 sqlQuery.append(" WHERE ").append(filter);
                 filterCount++;
             }
-            return filterCount;
+            return new Pair<Integer, Integer>(I(filterCount), I(selectCount));
         }
         int contextID = session.getContextId();
         int userID = session.getUserId();
@@ -377,6 +422,7 @@ public class SearchEngineImpl extends DBService {
             if (!readAllFolders.isEmpty()) {
                 if (appendUnion) {
                     sqlQuery.append(" UNION ").append(prefix);
+                    selectCount++;
                 }
 
                 Iterator<Integer> iter = readAllFolders.iterator();
@@ -397,6 +443,7 @@ public class SearchEngineImpl extends DBService {
         if (!readOwnFolders.isEmpty()) {
             if (appendUnion) {
                 sqlQuery.append(" UNION ").append(prefix);
+                selectCount++;
             }
 
             Iterator<Integer> iter = readOwnFolders.iterator();
@@ -413,7 +460,7 @@ public class SearchEngineImpl extends DBService {
                 filterCount++;
             }
         }
-        return filterCount;
+        return new Pair<Integer, Integer>(I(filterCount), I(selectCount));
     }
 
     /**
@@ -768,6 +815,24 @@ public class SearchEngineImpl extends DBService {
         return query;
     }
 
+    private boolean patternAllowsFulltextIndexSearch(String pattern) {
+        if (Strings.isNotEmpty(pattern)) {
+            int length = pattern.length();
+            if (pattern.contains("?")) {
+                return false;
+            }
+            if (pattern.contains("*")) {
+                boolean wildcardAtEnd = pattern.indexOf("*") == length - 1;
+                if (wildcardAtEnd) {
+                    return length - 1 >= getMinimumPatternLength();
+                }
+                return false;
+            }
+            return length >= getMinimumPatternLength();
+        }
+        return false;
+    }
+
     /** The special <code>SearchIterator</code> for an executed Infostore search */
     public static class InfostoreSearchIterator implements SearchIterator<DocumentMetadata> {
 
@@ -1065,6 +1130,133 @@ public class SearchEngineImpl extends DBService {
         @Override
         public synchronized Throwable fillInStackTrace() {
             return this;
+        }
+    }
+
+    public static String[] getSearchFields() {
+        String defaultValue = "title,description,filename,file_version_comment";
+        ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == configurationService) {
+            return defaultValue.split(",");
+        }
+        List<String> searchFields = configurationService.getProperty("com.openexchange.infostore.searchFields", defaultValue, ",");
+        return searchFields.toArray(new String[searchFields.size()]);
+    }
+
+    // -------------------------------------------------------- Fulltext index stuff ----------------------------------------------------
+
+    private static final ExpectedExceptionFactory<SQLException> EXCEPTION_FACTORY = new ExpectedExceptionFactory<SQLException>() {
+
+        @Override
+        public SQLException newUnexpectedError(Throwable t) {
+            return new SQLException("unchecked", t);
+        }
+
+        @Override
+        public Class<SQLException> getType() {
+            return SQLException.class;
+        }
+    };
+
+    private static int getMinimumPatternLength() {
+        int defaultValue = 3;
+        ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == configurationService) {
+            return defaultValue;
+        }
+        return configurationService.getIntProperty("com.openexchange.infostore.fulltextSearchMinimumPatternLength", defaultValue);
+    }
+
+    private static boolean isFulltextSearch(Connection con, int contextId) throws OXException {
+        if (false == isFulltextSearchEnabled()) {
+            return false;
+        }
+
+        String schemaName = getSchemaName(con, contextId);
+        boolean removeOnError = false;
+        boolean error = true;
+        try {
+            Future<Boolean> f = FULLTEXT_INDEX_SCHEMAS.get(schemaName);
+            if (null == f) {
+                FutureTask<Boolean> ft = new FutureTask<Boolean>(new Callable<Boolean>() {
+
+                    @Override
+                    public Boolean call() throws Exception {
+                        String indexName = Tools.existsIndex(con, "infostore_document", getSearchFields());
+                        return Boolean.valueOf((null != indexName) && indexName.startsWith("fulltextSearch_"));
+                    }
+
+                });
+                f = FULLTEXT_INDEX_SCHEMAS.putIfAbsent(schemaName, ft);
+                if (null == f) {
+                    f = ft;
+                    removeOnError = true;
+                    ft.run();
+                }
+            }
+
+            Boolean value = ThreadPools.getFrom(f, EXCEPTION_FACTORY);
+            error = false;
+            return value.booleanValue();
+        } catch (SQLException e) {
+            if ("unchecked".equals(e.getMessage())) {
+                Throwable cause = e.getCause();
+                if (null != cause) {
+                    throw (cause instanceof OXException) ? (OXException) cause : InfostoreExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+                }
+            }
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (error && removeOnError) {
+                FULLTEXT_INDEX_SCHEMAS.remove(schemaName);
+            }
+        }
+    }
+
+    private static boolean isFulltextSearchEnabled() {
+        Boolean tmp = fulltextSearch;
+        if (null == tmp) {
+            synchronized (SearchEngineImpl.class) {
+                tmp = fulltextSearch;
+                if (null == tmp) {
+                    boolean defaultValue = false;
+                    ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == configurationService) {
+                        return defaultValue;
+                    }
+                    tmp = Boolean.valueOf(configurationService.getBoolProperty("com.openexchange.infostore.fulltextSearch", defaultValue));
+                    fulltextSearch = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue(); 
+    }
+
+    private static String getSchemaName(final Connection con, final int contextId) throws OXException {
+        try {
+            return CACHE_SCHEMA_NAMES.get(Integer.valueOf(contextId), new Callable<String>() {
+
+                @Override
+                public String call() throws Exception {
+                    String schemaName = con.getCatalog();
+                    if (Strings.isEmpty(schemaName)) {
+                        schemaName = con.getSchema();
+                        if (Strings.isEmpty(schemaName)) {
+                            throw InfostoreExceptionCodes.SQL_PROBLEM.create("No schema name for connection");
+                        }
+                    }
+                    return schemaName;
+                }
+            });
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            if (cause instanceof SQLException) {
+                throw InfostoreExceptionCodes.SQL_PROBLEM.create(cause, cause.getMessage());
+            }
+            throw InfostoreExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
         }
     }
 
