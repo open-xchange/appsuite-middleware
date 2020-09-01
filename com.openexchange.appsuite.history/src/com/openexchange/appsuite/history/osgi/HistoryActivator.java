@@ -58,6 +58,7 @@ import java.nio.file.Files;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,7 +193,12 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
         File currentVersionFile = new File(historyFolder, "/current/version.txt");
         File installedVersionFile = installedFolder == null ? null : new File(installedFolder, "version.txt");
         try {
-            Optional<String> current = currentVersionFile.exists() ? Files.lines(currentVersionFile.toPath()).findFirst() : Optional.empty();
+            Optional<String> optCurrent = Optional.empty();
+            if (currentVersionFile.exists()) {
+                try (Stream<String> currentStream = Files.lines(currentVersionFile.toPath())) {
+                    optCurrent = currentStream.findFirst();
+                }
+            }
 
             if (installedVersionFile != null && installedVersionFile.exists()) {
                 Optional<String> installedVersion = HistoryUtil.readVersion(installedVersionFile.toPath());
@@ -202,7 +208,7 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
                     return;
                 }
                 // update history folder by copying/moving the required files
-                HistoryUtil.handleVersions(historyFolder, installedFolder, installedVersion.get(), current);
+                HistoryUtil.handleVersions(historyFolder, installedFolder, installedVersion.get(), optCurrent);
 
                 File previousVersionFile = new File(historyFolder, "/previous/version.txt");
                 Optional<String> previous = previousVersionFile.exists() ? HistoryUtil.readVersion(previousVersionFile.toPath()) : Optional.empty();
