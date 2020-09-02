@@ -78,8 +78,13 @@ msgstr ""
 msgid "Addressbook Client (CardDAV)"
 msgstr ""
 
-#. The display name used for a WebDAV Client / id "webdav"
+#. The display name used for a Calendar and Addressbook Client (CalDAV/CardDAV) / id "calcarddav"
 #: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:75
+msgid "Calendar and Addressbook Client (CalDAV/CardDAV)"
+msgstr ""
+
+#. The display name used for a WebDAV Client / id "webdav"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:78
 msgid "WebDAV Client"
 msgstr ""
 
