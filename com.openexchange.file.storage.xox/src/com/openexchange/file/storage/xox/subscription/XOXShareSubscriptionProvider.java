@@ -47,15 +47,15 @@
  *
  */
 
-package com.openexchange.file.storage.xox.analyzer;
+package com.openexchange.file.storage.xox.subscription;
 
 import static com.openexchange.api.client.common.OXExceptionParser.matches;
 import static com.openexchange.file.storage.xox.XOXStorageConstants.SHARE_URL;
-import static com.openexchange.share.federated.ShareLinkState.ADDABLE;
-import static com.openexchange.share.federated.ShareLinkState.ADDABLE_WITH_PASSWORD;
-import static com.openexchange.share.federated.ShareLinkState.CREDENTIALS_REFRESH;
-import static com.openexchange.share.federated.ShareLinkState.INACCESSIBLE;
-import static com.openexchange.share.federated.ShareLinkState.SUBSCRIBED;
+import static com.openexchange.share.subscription.ShareLinkState.ADDABLE;
+import static com.openexchange.share.subscription.ShareLinkState.ADDABLE_WITH_PASSWORD;
+import static com.openexchange.share.subscription.ShareLinkState.CREDENTIALS_REFRESH;
+import static com.openexchange.share.subscription.ShareLinkState.INACCESSIBLE;
+import static com.openexchange.share.subscription.ShareLinkState.SUBSCRIBED;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.slf4j.Logger;
@@ -77,38 +77,61 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.tools.ShareTool;
-import com.openexchange.share.federated.ShareLinkManager;
-import com.openexchange.share.federated.ShareLinkState;
+import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
+import com.openexchange.share.subscription.ShareLinkState;
+import com.openexchange.share.subscription.ShareSubscriptionExceptions;
+import com.openexchange.share.subscription.ShareSubscriptionInformation;
+import com.openexchange.share.subscription.ShareSubscriptionProvider;
+import com.openexchange.tools.id.IDMangler;
 
 /**
- * {@link XOXShareLinkManager}
+ * {@link XOXShareSubscriptionProvider}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class XOXShareLinkManager implements ShareLinkManager {
+public class XOXShareSubscriptionProvider implements ShareSubscriptionProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(XOXShareLinkManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(XOXShareSubscriptionProvider.class);
 
     private final ServiceLookup services;
 
     private XOXFileStorageService fileStorageService;
 
     /**
-     * Initializes a new {@link XOXShareLinkManager}.
+     * Initializes a new {@link XOXShareSubscriptionProvider}.
      * 
      * @param services The services
      * @param fileStorageService The storage
      */
-    public XOXShareLinkManager(ServiceLookup services, XOXFileStorageService fileStorageService) {
+    public XOXShareSubscriptionProvider(ServiceLookup services, XOXFileStorageService fileStorageService) {
         super();
         this.services = services;
         this.fileStorageService = fileStorageService;
     }
 
     @Override
-    public int getSupportedModule() {
-        return Module.INFOSTORE.getFolderConstant();
+    public boolean isSupported(String shareLink) {
+        ShareTargetPath shareTargetPath = ShareTool.getShareTarget(shareLink);
+        if (null == shareTargetPath) {
+            return false;
+        }
+
+        if (Strings.isNotEmpty(shareTargetPath.getItem())) {
+            /*
+             * Single files aren't supported
+             */
+            return false;
+        }
+        int module = shareTargetPath.getModule();
+        if (Module.INFOSTORE.getFolderConstant() != module) {
+            return false;
+        }
+        String folder = shareTargetPath.getFolder();
+        if (Strings.isEmpty(folder)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -123,13 +146,14 @@ public class XOXShareLinkManager implements ShareLinkManager {
     }
 
     @Override
-    public ShareLinkState analyzeLink(Session session, String shareLink) throws OXException {
+    public ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException {
         /*
          * Check if account exists and still accessible
          */
         FileStorageAccountAccess accountAccess = getStorageAccountAccess(session, shareLink);
         if (null != accountAccess) {
-            return checkAccessible(accountAccess, shareLink);
+            ShareLinkState state = checkAccessible(accountAccess, shareLink);
+            return new ShareLinkAnalyzeResult(state, generateInfos(accountAccess, shareLink));
         }
 
         /*
@@ -137,18 +161,19 @@ public class XOXShareLinkManager implements ShareLinkManager {
          */
         ApiClientService apiClientService = services.getServiceSafe(ApiClientService.class);
         ApiClient apiClient = null;
+        ShareLinkState state = INACCESSIBLE;
         try {
             /*
              * If creation of the client throws no error, the share has been access successfully
              */
             apiClient = apiClientService.getApiClient(session, shareLink, null);
-            return ADDABLE;
+            state = ADDABLE;
         } catch (OXException e) {
             /*
              * Check if credentials are missing
              */
             if (isPasswordMissing(e)) {
-                return ADDABLE_WITH_PASSWORD;
+                state = ADDABLE_WITH_PASSWORD;
             }
             handleExcpetion(e);
         } finally {
@@ -157,32 +182,37 @@ public class XOXShareLinkManager implements ShareLinkManager {
              */
             apiClientService.close(apiClient);
         }
-        return INACCESSIBLE;
+        return new ShareLinkAnalyzeResult(state, new ShareSubscriptionInformation(getId(), null, null, Module.INFOSTORE.getName()));
     }
 
     @Override
-    public String bindShare(Session session, String shareLink, String shareName, String password) throws OXException {
+    public ShareSubscriptionInformation mount(Session session, String shareLink, String shareName, String password) throws OXException {
         XOXFileStorageAccount account = new XOXFileStorageAccount(fileStorageService, shareLink, password, shareName, null);
-        return fileStorageService.getAccountManager().addAccount(account, session); // TODO enhance with "xox" ID ?
+        String accountId = fileStorageService.getAccountManager().addAccount(account, session);
+        return generateInfos(session, accountId, shareLink);
     }
 
     @Override
-    public void unbindShare(Session session, String shareLink) throws OXException {
+    public void unmount(Session session, String shareLink) throws OXException {
         FileStorageAccount storageAccount = getStorageAccount(session, shareLink);
         if (null != storageAccount) {
             clearRemoteSessions(session, shareLink, storageAccount);
             fileStorageService.getAccountManager().deleteAccount(storageAccount, session);
+            return;
         }
+        throw ShareSubscriptionExceptions.MISSING_SUBSCRIPTION.create(shareLink);
     }
 
     @Override
-    public void updateShare(Session session, String shareLink, String password) throws OXException {
+    public ShareSubscriptionInformation remount(Session session, String shareLink, String shareName, String password) throws OXException {
         FileStorageAccount storageAccount = getStorageAccount(session, shareLink);
         if (null != storageAccount) {
-            XOXFileStorageAccount updated = new XOXFileStorageAccount(storageAccount, password);
+            XOXFileStorageAccount updated = new XOXFileStorageAccount(storageAccount, shareName, password);
             fileStorageService.getAccountManager().updateAccount(updated, session);
             clearRemoteSessions(session, shareLink, storageAccount);
+            return generateInfos(session, storageAccount.getId(), shareLink);
         }
+        throw ShareSubscriptionExceptions.MISSING_SUBSCRIPTION.create(shareLink);
     }
 
     /*
@@ -337,4 +367,42 @@ public class XOXShareLinkManager implements ShareLinkManager {
         services.getServiceSafe(ApiClientService.class).close(session.getContextId(), session.getUserId(), shareLink);
     }
 
+    /**
+     * Generates the information about the account
+     *
+     * @param session The session
+     * @param accountId The account ID
+     * @param shareLink The share link
+     * @return The {@link ShareSubscriptionInformation}
+     * @throws OXException In case of error
+     */
+    private ShareSubscriptionInformation generateInfos(Session session, String accountId, String shareLink) throws OXException {
+        if (Strings.isEmpty(accountId)) {
+            throw ShareSubscriptionExceptions.MISSING_SUBSCRIPTION.create(shareLink);
+        }
+
+        FileStorageAccountAccess accountAccess = fileStorageService.getAccountAccess(accountId, session);
+        try {
+            accountAccess.connect();
+            return generateInfos(accountAccess, shareLink);
+        } finally {
+            accountAccess.close();
+        }
+    }
+
+    /**
+     * Generates the information about the account
+     *
+     * @param account The account to get the infos from
+     * @return The {@link ShareSubscriptionInformation}
+     * @throws OXException In case of error
+     */
+    private ShareSubscriptionInformation generateInfos(FileStorageAccountAccess accountAccess, String shareLink) {
+        String folderId = ShareTool.getShareTarget(shareLink).getFolder();
+        return new ShareSubscriptionInformation( // @formatter:off
+            getId(),
+            accountAccess.getAccountId(),
+            String.valueOf(Module.INFOSTORE.getFolderConstant()),
+            IDMangler.mangle(getId(), accountAccess.getAccountId(), folderId)); // @formatter:on
+    }
 }

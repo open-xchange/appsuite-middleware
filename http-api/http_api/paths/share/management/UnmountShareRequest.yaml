@@ -1,18 +1,12 @@
-/share/management?action=deleteShare:
-  get:
-    operationId: deleteShare
+/share/management?action=unmount:
+  put:
+    operationId: unmount
     tags:
       - Share/Management
       - FederatedSharing
     summary: Delets a federated share.
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
-      - in: query
-        name: link
-        description: The link to the share that should be updated
-        required: true
-        schema:
-          type: string
     responses:
       '200':
         description: >
@@ -24,3 +18,11 @@
           application/json:
             schema:
               $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MountShareBody'
+      description: >-
+        A JSON object containing the data for the update
+      required: true

@@ -4,3 +4,6 @@ requests:
   - SendLinkRequest.yaml
   - UpdateLinkRequest.yaml
   - AnalyzeLinkRequest.yaml
+  - MountShareRequest.yaml
+  - RemountShareRequest.yaml
+  - UnmountShareRequest.yaml

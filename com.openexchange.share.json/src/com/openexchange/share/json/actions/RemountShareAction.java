@@ -49,78 +49,42 @@
 
 package com.openexchange.share.json.actions;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.share.subscription.ShareSubscriptionInformation;
+import com.openexchange.share.subscription.ShareSubscriptionRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractFederatedShareAction}
+ * {@link RemountShareAction} - Updates an existing share that is associated with a specific share link from a remote server
+ * <p>
+ * Currently only refreshing of the password is supported.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public abstract class AbstractFederatedShareAction implements AJAXActionService {
+public class RemountShareAction extends AbstractShareSubscriptionAction {
 
     /**
-     * The {@value #LINK} parameter
-     */
-    protected static final String LINK = "link";
-
-    /**
-     * The {@value #SERVICE_ID} parameter
-     */
-    protected static final String SERVICE_ID = "service";
-
-    protected final ServiceLookup services;
-
-    /**
-     * Initializes a new {@link AnalyzeAction}.
+     * Initializes a new {@link RemountShareAction}.
      * 
      * @param services The service lookup
      */
-    public AbstractFederatedShareAction(ServiceLookup services) {
-        super();
-        this.services = services;
+    public RemountShareAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String shareLink = requestData.getParameter(LINK);
-        if (Strings.isEmpty(shareLink)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(LINK);
-        }
-        return perform(requestData, session, shareLink);
+    AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, JSONObject json, String shareLink) throws OXException, JSONException {
+        ShareSubscriptionRegistry service = services.getServiceSafe(ShareSubscriptionRegistry.class);
+        String password = json.optString(PASSWORD);
+        String dislpayName = json.optString(DISPLAY_NAME);
+        ShareSubscriptionInformation infos = service.remount(session, shareLink, dislpayName, password);
+        return createResponse(infos);
     }
 
-    /**
-     * Performs given request.
-     *
-     * @param requestData The request to perform
-     * @param session The session providing needed user data
-     * @param shareLink The share link, never <code>null</code>
-     * @return The result yielded for given request
-     * @throws OXException If an error occurs
-     */
-    abstract AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, String shareLink) throws OXException;
-
-    /**
-     * Get the {@value #SERVICE_ID} parameter
-     *
-     * @param requestData The data to get the parameter from
-     * @param The name of the parameter
-     * @return The parameter
-     * @throws OXException If parameter is unset
-     */
-    protected String requireParameter(AJAXRequestData requestData, String name) throws OXException {
-        String param = requestData.getParameter(name);
-        if (Strings.isEmpty(param)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
-        }
-        return param;
-    }
 }

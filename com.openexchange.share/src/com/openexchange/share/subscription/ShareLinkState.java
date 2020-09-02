@@ -1,3 +1,5 @@
+
+package com.openexchange.share.subscription;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -47,82 +49,38 @@
  *
  */
 
-package com.openexchange.share.federated;
-
-import com.openexchange.annotation.NonNull;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.Ranked;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
-
 /**
- * {@link ShareLinkManager} - A manager that handles CRUD operations for s single module and a certain kind of share
- * 
+ * {@link ShareLinkState} - States to indicate a possible usage of the link
+ *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-@SingletonService
-public interface ShareLinkManager extends Ranked {
-
-    /** The ranking for the remote OX to OX file storage */
-    final static int XOX_REMOTE_RANK = 55;
+public enum ShareLinkState {
 
     /**
-     * Get the module the manager supports
-     * <p>
-     * One of {@link com.openexchange.groupware.modules.Module}
-     *
-     * @return The module the analyzing is supported for
+     * State to indicate that the link belongs to a known share and is accessible. Nothing to do for the client.
      */
-    int getSupportedModule();
+    SUBSCRIBED,
+    
+    /**
+     * State to indicate that the link belongs to a known share but is not accessible at the moment because the remote
+     * server indicates that credentials have been updated meanwhile. 
+     */
+    CREDENTIALS_REFRESH,
 
     /**
-     * Get the unique identifier of the manager
-     *
-     * @return The unique ID
+     * State to indicate that the link is valid and belongs to a share that is not yet subscribed an can be added as an account.
      */
-    @NonNull
-    String getId();
+    ADDABLE,
 
     /**
-     * Analyzes the given share link
-     *
-     * @param session The session representing the acting user
-     * @param shareLink The share link to access
-     * @return A result indicating the action that can be performed, or <code>null</code> if not applicable
-     * @throws OXException In case of an error
+     * Equal state to {@link #ADDABLE} but in addition the user needs to enter a password to add the share.
      */
-    ShareLinkState analyzeLink(Session session, String shareLink) throws OXException;
+    ADDABLE_WITH_PASSWORD,
 
     /**
-     * Binds a share link to the user by e.g. creating a storage account for the share
-     *
-     * @param session The user session to bind the share to
-     * @param shareLink The share link to add or rather bind
-     * @param password The optional password for the share
-     * @param shareName The name to set for the binded object
-     * @return The ID of the created object
-     * @throws OXException In case of error
+     * State to indicate that the share link is inaccessible and thus can't be subscribed.
      */
-    String bindShare(Session session, String shareLink, String shareName, String password) throws OXException;
-
-    /**
-     * Updates a bound share link
-     *
-     * @param session The user session
-     * @param shareLink The share link to identify the bound object
-     * @param password The password
-     * @throws OXException In case of error
-     */
-    void updateShare(Session session, String shareLink, String password) throws OXException;
-
-    /**
-     * Unbinds a share and the associated resources of the share.
-     *
-     * @param session The user session
-     * @param shareLink The share link to remove
-     * @throws OXException In case of error
-     */
-    void unbindShare(Session session, String shareLink) throws OXException;
+    INACCESSIBLE;
 
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.xox.analyzer;
+package com.openexchange.file.storage.xox.subscription;
 
 import static com.openexchange.file.storage.xox.XOXStorageConstants.PASSWORD;
 import static com.openexchange.file.storage.xox.XOXStorageConstants.SHARE_URL;
@@ -92,13 +92,28 @@ public class XOXFileStorageAccount implements FileStorageAccount, ServiceAware {
      * Initializes a new {@link XOXFileStorageAccount}.
      * 
      * @param other Other account to clone
-     * @param password The new password for tha account
+     * @param password The new password for that account
      */
     public XOXFileStorageAccount(FileStorageAccount other, String password) {
         this(other.getFileStorageService(), // @formatter:off
             (String) other.getConfiguration().get(SHARE_URL),
             password,
             other.getDisplayName(),
+            other.getId());// @formatter:on
+    }
+
+    /**
+     * Initializes a new {@link XOXFileStorageAccount}.
+     * 
+     * @param other Other account to clone
+     * @param displayName The new display name to use
+     * @param password The new password for that account
+     */
+    public XOXFileStorageAccount(FileStorageAccount other, String displayName, String password) {
+        this(other.getFileStorageService(), // @formatter:off
+            (String) other.getConfiguration().get(SHARE_URL),
+            password,
+            Strings.isEmpty(displayName) ? other.getDisplayName() : displayName,
             other.getId());// @formatter:on
     }
 
@@ -150,6 +165,11 @@ public class XOXFileStorageAccount implements FileStorageAccount, ServiceAware {
     @Override
     public FileStorageService getFileStorageService() {
         return fileStorageService;
+    }
+
+    @Override
+    public String toString() {
+        return "XOXFileStorageAccount [fileStorageService=" + fileStorageService + ", displayName=" + displayName + ", id=" + id + ", shareLink=" + shareLink + "]";
     }
 
 }

@@ -56,9 +56,9 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.xox.XOXFileStorageService;
-import com.openexchange.file.storage.xox.analyzer.XOXShareLinkManager;
+import com.openexchange.file.storage.xox.subscription.XOXShareSubscriptionProvider;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.share.federated.ShareLinkManager;
+import com.openexchange.share.subscription.ShareSubscriptionProvider;
 
 /**
  * {@link Activator}
@@ -81,7 +81,7 @@ public class Activator extends HousekeepingActivator {
 
         XOXFileStorageService fileStorageService = new XOXFileStorageService(this);
         registerService(FileStorageService.class, fileStorageService);
-        registerService(ShareLinkManager.class, new XOXShareLinkManager(this, fileStorageService));
+        registerService(ShareSubscriptionProvider.class, new XOXShareSubscriptionProvider(this, fileStorageService));
     }
 
     @Override

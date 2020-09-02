@@ -50,34 +50,35 @@
 package com.openexchange.share.json.actions;
 
 import java.util.Date;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.federated.FederatedShareLinkService;
+import com.openexchange.share.subscription.ShareSubscriptionRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DeleteShareAction} - Deletes a share account that is associated with a specific share link from a remote server
+ * {@link UnmountShareAction} - Unmounts a share that is associated with a specific share link from a remote server
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class DeleteShareAction extends AbstractFederatedShareAction {
+public class UnmountShareAction extends AbstractShareSubscriptionAction {
 
     /**
-     * Initializes a new {@link DeleteShareAction}.
+     * Initializes a new {@link UnmountShareAction}.
      * 
      * @param services The service lookup
      */
-    public DeleteShareAction(ServiceLookup services) {
+    public UnmountShareAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, String shareLink) throws OXException {
-        FederatedShareLinkService service = services.getServiceSafe(FederatedShareLinkService.class);
-        service.unbindShare(session, shareLink);
+    AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, JSONObject json, String shareLink) throws OXException {
+        ShareSubscriptionRegistry service = services.getServiceSafe(ShareSubscriptionRegistry.class);
+        service.unmount(session, shareLink);
         return new AJAXRequestResult(null, new Date(System.currentTimeMillis()));
     }
 

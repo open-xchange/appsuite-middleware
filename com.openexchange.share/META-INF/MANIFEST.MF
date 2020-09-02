@@ -23,8 +23,8 @@ Import-Package: com.google.common.base,
  org.osgi.service.event,
  org.slf4j
 Export-Package: com.openexchange.share,
- com.openexchange.share.federated,
  com.openexchange.share.groupware,
  com.openexchange.share.groupware.spi,
  com.openexchange.share.notification,
- com.openexchange.share.recipient
+ com.openexchange.share.recipient,
+ com.openexchange.share.subscription

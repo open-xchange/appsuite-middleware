@@ -722,6 +722,39 @@
         }
       }
     },
+    "/share/management?action=unmount" : {
+      "put" : {
+        "operationId" : "unmount",
+        "tags" : [ "Share/Management", "FederatedSharing" ],
+        "summary" : "Delets a federated share.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An empty json object in case of success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MountShareBody"
+              }
+            }
+          },
+          "description" : "A JSON object containing the data for the update",
+          "required" : true
+        }
+      }
+    },
     "/mail/compose/{id}/attachments" : {
       "post" : {
         "operationId" : "postAttachments",
@@ -1866,6 +1899,39 @@
         },
         "requestBody" : {
           "$ref" : "#/components/requestBodies/ConversionDataSource"
+        }
+      }
+    },
+    "/share/management?action=mount" : {
+      "put" : {
+        "operationId" : "mount",
+        "tags" : [ "Share/Management", "FederatedSharing" ],
+        "summary" : "Mounts a share that is associated with a specific share link from a remote server.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An empty json object in case of success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MountShareResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExtendedMountShareBody"
+              }
+            }
+          },
+          "description" : "A JSON object containing the data for the update",
+          "required" : true
         }
       }
     },
@@ -9581,55 +9647,6 @@
         }
       }
     },
-    "/share/management?action=addShare" : {
-      "put" : {
-        "operationId" : "addShare",
-        "tags" : [ "Share/Management", "FederatedSharing" ],
-        "summary" : "Adds a federated share.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "link",
-          "description" : "The link to the share that should be updated",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "name",
-          "description" : "The display name",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An empty json object in case of success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/AddShareResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/FederatedShareBody"
-              }
-            }
-          },
-          "description" : "A JSON object containing the data for the creation",
-          "required" : false
-        }
-      }
-    },
     "/contacts?action=listuser" : {
       "put" : {
         "operationId" : "getContactListByUsers",
@@ -9876,20 +9893,12 @@
       }
     },
     "/share/management?action=analyze" : {
-      "get" : {
+      "put" : {
         "operationId" : "analyzeShareLink",
         "tags" : [ "Share/Management", "FederatedSharing" ],
         "summary" : "Analyzes a share link to gain knowlege about the operations that can be perfomed with the link.",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "link",
-          "description" : "The share link to analyze",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
         } ],
         "responses" : {
           "200" : {
@@ -9902,36 +9911,17 @@
               }
             }
           }
-        }
-      }
-    },
-    "/share/management?action=deleteShare" : {
-      "get" : {
-        "operationId" : "deleteShare",
-        "tags" : [ "Share/Management", "FederatedSharing" ],
-        "summary" : "Delets a federated share.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "link",
-          "description" : "The link to the share that should be updated",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An empty json object in case of success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CommonResponse"
-                }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MountShareBody"
               }
             }
-          }
+          },
+          "description" : "A JSON object containing the data for the update",
+          "required" : true
         }
       }
     },
@@ -16077,6 +16067,39 @@
         }
       }
     },
+    "/share/management?action=remount" : {
+      "put" : {
+        "operationId" : "remount",
+        "tags" : [ "Share/Management", "FederatedSharing" ],
+        "summary" : "Updates an existing share that is associated with a specific share link from a remote server",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An empty json object in case of success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MountShareResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExtendedMountShareBody"
+              }
+            }
+          },
+          "description" : "A JSON object containing the data for the update",
+          "required" : true
+        }
+      }
+    },
     "/contacts?action=getuser" : {
       "get" : {
         "operationId" : "getContactByUser",
@@ -17579,47 +17602,6 @@
               }
             }
           }
-        }
-      }
-    },
-    "/share/management?action=updateShare" : {
-      "put" : {
-        "operationId" : "updateShare",
-        "tags" : [ "Share/Management", "FederatedSharing" ],
-        "summary" : "Updates a federated share.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "link",
-          "description" : "The link to the share that should be updated",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An empty json object in case of success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CommonResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/FederatedShareBody"
-              }
-            }
-          },
-          "description" : "A JSON object containing the data for the update",
-          "required" : true
         }
       }
     }
@@ -36937,7 +36919,19 @@
                 "description" : "State to indicate a possible usage of the link\n  * `SUBSCRIBED` - State to indicate that the link belongs to a known share and is accessible. Nothing to do for the client.\n  * `CREDENTIALS_REFRESH` - State to indicate that the link belongs to a known share but is not accessible at the moment because the remote server indicates that credentials have been updated meanwhile.\n  * `ADDABLE` -State to indicate that the link is valid and belongs to a share that is not yet subscribed an can be added as an account.\n  * `ADDABLE_WITH_PASSWORD` - Equal state to `ADDABLE` but in addition the user needs to enter a password to add the share.\n  * `INACCESSIBLE` - State to indicate that the share link is inaccessible and thus can't be subscribed.\n",
                 "enum" : [ "SUBSCRIBED", "CREDENTIALS_REFRESH", "ADDABLE", "ADDABLE_WITH_PASSWORD", "INACCESSIBLE" ]
               },
-              "serviceId" : {
+              "account" : {
+                "type" : "string",
+                "description" : "The account ID of the newly created account"
+              },
+              "module" : {
+                "type" : "string",
+                "description" : "The module of the subscription"
+              },
+              "folder" : {
+                "type" : "string",
+                "description" : "The folder ID of the subscrition"
+              },
+              "service" : {
                 "type" : "string",
                 "description" : "The ID of the service that created the result."
               }
@@ -36988,7 +36982,7 @@
           }
         }
       },
-      "AddShareResponse" : {
+      "MountShareResponse" : {
         "type" : "object",
         "properties" : {
           "data" : {
@@ -36997,6 +36991,18 @@
               "account" : {
                 "type" : "string",
                 "description" : "The account ID of the newly created account"
+              },
+              "module" : {
+                "type" : "string",
+                "description" : "The module of the subscription"
+              },
+              "folder" : {
+                "type" : "string",
+                "description" : "The folder ID of the subscrition"
+              },
+              "service" : {
+                "type" : "string",
+                "description" : "The ID of the service that created the result."
               }
             }
           },
@@ -37045,12 +37051,29 @@
           }
         }
       },
-      "FederatedShareBody" : {
+      "MountShareBody" : {
         "type" : "object",
         "properties" : {
+          "link" : {
+            "type" : "string",
+            "description" : "The link to a share"
+          }
+        }
+      },
+      "ExtendedMountShareBody" : {
+        "type" : "object",
+        "properties" : {
+          "link" : {
+            "type" : "string",
+            "description" : "The link to a share"
+          },
           "password" : {
             "type" : "string",
             "description" : "The password to the share"
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The display name of the subsription"
           }
         }
       },

@@ -19,6 +19,15 @@ properties:
             - ADDABLE
             - ADDABLE_WITH_PASSWORD
             - INACCESSIBLE
-        serviceId:
+        account:
+          type: string
+          description: The account ID of the newly created account
+        module:
+          type: string
+          description: The module of the subscription
+        folder:
+          type: string
+          description: The folder ID of the subscrition
+        service:
           type: string
           description: The ID of the service that created the result.

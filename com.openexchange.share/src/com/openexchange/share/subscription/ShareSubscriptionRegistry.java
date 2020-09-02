@@ -47,57 +47,61 @@
  *
  */
 
-package com.openexchange.share.federated;
+package com.openexchange.share.subscription;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
- * {@link FederatedShareLinkService}
+ * {@link ShareSubscriptionRegistry}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public interface FederatedShareLinkService {
+@SingletonService
+public interface ShareSubscriptionRegistry {
 
     /**
-     * Analyzes the given share link
+     * Analyzes the given link
      *
      * @param session The session representing the acting user
-     * @param shareLink The share link to access
-     * @return A result indicating the action that can be performed, or <code>null</code> if not applicable
+     * @param shareLink The link to a share or rather subscription
+     * @return A result indicating the action that can be performed for the link, or <code>null</code> if not applicable
      * @throws OXException In case of an error
      */
-    ShareLinkAnalyzeResult analyzeLink(Session session, String shareLink) throws OXException;
+    ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException;
 
     /**
-     * Binds a share link to the user by e.g. creating a storage account for the share
+     * Mounts a share represented by the link efficiently subscribing the share
      *
      * @param session The user session to bind the share to
-     * @param shareLink The share link to add or rather bind
-     * @param shareName The name to set for the binded object
+     * @param shareLink The share link to mount
+     * @param shareName The name to set for the share to mount
      * @param password The optional password for the share
-     * @return The ID of the created object
+     * @return The information about the mount
      * @throws OXException In case of error
      */
-    String bindShare(Session session, String shareLink, String shareName, String password) throws OXException;
+    ShareSubscriptionInformation mount(Session session, String shareLink, String shareName, String password) throws OXException;
 
     /**
-     * Updates a bound share link
+     * Updates a mounted object that currently can't be used
      *
      * @param session The user session
-     * @param shareLink The share link to identify the bound object
-     * @param password The password
+     * @param shareLink The share link to identify the mounted object
+     * @param shareName The optional name to set for the share
+     * @param password The password to set for the object
+     * @return The information about the mount
      * @throws OXException In case of error
      */
-    void update(Session session, String shareLink, String password) throws OXException;
+    ShareSubscriptionInformation remount(Session session, String shareLink, String shareName, String password) throws OXException;
 
     /**
-     * Unbinds a share and the associated resources of the share.
+     * Unmouts a share or rather deactivates the subscription
      *
      * @param session The user session
-     * @param shareLink The share link to remove
+     * @param shareLink The share link to identify the mounted object
      * @throws OXException In case of error
      */
-    void unbindShare(Session session, String shareLink) throws OXException;
+    void unmount(Session session, String shareLink) throws OXException;
 }

@@ -47,51 +47,79 @@
  *
  */
 
-package com.openexchange.share.federated;
+package com.openexchange.share.subscription;
 
 /**
- * {@link ShareLinkAnalyzeResult}
+ * {@link ShareSubscriptionInformation}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class ShareLinkAnalyzeResult {
+public final class ShareSubscriptionInformation {
 
-    /** Result that indicate some preconditions weren't met */
-    public static final ShareLinkAnalyzeResult NONE = new ShareLinkAnalyzeResult(null, ShareLinkState.INACCESSIBLE);
+    private final String accountId;
 
-    private final String serviceId;
+    private final String providerId;
 
-    private final ShareLinkState state;
+    private final String module;
+
+    private final String folder;
 
     /**
-     * Initializes a new {@link ShareLinkAnalyzeResult}.
+     * Initializes a new {@link ShareSubscriptionInformation}.
      * 
-     * @param serviceId The ID of the service that created the result
-     * @param state The state of the result
+     * @param providerId The provider identifier that created the account
+     * @param accountId The account ID of the subscription
+     * @param module The module ID
+     * @param folder The folder ID
      */
-    public ShareLinkAnalyzeResult(String serviceId, ShareLinkState state) {
+    public ShareSubscriptionInformation(String providerId, String accountId, String module, String folder) {
         super();
-        this.serviceId = serviceId;
-        this.state = state;
+        this.accountId = accountId;
+        this.providerId = providerId;
+
+        this.module = module;
+        this.folder = folder;
     }
 
     /**
-     * Gets the serviceId
+     * Gets the providerId
      *
-     * @return The serviceId
+     * @return The providerId
      */
-    public String getServiceId() {
-        return serviceId;
+    public String getProviderId() {
+        return providerId;
     }
 
     /**
-     * Gets the state
+     * Gets the accountId
      *
-     * @return The state
+     * @return The accountId
      */
-    public ShareLinkState getState() {
-        return state;
+    public String getAccountId() {
+        return accountId;
     }
 
+    /**
+     * Gets the module
+     *
+     * @return The module
+     */
+    public String getModule() {
+        return module;
+    }
+
+    /**
+     * Gets the folder
+     *
+     * @return The folder
+     */
+    public String getFolder() {
+        return folder;
+    }
+
+    @Override
+    public String toString() {
+        return "ShareSubscriptionInformation [accountId=" + accountId + ", providerId=" + providerId + ", module=" + module + ", folder=" + folder + "]";
+    }
 }

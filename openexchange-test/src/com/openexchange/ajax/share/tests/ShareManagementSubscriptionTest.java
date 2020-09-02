@@ -53,7 +53,6 @@ import static com.openexchange.ajax.folder.manager.FolderManager.INFOSTORE;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
@@ -84,16 +83,17 @@ import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.AddShareResponse;
-import com.openexchange.testing.httpclient.models.AddShareResponseData;
 import com.openexchange.testing.httpclient.models.CommonResponse;
-import com.openexchange.testing.httpclient.models.FederatedShareBody;
+import com.openexchange.testing.httpclient.models.ExtendedMountShareBody;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.MailData;
 import com.openexchange.testing.httpclient.models.MailListElement;
 import com.openexchange.testing.httpclient.models.MailResponse;
 import com.openexchange.testing.httpclient.models.MailsResponse;
+import com.openexchange.testing.httpclient.models.MountShareBody;
+import com.openexchange.testing.httpclient.models.MountShareResponse;
+import com.openexchange.testing.httpclient.models.MountShareResponseData;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponse;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponseData;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponseData.StateEnum;
@@ -105,7 +105,7 @@ import com.openexchange.testing.httpclient.modules.MailApi;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 
 /**
- * {@link ShareManagementAnalyzeTest} - Test for the <code>analyze</code> action of the share management module.
+ * {@link ShareManagementSubscriptionTest} - Test for the <code>analyze</code> action of the share management module.
  * <p>
  * User 1 from context A will share the folder
  * User 2 from context B will analyze the share
@@ -113,7 +113,7 @@ import com.openexchange.testing.httpclient.modules.ShareManagementApi;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession {
+public class ShareManagementSubscriptionTest extends AbstractEnhancedApiClientSession {
 
     /** See also com.openexchange.file.storage.oxshare.OXShareStorageConstants.ID */
     private final static String FILESTORE_SERVICE = "xox" + Module.INFOSTORE.getFolderConstant();
@@ -162,7 +162,7 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
 
     @Test
     public void testMissingLink_APIException() throws Exception {
-        ShareLinkAnalyzeResponse analyzeShareLink = smApiC2.analyzeShareLink(apiClientC2.getSession(), "");
+        ShareLinkAnalyzeResponse analyzeShareLink = smApiC2.analyzeShareLink(apiClientC2.getSession(), getBody(""));
         assertNull(analyzeShareLink.getData());
         assertNotNull(analyzeShareLink.getError(), analyzeShareLink.getErrorDesc());
         assertTrue(analyzeShareLink.getErrorDesc().equals("Missing the following request parameter: link"));
@@ -170,7 +170,7 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
 
     @Test
     public void testSomeLink_APIException() throws Exception {
-        ShareLinkAnalyzeResponse analyzeShareLink = smApiC2.analyzeShareLink(apiClientC2.getSession(), "https://example.org/no/share/link");
+        ShareLinkAnalyzeResponse analyzeShareLink = smApiC2.analyzeShareLink(apiClientC2.getSession(), getBody("https://example.org/no/share/link"));
         assertNull(analyzeShareLink.getData());
         assertNotNull(analyzeShareLink.getError(), analyzeShareLink.getErrorDesc());
     }
@@ -300,9 +300,7 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
         /*
          * Update password in local instance and check response
          */
-        FederatedShareBody body = new FederatedShareBody();
-        body.setPassword(password);
-        smApiC2.updateShare(apiClientC2.getSession(), shareLink, body);
+        smApiC2.remount(apiClientC2.getSession(), getExtendedBody(shareLink, password, null));
         analyze(shareLink, StateEnum.SUBSCRIBED);
 
         /*
@@ -361,6 +359,20 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
         FolderData deltaFolder = new FolderData();
         deltaFolder.setPermissions(permissions);
         return folderManager.updateFolder(folderId, deltaFolder, null);
+    }
+
+    private MountShareBody getBody(String link) {
+        MountShareBody body = new MountShareBody();
+        body.setLink(link);
+        return body;
+    }
+
+    private ExtendedMountShareBody getExtendedBody(String shareLink, String password, String displayName) {
+        ExtendedMountShareBody body = new ExtendedMountShareBody();
+        body.setLink(shareLink);
+        body.setPassword(password);
+        body.setName(displayName);
+        return body;
     }
 
     /**
@@ -431,14 +443,15 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
      * @throws ApiException
      */
     private String addOXShareAccount(String shareLink, String password) throws ApiException {
-        FederatedShareBody body = new FederatedShareBody();
-        body.setPassword(password);
+        ExtendedMountShareBody body = getExtendedBody(shareLink, password, "Share from " + testUser.getLogin());
+        MountShareResponse mountResponse = smApiC2.mount(apiClientC2.getSession(), body);
 
-        AddShareResponse addShare = smApiC2.addShare(apiClientC2.getSession(), shareLink, "Share from " + testUser.getLogin(), body);
-        AddShareResponseData data = checkResponse(addShare.getError(), addShare.getErrorDesc(), addShare.getData());
+        MountShareResponseData data = checkResponse(mountResponse.getError(), mountResponse.getErrorDesc(), mountResponse.getData());
 
         String accountId = data.getAccount();
-        assertThat(accountId, not(nullValue()));
+        assertThat(accountId, notNullValue());
+        assertThat(data.getFolder(), notNullValue());
+        assertThat(data.getModule(), is(String.valueOf(Module.INFOSTORE.getFolderConstant())));
         addTearDownOperation(() -> deleteOXShareAccount(shareLink));
 
         analyze(shareLink, StateEnum.SUBSCRIBED);
@@ -446,7 +459,7 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
     }
 
     private void deleteOXShareAccount(String shareLink) throws Exception {
-        CommonResponse response = smApiC2.deleteShare(apiClientC2.getSession(), shareLink);
+        CommonResponse response = smApiC2.unmount(smApiC2.getApiClient().getSession(), getBody(shareLink));
         checkResponse(response);
     }
 
@@ -455,10 +468,11 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
      *
      * @param shareLinkData The data
      * @param expectedState The expected state
+     * @return 
      * @throws ApiException In case of error
      */
-    private void analyze(ShareLinkData shareLinkData, StateEnum expectedState) throws ApiException {
-        analyze(shareLinkData.getUrl(), expectedState);
+    private ShareLinkAnalyzeResponseData analyze(ShareLinkData shareLinkData, StateEnum expectedState) throws ApiException {
+        return analyze(shareLinkData.getUrl(), expectedState);
     }
 
     /**
@@ -466,10 +480,11 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
      *
      * @param shareLink The link to analyze
      * @param expectedState The expected state
+     * @return 
      * @throws ApiException In case of error
      */
-    private void analyze(String shareLink, StateEnum expectedState) throws ApiException {
-        ShareLinkAnalyzeResponse analyzeShareLink = smApiC2.analyzeShareLink(apiClientC2.getSession(), shareLink);
+    private ShareLinkAnalyzeResponseData analyze(String shareLink, StateEnum expectedState) throws ApiException {
+        ShareLinkAnalyzeResponse analyzeShareLink = smApiC2.analyzeShareLink(apiClientC2.getSession(), getBody(shareLink));
         checkResponse(analyzeShareLink.getError(), analyzeShareLink.getErrorDesc(), analyzeShareLink.getData());
         ShareLinkAnalyzeResponseData response = analyzeShareLink.getData();
         StateEnum state = response.getState();
@@ -478,7 +493,15 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
         } else {
             assertThat(state, is(expectedState));
         }
-        assertThat(response.getServiceId(), is(FILESTORE_SERVICE));
+
+        if (StateEnum.SUBSCRIBED.equals(expectedState)) {
+            assertThat(response.getAccount(), notNullValue());
+            assertThat(response.getModule(), is(String.valueOf(Module.INFOSTORE.getFolderConstant())));
+            assertThat(response.getFolder(), notNullValue());
+        }
+
+        assertThat(response.getService(), is(FILESTORE_SERVICE));
+        return response;
     }
 
     protected String receiveShareLink(ApiClient apiClient, String fromToMatch) throws Exception {
@@ -554,7 +577,7 @@ public class ShareManagementAnalyzeTest extends AbstractEnhancedApiClientSession
         elm.setId(data.getId());
         elm.setFolder(data.getFolderId());
         addTearDownOperation(() -> {
-            mailApi.deleteMails(mailApi.getApiClient().getSession(), Collections.singletonList(elm), now(), Boolean.TRUE, Boolean.FALSE);
+            mailApi.deleteMails(mailApi.getApiClient().getSession(), Collections.singletonList(elm), null, Boolean.TRUE, Boolean.FALSE);
         });
     }
 

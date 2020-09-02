@@ -1,5 +1,3 @@
-
-package com.openexchange.share.federated;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -49,38 +47,53 @@ package com.openexchange.share.federated;
  *
  */
 
+package com.openexchange.share.subscription;
+
 /**
- * {@link ShareLinkState} - States to indicate a possible usage of the link
+ * {@link ShareLinkAnalyzeResult}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public enum ShareLinkState {
+public final class ShareLinkAnalyzeResult {
+
+    private final ShareSubscriptionInformation infos;
+
+    private final ShareLinkState state;
 
     /**
-     * State to indicate that the link belongs to a known share and is accessible. Nothing to do for the client.
+     * Initializes a new {@link ShareLinkAnalyzeResult}.
+     * 
+     * @param state The state of the result
+     * @param infos Detailed information abouut the share
      */
-    SUBSCRIBED,
-    
-    /**
-     * State to indicate that the link belongs to a known share but is not accessible at the moment because the remote
-     * server indicates that credentials have been updated meanwhile. 
-     */
-    CREDENTIALS_REFRESH,
+    public ShareLinkAnalyzeResult(ShareLinkState state, ShareSubscriptionInformation infos) {
+        super();
+        this.infos = infos;
+        this.state = state;
+    }
 
     /**
-     * State to indicate that the link is valid and belongs to a share that is not yet subscribed an can be added as an account.
+     * Gets the infos
+     *
+     * @return The infos
      */
-    ADDABLE,
+    public ShareSubscriptionInformation getInfos() {
+        return infos;
+    }
 
     /**
-     * Equal state to {@link #ADDABLE} but in addition the user needs to enter a password to add the share.
+     * Gets the state
+     *
+     * @return The state
      */
-    ADDABLE_WITH_PASSWORD,
+    public ShareLinkState getState() {
+        return state;
+    }
 
-    /**
-     * State to indicate that the share link is inaccessible and thus can't be subscribed.
-     */
-    INACCESSIBLE;
+    @Override
+    public String toString() {
+        return "ShareLinkAnalyzeResult [infos=" + (null != infos ? infos.toString() : "null") + ", state=" + state + "]";
+    }
 
 }

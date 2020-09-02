@@ -1,0 +1,5 @@
+type: object
+properties:
+  link:
+    type: string
+    description: The link to a share

@@ -65,12 +65,12 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.federated.FederatedShareLinkService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.json.ShareActionFactory;
 import com.openexchange.share.json.fields.ExtendedFolderPermissionsField;
 import com.openexchange.share.json.fields.ExtendedObjectPermissionsField;
 import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.subscription.ShareSubscriptionRegistry;
 import com.openexchange.user.UserService;
 
 /**
@@ -93,7 +93,7 @@ public class ShareJsonActivator extends AJAXModuleActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, GroupService.class, ContactService.class,
             CapabilityService.class, SessiondService.class, ShareNotificationService.class, ModuleSupport.class, QuotaService.class, 
-            ContactUserStorage.class, FederatedShareLinkService.class };
+            ContactUserStorage.class, ShareSubscriptionRegistry.class };
     }
 
     @Override

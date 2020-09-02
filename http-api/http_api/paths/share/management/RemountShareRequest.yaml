@@ -1,18 +1,12 @@
-/share/management?action=updateShare:
+/share/management?action=remount:
   put:
-    operationId: updateShare
+    operationId: remount
     tags:
       - Share/Management
       - FederatedSharing
-    summary: Updates a federated share.
+    summary: Updates an existing share that is associated with a specific share link from a remote server
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
-      - in: query
-        name: link
-        description: The link to the share that should be updated
-        required: true
-        schema:
-          type: string
     responses:
       '200':
         description: >
@@ -23,12 +17,12 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CommonResponse'
+              $ref: '#/components/schemas/MountShareResponse'
     requestBody:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/FederatedShareBody'
+            $ref: '#/components/schemas/ExtendedMountShareBody'
       description: >-
         A JSON object containing the data for the update
       required: true

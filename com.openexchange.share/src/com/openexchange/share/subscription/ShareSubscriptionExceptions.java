@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.federated;
+package com.openexchange.share.subscription;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -56,12 +56,12 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link FederatedShareLinkExceptions}
+ * {@link ShareSubscriptionExceptions}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public enum FederatedShareLinkExceptions implements DisplayableOXExceptionCode {
+public enum ShareSubscriptionExceptions implements DisplayableOXExceptionCode {
 
     /** Unexpected error [%1$s] */
     UNEXPECTED_ERROR("Unexpected error [%1$s]", Category.CATEGORY_ERROR, 1),
@@ -79,16 +79,21 @@ public enum FederatedShareLinkExceptions implements DisplayableOXExceptionCode {
     MISSING_PASSWORD("The password is missing", Category.CATEGORY_ERROR, 3, OXExceptionStrings.BAD_REQUEST),
 
     /**
+     * <code>Unable to find a subscription for \"%1$s\"</code>
+     */
+    MISSING_SUBSCRIPTION("Unable to find a subscription for \"%1$s\"", Category.CATEGORY_ERROR, 4),
+
+    /**
      * Unable to interpret the link \"%1$s\".
      */
-    NOT_USABLE("Unable to interpret the link \"%1$s\".", Category.CATEGORY_ERROR, 4),
+    NOT_USABLE("Unable to interpret the link \"%1$s\".", Category.CATEGORY_ERROR, 5),
 
     ;
 
     /**
      * The error code prefix for password-change module.
      */
-    public static final String PREFIX = "FSLE";
+    public static final String PREFIX = "SUSE";
 
     private final Category category;
 
@@ -108,7 +113,7 @@ public enum FederatedShareLinkExceptions implements DisplayableOXExceptionCode {
      * @param category The category
      * @param detailNumber The exception number
      */
-    private FederatedShareLinkExceptions(final String message, final Category category, final int detailNumber) {
+    private ShareSubscriptionExceptions(final String message, final Category category, final int detailNumber) {
         this(message, category, detailNumber, null);
     }
 
@@ -120,7 +125,7 @@ public enum FederatedShareLinkExceptions implements DisplayableOXExceptionCode {
      * @param detailNumber The exception number
      * @param displayMessage The display message to send to the client
      */
-    private FederatedShareLinkExceptions(final String message, final Category category, final int detailNumber, final String displayMessage) {
+    private ShareSubscriptionExceptions(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
