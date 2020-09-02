@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import com.openexchange.api.client.common.calls.infostore.DocumentResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.Document;
@@ -203,19 +204,14 @@ public class XOXFileAccess implements /*@formatter:off*/
 
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
-        IDTuple movedDocumentId = client.moveDocument(source.getId(), destFolder, sequenceNumber);
-        if (update != null) {
-            DefaultFile movedFileToUpdate = new DefaultFile(update);
-            movedFileToUpdate.setFolderId(movedDocumentId.getFolder());
-            movedFileToUpdate.setId(movedDocumentId.getId());
-            movedDocumentId = saveFileMetadata(movedFileToUpdate, DISTANT_FUTURE, modifiedFields);
-        }
-        return movedDocumentId;
+        IDTuple newId = client.moveDocument(source.getId(), destFolder, sequenceNumber);
+        XOXFile movedFile = getMetadata(newId.getFolder(), newId.getId(), CURRENT_VERSION);
+        return update != null ? saveFileMetadata(movedFile, movedFile.getSequenceNumber(), modifiedFields) : newId;
     }
 
     @Override
     public InputStream getDocument(String folderId, String id, String version) throws OXException {
-        return client.getDocument(folderId, id, version);
+        return client.getDocument(folderId, id, version).getInputStream();
     }
 
     @Override
@@ -225,9 +221,9 @@ public class XOXFileAccess implements /*@formatter:off*/
 
     @Override
     public Document getDocumentAndMetadata(String folderId, String fileId, String version, String clientETag) throws OXException {
-        //TODO: use e-tag
         XOXFile fileMetaData = getMetadata(folderId, fileId, version);
-        return new XOXDocument(fileMetaData, () -> getDocument(folderId, fileId, version));
+        DocumentResponse response = client.getDocument(folderId, fileId, version, clientETag);
+        return new XOXDocument(fileMetaData, () -> response.getInputStream(), response.getETag());
     }
 
     @Override

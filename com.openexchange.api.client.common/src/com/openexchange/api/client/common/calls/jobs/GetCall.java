@@ -47,63 +47,63 @@
  *
  */
 
-package com.openexchange.file.storage.xox;
+package com.openexchange.api.client.common.calls.jobs;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.Map;
 import java.util.Objects;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Document;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.common.calls.AbstractGetCall;
 
 /**
- * {@link XOXDocument} - A document shared from another OX instance
+ * {@link GetCall} - Gets the result of a certain job
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class XOXDocument extends Document {
+public class GetCall<T> extends AbstractGetCall<T> {
 
-    @FunctionalInterface
-    interface InputStreamClosure {
-
-        InputStream newStream() throws OXException, IOException;
-    }
-
-    private final InputStreamClosure data;
+    private final String id;
+    private final HttpResponseParser<T> responseParser;
 
     /**
-     * Initializes a new {@link XOXDocument}.
+     * Initializes a new {@link GetCall}.
      *
-     * @param file The meta data as {@link XOXFile}
-     * @param data The data as {@link InputStreamClosure} which allows lazy loading
-     * @param eTag The ETag of the document, or null
+     * @param id The ID of the job to get
+     * @param responeParser The parser to use for the actual expected result
      */
-    public XOXDocument(XOXFile file, InputStreamClosure data, String eTag) {
-        this.data = Objects.requireNonNull(data, "data must not be null");
-        setEtag(eTag);
-        if (file != null) {
-            setFile(file);
-            setMimeType(file.getFileMIMEType());
-            setName(file.getFileName());
-            if (file.getLastModified() != null) {
-                setLastModified(file.getLastModified().getTime());
-            }
-            setSize(file.getFileSize());
-        }
+    public GetCall(String id, HttpResponseParser<T> responseParser) {
+        this.id = Objects.requireNonNull(id, "id must not be null");
+        this.responseParser = Objects.requireNonNull(responseParser, "responseParser must not be null");
+    }
+
+    /**
+     * Gets the parser to use
+     *
+     * @return The actual parser to use for the result
+     */
+    public HttpResponseParser<T> getResponseParser() {
+        return responseParser;
     }
 
     @Override
-    public boolean isRepetitive() {
-        return false;
+    @NonNull
+    public String getModule() {
+        return "jobs";
     }
 
     @Override
-    public InputStream getData() throws OXException {
-        try {
-            return data.newStream();
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
+    public HttpResponseParser<T> getParser() {
+        return responseParser;
+    }
+
+    @Override
+    protected void fillParameters(Map<String, String> parameters) {
+        parameters.put("id", id);
+    }
+
+    @Override
+    protected String getAction() {
+        return "get";
     }
 }

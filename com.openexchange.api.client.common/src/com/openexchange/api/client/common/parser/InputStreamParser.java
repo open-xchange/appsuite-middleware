@@ -70,12 +70,11 @@ public class InputStreamParser implements HttpResponseParser<InputStream> {
     public InputStream parse(HttpResponse response, HttpContext httpContext) throws OXException {
         Checks.checkStatusError(response);
         try {
-            return response.getEntity().getContent();
+            return response.getEntity() != null ? response.getEntity().getContent() : null;
         } catch (UnsupportedOperationException e) {
             throw ApiClientExceptions.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
             throw ApiClientExceptions.IO_ERROR.create(e, e.getMessage());
         }
     }
-
 }

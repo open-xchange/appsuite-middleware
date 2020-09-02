@@ -50,7 +50,7 @@
 package com.openexchange.api.client.common;
 
 import java.io.IOException;
-import java.util.Objects;
+import java.io.InputStream;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.slf4j.Logger;
@@ -74,14 +74,28 @@ public class ResourceReleasingInputStream extends CountingOnlyInputStream {
 
     /**
      * Initializes a new {@link ResourceReleasingInputStream}.
-     * 
+     * <br>
+     * Releases the given request and response resources if the response's InputStream gets closed.
+     *
      * @param request The request to close along the response
      * @param response The response to wrap
      * @throws IOException If the stream could not be created
      */
     @SuppressWarnings("resource")
     public ResourceReleasingInputStream(HttpRequestBase request, HttpResponse response) throws IOException {
-        super((Objects.requireNonNull(response, "response must not be null")).getEntity().getContent());
+        this(request, response, response.getEntity().getContent());
+    }
+
+    /**
+     * Initializes a new {@link ResourceReleasingInputStream}.
+     * Releases the given request and response resources if the given InputStream gets closed.
+     *
+     * @param request The request to close along the response
+     * @param response The response to wrap
+     * @param inputStream The {@link InpuStream}
+     */
+    public ResourceReleasingInputStream(HttpRequestBase request, HttpResponse response, InputStream inputStream) {
+        super(inputStream);
         this.request = request;
         this.response = response;
         this.contentLength = response.getEntity().getContentLength();

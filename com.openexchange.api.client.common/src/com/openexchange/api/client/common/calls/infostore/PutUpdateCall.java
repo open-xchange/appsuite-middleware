@@ -74,31 +74,39 @@ import com.openexchange.file.storage.File.Field;
  */
 public class PutUpdateCall extends AbstractPutCall<String> {
 
+    private final String id;
     private final DefaultFile file;
     private final long timestamp;
     private final int[] columns;
     private final String pushToken;
 
-    /**
-     * Initializes a new {@link PutUpdateCall}.
-     *
-     * @param file The file to update
-     * @param timestamp the last known timestamp/sequencenumber
-     * @param columns the column IDs of the file's fields to update
-     */
     public PutUpdateCall(DefaultFile file, long timestamp, int[] columns) {
-        this(file, timestamp, columns, null);
+        this(file.getId(), file, timestamp, columns, null);
     }
 
     /**
      * Initializes a new {@link PutUpdateCall}.
      *
+     * @param id The ID of the item to update
      * @param file The file to update
+     * @param timestamp the last known timestamp/sequencenumber
+     * @param columns the column IDs of the file's fields to update
+     */
+    public PutUpdateCall(String id, DefaultFile file, long timestamp, int[] columns) {
+        this(id, file, timestamp, columns, null);
+    }
+
+    /**
+     * Initializes a new {@link PutUpdateCall}.
+     *
+     * @param id The ID of the item to update
+     * @param file The file to update containing the new data
      * @param timestamp the last known timestamp/sequencenumber
      * @param columns the column IDs of the file's fields to update
      * @param pushToken The drive push token
      */
-    public PutUpdateCall(DefaultFile file, long timestamp, int[] columns, String pushToken) {
+    public PutUpdateCall(String id, DefaultFile file, long timestamp, int[] columns, String pushToken) {
+        this.id = id;
         this.file = Objects.requireNonNull(file, "file must not be null");
         this.timestamp = timestamp;
         this.columns = columns;
@@ -129,7 +137,7 @@ public class PutUpdateCall extends AbstractPutCall<String> {
 
     @Override
     protected void fillParameters(Map<String, String> parameters) {
-        parameters.put("id", file.getId());
+        parameters.put("id", id);
         parameters.put("timestamp", String.valueOf(timestamp));
         putIfNotEmpty(parameters,"pushToken", pushToken);
     }

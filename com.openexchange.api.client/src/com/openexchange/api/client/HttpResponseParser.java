@@ -75,5 +75,4 @@ public interface HttpResponseParser<T> {
      *             <li>serialization fails</li>
      */
     T parse(HttpResponse response, HttpContext httpContext) throws OXException;
-
 }

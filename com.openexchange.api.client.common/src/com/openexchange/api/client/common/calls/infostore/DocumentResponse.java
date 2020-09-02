@@ -47,63 +47,75 @@
  *
  */
 
-package com.openexchange.file.storage.xox;
+package com.openexchange.api.client.common.calls.infostore;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Document;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.api.client.InputStreamAwareResponse;
 
 /**
- * {@link XOXDocument} - A document shared from another OX instance
+ * {@link DocumentResponse}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class XOXDocument extends Document {
+public class DocumentResponse implements InputStreamAwareResponse {
 
-    @FunctionalInterface
-    interface InputStreamClosure {
-
-        InputStream newStream() throws OXException, IOException;
-    }
-
-    private final InputStreamClosure data;
+    private InputStream inputStream;
+    private String eTag;
 
     /**
-     * Initializes a new {@link XOXDocument}.
-     *
-     * @param file The meta data as {@link XOXFile}
-     * @param data The data as {@link InputStreamClosure} which allows lazy loading
-     * @param eTag The ETag of the document, or null
+     * Initializes a new {@link DocumentResponse}.
      */
-    public XOXDocument(XOXFile file, InputStreamClosure data, String eTag) {
-        this.data = Objects.requireNonNull(data, "data must not be null");
-        setEtag(eTag);
-        if (file != null) {
-            setFile(file);
-            setMimeType(file.getFileMIMEType());
-            setName(file.getFileName());
-            if (file.getLastModified() != null) {
-                setLastModified(file.getLastModified().getTime());
-            }
-            setSize(file.getFileSize());
-        }
+    public DocumentResponse() {}
+
+    /**
+     * Initializes a new {@link DocumentResponse}.
+     *
+     * @param inputStream The document's binary data, or null if no binary are present
+     * @param eTag The document's ETag
+     */
+    public DocumentResponse(InputStream inputStream, String eTag) {
+        this.inputStream = inputStream;
+        this.eTag = eTag;
     }
 
+    /**
+     * Gets the inputStream
+     *
+     * @return The inputStream, or <code>null</code> if the response does not contain any data
+     */
     @Override
-    public boolean isRepetitive() {
-        return false;
+    public InputStream getInputStream() {
+        return inputStream;
     }
 
+    /**
+     * Sets the inputStream
+     *
+     * @param inputStream The inputStream to set
+     */
     @Override
-    public InputStream getData() throws OXException {
-        try {
-            return data.newStream();
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
+    public void setInputStream(@NonNull InputStream inputStream) {
+        this.inputStream = inputStream;
+    }
+
+    /**
+     * Gets the eTag
+     *
+     * @return The eTag
+     */
+    public String getETag() {
+        return eTag;
+    }
+
+    /**
+     * Sets the ETag
+     *
+     * @param eTag The ETag to set
+     * @return this
+     */
+    public void setETag(String eTag) {
+        this.eTag = eTag;
     }
 }

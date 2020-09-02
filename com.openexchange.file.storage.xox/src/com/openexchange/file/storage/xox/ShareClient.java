@@ -75,6 +75,7 @@ import com.openexchange.api.client.common.calls.folders.UpdateCall;
 import com.openexchange.api.client.common.calls.infostore.DeleteCall;
 import com.openexchange.api.client.common.calls.infostore.DetachCall;
 import com.openexchange.api.client.common.calls.infostore.DocumentCall;
+import com.openexchange.api.client.common.calls.infostore.DocumentResponse;
 import com.openexchange.api.client.common.calls.infostore.GetAllCall;
 import com.openexchange.api.client.common.calls.infostore.GetCall;
 import com.openexchange.api.client.common.calls.infostore.InfostoreTuple;
@@ -253,10 +254,24 @@ public class ShareClient {
      * @param folderId The ID of the folder
      * @param id The ID of the item to get the data from
      * @param version The version to get the data for, or null to get the data for the current version
-     * @return The binary data as {@link InputStream}
+     * @param eTag The ETag to add to the request
+     * @return The {@link DocumentResponse} containing either the data as {@link InputStream} if the document was modified related to the given ETag
      * @throws OXException In case of error
      */
-    public InputStream getDocument(String folderId, String id, @Nullable String version) throws OXException {
+    public DocumentResponse getDocument(String folderId, String id, @Nullable String version, String eTag) throws OXException {
+        return ajaxClient.execute(new DocumentCall(folderId, id, version, DocumentCall.DELIVERY_METHOD_DOWNLOAD, eTag));
+    }
+
+    /**
+     * Gets the binary data from a document
+     *
+     * @param folderId The ID of the folder
+     * @param id The ID of the item to get the data from
+     * @param version The version to get the data for, or null to get the data for the current version
+     * @return The {@link DocumentResponse} containing the data as {@link InputStream}
+     * @throws OXException In case of error
+     */
+    public DocumentResponse getDocument(String folderId, String id, @Nullable String version) throws OXException {
         return ajaxClient.execute(new DocumentCall(folderId, id, version, DocumentCall.DELIVERY_METHOD_DOWNLOAD));
     }
 
@@ -286,6 +301,21 @@ public class ShareClient {
      */
     public IDTuple updateDocument(File file, InputStream data, long sequenceNumber, int[] columns) throws OXException {
         String idTuple = ajaxClient.execute(new PostUpdateCall(new DefaultFile(file), data, sequenceNumber, columns));
+        return toIDTuple(idTuple);
+    }
+
+    /**
+     * Updates a document's meta data
+     *
+     * @param id the ID of the item to update
+     * @param file The document to update
+     * @param sequenceNumber The sequence number
+     * @param columns The ID of the file's fields to update
+     * @return The {@link IDTuple} of the updated file
+     * @throws OXException In case of error
+     */
+    public IDTuple updateDocument(String id, File file, long sequenceNumber, int[] columns) throws OXException {
+        String idTuple = ajaxClient.execute(new PutUpdateCall(id, new DefaultFile(file), sequenceNumber, columns));
         return toIDTuple(idTuple);
     }
 
