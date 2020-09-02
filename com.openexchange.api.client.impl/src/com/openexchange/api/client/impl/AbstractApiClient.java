@@ -206,16 +206,26 @@ public abstract class AbstractApiClient implements ApiClient {
             }
             log(request, response);
 
+            final boolean enquedRequest = response.getStatusLine() != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_ACCEPTED;
+
             /*
              * Check response for exceptions, try to re-login if session expired
              */
             OXException oxException = response.getEntity().isRepeatable() ? getNestedOXException(response) : null;
-            if (null != oxException) {
+            if (null != oxException && !enquedRequest) {
                 if (matches(SessionExceptionCodes.SESSION_EXPIRED, oxException)) {
                     reLogin();
                     return execute(request, parser);
                 }
                 throw oxException;
+            }
+
+            /**
+             * Check if the request was enqueued on the remote side, because it takes longer.
+             */
+            if(enquedRequest) {
+                //We poll for the request until it's finished
+                return reDo(parser, response);
             }
 
             /*
@@ -346,6 +356,7 @@ public abstract class AbstractApiClient implements ApiClient {
                     builder.addParameter(SESSION, remoteSessionId);
                 }
             }
+            builder.addParameter("allow_enqueue", "true");
             uri = builder.build();
         } catch (URISyntaxException e) {
             throw ApiClientExceptions.INVALID_TARGET.create(e, loginLink);
@@ -545,6 +556,40 @@ public abstract class AbstractApiClient implements ApiClient {
                 LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(delay));
             }
         }
+    }
+
+    /**
+     * "Re-Do" a request which was added to the job-queue on the remote server.
+     * <p>
+     * This parses the job-id from the given response and polls the job-module until the result is present.
+     *
+     * @param <T> The type of of the response.
+     * @param parser The response parser to use for the actual result
+     * @param response The response containing the job-id
+     * @return The result of the job; i.e. the result of the original request
+     * @throws OXException
+     */
+    private <T> T reDo(HttpResponseParser<T> parser, HttpResponse response) throws OXException {
+        //Parse the job ID from the response body
+        final JSONValue json = JSONUtils.getJSON(response);
+        if (json instanceof JSONObject) {
+            final JSONObject jsonObject = (JSONObject) json;
+            if (jsonObject.hasAndNotNull("data")) {
+                try {
+                    final JSONObject data = jsonObject.getJSONObject("data");
+                    if (data.hasAndNotNull("job")) {
+                        String jobId = data.getString("job");
+
+                        //Try to get the result again by using the parsed job ID
+                        HttpRequestBase getRequest = buildRequest(new com.openexchange.api.client.common.calls.jobs.GetCall<T>(jobId, parser));
+                        return execute(getRequest, parser);
+                    }
+                } catch (JSONException e) {
+                    throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        }
+        throw ApiClientExceptions.UNEXPECTED_ERROR.create("Unexpected JSON response with status code 202.");
     }
 
     /**
