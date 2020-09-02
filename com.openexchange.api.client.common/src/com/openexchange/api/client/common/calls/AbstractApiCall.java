@@ -50,6 +50,7 @@
 package com.openexchange.api.client.common.calls;
 
 import static com.openexchange.api.client.common.ApiClientConstants.ACTION;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.http.HttpEntity;
@@ -108,6 +109,12 @@ public abstract class AbstractApiCall<T> implements ApiCall<T> {
         }
         fillParameters(parameters);
         return parameters;
+    }
+
+    @Override
+    @NonNull
+    public Map<String, String> getHeaders() {
+        return Collections.emptyMap();
     }
 
     protected abstract void fillParameters(Map<String, String> parameters);

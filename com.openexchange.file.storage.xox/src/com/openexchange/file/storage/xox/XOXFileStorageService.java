@@ -80,7 +80,7 @@ import com.openexchange.session.Session;
  * @since v7.10.5
  */
 public class XOXFileStorageService implements AccountAware, SharingFileStorageService, LoginAwareFileStorageServiceExtension {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(XOXFileStorageService.class);
 
     private static final String FILESTORAGE_OXSHARE_CAPABILITY = "filestorage_xox";

@@ -47,63 +47,20 @@
  *
  */
 
-package com.openexchange.file.storage.xox;
+package com.openexchange.ajax.infostore.thirdparty.xox;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Objects;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Document;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
- * {@link XOXDocument} - A document shared from another OX instance
+ * {@link XOXTestSuite} - Test for the XOX (Cross OX sharing) file storage integration
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class XOXDocument extends Document {
-
-    @FunctionalInterface
-    interface InputStreamClosure {
-
-        InputStream newStream() throws OXException, IOException;
-    }
-
-    private final InputStreamClosure data;
-
-    /**
-     * Initializes a new {@link XOXDocument}.
-     *
-     * @param file The meta data as {@link XOXFile}
-     * @param data The data as {@link InputStreamClosure} which allows lazy loading
-     * @param eTag The ETag of the document, or null
-     */
-    public XOXDocument(XOXFile file, InputStreamClosure data, String eTag) {
-        this.data = Objects.requireNonNull(data, "data must not be null");
-        setEtag(eTag);
-        if (file != null) {
-            setFile(file);
-            setMimeType(file.getFileMIMEType());
-            setName(file.getFileName());
-            if (file.getLastModified() != null) {
-                setLastModified(file.getLastModified().getTime());
-            }
-            setSize(file.getFileSize());
-        }
-    }
-
-    @Override
-    public boolean isRepetitive() {
-        return false;
-    }
-
-    @Override
-    public InputStream getData() throws OXException {
-        try {
-            return data.newStream();
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
-    }
-}
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    XOXAnonymousGuestTest.class,
+    XOXNamedGuestTest.class
+})
+public class XOXTestSuite { /** empty **/ }

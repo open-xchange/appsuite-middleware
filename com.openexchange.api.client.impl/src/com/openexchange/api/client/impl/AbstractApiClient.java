@@ -92,6 +92,7 @@ import com.openexchange.api.client.ApiCall;
 import com.openexchange.api.client.ApiClient;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.InputStreamAwareResponse;
 import com.openexchange.api.client.LoginInformation;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.Checks;
@@ -184,6 +185,7 @@ public abstract class AbstractApiClient implements ApiClient {
         return execute(buildRequest(call), call.getParser());
     }
 
+    @SuppressWarnings({ "resource", "unchecked" })
     @Override
     public <T> T execute(HttpRequestBase request, HttpResponseParser<T> parser) throws OXException {
         if (isClosed.get()) {
@@ -211,7 +213,7 @@ public abstract class AbstractApiClient implements ApiClient {
             /*
              * Check response for exceptions, try to re-login if session expired
              */
-            OXException oxException = response.getEntity().isRepeatable() ? getNestedOXException(response) : null;
+            OXException oxException = response.getEntity() != null && response.getEntity().isRepeatable() ? getNestedOXException(response) : null;
             if (null != oxException && !enquedRequest) {
                 if (matches(SessionExceptionCodes.SESSION_EXPIRED, oxException)) {
                     reLogin();
@@ -237,6 +239,15 @@ public abstract class AbstractApiClient implements ApiClient {
                 ret = (T) new ResourceReleasingInputStream(request, response);
                 request = null;
                 response = null;
+            }
+            else if (ret instanceof InputStreamAwareResponse) {
+                //Do not release resources yet if we return an InputStreamResponse
+                final InputStreamAwareResponse inputStreamResponse = (InputStreamAwareResponse) ret;
+                if(inputStreamResponse.getInputStream() != null) {
+                    inputStreamResponse.setInputStream(new ResourceReleasingInputStream(request, response, inputStreamResponse.getInputStream()));
+                    request = null;
+                    response = null;
+                }
             }
             return ret;
         } catch (IOException e) {
@@ -400,6 +411,13 @@ public abstract class AbstractApiClient implements ApiClient {
             }
         }
 
+        /*
+         * Set HTTP Header
+         */
+        for (Entry<String, String> entry : call.getHeaders().entrySet()) {
+            request.addHeader(entry.getKey(), entry.getValue());
+        }
+
         return request;
     }
 
@@ -440,7 +458,7 @@ public abstract class AbstractApiClient implements ApiClient {
      */
     private boolean canBuffer(HttpResponse response) {
         ContentType contentType = null;
-        if (response.getEntity().getContentType() != null) {
+        if (response.getEntity() != null && response.getEntity().getContentType() != null) {
             contentType = ContentType.parse(response.getEntity().getContentType().getValue());
         }
         if (contentType != null) {

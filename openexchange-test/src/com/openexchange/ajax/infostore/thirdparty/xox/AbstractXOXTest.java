@@ -47,63 +47,75 @@
  *
  */
 
-package com.openexchange.file.storage.xox;
+package com.openexchange.ajax.infostore.thirdparty.xox;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Objects;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Document;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.openexchange.ajax.infostore.thirdparty.AbstractFileStorageAccountTest;
+import com.openexchange.testing.httpclient.models.FileAccountData;
+import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 
 /**
- * {@link XOXDocument} - A document shared from another OX instance
+ * {@link AbstractXOXTest}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class XOXDocument extends Document {
+public abstract class AbstractXOXTest extends AbstractFileStorageAccountTest {
 
-    @FunctionalInterface
-    interface InputStreamClosure {
 
-        InputStream newStream() throws OXException, IOException;
-    }
+    protected static final String XOX_FILE_STORAGE_SERVICE = "xox8";
+    protected static final String XOX_FILE_STORAGE_SERVICE_DISPLAY_NAME = "Cross OX test storage";
 
-    private final InputStreamClosure data;
+    protected ShareManagementApi shareApi;
 
-    /**
-     * Initializes a new {@link XOXDocument}.
-     *
-     * @param file The meta data as {@link XOXFile}
-     * @param data The data as {@link InputStreamClosure} which allows lazy loading
-     * @param eTag The ETag of the document, or null
-     */
-    public XOXDocument(XOXFile file, InputStreamClosure data, String eTag) {
-        this.data = Objects.requireNonNull(data, "data must not be null");
-        setEtag(eTag);
-        if (file != null) {
-            setFile(file);
-            setMimeType(file.getFileMIMEType());
-            setName(file.getFileName());
-            if (file.getLastModified() != null) {
-                setLastModified(file.getLastModified().getTime());
-            }
-            setSize(file.getFileSize());
+    public static class XOXFileAccountConfiguration {
+
+        private final String shareLink;
+        private final String password;
+
+        /**
+         * Initializes a new {@link XOXFileAccountConfiguration}.
+         *
+         * @param shareLink The share link to use
+         * @param password The, optional, password
+         */
+        public XOXFileAccountConfiguration(String shareLink, String password) {
+            super();
+            this.shareLink = shareLink;
+            this.password = password;
+        }
+
+        /**
+         * Gets the shareLink
+         *
+         * @return The shareLink
+         */
+        @JsonProperty("url")
+        public String getShareLink() {
+            return shareLink;
+        }
+
+        /**
+         * Gets the optional password
+         *
+         * @return The optional password
+         */
+        public String getPassword() {
+            return password;
         }
     }
 
-    @Override
-    public boolean isRepetitive() {
-        return false;
+    protected String toXOXId(FileAccountData account, String folderId) {
+        return String.format("%s://%s/%s", XOX_FILE_STORAGE_SERVICE, account.getId(), folderId);
+    }
+
+    protected String toXOXId(FileAccountData account, String folderId, String fileId) {
+        return String.format("%s://%s/%s/%s", XOX_FILE_STORAGE_SERVICE, account.getId(), folderId, fileId.replace("/", "=2F"));
     }
 
     @Override
-    public InputStream getData() throws OXException {
-        try {
-            return data.newStream();
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
+    public void setUp() throws Exception {
+        super.setUp();
+        this.shareApi = new ShareManagementApi(getApiClient());
     }
 }

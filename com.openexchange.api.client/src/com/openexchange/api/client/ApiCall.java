@@ -121,6 +121,14 @@ public interface ApiCall<T> {
     Map<String, String> getPathParameters();
 
     /**
+     * Get the Headers to add to the outgoing request
+     *
+     * @return A map with headers, can be empty
+     */
+    @NonNull
+    Map<String, String> getHeaders();
+
+    /**
      * Get the body to add.
      * <p>
      * Will only be called if the method allows bodies to be sent

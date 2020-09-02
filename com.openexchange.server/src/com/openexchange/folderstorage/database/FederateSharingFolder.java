@@ -117,13 +117,18 @@ public class FederateSharingFolder {
                 if (service instanceof AccountAware && service instanceof SharingFileStorageService) {
                     List<FileStorageAccount> accounts = ((AccountAware) service).getAccounts(session);
                     for (FileStorageAccount account : accounts) {
-                        FileStorageAccountAccess access = account.getFileStorageService().getAccountAccess(account.getId(), session);
-                        access.connect();
-                        FileStorageFolderAccess folderAccess = access.getFolderAccess();
-                        FileStorageFolder[] sharedFolders = folderAccess.getSubfolders(String.valueOf(parentFolder), true);
-                        for (FileStorageFolder sharedFolder : sharedFolders) {
-                            String folderId = IDMangler.mangle(service.getId(), account.getId(), sharedFolder.getId());
-                            ret.add(new FileStorageId(folderId, ordinal++, sharedFolder.getName()));
+                        try {
+                            FileStorageAccountAccess access = account.getFileStorageService().getAccountAccess(account.getId(), session);
+                            access.connect();
+                            FileStorageFolderAccess folderAccess = access.getFolderAccess();
+                            FileStorageFolder[] sharedFolders = folderAccess.getSubfolders(String.valueOf(parentFolder), true);
+                            for (FileStorageFolder sharedFolder : sharedFolders) {
+                                String folderId = IDMangler.mangle(service.getId(), account.getId(), sharedFolder.getId());
+                                ret.add(new FileStorageId(folderId, ordinal++, sharedFolder.getName()));
+                            }
+                        }
+                        catch(Exception e) {
+                            LOG.error("Unable to list federate sharing account " + account.getId(), e);
                         }
                     }
                 }

@@ -47,63 +47,34 @@
  *
  */
 
-package com.openexchange.file.storage.xox;
+package com.openexchange.api.client;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Document;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.annotation.Nullable;
 
 /**
- * {@link XOXDocument} - A document shared from another OX instance
+ * {@link InputStreamAwareResponse} - Represents an API response object which encapsulates an {@link InputStream}.
+ * <p>
+ * Implementing this interface is useful if an response object encapsulates an {@link InpuStream} whose closure is controlled by the caller.
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class XOXDocument extends Document {
-
-    @FunctionalInterface
-    interface InputStreamClosure {
-
-        InputStream newStream() throws OXException, IOException;
-    }
-
-    private final InputStreamClosure data;
+public interface InputStreamAwareResponse {
 
     /**
-     * Initializes a new {@link XOXDocument}.
+     * Gets the {@link InputStream} of the response object
      *
-     * @param file The meta data as {@link XOXFile}
-     * @param data The data as {@link InputStreamClosure} which allows lazy loading
-     * @param eTag The ETag of the document, or null
+     * @return The {@link InputStream} of the response object
      */
-    public XOXDocument(XOXFile file, InputStreamClosure data, String eTag) {
-        this.data = Objects.requireNonNull(data, "data must not be null");
-        setEtag(eTag);
-        if (file != null) {
-            setFile(file);
-            setMimeType(file.getFileMIMEType());
-            setName(file.getFileName());
-            if (file.getLastModified() != null) {
-                setLastModified(file.getLastModified().getTime());
-            }
-            setSize(file.getFileSize());
-        }
-    }
+    @Nullable
+    InputStream getInputStream();
 
-    @Override
-    public boolean isRepetitive() {
-        return false;
-    }
-
-    @Override
-    public InputStream getData() throws OXException {
-        try {
-            return data.newStream();
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
-    }
+    /**
+     * Sets the {@link InputStream} of the response object
+     *
+     * @param stream The {@link InputStream} of the response object
+     */
+    void setInputStream(@NonNull InputStream stream);
 }
