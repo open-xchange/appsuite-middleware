@@ -51,7 +51,6 @@ package com.openexchange.ajax.chronos;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.rmi.server.UID;
 import java.util.ArrayList;
@@ -386,21 +385,6 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         String body = "{timezone: \"" + tz.getID() + "\"}";
         CommonResponse updateJSlob = defaultUserApi.getJslob().updateJSlob(defaultUserApi.getSession(), "io.ox/core", body, null);
         assertNull(updateJSlob.getErrorDesc(), updateJSlob.getError());
-    }
-
-    /**
-     * Checks if a response doesn't contain any errors
-     *
-     * @param error The error element of the response
-     * @param errorDesc The error description element of the response
-     * @param data The data element of the response
-     * @return The data
-     */
-    @Override
-    protected <T> T checkResponse(String error, String errorDesc, T data) {
-        assertNull(errorDesc, error);
-        assertNotNull(data);
-        return data;
     }
 
     /**

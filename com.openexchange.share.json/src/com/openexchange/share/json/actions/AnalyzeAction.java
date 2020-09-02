@@ -49,15 +49,14 @@
 
 package com.openexchange.share.json.actions;
 
-import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.federated.FederatedShareLinkService;
-import com.openexchange.share.federated.ShareLinkAnalyzeResult;
+import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
+import com.openexchange.share.subscription.ShareSubscriptionRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class AnalyzeAction extends AbstractFederatedShareAction {
+public class AnalyzeAction extends AbstractShareSubscriptionAction {
 
     /**
      * Initializes a new {@link AnalyzeAction}.
@@ -80,17 +79,16 @@ public class AnalyzeAction extends AbstractFederatedShareAction {
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, String shareLink) throws OXException {
-        FederatedShareLinkService service = services.getServiceSafe(FederatedShareLinkService.class);
-        ShareLinkAnalyzeResult result = service.analyzeLink(session, shareLink);
-        JSONObject jsonObject = new JSONObject(2);
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, JSONObject json, String shareLink) throws OXException {
+        ShareSubscriptionRegistry service = services.getServiceSafe(ShareSubscriptionRegistry.class);
+        ShareLinkAnalyzeResult result = service.analyze(session, shareLink);
+        JSONObject jsonObject = new JSONObject(5);
         try {
             jsonObject.put("state", result.getState());
-            jsonObject.put("serviceId", result.getServiceId());
+            return createResponse(result.getInfos(), jsonObject);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
-        return new AJAXRequestResult(jsonObject, new Date(System.currentTimeMillis()));
     }
 
 }

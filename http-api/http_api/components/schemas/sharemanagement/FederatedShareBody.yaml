@@ -1,5 +1,0 @@
-type: object
-properties:
-  password:
-    type: string
-    description: The password to the share

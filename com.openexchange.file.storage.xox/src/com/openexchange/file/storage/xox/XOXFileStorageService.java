@@ -54,6 +54,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -78,6 +80,8 @@ import com.openexchange.session.Session;
  * @since v7.10.5
  */
 public class XOXFileStorageService implements AccountAware, SharingFileStorageService, LoginAwareFileStorageServiceExtension {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(XOXFileStorageService.class);
 
     private static final String FILESTORAGE_OXSHARE_CAPABILITY = "filestorage_xox";
 
@@ -148,11 +152,10 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
      * Checks if the given session has the appropriate capability for using this file storage
      *
      * @param session The session to check
-     * @throws OXException in case the session does not have the appropriatead capability to use this file storage
+     * @throws OXException in case the session does not have the appropriated capability to use this file storage
      */
     private void assertCapability(Session session) throws OXException {
-        CapabilityService capabilityService = services.getServiceSafe(CapabilityService.class);
-        if (!capabilityService.getCapabilities(session).contains(FILESTORAGE_OXSHARE_CAPABILITY)) {
+        if (!hasCapability(session)) {
             throw XOXFileStorageExceptionCodes.MISSING_CAPABILITY.create(getId());
         }
     }
@@ -180,6 +183,17 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
     @Override
     public FileStorageAccountManager getAccountManager() throws OXException {
         return getAccountManager0();
+    }
+
+    @Override
+    public boolean hasCapability(Session session) {
+        try {
+            CapabilityService capabilityService = services.getServiceSafe(CapabilityService.class);
+            return capabilityService.getCapabilities(session).contains(FILESTORAGE_OXSHARE_CAPABILITY);
+        } catch (OXException e) {
+            LOGGER.error("Unable to get capability", e);
+        }
+        return false;
     }
 
     @Override

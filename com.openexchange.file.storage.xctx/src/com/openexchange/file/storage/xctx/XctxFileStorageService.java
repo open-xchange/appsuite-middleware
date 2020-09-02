@@ -52,6 +52,11 @@ package com.openexchange.file.storage.xctx;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
@@ -67,6 +72,7 @@ import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.ShareExceptionCodes;
 
 /**
  * {@link XctxFileStorageService}
@@ -75,6 +81,8 @@ import com.openexchange.session.Session;
  * @since 7.10.5
  */
 public class XctxFileStorageService implements FileStorageService, AccountAware, SharingFileStorageService, LoginAwareFileStorageServiceExtension {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(XctxFileStorageService.class);
 
     private final ServiceLookup services;
     private final XctxSessionCache sessionCache;
@@ -104,6 +112,7 @@ public class XctxFileStorageService implements FileStorageService, AccountAware,
         return getAccountManager().getAccounts(session);
     }
 
+    @NonNull
     @Override
     public String getId() {
         return "xctx" + Module.INFOSTORE.getFolderConstant();
@@ -128,21 +137,46 @@ public class XctxFileStorageService implements FileStorageService, AccountAware,
     }
 
     @Override
+    public boolean hasCapability(Session session) {
+        try {
+            CapabilitySet capabilities = services.getServiceSafe(CapabilityService.class).getCapabilities(session);
+            return capabilities.contains("filestorage_xctx");
+        } catch (OXException e) {
+            LOGGER.error("Unable to get capability", e);
+        }
+        return false;
+    }
+
+    @Override
     public FileStorageAccountManager getAccountManager() throws OXException {
         return services.getServiceSafe(FileStorageAccountManagerLookupService.class).getAccountManagerFor(getId());
     }
 
     @Override
     public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
+        assertCapability(session);
         FileStorageAccount account = getAccountManager().getAccount(accountId, session);
         return new XctxAccountAccess(services, account, session, sessionCache);
     }
 
     @Override
     public void testConnection(FileStorageAccount account, Session session) throws OXException {
+        assertCapability(session);
         XctxAccountAccess accountAccess = new XctxAccountAccess(services, account, session, sessionCache);
         accountAccess.connect();
         accountAccess.close();
+    }
+
+    /**
+     * Checks if the given session has the appropriate capability for using this file storage
+     *
+     * @param session The session to check
+     * @throws OXException in case the session does not have the appropriated capability to use this file storage
+     */
+    private void assertCapability(Session session) throws OXException {
+        if (!hasCapability(session)) {
+            throw ShareExceptionCodes.NO_SUBSCRIBE_SHARE_PERMISSION.create();
+        }
     }
 
 }

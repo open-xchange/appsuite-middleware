@@ -1,5 +1,5 @@
 /share/management?action=analyze:
-  get:
+  put:
     operationId: analyzeShareLink
     tags:
       - Share/Management
@@ -7,12 +7,6 @@
     summary: Analyzes a share link to gain knowlege about the operations that can be perfomed with the link.
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
-      - in: query
-        name: link
-        description: The share link to analyze
-        required: true
-        schema:
-          type: string
     responses:
       '200':
         description: >
@@ -23,4 +17,12 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ShareLinkAnalyzeResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MountShareBody'
+      description: >-
+        A JSON object containing the data for the update
+      required: true
 

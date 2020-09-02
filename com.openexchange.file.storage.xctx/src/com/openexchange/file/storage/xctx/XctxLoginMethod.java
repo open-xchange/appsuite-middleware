@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.xctx;
 
 import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -117,12 +118,14 @@ public class XctxLoginMethod implements LoginMethodClosure {
             case GUEST:
                 return new XctxAuthenticated(guestUser, context);
             case ANONYMOUS_PASSWORD:
-                if (Strings.isNotEmpty(password) && password.equals(services.getServiceSafe(PasswordMechRegistry.class).get(ShareConstants.PASSWORD_MECH_ID).decode(guestUser.getUserPassword(), guestUser.getSalt()))) {
+                checkPasswordIsSet();
+                if (password.equals(services.getServiceSafe(PasswordMechRegistry.class).get(ShareConstants.PASSWORD_MECH_ID).decode(guestUser.getUserPassword(), guestUser.getSalt()))) {
                     return new XctxAuthenticated(guestUser, context);
                 }
                 return null;
             case GUEST_PASSWORD:
-                if (Strings.isNotEmpty(password) && services.getServiceSafe(GuestService.class).authenticate(guestUser, context.getContextId(), password)) {
+                checkPasswordIsSet();
+                if (services.getServiceSafe(GuestService.class).authenticate(guestUser, context.getContextId(), password)) {
                     return new XctxAuthenticated(guestUser, context);
                 }
                 return null;
@@ -131,4 +134,9 @@ public class XctxLoginMethod implements LoginMethodClosure {
         }
     }
 
+    private void checkPasswordIsSet() throws OXException {
+        if (Strings.isEmpty(password)) {
+            throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+        }
+    }
 }

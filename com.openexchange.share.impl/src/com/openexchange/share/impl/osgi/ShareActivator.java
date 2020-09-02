@@ -85,14 +85,12 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.core.ModuleAdjuster;
 import com.openexchange.share.core.ModuleHandler;
-import com.openexchange.share.federated.FederatedShareLinkService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.SharePasswordMech;
 import com.openexchange.share.impl.ShareRMIServiceImpl;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
-import com.openexchange.share.impl.federated.FederatedShareLinkServiceImpl;
 import com.openexchange.share.impl.groupware.FileStorageHandler;
 import com.openexchange.share.impl.groupware.MailModuleAdjuster;
 import com.openexchange.share.impl.groupware.ModuleExtensionRegistry;
@@ -100,6 +98,12 @@ import com.openexchange.share.impl.groupware.ModuleSupportImpl;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.impl.quota.InviteGuestsQuotaProvider;
 import com.openexchange.share.impl.quota.ShareLinksQuotaProvider;
+import com.openexchange.share.impl.subscription.ContextInternalSubscriptionProvider;
+import com.openexchange.share.impl.subscription.ShareSubscriptionRegistryImpl;
+import com.openexchange.share.impl.xctx.XctxSessionCache;
+import com.openexchange.share.subscription.ShareSubscriptionProvider;
+import com.openexchange.share.subscription.ShareSubscriptionRegistry;
+import com.openexchange.share.subscription.XctxSessionManager;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -197,9 +201,14 @@ public class ShareActivator extends HousekeepingActivator {
             registerService(Remote.class, new ShareRMIServiceImpl(shareService), serviceProperties);
         }
 
-        FederatedShareLinkServiceImpl linkService = new FederatedShareLinkServiceImpl(context);
+        ShareSubscriptionRegistryImpl linkService = new ShareSubscriptionRegistryImpl(context);
         rememberTracker(linkService);
-        registerService(FederatedShareLinkService.class, linkService);
+        registerService(ShareSubscriptionRegistry.class, linkService);
+        ShareSubscriptionRegistryImpl shareSubscriptionRegistry = new ShareSubscriptionRegistryImpl(context);
+        rememberTracker(shareSubscriptionRegistry);
+        registerService(ShareSubscriptionRegistry.class, shareSubscriptionRegistry);
+        registerService(ShareSubscriptionProvider.class , new ContextInternalSubscriptionProvider(this));
+        registerService(XctxSessionManager.class, new XctxSessionCache(this));
 
         trackService(ModuleSupport.class);
         trackService(IDBasedFileAccessFactory.class);

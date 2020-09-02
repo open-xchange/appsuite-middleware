@@ -249,7 +249,7 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
      * @param error The error element of the response
      * @param errorDesc The error description element of the response
      */
-    protected void checkResponse(CommonResponse response) {
+    protected static void checkResponse(CommonResponse response) {
         assertNull(response.getError(), response.getErrorDesc());
     }
 
@@ -259,7 +259,7 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
      * @param error The error element of the response
      * @param errorDesc The error description element of the response
      */
-    protected void checkResponse(String error, String errorDesc) {
+    protected static void checkResponse(String error, String errorDesc) {
         assertNull(errorDesc, error);
     }
 
@@ -271,7 +271,7 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
      * @param data The data element of the response
      * @return The data
      */
-    protected <T> T checkResponse(String error, String errorDesc, T data) {
+    protected static <T> T checkResponse(String error, String errorDesc, T data) {
         assertNull(errorDesc, error);
         assertNotNull(data);
         return data;

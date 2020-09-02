@@ -49,8 +49,6 @@
 
 package com.openexchange.file.storage.xctx;
 
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -123,9 +121,6 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
 
     @Override
     public void connect() throws OXException {
-        if (false == hasCapability(session)) {
-            throw ShareExceptionCodes.NO_SUBSCRIBE_SHARE_PERMISSION.create();
-        }
         String shareUrl = (String) account.getConfiguration().get("url");
         if (Strings.isEmpty(shareUrl)) {
             throw FileStorageExceptionCodes.MISSING_CONFIG.create("url", account.getId());
@@ -187,11 +182,6 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
     @Override
     public FileStorageService getService() {
         return account.getFileStorageService();
-    }
-
-    private boolean hasCapability(Session session) throws OXException {
-        CapabilitySet capabilities = services.getServiceSafe(CapabilityService.class).getCapabilities(session);
-        return capabilities.contains("filestorage_xctx");
     }
 
 }

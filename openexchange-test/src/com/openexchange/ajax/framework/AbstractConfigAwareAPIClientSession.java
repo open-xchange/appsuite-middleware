@@ -52,6 +52,7 @@ package com.openexchange.ajax.framework;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +77,7 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
      */
     protected AbstractConfigAwareAPIClientSession() {}
 
-    JSONObject oldData;
+    Map<AJAXClient, JSONObject> oldData = new HashMap<>(3, 0.9f);
 
     /**
      * Changes the configurations given by {@link #getNeededConfigurations()}.
@@ -84,45 +85,64 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
      * @throws Exception if changing the configuration fails
      */
     protected void setUpConfiguration() throws Exception {
+        setUpConfiguration(getClient());
+    }
+
+    /**
+     * Changes the configurations given by {@link #getNeededConfigurations()}.
+     *
+     * @throws Exception if changing the configuration fails
+     */
+    protected void setUpConfiguration(AJAXClient client) throws Exception {
         Map<String, String> map = getNeededConfigurations();
         if (!map.isEmpty()) {
             // change configuration to new values
             ChangePropertiesRequest req = new ChangePropertiesRequest(map, getScope(), getReloadables());
-            ChangePropertiesResponse response = getClient().execute(req);
-            if (oldData == null) {
-                oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
+            ChangePropertiesResponse response = client.execute(req);
+            oldData.put(client, ResponseWriter.getJSON(response.getResponse()).getJSONObject("data"));
+        }
+    }
+
+    /**
+     * Roll back the configuration based in the old data
+     *
+     * @param client The client to use
+     * @param oldData The data to restore
+     * @throws Exception In case of error
+     */
+    protected void rollbackConfiguration(AJAXClient client, JSONObject oldData) throws Exception {
+        Map<String, Object> map = oldData.asMap();
+        if (map.isEmpty()) {
+            return;
+        }
+        Map<String, String> newMap = new HashMap<>();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            try {
+                Object value = entry.getValue();
+                if (value == JSONObject.NULL) {
+                    value = null;
+                }
+                newMap.put(entry.getKey(), (String) value);
+            } catch (ClassCastException cce) {
+                //should never be the case
+                LOG.error("Cannot revert the old values", cce);
+                continue;
             }
         }
+        ChangePropertiesRequest req = new ChangePropertiesRequest(newMap, getScope(), getReloadables());
+        ChangePropertiesResponse response = client.execute(req);
+        LOG.info("Restored capabilities, etc. back to:\n{}", ResponseWriter.getJSON(response.getResponse()));
     }
 
     @Override
     public void tearDown() throws Exception {
         try {
-            if (oldData == null) {
+            if (oldData.isEmpty()) {
                 return;
             }
-            // change back to old value if present
-            Map<String, Object> map = oldData.asMap();
-            Map<String, String> newMap = new HashMap<>();
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                try {
-                    Object value = entry.getValue();
-                    if (value == JSONObject.NULL) {
-                        value = null;
-                    }
-                    newMap.put(entry.getKey(), (String) value);
-                } catch (ClassCastException cce) {
-                    //should never be the case
-                    LOG.error("Cannot revert the old values", cce);
-                    return;
-                }
+            for (Entry<AJAXClient, JSONObject> entry : oldData.entrySet()) {
+                rollbackConfiguration(entry.getKey(), entry.getValue());
             }
-            if (map.isEmpty()) {
-                return;
-            }
-            ChangePropertiesRequest req = new ChangePropertiesRequest(newMap, getScope(), getReloadables());
-            ChangePropertiesResponse response = getClient().execute(req);
-            oldData = ResponseWriter.getJSON(response.getResponse());
         } finally {
             super.tearDown();
         }
@@ -161,7 +181,7 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
     protected String getReloadables() {
         return null;
     }
-    
+
     /**
      * Gets the default user id
      *

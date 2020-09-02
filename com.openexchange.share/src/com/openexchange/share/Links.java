@@ -63,6 +63,16 @@ import com.openexchange.java.Strings;
 public class Links {
 
     /**
+     * The <code>path</code> to set on an internal link
+     */
+    public static final String PATH = "/appsuite/ui";
+
+    /**
+     * The <code>app</code> segment to add to the fragment of an internal link
+     */
+    public static final String FRAGMENT_APP = "!&app=io.ox/";
+
+    /**
      * Initializes a new {@link Links}.
      */
     private Links() {
@@ -80,12 +90,12 @@ public class Links {
      */
     public static String generateInternalLink(String module, String folder, String item, HostData hostData) {
         try {
-            StringBuilder fragment = new StringBuilder(64).append("!&app=io.ox/").append(module).append("&folder=").append(folder);
+            StringBuilder fragment = new StringBuilder(64).append(FRAGMENT_APP).append(module).append("&folder=").append(folder);
             if (Strings.isNotEmpty(item)) {
                 fragment.append("&id=").append(item);
             }
 
-            return new URI(hostData.isSecure() ? "https" : "http", null, hostData.getHost(), -1, "/appsuite/ui", null, fragment.toString()).toString();
+            return new URI(hostData.isSecure() ? "https" : "http", null, hostData.getHost(), -1, PATH, null, fragment.toString()).toString();
         } catch (URISyntaxException e) {
             throw new IllegalStateException("Building URI failed", e);
         }

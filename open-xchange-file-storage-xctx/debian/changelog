@@ -1,0 +1,5 @@
+open-xchange-file-storage-xctx (7.10.4-7) stable; urgency=medium
+
+  * Develop candidate for 7.10.5 release
+
+ -- Daniel Becker <daniel.becker@open-xchange.com>  Wed, 05 Aug 2020 11:18:07 +0000

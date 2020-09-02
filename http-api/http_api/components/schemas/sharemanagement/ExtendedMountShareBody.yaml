@@ -1,0 +1,11 @@
+type: object
+properties:
+  link:
+    type: string
+    description: The link to a share
+  password:
+    type: string
+    description: The password to the share
+  name:
+    type: string
+    description: The display name of the subsription
