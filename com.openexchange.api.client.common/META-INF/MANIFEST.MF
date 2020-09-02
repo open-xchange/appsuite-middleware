@@ -53,6 +53,7 @@ Export-Package: com.openexchange.api.client.common,
  com.openexchange.api.client.common.calls.folders,
  com.openexchange.api.client.common.calls.infostore,
  com.openexchange.api.client.common.calls.infostore.mapping,
+ com.openexchange.api.client.common.calls.jobs,
  com.openexchange.api.client.common.calls.login,
  com.openexchange.api.client.common.calls.quota,
  com.openexchange.api.client.common.calls.system
