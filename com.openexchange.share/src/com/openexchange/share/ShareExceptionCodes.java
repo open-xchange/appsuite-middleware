@@ -154,6 +154,9 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
     /** The set permissions for the link are invalid. */
     INVALID_LINK_PERMISSION(INVALID_LINK_PERMISSIONS_MSG, INVALID_LINK_PERMISSIONS_MSG, Category.CATEGORY_USER_INPUT, 24),
 
+    /** You don't have sufficient permissions to subscribe to a share. **/
+    NO_SUBSCRIBE_SHARE_PERMISSION(ShareExceptionMessages.NO_SUBSCRIBE_SHARE_PERMISSION_MSG, ShareExceptionMessages.NO_SUBSCRIBE_SHARE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 25),
+
     ;
 
     private static final String PREFIX = "SHR";

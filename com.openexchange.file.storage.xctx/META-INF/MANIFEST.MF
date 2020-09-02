@@ -6,7 +6,7 @@ Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.file.storage.xctx
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.google.common.cache;version="28.2.0",
+Import-Package: com.google.common.cache,
  com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.login,
@@ -46,7 +46,7 @@ Import-Package: com.google.common.cache;version="28.2.0",
  com.openexchange.share,
  com.openexchange.share.core,
  com.openexchange.share.core.tools,
- com.openexchange.share.federated,
+ com.openexchange.share.subscription,
  com.openexchange.share.recipient,
  com.openexchange.tools.arrays,
  com.openexchange.tools.iterator,
