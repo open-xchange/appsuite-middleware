@@ -50,19 +50,9 @@
 package com.openexchange.file.storage.owncloud;
 
 import static com.openexchange.java.Autoboxing.B;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicAuthCache;
-import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.NonNull;
@@ -170,42 +160,42 @@ public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
         return Optional.ofNullable(restClient);
     }
 
-    @SuppressWarnings("null")
     @Override
     public void connect() throws OXException {
         super.connect();
+        connectRestClient();
+    }
+
+    /**
+     * Connects the rest client
+     *
+     * @throws OXException
+     */
+    @SuppressWarnings("null")
+    protected void connectRestClient() throws OXException {
         Map<String, Object> configuration = account.getConfiguration();
-        String login = (String) configuration.get("login");
-        String password = (String) configuration.get("password");
-        WebDAVEndpointConfig config = new WebDAVEndpointConfig.Builder(this.session, this.getWebDAVFileStorageService(), (String) configuration.get(WebDAVFileStorageConstants.WEBDAV_URL)).build();
+        String configUrl = (String) configuration.get(WebDAVFileStorageConstants.WEBDAV_URL);
+        if (Strings.isEmpty(configUrl)) {
+            throw FileStorageExceptionCodes.INVALID_URL.create("not provided", "empty");
+        }
+        WebDAVEndpointConfig config = new WebDAVEndpointConfig.Builder(this.session, this.getWebDAVFileStorageService(), configUrl).build();
         String host = config.getUrl();
 
-        if (Strings.isEmpty(login) || Strings.isEmpty(password) || Strings.isEmpty(host)) {
+        if (Strings.isEmpty(host)) {
             throw FileStorageExceptionCodes.MISSING_CONFIG.create(getService().getId(), getAccountId());
         }
         if (host.contains(REMOTE_PHP) == false) {
             throw WebdavExceptionCodes.INVALID_CONFIG.create("Host url is invalid. Must contain '/remote.php'.");
         }
         String baseUri = host.substring(0, host.indexOf(REMOTE_PHP));
-        try {
-            URI uri = new URI(host);
-            HttpHost targetHost = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
-            CredentialsProvider credsProvider = new BasicCredentialsProvider();
-            credsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-
-            AuthCache authCache = new BasicAuthCache();
-            authCache.put(targetHost, new BasicScheme());
-
-            // Add AuthCache to the execution context
-            HttpClientContext context = HttpClientContext.create();
-            context.setCredentialsProvider(credsProvider);
-            context.setAuthCache(authCache);
-            HttpContextUtils.addCookieStore(context, getSession(), getAccountId());
-            ManagedHttpClient client = initDefaultClient();
-            restClient = new OwnCloudRestClient(client, baseUri, context);
-        } catch (URISyntaxException e) {
-            throw FileStorageExceptionCodes.INVALID_URL.create(host, e.getMessage(), e);
+        if (Strings.isEmpty(baseUri)) {
+            throw WebdavExceptionCodes.INVALID_CONFIG.create("Host url is invalid. Missing base uri.");
         }
+
+        HttpContext context = getContextByAuthScheme(configuration, host);
+        HttpContextUtils.addCookieStore(context, getSession(), getAccountId());
+        ManagedHttpClient client = initDefaultClient();
+        restClient = new OwnCloudRestClient(client, baseUri, context);
     }
 
     @Override
@@ -213,7 +203,8 @@ public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
         return super.isConnected() && restClient != null;
     }
 
-    protected ManagedHttpClient initDefaultClient() throws OXException {
+    @SuppressWarnings("null")
+    protected @NonNull ManagedHttpClient initDefaultClient() throws OXException {
         return Services.getServiceLookup().getServiceSafe(HttpClientService.class).getHttpClient(optHttpClientId().orElse(HTTP_CLIENT_ID));
     }
 

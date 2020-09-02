@@ -72,13 +72,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -90,9 +85,6 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicAuthCache;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.protocol.HttpContext;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavServletResponse;
@@ -154,7 +146,7 @@ public class WebDAVClientImpl implements WebDAVClient {
      * @param context The context to pass when executing an HTTP request
      * @param baseUrl The URL of the WebDAV host to connect to
      */
-    private WebDAVClientImpl(HttpClient httpClient, HttpContext context, URI baseUrl) {
+    public WebDAVClientImpl(HttpClient httpClient, HttpContext context, URI baseUrl) {
         super();
         this.httpClient = httpClient;
         this.context = context;
@@ -178,14 +170,13 @@ public class WebDAVClientImpl implements WebDAVClient {
      * @param session The users session
      * @param accountId The account id
      * @param baseUrl The URL of the WebDAV host to connect to
-     * @param login The user name to use for authentication
-     * @param password The password to use for authentication
      * @param services The service look-up providing OSGi services
      * @param optClientId The optional http client id to use
+     * @param context The {@link HttpClientContext} to use
      * @throws OXException If initialization fails
      */
-    public WebDAVClientImpl(Session session, String accountId, URI baseUrl, String login, String password, ServiceLookup services, Optional<String> optClientId) throws IllegalStateException, OXException {
-        this(initDefaultClient(services, optClientId), initDefaultContext(session, accountId, baseUrl, login, password), baseUrl);
+    public WebDAVClientImpl(Session session, String accountId, URI baseUrl, ServiceLookup services, Optional<String> optClientId, HttpContext context) throws IllegalStateException, OXException {
+        this(initDefaultClient(services, optClientId), addCookieStore(session, accountId, context), baseUrl);
     }
 
     private HttpResponse execute(HttpUriRequest request) throws IOException, ClientProtocolException {
@@ -541,42 +532,16 @@ public class WebDAVClientImpl implements WebDAVClient {
     }
 
     /**
-     * Initializes the default {@link HttpContext}
+     * Adds the cookie store to the given {@link HttpContext}
      *
      * @param session The users session
      * @param accountId The account id
-     * @param baseUrl The base url
-     * @param login The login name
-     * @param password The login password
+     * @param context The {@link HttpContext}
      * @return The {@link HttpContext}
      */
-    private static HttpContext initDefaultContext(Session session, String accountId, URI baseUrl, String login, String password) {
-        HttpHost targetHost = new HttpHost(baseUrl.getHost(), determinePort(baseUrl), baseUrl.getScheme());
-        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        credsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-
-        AuthCache authCache = new BasicAuthCache();
-        authCache.put(targetHost, new BasicScheme());
-
-        // Add AuthCache to the execution context
-        HttpClientContext context = HttpClientContext.create();
-        context.setCredentialsProvider(credsProvider);
-        context.setAuthCache(authCache);
+    private static HttpContext addCookieStore(Session session, String accountId, HttpContext context) {
         HttpContextUtils.addCookieStore(context, session, accountId);
         return context;
     }
 
-    /**
-     * Determines the port
-     *
-     * @param baseUrl The url
-     * @return The port
-     */
-    private static int determinePort(URI baseUrl) {
-        int port = baseUrl.getPort();
-        if (port > 0) {
-            return port;
-        }
-        return "https".equals(baseUrl.getScheme()) ? 443 : 80;
-    }
 }

@@ -150,6 +150,7 @@ public class ContactEventHandler implements EventHandler {
                 default:
                     LOG.info("Skipping event handling for unexpected topic \"{}\".", topic);
                     break;
+                // TODO: React to folder delete and update events as well, since they can cause contacts to be removed or to be inaccessible.
             }
         } catch (Exception e) {
             LOG.warn("Error handling event \"{}\": {}", topic, e.getMessage(), e);

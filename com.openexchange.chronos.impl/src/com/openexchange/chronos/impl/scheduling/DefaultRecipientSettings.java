@@ -90,6 +90,7 @@ public class DefaultRecipientSettings implements RecipientSettings {
     private final ServiceLookup services;
     private final int contextId;
     private final CalendarUser recipient;
+    private final CalendarUserType recipientType;
     private final Locale locale;
     private final TimeZone timeZone;
     private final RegionalSettings regionalSettings;
@@ -98,28 +99,35 @@ public class DefaultRecipientSettings implements RecipientSettings {
 
     /**
      * Initializes a new {@link DefaultRecipientSettings}.
-     * 
+     *
      * @param services A service lookup reference
      * @param session The calendar session
      * @param originator The originator of the message
      * @param recipient The recipient of the message
+     * @param recipientType The calendar user type of the recipient
      * @param resource The resource
      */
-    public DefaultRecipientSettings(ServiceLookup services, CalendarSession session, CalendarUser originator, CalendarUser recipient, CalendarObjectResource resource) {
+    public DefaultRecipientSettings(ServiceLookup services, CalendarSession session, CalendarUser originator, CalendarUser recipient, CalendarUserType recipientType, CalendarObjectResource resource) {
         super();
         this.services = services;
         this.contextId = session.getContextId();
         this.recipient = recipient;
+        this.recipientType = recipientType;
         this.hostData = session.getHostData();
-        this.msgFormat = selectMsgFormat(session, recipient);
-        this.locale = selectLocale(session, originator, recipient);
-        this.timeZone = selectTimeZone(session, originator, recipient, resource);
-        this.regionalSettings = optRegionalSettings(services, contextId, recipient);
+        this.msgFormat = selectMsgFormat(session, recipient, recipientType);
+        this.locale = selectLocale(session, originator, recipient, recipientType);
+        this.timeZone = selectTimeZone(session, originator, recipient, resource, recipientType);
+        this.regionalSettings = optRegionalSettings(services, contextId, recipient, recipientType);
     }
 
     @Override
     public CalendarUser getRecipient() {
         return recipient;
+    }
+
+    @Override
+    public CalendarUserType getRecipientType() {
+        return recipientType;
     }
 
     @Override
@@ -144,7 +152,7 @@ public class DefaultRecipientSettings implements RecipientSettings {
 
     @Override
     public String getDirectLink(Event event) {
-        if (null == event || false == isInternal(recipient, CalendarUserType.INDIVIDUAL)) {
+        if (null == event || false == isInternal(recipient, recipientType) || false == CalendarUserType.INDIVIDUAL.matches(recipientType)) {
             return null;
         }
         /*
@@ -201,8 +209,8 @@ public class DefaultRecipientSettings implements RecipientSettings {
         return hostname;
     }
 
-    private static RegionalSettings optRegionalSettings(ServiceLookup services, int contextId, CalendarUser recipient) {
-        if (isInternal(recipient, CalendarUserType.INDIVIDUAL)) {
+    private static RegionalSettings optRegionalSettings(ServiceLookup services, int contextId, CalendarUser recipient, CalendarUserType recipientType) {
+        if (isInternal(recipient, recipientType) && CalendarUserType.INDIVIDUAL.matches(recipientType)) {
             RegionalSettingsService regionalSettingsService = services.getOptionalService(RegionalSettingsService.class);
             if (null == regionalSettingsService) {
                 LOG.warn("", ServiceExceptionCode.absentService(RegionalSettingsService.class));
@@ -213,16 +221,16 @@ public class DefaultRecipientSettings implements RecipientSettings {
         return null;
     }
 
-    private static int selectMsgFormat(CalendarSession session, CalendarUser recipient) {
-        if (isInternal(recipient, CalendarUserType.INDIVIDUAL)) {
+    private static int selectMsgFormat(CalendarSession session, CalendarUser recipient, CalendarUserType recipientType) {
+        if (isInternal(recipient, recipientType) && CalendarUserType.INDIVIDUAL.matches(recipientType)) {
             return session.getConfig().getMsgFormat(recipient.getEntity());
         }
         return UserSettingMail.MSG_FORMAT_BOTH;
     }
 
-    private static Locale selectLocale(CalendarSession session, CalendarUser originator, CalendarUser recipient) {
+    private static Locale selectLocale(CalendarSession session, CalendarUser originator, CalendarUser recipient, CalendarUserType recipientType) {
         try {
-            if (isInternal(recipient, CalendarUserType.INDIVIDUAL)) {
+            if (isInternal(recipient, recipientType) && CalendarUserType.INDIVIDUAL.matches(recipientType)) {
                 return session.getEntityResolver().getLocale(recipient.getEntity());
             }
             if (isInternal(originator, CalendarUserType.INDIVIDUAL)) {
@@ -234,9 +242,9 @@ public class DefaultRecipientSettings implements RecipientSettings {
         return LocaleTools.DEFAULT_LOCALE;
     }
 
-    private static TimeZone selectTimeZone(CalendarSession session, CalendarUser originator, CalendarUser recipient, CalendarObjectResource resource) {
+    private static TimeZone selectTimeZone(CalendarSession session, CalendarUser originator, CalendarUser recipient, CalendarObjectResource resource, CalendarUserType recipientType) {
         try {
-            if (isInternal(recipient, CalendarUserType.INDIVIDUAL)) {
+            if (isInternal(recipient, recipientType) && CalendarUserType.INDIVIDUAL.matches(recipientType)) {
                 return session.getEntityResolver().getTimeZone(recipient.getEntity());
             }
             if (isInternal(originator, CalendarUserType.INDIVIDUAL)) {

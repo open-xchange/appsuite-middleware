@@ -98,9 +98,9 @@ import com.openexchange.oidc.AuthenticationInfo;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
-import com.openexchange.oidc.http.outbound.OIDCHttpClientConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
+import com.openexchange.oidc.http.outbound.OIDCHttpClientConfig;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.state.LogoutRequestInfo;
@@ -217,7 +217,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     private String getRedirectLocationForSession(HttpServletRequest request, Session session) {
         LOG.trace("getRedirectLocationForSession(HttpServletRequest request: {}, Session session: {})", request.getRequestURI(), session.getSessionID());
-        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), request.getParameter(OIDCTools.PARAM_DEEP_LINK));
+        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), OIDCTools.getDeepLink(request));
     }
 
     private String buildLoginRequest(State state, Nonce nonce, HttpServletRequest request) throws OXException {
@@ -240,7 +240,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     private void addAuthRequestToStateManager(State state, Nonce nonce, HttpServletRequest request)  throws OXException {
         LOG.trace("addAuthRequestToStateManager(State state: {}, Nonce nonce: {}, HttpServletRequest request: {})", state.getValue(), nonce.getValue(), request.getRequestURI());
-        String deepLink = request.getParameter("hash");
+        String deepLink = OIDCTools.getDeepLink(request);
         String uiClientID = OIDCTools.getUiClient(request);
         String hostname = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
         Map<String, String> additionalClientInformation = Collections.emptyMap();
@@ -424,7 +424,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     private String getResumeURL(HttpServletRequest request, HttpServletResponse response, String domainName, Session session) {
         String redirectURI = "";
-        String path = OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), request.getParameter("hash"));
+        String path = OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), OIDCTools.getDeepLink(request));
         URIBuilder redirectLocation = new URIBuilder()
             .setScheme(OIDCTools.getRedirectScheme(request))
             .setHost(domainName)

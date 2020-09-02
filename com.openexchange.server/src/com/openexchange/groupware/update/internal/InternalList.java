@@ -743,6 +743,10 @@ public final class InternalList {
         // Reassign guests whose user who created them has been deleted see MWB-257
         list.add(new com.openexchange.groupware.update.tasks.ReassignGuestsWithDeletedUserToAdminUpdateTask());
 
+        // +++++++++++++++++++++++++++++++++ Version 7.10.5 starts here. +++++++++++++++++++++++++++++++++
+        // Re-add accidentally removed com.openexchange.groupware.update.tasks.CreateSubscribeTableTask, see MWB-489
+        list.add(new com.openexchange.groupware.update.tasks.CreateSubscribeTableTask());
+
         // +++++++++++++++++++++++++++++++++ Version 7.12.0 starts here. +++++++++++++++++++++++++++++++++
         // list.add(new com.openexchange.groupware.update.tasks.DropUWAWidgetsTask());
         // list.add(new com.openexchange.groupware.update.tasks.DropSwiftFilestoreTask());

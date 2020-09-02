@@ -1,3 +1,9 @@
+open-xchange-parallels (7.10.4-8) stable; urgency=medium
+
+  * Build for patch 2020-08-24 (5842)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 24 Aug 2020 15:08:42 +0000
+
 open-xchange-parallels (7.10.4-7) stable; urgency=medium
 
   * Fifth candidate for 7.10.4 release

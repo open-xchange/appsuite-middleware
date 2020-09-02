@@ -855,7 +855,7 @@ public class SAMLWebSSOProviderTest {
             .setHost(requestHost)
             .setPath("/appsuite/api/saml/init")
             .setParameter("flow", "login")
-            .setParameter("hash", uriFragment)
+            .setParameter("uriFragment", uriFragment)
             .build());
         URI authnRequestURI = new URI(provider.buildAuthnRequest(loginHTTPRequest, new SimHttpServletResponse()));
 

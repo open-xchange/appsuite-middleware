@@ -66,6 +66,6 @@ public class DropVersionTableTask extends AbstractDropTableTask {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { com.openexchange.groupware.update.tasks.RemoveFacebookAccountsTask.class.getName() };
+        return new String[] { com.openexchange.groupware.update.tasks.ContactAddVCardIdTask.class.getName() };
     }
 }

@@ -51,7 +51,8 @@ package com.openexchange.webdav.client.osgi;
 
 import java.net.URI;
 import java.util.Optional;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.client.HttpClient;
+import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
@@ -98,14 +99,20 @@ public class WebDAVClientActivator extends HousekeepingActivator {
             registerService(WebDAVClientFactory.class, new WebDAVClientFactory() {
 
                 @Override
-                public WebDAVClient create(Session session, String accountId, URI baseUrl, String login, String password, Optional<String> optClientId) throws OXException {
-                    return new WebDAVClientImpl(session, accountId, baseUrl, login, password, services, optClientId);
+                public WebDAVClient create(HttpClient client, URI baseUrl) {
+                    return new WebDAVClientImpl(client, baseUrl);
                 }
 
                 @Override
-                public WebDAVClient create(CloseableHttpClient client, URI baseUrl) {
-                    return new WebDAVClientImpl(client, baseUrl);
+                public WebDAVClient create(HttpClient client, HttpContext context, URI baseUrl) {
+                    return new WebDAVClientImpl(client, context, baseUrl);
                 }
+
+                @Override
+                public WebDAVClient create(Session session, String accountId, URI baseUrl, Optional<String> optClientId, HttpContext context) throws OXException {
+                    return new WebDAVClientImpl(session, accountId, baseUrl, services, optClientId, context);
+                }
+
             });
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);

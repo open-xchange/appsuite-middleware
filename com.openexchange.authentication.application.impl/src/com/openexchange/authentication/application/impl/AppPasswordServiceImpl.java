@@ -283,7 +283,7 @@ public class AppPasswordServiceImpl implements AppPasswordService, AppAuthentica
         for (String appType : appTypes) {
             AppPasswordApplication application = availableApps.get(appType);
             if (null == application) {
-                LOG.info("Unknwon application type {} configured for user {} in context {}, skipping.", appType, I(userId), I(contextId));
+                LOG.info("Unknown application type {} configured for user {} in context {}, skipping.", appType, I(userId), I(contextId));
                 continue;
             }
             applicationsById.put(appType, application);

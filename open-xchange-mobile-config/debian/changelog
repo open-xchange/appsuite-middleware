@@ -1,3 +1,9 @@
+open-xchange-mobile-config (7.10.4-8) stable; urgency=medium
+
+  * Build for patch 2020-08-24 (5842)
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 24 Aug 2020 15:08:36 +0000
+
 open-xchange-mobile-config (7.10.4-7) stable; urgency=medium
 
   * Fifth candidate for 7.10.4 release
