@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.impl.federated;
+package com.openexchange.share.impl.subscription;
 
 import java.util.Iterator;
 import org.osgi.framework.BundleContext;
@@ -55,7 +55,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.session.Session;
-import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
 import com.openexchange.share.subscription.ShareSubscriptionExceptions;
 import com.openexchange.share.subscription.ShareSubscriptionInformation;
@@ -82,7 +81,7 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
     @Override
     public ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException {
         checkLinkIsUsable(shareLink);
-        ShareSubscriptionProvider provider = getProvider(shareLink);
+        ShareSubscriptionProvider provider = getProvider(session, shareLink);
         if (null == provider) {
             throw ShareSubscriptionExceptions.NOT_USABLE.create(shareLink);
         }
@@ -96,7 +95,7 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
     @Override
     public ShareSubscriptionInformation mount(Session session, String shareLink, String shareName, String password) throws OXException {
         checkLinkIsUsable(shareLink);
-        ShareSubscriptionProvider provider = getProvider(shareLink);
+        ShareSubscriptionProvider provider = getProvider(session, shareLink);
         if (null != provider) {
             return provider.mount(session, shareLink, shareName, password);
         }
@@ -106,23 +105,26 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
     @Override
     public ShareSubscriptionInformation remount(Session session, String shareLink, String shareName, String password) throws OXException {
         checkLinkIsUsable(shareLink);
-        ShareSubscriptionProvider provider = getProvider(shareLink);
+        ShareSubscriptionProvider provider = getProvider(session, shareLink);
         if (null != provider) {
             checkPasswordIsSet(password);
             return provider.remount(session, shareLink, shareName, password);
         }
-        throw ShareSubscriptionExceptions.NOT_USABLE.create(shareLink);
+        throw ShareSubscriptionExceptions.MISSING_SUBSCRIPTION.create(shareLink);
     }
 
     @Override
     public void unmount(Session session, String shareLink) throws OXException {
         checkLinkIsUsable(shareLink);
-        ShareSubscriptionProvider provider = getProvider(shareLink);
-        if (null != provider) {
-            provider.unmount(session, shareLink);
-            return;
+        /*
+         * Try all provider as "isSupported()" might not be true anymore
+         */
+        for (Iterator<ShareSubscriptionProvider> iterator = iterator(); iterator.hasNext();) {
+            if (iterator.next().unmount(session, shareLink)) {
+                return;
+            }
         }
-        throw ShareSubscriptionExceptions.NOT_USABLE.create(shareLink);
+        throw ShareSubscriptionExceptions.MISSING_SUBSCRIPTION.create(shareLink);
     }
 
     /*
@@ -133,14 +135,11 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
         if (Strings.isEmpty(shareLink)) {
             throw ShareSubscriptionExceptions.MISSING_LINK.create();
         }
-        if (false == ShareTool.isShare(shareLink)) {
-            throw ShareSubscriptionExceptions.NOT_USABLE.create(shareLink);
-        }
     }
 
     private void checkPasswordIsSet(String password) throws OXException {
         if (Strings.isEmpty(password)) {
-            throw ShareSubscriptionExceptions.MISSING_PASSWORD.create();
+            throw ShareSubscriptionExceptions.MISSING_CREDENTIALS.create();
         }
     }
 
@@ -150,14 +149,10 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
      * @param shareLink The share link
      * @return A provider or <code>null</code>
      */
-    private ShareSubscriptionProvider getProvider(String shareLink) {
-        if (false == ShareTool.isShare(shareLink)) {
-            return null;
-        }
-
+    private ShareSubscriptionProvider getProvider(Session session, String shareLink) {
         for (Iterator<ShareSubscriptionProvider> iterator = iterator(); iterator.hasNext();) {
             ShareSubscriptionProvider provider = iterator.next();
-            if (provider.isSupported(shareLink)) {
+            if (provider.isSupported(session, shareLink)) {
                 return provider;
             }
         }

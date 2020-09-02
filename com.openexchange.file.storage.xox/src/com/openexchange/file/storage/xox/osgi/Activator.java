@@ -59,6 +59,7 @@ import com.openexchange.file.storage.xox.XOXFileStorageService;
 import com.openexchange.file.storage.xox.subscription.XOXShareSubscriptionProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.subscription.ShareSubscriptionProvider;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link Activator}
@@ -72,7 +73,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class, FileStorageServiceRegistry.class };
+        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class, FileStorageServiceRegistry.class, UserPermissionService.class };
     }
 
     @Override

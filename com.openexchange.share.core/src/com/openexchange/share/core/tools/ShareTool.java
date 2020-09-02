@@ -440,7 +440,7 @@ public class ShareTool {
      * @param url The path to extract the token from
      * @return The token or <code>null</code> if no token is embedded in the path
      */
-    private static String extractBaseToken(String url) {
+    public static String extractBaseToken(String url) {
         if (Strings.isEmpty(url)) {
             return null;
         }

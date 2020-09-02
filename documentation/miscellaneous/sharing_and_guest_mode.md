@@ -519,22 +519,48 @@ It is possible to reload an adapted configuration by using reloadconfiguration c
 
 # Integrating shares from other Open Xchange Server
 
-Starting with the version 7.10.5 of the Open Xchange Server the so called "Federated Sharing" feature is introduced. With this feature it is possible for users to integrate shares from foreign OX servers into the App Suite. Efficiently external shares from other OX servers will look and behave like shared internally.
+Starting with the version 7.10.5 of the Open Xchange Server the so called "Federated Sharing" feature is introduced. With this feature it is possible for users to integrate shares from foreign OX entities into the App Suite. Efficiently external shares will look and behave like shared internally.
 
-## Technical mechanism
+> **Note:** Currently only shares of *infostore* folders are supported.
+
+## Adding a share
+
+The MW offers additional actions within the <code>share management</code> module of the HTTP API. Therefore a client can e.g. simply add a share by providing the share link to the MW. For details on the API please have a look [here]({{ site.baseurl }}/components/middleware/http/latest/index.html#!ShareManagement)
+
+## Modes
+
+When it comes to integrating a share there will be chosen between two different modes the *cross-context* and the *cross-ox* mode.
+
+### Cross context
+
+The *cross-context* mode is chosen when a share comes from a context on the same OX server. The server then will use internal services to access the shared data.
+
+#### Administrator Notes:
+
+The following properties should be checked to guarantee the functionality of the feature:
+
+* <code>com.openexchange.capability.filestorage_xctx=true</code>
+* <code>com.openexchange.share.crossContextGuests=true</code>
+
+### Cross OX
+
+The *cross-ox* mode is used when a share is from another OX server. The communication between the OX servers will then take place over the HTTP API.
+
+
+#### Technical mechanism
 
 Once the share is integrated into the App Suite, the UI will send request as usual to the Middleware. The Middleware is in charge to provide the data.
 To access the content provided within the share the local server needs to request this data. Therefore the data from the remote server will be requested via the HTTP API. Internally, a proper client will take care of the session lifecycle on the remote system.
 Once validation on the server has finished the response will be returned to the UI.
 
-### Administrator Notes:
+#### Administrator Notes:
 
-The following properties should be checked to guarantee a the functionality of the feature:
+The following properties should be checked to guarantee the functionality of the feature:
 
-* <code>com.openexchange.capability.filestorage_oxshare=true</code>
+* <code>com.openexchange.capability.filestorage_xox=true</code>
 
-Furthermore there are properties that influences the communication channel to the remote server. A administrator can adjust:
+Furthermore there are properties that influences the communication between the servers. A administrator can adjust:
 
-* <code>com.openexchange.api.client.blacklistedHosts="127.0.0.1-127.255.255.255,localhost"</code>
-* <code>com.openexchange.api.client.allowedPorts=""</code>
+* <code>com.openexchange.api.client.blacklistedHosts</code>
+* <code>com.openexchange.api.client.allowedPorts</code>
 * <code>com.openenexchange.httpclient.apiClient*</code>, see [here]({{ site.baseurl }}/middleware/administration/http_client_configuration.html) for more details.

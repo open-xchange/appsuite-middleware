@@ -148,7 +148,7 @@ public class XctxSessionCache {
              * invalidate cache entry & login again if no session could be looked up
              */
             guestSessionCache.asMap().remove(key, guestSessionId);
-            return getGuestSession(guestSession, baseToken, password);
+            return getGuestSession(session, baseToken, password);
         }
         return guestSession;
     }

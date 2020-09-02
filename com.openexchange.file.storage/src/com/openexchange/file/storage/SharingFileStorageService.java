@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage;
 
+import com.openexchange.session.Session;
 
 /**
  * {@link SharingFileStorageService} - A marker interface which will place the FileStorage content under folder 10 and 15
@@ -56,4 +57,15 @@ package com.openexchange.file.storage;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public interface SharingFileStorageService extends FileStorageService { }
+public interface SharingFileStorageService extends FileStorageService {
+
+    /**
+     * Gets a value indicating if the user represented by the session has the capability to
+     * use the file storage
+     *
+     * @param session The user session
+     * @return <code>true</code> if the user is allowed to use the storage, <code>false</code> otherwise
+     */
+    boolean hasCapability(Session session);
+
+}

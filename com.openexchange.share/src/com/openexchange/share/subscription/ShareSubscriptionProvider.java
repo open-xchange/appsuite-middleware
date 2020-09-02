@@ -49,38 +49,27 @@
 
 package com.openexchange.share.subscription;
 
-import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.Ranked;
 import com.openexchange.session.Session;
 
 /**
- * {@link ShareSubscriptionProvider} - A provider that handles CRUD operations for s single module and a certain kind of share
+ * {@link ShareSubscriptionProvider} - A provider that handles CRUD operations for a certain kind of share in a specific module
  * 
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
 public interface ShareSubscriptionProvider extends Ranked {
 
-    /** The ranking for the remote OX to OX file storage */
-    final static int XOX_REMOTE_RANK = 55;
-
     /**
      * Gets a value indicating whether e.g. the given combination of module,
      * folder and item extracted from the share link is supported by this provider.
-     *
+     * 
+     * @param session The session of the user
      * @param shareLink The share link to support
      * @return <code>true</code> in case this provider can be used for subsequent calls, <code>false</code> if not
      */
-    boolean isSupported(String shareLink);
-
-    /**
-     * Get the unique identifier of the manager
-     *
-     * @return The unique ID
-     */
-    @NonNull
-    String getId();
+    boolean isSupported(Session session, String shareLink);
 
     /**
      * Analyzes the given share link
@@ -105,7 +94,7 @@ public interface ShareSubscriptionProvider extends Ranked {
     ShareSubscriptionInformation mount(Session session, String shareLink, String shareName, String password) throws OXException;
 
     /**
-     * Updates a mounted object that currently can't be used
+     * Updates a mounted object
      *
      * @param session The user session
      * @param shareLink The share link to identify the mounted object
@@ -118,11 +107,15 @@ public interface ShareSubscriptionProvider extends Ranked {
 
     /**
      * Unmouts a share or rather deactivates the subscription
+     * <p>
+     * Implementations should always search for subscription for the given share link
+     * nevertheless the link might not fit the expectations of {@link #isSupported(Session, String)}
      *
      * @param session The user session
      * @param shareLink The share link to identify the mounted object
-     * @throws OXException In case of error
+     * @return <code>true</code> if the resource identified by the link was unmount, <code>false</code> otherwise
+     * @throws OXException In case of missing service.
      */
-    void unmount(Session session, String shareLink) throws OXException;
+    boolean unmount(Session session, String shareLink) throws OXException;
 
 }

@@ -55,6 +55,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.xctx.XctxFileStorageService;
+import com.openexchange.file.storage.xctx.subscription.XctxShareSubscriptionProvider;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
@@ -62,7 +63,9 @@ import com.openexchange.guest.GuestService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.subscription.ShareSubscriptionProvider;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link XctxFileStorageActivator}
@@ -82,7 +85,8 @@ public class XctxFileStorageActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { ContextService.class, UserService.class, ShareService.class, GuestService.class, PasswordMechRegistry.class, 
-            FileStorageAccountManagerLookupService.class, FolderService.class, InfostoreFacade.class, InfostoreSearchEngine.class, CapabilityService.class 
+            FileStorageAccountManagerLookupService.class, FolderService.class, InfostoreFacade.class, InfostoreSearchEngine.class, 
+            CapabilityService.class, UserPermissionService.class 
         };
     }
 
@@ -93,7 +97,9 @@ public class XctxFileStorageActivator extends HousekeepingActivator {
             /*
              * register cross-context file storage service
              */
-            registerService(FileStorageService.class, new XctxFileStorageService(this));
+            XctxFileStorageService fileStorageService = new XctxFileStorageService(this);
+            registerService(FileStorageService.class, fileStorageService);
+            registerService(ShareSubscriptionProvider.class, new XctxShareSubscriptionProvider(this, fileStorageService));
         } catch (Exception e) {
             getLogger(XctxFileStorageActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;

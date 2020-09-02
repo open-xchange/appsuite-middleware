@@ -151,7 +151,7 @@ public class ShareLinks {
     /**
      * Extracts the share base token from a share URL.
      *
-     * @param path The path to extract the token from
+     * @param shareUrl The path to extract the token from
      * @return The token or <code>null</code> if no token is embedded in the path
      */
     public static String extractBaseToken(String shareUrl) {

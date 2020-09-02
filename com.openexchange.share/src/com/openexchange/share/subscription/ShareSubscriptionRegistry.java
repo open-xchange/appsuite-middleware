@@ -85,7 +85,7 @@ public interface ShareSubscriptionRegistry {
     ShareSubscriptionInformation mount(Session session, String shareLink, String shareName, String password) throws OXException;
 
     /**
-     * Updates a mounted object that currently can't be used
+     * Updates a mounted object
      *
      * @param session The user session
      * @param shareLink The share link to identify the mounted object

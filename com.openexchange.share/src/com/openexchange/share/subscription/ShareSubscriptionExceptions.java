@@ -73,10 +73,10 @@ public enum ShareSubscriptionExceptions implements DisplayableOXExceptionCode {
     MISSING_LINK("The link is missing", Category.CATEGORY_ERROR, 2, OXExceptionStrings.BAD_REQUEST),
 
     /**
-     * <code>The password is missing</code>
+     * <code>The credentials are missing</code>
      * {@value OXExceptionStrings#BAD_REQUEST}
      */
-    MISSING_PASSWORD("The password is missing", Category.CATEGORY_ERROR, 3, OXExceptionStrings.BAD_REQUEST),
+    MISSING_CREDENTIALS("The credentials are missing", Category.CATEGORY_ERROR, 3, OXExceptionStrings.BAD_REQUEST),
 
     /**
      * <code>Unable to find a subscription for \"%1$s\"</code>
@@ -87,6 +87,11 @@ public enum ShareSubscriptionExceptions implements DisplayableOXExceptionCode {
      * Unable to interpret the link \"%1$s\".
      */
     NOT_USABLE("Unable to interpret the link \"%1$s\".", Category.CATEGORY_ERROR, 5),
+    
+    /**
+     * You don't have enough permissions to perform the operation.
+     */
+    MISSING_PERMISSIONS("You don't have enough permissions to perform the operation.", Category.CATEGORY_ERROR, 6),
 
     ;
 

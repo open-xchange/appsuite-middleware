@@ -47,25 +47,29 @@
  *
  */
 
-package com.openexchange.file.storage.xox.subscription;
+package com.openexchange.file.storage.xctx.subscription;
 
-import static com.openexchange.api.client.common.OXExceptionParser.matches;
+import static com.openexchange.share.AuthenticationMode.ANONYMOUS;
+import static com.openexchange.share.AuthenticationMode.ANONYMOUS_PASSWORD;
+import static com.openexchange.share.AuthenticationMode.GUEST;
+import static com.openexchange.share.AuthenticationMode.GUEST_PASSWORD;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE_WITH_PASSWORD;
 import static com.openexchange.share.subscription.ShareLinkState.INACCESSIBLE;
-import com.openexchange.api.client.ApiClient;
-import com.openexchange.api.client.ApiClientExceptions;
-import com.openexchange.api.client.ApiClientService;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.xox.XOXFileStorageService;
+import com.openexchange.file.storage.xctx.XctxFileStorageService;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.subscription.AbstractFileStorageSubscriptionProvider;
+import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
 import com.openexchange.share.subscription.ShareLinkState;
@@ -73,125 +77,90 @@ import com.openexchange.share.subscription.ShareSubscriptionInformation;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
- * {@link XOXShareSubscriptionProvider}
+ * {@link XctxShareSubscriptionProvider}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptionProvider {
+public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscriptionProvider {
 
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link XOXShareSubscriptionProvider}.
+     * Initializes a new {@link XctxShareSubscriptionProvider}.
      * 
      * @param services The services
-     * @param fileStorageService The storage
+     * @param fileStorageService The filestorage to operate with
      */
-    public XOXShareSubscriptionProvider(ServiceLookup services, XOXFileStorageService fileStorageService) {
+    public XctxShareSubscriptionProvider(ServiceLookup services, XctxFileStorageService fileStorageService) {
         super(fileStorageService, services.getService(UserPermissionService.class));
         this.services = services;
     }
 
     @Override
     public boolean isSupported(Session session, String shareLink) {
-        ShareTargetPath shareTargetPath = ShareTool.getShareTarget(shareLink);
-        if (null == shareTargetPath) {
+        if (false == ShareTool.isShare(shareLink)) {
             return false;
         }
-        if (Strings.isNotEmpty(shareTargetPath.getItem())) {
-            /*
-             * Single files aren't supported
-             */
+        ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
+        if (Module.INFOSTORE.getFolderConstant() != targetPath.getModule()) {
             return false;
         }
-        int module = shareTargetPath.getModule();
-        if (Module.INFOSTORE.getFolderConstant() != module) {
+        String baseToken = ShareTool.extractBaseToken(shareLink);
+        if (Strings.isEmpty(baseToken)) {
             return false;
         }
-        String folder = shareTargetPath.getFolder();
-        if (Strings.isEmpty(folder)) {
-            return false;
-        }
-        return hasCapability(session);
-    }
-
-    @Override
-    public int getRanking() {
-        return 55;
-    }
-
-    @Override
-    public ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException {
-        requireAccess(session);
-        /*
-         * Check if account exists and still accessible
-         */
-        FileStorageAccountAccess accountAccess = getStorageAccountAccess(session, shareLink);
-        if (null != accountAccess) {
-            ShareLinkState state = checkAccessible(accountAccess, shareLink);
-            return new ShareLinkAnalyzeResult(state, generateInfos(accountAccess, shareLink));
-        }
-
-        /*
-         * The share is unknown. Try to login to the remote server
-         */
-        ApiClientService apiClientService = services.getServiceSafe(ApiClientService.class);
-        ApiClient apiClient = null;
-        ShareLinkState state = INACCESSIBLE;
         try {
-            /*
-             * If creation of the client throws no error, the share has been access successfully
-             */
-            apiClient = apiClientService.getApiClient(session, shareLink, null);
-            state = ADDABLE;
-        } catch (OXException e) {
-            /*
-             * Check if credentials are missing
-             */
-            if (isPasswordMissing(e)) {
-                state = ADDABLE_WITH_PASSWORD;
+            GuestInfo guestInfo = services.getServiceSafe(ShareService.class).resolveGuest(baseToken);
+            if (null == guestInfo) {
+                return false;
             }
-            logExcpetionDebug(e);
-        } finally {
             /*
-             * Close to avoid initialized client in cache
+             * Skip checking if context or user are enabled. This provider is responsible for handling the link
              */
-            apiClientService.close(apiClient);
-        }
-        return new ShareLinkAnalyzeResult(state, new ShareSubscriptionInformation(getId(), null, null, String.valueOf(Module.INFOSTORE.getFolderConstant())));
-    }
-
-    @Override
-    public ShareSubscriptionInformation remount(Session session, String shareLink, String shareName, String password) throws OXException {
-        ShareSubscriptionInformation information = super.remount(session, shareLink, shareName, password);
-        clearRemoteSessions(session, shareLink);
-        return information;
-    }
-
-    @Override
-    public boolean unmount(Session session, String shareLink) throws OXException {
-        if (super.unmount(session, shareLink)) {
-            clearRemoteSessions(session, shareLink);
-            return true;
+            return hasCapability(session);
+        } catch (OXException e) {
+            logExcpetionError(e);
         }
         return false;
     }
 
     @Override
-    public boolean isPasswordMissing(OXException e) {
-        return matches(e, ApiClientExceptions.MISSING_CREDENTIALS, LoginExceptionCodes.INVALID_CREDENTIALS, LoginExceptionCodes.INVALID_GUEST_PASSWORD);
+    public int getRanking() {
+        return 60;
     }
 
-    /**
-     * Clear any remote session so follow up calls will work as expected
-     *
-     * @param session The user session
-     * @param shareLink The share link
-     * @param storageAccount The account to close
-     * @throws OXException In case service is missing
-     */
-    private void clearRemoteSessions(Session session, String shareLink) throws OXException {
-        services.getServiceSafe(ApiClientService.class).close(session.getContextId(), session.getUserId(), shareLink);
+    @Override
+    public ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException {
+        requireAccess(session);
+        FileStorageAccountAccess accountAccess = getStorageAccountAccess(session, shareLink);
+        if (null != accountAccess) {
+            ShareLinkState state = checkAccessible(accountAccess, shareLink);
+            return new ShareLinkAnalyzeResult(state, generateInfos(accountAccess, shareLink));
+        }
+        /*
+         * Try to resolve the token to a guest and if found announce that it can be added
+         */
+        GuestInfo guestInfo = services.getServiceSafe(ShareService.class).resolveGuest(ShareLinks.extractBaseToken(shareLink));
+        ShareLinkState state = INACCESSIBLE;
+        if (null != guestInfo && null != guestInfo.getAuthentication()) {
+            AuthenticationMode mode = guestInfo.getAuthentication();
+            if (GUEST_PASSWORD.equals(mode) || ANONYMOUS_PASSWORD.equals(mode)) {
+                state = ADDABLE_WITH_PASSWORD;
+            } else if (GUEST.equals(mode) || ANONYMOUS.equals(mode)) {
+                state = ADDABLE;
+            }
+        }
+        return new ShareLinkAnalyzeResult(state, new ShareSubscriptionInformation(getId(), null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
+    }
+
+    @Override
+    public boolean isPasswordMissing(OXException e) {
+        if (LoginExceptionCodes.prefix().equals(e.getPrefix())) {
+            if (LoginExceptionCodes.INVALID_CREDENTIALS.getNumber() == e.getCode() || LoginExceptionCodes.INVALID_GUEST_PASSWORD.getNumber() == e.getCode()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

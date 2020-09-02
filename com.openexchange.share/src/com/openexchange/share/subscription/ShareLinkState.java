@@ -58,7 +58,7 @@ package com.openexchange.share.subscription;
 public enum ShareLinkState {
 
     /**
-     * State to indicate that the link belongs to a known share and is accessible. Nothing to do for the client.
+     * State to indicate that the link belongs to a known share and is accessible.
      */
     SUBSCRIBED,
     
@@ -69,12 +69,12 @@ public enum ShareLinkState {
     CREDENTIALS_REFRESH,
 
     /**
-     * State to indicate that the link is valid and belongs to a share that is not yet subscribed an can be added as an account.
+     * State to indicate that the link is valid and belongs to a share that is not yet subscribed an can be added.
      */
     ADDABLE,
 
     /**
-     * Equal state to {@link #ADDABLE} but in addition the user needs to enter a password to add the share.
+     * Similar to {@link #ADDABLE} but in addition the user needs to enter a password to add the share.
      */
     ADDABLE_WITH_PASSWORD,
 

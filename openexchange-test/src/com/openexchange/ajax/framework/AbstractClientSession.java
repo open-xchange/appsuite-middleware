@@ -106,9 +106,6 @@ public class AbstractClientSession {
     @After
     public void tearDown() throws Exception {
         try {
-            client = logoutClient(client, true);
-            client2 = logoutClient(client2, true);
-
             /*
              * Call operations from last added item to first added item (LIFO)
              * to avoid premature closing of e.g. API clients before all relevant
@@ -117,6 +114,9 @@ public class AbstractClientSession {
             for (int i = operations.size() - 1; i >= 0; i--) {
                 operations.get(i).safeTearDown();
             }
+            client = logoutClient(client, true);
+            client2 = logoutClient(client2, true);
+
         } finally {
             TestContextPool.backContext(testContext);
         }
