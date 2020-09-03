@@ -207,7 +207,7 @@ public class ShareActivator extends HousekeepingActivator {
         ShareSubscriptionRegistryImpl shareSubscriptionRegistry = new ShareSubscriptionRegistryImpl(context);
         rememberTracker(shareSubscriptionRegistry);
         registerService(ShareSubscriptionRegistry.class, shareSubscriptionRegistry);
-        registerService(ShareSubscriptionProvider.class , new ContextInternalSubscriptionProvider(this));
+        registerService(ShareSubscriptionProvider.class, new ContextInternalSubscriptionProvider(this));
         registerService(XctxSessionManager.class, new XctxSessionCache(this));
 
         trackService(ModuleSupport.class);

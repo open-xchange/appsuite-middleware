@@ -2,10 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The share implementation bundle
 Bundle-SymbolicName: com.openexchange.share.impl
+<<<<<<< HEAD
 Bundle-Version: 7.10.5
+=======
+Automatic-Module-Name: com.openexchange.share.impl
+Bundle-Version: 7.10.4
+>>>>>>> MW-1411: Expose cross-context session cache as service
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.caching,
+Import-Package: com.google.common.cache,
+ com.openexchange.ajax.login,
+ com.openexchange.authentication,
+ com.openexchange.caching,
  com.openexchange.caching.events,
  com.openexchange.capabilities,
  com.openexchange.cluster.timer,
@@ -46,6 +54,8 @@ Import-Package: com.openexchange.caching,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
+ com.openexchange.login,
+ com.openexchange.login.internal,
  com.openexchange.mail,
  com.openexchange.mail.api,
  com.openexchange.mail.dataobjects.compose,

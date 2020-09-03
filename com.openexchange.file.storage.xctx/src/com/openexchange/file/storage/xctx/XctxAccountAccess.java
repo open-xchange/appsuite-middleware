@@ -66,6 +66,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.core.tools.ShareLinks;
+import com.openexchange.share.subscription.XctxSessionManager;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -80,7 +81,6 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
     private final FileStorageAccount account;
     private final ServerSession session;
     private final ServiceLookup services;
-    private final XctxSessionCache sessionCache;
 
     private ServerSession guestSession;
 
@@ -90,14 +90,12 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
      * @param services A service lookup reference
      * @param account The account
      * @param session The user's session
-     * @param sessionCache The guest session cache to use
      */
-    protected XctxAccountAccess(ServiceLookup services, FileStorageAccount account, Session session, XctxSessionCache sessionCache) throws OXException {
+    protected XctxAccountAccess(ServiceLookup services, FileStorageAccount account, Session session) throws OXException {
         super();
         this.services = services;
         this.account = account;
         this.session = ServerSessionAdapter.valueOf(session);
-        this.sessionCache = sessionCache;
     }
     /**
      * Gets the service of specified type. Throws error if service is absent.
@@ -130,7 +128,7 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
         if (null == baseToken) {
             throw ShareExceptionCodes.INVALID_LINK.create(shareUrl);
         }
-        this.guestSession = ServerSessionAdapter.valueOf(sessionCache.getGuestSession(session, baseToken, password));
+        this.guestSession = ServerSessionAdapter.valueOf(services.getServiceSafe(XctxSessionManager.class).getGuestSession(session, baseToken, password));
     }
 
     @Override

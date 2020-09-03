@@ -85,7 +85,6 @@ public class XctxFileStorageService implements FileStorageService, AccountAware,
     private static final Logger LOGGER = LoggerFactory.getLogger(XctxFileStorageService.class);
 
     private final ServiceLookup services;
-    private final XctxSessionCache sessionCache;
 
     /**
      * Initializes a new {@link XctxFileStorageService}
@@ -95,16 +94,6 @@ public class XctxFileStorageService implements FileStorageService, AccountAware,
     public XctxFileStorageService(ServiceLookup services) {
         super();
         this.services = services;
-        this.sessionCache = new XctxSessionCache(services);
-    }
-
-    /**
-     * Gets the cross-context session cache.
-     * 
-     * @return The session cache
-     */
-    public XctxSessionCache getSessionCache() {
-        return sessionCache;
     }
 
     @Override
@@ -156,13 +145,13 @@ public class XctxFileStorageService implements FileStorageService, AccountAware,
     public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
         assertCapability(session);
         FileStorageAccount account = getAccountManager().getAccount(accountId, session);
-        return new XctxAccountAccess(services, account, session, sessionCache);
+        return new XctxAccountAccess(services, account, session);
     }
 
     @Override
     public void testConnection(FileStorageAccount account, Session session) throws OXException {
         assertCapability(session);
-        XctxAccountAccess accountAccess = new XctxAccountAccess(services, account, session, sessionCache);
+        XctxAccountAccess accountAccess = new XctxAccountAccess(services, account, session);
         accountAccess.connect();
         accountAccess.close();
     }
