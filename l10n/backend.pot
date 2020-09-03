@@ -695,12 +695,11 @@ msgid "You have been invited to an appointment by %1$s:"
 msgstr ""
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
-msgid ""
-"You have been invited to an appointment organized by %1$s on behalf of %2$s"
+msgid "You have been invited to an appointment by %1$s on behalf of %2$s:"
 msgstr ""
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
-msgid "%1$s is organizing an appointment on your behalf."
+msgid "%1$s is organizing an appointment on your behalf:"
 msgstr ""
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
