@@ -175,9 +175,9 @@ public class Messages implements LocalizableStrings {
 
     public static final String CREATE_INTRO = "You have been invited to an appointment by %1$s:";
 
-    public static final String CREATE_ON_BEHALF_INTRO = "You have been invited to an appointment organized by %1$s on behalf of %2$s";
+    public static final String CREATE_ON_BEHALF_INTRO = "You have been invited to an appointment by %1$s on behalf of %2$s:";
 
-    public static final String CREATE_ON_YOUR_BEHALF_INTRO = "%1$s is organizing an appointment on your behalf.";
+    public static final String CREATE_ON_YOUR_BEHALF_INTRO = "%1$s is organizing an appointment on your behalf:";
 
     public static final String CREATE_EXCEPTION_INTRO = "%1$s created a recurrence exception. Original date: %2$s:";
 
