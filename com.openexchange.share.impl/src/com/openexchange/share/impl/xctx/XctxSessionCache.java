@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.xctx;
+package com.openexchange.share.impl.xctx;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.HashMap;
@@ -70,6 +70,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.core.tools.ShareToken;
+import com.openexchange.share.subscription.XctxSessionManager;
 
 /**
  * {@link XctxSessionCache}
@@ -77,7 +79,7 @@ import com.openexchange.share.ShareExceptionCodes;
  * @author <a href="mailto:tobias.friedrich@open-xchange.org">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public class XctxSessionCache {
+public class XctxSessionCache implements XctxSessionManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(XctxSessionCache.class);
 
@@ -104,15 +106,12 @@ public class XctxSessionCache {
         .build();
     }
 
-    /**
-     * Gets a guest session, logging in as the guest user automatically if needed.
-     * 
-     * @param session The user session spawning the guest session
-     * @param baseToken The base token of the guest user
-     * @param password The optional password of the guest account
-     * @return The guest session
-     */
+    @Override
     public Session getGuestSession(Session session, String baseToken, String password) throws OXException {
+        ShareToken shareToken = new ShareToken(baseToken);
+        if (session.getContextId() == shareToken.getContextID()) {
+            throw ShareExceptionCodes.INVALID_TOKEN.create(baseToken);
+        }
         Reference<Session> newGuestSession = new Reference<Session>();
         String key = getKey(session, baseToken, password);
         String guestSessionId;

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.xctx;
+package com.openexchange.share.impl.xctx;
 
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginExceptionCodes;

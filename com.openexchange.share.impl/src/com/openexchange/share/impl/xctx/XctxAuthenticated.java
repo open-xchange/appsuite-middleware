@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.xctx;
+package com.openexchange.share.impl.xctx;
 
 import com.openexchange.authentication.GuestAuthenticated;
 import com.openexchange.authentication.SessionEnhancement;

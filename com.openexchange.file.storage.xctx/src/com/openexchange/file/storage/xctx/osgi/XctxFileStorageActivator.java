@@ -59,11 +59,10 @@ import com.openexchange.file.storage.xctx.subscription.XctxShareSubscriptionProv
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
-import com.openexchange.guest.GuestService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.subscription.ShareSubscriptionProvider;
+import com.openexchange.share.subscription.XctxSessionManager;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -84,7 +83,7 @@ public class XctxFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ContextService.class, UserService.class, ShareService.class, GuestService.class, PasswordMechRegistry.class, 
+        return new Class[] { XctxSessionManager.class, ContextService.class, UserService.class, ShareService.class, 
             FileStorageAccountManagerLookupService.class, FolderService.class, InfostoreFacade.class, InfostoreSearchEngine.class, 
             CapabilityService.class, UserPermissionService.class 
         };
