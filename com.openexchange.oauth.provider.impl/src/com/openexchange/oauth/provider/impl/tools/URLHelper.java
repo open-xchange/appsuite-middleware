@@ -104,7 +104,6 @@ public class URLHelper {
         String hostname = getHostname(request);
         String prefix = Services.requireService(DispatcherPrefixService.class).getPrefix();
         return "https://" + hostname + prefix;
-
     }
 
     public static String getRedirectLocation(String redirectURI, String... additionalParams) throws OXException {
@@ -165,6 +164,11 @@ public class URLHelper {
 
         if (hostname == null) {
             hostname = request.getServerName();
+        }
+
+        int serverPort = request.getServerPort();
+        if (serverPort > 0 && serverPort != 443 && hostname.indexOf(':') < 0) {
+            hostname += ":" + serverPort;
         }
 
         return hostname;
