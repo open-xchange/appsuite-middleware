@@ -87,6 +87,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -161,6 +162,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
@@ -1286,25 +1288,34 @@ public class Utils {
      * @return The folders, or an empty list if there are none
      */
     public static List<CalendarFolder> getVisibleFolders(CalendarSession session) throws OXException {
-        return getVisibleFolders(session, Permission.READ_FOLDER, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
+        return getVisibleFolders(session, true, Permission.READ_FOLDER, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
     }
 
     /**
      * Gets all calendar folders accessible by the current sesssion's user, where a minimum set of permissions are set.
      *
      * @param session The underlying calendar session
+     * @param all <code>true</code> to also include currently unsubscribed folders, <code>false</code> to only include subscribed ones
      * @param requiredFolderPermission The required folder permission, or {@link Permission#NO_PERMISSIONS} if none required
      * @param requiredReadPermission The required read object permission, or {@link Permission#NO_PERMISSIONS} if none required
      * @param requiredWritePermission The required write object permission, or {@link Permission#NO_PERMISSIONS} if none required
      * @param requiredDeletePermission The required delete object permission, or {@link Permission#NO_PERMISSIONS} if none required
      * @return The folders, or an empty list if there are none
      */
-    public static List<CalendarFolder> getVisibleFolders(CalendarSession session, int requiredFolderPermission, int requiredReadPermission, int requiredWritePermission, int requiredDeletePermission) throws OXException {
+    public static List<CalendarFolder> getVisibleFolders(CalendarSession session, boolean includeUnsubscribed, int requiredFolderPermission, int requiredReadPermission, int requiredWritePermission, int requiredDeletePermission) throws OXException {
+        FolderSubscriptionHelper subscriptionHelper = includeUnsubscribed ? null : Services.optService(FolderSubscriptionHelper.class);
         Connection connection = optConnection(session);
         List<FolderObject> folders = getEntityResolver(session).getVisibleFolders(session.getUserId(), connection);
         UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(session.getSession()).getUserPermissionBits();
         List<CalendarFolder> calendarFolders = new ArrayList<CalendarFolder>(folders.size());
         for (FolderObject folder : folders) {
+            if (false == includeUnsubscribed && null != subscriptionHelper) {
+                Optional<Boolean> subscribed = subscriptionHelper.isSubscribed(
+                    Optional.ofNullable(connection), session.getContextId(), session.getUserId(), folder.getObjectID(), folder.getModule());
+                if (subscribed.isPresent() && Boolean.FALSE.equals(subscribed.get())) {
+                    continue;
+                }
+            }
             EffectivePermission ownPermission;
             try {
                 ownPermission = folder.getEffectiveUserPermission(session.getUserId(), permissionBits, connection);

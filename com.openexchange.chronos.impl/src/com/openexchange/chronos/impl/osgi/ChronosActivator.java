@@ -97,6 +97,7 @@ import com.openexchange.quota.QuotaService;
 import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.user.UserService;
 
 /**
@@ -129,7 +130,7 @@ public class ChronosActivator extends HousekeepingActivator {
     protected Class<?>[] getOptionalServices() {
         return new Class<?>[] { FreeBusyService.class, ContactCollectorService.class, ObjectUseCountService.class, CalendarAvailabilityService.class,
             PrincipalUseCountService.class, CalendarEventNotificationService.class, SchedulingBroker.class, SchedulingChangeService.class, DescriptionService.class,
-            RegionalSettingsService.class };
+            RegionalSettingsService.class, FolderSubscriptionHelper.class };
     }
 
     @Override
