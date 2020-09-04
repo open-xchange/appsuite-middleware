@@ -66,6 +66,7 @@
         required: false
         schema:
           type: string
+      - $ref: '#/components/parameters/glbQueryParamsAllowEnqueue'
     responses:
       '200':
         description: >

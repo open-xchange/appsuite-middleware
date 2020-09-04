@@ -64,6 +64,8 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
+import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -88,8 +90,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 @OAuthAction(OAuthAction.CUSTOM)
 @RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE)
-public final class DeleteAction extends AbstractFolderAction {
+public final class DeleteAction extends AbstractFolderAction implements EnqueuableAJAXActionService {
 
+    private static final String PARAM_HARD_DELETE = "hardDelete";
+    private static final String PARAM_FAIL_ON_ERROR = "failOnError";
+    private static final String PARAM_TREE = "tree";
     public static final String ACTION = AJAXServlet.ACTION_DELETE;
     private static final String NEW_PATH = "new_path";
     private static final String PATH = "path";
@@ -110,7 +115,7 @@ public final class DeleteAction extends AbstractFolderAction {
         /*
          * Parse parameters
          */
-        String treeId = request.getParameter("tree");
+        String treeId = request.getParameter(PARAM_TREE);
         if (null == treeId) {
             /*
              * Fallback to default tree identifier
@@ -143,9 +148,9 @@ public final class DeleteAction extends AbstractFolderAction {
         /*
          * Delete
          */
-        final boolean failOnError = AJAXRequestDataTools.parseBoolParameter("failOnError", request, false);
+        final boolean failOnError = AJAXRequestDataTools.parseBoolParameter(PARAM_FAIL_ON_ERROR, request, false);
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        FolderServiceDecorator decorator = new FolderServiceDecorator().put("hardDelete", request.getParameter("hardDelete"));
+        FolderServiceDecorator decorator = new FolderServiceDecorator().put(PARAM_HARD_DELETE, request.getParameter(PARAM_HARD_DELETE));
         final AJAXRequestResult result;
         if (failOnError) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
@@ -329,7 +334,7 @@ public final class DeleteAction extends AbstractFolderAction {
     public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthAccess access) throws OXException {
         final JSONArray jsonArray = (JSONArray) request.requireData();
         final int len = jsonArray.length();
-        String treeId = request.getParameter("tree");
+        String treeId = request.getParameter(PARAM_TREE);
         if (null == treeId) {
             treeId = getDefaultTreeIdentifier();
         }
@@ -345,6 +350,39 @@ public final class DeleteAction extends AbstractFolderAction {
             }
 
             return true;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public EnqueuableAJAXActionService.Result isEnqueueable(AJAXRequestData request, ServerSession session) throws OXException {
+
+        String treeId = request.getParameter(PARAM_TREE);
+        if (null == treeId) {
+            treeId = getDefaultTreeIdentifier();
+        }
+
+        Boolean bExtendedResponse = request.getParameter(EXTENDED_RESPONSE, boolean.class, true);
+        boolean extendedResponse = bExtendedResponse != null ? bExtendedResponse.booleanValue() : false;
+
+        boolean failOnError = AJAXRequestDataTools.parseBoolParameter(PARAM_FAIL_ON_ERROR, request, false);
+        String hardDelete = request.getParameter(PARAM_HARD_DELETE);
+
+        final JSONArray jsonArray = (JSONArray) request.requireData();
+        int hash = jsonArray.toString().hashCode();
+
+        try {
+            JSONObject jKeyDesc = new JSONObject(4);
+            jKeyDesc.put("module", "folder");
+            jKeyDesc.put("action", "delete");
+            jKeyDesc.put(PARAM_TREE, treeId);
+            jKeyDesc.put(PARAM_FAIL_ON_ERROR, failOnError);
+            jKeyDesc.put(EXTENDED_RESPONSE, extendedResponse);
+            jKeyDesc.put(PARAM_HARD_DELETE, hardDelete);
+            jKeyDesc.put("body", hash);
+
+            return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
