@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.session.Session;
 
 /**
  * {@link MediaMetadataExtractor} - Extracts possible metadata from a certain media resources (images, videos, etc.).
@@ -74,13 +75,14 @@ public interface MediaMetadataExtractor {
     /**
      * Checks the effort of extracting media metadata from given input stream.
      *
+     * @param session The user session
      * @param in The input stream to examine
      * @param document The document associated with given stream
      * @param optArguments Optional (mutable) additional arguments
      * @return The effort
      * @throws OXException If effort estimation fails
      */
-    Effort estimateEffort(InputStream in, DocumentMetadata document, Map<String, Object> optArguments) throws OXException;
+    Effort estimateEffort(Session session, InputStream in, DocumentMetadata document, Map<String, Object> optArguments) throws OXException;
 
     /**
      * Extracts media metadata from given stream and applies them to specified document.

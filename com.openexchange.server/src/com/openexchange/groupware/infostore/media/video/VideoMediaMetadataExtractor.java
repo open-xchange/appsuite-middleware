@@ -55,25 +55,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
-import org.jcodec.codecs.mpeg12.MPEGDecoder;
-import org.jcodec.codecs.mpeg4.MPEG4Decoder;
-import org.jcodec.codecs.mpeg4.MPEG4DecodingContext;
-import org.jcodec.common.Codec;
-import org.jcodec.common.JCodecUtil;
-import org.jcodec.common.TrackType;
-import org.jcodec.common.VideoCodecMeta;
 import org.jcodec.common.io.FileChannelWrapper;
-import org.jcodec.common.model.Size;
 import org.jcodec.containers.mkv.MKVParser;
 import org.jcodec.containers.mkv.MKVType;
 import org.jcodec.containers.mkv.boxes.EbmlBase;
@@ -95,10 +85,10 @@ import com.openexchange.groupware.infostore.media.InputStreamProvider;
 import com.openexchange.groupware.infostore.media.MediaMetadataExtractor;
 import com.openexchange.groupware.infostore.media.MediaMetadataExtractors;
 import com.openexchange.groupware.infostore.media.video.mkv.MkvUtility;
-import com.openexchange.java.GeoLocation;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.session.Session;
 
 /**
  * {@link VideoMediaMetadataExtractor} - The extractor for video files.
@@ -162,7 +152,7 @@ public class VideoMediaMetadataExtractor implements MediaMetadataExtractor {
     }
 
     @Override
-    public Effort estimateEffort(InputStream in, DocumentMetadata document, Map<String, Object> optArguments) throws OXException {
+    public Effort estimateEffort(Session session, InputStream in, DocumentMetadata document, Map<String, Object> optArguments) throws OXException {
         if (null == indicatesVideo(document)) {
             return Effort.NOT_APPLICABLE;
         }
@@ -202,11 +192,9 @@ public class VideoMediaMetadataExtractor implements MediaMetadataExtractor {
             in = null == in ? provider.getInputStream() : in;
 
             Date captureDate = null;
-            Object timeZoneOffset = null;
             Long width = null;
             Long height = null;
             Long durationMillis = null;
-            GeoLocation geoLocation = null;
             Map<String, Object> mediaMeta = new LinkedHashMap<String, Object>(4);
 
             boolean processFile = true;
@@ -256,32 +244,6 @@ public class VideoMediaMetadataExtractor implements MediaMetadataExtractor {
                 } finally {
                     Streams.close(fileInputStream);
                     FileUtils.deleteQuietly(tempFile);
-                }
-            }
-
-            if (false && mimeType.indexOf("mpeg") >= 0) {
-                ByteBuffer b = ByteBuffer.wrap(IOUtils.toByteArray(in));
-                Codec detectDecoder = JCodecUtil.detectDecoder(b);
-                if (null != detectDecoder && TrackType.VIDEO == detectDecoder.getType()) {
-                    processFile = false;
-                    VideoCodecMeta videoCodecMeta = null;
-                    if (MPEG4Decoder.probe(b) > 1) {
-                        MPEG4Decoder decoder = new MPEG4Decoder();
-                        videoCodecMeta = decoder.getCodecMeta(b);
-                        MPEG4DecodingContext context = MPEG4DecodingContext.readFromHeaders(b);
-                        if (null != context) {
-                            captureDate = new Date(context.time);
-                        }
-                    }
-                    if (MPEGDecoder.probe(b) > 1) {
-                        MPEGDecoder decoder = new MPEGDecoder();
-                        videoCodecMeta = decoder.getCodecMeta(b);
-                    }
-                    if (null != videoCodecMeta) {
-                        Size size = videoCodecMeta.getSize();
-                        height = Long.valueOf(Integer.toUnsignedLong(size.getHeight()));
-                        width = Long.valueOf(Integer.toUnsignedLong(size.getWidth()));
-                    }
                 }
             }
 
@@ -418,9 +380,6 @@ public class VideoMediaMetadataExtractor implements MediaMetadataExtractor {
             }
             if (null != durationMillis) {
                 //document.setDuration(durationMillis.longValue());
-            }
-            if (null != geoLocation) {
-                document.setGeoLocation(geoLocation);
             }
             if (null != captureDate) {
                 document.setCaptureDate(captureDate);
