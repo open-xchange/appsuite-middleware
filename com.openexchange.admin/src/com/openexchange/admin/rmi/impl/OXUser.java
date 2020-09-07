@@ -1912,6 +1912,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 log(LogLevel.ERROR, LOGGER, credentials, e, EMPTY_STRING);
                 throw e;
             }
+            checkExistence(ctx);
             if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                 auth.setLogin(auth.getLogin().toLowerCase());
             }
