@@ -106,6 +106,8 @@ public class Metadata {
     public static final int MEDIA_STATUS = 724;
     public static final int MEDIA_DATE = 725;
 
+    public static final int CREATED_FROM = 51;
+    public static final int MODIFIED_FROM = 52;
 
     public static final Metadata LAST_MODIFIED_LITERAL = new Metadata(LAST_MODIFIED, "last_modified");
     public static final Metadata CREATION_DATE_LITERAL = new Metadata(CREATION_DATE, "creation_date");
@@ -148,6 +150,8 @@ public class Metadata {
     public static final Metadata MEDIA_META_LITERAL = new Metadata(MEDIA_META, "media_meta");
     public static final Metadata MEDIA_STATUS_LITERAL = new Metadata(MEDIA_STATUS, "media_status");
     public static final Metadata MEDIA_DATE_LITERAL = new Metadata(MEDIA_DATE, "media_date");
+    public static final Metadata CREATED_FROM_LITERAL = new Metadata(CREATED_FROM, "created_from");
+    public static final Metadata MODIFIED_FROM_LITERAL = new Metadata(MODIFIED_FROM, "modified_from");
 
     public static final Metadata[] VALUES_ARRAY = new Metadata[]{
         LAST_MODIFIED_LITERAL,
@@ -189,7 +193,9 @@ public class Metadata {
         CAMERA_EXPOSURE_TIME_LITERAL,
         CAMERA_FOCAL_LENGTH_LITERAL,
         MEDIA_META_LITERAL,
-        MEDIA_STATUS_LITERAL
+        MEDIA_STATUS_LITERAL,
+        CREATED_FROM_LITERAL,
+        MODIFIED_FROM_LITERAL
     };
 
     public static final Metadata[] HTTPAPI_VALUES_ARRAY = new Metadata[]{
@@ -230,7 +236,9 @@ public class Metadata {
         CAMERA_EXPOSURE_TIME_LITERAL,
         CAMERA_FOCAL_LENGTH_LITERAL,
         MEDIA_META_LITERAL,
-        MEDIA_STATUS_LITERAL
+        MEDIA_STATUS_LITERAL,
+        CREATED_FROM_LITERAL,
+        MODIFIED_FROM_LITERAL
     };
 
     public static final Metadata[] MEDIA_VALUES_ARRAY = new Metadata[]{
@@ -332,6 +340,8 @@ public class Metadata {
         case MEDIA_META: return MEDIA_META_LITERAL;
         case MEDIA_STATUS: return MEDIA_STATUS_LITERAL;
         case MEDIA_DATE: return MEDIA_DATE_LITERAL;
+        case CREATED_FROM: return CREATED_FROM_LITERAL;
+        case MODIFIED_FROM: return MODIFIED_FROM_LITERAL;
         default : return null;
         }
     }

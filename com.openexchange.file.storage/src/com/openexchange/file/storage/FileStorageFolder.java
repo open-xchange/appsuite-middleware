@@ -55,6 +55,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link FileStorageFolder} - Represents a file storage folder.
@@ -249,5 +250,19 @@ public interface FileStorageFolder extends FileStorageConstants {
      * @return The entity, or <code>-1</code> if not available
      */
     int getModifiedBy();
+
+    /**
+     * Gets the entity info from folder creator
+     * 
+     * @return The entity info
+     */
+    EntityInfo getCreatedFrom();
+
+    /**
+     * Gets the entity info from latest modificator
+     * 
+     * @return The entity info
+     */
+    EntityInfo getModifiedFrom();
 
 }

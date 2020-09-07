@@ -282,6 +282,8 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         creationDate = fsFolder.getCreationDate();
         createdBy = fsFolder.getCreatedBy();
         modifiedBy = fsFolder.getModifiedBy();
+        createdFrom = fsFolder.getCreatedFrom();
+        modifiedFrom = fsFolder.getModifiedFrom();
     }
 
     private Set<String> getSupportedCapabilities(FileStorageFolder fsFolder, IDBasedFolderAccess folderAccess) {

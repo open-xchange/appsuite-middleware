@@ -102,6 +102,7 @@ import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.EffectiveObjectPermission;
@@ -114,6 +115,7 @@ import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostoreFolderPermission;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
+import com.openexchange.groupware.infostore.EntityInfoLoader;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
@@ -4226,6 +4228,21 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             for (DocumentMetadata document : documents) {
                 maxSequenceNumber = Math.max(maxSequenceNumber, document.getSequenceNumber());
                 objectIDs.add(Integer.valueOf(document.getId()));
+            }
+            if (null != optSession && (Metadata.contains(columns, Metadata.CREATED_FROM_LITERAL) || Metadata.contains(columns, Metadata.MODIFIED_FROM_LITERAL))) {
+                EntityInfoLoader loader = new EntityInfoLoader();
+                if (Metadata.contains(columns, Metadata.CREATED_FROM_LITERAL)) {
+                    for (DocumentMetadata document : documents) {
+                        EntityInfo entityInfo = loader.load(document.getCreatedBy(), optSession);
+                        document.setCreatedFrom(entityInfo);
+                    }
+                }
+                if (Metadata.contains(columns, Metadata.MODIFIED_FROM_LITERAL)) {
+                    for (DocumentMetadata document : documents) {
+                        EntityInfo entityInfo = loader.load(document.getModifiedBy(), optSession);
+                        document.setModifiedFrom(entityInfo);
+                    }
+                }
             }
             final long sequenceNumber = maxSequenceNumber;
             TimedResult<DocumentMetadata> timedResult = new TimedResult<DocumentMetadata>() {

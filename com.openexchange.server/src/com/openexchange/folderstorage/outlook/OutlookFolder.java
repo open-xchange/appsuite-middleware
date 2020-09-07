@@ -67,6 +67,7 @@ import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UsedForSync;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 
@@ -538,6 +539,26 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder,
     @Override
     public UsedForSync getUsedForSync() {
         return realFolder.getUsedForSync();
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return realFolder.getCreatedFrom();
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        realFolder.setCreatedFrom(createdFrom);
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return realFolder.getModifiedFrom();
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        realFolder.setModifiedFrom(modifiedFrom);
     }
 
 }

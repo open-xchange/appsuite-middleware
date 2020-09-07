@@ -100,6 +100,8 @@ public class XctxFolderConverter extends FolderConverter {
         UserizedFileStorageFolder storageFolder = super.getStorageFolder(folder);
         storageFolder.setCreatedBy(0);
         storageFolder.setModifiedBy(0);
+        storageFolder.setCreatedFrom(folder.getCreatedFrom());
+        storageFolder.setModifiedFrom(folder.getModifiedFrom());
         storageFolder.setPermissions(tranferForeignPermissions(storageFolder.getPermissions()));
         storageFolder.setOwnPermission(tranferForeignPermission(storageFolder.getOwnPermission()));
         return storageFolder;

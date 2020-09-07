@@ -67,6 +67,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.session.Session;
@@ -625,6 +626,26 @@ public class UserizedFolderImpl implements UserizedFolder {
     @Override
     public void setUsedForSync(UsedForSync usedForSync) {
         folder.setUsedForSync(usedForSync);
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return folder.getCreatedFrom();
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        folder.setCreatedFrom(createdFrom);
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return folder.getModifiedFrom();
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        folder.setModifiedFrom(modifiedFrom);
     }
 
 }

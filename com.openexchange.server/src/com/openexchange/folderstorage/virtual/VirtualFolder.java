@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 
@@ -508,6 +509,26 @@ public final class VirtualFolder implements ParameterizedFolder {
     @Override
     public void setOriginPath(FolderPath originPath) {
         realFolder.setOriginPath(originPath);
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return realFolder.getCreatedFrom();
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        realFolder.setCreatedFrom(createdFrom);
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return realFolder.getModifiedFrom();
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        realFolder.setModifiedFrom(modifiedFrom);
     }
 
 }

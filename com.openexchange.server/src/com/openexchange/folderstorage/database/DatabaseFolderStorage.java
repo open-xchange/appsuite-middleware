@@ -150,10 +150,12 @@ import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.infostore.EntityInfoLoader;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
@@ -980,6 +982,16 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
             if (storageParameters.getUser().isAnonymousGuest()) {
                 handleAnonymousUser(retval, treeId, storageType, storageParameters, con);
+            }
+
+            EntityInfoLoader loader = new EntityInfoLoader();
+            if (0 < retval.getCreatedBy()) {
+                EntityInfo entityInfo = loader.load(retval.getCreatedBy(), storageParameters.getSession());
+                retval.setCreatedFrom(entityInfo);
+            }
+            if (0 < retval.getModifiedBy()) {
+                EntityInfo entityInfo = loader.load(retval.getModifiedBy(), storageParameters.getSession());
+                retval.setModifiedFrom(entityInfo);
             }
             return retval;
         } finally {

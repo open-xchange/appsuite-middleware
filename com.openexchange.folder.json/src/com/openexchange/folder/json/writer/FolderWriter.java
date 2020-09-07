@@ -88,6 +88,7 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
@@ -735,6 +736,22 @@ public final class FolderWriter {
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final Set<String> caps = getSupportedCapabilities(folder);
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.SUPPORTED_CAPABILITIES.getName() : null, null == caps ? JSONObject.NULL : new JSONArray(caps));
+            }
+        });
+        m.put(FolderField.CREATED_FROM.getColumn(), new FolderFieldWriter() {
+            
+            @Override
+            public void writeField(JSONValuePutter jsonValue, UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
+                EntityInfo entityInfo = folder.getCreatedFrom();
+                jsonValue.put(jsonValue.withKey() ? FolderField.CREATED_FROM.getName() : null, null == entityInfo ? JSONObject.NULL : entityInfo.toJSON());
+            }
+        });
+        m.put(FolderField.MODIFIED_FROM.getColumn(), new FolderFieldWriter() {
+            
+            @Override
+            public void writeField(JSONValuePutter jsonValue, UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
+                EntityInfo entityInfo = folder.getModifiedFrom();
+                jsonValue.put(jsonValue.withKey() ? FolderField.MODIFIED_FROM.getName() : null, null == entityInfo ? JSONObject.NULL : entityInfo.toJSON());
             }
         });
         STATIC_WRITERS_MAP = m;

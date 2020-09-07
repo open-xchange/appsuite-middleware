@@ -263,4 +263,14 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
         return null == captureDate ? file.getLastModified() : captureDate;
     }
 
+    @Override
+    public Object created_from(Object... args) {
+        return md(args).getCreatedFrom();
+    }
+
+    @Override
+    public Object modified_from(Object... args) {
+        return md(args).getModifiedFrom();
+    }
+
 }

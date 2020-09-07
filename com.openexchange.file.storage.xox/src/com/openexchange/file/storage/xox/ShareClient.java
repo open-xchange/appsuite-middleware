@@ -110,6 +110,7 @@ import com.openexchange.folderstorage.BasicGuestPermission;
 import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Strings;
@@ -231,7 +232,17 @@ public class ShareClient {
     public XOXFolder getFolder(String folderId) throws OXException {
         RemoteFolder remoteFolder = ajaxClient.execute(new GetFolderCall(folderId));
         final int userId = session.getUserId();
-        return new XOXFolder(userId, remoteFolder);
+        XOXFolder folder = new XOXFolder(userId, remoteFolder);
+        XOXEntityInfoLoader loader = new XOXEntityInfoLoader(ajaxClient);
+        if (0 < remoteFolder.getCreatedBy()) {
+            EntityInfo entityInfo = loader.load(remoteFolder.getID(), folder.getCreatedBy());
+            folder.setCreatedFrom(entityInfo);
+        }
+        if (0 < remoteFolder.getModifiedBy()) {
+            EntityInfo entityInfo = loader.load(remoteFolder.getID(), folder.getModifiedBy());
+            folder.setModifiedFrom(entityInfo);
+        }
+        return folder;
     }
 
     /**
@@ -244,7 +255,21 @@ public class ShareClient {
     public XOXFolder[] getSubFolders(String parentId) throws OXException {
         List<RemoteFolder> folders = ajaxClient.execute(new ListFoldersCall(getFolderId(parentId)));
         final int userId = session.getUserId();
-        List<XOXFolder> ret = folders.stream().map(f -> new XOXFolder(userId, f)).collect(Collectors.toList());
+//        List<XOXFolder> ret = folders.stream().map(f -> new XOXFolder(userId, f)).collect(Collectors.toList());
+        XOXEntityInfoLoader loader = new XOXEntityInfoLoader(ajaxClient);
+        List<XOXFolder> ret = new ArrayList<XOXFolder>(folders.size());
+        for (RemoteFolder folder : folders) {
+            XOXFolder f = new XOXFolder(userId, folder);
+            if (0 < folder.getCreatedBy()) {
+                EntityInfo entityInfo = loader.load(folder.getID(), folder.getCreatedBy());
+                f.setCreatedFrom(entityInfo);
+            }
+            if (0 < folder.getModifiedBy()) {
+                EntityInfo entityInfo = loader.load(folder.getID(), folder.getModifiedBy());
+                f.setModifiedFrom(entityInfo);
+            }
+            ret.add(f);
+        }
         return ret.toArray(new XOXFolder[ret.size()]);
     }
 
@@ -420,6 +445,17 @@ public class ShareClient {
      */
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order, Range range) throws OXException {
         final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
+        boolean requestCreatedFrom = fields == null;
+        boolean requestModifiedFrom = fields == null;
+        // TODO: Detect 7.10.5 OX to request those fields directly
+        if (fieldsToQuery.contains(Field.CREATED_FROM)) {
+            fieldsToQuery.remove(Field.CREATED_FROM);
+            requestCreatedFrom = true;
+        }
+        if (fieldsToQuery.contains(Field.MODIFIED_FROM)) {
+            fieldsToQuery.remove(Field.MODIFIED_FROM);
+            requestModifiedFrom = true;
+        }
         //@formatter:off
         List<? extends File> files = ajaxClient.execute(
             new GetAllCall(getFolderId(folderId),
@@ -429,6 +465,19 @@ public class ShareClient {
                           range != null ? I(range.from) : null,
                           range != null ? I(range.to) : null));
         //@formatter:on
+        if (requestCreatedFrom || requestModifiedFrom) {
+            XOXEntityInfoLoader loader = new XOXEntityInfoLoader(ajaxClient);
+            for (File file : files) {
+                if (requestCreatedFrom) {
+                    EntityInfo info = loader.load(file.getFolderId(), file.getCreatedBy());
+                    file.setCreatedFrom(info);
+                }
+                if (requestModifiedFrom) {
+                    EntityInfo info = loader.load(file.getFolderId(), file.getModifiedBy());
+                    file.setModifiedFrom(info);
+                }
+            }
+        }
         return new FileTimedResult((List<File>) files);
     }
 

@@ -12,6 +12,7 @@ import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.infostore.internal.Utils;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
@@ -500,6 +501,26 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
     @Override
     public MediaStatus getMediaStatusForClient(Session session) {
         return document.getMediaStatusForClient(session);
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return document.getCreatedFrom();
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        document.setCreatedFrom(createdFrom);
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return document.getModifiedFrom();
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        document.setModifiedFrom(modifiedFrom);
     }
 
 }

@@ -75,6 +75,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.actions.files.AJAXInfostoreRequest;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.file.storage.meta.FileFieldGet;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
@@ -376,6 +377,16 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
             return new JSONArray(0);
         case ORIGIN:
             return handleFolderPath((FolderPath) value);
+        case CREATED_FROM:
+            if (null != value) {
+                return ((EntityInfo) value).toJSON();
+            }
+            return null;
+        case MODIFIED_FROM:
+            if (null != value) {
+                return ((EntityInfo) value).toJSON();
+            }
+            return null;
         default: // do nothing;
         }
 
