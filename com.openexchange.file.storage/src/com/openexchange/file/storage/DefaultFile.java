@@ -55,6 +55,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.java.GeoLocation;
 
 /**
@@ -105,6 +106,8 @@ public class DefaultFile extends AbstractFile {
     private Double cameraFocalLength = null;
     private Map<String, Object> mediaMeta = null;
     private MediaStatus mediaStatus = null;
+    private EntityInfo createdFrom;
+    private EntityInfo modifiedFrom;
 
     /**
      * Initializes a new {@link DefaultFile}.
@@ -567,6 +570,26 @@ public class DefaultFile extends AbstractFile {
     @Override
     public void setMediaStatus(MediaStatus mediaStatus) {
         this.mediaStatus = mediaStatus;
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return createdFrom;
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        this.createdFrom = createdFrom;
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return modifiedFrom;
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        this.modifiedFrom = modifiedFrom;
     }
 
 }

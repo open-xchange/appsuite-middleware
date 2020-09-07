@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,57 +47,55 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.xox;
 
+import java.util.HashMap;
+import java.util.Map;
+import org.slf4j.Logger;
+import com.openexchange.api.client.ApiClient;
+import com.openexchange.api.client.common.calls.user.GetEntityInfoCall;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.groupware.EntityInfo;
 
 /**
- * A {@link FileFieldSwitcher} allows to generically do work for a certain field
+ * {@link XOXEntityInfoLoader}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.5
  */
-public interface FileFieldSwitcher {
+public class XOXEntityInfoLoader {
 
-    Object lastModified(Object...args);
-    Object created(Object...args);
-    Object modifiedBy(Object...args);
-    Object folderId(Object...args);
-    Object title(Object...args);
-    Object version(Object...args);
-    Object content(Object...args);
-    Object id(Object...args);
-    Object fileSize(Object...args);
-    Object description(Object...args);
-    Object url(Object...args);
-    Object createdBy(Object...args);
-    Object filename(Object...args);
-    Object fileMimetype(Object...args);
-    Object sequenceNumber(Object...args);
-    Object categories(Object...args);
-    Object lockedUntil(Object...args);
-    Object fileMd5sum(Object...args);
-    Object versionComment(Object...args);
-    Object currentVersion(Object...args);
-    Object colorLabel(Object...args);
-    Object lastModifiedUtc(Object...args);
-    Object numberOfVersions(Object...args);
-    Object meta(Object...args);
-    Object objectPermissions(Object...args);
-    Object shareable(Object...args);
-    Object origin(Object...args);
-    Object captureDate(Object... args);
-    Object geolocation(Object... args);
-    Object width(Object... args);
-    Object height(Object... args);
-    Object cameraMake(Object... args);
-    Object cameraModel(Object... args);
-    Object cameraIsoSpeed(Object... args);
-    Object cameraAperture(Object... args);
-    Object cameraExposureTime(Object... args);
-    Object cameraFocalLength(Object... args);
-    Object mediaMeta(Object... args);
-    Object mediaStatus(Object[] args);
-    Object mediaDate(Object[] args);
-    Object created_from(Object...args);
-    Object modified_from(Object...args);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(XOXEntityInfoLoader.class);
+
+    private final Map<String, EntityInfo> knownUsers;
+    private final ApiClient apiClient;
+
+    public XOXEntityInfoLoader(ApiClient apiClient) {
+        super();
+        this.apiClient = apiClient;
+        this.knownUsers = new HashMap<String, EntityInfo>();
+    }
+
+    /**
+     * Enhances a file with entity info for 'created_from' and/or 'modified_from'
+     *
+     * @param files The list of files
+     */
+    public EntityInfo load(File file, int userId) {
+        String identifier = XOXStorageConstants.ID + "/" + file.getFolderId() + "/" + userId;
+        if (knownUsers.containsKey(identifier)) {
+            return knownUsers.get(identifier);
+        }
+        GetEntityInfoCall call = new GetEntityInfoCall(identifier, userId);
+        EntityInfo entityInfo = null;
+        try {
+            entityInfo = apiClient.execute(call);
+        } catch (OXException e) {
+            LOG.info("Could not get entity info.", e);
+        }
+        knownUsers.put(identifier, entityInfo);
+        return entityInfo;
+    }
 
 }

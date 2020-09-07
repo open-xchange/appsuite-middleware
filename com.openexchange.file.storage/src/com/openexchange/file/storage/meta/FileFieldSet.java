@@ -56,6 +56,7 @@ import com.openexchange.file.storage.AbstractFileFieldSwitcher;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.MediaStatus;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.java.GeoLocation;
 
 /**
@@ -351,6 +352,22 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
     public Object mediaDate(Object[] args) {
         // Nothing to do
         return null;
+    }
+
+    @Override
+    public Object created_from(Object... args) {
+        if (EntityInfo.class.isInstance(args[1])) {
+            md(args).setCreatedFrom((EntityInfo) args[1]);
+        }
+        return ret(args);
+    }
+
+    @Override
+    public Object modified_from(Object... args) {
+        if (EntityInfo.class.isInstance(args[1])) {
+            md(args).setModifiedFrom((EntityInfo) args[1]);
+        }
+        return ret(args);
     }
 
     private Object ret(final Object[] args) {

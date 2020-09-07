@@ -58,6 +58,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.MediaStatus;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
@@ -474,6 +475,26 @@ public class XctxFile extends AbstractFile {
     @Override
     public void setMediaStatus(MediaStatus mediaStatus) {
         document.setMediaStatus(mediaStatus);
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return document.getCreatedFrom();
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        document.setCreatedFrom(createdFrom);
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return document.getModifiedFrom();
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        document.setModifiedFrom(modifiedFrom);
     }
 
 }

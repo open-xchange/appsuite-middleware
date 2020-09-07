@@ -62,9 +62,11 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.MediaStatus;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.json.DateMapping;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
+import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.LongMapping;
@@ -1046,6 +1048,82 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
             public void remove(DefaultFile object) {
                 object.setCaptureDate(null);
             }
+        });
+
+        mappings.put(File.Field.CREATED_FROM, new DefaultJsonMapping<EntityInfo, DefaultFile>(File.Field.CREATED_FROM.getName(), I(File.Field.CREATED_FROM.getNumber())) {
+
+            @Override
+            public void deserialize(JSONObject from, DefaultFile to) throws JSONException, OXException {
+                if (from.isNull(getAjaxName())) {
+                    to.setCreatedFrom(null);
+                } else {
+                    Object o = from.get(getAjaxName());
+                    if (JSONObject.class.isInstance(o)) {
+                        JSONObject json = (JSONObject)o;
+                        EntityInfo info = EntityInfo.parseJSON(json);
+                        to.setCreatedFrom(info);
+                    }
+                }
+            }
+
+            @Override
+            public boolean isSet(DefaultFile object) {
+                return null != object && null != object.getCreatedFrom();
+            }
+
+            @Override
+            public void set(DefaultFile object, EntityInfo value) throws OXException {
+                object.setCreatedFrom(value);
+            }
+
+            @Override
+            public EntityInfo get(DefaultFile object) {
+                return object.getCreatedFrom();
+            }
+
+            @Override
+            public void remove(DefaultFile object) {
+                object.setCreatedFrom(null);
+            }
+            
+        });
+
+        mappings.put(File.Field.MODIFIED_FROM, new DefaultJsonMapping<EntityInfo, DefaultFile>(File.Field.MODIFIED_FROM.getName(), I(File.Field.MODIFIED_FROM.getNumber())) {
+
+            @Override
+            public void deserialize(JSONObject from, DefaultFile to) throws JSONException, OXException {
+                if (from.isNull(getAjaxName())) {
+                    to.setModifiedFrom(null);
+                } else {
+                    Object o = from.get(getAjaxName());
+                    if (JSONObject.class.isInstance(o)) {
+                        JSONObject json = (JSONObject)o;
+                        EntityInfo info = EntityInfo.parseJSON(json);
+                        to.setModifiedFrom(info);
+                    }
+                }
+            }
+
+            @Override
+            public boolean isSet(DefaultFile object) {
+                return null != object && null != object.getModifiedFrom();
+            }
+
+            @Override
+            public void set(DefaultFile object, EntityInfo value) throws OXException {
+                object.setModifiedFrom(value);
+            }
+
+            @Override
+            public EntityInfo get(DefaultFile object) {
+                return object.getModifiedFrom();
+            }
+
+            @Override
+            public void remove(DefaultFile object) {
+                object.setModifiedFrom(null);
+            }
+            
         });
 
         return mappings;

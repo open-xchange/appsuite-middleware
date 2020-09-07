@@ -63,6 +63,7 @@ import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.infostore.internal.Utils;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -843,6 +844,26 @@ public class FileMetadata implements DocumentMetadata {
                 return file.getMediaStatus();
             }
 
+            @Override
+            public EntityInfo getCreatedFrom() {
+                return file.getCreatedFrom();
+            }
+
+            @Override
+            public void setCreatedFrom(EntityInfo createdFrom) {
+                // nothing to do
+            }
+
+            @Override
+            public EntityInfo getModifiedFrom() {
+                return file.getModifiedFrom();
+            }
+
+            @Override
+            public void setModifiedFrom(EntityInfo modifiedFrom) {
+                // nothing to do
+            }
+
         };
         return metaData;
     }
@@ -1018,6 +1039,26 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public MediaStatus getMediaStatusForClient(Session session) {
         return file.getMediaStatus();
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return file.getCreatedFrom();
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        file.setCreatedFrom(createdFrom);
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return file.getModifiedFrom();
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        file.setModifiedFrom(modifiedFrom);
     }
 
 }

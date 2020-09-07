@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.java.GeoLocation;
 
 /**
@@ -168,6 +169,14 @@ public interface File {
     Map<String, Object> getMeta();
 
     void setMeta(Map<String, Object> properties);
+
+    EntityInfo getCreatedFrom();
+
+    void setCreatedFrom(EntityInfo createdFrom);
+
+    EntityInfo getModifiedFrom();
+
+    void setModifiedFrom(EntityInfo modifiedFrom);
 
     /**
      * Checks whether {@link #getFileSize()} returns the exact size w/o any encodings (e.g. base64) applied.
@@ -476,6 +485,8 @@ public interface File {
         MEDIA_META("media_meta", 723),
         MEDIA_STATUS("media_status", 724),
         MEDIA_DATE("media_date", 725),
+        CREATED_FROM("created_from", 51),
+        MODIFIED_FROM("modified_from", 52),
         ;
 
         /** The set containing all media-associated fields */
@@ -596,6 +607,10 @@ public interface File {
                 return switcher.mediaStatus(args);
             case MEDIA_DATE:
                 return switcher.mediaDate(args);
+            case CREATED_FROM:
+                return switcher.created_from(args);
+            case MODIFIED_FROM:
+                return switcher.modified_from(args);
             default:
                 throw new IllegalArgumentException("Don't know field: " + getName());
             }

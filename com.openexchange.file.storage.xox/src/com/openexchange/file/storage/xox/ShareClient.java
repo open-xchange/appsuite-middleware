@@ -110,6 +110,7 @@ import com.openexchange.folderstorage.BasicGuestPermission;
 import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Strings;
@@ -420,6 +421,17 @@ public class ShareClient {
      */
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order, Range range) throws OXException {
         final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
+        boolean requestCreatedFrom = fields == null;
+        boolean requestModifiedFrom = fields == null;
+        // TODO: Detect 7.10.5 OX to request those fields directly
+        if (fieldsToQuery.contains(Field.CREATED_FROM)) {
+            fieldsToQuery.remove(Field.CREATED_FROM);
+            requestCreatedFrom = true;
+        }
+        if (fieldsToQuery.contains(Field.MODIFIED_FROM)) {
+            fieldsToQuery.remove(Field.MODIFIED_FROM);
+            requestModifiedFrom = true;
+        }
         //@formatter:off
         List<? extends File> files = ajaxClient.execute(
             new GetAllCall(getFolderId(folderId),
@@ -429,6 +441,19 @@ public class ShareClient {
                           range != null ? I(range.from) : null,
                           range != null ? I(range.to) : null));
         //@formatter:on
+        if (requestCreatedFrom || requestModifiedFrom) {
+            XOXEntityInfoLoader loader = new XOXEntityInfoLoader(ajaxClient);
+            for (File file : files) {
+                if (requestCreatedFrom) {
+                    EntityInfo info = loader.load(file, file.getCreatedBy());
+                    file.setCreatedFrom(info);
+                }
+                if (requestModifiedFrom) {
+                    EntityInfo info = loader.load(file, file.getModifiedBy());
+                    file.setModifiedFrom(info);
+                }
+            }
+        }
         return new FileTimedResult((List<File>) files);
     }
 
