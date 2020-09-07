@@ -350,7 +350,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, EMPTY_STRING);
                 throw invalidDataException;
             }
-            final int user_id = user.getId().intValue();
 
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
@@ -360,6 +359,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new NoSuchUserException(e);
             }
 
+            final int user_id = user.getId().intValue();
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException(ctx.getIdAsString());
             } else if (!tool.existsUser(ctx, user_id)) {
