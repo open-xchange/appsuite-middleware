@@ -777,6 +777,28 @@ EOF
         ox_remove_property ui/portal/customUWA /opt/open-xchange/etc/settings/ui.properties
         ox_scr_done SCR-713
     fi
+
+    if ox_scr_todo SCR-676
+    then
+        # rename all appenders, converters, encoders and policies classes
+        logconfig=/opt/open-xchange/etc/logback.xml
+        tmp=${logconfig}.tmp
+        cp -a --remove-destination $logconfig $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.LogstashSocketAppender/com.openexchange.logback.extensions.appenders.logstash.LogstashSocketAppender/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.CustomFieldsAction/com.openexchange.logback.extensions.encoders.CustomFieldsAction/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.ExtendedReplacingCompositeConverter/com.openexchange.logback.extensions.converters.ExtendedReplacingCompositeConverter/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.LineMDCConverter/com.openexchange.logback.extensions.converters.LineMDCConverter/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.LogSanitisingConverter/com.openexchange.logback.extensions.converters.LogSanitisingConverter/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.ThreadIdConverter/com.openexchange.logback.extensions.converters.ThreadIdConverter/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.ExtendedPatternLayoutEncoder/com.openexchange.logback.extensions.encoders.ExtendedPatternLayoutEncoder/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.JSONEncoder/com.openexchange.logback.extensions.encoders.JSONEncoder/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.FixedWindowRollingPolicy/com.openexchange.logback.extensions.policies.FixedWindowRollingPolicy/g' $tmp
+        if [[ $(ox_md5 $tmp) != $(ox_md5 $logconfig) ]]; then
+            cat $tmp >$logconfig
+        fi
+        rm $tmp
+        ox_scr_done SCR-676
+    fi
 }
 
 setConfigFilePermissions() {
