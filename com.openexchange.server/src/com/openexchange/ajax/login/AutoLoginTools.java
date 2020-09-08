@@ -318,8 +318,11 @@ public class AutoLoginTools {
          * ensure user & context are enabled
          */
         Context context = ContextStorage.getInstance().getContext(session.getContextId());
+        if (false == context.isEnabled()) {
+            throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+        }
         User user = UserStorage.getInstance().getUser(session.getUserId(), context);
-        if (false == context.isEnabled() || false == user.isMailEnabled()) {
+        if (false == user.isMailEnabled()) {
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
         }
         /*
