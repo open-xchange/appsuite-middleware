@@ -139,7 +139,7 @@ properties:
        Defaults to "true". If set to "false", sessions will be preserved in the storage, which helps in situations where the same session
        is used from clients on different nodes in the cluster. Still, the session in the in the distributed storage will get evicted 
        after being idle for some time, as specified in the map config at "hazelcast/session.properties".
-    defaultValue: true
+    defaultValue: false
     version: 7.10.4
     reloadable: false
     configcascadeAware: false

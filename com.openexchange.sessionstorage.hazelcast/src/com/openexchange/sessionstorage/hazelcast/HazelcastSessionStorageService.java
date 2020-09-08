@@ -49,6 +49,8 @@
 
 package com.openexchange.sessionstorage.hazelcast;
 
+import static com.openexchange.java.Autoboxing.D;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -72,12 +74,15 @@ import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
 import com.hazelcast.query.Predicate;
 import com.hazelcast.query.SqlPredicate;
+import com.openexchange.config.ConfigTools;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionAttributes;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
+import com.openexchange.sessionstorage.hazelcast.osgi.Services;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.threadpool.ThreadPools;
 import io.micrometer.core.instrument.Gauge;
@@ -138,6 +143,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     private final Unregisterer unregisterer;
     private final AtomicBoolean inactive;
     private final ConcurrentMap<String, AcquiredLatch> synchronizer;
+    private volatile Long maxShortTermIdleTime;
+    private volatile Long maxLongTermIdleTime;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
@@ -327,7 +334,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             IMap<String, PortableSession> sessionsMap = sessions();
             for (Session session : sessions) {
-                sessionsMap.putIfAbsent(session.getSessionID(), new PortableSession(session));
+                sessionsMap.putIfAbsent(session.getSessionID(), new PortableSession(session), -1, TimeUnit.MILLISECONDS, getMaxIdleTime(session), TimeUnit.MILLISECONDS);
             }
         } catch (HazelcastInstanceNotActiveException e) {
             throw handleNotActiveException(e);
@@ -343,7 +350,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         }
         ensureActive();
         try {
-            return null == sessions().putIfAbsent(session.getSessionID(), new PortableSession(session));
+            return null == sessions().putIfAbsent(session.getSessionID(), new PortableSession(session), -1, TimeUnit.MILLISECONDS, getMaxIdleTime(session), TimeUnit.MILLISECONDS);
         } catch (HazelcastInstanceNotActiveException e) {
             throw handleNotActiveException(e);
         } catch (HazelcastException e) {
@@ -361,7 +368,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (null != session) {
             ensureActive();
             try {
-                sessions().set(session.getSessionID(), new PortableSession(session), 0, TimeUnit.SECONDS);
+                sessions().set(session.getSessionID(), new PortableSession(session), -1, TimeUnit.MILLISECONDS, getMaxIdleTime(session), TimeUnit.MILLISECONDS);
             } catch (HazelcastInstanceNotActiveException e) {
                 throw handleNotActiveException(e);
             } catch (HazelcastException e) {
@@ -602,6 +609,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             return new ArrayList<Session>(sessions().values());
         } catch (HazelcastInstanceNotActiveException e) {
             inactive.set(true);
+            LOG.trace("", e);
         } catch (HazelcastException e) {
             LOG.debug("", e);
         } catch (OXException e) {
@@ -818,6 +826,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      *
      * @param sessionIDs The session ID to touch
      * @return The number of successfully touched sessions
+     * @throws OXException In case of hazelcast error
      */
     public int touch(List<String> sessionIDs) throws OXException {
         int touched = 0;
@@ -909,6 +918,68 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         }
     }
 
+    /**
+     * Gets the default max idle time for sessions not to be put in long term containers
+     *
+     * @return The max idle time in milliseconds
+     */
+    private long getMaxShortTermIdleTime() {
+        if (null != maxShortTermIdleTime) {
+            return maxShortTermIdleTime.longValue();
+        }
+        int defaultValue = 3600000;
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        if (null != configService) {
+            maxShortTermIdleTime = L(configService.getIntProperty("com.openexchange.sessiond.sessionDefaultLifeTime", defaultValue));
+            return maxShortTermIdleTime.longValue();
+        }
+        LOG.warn("ConfigurationService is not available, using default value: {}", L(defaultValue));
+        return defaultValue;
+    }
+
+    /**
+     * Gets the default max idle time for sessions to be put in long term containers
+     *
+     * @return The max idle time in milliseconds
+     */
+    private long getMaxLongTermIdleTime() {
+        if (null != maxLongTermIdleTime) {
+            return maxLongTermIdleTime.longValue();
+        }
+        String defaultValue = "1W";
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        if (null != configService) {
+            String value = configService.getProperty("com.openexchange.sessiond.sessionLongLifeTime", defaultValue);
+            Long tmp = L(ConfigTools.parseTimespan(value));
+            if (-1L == tmp.longValue()) {
+                LOG.warn("Invalid value {}, using default value {}", value, defaultValue);
+                return ConfigTools.parseTimespan(defaultValue);
+            }
+            maxLongTermIdleTime = tmp;
+            return maxLongTermIdleTime.longValue();
+        }
+        LOG.warn("ConfigurationService is not available, using default value: {}", defaultValue);
+        return ConfigTools.parseTimespan(defaultValue);
+    }
+
+    /**
+     * Gets the default max idle time for given session
+     *
+     * @param session The session
+     * @return The max idle time in milliseconds
+     */
+    private long getMaxIdleTime(Session session) {
+        if (null != session) {
+            if (false == session.isStaySignedIn() || session.isTransient()) {
+                // Do not put in long term containers
+                return getMaxShortTermIdleTime();
+            }
+            // Put in long term containers
+            return getMaxLongTermIdleTime();
+        }
+        return 0;
+    }
+
     // ------------------------------------ Exception handling ------------------------------------------------------------ //
 
     private OXException handleRuntimeException(RuntimeException e, OXException optRegular) {
@@ -948,9 +1019,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     private void initMetrics() {
         Gauge.builder("appsuite.sessionstorage.sessions.total", () -> {
                 try {
-                    return sessions().getLocalMapStats().getOwnedEntryCount();
+                    return L(sessions().getLocalMapStats().getOwnedEntryCount());
                 } catch (OXException e) {
-                    return Double.NaN;
+                    return D(Double.NaN);
                 }
             })
             .description("Total number of stored sessions (owned or backups) held by this node.")
@@ -959,9 +1030,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
         Gauge.builder("appsuite.sessionstorage.memory.bytes", () -> {
                 try {
-                    return sessions().getLocalMapStats().getOwnedEntryMemoryCost();
+                    return L(sessions().getLocalMapStats().getOwnedEntryMemoryCost());
                 } catch (OXException e) {
-                    return Double.NaN;
+                    return D(Double.NaN);
                 }
             })
             .description("Consumed memory of stored sessions (owned or backups) held by this node in.")
@@ -970,9 +1041,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
         Gauge.builder("appsuite.sessionstorage.sessions.total", () -> {
                 try {
-                    return sessions().getLocalMapStats().getBackupEntryCount();
+                    return L(sessions().getLocalMapStats().getBackupEntryCount());
                 } catch (OXException e) {
-                    return Double.NaN;
+                    return D(Double.NaN);
                 }
             })
             .description("Total number of stored sessions (owned or backups) held by this node.")
@@ -981,9 +1052,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
         Gauge.builder("appsuite.sessionstorage.memory.bytes", () -> {
                 try {
-                    return sessions().getLocalMapStats().getBackupEntryMemoryCost();
+                    return L(sessions().getLocalMapStats().getBackupEntryMemoryCost());
                 } catch (OXException e) {
-                    return Double.NaN;
+                    return D(Double.NaN);
                 }
             })
             .description("Consumed memory of stored sessions (owned or backups) held by this node.")

@@ -115,7 +115,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         asyncPutToSessionStorage = Boolean.parseBoolean(tmp.trim());
 
         obfuscationKey = conf.getProperty("com.openexchange.sessiond.encryptionKey", "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn");
-        removeFromSessionStorageOnTimeout = conf.getBoolProperty("com.openexchange.sessiond.removeFromSessionStorageOnTimeout", true);
+        removeFromSessionStorageOnTimeout = conf.getBoolProperty("com.openexchange.sessiond.removeFromSessionStorageOnTimeout", false);
     }
 
     @Override
