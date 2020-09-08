@@ -47,6 +47,9 @@ This command line tool registers a filestore.
 **--responsetimeout**
 : The optional response timeout in seconds when reading data from server (default: 0s; infinite).
 
+**--if-nonexistent**
+: If set returns the id of one an existing filestore instead of throwing an error.
+
 # EXAMPLES
 
 **registerfilestore -A masteradmin -P secret -t file:/var/lib/open-xchange/filestore -x 1000 -s 5000**
