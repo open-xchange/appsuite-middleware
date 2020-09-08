@@ -227,7 +227,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param resp The HTTP response
      */
     protected void handleSessiondException(OXException e, HttpServletRequest req, HttpServletResponse resp) {
-        if (SessionUtility.isSessionExpiredError(e)) {
+        if (SessionUtility.isIpCheckError(e)) {
             try {
                 // Drop Open-Xchange cookies
                 SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
