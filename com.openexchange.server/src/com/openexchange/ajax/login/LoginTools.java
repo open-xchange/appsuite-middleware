@@ -343,7 +343,7 @@ public final class LoginTools {
      *
      * @param req The HTTP request to parse from
      * @return The parsed share information or <code>null</code>
-     * @throws OXException If parsing share information fails; e.g. guest infor cannot be obtained from available share token
+     * @throws OXException If parsing share information fails; e.g. guest information cannot be obtained from available share token
      */
     public static String[] parseShareInformation(HttpServletRequest req) throws OXException {
         String token = req.getParameter(SHARE_TOKEN);
@@ -355,15 +355,16 @@ public final class LoginTools {
         if (null == shareService) {
             return null;
         }
-        String[] result = new String[0];
+
         GuestInfo guest = shareService.resolveGuest(token);
-        if (null != guest) {
-            int contextId = guest.getContextID();
-            int guestId = guest.getGuestID();
-            result = new String[] { String.valueOf(contextId), String.valueOf(guestId) };
+        if (null == guest) {
+            LOG.warn("No guest could be determined for share token: {}", token);
+            return new String[0];
         }
-        LOG.warn("No guest could be determined for share token: {}", token);
-        return result;
+
+        int contextId = guest.getContextID();
+        int guestId = guest.getGuestID();
+        return new String[] { Integer.toString(contextId), Integer.toString(guestId) };
     }
 
     /**
