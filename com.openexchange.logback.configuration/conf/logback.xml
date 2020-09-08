@@ -29,7 +29,7 @@
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>/var/log/open-xchange/open-xchange.log.0</file>
-        <rollingPolicy class="com.openexchange.logback.extensions.FixedWindowRollingPolicy">
+        <rollingPolicy class="com.openexchange.logback.extensions.policies.FixedWindowRollingPolicy">
             <fileNamePattern>/var/log/open-xchange/open-xchange.log.%i</fileNamePattern>
             <minIndex>1</minIndex>
             <maxIndex>99</maxIndex>
@@ -37,7 +37,7 @@
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
             <maxFileSize>2MB</maxFileSize>
         </triggeringPolicy>
-        <encoder class="com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder">
+        <encoder class="com.openexchange.logback.extensions.encoders.ExtendedPatternLayoutEncoder">
         	<!--
         	The '%sanitisedMessage' token has been introduced in order to address the 'CWE-117: Improper Output Neutralization for Logs' vulnerability.
         	This token ensures that the 'LogSanitisingConverter' is used in the logging pipeline in order to sanitise log messages that might contain
@@ -51,7 +51,7 @@
     <!--
     <appender name="FILE_COMPAT" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>/var/log/open-xchange/open-xchange.log.0</file>
-        <rollingPolicy class="com.openexchange.logback.extensions.FixedWindowRollingPolicy">
+        <rollingPolicy class="com.openexchange.logback.extensions.policies.FixedWindowRollingPolicy">
             <fileNamePattern>/var/log/open-xchange/open-xchange.log.%i</fileNamePattern>
             <minIndex>1</minIndex>
             <maxIndex>99</maxIndex>
@@ -59,7 +59,7 @@
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
             <maxFileSize>2MB</maxFileSize>
         </triggeringPolicy>
-        <encoder class="com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder">
+        <encoder class="com.openexchange.logback.extensions.encoders.ExtendedPatternLayoutEncoder">
             <pattern>%d{"MMM dd, yyyy H:mm:ss a"} %class.%method\(%class{0}.java:%line\)%n%level: %sanitisedMessage%n%lmdc%exception{full}</pattern>
         </encoder>
     </appender>
