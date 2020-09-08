@@ -1,3 +1,9 @@
+open-xchange-drive-client-windows (7.10.4-9) stable; urgency=medium
+
+  * Build for patch 2020-09-14 (5857)
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Tue, 08 Sep 2020 15:18:13 +0000
+
 open-xchange-drive-client-windows (7.10.4-8) stable; urgency=medium
 
   * Build for patch 2020-08-24 (5842)
