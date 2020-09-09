@@ -900,14 +900,86 @@ public final class Databases {
      * Executes an SQL query
      *
      * @param databaseService The {@link DatabaseService} to obtain the connection from
+     * @param connection The optional connection. If <code>null</code>, a new connection is fetched from the service
      * @param statement The statement to execute
      * @param rc The consumer of the result to use transform into a concrete java object
-     * @param consumers The consumers to fill the statement with variables
+     * @param valueSetters The valueSetters to fill the statement with variables
      * @throws SQLException In case of an SQL error
      * @throws OXException In all other error cases
      */
-    public static void executeAndConsumeQuery(DatabaseService databaseService, String statement, ResultConsumer rc, PreparedStatementValueSetter... consumers) throws SQLException, OXException {
-        executeAndConsumeQuery(-1, databaseService, statement, rc, consumers);
+    public static void executeAndConsumeQuery(DatabaseService databaseService, Connection connection, String statement, ResultConsumer rc, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
+        if (null == connection) {
+            executeAndConsumeQuery(-1, databaseService, statement, rc, valueSetters);
+        } else {
+            executeAndConsumeQuery(connection, statement, rc, valueSetters);
+        }
+    }
+
+    /**
+     * Executes an SQL query
+     * 
+     * @param <T> The class of the response object
+     * @param databaseService The database service
+     * @param connection The connection to use or <code>null</code> to obtain a connection
+     * @param statement The statement to execute
+     * @param producer The producer for the result object
+     * @param valueSetters The valueSetters to fill the statement with variables
+     * @return See {@link PreparedStatement#executeUpdate()}
+     * @throws SQLException In case of an SQL error
+     * @throws OXException In case result can't be produced
+     */
+    public static <T> T executeQuery(DatabaseService databaseService, Connection connection, String statement, ResultProduccer<T> producer, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
+        if (null == connection) {
+            return executeQuery(-1, databaseService, statement, producer, valueSetters);
+        }
+        return executeQuery(connection, statement, producer, valueSetters);
+    }
+
+    /**
+     * Executes an SQL query
+     *
+     * @param databaseService The {@link DatabaseService} to obtain the connection from
+     * @param statement The statement to execute
+     * @param rc The consumer of the result to use transform into a concrete java object
+     * @param valueSetters The valueSetters to fill the statement with variables
+     * @throws SQLException In case of an SQL error
+     * @throws OXException In all other error cases
+     */
+    public static void executeAndConsumeQuery(DatabaseService databaseService, String statement, ResultConsumer rc, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
+        executeAndConsumeQuery(-1, databaseService, statement, rc, valueSetters);
+    }
+
+    /**
+     * Executes an SQL query.
+     * 
+     * @param <T> The class of the result object
+     * @param contextId The context identifier to use when obtaining the connection. <code>-1</code> to fetch connection without context
+     * @param databaseService The {@link DatabaseService} to obtain the connection from
+     * @param statement The statement to execute
+     * @param producer The producer to produce the result object
+     * @param valueSetters The valueSetters to fill the statement with variables
+     * @param rc The consumer of the result to use transform into a concrete java object
+     * @param valueSetters The valueSetters to fill the statement with variables
+     * @return The result
+     * @throws SQLException In case of an SQL error
+     * @throws OXException In all other error cases
+     */
+    public static <T> T executeQuery(int contextId, DatabaseService databaseService, String statement, ResultProduccer<T> producer, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
+        Connection connection = null;
+        try {
+            connection = contextId <= 0 ? databaseService.getReadOnly() : databaseService.getReadOnly(contextId);
+            if (null != connection) {
+                connection.setAutoCommit(false);
+                return executeQuery(connection, statement, producer, valueSetters);
+            }
+        } finally {
+            if (contextId <= 0) {
+                databaseService.backReadOnly(connection);
+            } else {
+                databaseService.backReadOnly(contextId, connection);
+            }
+        }
+        return null;
     }
 
     /**
@@ -917,17 +989,17 @@ public final class Databases {
      * @param databaseService The {@link DatabaseService} to obtain the connection from
      * @param statement The statement to execute
      * @param rc The consumer of the result to use transform into a concrete java object
-     * @param valueSetter The consumers to fill the statement with variables
+     * @param valueSetters The valueSetters to fill the statement with variables
      * @throws SQLException In case of an SQL error
      * @throws OXException In all other error cases
      */
-    public static void executeAndConsumeQuery(int contextId, DatabaseService databaseService, String statement, ResultConsumer rc, PreparedStatementValueSetter... valueSetter) throws SQLException, OXException {
+    public static void executeAndConsumeQuery(int contextId, DatabaseService databaseService, String statement, ResultConsumer rc, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
         Connection connection = null;
         try {
             connection = contextId <= 0 ? databaseService.getReadOnly() : databaseService.getReadOnly(contextId);
             if (null != connection) {
                 connection.setAutoCommit(false);
-                executeAndConsumeQuery(connection, statement, rc, valueSetter);
+                executeAndConsumeQuery(connection, statement, rc, valueSetters);
             }
         } finally {
             if (contextId <= 0) {
@@ -943,13 +1015,13 @@ public final class Databases {
      *
      * @param databaseService The {@link DatabaseService} to obtain the connection from
      * @param statement The statement to execute
-     * @param valueSetter The consumers to fill the statement with variables
+     * @param valueSetters The valueSetters to fill the statement with variables
      * @return See {@link PreparedStatement#executeUpdate()} or <code>-1</code> if no connection could be obtained
      * @throws SQLException In case of an SQL error
      * @throws OXException If no connection can be obtained
      */
-    public static int executeUpdate(DatabaseService databaseService, String statement, PreparedStatementValueSetter... valueSetter) throws SQLException, OXException {
-        return executeUpdate(-1, databaseService, statement, valueSetter);
+    public static int executeUpdate(DatabaseService databaseService, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
+        return executeUpdate(-1, databaseService, statement, valueSetters);
     }
 
     /**
@@ -958,23 +1030,21 @@ public final class Databases {
      * @param contextId The context identifier to use when obtaining the connection. <code>-1</code> to fetch connection without context
      * @param databaseService The {@link DatabaseService} to obtain the connection from
      * @param statement The statement to execute
-     * @param valueSetter The consumers to fill the statement with variables
+     * @param valueSetters The valueSetters to fill the statement with variables
      * @return See {@link PreparedStatement#executeUpdate()} or <code>-1</code> if no connection could be obtained
      * @throws SQLException In case of an SQL error
      * @throws OXException If no connection can be obtained
      */
-    public static int executeUpdate(int contextId, DatabaseService databaseService, String statement, PreparedStatementValueSetter... valueSetter) throws SQLException, OXException {
+    public static int executeUpdate(int contextId, DatabaseService databaseService, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
         Connection connection = null;
         int rollback = 0;
         try {
             connection = contextId <= 0 ? databaseService.getWritable() : databaseService.getWritable(contextId);
             int result = -1;
-            if (null != connection) {
-                connection.setAutoCommit(false);
-                rollback = 1;
-                result = executeUpdate(connection, statement, valueSetter);
-                rollback = 2;
-            }
+            connection.setAutoCommit(false);
+            rollback = 1;
+            result = executeUpdate(connection, statement, valueSetters);
+            rollback = 2;
             return result;
         } finally {
             if (rollback > 0) {
@@ -997,16 +1067,16 @@ public final class Databases {
      * @param connection The connection to use
      * @param statement The statement to execute
      * @param rc The consumer of the result to use transform into a concrete java object
-     * @param valueSetter The consumers to fill the statement with variables
+     * @param valueSetters The valueSetters to fill the statement with variables
      * @throws SQLException In case of an SQL error
      * @throws OXException In all other error cases
      */
-    public static void executeAndConsumeQuery(Connection connection, String statement, ResultConsumer rc, PreparedStatementValueSetter... valueSetter) throws SQLException, OXException {
+    public static void executeAndConsumeQuery(Connection connection, String statement, ResultConsumer rc, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
         ResultSet rs = null;
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(statement);
-            rs = executeQuery(stmt, valueSetter);
+            rs = executeQuery(stmt, valueSetters);
             while (rs.next()) {
                 rc.accept(rs);
             }
@@ -1016,20 +1086,66 @@ public final class Databases {
     }
 
     /**
+     * Executes an SQL query
+     * 
+     * @param <T> The class of the response object
+     * @param connection The connection to use
+     * @param statement The statement to execute
+     * @param producer The producer for the result object
+     * @param valueSetters The valueSetters to fill the statement with variables
+     * @return See {@link PreparedStatement#executeUpdate()}
+     * @throws SQLException In case of an SQL error
+     * @throws OXException In case result can't be produced
+     */
+    public static <T> T executeQuery(Connection connection, String statement, ResultProduccer<T> producer, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement(statement);
+            rs = executeQuery(stmt, valueSetters);
+            if (rs.next()) {
+                return producer.accept(rs);
+            }
+            return null;
+        } finally {
+            closeSQLStuff(stmt, rs);
+        }
+    }
+
+    /**
+     * Executes an SQL query
+     *
+     * @param connection The connection to use
+     * @param statement The statement to execute
+     * @param valueSetters The valueSetters to fill the statement with variables
+     * @return See {@link PreparedStatement#executeUpdate()}
+     * @throws SQLException In case of an SQL error
+     */
+    public static ResultSet executeQuery(Connection connection, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(statement);
+            return executeQuery(stmt, valueSetters);
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    /**
      * Executes an SQL update
      *
      * @param connection The connection to use
      * @param statement The statement to execute
-     * @param valueSetter The consumers to fill the statement with variables
+     * @param valueSetters The valueSetters to fill the statement with variables
      * @return See {@link PreparedStatement#executeUpdate()}
      * @throws SQLException In case of an SQL error
      */
-    public static int executeUpdate(Connection connection, String statement, PreparedStatementValueSetter... valueSetter) throws SQLException {
+    public static int executeUpdate(Connection connection, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException {
         ResultSet rs = null;
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(statement);
-            return executeUpdate(stmt, valueSetter);
+            return executeUpdate(stmt, valueSetters);
         } finally {
             closeSQLStuff(stmt, rs);
         }
@@ -1039,24 +1155,24 @@ public final class Databases {
      * Executes an SQL query
      *
      * @param stmt The statement to execute
-     * @param valueSetter The consumers to fill the statement with variables
+     * @param valueSetters The valueSetters to fill the statement with variables
      * @return See {@link PreparedStatement#executeQuery()}
      * @throws SQLException In case of error
      */
-    public static ResultSet executeQuery(PreparedStatement stmt, PreparedStatementValueSetter... valueSetter) throws SQLException {
-        return execute(stmt, (s) -> s.executeQuery(), valueSetter);
+    public static ResultSet executeQuery(PreparedStatement stmt, PreparedStatementValueSetter... valueSetters) throws SQLException {
+        return execute(stmt, (s) -> s.executeQuery(), valueSetters);
     }
 
     /**
      * Executes an SQL update
      *
      * @param stmt The statement to execute
-     * @param valueSetter The consumers to fill the statement with variables
+     * @param valueSetters The valueSetters to fill the statement with variables
      * @return See {@link PreparedStatement#executeUpdate()}
      * @throws SQLException In case of error
      */
-    public static int executeUpdate(PreparedStatement stmt, PreparedStatementValueSetter... valueSetter) throws SQLException {
-        return i(execute(stmt, (s) -> I(s.executeUpdate()), valueSetter));
+    public static int executeUpdate(PreparedStatement stmt, PreparedStatementValueSetter... valueSetters) throws SQLException {
+        return i(execute(stmt, (s) -> I(s.executeUpdate()), valueSetters));
     }
 
     /**
@@ -1065,13 +1181,13 @@ public final class Databases {
      * @param <T> The result to return
      * @param stmt The statement to execute
      * @param executionFunction The executing function
-     * @param valueSetter The consumers to fill the statement with variables
+     * @param valueSetters The valueSetters to fill the statement with variables
      * @return A dedicated value
      * @throws SQLException In case of error
      */
-    public static <T> T execute(PreparedStatement stmt, SQLExecutorFunction<T> executionFunction, PreparedStatementValueSetter... valueSetter) throws SQLException {
-        for (PreparedStatementValueSetter preparer : valueSetter) {
-            preparer.setValue(stmt);
+    public static <T> T execute(PreparedStatement stmt, SQLExecutorFunction<T> executionFunction, PreparedStatementValueSetter... valueSetters) throws SQLException {
+        for (PreparedStatementValueSetter setter : valueSetters) {
+            setter.setValue(stmt);
         }
         return executionFunction.execute(stmt);
     }
@@ -1136,6 +1252,31 @@ public final class Databases {
          * @throws OXException In case of other errors
          */
         void accept(ResultSet rs) throws SQLException, OXException;
+    }
+
+    /**
+     *
+     * {@link ResultConsumer}
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @param <T> The class of the result object
+     * @since v7.10.4
+     */
+    @FunctionalInterface
+    public interface ResultProduccer<T> {
+
+        /**
+         * Consumes a {@link ResultSet} that has already a moved cursor, frankly speaking the {@link ResultSet#next()} was already called.
+         * The method will be called at most once.
+         * <p>
+         * It is possible that the method won't be called at all. This means that there has been no result to consume.
+         *
+         * @param rs The result set with moved cursor
+         * @return The object to create
+         * @throws SQLException In case of an SQL related error
+         * @throws OXException In case of other errors
+         */
+        T accept(ResultSet rs) throws SQLException, OXException;
     }
 
 }
