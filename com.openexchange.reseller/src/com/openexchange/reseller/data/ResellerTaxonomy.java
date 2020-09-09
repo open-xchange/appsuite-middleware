@@ -63,6 +63,8 @@ public class ResellerTaxonomy {
 
     /**
      * Initializes a new {@link ResellerTaxonomy}.
+     * @param taxonomy The taxonomy
+     * @param resellerId The reseller identifier
      */
     public ResellerTaxonomy(String taxonomy, int resellerId) {
         super();

@@ -123,9 +123,9 @@ public interface ResellerService {
     List<ResellerAdmin> getAll() throws OXException;
 
     /**
-     * Returns <code> only if the reseller bundles are installed; <code>false</code> otherwise.
+     * Returns <code>true</code> only if the reseller bundles are installed; <code>false</code> otherwise.
      *
-     * @return <code> only if the reseller bundles are installed; <code>false</code> otherwise.
+     * @return <code>true</code> only if the reseller bundles are installed; <code>false</code> otherwise.
      */
     boolean isEnabled();
 
@@ -155,6 +155,7 @@ public interface ResellerService {
      * @param resellerId the reseller identifier
      * @param key The fully qualified name of the property
      * @return The value of the property
+     * @throws OXException if an error is occurred
      */
     ResellerConfigProperty getConfigProperty(int resellerId, String key) throws OXException;
 
@@ -166,6 +167,7 @@ public interface ResellerService {
      * @param contextId the context identifier
      * @param key The fully qualified name of the property
      * @return The value of the property
+     * @throws OXException if an error is occurred
      */
     ResellerConfigProperty getConfigPropertyByContext(int contextId, String key) throws OXException;
 
@@ -174,6 +176,7 @@ public interface ResellerService {
      *
      * @param resellerId The reseller identifier
      * @return A {@link Map} with all configuration properties
+     * @throws OXException if an error is occurred
      */
     Map<String, ResellerConfigProperty> getAllConfigProperties(int resellerId) throws OXException;
 
@@ -185,6 +188,7 @@ public interface ResellerService {
      *
      * @param contextId The context identifier
      * @return A {@link Map} with all configuration properties
+     * @throws OXException if an error is occurred
      */
     Map<String, ResellerConfigProperty> getAllConfigPropertiesByContext(int contextId) throws OXException;
 
@@ -194,6 +198,7 @@ public interface ResellerService {
      * @param resellerId The reseller identifier
      * @param keys A set of property keys
      * @return A {@link Map} with the specified configuration properties
+     * @throws OXException if an error is occurred
      */
     Map<String, ResellerConfigProperty> getConfigProperties(int resellerId, Set<String> keys) throws OXException;
 
@@ -206,6 +211,7 @@ public interface ResellerService {
      * @param contextId The context identifier
      * @param keys A set of property keys
      * @return A {@link Map} with the specified configuration properties
+     * @throws OXException if an error is occurred
      */
     Map<String, ResellerConfigProperty> getConfigPropertiesByContext(int contextId, Set<String> keys) throws OXException;
 
