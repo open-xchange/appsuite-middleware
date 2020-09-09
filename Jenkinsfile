@@ -20,13 +20,10 @@ spec:
     - cat
     tty: true
   - name: coverity
-    image: gitlab.open-xchange.com:4567/jenkins/slave-coverity:latest
+    image: gitlab.open-xchange.com:4567/jenkins/slave-coverity:2020.06-jdk8
     command:
     - cat
     tty: true
-    resources:
-      requests:
-        cpu: 3
   - name: java-gettext
     image: gitlab.open-xchange.com:4567/jenkins/slave-gettext:latest
     command:
