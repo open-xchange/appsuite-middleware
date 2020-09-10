@@ -69,5 +69,12 @@ public interface PGPMailRecognizer {
      */
     boolean isPGPMessage(MailMessage message) throws OXException;
 
+    /**
+     * Checks whether the given message is a signed PGP message or not.
+     *
+     * @param message The message
+     * @return True, if the given message is a PGP signed message, false otherwise
+     * @throws OXException
+     */
     boolean isPGPSignedMessage(MailMessage message) throws OXException;
 }
