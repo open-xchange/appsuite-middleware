@@ -179,7 +179,7 @@ public class ShareClient {
     }
 
     /**
-     * Internal method to create an instance of {@link IDTubple}
+     * Internal method to create an instance of {@link IDTuple}
      *
      * @param tupleData The data to create the IDTuple from
      * @return The IDTUple, or null if no tuple could be created from the given data

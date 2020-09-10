@@ -204,9 +204,17 @@ public class XOXFileAccess implements /*@formatter:off*/
 
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
+        //IDTuple newId = client.moveDocument(source.getId(), destFolder, sequenceNumber);
+        //XOXFile movedFile = getMetadata(newId.getFolder(), newId.getId(), CURRENT_VERSION);
+        //return update != null ? saveFileMetadata(movedFile, movedFile.getSequenceNumber(), modifiedFields) : newId;
+
         IDTuple newId = client.moveDocument(source.getId(), destFolder, sequenceNumber);
-        XOXFile movedFile = getMetadata(newId.getFolder(), newId.getId(), CURRENT_VERSION);
-        return update != null ? saveFileMetadata(movedFile, movedFile.getSequenceNumber(), modifiedFields) : newId;
+        if(modifiedFields != null) {
+            XOXFile movedFile = new XOXFile(update);
+            movedFile.setSequenceNumber(getMetadata(newId.getFolder(), newId.getId(), CURRENT_VERSION).getSequenceNumber());
+            return update != null ? saveFileMetadata(movedFile, movedFile.getSequenceNumber(), modifiedFields) : newId;
+        }
+        return newId;
     }
 
     @Override
