@@ -97,7 +97,7 @@ public class TelephoneMapping extends AbstractMapping {
         exportTelephone(vCard, properties, 0, false, null, contact, Contact.TELEPHONE_TTYTDD, TelephoneType.TEXTPHONE.getValue());
         exportTelephone(vCard, properties, 0, false, null, contact, Contact.TELEPHONE_ISDN, TelephoneType.ISDN.getValue());
         exportTelephone(vCard, properties, 0, false, null, contact, Contact.TELEPHONE_CAR, TelephoneType.CAR.getValue());
-        exportTelephones(vCard, properties, true, contact, Contact.CELLULAR_TELEPHONE1, Contact.CELLULAR_TELEPHONE2, TelephoneType.CELL.getValue());
+        exportTelephones(vCard, properties, false, contact, Contact.CELLULAR_TELEPHONE1, Contact.CELLULAR_TELEPHONE2, TelephoneType.CELL.getValue());
         exportTelephone(vCard, properties, 0, false, null, contact, Contact.TELEPHONE_CALLBACK, TYPE_CALLBACK);
         exportTelephone(vCard, properties, 0, false, null, contact, Contact.TELEPHONE_COMPANY, TYPE_COMPANY);
         exportTelephone(vCard, properties, 0, false, null, contact, Contact.TELEPHONE_ASSISTANT, TYPE_ASSISTENT);
