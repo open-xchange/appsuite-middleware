@@ -186,7 +186,7 @@ public class Change extends ResellerAbstraction {
         }
         Set<String> configuration = new HashSet<>();
         for (String s : config.trim().split(",")) {
-            configuration.add(s);
+            configuration.add(s.trim());
         }
         return configuration;
     }

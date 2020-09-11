@@ -49,13 +49,17 @@
 
 package com.openexchange.reseller.data;
 
+import java.io.Serializable;
+
 /**
  * {@link ResellerConfigProperty}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.5
  */
-public class ResellerConfigProperty {
+public class ResellerConfigProperty implements Serializable {
+
+    private static final long serialVersionUID = -1880273509202898478L;
 
     private final String key;
     private final String value;

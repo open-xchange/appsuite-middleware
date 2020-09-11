@@ -51,9 +51,7 @@ package com.openexchange.config.cascade.reseller.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.cascade.reseller.ResellerConfigProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -76,7 +74,7 @@ public class ResellerConfigCascadeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ResellerService.class, ConfigurationService.class, ConfigViewFactory.class };
+        return new Class[] { ResellerService.class };
     }
 
     @Override

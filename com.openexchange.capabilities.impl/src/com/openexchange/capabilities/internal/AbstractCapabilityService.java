@@ -132,7 +132,6 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
 
     private static final Object PRESENT = new Object();
 
-    private static final String REGION_NAME_RESELLER = "CapabilitiesReseller";
     private static final String REGION_NAME_CONTEXT = "CapabilitiesContext";
     private static final String REGION_NAME_USER = "CapabilitiesUser";
     private static final String REGION_NAME = "Capabilities";
@@ -256,10 +255,6 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
         this.services = services;
         declaredCapabilities = new ConcurrentHashMap<String, Object>(32, 0.9f, 1);
         this.registry = registry;
-    }
-
-    private Cache optResellerCache() {
-        return optCache(REGION_NAME_RESELLER);
     }
 
     private Cache optContextCache() {
@@ -1396,21 +1391,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
         if (contextId <= 0) {
             return Collections.emptySet();
         }
-        // TODO: Possible optimisation for capabilities in multiple contexts owned by the same reseller.
-        //       Maybe cache by reseller?
-        Cache cache = allowCache ? optResellerCache() : null;
-        if (null == cache) {
-            return loadResellerCaps(contextId);
-        }
-        Object object = cache.get(Integer.valueOf(contextId));
-        if (object instanceof Set) {
-            @SuppressWarnings("unchecked") Set<ResellerCapability> caps = (Set<ResellerCapability>) object;
-            return caps;
-        }
-        // Load from database
-        Set<ResellerCapability> caps = loadResellerCaps(contextId);
-        cache.put(Integer.valueOf(contextId), new HashSet<ResellerCapability>(caps), false);
-        return caps;
+        return loadResellerCaps(contextId);
     }
 
     /**

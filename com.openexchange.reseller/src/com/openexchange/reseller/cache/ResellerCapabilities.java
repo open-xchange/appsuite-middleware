@@ -47,87 +47,40 @@
  *
  */
 
-package com.openexchange.reseller.data;
+package com.openexchange.reseller.cache;
 
 import java.io.Serializable;
+import java.util.Set;
+import com.openexchange.reseller.data.ResellerCapability;
 
 /**
- * {@link ResellerTaxonomy}
+ * {@link ResellerCapabilities}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.5
  */
-public class ResellerTaxonomy implements Serializable {
-
-    private static final long serialVersionUID = -6069196027590972948L;
-
-    private final String taxonomy;
-    private final int resellerId;
-    private final int hashCode;
+public class ResellerCapabilities implements Serializable {
 
     /**
-     * Initializes a new {@link ResellerTaxonomy}.
-     * 
-     * @param taxonomy The taxonomy
-     * @param resellerId The reseller identifier
+     * The ResellerCapabilities.java.
      */
-    public ResellerTaxonomy(String taxonomy, int resellerId) {
+    private static final long serialVersionUID = 8374414893912728135L;
+    private final Set<ResellerCapability> capabilities;
+
+    /**
+     * Initializes a new {@link ResellerCapabilities}.
+     */
+    public ResellerCapabilities(Set<ResellerCapability> capabilities) {
         super();
-        this.taxonomy = taxonomy;
-        this.resellerId = resellerId;
-
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + resellerId;
-        result = prime * result + ((taxonomy == null) ? 0 : taxonomy.hashCode());
-        hashCode = result;
+        this.capabilities = capabilities;
     }
 
     /**
-     * Gets the taxonomy
+     * Gets the capabilities
      *
-     * @return The taxonomy
+     * @return The capabilities
      */
-    public String getTaxonomy() {
-        return taxonomy;
-    }
-
-    /**
-     * Gets the resellerId
-     *
-     * @return The resellerId
-     */
-    public int getResellerId() {
-        return resellerId;
-    }
-
-    @Override
-    public int hashCode() {
-        return hashCode;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        ResellerTaxonomy other = (ResellerTaxonomy) obj;
-        if (resellerId != other.resellerId) {
-            return false;
-        }
-        if (taxonomy == null) {
-            if (other.taxonomy != null) {
-                return false;
-            }
-        } else if (!taxonomy.equals(other.taxonomy)) {
-            return false;
-        }
-        return true;
+    public Set<ResellerCapability> getCapabilities() {
+        return capabilities;
     }
 }

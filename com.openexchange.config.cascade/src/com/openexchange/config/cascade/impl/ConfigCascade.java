@@ -242,7 +242,7 @@ public class ConfigCascade implements ConfigViewFactory {
                 }
 
                 private String getFinalScope() throws OXException {
-                    return property(property, String.class).precedence("server", "context", "user").get("final");
+                    return property(property, String.class).precedence("server", "reseller", "context", "user").get("final");
                 }
 
                 @Override
