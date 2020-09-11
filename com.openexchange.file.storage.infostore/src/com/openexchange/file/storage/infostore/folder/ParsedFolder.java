@@ -59,6 +59,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.tools.id.IDMangler;
 
 /**
@@ -123,6 +124,10 @@ public final class ParsedFolder implements Folder {
     protected Map<String, Object> meta;
 
     protected Set<String> supportedCapbilitites;
+
+    protected EntityInfo createdFrom;
+
+    protected EntityInfo modifiedFrom;
 
 
     /**
@@ -470,6 +475,26 @@ public final class ParsedFolder implements Folder {
     @Override
     public void setSupportedCapabilities(Set<String> capabilities) {
         this.supportedCapbilitites = capabilities;
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return createdFrom;
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        this.createdFrom = createdFrom;
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return modifiedFrom;
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        this.modifiedFrom = modifiedFrom;
     }
 
 }

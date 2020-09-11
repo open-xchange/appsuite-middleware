@@ -56,6 +56,7 @@ import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link AbstractFolder} - An abstract folder.
@@ -121,6 +122,10 @@ public abstract class AbstractFolder implements Folder, Serializable {
     protected FolderPath originPath;
 
     protected Set<String> supportedCapabilities;
+
+    protected EntityInfo createdFrom;
+
+    protected EntityInfo modifiedFrom;
 
     protected Map<String, Object> meta = new HashMap<String, Object>();
 
@@ -511,6 +516,26 @@ public abstract class AbstractFolder implements Folder, Serializable {
             this.supportedCapabilities = new LinkedHashSet<String>(8);
         }
         this.supportedCapabilities.add(capability);
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return createdFrom;
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        this.createdFrom = createdFrom;
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return modifiedFrom;
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        this.modifiedFrom = modifiedFrom;
     }
 
 }

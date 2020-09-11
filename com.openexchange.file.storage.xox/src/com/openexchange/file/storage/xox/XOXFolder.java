@@ -147,10 +147,11 @@ public class XOXFolder extends DefaultFileStorageFolder implements TypeAware {
         addPermission(ownPermission);
 
         createdBy = 0;
-        //TODO MW1380 MW-1401 set extendedCreateBy
-
         modifiedBy = 0;
-        //TODO MW1380 MW-1401 set extendedModifiedBy
+        if (null != other && (null != other.getCreatedFrom() || null != other.getModifiedFrom())) {
+            createdFrom = other.getCreatedFrom();
+            modifiedFrom = other.getModifiedFrom();
+        }
     }
 
     @Override

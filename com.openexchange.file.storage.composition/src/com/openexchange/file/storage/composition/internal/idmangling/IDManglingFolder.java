@@ -62,6 +62,7 @@ import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.OriginAwareFileStorageFolder;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link IDManglingFolder}
@@ -253,6 +254,16 @@ public class IDManglingFolder implements TypeAware, CacheAware, OriginAwareFileS
     @Override
     public int getModifiedBy() {
         return delegate.getModifiedBy();
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return delegate.getCreatedFrom();
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return delegate.getModifiedFrom();
     }
 
     @Override

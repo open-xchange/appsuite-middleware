@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link DefaultFileStorageFolder} - The default file storage folder providing setter methods.
@@ -108,6 +109,10 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     protected boolean b_subfolders;
 
+    protected boolean b_createdFrom;
+
+    protected boolean b_modifiedFrom;
+
     protected boolean exists;
 
     protected Date creationDate;
@@ -119,6 +124,10 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
     protected int createdBy;
 
     protected int modifiedBy;
+
+    protected EntityInfo createdFrom;
+
+    protected EntityInfo modifiedFrom;
 
     private Map<String, Object> meta = new HashMap<String, Object>();
 
@@ -576,6 +585,34 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     public void setModifiedBy(int modifiedBy) {
         this.modifiedBy = modifiedBy;
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return this.createdFrom;
+    }
+
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        b_createdFrom = null != createdFrom;
+        this.createdFrom = createdFrom;
+    }
+
+    public boolean containsCreatedFrom() {
+        return b_createdFrom;
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return this.modifiedFrom;
+    }
+
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        b_modifiedFrom = null != modifiedFrom;
+        this.modifiedFrom = modifiedFrom;
+    }
+
+    public boolean containsModifiedFrom() {
+        return b_modifiedFrom;
     }
 
 }

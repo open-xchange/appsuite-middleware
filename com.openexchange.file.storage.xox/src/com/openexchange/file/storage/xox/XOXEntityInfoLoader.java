@@ -55,7 +55,6 @@ import org.slf4j.Logger;
 import com.openexchange.api.client.ApiClient;
 import com.openexchange.api.client.common.calls.user.GetEntityInfoCall;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
 import com.openexchange.groupware.EntityInfo;
 
 /**
@@ -82,8 +81,8 @@ public class XOXEntityInfoLoader {
      *
      * @param files The list of files
      */
-    public EntityInfo load(File file, int userId) {
-        String identifier = XOXStorageConstants.ID + "/" + file.getFolderId() + "/" + userId;
+    public EntityInfo load(String folderId, int userId) {
+        String identifier = XOXStorageConstants.ID + "/" + folderId + "/" + userId;
         if (knownUsers.containsKey(identifier)) {
             return knownUsers.get(identifier);
         }

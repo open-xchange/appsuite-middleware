@@ -232,7 +232,17 @@ public class ShareClient {
     public XOXFolder getFolder(String folderId) throws OXException {
         RemoteFolder remoteFolder = ajaxClient.execute(new GetFolderCall(folderId));
         final int userId = session.getUserId();
-        return new XOXFolder(userId, remoteFolder);
+        XOXFolder folder = new XOXFolder(userId, remoteFolder);
+        XOXEntityInfoLoader loader = new XOXEntityInfoLoader(ajaxClient);
+        if (0 < remoteFolder.getCreatedBy()) {
+            EntityInfo entityInfo = loader.load(remoteFolder.getID(), folder.getCreatedBy());
+            folder.setCreatedFrom(entityInfo);
+        }
+        if (0 < remoteFolder.getModifiedBy()) {
+            EntityInfo entityInfo = loader.load(remoteFolder.getID(), folder.getModifiedBy());
+            folder.setModifiedFrom(entityInfo);
+        }
+        return folder;
     }
 
     /**
@@ -245,7 +255,21 @@ public class ShareClient {
     public XOXFolder[] getSubFolders(String parentId) throws OXException {
         List<RemoteFolder> folders = ajaxClient.execute(new ListFoldersCall(getFolderId(parentId)));
         final int userId = session.getUserId();
-        List<XOXFolder> ret = folders.stream().map(f -> new XOXFolder(userId, f)).collect(Collectors.toList());
+//        List<XOXFolder> ret = folders.stream().map(f -> new XOXFolder(userId, f)).collect(Collectors.toList());
+        XOXEntityInfoLoader loader = new XOXEntityInfoLoader(ajaxClient);
+        List<XOXFolder> ret = new ArrayList<XOXFolder>(folders.size());
+        for (RemoteFolder folder : folders) {
+            XOXFolder f = new XOXFolder(userId, folder);
+            if (0 < folder.getCreatedBy()) {
+                EntityInfo entityInfo = loader.load(folder.getID(), folder.getCreatedBy());
+                f.setCreatedFrom(entityInfo);
+            }
+            if (0 < folder.getModifiedBy()) {
+                EntityInfo entityInfo = loader.load(folder.getID(), folder.getModifiedBy());
+                f.setModifiedFrom(entityInfo);
+            }
+            ret.add(f);
+        }
         return ret.toArray(new XOXFolder[ret.size()]);
     }
 
@@ -445,11 +469,11 @@ public class ShareClient {
             XOXEntityInfoLoader loader = new XOXEntityInfoLoader(ajaxClient);
             for (File file : files) {
                 if (requestCreatedFrom) {
-                    EntityInfo info = loader.load(file, file.getCreatedBy());
+                    EntityInfo info = loader.load(file.getFolderId(), file.getCreatedBy());
                     file.setCreatedFrom(info);
                 }
                 if (requestModifiedFrom) {
-                    EntityInfo info = loader.load(file, file.getModifiedBy());
+                    EntityInfo info = loader.load(file.getFolderId(), file.getModifiedBy());
                     file.setModifiedFrom(info);
                 }
             }
