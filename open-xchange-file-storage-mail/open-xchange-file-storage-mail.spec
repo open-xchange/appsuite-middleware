@@ -7,7 +7,7 @@ BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-imap
 BuildRequires: java-1.8.0-openjdk-devel
 Version:        @OXVERSION@
-%define         ox_release 9
+%define         ox_release 8
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -64,8 +64,6 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Tue Sep 08 2020 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2020-09-14 (5857)
 * Mon Aug 24 2020 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2020-08-24 (5842)
 * Wed Aug 05 2020 Thorben Betten <thorben.betten@open-xchange.com>
