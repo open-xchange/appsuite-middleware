@@ -41,11 +41,21 @@ public interface IFileItemService {
     }
 
     /**
+     * Getting the current status of the implementing service.
+     *
+     * @return <code>true</code> in case the implementing service is valid,
+     *  <code>false</code> otherwise.
+     */
+    default boolean isValid() {
+        return true;
+    }
+
+    /**
      * Retrieving the type of database, internally used to store and retrieve file metadata.
      *
      * @return The {@link DatabaseType}.
      */
-    public DatabaseType getDatabaseType();
+    DatabaseType getDatabaseType();
 
     /**
      * Registering a group and potential custom keys for this specific group,
@@ -57,7 +67,7 @@ public interface IFileItemService {
      * @param keyNames The key(s) to be used as user defined properties
      * @throws FileItemException
      */
-    public void registerGroup(final String groupId, final String... customKeyN) throws FileItemException;
+    void registerGroup(final String groupId, final String... customKeyN) throws FileItemException;
 
     /**
      * Getting the array of custom keys, registered for a specific group.
@@ -66,7 +76,7 @@ public interface IFileItemService {
      * @return The array of custom keys for the given group
      * @throws FileItemException
      */
-    public String[] getCustomKeys(final String groupId) throws FileItemException;
+    String[] getCustomKeys(final String groupId) throws FileItemException;
 
     /**
      * Querying, if a custom key is already registered for the group and thus can be used
@@ -76,7 +86,7 @@ public interface IFileItemService {
      * @return <code>true</code>, if the given key has been registered for the group,
      *  <code>false</code> otherwise
      */
-    public boolean hasCustomKey(final String groupId, final String customKey) throws FileItemException;
+    boolean hasCustomKey(final String groupId, final String customKey) throws FileItemException;
 
     /**
      * Querying the user data for the group.
@@ -85,7 +95,7 @@ public interface IFileItemService {
      * @return The user data as {@link JSONObject}.
      *  If no user data is set, an empty object will be returned.
      */
-    public JSONObject getUserData(final String groupId) throws FileItemException;
+    JSONObject getUserData(final String groupId) throws FileItemException;
 
     /**
      * Setting the user data for the group.
@@ -95,7 +105,7 @@ public interface IFileItemService {
      * @return <code>true</code>, if the user data was successfully set for the given group,
      *  <code>false</code> otherwise
      */
-    public boolean setUserData(final String groupId, final JSONObject userData) throws FileItemException;
+    boolean setUserData(final String groupId, final JSONObject userData) throws FileItemException;
 
     // -------------------------------------------------------------------------
 
@@ -106,7 +116,7 @@ public interface IFileItemService {
      * @return true, if the collections contains the group with the given id
      * @throws FileItemException
      */
-    public boolean containsGroup(final String groupId) throws FileItemException;
+    boolean containsGroup(final String groupId) throws FileItemException;
 
     /**
      * Querying, if a subgroup is contained in the collection.
@@ -116,7 +126,7 @@ public interface IFileItemService {
      * @return true, if the collections contains the group-subgroup with the given ids
      * @throws FileItemException
      */
-    public boolean containsSubGroup(final String groupId, final String subGroupId) throws FileItemException;
+    boolean containsSubGroup(final String groupId, final String subGroupId) throws FileItemException;
 
     /**
      * Querying, if a file is contained in the collection.
@@ -126,7 +136,7 @@ public interface IFileItemService {
      * @return true, if the collections contains the group-subgroup with the given ids
      * @throws FileItemException
      */
-    public boolean contains(final String groupId, final String subGroupId, final String fileId) throws FileItemException;
+    boolean contains(final String groupId, final String subGroupId, final String fileId) throws FileItemException;
 
     // -------------------------------------------------------------------------
 
@@ -137,7 +147,7 @@ public interface IFileItemService {
      * @return The {@link IFileItem} interface or <code>null</code>.
      * @throws FileItemException
      */
-    public IFileItem get(final String groupId, final String subGroupId, final String fileId) throws FileItemException;
+    IFileItem get(final String groupId, final String subGroupId, final String fileId) throws FileItemException;
 
     /**
      * Getting all {@link IFileItem} interfaces of the given group-subgroup as an array.
@@ -147,7 +157,7 @@ public interface IFileItemService {
      * @return The array of {@link IFileItem} interfaces
      * @throws FileItemException
      */
-    public IFileItem[] get(final String groupId, final String subGroupId) throws FileItemException;
+    IFileItem[] get(final String groupId, final String subGroupId) throws FileItemException;
 
     /**
      * Getting all {@link IFileItem} interfaces of the given group,
@@ -157,7 +167,7 @@ public interface IFileItemService {
      * @return The array of subgroup ids
      * @throws FileItemException
      */
-    public IFileItem[] get(final String groupId, final Properties properties) throws FileItemException;
+    IFileItem[] get(final String groupId, final Properties properties) throws FileItemException;
 
     /**
      * Getting the number of distinct subgroup ids.
@@ -165,7 +175,7 @@ public interface IFileItemService {
      * @return The number of distinct subgroup ids.
      * @throws FileItemException
      */
-    public long getSubGroupCount(final String groupId) throws FileItemException;
+    long getSubGroupCount(final String groupId) throws FileItemException;
 
     /**
      * Getting all subgroup ids of the given group
@@ -174,7 +184,7 @@ public interface IFileItemService {
      * @return The array of subgroup ids
      * @throws FileItemException
      */
-    public String[] getSubGroups(final String groupId) throws FileItemException;
+    String[] getSubGroups(final String groupId) throws FileItemException;
 
     /**
      * Getting all subgroup ids, satisfying the optionally given WHERE and/or LIMIT clauses
@@ -183,7 +193,7 @@ public interface IFileItemService {
      * @param groupId
      * @return The array of subgroup ids
      */
-     public String[] getSubGroupsBy(final String groupId,
+     String[] getSubGroupsBy(final String groupId,
          @Nullable final String whereClause,
          @Nullable final String limitClause) throws FileItemException;
 
@@ -198,7 +208,7 @@ public interface IFileItemService {
      * @return The number of found SubGroup items.
      * @throws FileItemException
      */
-    public long getSubGroupsBy(final String groupId,
+    long getSubGroupsBy(final String groupId,
         @Nullable final String whereClause,
         @Nullable final String limitClause,
         final Consumer<ISubGroup> subGroupConsumer) throws FileItemException;
@@ -209,7 +219,7 @@ public interface IFileItemService {
      * @return The number of distinct group ids.
      * @throws FileItemException
      */
-    public long getGroupCount() throws FileItemException;
+    long getGroupCount() throws FileItemException;
 
     /**
      * Getting all group ids of the collection
@@ -217,7 +227,7 @@ public interface IFileItemService {
      * @return The array of group ids
      * @throws FileItemException
      */
-    public String[] getGroups() throws FileItemException;
+    String[] getGroups() throws FileItemException;
 
     /**
      * Getting the summed up length of all items within the given group
@@ -225,7 +235,7 @@ public interface IFileItemService {
      * @return The total length
      * @throws FileItemException
      */
-    public long getGroupLength(final String groupId) throws FileItemException;
+    long getGroupLength(final String groupId) throws FileItemException;
 
     /**
      * Getting the summed up length of all items within the given group,
@@ -234,7 +244,7 @@ public interface IFileItemService {
      * @return The total length
      * @throws FileItemException
      */
-    public long getGroupLength(final String groupId, final Properties properties) throws FileItemException;
+    long getGroupLength(final String groupId, final Properties properties) throws FileItemException;
 
     /**
      * Getting the summed up length of all items within the given group and subgroup,
@@ -242,7 +252,7 @@ public interface IFileItemService {
      * @return The total length
      * @throws FileItemException
      */
-    public long getSubGroupLength(final String groupId, final String subGroupId) throws FileItemException;
+    long getSubGroupLength(final String groupId, final String subGroupId) throws FileItemException;
 
     /**
      * Getting the summed up length of all items within the given group and subgroup,
@@ -251,7 +261,7 @@ public interface IFileItemService {
      * @return The total length
      * @throws FileItemException
      */
-    public long getSubGroupLength(final String groupId, final String subGroupId, final Properties properties) throws FileItemException;
+    long getSubGroupLength(final String groupId, final String subGroupId, final Properties properties) throws FileItemException;
 
     // -------------------------------------------------------------------------
 
@@ -262,7 +272,7 @@ public interface IFileItemService {
      * @return true, if the file item was removed; false otherwise
      * @throws FileItemException
      */
-    public boolean remove(final IFileItem fileItem) throws FileItemException;
+    boolean remove(final IFileItem fileItem) throws FileItemException;
 
     /**
      * removing a single file item
@@ -273,7 +283,7 @@ public interface IFileItemService {
      * @return true, if the file item was removed; false otherwise
      * @throws FileItemException
      */
-    public boolean remove(final String groupId, final String subGroupId, final String fileId) throws FileItemException;
+    boolean remove(final String groupId, final String subGroupId, final String fileId) throws FileItemException;
 
     /**
      * removing an array of file items
@@ -282,7 +292,7 @@ public interface IFileItemService {
      * @return The number of removed file items
      * @throws FileItemException
      */
-    public int remove(final IFileItem[] fileElements) throws FileItemException;
+    int remove(final IFileItem[] fileElements) throws FileItemException;
 
     /**
      * removing all file item, whose properties satisfy the search properties
@@ -292,7 +302,7 @@ public interface IFileItemService {
      * @return The number of removed file items
      * @throws FileItemException
      */
-    public int remove(final String groupId, final Properties properties) throws FileItemException;
+    int remove(final String groupId, final Properties properties) throws FileItemException;
 
     /**
      * Removing all file items with the given group-subgruop
@@ -302,7 +312,7 @@ public interface IFileItemService {
      * @return The number of removed file items
      * @throws FileItemException
      */
-    public int removeSubGroup(final String groupId, final String subGroupId) throws FileItemException;
+    int removeSubGroup(final String groupId, final String subGroupId) throws FileItemException;
 
     /**
      * Removing all file items with the given group-subgroup ids
@@ -312,7 +322,7 @@ public interface IFileItemService {
      * @return The number of removed file items
      * @throws FileItemException
      */
-    public int removeSubGroups(final String groupId, final String[] subGroupIds) throws FileItemException;
+    int removeSubGroups(final String groupId, final String[] subGroupIds) throws FileItemException;
 
     /**
      * Removing all file items with the given group
@@ -321,7 +331,7 @@ public interface IFileItemService {
      * @return The number of removed file items
      * @throws FileItemException
      */
-    public int removeGroup(final String groupId) throws FileItemException;
+    int removeGroup(final String groupId) throws FileItemException;
 
     // -------------------------------------------------------------------------
 
@@ -338,7 +348,7 @@ public interface IFileItemService {
      * @return The {@link IFileItemReadAccess} interface to access the physical file item.
      * @throws FileItemException
      */
-    public IFileItemReadAccess getReadAccess(final IFileItem fileItem, final AccessOption ... accessOption) throws FileItemException;
+    IFileItemReadAccess getReadAccess(final IFileItem fileItem, final AccessOption ... accessOption) throws FileItemException;
 
     /**
      * Convenience method for {@link IFileItemService#getReadAccess(IFileItem, AccessOption...)}
@@ -354,7 +364,7 @@ public interface IFileItemService {
      * @return The {@link IFileItemReadAccess} interface to access the physical file item.
      * @throws FileItemException
      */
-    public IFileItemReadAccess getReadAccess(final String groupId, final String subGroupId, final String fileId, AccessOption... accessOptions) throws FileItemException;
+    IFileItemReadAccess getReadAccess(final String groupId, final String subGroupId, final String fileId, AccessOption... accessOptions) throws FileItemException;
 
     /**
      * Acquiring write access to a single file item.
@@ -368,7 +378,7 @@ public interface IFileItemService {
      * @return The {@link IFileItemWriteAccess} interface to access the physical file item.
      * @throws FileItemException
      */
-    public IFileItemWriteAccess getWriteAccess(final IFileItem fileItem, final AccessOption ... accessOption) throws FileItemException;
+    IFileItemWriteAccess getWriteAccess(final IFileItem fileItem, final AccessOption ... accessOption) throws FileItemException;
 
     /**
      * Convenience method for {@link IFileItemService#getWriteAccess(IFileItem, AccessOption...)}
@@ -384,5 +394,5 @@ public interface IFileItemService {
      * @return The {@link IFileItemWriteAccess} interface to access the physical file item.
      * @throws FileItemException
      */
-    public IFileItemWriteAccess getWriteAccess(String groupId, String subGroupId, String fileId, AccessOption... accessOptions) throws FileItemException;
+    IFileItemWriteAccess getWriteAccess(String groupId, String subGroupId, String fileId, AccessOption... accessOptions) throws FileItemException;
 }
