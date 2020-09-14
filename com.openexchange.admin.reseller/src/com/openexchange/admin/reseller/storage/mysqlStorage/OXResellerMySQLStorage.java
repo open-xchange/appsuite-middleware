@@ -68,6 +68,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.osgi.framework.BundleContext;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
@@ -86,7 +87,10 @@ import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -105,6 +109,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXResellerMySQLStorage.class);
 
     private static final ResellerAdmin masteradmin = new ResellerAdmin(I(0), "oxadminmaster");
+
+    private static final String CAPABILITIES_REGION_NAME = "CapabilitiesReseller";
+    private static final String CONFIGURATION_REGION_NAME = "ConfigurationReseller";
+    private static final String TAXONOMIES_REGION_NAME = "TaxonomiesReseller";
 
     private static final String DATABASE_COLUMN_VALUE = "value";
     private static final String DATABASE_COLUMN_NAME = "name";
@@ -213,6 +221,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             changeCapabilities(adm, oxcon);
             changeConfiguration(adm, oxcon);
             changeTaxonomies(adm, oxcon);
+            invalidateResellerCaches(adm.getId().intValue(), CAPABILITIES_REGION_NAME, CONFIGURATION_REGION_NAME, TAXONOMIES_REGION_NAME);
 
             oxcon.commit();
             rollback = false;
@@ -2356,6 +2365,31 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw new StorageException(e);
         } finally {
             Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * Invalidates reseller cache regions
+     * 
+     * @param resellerId The reseller identifier
+     * @param cacheRegions The cache regions
+     */
+    private void invalidateResellerCaches(int resellerId, String... cacheRegions) {
+        BundleContext context = AdminCache.getBundleContext();
+        if (null == context) {
+            return;
+        }
+        CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+        if (null == cacheService) {
+            return;
+        }
+        try {
+            for (String cacheRegion : cacheRegions) {
+                Cache cache = cacheService.getCache(cacheRegion);
+                cache.remove(resellerId);
+            }
+        } catch (OXException e) {
+            LOGGER.error("", e);
         }
     }
 

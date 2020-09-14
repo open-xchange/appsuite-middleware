@@ -75,6 +75,10 @@ import com.openexchange.server.ServiceLookup;
  */
 public class CachingResellerService implements ResellerService {
 
+    /**
+     * Caches a reverse index for the context-reseller. Stores {@link ResellerValue}s
+     */
+    private static final String RESELLER_CONTEXT_NAME = "ResellerContext";
     private static final String CAPABILITIES_REGION_NAME = "CapabilitiesReseller";
     private static final String CONFIGURATION_REGION_NAME = "ConfigurationReseller";
     private static final String TAXONOMIES_REGION_NAME = "TaxonomiesReseller";
@@ -93,7 +97,15 @@ public class CachingResellerService implements ResellerService {
 
     @Override
     public ResellerAdmin getReseller(int contextId) throws OXException {
-        return delegate.getReseller(contextId);
+        ResellerAdmin resellerAdmin = delegate.getReseller(contextId);
+        CacheService cacheService = getCacheService();
+        Cache cache = cacheService.getCache(RESELLER_CONTEXT_NAME);
+        Integer key = I(contextId);
+        Object object = cache.get(key);
+        if (null == object) {
+            cache.put(key, new ResellerValue(resellerAdmin.getId(), resellerAdmin.getParentId()), false);
+        }
+        return resellerAdmin;
     }
 
     @Override
@@ -126,31 +138,24 @@ public class CachingResellerService implements ResellerService {
         return delegate.isEnabled();
     }
 
-    @Override
-    public Set<ResellerCapability> getCapabilities(int resellerId) throws OXException {
-        // No caching at the moment
-        return delegate.getCapabilities(resellerId);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
-    public Set<ResellerCapability> getCapabilitiesByContext(int contextId) throws OXException {
+    public Set<ResellerCapability> getCapabilities(int resellerId) throws OXException {
         Cache cache = getCacheService().getCache(CAPABILITIES_REGION_NAME);
-        Integer key = I(contextId);
+        Integer key = I(resellerId);
         Object object = cache.get(key);
         if (object instanceof Set) {
             return Set.class.cast(object);
         }
         LockService lockService = optLockService();
-        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("getResellerCapabilities-").append(contextId).toString());
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("getResellerCapabilities-").append(resellerId).toString());
         lock.lock();
-
         try {
             object = cache.get(key);
             if (object instanceof Set) {
                 return Set.class.cast(object);
             }
-            Set<ResellerCapability> capas = delegate.getCapabilitiesByContext(contextId);
+            Set<ResellerCapability> capas = delegate.getCapabilities(resellerId);
             cache.put(key, new HashSet<>(capas), false);
             return capas;
         } finally {
@@ -159,9 +164,29 @@ public class CachingResellerService implements ResellerService {
     }
 
     @Override
+    public Set<ResellerCapability> getCapabilitiesByContext(int contextId) throws OXException {
+        ResellerValue resellerValue = getResellerValue(contextId);
+        Integer resellerId = resellerValue.getResellerId();
+        Integer parentId = resellerValue.getParentId();
+
+        Set<ResellerCapability> capabilities = getCapabilities(resellerId);
+        if (parentId == null) {
+            // Context is assigned to the root reseller, just return capas
+            return capabilities;
+        }
+
+        // Traverse the admin path to get all capabilities for the context
+        do {
+            ResellerAdmin resellerAdmin = getResellerById(parentId);
+            capabilities.addAll(getCapabilities(resellerAdmin.getId()));
+            parentId = resellerAdmin.getParentId();
+        } while (parentId != null && parentId.intValue() > 0);
+        return capabilities;
+    }
+
+    @Override
     public ResellerConfigProperty getConfigProperty(int resellerId, String key) throws OXException {
-        // No caching at the moment
-        return delegate.getConfigProperty(resellerId, key);
+        return getAllConfigProperties(resellerId).get(key);
     }
 
     @Override
@@ -169,42 +194,63 @@ public class CachingResellerService implements ResellerService {
         return getAllConfigPropertiesByContext(contextId).get(key);
     }
 
-    @Override
-    public Map<String, ResellerConfigProperty> getAllConfigProperties(int resellerId) throws OXException {
-        // No caching at the moment
-        return delegate.getAllConfigProperties(resellerId);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
-    public Map<String, ResellerConfigProperty> getAllConfigPropertiesByContext(int contextId) throws OXException {
+    public Map<String, ResellerConfigProperty> getAllConfigProperties(int resellerId) throws OXException {
         Cache cache = getCacheService().getCache(CONFIGURATION_REGION_NAME);
-        Integer key = I(contextId);
+        Integer key = I(resellerId);
         Object object = cache.get(key);
         if (object instanceof Map) {
             return Map.class.cast(object);
         }
-        LockService lockService = optLockService();
-        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("getAllConfigPropertiesByContext-").append(contextId).toString());
-        lock.lock();
 
+        LockService lockService = optLockService();
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("getAllConfigProperties-").append(resellerId).append("-").toString());
+        lock.lock();
         try {
             object = cache.get(key);
             if (object instanceof Map) {
                 return Map.class.cast(object);
             }
-            Map<String, ResellerConfigProperty> config = delegate.getAllConfigPropertiesByContext(contextId);
-            cache.put(key, new HashMap<>(config), false);
-            return config;
+            Map<String, ResellerConfigProperty> props = delegate.getAllConfigProperties(resellerId);
+            cache.put(key, new HashMap<>(props), false);
+            return props;
         } finally {
             lock.unlock();
         }
     }
 
     @Override
+    public Map<String, ResellerConfigProperty> getAllConfigPropertiesByContext(int contextId) throws OXException {
+        ResellerValue resellerValue = getResellerValue(contextId);
+        Integer resellerId = resellerValue.getResellerId();
+        Integer parentId = resellerValue.getParentId();
+
+        Map<String, ResellerConfigProperty> properties = getAllConfigProperties(resellerId);
+        if (parentId == null) {
+            // Context is assigned to the root reseller, just return props
+            return properties;
+        }
+
+        // Traverse the admin path to get all properties for the context
+        do {
+            ResellerAdmin resellerAdmin = getResellerById(parentId);
+            properties.putAll(getAllConfigProperties(resellerAdmin.getId()));
+            parentId = resellerAdmin.getParentId();
+        } while (parentId != null && parentId.intValue() > 0);
+        return properties;
+    }
+
+    @Override
     public Map<String, ResellerConfigProperty> getConfigProperties(int resellerId, Set<String> keys) throws OXException {
-        // No caching at the moment
-        return delegate.getConfigProperties(resellerId, keys);
+        Map<String, ResellerConfigProperty> properties = getAllConfigProperties(resellerId);
+        Map<String, ResellerConfigProperty> ret = new HashMap<>();
+        for (String key : keys) {
+            if (properties.containsKey(key)) {
+                ret.put(key, properties.get(key));
+            }
+        }
+        return ret;
     }
 
     @Override
@@ -219,39 +265,73 @@ public class CachingResellerService implements ResellerService {
         return ret;
     }
 
-    @Override
-    public Set<ResellerTaxonomy> getTaxonomies(int resellerId) throws OXException {
-        // No caching at the moment
-        return delegate.getTaxonomies(resellerId);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
-    public Set<ResellerTaxonomy> getTaxonomiesByContext(int contextId) throws OXException {
+    public Set<ResellerTaxonomy> getTaxonomies(int resellerId) throws OXException {
         Cache cache = getCacheService().getCache(TAXONOMIES_REGION_NAME);
-        Integer key = I(contextId);
+        Integer key = I(resellerId);
         Object object = cache.get(key);
         if (object instanceof Set) {
             return Set.class.cast(object);
         }
-        LockService lockService = optLockService();
-        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("getTaxonomiesByContext-").append(contextId).toString());
-        lock.lock();
 
+        LockService lockService = optLockService();
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("getTaxonomies-").append(resellerId).append("-").toString());
+        lock.lock();
         try {
             object = cache.get(key);
-            if (object instanceof Set) {
+            if (object instanceof Map) {
                 return Set.class.cast(object);
             }
-            Set<ResellerTaxonomy> config = delegate.getTaxonomiesByContext(contextId);
-            cache.put(key, new HashSet<>(config), false);
-            return config;
+            Set<ResellerTaxonomy> taxonomies = delegate.getTaxonomies(resellerId);
+            cache.put(key, new HashSet<>(taxonomies), false);
+            return taxonomies;
         } finally {
             lock.unlock();
         }
     }
 
+    @Override
+    public Set<ResellerTaxonomy> getTaxonomiesByContext(int contextId) throws OXException {
+        ResellerValue resellerValue = getResellerValue(contextId);
+        Integer resellerId = resellerValue.getResellerId();
+        Integer parentId = resellerValue.getParentId();
+
+        Set<ResellerTaxonomy> taxonomies = getTaxonomies(resellerId);
+        if (parentId == null) {
+            // Context is assigned to the root reseller, just return taxonomies
+            return taxonomies;
+        }
+
+        // Traverse the admin path to get all taxonomies for the context
+        do {
+            ResellerAdmin resellerAdmin = getResellerById(parentId);
+            taxonomies.addAll(getTaxonomies(resellerAdmin.getId()));
+            parentId = resellerAdmin.getParentId();
+        } while (parentId != null && parentId.intValue() > 0);
+        return taxonomies;
+    }
+
     ////////////////////////////////// HELPERS ///////////////////////////
+
+    /**
+     * Retrieves the cached {@link ResellerValue} for the specified context
+     *
+     * @param contextId The context identifier
+     * @return The {@link ResellerValue}
+     * @throws OXException if an error is occurred
+     */
+    private ResellerValue getResellerValue(int contextId) throws OXException {
+        CacheService cacheService = getCacheService();
+        Cache cache = cacheService.getCache(RESELLER_CONTEXT_NAME);
+        Integer key = I(contextId);
+        Object object = cache.get(key);
+        if (object instanceof ResellerValue) {
+            return ResellerValue.class.cast(object);
+        }
+        ResellerAdmin ra = getReseller(contextId);
+        return new ResellerValue(ra.getId(), ra.getParentId());
+    }
 
     /**
      * Returns the {@link CacheService}

@@ -67,6 +67,7 @@ import com.openexchange.admin.reseller.services.PluginInterfaces;
 import com.openexchange.admin.reseller.tools.AdminCacheExtended;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExecutorService;
@@ -152,6 +153,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class, DatabaseService.class, DBMigrationExecutorService.class };
+        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class, DatabaseService.class, DBMigrationExecutorService.class, CacheService.class };
     }
 }
