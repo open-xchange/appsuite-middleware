@@ -73,6 +73,7 @@ public class ResellerBasicPropertyImpl implements BasicProperty {
     private final int contextId;
     private final ServiceLookup services;
     private ResellerConfigProperty resellerProperty;
+    private boolean loaded;
 
     /**
      * Initializes a new {@link ResellerBasicPropertyImpl}.
@@ -125,8 +126,12 @@ public class ResellerBasicPropertyImpl implements BasicProperty {
         return isDefined() ? ImmutableList.of(RESELLER_ID_METADATA_NAME) : ImmutableList.of();
     }
 
-    private void loadProperty() throws OXException {
+    private synchronized void loadProperty() throws OXException {
+        if (loaded) {
+            return;
+        }
         ResellerService resellerService = services.getServiceSafe(ResellerService.class);
         resellerProperty = resellerService.getConfigPropertyByContext(contextId, property);
+        loaded = true;
     }
 }
