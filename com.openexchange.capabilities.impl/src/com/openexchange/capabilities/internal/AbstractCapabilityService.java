@@ -1387,21 +1387,18 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
         }
     }
 
-    private Set<ResellerCapability> getResellerCaps(int contextId, boolean allowCache) throws OXException {
-        if (contextId <= 0) {
-            return Collections.emptySet();
-        }
-        return loadResellerCaps(contextId);
-    }
-
     /**
      * Loads the reseller capabilities for the specified context.
      *
      * @param contextId The context identifier
+     * @param allowCache Whether to utilise cache for this operation
      * @return A Set with all reseller capabilities.
      * @throws OXException
      */
-    private Set<ResellerCapability> loadResellerCaps(int contextId) throws OXException {
+    private Set<ResellerCapability> getResellerCaps(int contextId, boolean allowCache) throws OXException {
+        if (contextId <= 0) {
+            return ImmutableSet.of();
+        }
         ResellerService resellerService = services.getOptionalService(ResellerService.class);
         if (resellerService == null) {
             return ImmutableSet.of();

@@ -101,8 +101,7 @@ public class CachingResellerService implements ResellerService {
         CacheService cacheService = getCacheService();
         Cache cache = cacheService.getCache(RESELLER_CONTEXT_NAME);
         Integer key = I(contextId);
-        Object object = cache.get(key);
-        if (null == object) {
+        if (null == cache.get(key)) {
             cache.put(key, new ResellerValue(resellerAdmin.getId(), resellerAdmin.getParentId()), false);
         }
         return resellerAdmin;
