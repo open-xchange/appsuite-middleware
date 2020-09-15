@@ -321,7 +321,10 @@ public class ConfigCascade implements ConfigViewFactory {
                         collect = collect || finalScope == null || finalScope.equals(scope);
 
                         if (collect) {
-                            p.add(providers.get(scope));
+                            ConfigProviderService providerService = providers.get(scope);
+                            if (providerService != null) {
+                                p.add(providerService);
+                            }
                         }
                     }
                     return p;
