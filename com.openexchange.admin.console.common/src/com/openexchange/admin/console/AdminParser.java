@@ -500,7 +500,7 @@ public class AdminParser extends CLIParser {
 
         if (arg.startsWith("--remove-")) {
             namespace = arg.substring(9, slashPos);
-            name = arg.substring(slashPos+1);
+            name = arg.substring(slashPos + 1);
         } else {
             int equalPos = arg.indexOf('=');
 
@@ -512,9 +512,9 @@ public class AdminParser extends CLIParser {
                 return;
             }
 
-            namespace = arg.substring(2,slashPos);
-            name = arg.substring(slashPos+1, equalPos);
-            value = arg.substring(equalPos+1);
+            namespace = arg.substring(2, slashPos);
+            name = arg.substring(slashPos + 1, equalPos);
+            value = arg.substring(equalPos + 1);
         }
 
         getDynamicMap(namespace).put(name, value);

@@ -55,13 +55,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.OXResellerTools;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.java.Strings;
 
 /**
  * {@link Change} - changereseller command line tool
@@ -70,6 +68,18 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Change extends ResellerAbstraction {
+
+    private enum DynamicNamespace {
+        taxonomy,
+        config;
+    }
+
+    private static Set<String> SUPPORTED_TAXONOMIES;
+    static {
+        Set<String> s = new HashSet<>();
+        s.add("types");
+        SUPPORTED_TAXONOMIES = Collections.unmodifiableSet(s);
+    }
 
     /**
      * Entry point
@@ -117,13 +127,8 @@ public class Change extends ResellerAbstraction {
             adm.setCapabilitiesToRemove(parseAndSetCapabilitiesToRemove(parser));
             adm.setCapabilitiesToDrop(parseAndSetCapabilitiesToDrop(parser));
 
-            // Configuration
-            adm.setConfigurationToAdd(parseAndSetConfigurationToAdd(parser));
-            adm.setConfigurationToRemove(parseSet(parser, configToRemove));
-
-            // Taxonomies
-            adm.setTaxonomiesToAdd(parseSet(parser, taxonomiesToAdd));
-            adm.setTaxonomiesToRemove(parseSet(parser, taxonomiesToRemove));
+            // Configuration & Taxonomies
+            applyDynamicOptionsToReseller(parser, adm);
 
             HashSet<String> removeRes = getRestrictionsToRemove(parser, this.removeRestrictionsOption);
             HashSet<Restriction> editRes = getRestrictionsToEdit(parser, this.editRestrictionsOption);
@@ -143,51 +148,72 @@ public class Change extends ResellerAbstraction {
     }
 
     /**
+     * Applies the dynamic options of configuration and taxonomies to the specified {@link ResellerAdmin}
+     * 
+     * @param parser the {@link AdminParser}
+     * @param adm The {@link ResellerAdmin}
+     */
+    private void applyDynamicOptionsToReseller(AdminParser parser, ResellerAdmin adm) {
+        Map<String, Map<String, String>> dynamicArguments = parser.getDynamicArguments();
+        Map<String, String> configToAdd = new HashMap<>();
+        Set<String> configToRemove = new HashSet<>();
+
+        Set<String> taxonomiesToAdd = new HashSet<>();
+        Set<String> taxonomiesToRemove = new HashSet<>();
+
+        for (Map.Entry<String, Map<String, String>> namespaced : dynamicArguments.entrySet()) {
+            String namespace = namespaced.getKey();
+            for (Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
+                String name = pair.getKey();
+                String value = pair.getValue();
+                DynamicNamespace dynamicNamespace;
+                try {
+                    dynamicNamespace = DynamicNamespace.valueOf(namespace);
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Unknown option '" + namespace + "'");
+                    sysexit(1);
+                    return;
+                }
+                switch (dynamicNamespace) {
+                    case config:
+                        if (value == null) {
+                            configToRemove.add(name);
+                        } else {
+                            configToAdd.put(name, value);
+                        }
+                        break;
+                    case taxonomy:
+                        if (false == SUPPORTED_TAXONOMIES.contains(name)) {
+                            System.err.println("Unsupported taxonomy '" + name + "'. Supported taxonomies are: " + SUPPORTED_TAXONOMIES);
+                            sysexit(1);
+                        }
+                        if (value == null) {
+                            taxonomiesToRemove.add(value);
+                        } else {
+                            taxonomiesToAdd.add(value);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        // Configuration
+        adm.setConfigurationToAdd(configToAdd);
+        adm.setConfigurationToRemove(configToRemove);
+
+        // Taxonomies
+        adm.setTaxonomiesToAdd(taxonomiesToAdd);
+        adm.setTaxonomiesToRemove(taxonomiesToRemove);
+    }
+
+    /**
      * Sets the extra options for the clt
      *
      * @param parser The {@link AdminParser}
      */
     private void setOptions(AdminParser parser) {
         setChangeOptions(parser);
-    }
-
-    /**
-     * Parses and sets the configuration to add/change
-     *
-     * @param parser the {@link AdminParser}
-     * @return A {@link Map} with the configuration to add/change
-     */
-    private Map<String, String> parseAndSetConfigurationToAdd(AdminParser parser) {
-        String config = (String) parser.getOptionValue(configToAdd);
-        if (Strings.isEmpty(config)) {
-            return Collections.emptyMap();
-        }
-        Map<String, String> configuration = new HashMap<>();
-        for (String s : config.trim().split(",")) {
-            String[] split = s.split("=");
-            if (split.length != 2) {
-                continue;
-            }
-            configuration.put(split[0].trim(), split[1].trim());
-        }
-        return configuration;
-    }
-
-    /**
-     * Parses and sets the configuration to remove
-     *
-     * @param parser The {@link AdminParser}
-     * @return A {@link Set} with the configuration to remove
-     */
-    private Set<String> parseSet(AdminParser parser, CLIOption cliOption) {
-        String config = (String) parser.getOptionValue(cliOption);
-        if (Strings.isEmpty(config)) {
-            return Collections.emptySet();
-        }
-        Set<String> configuration = new HashSet<>();
-        for (String s : config.trim().split(",")) {
-            configuration.add(s.trim());
-        }
-        return configuration;
+        parser.allowDynamicOptions();
     }
 }

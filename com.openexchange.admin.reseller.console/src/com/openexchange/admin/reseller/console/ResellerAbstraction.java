@@ -102,10 +102,10 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_CAPABILITIES_TO_DROP = "capabilities-to-drop";
 
     protected static final String OPT_CONFIGURATION_TO_ADD = "config";
-    protected static final String OPT_CONFIGURATION_TO_REMOVE = "remove-config";
+    protected static final String OPT_CONFIGURATION_TO_REMOVE = "config-to-remove";
 
-    protected static final String OPT_TAXONOMIES_TO_ADD = "taxonomies";
-    protected static final String OPT_TAXONOMIES_TO_REMOVE = "remove-taxonomies";
+    protected static final String OPT_TAXONOMY_TO_ADD = "taxonomy";
+    protected static final String OPT_TAXONOMY_TO_REMOVE = "taxonomy-to-remove";
 
     protected CLIOption idOption = null;
     protected CLIOption adminNameOption = null;
@@ -182,19 +182,19 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void setConfigToAdd(final AdminParser parser) {
-        this.configToAdd = setLongOpt(parser, OPT_CONFIGURATION_TO_ADD, "Add/Change reseller specific configuration as a comma-separated list, e. g. '--config \"com.openexchange.oauth.twitter=false,com.openexchange.oauth.google=true\"'", true, false, false);
+        this.configToAdd = setLongOpt(parser, OPT_CONFIGURATION_TO_ADD, "Add/Change reseller specific configuration, e. g. '--config/com.openexchange.oauth.twitter=false --config/com.openexchange.oauth.google=true'", false, false);
     }
 
     protected void setConfigToRemove(final AdminParser parser) {
-        this.configToRemove = setLongOpt(parser, OPT_CONFIGURATION_TO_REMOVE, "Remove reseller specific configuration, e. g. '--remove-config \"com.openexchange.oauth.twitter, com.openexchange.oauth.google\"'", true, false, false);
+        this.configToRemove = setLongOpt(parser, OPT_CONFIGURATION_TO_REMOVE, "Remove reseller specific configuration, e. g. '--remove-config/com.openexchange.oauth.twitter --remove-config/com.openexchange.oauth.google'", false, false);
     }
 
     protected void setTaxonomiesToAdd(final AdminParser parser) {
-        this.taxonomiesToAdd = setLongOpt(parser, OPT_TAXONOMIES_TO_ADD, "Add reseller specific taxonomies as a comma-separated list, e. g. '--taxonomies \"some-taxonomy\"'", true, false, false);
+        this.taxonomiesToAdd = setLongOpt(parser, OPT_TAXONOMY_TO_ADD, "Add reseller specific taxonomies as a comma-separated list, e. g. '--taxonomy/types=some-taxonomy'", false, false);
     }
 
     protected void setTaxonomiesToRemove(final AdminParser parser) {
-        this.taxonomiesToRemove = setLongOpt(parser, OPT_TAXONOMIES_TO_REMOVE, "Remove reseller specific taxonomies, e. g. '--remove-taxonomies \"some-taxonomy\"'", true, false, false);
+        this.taxonomiesToRemove = setLongOpt(parser, OPT_TAXONOMY_TO_REMOVE, "Remove reseller specific taxonomies, e. g. '--remove-taxonomy/types'", false, false);
     }
 
     protected void setNameAndIdOptions(final AdminParser parser) {
