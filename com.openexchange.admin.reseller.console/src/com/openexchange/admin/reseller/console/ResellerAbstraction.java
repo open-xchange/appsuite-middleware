@@ -102,10 +102,10 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_CAPABILITIES_TO_DROP = "capabilities-to-drop";
 
     protected static final String OPT_CONFIGURATION_TO_ADD = "config";
-    protected static final String OPT_CONFIGURATION_TO_REMOVE = "config-to-remove";
+    protected static final String OPT_CONFIGURATION_TO_REMOVE = "remove-config";
 
     protected static final String OPT_TAXONOMY_TO_ADD = "taxonomy";
-    protected static final String OPT_TAXONOMY_TO_REMOVE = "taxonomy-to-remove";
+    protected static final String OPT_TAXONOMY_TO_REMOVE = "remove-taxonomy";
 
     protected CLIOption idOption = null;
     protected CLIOption adminNameOption = null;

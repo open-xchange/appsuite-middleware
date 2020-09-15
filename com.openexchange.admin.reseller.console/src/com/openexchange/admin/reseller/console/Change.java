@@ -71,7 +71,10 @@ public class Change extends ResellerAbstraction {
 
     private enum DynamicNamespace {
         taxonomy,
-        config;
+        remove_taxonomy,
+        config,
+        remove_config;
+
     }
 
     private static Set<String> SUPPORTED_TAXONOMIES;
@@ -168,7 +171,7 @@ public class Change extends ResellerAbstraction {
                 String value = pair.getValue();
                 DynamicNamespace dynamicNamespace;
                 try {
-                    dynamicNamespace = DynamicNamespace.valueOf(namespace);
+                    dynamicNamespace = DynamicNamespace.valueOf(namespace.replace("-", "_"));
                 } catch (IllegalArgumentException e) {
                     System.err.println("Unknown option '" + namespace + "'");
                     sysexit(1);
@@ -176,22 +179,24 @@ public class Change extends ResellerAbstraction {
                 }
                 switch (dynamicNamespace) {
                     case config:
-                        if (value == null) {
-                            configToRemove.add(name);
-                        } else {
-                            configToAdd.put(name, value);
-                        }
+                        configToAdd.put(name, value);
+                        break;
+                    case remove_config:
+                        configToRemove.add(name);
                         break;
                     case taxonomy:
                         if (false == SUPPORTED_TAXONOMIES.contains(name)) {
                             System.err.println("Unsupported taxonomy '" + name + "'. Supported taxonomies are: " + SUPPORTED_TAXONOMIES);
                             sysexit(1);
                         }
-                        if (value == null) {
-                            taxonomiesToRemove.add(value);
-                        } else {
-                            taxonomiesToAdd.add(value);
+                        taxonomiesToAdd.add(value);
+                        break;
+                    case remove_taxonomy:
+                        if (false == SUPPORTED_TAXONOMIES.contains(name)) {
+                            System.err.println("Unsupported taxonomy '" + name + "'. Supported taxonomies are: " + SUPPORTED_TAXONOMIES);
+                            sysexit(1);
                         }
+                        taxonomiesToRemove.add(value);
                         break;
                     default:
                         break;
@@ -215,5 +220,6 @@ public class Change extends ResellerAbstraction {
     private void setOptions(AdminParser parser) {
         setChangeOptions(parser);
         parser.allowDynamicOptions();
+        parser.allowFlexibleDynamicOptions();
     }
 }
