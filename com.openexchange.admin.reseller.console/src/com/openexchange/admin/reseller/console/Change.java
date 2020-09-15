@@ -185,17 +185,11 @@ public class Change extends ResellerAbstraction {
                         configToRemove.add(name);
                         break;
                     case taxonomy:
-                        if (false == SUPPORTED_TAXONOMIES.contains(name)) {
-                            System.err.println("Unsupported taxonomy '" + name + "'. Supported taxonomies are: " + SUPPORTED_TAXONOMIES);
-                            sysexit(1);
-                        }
+                        checkTaxonomy(name);
                         taxonomiesToAdd.add(value);
                         break;
                     case remove_taxonomy:
-                        if (false == SUPPORTED_TAXONOMIES.contains(name)) {
-                            System.err.println("Unsupported taxonomy '" + name + "'. Supported taxonomies are: " + SUPPORTED_TAXONOMIES);
-                            sysexit(1);
-                        }
+                        checkTaxonomy(name);
                         taxonomiesToRemove.add(value);
                         break;
                     default:
@@ -210,6 +204,14 @@ public class Change extends ResellerAbstraction {
         // Taxonomies
         adm.setTaxonomiesToAdd(taxonomiesToAdd);
         adm.setTaxonomiesToRemove(taxonomiesToRemove);
+    }
+
+    private void checkTaxonomy(String name) {
+        if (SUPPORTED_TAXONOMIES.contains(name)) {
+            return;
+        }
+        System.err.println("Unsupported taxonomy '" + name + "'. Supported taxonomies are: " + SUPPORTED_TAXONOMIES);
+        sysexit(1);
     }
 
     /**
