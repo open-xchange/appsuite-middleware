@@ -500,15 +500,15 @@ public class ResellerServiceImpl implements ResellerService {
                 if (false == restrictions.isEmpty()) {
                     builder.restrictions(restrictions);
                 }
-                Set<ResellerCapability> capabilities = getCapabilitiesByReseller(id, con);
+                Set<ResellerCapability> capabilities = getCapabilitiesByReseller(i(id), con);
                 if (false == capabilities.isEmpty()) {
                     builder.capabilities(capabilities);
                 }
-                Set<ResellerTaxonomy> taxonomies = getTaxonomiesByReseller(id, con);
+                Set<ResellerTaxonomy> taxonomies = getTaxonomiesByReseller(i(id), con);
                 if (false == taxonomies.isEmpty()) {
                     builder.taxonomies(taxonomies);
                 }
-                Map<String, ResellerConfigProperty> configuration = getAllConfigPropertiesByReseller(id, con);
+                Map<String, ResellerConfigProperty> configuration = getAllConfigPropertiesByReseller(i(id), con);
                 if (false == configuration.isEmpty()) {
                     builder.configuration(configuration);
                 }
@@ -819,7 +819,7 @@ public class ResellerServiceImpl implements ResellerService {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = connection.prepareStatement(GET_RESELLER_SELECTED_PROPERTIES + buildKeySubQuery(keys) + ") ;");
+            stmt = connection.prepareStatement(Databases.getIN(GET_RESELLER_SELECTED_PROPERTIES, keys.size()));
             int pIndex = 1;
             stmt.setInt(pIndex++, resellerId);
             for (String key : keys) {
@@ -947,20 +947,5 @@ public class ResellerServiceImpl implements ResellerService {
                 dbService.backReadOnly(connection);
             }
         }
-    }
-
-    /**
-     * Builds the key subquery
-     *
-     * @param keys The set with keys
-     * @return The subquery
-     */
-    private String buildKeySubQuery(Set<?> keys) {
-        StringBuilder b = new StringBuilder();
-        for (int i = 0; i < keys.size(); i++) {
-            b.append("?,");
-        }
-        b.setLength(b.length() - 1);
-        return b.toString();
     }
 }

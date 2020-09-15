@@ -51,6 +51,8 @@ package com.openexchange.admin.reseller.storage.mysqlStorage;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -1016,68 +1018,66 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 restrictions.add(subadminCanCreateSubadminsRestriction);
             }
         }
-        if (restrictions.size() > 0) {
-            Connection con = null;
-            try {
-                con = cache.getReadConnectionForConfigDB();
-                for (Restriction res : restrictions) {
-                    for (String tocheck : restriction_types) {
-                        String name = res.getName();
-                        String value = res.getValue();
-                        if (name.equals(tocheck)) {
-                            if (tocheck.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN)) {
-                                //long tstart = System.currentTimeMillis();
-                                checkMaxContextRestriction(con, adm, Integer.parseInt(value));
-                                //long tend = System.currentTimeMillis();
-                                //System.out.println("checkMaxContextRestriction: " + (tend - tstart) + " ms");
-                            } else if (tocheck.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN)) {
-                                //long tstart = System.currentTimeMillis();
-                                checkMaxContextQuotaRestriction(con, adm, Long.parseLong(value));
-                                //long tend = System.currentTimeMillis();
-                                //System.out.println("checkMaxContextQuotaRestriction: " + (tend - tstart) + " ms");
-                            } else if (tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN)) {
-                                //long tstart = System.currentTimeMillis();
-                                checkMaxOverallUserRestriction(con, adm, Integer.parseInt(value), true);
-                                //long tend = System.currentTimeMillis();
-                                //System.out.println("checkMaxOverallUserRestriction: " + (tend - tstart) + " ms");
-                            } else if (tocheck.equals(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS)) {
-                                if (!OXResellerTools.isTrue(value)) {
-                                    throw new OXResellerException(OXResellerException.Code.SUBADMIN_NOT_ALLOWED_TO_CREATE_SUBADMIN, adm.getName());
-                                }
-                            } else if (tocheck.equals(Restriction.MAX_SUBADMIN_PER_SUBADMIN)) {
-                                checkSubadminRestriction(con, adm, Integer.parseInt(value));
+        if (restrictions.size() <= 0) {
+            return;
+        }
+        Connection con = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+            for (Restriction res : restrictions) {
+                for (String tocheck : restriction_types) {
+                    String name = res.getName();
+                    String value = res.getValue();
+                    if (name.equals(tocheck)) {
+                        if (tocheck.equals(Restriction.MAX_CONTEXT_PER_SUBADMIN)) {
+                            long tstart = System.currentTimeMillis();
+                            checkMaxContextRestriction(con, adm, Integer.parseInt(value));
+                            LOGGER.trace("checkMaxContextRestriction: {} ms", L(System.currentTimeMillis() - tstart));
+                        } else if (tocheck.equals(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN)) {
+                            long tstart = System.currentTimeMillis();
+                            checkMaxContextQuotaRestriction(con, adm, Long.parseLong(value));
+                            LOGGER.trace("checkMaxContextQuotaRestriction: {} ms", L(System.currentTimeMillis() - tstart));
+                        } else if (tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN)) {
+                            long tstart = System.currentTimeMillis();
+                            checkMaxOverallUserRestriction(con, adm, Integer.parseInt(value), true);
+                            LOGGER.trace("checkMaxOverallUserRestriction: {} ms", L(System.currentTimeMillis() - tstart));
+                        } else if (tocheck.equals(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS)) {
+                            if (!OXResellerTools.isTrue(value)) {
+                                throw new OXResellerException(OXResellerException.Code.SUBADMIN_NOT_ALLOWED_TO_CREATE_SUBADMIN, adm.getName());
                             }
-                        } else if (name.startsWith(tocheck)) {
-                            if (tocheck.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX)) {
-                                //long tstart = System.currentTimeMillis();
-                                checkMaxOverallUserRestrictionByModuleAccess(con, adm.getId().intValue(), res, access, true, contextAdmin);
-                                //long tend = System.currentTimeMillis();
-                                //System.out.println("checkMaxOverallUserRestrictionByModuleAccess: " + (tend - tstart) + " ms");
-                            }
+                        } else if (tocheck.equals(Restriction.MAX_SUBADMIN_PER_SUBADMIN)) {
+                            checkSubadminRestriction(con, adm, Integer.parseInt(value));
+                        }
+                    } else if (name.startsWith(tocheck)) {
+                        if (tocheck.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX)) {
+                            long tstart = System.currentTimeMillis();
+                            checkMaxOverallUserRestrictionByModuleAccess(con, adm.getId().intValue(), res, access, true, contextAdmin);
+                            LOGGER.trace("checkMaxOverallUserRestrictionByModuleAccess: {} ms", L(System.currentTimeMillis() - tstart));
+
                         }
                     }
                 }
-            } catch (RuntimeException e) {
-                LOGGER.error("", e);
-                throw StorageException.storageExceotionFor(e);
-            } catch (PoolException e) {
-                LOGGER.error("", e);
-                throw new StorageException(e.getMessage());
-            } catch (OXResellerException e) {
-                LOGGER.error("", e);
-                throw new StorageException(e.getMessage());
-            } catch (SQLException e) {
-                LOGGER.error("", e);
-                throw new StorageException(e.getMessage());
-            } catch (ClassNotFoundException e) {
-                LOGGER.error("", e);
-                throw new StorageException(e.getMessage());
-            } catch (OXGenericException e) {
-                LOGGER.error("", e);
-                throw new StorageException(e.getMessage());
-            } finally {
-                cache.closeReadConfigDBSqlStuff(con, null);
             }
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw StorageException.storageExceptionFor(e);
+        } catch (PoolException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e.getMessage());
+        } catch (OXResellerException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e.getMessage());
+        } catch (SQLException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e.getMessage());
+        } catch (OXGenericException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeReadConfigDBSqlStuff(con, null);
         }
     }
 
@@ -1096,15 +1096,13 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     String name = res.getName();
                     for (String tocheck : restriction_types) {
                         if (tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN) && name.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN)) {
-                            //long tstart = System.currentTimeMillis();
+                            long tstart = System.currentTimeMillis();
                             checkMaxOverallUserRestriction(con, adm, Integer.parseInt(res.getValue()), false);
-                            //long tend = System.currentTimeMillis();
-                            //System.out.println("checkMaxOverallUserRestriction: " + (tend - tstart) + " ms");
+                            LOGGER.trace("checkMaxOverallUserRestriction: {} ms", L(System.currentTimeMillis() - tstart));
                         } else if (tocheck.equals(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX) && name.startsWith(Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX)) {
-                            //long tstart = System.currentTimeMillis();
+                            long tstart = System.currentTimeMillis();
                             checkMaxOverallUserRestrictionByModuleAccess(con, adm.getId().intValue(), res, access, false, contextAdmin);
-                            //long tend = System.currentTimeMillis();
-                            //System.out.println("checkMaxOverallUserRestrictionByModuleAccess: " + (tend - tstart) + " ms");
+                            LOGGER.trace("checkMaxOverallUserRestrictionByModuleAccess: {} ms", L(System.currentTimeMillis() - tstart));
                         }
                     }
                 }
@@ -1114,15 +1112,13 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     String name = res.getName();
                     for (String tocheck : restriction_types) {
                         if (tocheck.equals(Restriction.MAX_USER_PER_CONTEXT) && name.equals(Restriction.MAX_USER_PER_CONTEXT)) {
-                            //long tstart = System.currentTimeMillis();
+                            long tstart = System.currentTimeMillis();
                             checkMaxUserRestriction(ctx, Integer.parseInt(res.getValue()));
-                            //long tend = System.currentTimeMillis();
-                            //System.out.println("checkMaxUserRestriction: " + (tend - tstart) + " ms");
+                            LOGGER.trace("checkMaxUserRestriction: {} ms", L(System.currentTimeMillis() - tstart));
                         } else if (tocheck.equals(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX) && name.startsWith(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX)) {
-                            //long tstart = System.currentTimeMillis();
+                            long tstart = System.currentTimeMillis();
                             checkMaxUserRestrictionByModuleAccess(ctx, res, access, contextAdmin);
-                            //long tend = System.currentTimeMillis();
-                            //System.out.println("checkMaxUserRestrictionByModuleAccess: " + (tend - tstart) + " ms");
+                            LOGGER.trace("checkMaxUserRestrictionByModuleAccess: {} ms", L(System.currentTimeMillis() - tstart));
                         }
                     }
                 }
@@ -1208,7 +1204,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw AdminCache.parseDataTruncation(dt);
         } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } catch (PoolException e) {
             LOGGER.error("", e);
             throw new StorageException(e.getMessage());
@@ -1288,7 +1284,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw new StorageException(e.getMessage());
         } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (rollback) {
                 doRollback(con);
@@ -1321,7 +1317,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw new StorageException(e.getMessage());
         } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (rollback) {
                 doRollback(con);
@@ -1353,7 +1349,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw new StorageException(e.getMessage());
         } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             cache.closeReadConfigDBSqlStuff(con, prep, rs);
         }
@@ -1397,7 +1393,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 throw new StorageException(e.getMessage());
             } catch (RuntimeException e) {
                 LOGGER.error("", e);
-                throw StorageException.storageExceotionFor(e);
+                throw StorageException.storageExceptionFor(e);
             } finally {
                 cache.closeWriteConfigDBSqlStuff(con, prep, rs);
             }
@@ -1443,7 +1439,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw new StorageException(e.getMessage());
         } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
@@ -1472,7 +1468,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw new StorageException(e.getMessage());
         } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
@@ -1508,7 +1504,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw new StorageException(e.getMessage());
         } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
@@ -1603,7 +1599,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw new StorageException(e.getMessage());
         } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (rollback) {
                 doRollback(con);
@@ -1651,7 +1647,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 throw new StorageException(e.getMessage());
             } catch (RuntimeException e) {
                 LOGGER.error("", e);
-                throw StorageException.storageExceotionFor(e);
+                throw StorageException.storageExceptionFor(e);
             } finally {
                 if (rollback) {
                     doRollback(con);
@@ -2145,7 +2141,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      * @throws StorageException if a storage error is occurred
      */
     private void changeCapabilities(ResellerAdmin resellerAdmin, Connection connection) throws StorageException {
-        int resellerId = resellerAdmin.getId();
+        int resellerId = i(resellerAdmin.getId());
         Set<String> capsToDrop = resellerAdmin.getCapabilitiesToDrop();
         Set<String> capsToAdd = resellerAdmin.getCapabilitiesToAdd();
         Set<String> capsToRemove = resellerAdmin.getCapabilitiesToRemove();
@@ -2281,7 +2277,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      * @throws StorageException
      */
     private void changeConfiguration(ResellerAdmin resellerAdmin, Connection connection) throws StorageException {
-        int resellerId = resellerAdmin.getId();
+        int resellerId = i(resellerAdmin.getId());
         PreparedStatement stmt = null;
         try {
             if (resellerAdmin.isConfigurationToRemoveSet() && false == resellerAdmin.getConfigurationToRemove().isEmpty()) {
@@ -2331,7 +2327,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      * @throws StorageException
      */
     private void changeTaxonomies(ResellerAdmin resellerAdmin, Connection connection) throws StorageException {
-        int resellerId = resellerAdmin.getId();
+        int resellerId = i(resellerAdmin.getId());
         PreparedStatement stmt = null;
         try {
             if (resellerAdmin.isTaxonomiesToRemoveSet() && false == resellerAdmin.getTaxonomiesToRemove().isEmpty()) {
@@ -2386,7 +2382,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         try {
             for (String cacheRegion : cacheRegions) {
                 Cache cache = cacheService.getCache(cacheRegion);
-                cache.remove(resellerId);
+                cache.remove(I(resellerId));
             }
         } catch (OXException e) {
             LOGGER.error("", e);
@@ -2407,7 +2403,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         try {
             stmt = con.prepareStatement("SELECT propertyKey, propertyValue FROM subadmin_config_properties WHERE sid = ?;");
             int pIndex = 1;
-            stmt.setInt(pIndex++, adm.getId());
+            stmt.setInt(pIndex++, i(adm.getId()));
             rs = stmt.executeQuery();
 
             Map<String, String> props = new HashMap<>(4);
@@ -2436,7 +2432,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT taxonomy FROM subadmin_taxonomies WHERE sid=?");
-            stmt.setLong(1, adm.getId());
+            stmt.setLong(1, i(adm.getId()));
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return ImmutableSet.of();
@@ -2467,7 +2463,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT capability FROM subadmin_capabilities WHERE sid=?");
-            stmt.setLong(1, adm.getId());
+            stmt.setLong(1, i(adm.getId()));
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return ImmutableSet.of();
