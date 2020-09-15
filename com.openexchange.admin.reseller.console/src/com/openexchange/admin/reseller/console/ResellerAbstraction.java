@@ -194,7 +194,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void setTaxonomiesToRemove(final AdminParser parser) {
-        this.taxonomiesToRemove = setLongOpt(parser, OPT_TAXONOMY_TO_REMOVE, "Remove reseller specific taxonomies, e. g. '--remove-taxonomy/types'", false, false);
+        this.taxonomiesToRemove = setLongOpt(parser, OPT_TAXONOMY_TO_REMOVE, "Remove reseller specific taxonomies, e. g. '--remove-taxonomy/types=some-taxonomy'", false, false);
     }
 
     protected void setNameAndIdOptions(final AdminParser parser) {
