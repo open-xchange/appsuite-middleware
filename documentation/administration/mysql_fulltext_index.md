@@ -41,7 +41,7 @@ An administrator can even influence what fields are supposed to be considered fo
 Otherwise, the ``FULLTEXT`` index will stop working.
 
 ## Files module
-For enabling the usage for ``FULLTEXT`` index in the files module, the property ``com.openexchange.infostore.fulltextSearch`` needs to be set to ``true``. This registers an update task (``InfostoreDocumentAddFulltextIndexUpdateTask``) at the next server restart, which creates the index after the next login attempt for associated database schemas.
+For enabling the usage for ``FULLTEXT`` index in the files module, the property ``com.openexchange.infostore.fulltextSearch`` needs to be set to ``true``. This registers an update task (``InfostoreDocumentAddFulltextIndexUpdateTask``) at the next server restart, which creates the index after the next login attempt for associated database schemas. Fields defined in ``com.openexchange.infostore.searchFields`` are added to the index. If the property is changed the update task has to be re-executed manually. 
 
 Additional the minimum search pattern length to use the ``FULLTEXT`` index can be configured with the property ``com.openexchange.infostore.fulltextSearchMinimumPatternLength``, which defaults to 3. This value should be adjusted to the ``innodb_ft_min_token_size`` MySQL property. **Note:** Changing MySQL properties most likely requires the ``FULLTEXT`` index to be rebuild. See 'MySQL configuration options' section.
 
