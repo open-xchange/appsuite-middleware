@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.ctc.wstx.stax,
  com.google.common.collect,
  com.openexchange.config,
+ com.openexchange.configuration,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.java.util,
