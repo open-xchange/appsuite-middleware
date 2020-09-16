@@ -8,7 +8,6 @@ import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.instance.EndpointQualifier;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.filemanagement.DistributedFileManagement;
 import com.openexchange.filemanagement.distributed.DistributedFileManagementImpl;
@@ -49,7 +48,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
                     DistributedFileManagementImpl.setHazelcastInstance(service);
 
                     // Address and map name
-                    String address = service.getCluster().getLocalMember().getSocketAddress(EndpointQualifier.MEMBER).getHostName();
+                    String address = service.getCluster().getLocalMember().getSocketAddress().getHostName();
                     String mapName = discoverMapName(service.getConfig(), logger);
                     address = address + ":" + port;
 
