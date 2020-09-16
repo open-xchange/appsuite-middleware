@@ -101,6 +101,7 @@ import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.common.DeleteResultImpl;
 import com.openexchange.chronos.common.DeltaEvent;
+import com.openexchange.chronos.common.RecurrenceUtils;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -1063,6 +1064,15 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
              */
             try {
                 Check.mandatoryFields(event, EventField.START_DATE);
+            } catch (OXException e) {
+                LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", event.getUid(), e.getMessage());
+                continue;
+            }
+            /*
+             * Adjust faulty reccurrence rule
+             */
+            try {
+                RecurrenceUtils.adjustRecurrenceRule(event);
             } catch (OXException e) {
                 LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", event.getUid(), e.getMessage());
                 continue;
