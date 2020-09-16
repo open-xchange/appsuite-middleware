@@ -133,6 +133,22 @@ public final class DownloadUtility {
         return checkInlineDownload(inputStream, -1L, fileName, sContentType, overridingDisposition, userAgent, session);
     }
 
+    /**
+     * Checks specified input stream intended for inline display for harmful data if its Content-Type indicates image content.
+     *
+     * @param inputStream The input stream
+     * @param size The size of the passed stream
+     * @param fileName The file name
+     * @param sContentType The <i>Content-Type</i> string
+     * @param overridingDisposition Optionally overrides the <i>Content-Disposition</i> header
+     * @param userAgent The <i>User-Agent</i>
+     * @param session The associated session
+     * @return The checked download providing input stream, content type, and content disposition to use
+     * @throws OXException If checking download fails
+     */
+    public static CheckedDownload checkInlineDownload(Readable inputStream, long size, String fileName, String sContentType, String overridingDisposition, String userAgent, ServerSession session) throws OXException {
+        return checkInlineDownload(inputStream, size, fileName, sContentType, overridingDisposition, userAgent, null == session ? Locale.US : session.getUser().getLocale());
+    }
 
     private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
 
@@ -149,7 +165,7 @@ public final class DownloadUtility {
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(Readable inputStream, long sizer, String fileName, String sContentType, String overridingDisposition, String userAgent, ServerSession session) throws OXException {
+    public static CheckedDownload checkInlineDownload(Readable inputStream, long size, String fileName, String sContentType, String overridingDisposition, String userAgent, Locale locale) throws OXException {
         ThresholdFileHolder sink = null;
         try {
             /*
@@ -167,8 +183,23 @@ public final class DownloadUtility {
                 contentType.setSubType(ct.substring(pos + 1));
             }
             boolean harmful = false;
+            boolean indicatesInline = false;
             String sContentDisposition = overridingDisposition;
-            long sz = sizer;
+            if (sContentDisposition != null) {
+                // Content-Disposition is given. Check for valid/known value
+                String lccd = toLowerCase(sContentDisposition).trim();
+                if (lccd.startsWith("inline")) {
+                    sContentDisposition = "inline";
+                    indicatesInline = true;
+                } else if (lccd.startsWith("attachment")) {
+                    sContentDisposition = "attachment";
+                } else {
+                    // Unknown value. Assume "inline" as default disposition to trigger client's (Browser) internal viewer.
+                    sContentDisposition = "inline";
+                    indicatesInline = true;
+                }
+            }
+            long sz = size;
             Readable in = inputStream;
             // Some variables
             String fn = fileName;
@@ -179,13 +210,13 @@ public final class DownloadUtility {
                  */
                 if (null == sContentDisposition) {
                     sContentDisposition = "attachment";
-                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
-                    /*
-                     * Sanitizing of HTML content needed
-                     */
+                } else if (indicatesInline) {
                     if (contentType.contains("application/")) {
                         sContentDisposition = "attachment";
                     } else {
+                        /*
+                         * Sanitizing of HTML content needed
+                         */
                         sink = new ThresholdFileHolder();
                         sink.write(in);
                         in = null;
@@ -201,7 +232,6 @@ public final class DownloadUtility {
                         if (sink.getLength() > HtmlServices.htmlThreshold()) {
                             // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
                             OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
-                            Locale locale = session.getUser().getLocale();
                             htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
                         } else {
                             htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
@@ -235,7 +265,7 @@ public final class DownloadUtility {
                  */
                 if (null == sContentDisposition) {
                     sContentDisposition = "attachment";
-                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
+                } else if (indicatesInline) {
                     if (contentType.contains("application/")) {
                         sContentDisposition = "attachment";
                     } else {
@@ -254,10 +284,11 @@ public final class DownloadUtility {
                         }
                         // Escape of XML content
                         {
-                            final ThresholdFileHolder copy = new ThresholdFileHolder();
+                            ThresholdFileHolder copy = null;
                             OutputStreamWriter w = null;
                             Reader r = null;
                             try {
+                                copy = new ThresholdFileHolder();
                                 r = new InputStreamReader(sink.getClosingStream(), Charsets.forName(cs));
                                 w = new OutputStreamWriter(copy.asOutputStream(), Charsets.UTF_8);
                                 HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
@@ -269,10 +300,11 @@ public final class DownloadUtility {
                                     w.write(xmlContent);
                                 }
                                 w.flush();
+                                sink = copy;
+                                copy = null; // Avoid premature closing
                             } finally {
-                                Streams.close(r, w);
+                                Streams.close(r, w, copy);
                             }
-                            sink = copy;
                         }
                         contentType.setSubType("html");
                         contentType.setCharsetParameter("UTF-8");
@@ -311,7 +343,7 @@ public final class DownloadUtility {
                         sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                     }
                     sContentDisposition = "attachment";
-                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
+                } else if (indicatesInline) {
                     /*
                      * Sanitizing of text content needed
                      */
@@ -329,10 +361,11 @@ public final class DownloadUtility {
                     }
                     // Convert to UTF-8
                     {
-                        final ThresholdFileHolder utf8Copy = new ThresholdFileHolder();
+                        ThresholdFileHolder utf8Copy = null;
                         OutputStreamWriter w = null;
                         Reader r = null;
                         try {
+                            utf8Copy = new ThresholdFileHolder();
                             r = new InputStreamReader(sink.getClosingStream(), Charsets.forName(cs));
                             w = new OutputStreamWriter(utf8Copy.asOutputStream(), Charsets.UTF_8);
                             final int buflen = 8192;
@@ -341,10 +374,11 @@ public final class DownloadUtility {
                                 w.write(cbuf, 0, read);
                             }
                             w.flush();
+                            sink = utf8Copy;
+                            utf8Copy = null; // Avoid premature closing
                         } finally {
-                            Streams.close(r, w);
+                            Streams.close(r, w, utf8Copy);
                         }
-                        sink = utf8Copy;
                     }
                     contentType.setCharsetParameter("UTF-8");
                     sz = sink.getLength();
@@ -415,7 +449,7 @@ public final class DownloadUtility {
                             /*
                              * File extension does not fit to MIME type. Reset file name.
                              */
-                            fn = addFileExtension(fileExtension, extensions.iterator().next());
+                            fn = addFileExtension(fn, extensions.iterator().next());
                             preparedFileName = getSaveAsFileName(fn, msieOnWindows, contentType.getBaseType());
                         }
                         final String detectedCT = ImageTypeDetector.getMimeType(sink.getStream());
@@ -449,7 +483,7 @@ public final class DownloadUtility {
                  */
                 if (null == sContentDisposition) {
                     sContentDisposition = "attachment";
-                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
+                } else if (indicatesInline) {
                     /*
                      * Sanitizing of HTML content needed
                      */
@@ -469,7 +503,6 @@ public final class DownloadUtility {
                         if (sink.getLength() > HtmlServices.htmlThreshold()) {
                             // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
                             OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
-                            Locale locale = session.getUser().getLocale();
                             htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
                         } else {
                             htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
@@ -494,22 +527,22 @@ public final class DownloadUtility {
             if (sContentDisposition == null) {
                 // Assume "inline" as default disposition to trigger client's (Browser) internal viewer.
                 final StringBuilder builder = new StringBuilder(32).append("inline");
-                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
+                appendFilenameParameter(fn, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
                 contentType.removeParameter("name");
-                retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz, harmful);
+                retval = new CheckedDownload(contentType.toString(), builder.toString(), fn, in, sz, harmful);
             } else if (sContentDisposition.indexOf(';') < 0) {
                 final StringBuilder builder = new StringBuilder(32).append(sContentDisposition);
-                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
+                appendFilenameParameter(fn, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
                 contentType.removeParameter("name");
-                retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz, harmful);
+                retval = new CheckedDownload(contentType.toString(), builder.toString(), fn, in, sz, harmful);
             } else {
                 contentType.removeParameter("name");
-                retval = new CheckedDownload(contentType.toString(), sContentDisposition, in, sz, harmful);
+                retval = new CheckedDownload(contentType.toString(), sContentDisposition, fn, in, sz, harmful);
             }
             return retval;
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(sink);
@@ -646,7 +679,7 @@ public final class DownloadUtility {
         /*
          * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
          */
-        return new CheckedDownload(MIME_APPL_OCTET, new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString(), randomAccess, size, harmful);
+        return new CheckedDownload(MIME_APPL_OCTET, new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString(), preparedFileName, randomAccess, size, harmful);
     }
 
     // private static final Pattern P = Pattern.compile("^[\\w\\d\\:\\/\\.]+(\\.\\w{3,4})$");
@@ -729,14 +762,16 @@ public final class DownloadUtility {
 
         private final String contentType;
         private final String contentDisposition;
+        private final String fileName;
         private final Readable inputStream;
         private final long size;
         private final boolean consideredHarmful;
 
-        CheckedDownload(String contentType, String contentDisposition, Readable inputStream, long size, boolean consideredHarmful) {
+        CheckedDownload(String contentType, String contentDisposition, String fileName, Readable inputStream, long size, boolean consideredHarmful) {
             super();
             this.contentType = contentType;
             this.contentDisposition = contentDisposition;
+            this.fileName = fileName;
             this.inputStream = inputStream;
             this.size = size;
             this.consideredHarmful = consideredHarmful;
@@ -749,6 +784,15 @@ public final class DownloadUtility {
          */
         public boolean isConsideredHarmful() {
             return consideredHarmful;
+        }
+
+        /**
+         * Gets the file name
+         *
+         * @return The file name
+         */
+        public String getFileName() {
+            return fileName;
         }
 
         /**
