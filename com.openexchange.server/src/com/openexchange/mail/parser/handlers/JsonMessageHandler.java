@@ -53,6 +53,7 @@ import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+import com.google.common.html.HtmlEscapers;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -712,7 +713,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                     final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, mailPath.getFolder())).id(mailPath.getMailID()).build();
                                     imageURL = imgSource.generateUrl(imageLocation, session);
                                 }
-                                final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
+                                final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + HtmlEscapers.htmlEscaper().escape(fileName) + "\">";
                                 final String content = jAttachment.getString(keyContent);
                                 final String newContent = content + imgTag;
                                 jAttachment.put(keyContent, newContent);
@@ -740,7 +741,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                                 final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, mailPath.getFolder())).id(mailPath.getMailID()).build();
                                                 imageURL = imgSource.generateUrl(imageLocation, session);
                                             }
-                                            final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
+                                            final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + HtmlEscapers.htmlEscaper().escape(fileName) + "\">";
                                             content = new StringBuilder(content).append(imgTag).toString();
                                             jAttachment.put(CONTENT, content);
                                             b = false;
