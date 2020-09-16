@@ -67,12 +67,17 @@ public class IOTools {
     }
 
     public static final void reallyBloodySkip(final InputStream is, long bytes) throws IOException {
-        while (bytes > 0) {
-            final long skipped = is.skip(bytes);
-            if (skipped < 0) {
-                return;
+        if (bytes <= 0) {
+            return;
+        }
+        long bytesToSkip = bytes;
+        byte buffer[] = new byte[(int) Math.min(0xFFFF, bytesToSkip)];
+        while (0 < bytesToSkip) {
+            int read = is.read(buffer, 0, (int) Math.min(buffer.length, bytesToSkip));
+            if (read < 0) {
+                break;
             }
-            bytes -= skipped;
+            bytesToSkip -= read;
         }
     }
 

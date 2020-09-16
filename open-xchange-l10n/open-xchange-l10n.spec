@@ -5,7 +5,7 @@ BuildArch:     noarch
 BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 8
+%define        ox_release 9
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -719,6 +719,8 @@ done
 /opt/open-xchange/i18n/*en_GB*
 
 %changelog
+* Fri Sep 11 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-09-14 (5857)
 * Mon Aug 24 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-08-24 (5842)
 * Wed Aug 05 2020 Marcus Klein <marcus.klein@open-xchange.com>

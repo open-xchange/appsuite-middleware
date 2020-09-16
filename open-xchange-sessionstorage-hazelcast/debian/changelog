@@ -1,3 +1,9 @@
+open-xchange-sessionstorage-hazelcast (7.10.4-9) stable; urgency=medium
+
+  * Build for patch 2020-09-14 (5857)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 11 Sep 2020 11:09:10 +0000
+
 open-xchange-sessionstorage-hazelcast (7.10.4-8) stable; urgency=medium
 
   * Build for patch 2020-08-24 (5842)

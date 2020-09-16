@@ -163,21 +163,6 @@ public class DownloadHandlerTest extends ShareTest {
             byte[] downloadedFile = EntityUtils.toByteArray(entity);
             Assert.assertArrayEquals("Different contents downloaded", contents, downloadedFile);
         }
-        /*
-         * check inline delivery
-         */
-        for (String queryParameter : new String[] { "delivery=view", "raw=1", "raw=true" }) {
-            HttpGet httpGet = new HttpGet(shareURL + '?' + queryParameter);
-            HttpResponse httpResponse = httpClient.execute(httpGet);
-            assertEquals("Wrong HTTP status", 200, httpResponse.getStatusLine().getStatusCode());
-            Header disposition = httpResponse.getFirstHeader("Content-Disposition");
-            assertTrue("Wrong content disposition", null != disposition && null != disposition.getValue() && disposition.getValue().startsWith("inline"));
-            HttpEntity entity = httpResponse.getEntity();
-            assertNotNull("No file downloaded", entity);
-            byte[] downloadedFile = EntityUtils.toByteArray(entity);
-            Assert.assertArrayEquals("Different contents downloaded", contents, downloadedFile);
-        }
-
     }
 
 }

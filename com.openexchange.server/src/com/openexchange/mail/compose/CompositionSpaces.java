@@ -51,7 +51,12 @@ package com.openexchange.mail.compose;
 
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -68,6 +73,7 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.java.InterruptibleCharSequence;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -78,6 +84,8 @@ import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTrackableTask;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
 
@@ -336,23 +344,49 @@ public class CompositionSpaces {
         }
 
         StringBuffer sb = new StringBuffer(htmlContent.length());
-        Matcher mailComposeUrlMatcher;
+        Optional<Matcher> mailComposeUrlMatcher;
         do {
             String imageTag = matcher.group();
             String srcValue = matcher.group(1);
-            if (PATTERN_IMAGE_SRC_START_BY_IMAGE.matcher(srcValue).find()) {
+            if (srcValue.indexOf(AttachmentStorage.IMAGE_DATA_SOURCE_ALIAS) > 0 && returnMatcherOnFind(PATTERN_IMAGE_SRC_START_BY_IMAGE, srcValue).isPresent()) {
                 Matcher attachmentIdMatcher = PATTERN_IMAGE_ID.matcher(srcValue);
                 if (attachmentIdMatcher.find()) {
                     String attachmentId = AJAXUtility.decodeUrl(attachmentIdMatcher.group(1), UTF_8);
                     replaceLinkedInlineImage(attachmentId, imageTag, sb, matcher, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments);
                 }
-            } else if ((mailComposeUrlMatcher = PATTERN_IMAGE_SRC_START_BY_URL.matcher(srcValue)).find()) {
-                String attachmentId = AJAXUtility.decodeUrl(mailComposeUrlMatcher.group(2), UTF_8);
+            } else if (srcValue.indexOf("/mail/compose/") > 0 &&  (mailComposeUrlMatcher = returnMatcherOnFind(PATTERN_IMAGE_SRC_START_BY_URL, srcValue)).isPresent()) {
+                String attachmentId = AJAXUtility.decodeUrl(mailComposeUrlMatcher.get().group(2), UTF_8);
                 replaceLinkedInlineImage(attachmentId, imageTag, sb, matcher, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments);
             }
         } while (matcher.find());
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    private static Optional<Matcher> returnMatcherOnFind(Pattern pattern, CharSequence input) {
+        Matcher matcher = pattern.matcher(InterruptibleCharSequence.valueOf(input));
+
+        Future<Boolean> future = ThreadPools.getThreadPool().submit(new MatcherFindTask(matcher));
+
+        try {
+            return future.get(60, TimeUnit.SECONDS).booleanValue() ? Optional.of(matcher) : Optional.empty();
+        } catch (InterruptedException e) {
+            // Keep interrupted status
+            LoggerHolder.LOG.warn("Interrupted while trying to parse: {}", input, e);
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            LoggerHolder.LOG.warn("Failed to parse: {}", input, cause == null ? e : cause);
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw (cause instanceof RuntimeException) ? ((RuntimeException) cause) : new RuntimeException(e);
+        } catch (TimeoutException e) {
+            LoggerHolder.LOG.warn("Timed out while trying to parse: {}", input);
+            future.cancel(true);
+            return Optional.empty();
+        }
     }
 
     private static void replaceLinkedInlineImage(String attachmentId, String imageTag, StringBuffer sb, Matcher matcher, Map<String, Attachment> attachmentId2inlineAttachments, Map<String, Attachment> contentId2InlineAttachment, Map<UUID, Attachment> fileAttachments) {
@@ -369,6 +403,23 @@ public class CompositionSpaces {
 
             contentId2InlineAttachment.put(attachment.getContentId(), attachment);
             fileAttachments.remove(attachment.getId());
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static final class MatcherFindTask extends AbstractTrackableTask<Boolean> {
+
+        private final Matcher matcher;
+
+        MatcherFindTask(Matcher matcher) {
+            super();
+            this.matcher = matcher;
+        }
+
+        @Override
+        public Boolean call() throws Exception {
+            return Boolean.valueOf(matcher.find());
         }
     }
 

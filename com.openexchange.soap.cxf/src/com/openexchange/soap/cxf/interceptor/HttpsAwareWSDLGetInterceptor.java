@@ -51,11 +51,15 @@ package com.openexchange.soap.cxf.interceptor;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
+import java.util.TreeMap;
 import org.apache.cxf.frontend.WSDLGetInterceptor;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.message.Message;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.soap.cxf.osgi.Services;
 
 
@@ -66,6 +70,8 @@ import com.openexchange.soap.cxf.osgi.Services;
  * @since v7.10.3
  */
 public class HttpsAwareWSDLGetInterceptor extends WSDLGetInterceptor {
+
+    private static final String HTTPS = "https";
 
     /**
      * Initializes a new {@link HttpsAwareWSDLGetInterceptor}.
@@ -88,14 +94,22 @@ public class HttpsAwareWSDLGetInterceptor extends WSDLGetInterceptor {
             String baseUri = (String) message.get(Message.REQUEST_URL);
 
             URI uri = new URI(baseUri);
-            int port = uri.getPort();
-            if (port < 0) {
-                ConfigurationService configService = Services.optService(ConfigurationService.class);
-                boolean forceHTTPS = configService != null && configService.getBoolProperty("com.openexchange.forceHTTPS", false);
-                if (forceHTTPS) {
-                    baseUri = new URI("https", uri.getUserInfo(), uri.getHost(), -1, uri.getPath(), uri.getQuery(), uri.getFragment()).toString();
-                    message.put(Message.REQUEST_URL, baseUri);
+            ConfigurationService configService = Services.optService(ConfigurationService.class);
+            boolean forceHTTPS = configService != null && configService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), Boolean.valueOf(ServerConfig.Property.FORCE_HTTPS.getDefaultValue()).booleanValue());
+            TreeMap<String, List<String>> headers = (TreeMap<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
+            Optional<List<String>> optProto = headers != null ? Optional.ofNullable(headers.get("X-Forwarded-Proto")) : Optional.empty();
+            if (forceHTTPS || (optProto.isPresent() && optProto.get().size() > 0 && optProto.get().get(0).equalsIgnoreCase(HTTPS))) {
+                Optional<List<String>> optForwardPort = headers != null ? Optional.ofNullable(headers.get("X-Forwarded-Port")) : Optional.empty();
+                int port = 443;
+                try {
+                    if (optForwardPort.isPresent() && optForwardPort.get().isEmpty() == false) {
+                        port = Integer.valueOf(optForwardPort.get().get(0)).intValue();
+                    }
+                } catch (NumberFormatException e) {
+                    // ignore
                 }
+                baseUri = new URI(HTTPS, uri.getUserInfo(), uri.getHost(), port, uri.getPath(), uri.getQuery(), uri.getFragment()).toString();
+                message.put(Message.REQUEST_URL, baseUri);
             }
 
             super.handleMessage(message);

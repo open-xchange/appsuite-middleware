@@ -254,13 +254,6 @@ public class ICalFeedClient {
         }
 
         // Assert the 5xx codes
-        switch (statusCode) {
-            case 500:
-                throw ICalProviderExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(httpResponse.getStatusLine().getReasonPhrase());
-            case 503:
-                LOG.info("The previously existing feed '{}' seems to be removed.", iCalFeedConfig.getFeedUrl());
-                return statusCode;
-        }
         if (statusCode >= 500 && statusCode <= 599) {
             throw ICalProviderExceptionCodes.REMOTE_SERVER_ERROR.create(String.valueOf(httpResponse.getStatusLine()));
         }

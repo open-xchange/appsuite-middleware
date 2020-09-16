@@ -227,6 +227,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         newFolder.setParentFolderID(parent);
         newFolder.setType(FolderObject.PRIVATE);
         newFolder.setModule(FolderObject.CONTACT);
+        newFolder.setMeta(Collections.singletonMap("__ccf#", Boolean.TRUE));
 
         // User is Admin and can read, write or delete everything
         final OCLPermission perm = new OCLPermission();
