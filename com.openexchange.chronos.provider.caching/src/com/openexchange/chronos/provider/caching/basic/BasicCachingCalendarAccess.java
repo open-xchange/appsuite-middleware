@@ -104,6 +104,7 @@ import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.common.DeleteResultImpl;
 import com.openexchange.chronos.common.DeltaEvent;
+import com.openexchange.chronos.common.RecurrenceUtils;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.ConferenceMapper;
@@ -1113,6 +1114,15 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                 continue;
             }
             /*
+             * Adjust faulty reccurrence rule
+             */
+            try {
+                RecurrenceUtils.adjustRecurrenceRule(event);
+            } catch (OXException e) {
+                LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", event.getUid(), e.getMessage());
+                continue;
+            }
+            /*
              * map events by UID
              */
             com.openexchange.tools.arrays.Collections.put(eventsByUID, event.getUid(), event);
@@ -1122,6 +1132,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             try {
                 eventGroup = sortEventGroup(eventGroup);
             } catch (OXException e) {
+                e.printStackTrace();
                 LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", eventGroup.get(0).getUid(), e.getMessage());
                 iterator.remove();
             }

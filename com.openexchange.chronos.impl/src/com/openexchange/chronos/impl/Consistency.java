@@ -57,13 +57,13 @@ import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.common.RecurrenceUtils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
 
 /**
- * {@link CalendarService}
+ * {@link Consistency}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
@@ -124,25 +124,7 @@ public class Consistency {
      * @throws OXException if the event has an invalid recurrence rule
      */
     public static void adjustRecurrenceRule(Event event) throws OXException {
-        if (null == event.getRecurrenceRule()) {
-            return;
-        }
-        RecurrenceRule rule = CalendarUtils.initRecurrenceRule(event.getRecurrenceRule());
-        if (null == rule.getUntil()) {
-            return;
-        }
-        DateTime until = rule.getUntil();
-        TimeZone timeZone = event.getStartDate().getTimeZone();
-        boolean startAllDay = event.getStartDate().isAllDay();
-        boolean untilAllDay = until.isAllDay();
-        if (startAllDay && !untilAllDay) {
-            rule.setUntil(until.toAllDay());
-        } else if (!startAllDay && untilAllDay) {
-            rule.setUntil(new DateTime(until.getCalendarMetrics(), timeZone, until.getTimestamp()));
-        } else {
-            return;
-        }
-        event.setRecurrenceRule(rule.toString());
+        RecurrenceUtils.adjustRecurrenceRule(event);
     }
 
     /**
