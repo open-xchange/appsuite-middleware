@@ -778,26 +778,34 @@ EOF
         ox_scr_done SCR-713
     fi
 
-    if ox_scr_todo SCR-676
+    if ox_scr_todo SCR-676-mw
     then
         # rename all appenders, converters, encoders and policies classes
         logconfig=/opt/open-xchange/etc/logback.xml
         tmp=${logconfig}.tmp
         cp -a --remove-destination $logconfig $tmp
-        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.LogstashSocketAppender/com.openexchange.logback.extensions.appenders.logstash.LogstashSocketAppender/g' $tmp
-        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.CustomFieldsAction/com.openexchange.logback.extensions.encoders.CustomFieldsAction/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.LogstashSocketAppender/com.openexchange.logback.extensions.appenders.logstash.LogstashAppender/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.encoder/com.openexchange.logback.extensions.appenders.logstash.encoder/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.queueSize/com.openexchange.logback.extensions.appenders.logstash.queueSize/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.alwaysPersistEvents/com.openexchange.logback.extensions.appenders.logstash.alwaysPersistEvents/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.loadFactor/com.openexchange.logback.extensions.appenders.logstash.loadFactor/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.connectionTimeout/com.openexchange.logback.extensions.appenders.logstash.connectionTimeout/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.mbeanEnabled/com.openexchange.logback.extensions.appenders.logstash.mbeanEnabled/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.CustomFieldsAction/com.openexchange.logback.extensions.encoders.CustomFieldAction/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.CustomField/com.openexchange.logback.extensions.encoders.CustomField/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.ExtendedPatternLayoutEncoder/com.openexchange.logback.extensions.encoders.ExtendedPatternLayoutEncoder/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.JSONEncoder/com.openexchange.logback.extensions.encoders.JSONEncoder/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.SyslogPatternLayoutActivator/com.openexchange.logback.extensions.encoders.SyslogPatternLayoutActivator/g' $tmp
         sed -i 's/com\.openexchange\.logback\.extensions\.ExtendedReplacingCompositeConverter/com.openexchange.logback.extensions.converters.ExtendedReplacingCompositeConverter/g' $tmp
         sed -i 's/com\.openexchange\.logback\.extensions\.LineMDCConverter/com.openexchange.logback.extensions.converters.LineMDCConverter/g' $tmp
         sed -i 's/com\.openexchange\.logback\.extensions\.LogSanitisingConverter/com.openexchange.logback.extensions.converters.LogSanitisingConverter/g' $tmp
         sed -i 's/com\.openexchange\.logback\.extensions\.ThreadIdConverter/com.openexchange.logback.extensions.converters.ThreadIdConverter/g' $tmp
-        sed -i 's/com\.openexchange\.logback\.extensions\.ExtendedPatternLayoutEncoder/com.openexchange.logback.extensions.encoders.ExtendedPatternLayoutEncoder/g' $tmp
-        sed -i 's/com\.openexchange\.logback\.extensions\.JSONEncoder/com.openexchange.logback.extensions.encoders.JSONEncoder/g' $tmp
         sed -i 's/com\.openexchange\.logback\.extensions\.FixedWindowRollingPolicy/com.openexchange.logback.extensions.policies.FixedWindowRollingPolicy/g' $tmp
         if [[ $(ox_md5 $tmp) != $(ox_md5 $logconfig) ]]; then
             cat $tmp >$logconfig
         fi
         rm $tmp
-        ox_scr_done SCR-676
+        ox_scr_done SCR-676-mw
     fi
 }
 
