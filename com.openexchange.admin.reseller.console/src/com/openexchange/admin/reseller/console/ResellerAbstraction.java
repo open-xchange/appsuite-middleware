@@ -252,12 +252,8 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         setAddRestrictionsOption(parser);
 
         setCapsToAdd(parser);
-        setCapsToRemove(parser);
-        setCapsToDrop(parser);
         setConfigToAdd(parser);
-        setConfigToRemove(parser);
         setTaxonomiesToAdd(parser);
-        setTaxonomiesToRemove(parser);
     }
 
     protected void parseAndSetAdminname(final AdminParser parser, final ResellerAdmin adm) {
