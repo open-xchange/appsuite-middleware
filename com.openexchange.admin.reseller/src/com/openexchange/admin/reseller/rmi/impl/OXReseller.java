@@ -461,7 +461,15 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             checkAdminIdOrName(admins);
             for (final ResellerAdmin admin : admins) {
                 if (!oxresell.existsAdmin(admin, pid)) {
-                    throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, admin.getName());
+                    String id;
+                    if (admin.isNameset()) {
+                        id = admin.getName();
+                    } else if (admin.isIdset()) {
+                        id = admin.getId().toString();
+                    } else {
+                        id = "";
+                    }
+                    throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, id);
                 }
             }
 
