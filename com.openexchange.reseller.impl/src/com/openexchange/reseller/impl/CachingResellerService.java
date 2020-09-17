@@ -169,7 +169,7 @@ public class CachingResellerService implements ResellerService {
         Integer parentId = resellerValue.getParentId();
 
         Set<ResellerCapability> capabilities = getCapabilities(resellerId);
-        if (parentId == null) {
+        if (parentId == null || parentId.intValue() == 0) {
             // Context is assigned to the root reseller, just return capas
             return capabilities;
         }
@@ -226,7 +226,7 @@ public class CachingResellerService implements ResellerService {
         Integer parentId = resellerValue.getParentId();
 
         Map<String, ResellerConfigProperty> properties = getAllConfigProperties(resellerId);
-        if (parentId == null) {
+        if (parentId == null || parentId.intValue() == 0) {
             // Context is assigned to the root reseller, just return props
             return properties;
         }
@@ -297,7 +297,7 @@ public class CachingResellerService implements ResellerService {
         Integer parentId = resellerValue.getParentId();
 
         Set<ResellerTaxonomy> taxonomies = getTaxonomies(resellerId);
-        if (parentId == null) {
+        if (parentId == null || parentId.intValue() == 0) {
             // Context is assigned to the root reseller, just return taxonomies
             return taxonomies;
         }
