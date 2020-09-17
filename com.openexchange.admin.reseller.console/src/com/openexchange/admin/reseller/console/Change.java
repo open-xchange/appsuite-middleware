@@ -84,6 +84,8 @@ public class Change extends ResellerAbstraction {
         SUPPORTED_TAXONOMIES = Collections.unmodifiableSet(s);
     }
 
+    private static final String CAPABILIITY_PREFIX = "com.openexchange.capability.";
+
     /**
      * Entry point
      * 
@@ -179,9 +181,11 @@ public class Change extends ResellerAbstraction {
                 }
                 switch (dynamicNamespace) {
                     case config:
+                        checkPropertyName(name);
                         configToAdd.put(name, value);
                         break;
                     case remove_config:
+                        checkPropertyName(name);
                         configToRemove.add(name);
                         break;
                     case taxonomy:
@@ -206,11 +210,29 @@ public class Change extends ResellerAbstraction {
         adm.setTaxonomiesToRemove(taxonomiesToRemove);
     }
 
+    /**
+     * Check if the specified name is a supported taxonomy
+     *
+     * @param name The name to check
+     */
     private void checkTaxonomy(String name) {
         if (SUPPORTED_TAXONOMIES.contains(name)) {
             return;
         }
         System.err.println("Unsupported taxonomy '" + name + "'. Supported taxonomies are: " + SUPPORTED_TAXONOMIES);
+        sysexit(1);
+    }
+
+    /**
+     * Checks if the property name starts with the capability prefix.
+     *
+     * @param name The name to check
+     */
+    private void checkPropertyName(String name) {
+        if (!name.startsWith(CAPABILIITY_PREFIX)) {
+            return;
+        }
+        System.err.println("Changing a capability via --config is not allowed. Please use the appropriate command-line switches for that.");
         sysexit(1);
     }
 
