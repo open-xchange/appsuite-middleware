@@ -2532,12 +2532,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected void setExtendedOptions(final AdminParser parser) {
         setAddGuiSettingOption(parser);
 
+        setConfigOption(parser);
         if (this.getClass().getName().endsWith("Change")) {
+            setRemoveConfigOption(parser);
             setRemoveGuiSettingOption(parser);
         }
-
-        setConfigOption(parser);
-        setRemoveConfigOption(parser);
 
         this.email1Option = setLongOpt(parser, OPT_EMAIL1_LONG, "stringvalue", "Email1", true, false, true);
         this.mailenabledOption = setSettableBooleanLongOpt(parser, OPT_MAILENABLED_LONG, "true / false", "Mailenabled", true, false, true);

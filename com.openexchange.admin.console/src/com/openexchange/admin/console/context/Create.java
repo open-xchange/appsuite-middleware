@@ -91,9 +91,6 @@ public class Create extends CreateCore {
         ctxabs.setDestinationStoreIdOption(parser, false);
         ctxabs.setDestinationDatabaseIdOption(parser, false);
 
-        setConfigOption(parser);
-        setRemoveConfigOption(parser);
-
         setAddAccessRightCombinationNameOption(parser);
         setModuleAccessOptions(parser);
 
