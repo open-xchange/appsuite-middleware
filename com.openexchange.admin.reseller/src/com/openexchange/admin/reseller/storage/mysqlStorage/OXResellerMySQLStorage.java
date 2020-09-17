@@ -292,6 +292,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 }
             }
 
+            insertCapabilities(adm, oxcon);
+            insertConfiguration(adm, oxcon);
+            insertTaxonomies(adm, oxcon);
+
             oxcon.commit();
             rollback = false;
 
@@ -2129,6 +2133,103 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             } catch (SQLException e2) {
                 LOGGER.error("Error doing rollback", e2);
             }
+        }
+    }
+
+    /**
+     * Inserts the capabilities for the specified reseller admin
+     *
+     * @param resellerAdmin The reseller admin
+     * @param connection The writeable connection
+     * @throws StorageException if a storage error is occurred
+     */
+    private void insertCapabilities(ResellerAdmin resellerAdmin, Connection connection) throws StorageException {
+        int resellerId = i(resellerAdmin.getId());
+        Set<String> capabilities = resellerAdmin.getCapabilitiesToAdd();
+        if (capabilities == null || capabilities.isEmpty()) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement("INSERT INTO subadmin_capabilities (sid,capability) VALUES (?,?);");
+            stmt.setInt(1, resellerId);
+            for (String capability : capabilities) {
+                stmt.setString(2, capability);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (SQLException e) {
+            LOGGER.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * Inserts the coonfiguration for the specified reseller admin
+     *
+     * @param resellerAdmin The reseller admin
+     * @param connection The writeable connection
+     * @throws StorageException if a storage error is occurred
+     */
+    private void insertConfiguration(ResellerAdmin resellerAdmin, Connection connection) throws StorageException {
+        int resellerId = i(resellerAdmin.getId());
+        Map<String, String> configurationToAdd = resellerAdmin.getConfigurationToAdd();
+        if (configurationToAdd == null || configurationToAdd.isEmpty()) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement("INSERT INTO subadmin_config_properties (sid,propertyKey,propertyValue) VALUES (?,?,?);");
+            stmt.setInt(1, resellerId);
+            for (Entry<String, String> entry : configurationToAdd.entrySet()) {
+                if (entry.getKey().startsWith("com.openexchange.capability")) {
+                    continue;
+                }
+                if (entry.getValue() == null) {
+                    continue;
+                }
+                stmt.setString(2, entry.getKey());
+                stmt.setString(3, entry.getValue());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (SQLException e) {
+            LOGGER.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * Inserts the taxonomies for the specified reseller admin
+     *
+     * @param resellerAdmin The reseller admin
+     * @param connection The writeable connection
+     * @throws StorageException if a storage error is occurred
+     */
+    private void insertTaxonomies(ResellerAdmin resellerAdmin, Connection connection) throws StorageException {
+        int resellerId = i(resellerAdmin.getId());
+        Set<String> taxonomies = resellerAdmin.getTaxonomiesToAdd();
+        if (taxonomies == null || taxonomies.isEmpty()) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement("INSERT INTO subadmin_taxonomies (sid,taxonomy) VALUES (?,?);");
+            stmt.setInt(1, resellerId);
+            for (String taxonomy : taxonomies) {
+                stmt.setString(2, taxonomy);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (SQLException e) {
+            LOGGER.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
     }
 

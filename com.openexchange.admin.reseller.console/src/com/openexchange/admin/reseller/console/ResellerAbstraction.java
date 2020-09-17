@@ -55,7 +55,9 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
@@ -132,6 +134,23 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
 
     protected Integer adminid = null;
     protected String adminname = null;
+
+    private enum DynamicNamespace {
+        taxonomy,
+        remove_taxonomy,
+        config,
+        remove_config;
+
+    }
+
+    private static Set<String> SUPPORTED_TAXONOMIES;
+    static {
+        Set<String> s = new HashSet<>();
+        s.add("types");
+        SUPPORTED_TAXONOMIES = Collections.unmodifiableSet(s);
+    }
+
+    private static final String CAPABILIITY_PREFIX = "com.openexchange.capability.";
 
     protected final void setIdOption(final AdminParser admp) {
         this.idOption = setShortLongOpt(admp, OPT_ID_SHORT, OPT_ID_LONG, "Id of the user", true, NeededQuadState.eitheror);
@@ -231,6 +250,14 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         setPasswordOption(parser, NeededQuadState.needed);
         setPasswordMechOption(parser);
         setAddRestrictionsOption(parser);
+
+        setCapsToAdd(parser);
+        setCapsToRemove(parser);
+        setCapsToDrop(parser);
+        setConfigToAdd(parser);
+        setConfigToRemove(parser);
+        setTaxonomiesToAdd(parser);
+        setTaxonomiesToRemove(parser);
     }
 
     protected void parseAndSetAdminname(final AdminParser parser, final ResellerAdmin adm) {
@@ -496,5 +523,89 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         } else {
             return "";
         }
+    }
+
+    /**
+     * Applies the dynamic options of configuration and taxonomies to the specified {@link ResellerAdmin}
+     * 
+     * @param parser the {@link AdminParser}
+     * @param adm The {@link ResellerAdmin}
+     */
+    void applyDynamicOptionsToReseller(AdminParser parser, ResellerAdmin adm) {
+        Map<String, Map<String, String>> dynamicArguments = parser.getDynamicArguments();
+        Map<String, String> configToAdd = new HashMap<>();
+        Set<String> configToRemove = new HashSet<>();
+
+        Set<String> taxonomiesToAdd = new HashSet<>();
+        Set<String> taxonomiesToRemove = new HashSet<>();
+
+        for (Map.Entry<String, Map<String, String>> namespaced : dynamicArguments.entrySet()) {
+            String namespace = namespaced.getKey();
+            for (Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
+                String name = pair.getKey();
+                String value = pair.getValue();
+                DynamicNamespace dynamicNamespace;
+                try {
+                    dynamicNamespace = DynamicNamespace.valueOf(namespace.replace("-", "_"));
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Unknown option '" + namespace + "'");
+                    sysexit(1);
+                    return;
+                }
+                switch (dynamicNamespace) {
+                    case config:
+                        checkPropertyName(name);
+                        configToAdd.put(name, value);
+                        break;
+                    case remove_config:
+                        checkPropertyName(name);
+                        configToRemove.add(name);
+                        break;
+                    case taxonomy:
+                        checkTaxonomy(name);
+                        taxonomiesToAdd.add(value);
+                        break;
+                    case remove_taxonomy:
+                        checkTaxonomy(name);
+                        taxonomiesToRemove.add(value);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        // Configuration
+        adm.setConfigurationToAdd(configToAdd);
+        adm.setConfigurationToRemove(configToRemove);
+
+        // Taxonomies
+        adm.setTaxonomiesToAdd(taxonomiesToAdd);
+        adm.setTaxonomiesToRemove(taxonomiesToRemove);
+    }
+
+    /**
+     * Check if the specified name is a supported taxonomy
+     *
+     * @param name The name to check
+     */
+    void checkTaxonomy(String name) {
+        if (SUPPORTED_TAXONOMIES.contains(name)) {
+            return;
+        }
+        System.err.println("Unsupported taxonomy '" + name + "'. Supported taxonomies are: " + SUPPORTED_TAXONOMIES);
+        sysexit(1);
+    }
+
+    /**
+     * Checks if the property name starts with the capability prefix.
+     *
+     * @param name The name to check
+     */
+    void checkPropertyName(String name) {
+        if (!name.startsWith(CAPABILIITY_PREFIX)) {
+            return;
+        }
+        System.err.println("Changing a capability via --config is not allowed. Please use the appropriate command-line switches for that.");
+        sysexit(1);
     }
 }
