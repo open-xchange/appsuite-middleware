@@ -87,6 +87,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.JdbcProperties;
@@ -134,6 +135,7 @@ public class AdminCache {
     }
 
     private static final AtomicReference<ConfigurationService> CONF_SERVICE = new AtomicReference<ConfigurationService>();
+    private static final AtomicReference<CacheService> CACHE_SERVICE = new AtomicReference<CacheService>();
 
     /**
      * Gets the <tt>ConfigurationService</tt>.
@@ -162,6 +164,35 @@ public class AdminCache {
      */
     public static void setConfigurationService(ConfigurationService service) {
         CONF_SERVICE.set(service);
+    }
+
+    /**
+     * Gets the <tt>CacheService</tt>.
+     *
+     * @return The <tt>CacheService</tt> or <code>null</code>
+     */
+    public static CacheService getCacheService() {
+        return CACHE_SERVICE.get();
+    }
+
+    /**
+     * Atomically sets the <tt>CacheService</tt> to the given updated <tt>CacheService</tt> reference if the current value <tt>==</tt> the expected value.
+     *
+     * @param expect the expected <tt>CacheService</tt>
+     * @param update the new <tt>CacheService</tt>
+     * @return <code>true</code> if successful. <code>false</code> return indicates that the actual <tt>CacheService</tt> was not equal to the expected <tt>CacheService</tt>.
+     */
+    public static boolean compareAndSetCacheService(CacheService expect, CacheService update) {
+        return CACHE_SERVICE.compareAndSet(expect, update);
+    }
+
+    /**
+     * Sets the <tt>CacheService</tt>.
+     *
+     * @param service The <tt>CacheService</tt> to set
+     */
+    public static void setCacheService(CacheService service) {
+        CACHE_SERVICE.set(service);
     }
 
     public final static String DATA_TRUNCATION_ERROR_MSG = "Data too long for column(s)";
@@ -900,22 +931,22 @@ public class AdminCache {
         return allowMasterOverride;
     }
 
-//    /**
-//     * {@link Encrypter} - Password encrypter interface
-//     *
-//     * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
-//     * @since v7.10.0
-//     */
-//    private interface Encrypter {
-//
-//        /**
-//         * Encrypts the specified password and returns it
-//         *
-//         * @param password The password to encrypt
-//         * @return The encrypted password
-//         * @throws UnsupportedEncodingException
-//         * @throws NoSuchAlgorithmException
-//         */
-//        String encrypt(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException;
-//    }
+    //    /**
+    //     * {@link Encrypter} - Password encrypter interface
+    //     *
+    //     * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+    //     * @since v7.10.0
+    //     */
+    //    private interface Encrypter {
+    //
+    //        /**
+    //         * Encrypts the specified password and returns it
+    //         *
+    //         * @param password The password to encrypt
+    //         * @return The encrypted password
+    //         * @throws UnsupportedEncodingException
+    //         * @throws NoSuchAlgorithmException
+    //         */
+    //        String encrypt(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException;
+    //    }
 }

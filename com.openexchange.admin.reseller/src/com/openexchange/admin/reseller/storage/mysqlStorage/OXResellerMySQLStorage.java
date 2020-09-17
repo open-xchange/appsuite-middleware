@@ -89,7 +89,6 @@ import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
@@ -2377,7 +2376,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         if (null == context) {
             return;
         }
-        CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+        CacheService cacheService = AdminCache.getCacheService();
         if (null == cacheService) {
             return;
         }

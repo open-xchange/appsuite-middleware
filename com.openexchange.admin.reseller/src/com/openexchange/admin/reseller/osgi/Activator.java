@@ -86,6 +86,10 @@ public class Activator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         try {
             AdminCache.compareAndSetBundleContext(null, context);
+
+            CacheService cacheService = getService(CacheService.class);
+            AdminCache.compareAndSetCacheService(null, cacheService);
+
             ConfigurationService configurationService = getService(ConfigurationService.class);
             AdminCache.compareAndSetConfigurationService(null, configurationService);
             initCache(configurationService);
