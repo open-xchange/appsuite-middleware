@@ -2281,8 +2281,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement stmt = null;
         try {
             if (resellerAdmin.isConfigurationToRemoveSet() && false == resellerAdmin.getConfigurationToRemove().isEmpty()) {
-                Set<String> keys = resellerAdmin.getConfigurationToRemove().stream().filter(p -> p.startsWith("com.openexchange.capability")).collect(Collectors.toSet());
-                stmt = connection.prepareStatement("DELETE FROM subadmin_config_properties WHERE sid = ? AND propertyKey IN (" + buildKeySubQuery((keys)) + ") ;");
+                Set<String> keys = resellerAdmin.getConfigurationToRemove().stream().filter(p -> !p.startsWith("com.openexchange.capability")).collect(Collectors.toSet());
+                String sql = "DELETE FROM subadmin_config_properties WHERE sid = ? AND propertyKey IN (";
+                stmt = connection.prepareStatement(Databases.getIN(sql, keys.size()) + ";");
                 stmt.setInt(1, resellerId);
                 int parameterIndex = 2;
                 for (String key : keys) {
@@ -2332,7 +2333,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         try {
             if (resellerAdmin.isTaxonomiesToRemoveSet() && false == resellerAdmin.getTaxonomiesToRemove().isEmpty()) {
                 Set<String> keys = resellerAdmin.getTaxonomiesToRemove();
-                stmt = connection.prepareStatement("DELETE FROM subadmin_taxonomies WHERE sid = ? AND taxonomy IN (" + buildKeySubQuery((keys)) + ") ;");
+                String sql = "DELETE FROM subadmin_taxonomies WHERE sid = ? AND taxonomy IN (";
+                stmt = connection.prepareStatement(Databases.getIN(sql, keys.size()) + ";");
                 stmt.setInt(1, resellerId);
                 int parameterIndex = 2;
                 for (String key : keys) {
