@@ -50,6 +50,7 @@
 package com.openexchange.reseller.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -168,7 +169,7 @@ public class CachingResellerService implements ResellerService {
         Integer resellerId = resellerValue.getResellerId();
         Integer parentId = resellerValue.getParentId();
 
-        Set<ResellerCapability> capabilities = getCapabilities(resellerId);
+        Set<ResellerCapability> capabilities = getCapabilities(i(resellerId));
         if (parentId == null || parentId.intValue() == 0) {
             // Context is assigned to the root reseller, just return capas
             return capabilities;
@@ -176,8 +177,8 @@ public class CachingResellerService implements ResellerService {
 
         // Traverse the admin path to get all capabilities for the context
         do {
-            ResellerAdmin resellerAdmin = getResellerById(parentId);
-            capabilities.addAll(getCapabilities(resellerAdmin.getId()));
+            ResellerAdmin resellerAdmin = getResellerById(i(parentId));
+            capabilities.addAll(getCapabilities(i(resellerAdmin.getId())));
             parentId = resellerAdmin.getParentId();
         } while (parentId != null && parentId.intValue() > 0);
         return capabilities;
@@ -225,7 +226,7 @@ public class CachingResellerService implements ResellerService {
         Integer resellerId = resellerValue.getResellerId();
         Integer parentId = resellerValue.getParentId();
 
-        Map<String, ResellerConfigProperty> properties = getAllConfigProperties(resellerId);
+        Map<String, ResellerConfigProperty> properties = getAllConfigProperties(i(resellerId));
         if (parentId == null || parentId.intValue() == 0) {
             // Context is assigned to the root reseller, just return props
             return properties;
@@ -233,8 +234,8 @@ public class CachingResellerService implements ResellerService {
 
         // Traverse the admin path to get all properties for the context
         do {
-            ResellerAdmin resellerAdmin = getResellerById(parentId);
-            properties.putAll(getAllConfigProperties(resellerAdmin.getId()));
+            ResellerAdmin resellerAdmin = getResellerById(i(parentId));
+            properties.putAll(getAllConfigProperties(i(resellerAdmin.getId())));
             parentId = resellerAdmin.getParentId();
         } while (parentId != null && parentId.intValue() > 0);
         return properties;
@@ -296,7 +297,7 @@ public class CachingResellerService implements ResellerService {
         Integer resellerId = resellerValue.getResellerId();
         Integer parentId = resellerValue.getParentId();
 
-        Set<ResellerTaxonomy> taxonomies = getTaxonomies(resellerId);
+        Set<ResellerTaxonomy> taxonomies = getTaxonomies(i(resellerId));
         if (parentId == null || parentId.intValue() == 0) {
             // Context is assigned to the root reseller, just return taxonomies
             return taxonomies;
@@ -304,8 +305,8 @@ public class CachingResellerService implements ResellerService {
 
         // Traverse the admin path to get all taxonomies for the context
         do {
-            ResellerAdmin resellerAdmin = getResellerById(parentId);
-            taxonomies.addAll(getTaxonomies(resellerAdmin.getId()));
+            ResellerAdmin resellerAdmin = getResellerById(i(parentId));
+            taxonomies.addAll(getTaxonomies(i(resellerAdmin.getId())));
             parentId = resellerAdmin.getParentId();
         } while (parentId != null && parentId.intValue() > 0);
         return taxonomies;
