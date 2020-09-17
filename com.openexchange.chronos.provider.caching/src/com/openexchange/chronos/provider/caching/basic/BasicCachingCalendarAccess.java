@@ -1132,7 +1132,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             try {
                 eventGroup = sortEventGroup(eventGroup);
             } catch (OXException e) {
-                e.printStackTrace();
                 LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", eventGroup.get(0).getUid(), e.getMessage());
                 iterator.remove();
             }
