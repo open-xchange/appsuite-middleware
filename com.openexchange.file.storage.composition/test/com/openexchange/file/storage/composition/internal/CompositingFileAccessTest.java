@@ -72,6 +72,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAccountError;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -490,27 +491,37 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
     public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
         final FileStorageAccount account = new FileStorageAccount() {
 
-                    @Override
-                    public Map<String, Object> getConfiguration() {
+            @Override
+            public Map<String, Object> getConfiguration() {
                 // Nothing to do
                 return null;
             }
 
-                    @Override
-                    public String getDisplayName() {
+            @Override
+            public String getDisplayName() {
                 // Nothing to do
                 return null;
             }
 
-                    @Override
-                    public FileStorageService getFileStorageService() {
+            @Override
+            public FileStorageService getFileStorageService() {
                 // Nothing to do
                 return null;
             }
 
-                    @Override
-                    public String getId() {
+            @Override
+            public String getId() {
                 return "account 23";
+            }
+
+            @Override
+            public FileStorageAccountError getLastError() {
+                return null;
+            }
+
+            @Override
+            public void setLastError(FileStorageAccountError error) {
+                /*no-op*/
             }
         };
         return Arrays.asList(account);

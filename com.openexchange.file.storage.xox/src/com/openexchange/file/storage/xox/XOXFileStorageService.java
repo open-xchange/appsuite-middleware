@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
@@ -89,7 +90,6 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
 
     private final DynamicFormDescription formDescription;
     private final ServiceLookup services;
-
     private volatile FileStorageAccountManager accountManger;
 
     /**
@@ -160,6 +160,18 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
         }
     }
 
+    /**
+     * Returns the configured retryAfter value which indicates after which time access to an error afflicted account can be retried.
+     *
+     * @param session The session
+     * @return The configured amount of time in seconds
+     * @throws OXException
+     */
+    private int getRetryAfterError(Session session) throws OXException {
+        LeanConfigurationService configuration = this.services.getServiceSafe(LeanConfigurationService.class);
+        return configuration.getIntProperty(session.getUserId(), session.getContextId(), XOXFileStorageProperties.RETRY_AFTER_ERROR);
+    }
+
     @Override
     public String getId() {
         return XOXStorageConstants.ID;
@@ -204,7 +216,7 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId(), I(session.getUserId()), I(session.getContextId()));
         }
         FileStorageAccount account = manager.getAccount(accountId, session);
-        return new XOXAccountAccess(this, getApiClientService(), account, session);
+        return new XOXAccountAccess(this, getApiClientService(), account, session, getRetryAfterError(session));
     }
 
     @Override

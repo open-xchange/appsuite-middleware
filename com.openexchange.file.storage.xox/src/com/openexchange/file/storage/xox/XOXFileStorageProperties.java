@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,64 +47,23 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.xox;
 
-import java.io.Serializable;
-import java.util.Map;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.Property;
+
+import static com.openexchange.java.Autoboxing.I;
 
 /**
- * {@link FileStorageAccount} - A file storage account.
+ * {@link XOXFileStorageProperties}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v7.10.5
  */
-public interface FileStorageAccount extends Serializable, FileStorageConstants {
+public class XOXFileStorageProperties {
 
     /**
-     * The identifier for default/primary file storage account.
+     * The time, in seconds, after which the access to an an error afflicted XOX account should be retried.
      */
-    public static final String DEFAULT_ID = "0";
-
-    /**
-     * Gets this account's configuration.
-     *
-     * @return The configuration as a {@link Map}
-     */
-    Map<String, Object> getConfiguration();
-
-    /**
-     * Gets the identifier.
-     *
-     * @return The identifier
-     */
-    String getId();
-
-    /**
-     * Gets the display name.
-     *
-     * @return The display name
-     */
-    String getDisplayName();
-
-    /**
-     * Gets the associated file storage service.
-     *
-     * @return The associated file storage service
-     */
-    FileStorageService getFileStorageService();
-
-    /**
-     * Indicates if there is a problem with accessing the corresponding file storage and returns the last known error occurred.
-     *
-     * @return The last known error occurred, or null if no error occurred
-     */
-    FileStorageAccountError getLastError();
-
-    /**
-     * Sets the last known error for the account
-     *
-     * @param error The last known error, or <code>null</code>
-     */
-    void setLastError(FileStorageAccountError error);
+    public static Property RETRY_AFTER_ERROR = DefaultProperty.valueOf("com.openexchange.file.storage.xox.retryAfterError", I(3600 /* seconds = 1h */));
 }

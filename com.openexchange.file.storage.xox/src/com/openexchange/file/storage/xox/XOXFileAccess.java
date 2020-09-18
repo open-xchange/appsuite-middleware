@@ -89,17 +89,17 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @since v7.10.5
  */
 public class XOXFileAccess implements /*@formatter:off*/
-                                          ThumbnailAware,
-                                          FileStorageVersionedFileAccess,
-                                          FileStorageIgnorableVersionFileAccess,
-                                          FileStorageSequenceNumberProvider,
-                                          FileStorageEfficientRetrieval,
-                                          FileStorageLockedFileAccess,
-                                          FileStorageZippableFolderFileAccess,
-                                          FileStorageCaseInsensitiveAccess,
-                                          FileStorageAutoRenameFoldersAccess,
-                                          FileStorageRangeFileAccess {
-                                          /*@formatter:on*/
+                                       ThumbnailAware,
+                                       FileStorageVersionedFileAccess,
+                                       FileStorageIgnorableVersionFileAccess,
+                                       FileStorageSequenceNumberProvider,
+                                       FileStorageEfficientRetrieval,
+                                       FileStorageLockedFileAccess,
+                                       FileStorageZippableFolderFileAccess,
+                                       FileStorageCaseInsensitiveAccess,
+                                       FileStorageAutoRenameFoldersAccess,
+                                       FileStorageRangeFileAccess {
+                                       /*@formatter:on*/
 
     private final XOXAccountAccess accountAccess;
     private final ShareClient client;
@@ -204,12 +204,8 @@ public class XOXFileAccess implements /*@formatter:off*/
 
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
-        //IDTuple newId = client.moveDocument(source.getId(), destFolder, sequenceNumber);
-        //XOXFile movedFile = getMetadata(newId.getFolder(), newId.getId(), CURRENT_VERSION);
-        //return update != null ? saveFileMetadata(movedFile, movedFile.getSequenceNumber(), modifiedFields) : newId;
-
         IDTuple newId = client.moveDocument(source.getId(), destFolder, sequenceNumber);
-        if(modifiedFields != null) {
+        if (modifiedFields != null) {
             XOXFile movedFile = new XOXFile(update);
             movedFile.setSequenceNumber(getMetadata(newId.getFolder(), newId.getId(), CURRENT_VERSION).getSequenceNumber());
             return update != null ? saveFileMetadata(movedFile, movedFile.getSequenceNumber(), modifiedFields) : newId;
@@ -275,7 +271,6 @@ public class XOXFileAccess implements /*@formatter:off*/
             }
         }
         removeDocument(ids, sequenceNumber, hardDelete);
-
     }
 
     @Override
@@ -407,7 +402,6 @@ public class XOXFileAccess implements /*@formatter:off*/
     @Override
     public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
         return client.getVersions(id, fields, sort, order);
-
     }
 
     @Override
@@ -439,5 +433,4 @@ public class XOXFileAccess implements /*@formatter:off*/
     public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
         return client.moveFolder(folderId, newParentId, newName, DISTANT_FUTURE, autoRename);
     }
-
 }

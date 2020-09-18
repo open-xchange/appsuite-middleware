@@ -55,6 +55,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountError;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.session.Session;
@@ -114,5 +115,15 @@ public final class MailDriveFileStorageAccount implements FileStorageAccount {
     @Override
     public Map<String, Object> getConfiguration() {
         return Collections.emptyMap();
+    }
+
+    @Override
+    public FileStorageAccountError getLastError() {
+        return null;
+    }
+
+    @Override
+    public void setLastError(FileStorageAccountError error) {
+        /*no-op*/
     }
 }

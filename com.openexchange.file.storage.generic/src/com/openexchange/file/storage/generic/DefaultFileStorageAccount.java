@@ -51,6 +51,7 @@ package com.openexchange.file.storage.generic;
 
 import java.util.Map;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountError;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.ServiceAware;
 
@@ -88,6 +89,11 @@ public class DefaultFileStorageAccount implements FileStorageAccount, ServiceAwa
      * The transient reference to file storage service.
      */
     protected transient FileStorageService fsService;
+
+    /**
+     * The last known error occurred while accessing the storage
+     */
+    protected FileStorageAccountError lastError;
 
     /**
      * Initializes a new {@link DefaultFileStorageAccount}.
@@ -182,4 +188,19 @@ public class DefaultFileStorageAccount implements FileStorageAccount, ServiceAwa
         return stringBuilder.toString();
     }
 
+    @Override
+    public FileStorageAccountError getLastError() {
+        return lastError;
+    }
+
+
+    /**
+     * Sets the last error
+     *
+     * @param lastError The last error occurred while accessing the file storage account
+     */
+    @Override
+    public void setLastError(FileStorageAccountError lastError) {
+        this.lastError = lastError;
+    }
 }

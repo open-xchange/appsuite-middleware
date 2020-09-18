@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,64 +47,41 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.rdb.groupware;
 
-import java.io.Serializable;
-import java.util.Map;
+import com.openexchange.groupware.update.ExtendedColumnCreationTask;
+import com.openexchange.tools.update.Column;
 
 /**
- * {@link FileStorageAccount} - A file storage account.
+ * {@link FileStorageAddLastErrorColumnsTask}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v7.10.5
  */
-public interface FileStorageAccount extends Serializable, FileStorageConstants {
+public class FileStorageAddLastErrorColumnsTask extends ExtendedColumnCreationTask {
 
-    /**
-     * The identifier for default/primary file storage account.
-     */
-    public static final String DEFAULT_ID = "0";
+    private static final String TABLE_NAME = "filestorageAccount";
+    private static final String[] DEPENDENCIES = new String[] {};
 
-    /**
-     * Gets this account's configuration.
-     *
-     * @return The configuration as a {@link Map}
-     */
-    Map<String, Object> getConfiguration();
+    //@formatter:off
+    private final static Column[] NEW_COLUMNS = {
+        new Column("lastErrorCode", "VARCHAR(64) COLLATE utf8_unicode_ci DEFAULT NULL"),
+        new Column("lastErrorTimestamp", "DATETIME DEFAULT NULL")
+    };
+    //@formatter:on
 
-    /**
-     * Gets the identifier.
-     *
-     * @return The identifier
-     */
-    String getId();
+    @Override
+    public String[] getDependencies() {
+        return DEPENDENCIES;
+    }
 
-    /**
-     * Gets the display name.
-     *
-     * @return The display name
-     */
-    String getDisplayName();
+    @Override
+    protected String getTableName() {
+        return TABLE_NAME;
+    }
 
-    /**
-     * Gets the associated file storage service.
-     *
-     * @return The associated file storage service
-     */
-    FileStorageService getFileStorageService();
-
-    /**
-     * Indicates if there is a problem with accessing the corresponding file storage and returns the last known error occurred.
-     *
-     * @return The last known error occurred, or null if no error occurred
-     */
-    FileStorageAccountError getLastError();
-
-    /**
-     * Sets the last known error for the account
-     *
-     * @param error The last known error, or <code>null</code>
-     */
-    void setLastError(FileStorageAccountError error);
+    @Override
+    protected Column[] getColumns() {
+        return NEW_COLUMNS;
+    }
 }

@@ -144,4 +144,13 @@ public final class SimFileStorageAccount implements FileStorageAccount {
         return stringBuilder.toString();
     }
 
+    @Override
+    public FileStorageAccountError getLastError() {
+        return null;
+    }
+
+    @Override
+    public void setLastError(FileStorageAccountError error) {
+        /*no-op*/
+    }
 }

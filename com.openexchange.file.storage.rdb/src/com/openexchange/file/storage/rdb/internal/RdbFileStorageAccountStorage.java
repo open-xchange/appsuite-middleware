@@ -67,6 +67,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountError;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
@@ -122,7 +123,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         super();
     }
 
-    private static final String SQL_SELECT = "SELECT confId, displayName FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
+    private static final String SQL_SELECT = "SELECT confId, displayName, lastErrorCode, lastErrorTimeStamp FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
     private static final String SQL_SELECT_CONFIDS_FOR_USER = "SELECT confId, account FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ?";
 
@@ -152,6 +153,12 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             account.setId(String.valueOf(id));
             account.setFileStorageService(messagingService);
             account.setDisplayName(rs.getString(2));
+
+            String lastErrorCode = rs.getString(3);
+            if(lastErrorCode != null) {
+                account.setLastError(new FileStorageAccountError(lastErrorCode, rs.getTimestamp(4)));
+            }
+
             {
                 final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                 final Map<String, Object> configuration = new HashMap<String, Object>();
@@ -205,7 +212,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = rc.prepareStatement("SELECT confId, displayName, serviceId FROM filestorageAccount WHERE cid = ? AND user = ? AND account = ?");
+            stmt = rc.prepareStatement("SELECT confId, displayName, serviceId, lastErrorCode, lastErrorTimestamp FROM filestorageAccount WHERE cid = ? AND user = ? AND account = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, session.getUserId());
@@ -226,6 +233,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             account.setId(String.valueOf(accountId));
             account.setFileStorageService(fsService);
             account.setDisplayName(rs.getString(2));
+            account.setLastError(new FileStorageAccountError(rs.getString(4), rs.getTimestamp(5)));
             {
                 final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                 final Map<String, Object> configuration = new HashMap<String, Object>();
@@ -261,7 +269,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         }
     }
 
-    private static final String SQL_SELECT_ACCOUNTS = "SELECT account, confId, displayName FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ?";
+    private static final String SQL_SELECT_ACCOUNTS = "SELECT account, confId, displayName, lastErrorCode, lastErrorTimestamp FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ?";
 
     @Override
     public List<FileStorageAccount> getAccounts(final String serviceId, final Session session) throws OXException {
@@ -297,6 +305,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                     account.setConfiguration(configuration);
                     account.setId(String.valueOf(rs.getInt(1)));
                     account.setFileStorageService(messagingService);
+                    account.setLastError(new FileStorageAccountError(rs.getString(4), rs.getTimestamp(5)));
                     accounts.add(account);
                 } while (rs.next());
             } else {
@@ -603,7 +612,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         }
     }
 
-    private static final String SQL_UPDATE = "UPDATE filestorageAccount SET displayName = ? WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
+    private static final String SQL_UPDATE = "UPDATE filestorageAccount SET displayName = ?, lastErrorCode = ?, lastErrorTimestamp = ? WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
     @Override
     public void updateAccount(final String serviceId, final FileStorageAccount account, final Session session) throws OXException {
@@ -650,15 +659,26 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
              * Update account data
              */
             final String displayName = account.getDisplayName();
-            if (null != displayName) {
+            final String lastErrorCode = account.getLastError() != null ? account.getLastError().getErrorCode() : null;
+            //@formatter:off
+            final java.sql.Timestamp lastErrorTimeStamp = account.getLastError() != null && account.getLastError().getTimeStamp() != null ?
+                new java.sql.Timestamp(account.getLastError().getTimeStamp().getTime()) :
+                null;
+            //@formatter:on
+            if (null != displayName || null != lastErrorCode) {
                 stmt = wc.prepareStatement(SQL_UPDATE);
                 int pos = 1;
                 stmt.setString(pos++, displayName);
+                stmt.setString(pos++, lastErrorCode);
+                stmt.setTimestamp(pos++, lastErrorTimeStamp);
                 stmt.setInt(pos++, contextId);
                 stmt.setInt(pos++, session.getUserId());
                 stmt.setString(pos++, serviceId);
                 stmt.setInt(pos, accountId);
                 stmt.executeUpdate();
+            }
+            else {
+
             }
             wc.commit(); // COMMIT
             rollback = 2;

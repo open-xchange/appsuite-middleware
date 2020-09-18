@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountError;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
@@ -109,6 +110,16 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
         @Override
         public String getServiceId() {
             return "com.openexchange.infostore";
+        }
+
+        @Override
+        public FileStorageAccountError getLastError() {
+            return null;
+        }
+
+        @Override
+        public void setLastError(FileStorageAccountError error) {
+            /*no-op*/
         }
     }
 
