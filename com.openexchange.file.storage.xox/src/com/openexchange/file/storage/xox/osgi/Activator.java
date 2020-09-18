@@ -52,6 +52,7 @@ package com.openexchange.file.storage.xox.osgi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.api.client.ApiClientService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -73,7 +74,13 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, ApiClientService.class, FileStorageServiceRegistry.class, UserPermissionService.class };
+        //@formatter:off
+        return new Class[] { FileStorageAccountManagerLookupService.class,
+            ApiClientService.class,
+            FileStorageServiceRegistry.class,
+            ConversionService.class,
+            UserPermissionService.class };
+        //@formatter:on
     }
 
     @Override

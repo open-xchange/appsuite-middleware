@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
@@ -109,6 +110,11 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
         @Override
         public String getServiceId() {
             return "com.openexchange.infostore";
+        }
+
+        @Override
+        public JSONObject getMetadata() {
+            return new JSONObject();
         }
     }
 

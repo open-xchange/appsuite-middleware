@@ -81,14 +81,14 @@ import com.openexchange.share.ShareExceptionCodes;
  * @since 7.10.5
  */
 public class XctxFileStorageService implements FileStorageService, AccountAware, SharingFileStorageService, LoginAwareFileStorageServiceExtension {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(XctxFileStorageService.class);
 
     private final ServiceLookup services;
 
     /**
      * Initializes a new {@link XctxFileStorageService}
-     * 
+     *
      * @param services A service lookup reference
      */
     public XctxFileStorageService(ServiceLookup services) {
@@ -166,6 +166,11 @@ public class XctxFileStorageService implements FileStorageService, AccountAware,
         if (!hasCapability(session)) {
             throw ShareExceptionCodes.NO_SUBSCRIBE_SHARE_PERMISSION.create();
         }
+    }
+
+    @Override
+    public void resetRecentError(String accountId, Session session) throws OXException {
+        /* no-op */
     }
 
 }

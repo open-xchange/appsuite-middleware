@@ -5,8 +5,10 @@ Bundle-SymbolicName: com.openexchange.file.storage.generic
 Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.datatypes.genericonf,
+Import-Package: com.openexchange.annotation,
+ com.openexchange.datatypes.genericonf,
  com.openexchange.file.storage,
  com.openexchange.java,
- com.openexchange.log
+ com.openexchange.log,
+ org.json
 Export-Package: com.openexchange.file.storage.generic

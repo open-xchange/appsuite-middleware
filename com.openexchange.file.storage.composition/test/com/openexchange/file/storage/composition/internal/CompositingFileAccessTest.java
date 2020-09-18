@@ -58,6 +58,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -490,27 +491,32 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
     public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
         final FileStorageAccount account = new FileStorageAccount() {
 
-                    @Override
-                    public Map<String, Object> getConfiguration() {
+            @Override
+            public Map<String, Object> getConfiguration() {
                 // Nothing to do
                 return null;
             }
 
-                    @Override
-                    public String getDisplayName() {
+            @Override
+            public String getDisplayName() {
                 // Nothing to do
                 return null;
             }
 
-                    @Override
-                    public FileStorageService getFileStorageService() {
+            @Override
+            public FileStorageService getFileStorageService() {
                 // Nothing to do
                 return null;
             }
 
-                    @Override
-                    public String getId() {
+            @Override
+            public String getId() {
                 return "account 23";
+            }
+
+            @Override
+            public JSONObject getMetadata() {
+                return new JSONObject();
             }
         };
         return Arrays.asList(account);

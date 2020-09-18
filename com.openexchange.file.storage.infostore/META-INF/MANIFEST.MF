@@ -54,6 +54,7 @@ Import-Package: com.google.common.base;version="23.0.0",
  gnu.trove.map,
  gnu.trove.map.hash,
  gnu.trove.procedure,
+ org.json,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.file.storage.infostore.osgi.InfostoreFileStorageActivator

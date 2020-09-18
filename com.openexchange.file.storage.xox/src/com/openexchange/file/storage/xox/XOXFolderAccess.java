@@ -145,15 +145,14 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public boolean exists(String folderId) throws OXException {
-        if(isRoot(folderId)) {
+        if (isRoot(folderId)) {
             return true;
         }
         try {
             client.getFolder(folderId);
             return true;
-        }
-        catch(OXException e) {
-            if(e.similarTo(OXFolderExceptionCode.NOT_EXISTS)) {
+        } catch (OXException e) {
+            if (e.similarTo(OXFolderExceptionCode.NOT_EXISTS)) {
                 return false;
             }
             throw e;

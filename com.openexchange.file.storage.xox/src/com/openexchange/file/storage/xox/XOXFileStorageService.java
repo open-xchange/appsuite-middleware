@@ -58,6 +58,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
@@ -89,7 +91,6 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
 
     private final DynamicFormDescription formDescription;
     private final ServiceLookup services;
-
     private volatile FileStorageAccountManager accountManger;
 
     /**
@@ -138,6 +139,16 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
     }
 
     /**
+     * Gets the {@link ConversionService}
+     *
+     * @return The {@link ConversionService}
+     * @throws OXException
+     */
+    private ConversionService getConversionService() throws OXException {
+        return this.services.getServiceSafe(ConversionService.class);
+    }
+
+    /**
      * Gets a list of accounts for the given session
      *
      * @param session The session to get the accounts for
@@ -158,6 +169,18 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
         if (!hasCapability(session)) {
             throw XOXFileStorageExceptionCodes.MISSING_CAPABILITY.create(getId());
         }
+    }
+
+    /**
+     * Returns the configured retryAfter value which indicates after which time access to an error afflicted account can be retried.
+     *
+     * @param session The session
+     * @return The configured amount of time in seconds
+     * @throws OXException
+     */
+    private int getRetryAfterError(Session session) throws OXException {
+        LeanConfigurationService configuration = this.services.getServiceSafe(LeanConfigurationService.class);
+        return configuration.getIntProperty(session.getUserId(), session.getContextId(), XOXFileStorageProperties.RETRY_AFTER_ERROR);
     }
 
     @Override
@@ -204,7 +227,7 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId(), I(session.getUserId()), I(session.getContextId()));
         }
         FileStorageAccount account = manager.getAccount(accountId, session);
-        return new XOXAccountAccess(this, getApiClientService(), account, session);
+        return new XOXAccountAccess(this, getApiClientService(), getConversionService(), account, session, getRetryAfterError(session));
     }
 
     @Override
@@ -221,5 +244,11 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
         } catch (OXException e) {
             throw XOXFileStorageExceptionCodes.PING_FAILED.create(e.getCause(), (Object[]) null);
         }
+    }
+
+    @Override
+    public void resetRecentError(String accountId, Session session) throws OXException {
+        XOXAccountAccess accountAccess = (XOXAccountAccess) getAccountAccess(accountId, session);
+        accountAccess.resetRecentError();
     }
 }

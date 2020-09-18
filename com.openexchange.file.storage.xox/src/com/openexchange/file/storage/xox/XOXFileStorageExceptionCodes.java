@@ -65,7 +65,9 @@ public enum XOXFileStorageExceptionCodes implements DisplayableOXExceptionCode {
 
     PING_FAILED("The connection check failed.", CATEGORY_CONNECTIVITY, 1, XOXFileStorageExceptionMessages.PING_FAILED),
 
-    MISSING_CAPABILITY("Missing capability for file storage %1$s", Category.CATEGORY_PERMISSION_DENIED, 2, XOXFileStorageExceptionMessages.MISSING_CAP_MSG)
+    MISSING_CAPABILITY("Missing capability for file storage %1$s", Category.CATEGORY_PERMISSION_DENIED, 2, XOXFileStorageExceptionMessages.MISSING_CAP_MSG),
+
+    JSON_ERROR("JSON error: %1$s", Category.CATEGORY_ERROR, 3),
 
     ;
 

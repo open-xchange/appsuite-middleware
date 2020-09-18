@@ -51,6 +51,7 @@ package com.openexchange.file.storage;
 
 import java.io.Serializable;
 import java.util.Map;
+import org.json.JSONObject;
 
 /**
  * {@link FileStorageAccount} - A file storage account.
@@ -94,4 +95,10 @@ public interface FileStorageAccount extends Serializable, FileStorageConstants {
      */
     FileStorageService getFileStorageService();
 
+    /**
+     * Gets the account's meta data
+     *
+     * @return The meta data of the account
+     */
+    JSONObject getMetadata();
 }

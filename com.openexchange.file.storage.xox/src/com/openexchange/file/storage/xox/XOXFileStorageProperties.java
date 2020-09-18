@@ -47,34 +47,23 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.xox;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.Property;
+
+import static com.openexchange.java.Autoboxing.I;
 
 /**
- * {@link SharingFileStorageService} - A marker interface which will place the FileStorage content under folder 10 and 15
+ * {@link XOXFileStorageProperties}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public interface SharingFileStorageService extends FileStorageService {
+public class XOXFileStorageProperties {
 
     /**
-     * Gets a value indicating if the user represented by the session has the capability to
-     * use the file storage
-     *
-     * @param session The user session
-     * @return <code>true</code> if the user is allowed to use the storage, <code>false</code> otherwise
+     * The time, in seconds, after which the access to an an error afflicted XOX account should be retried.
      */
-    boolean hasCapability(Session session);
-
-    /**
-     * Resets the last known, recent, error for the account
-     *
-     * @param accountId The id of the account to reset the errors for
-     * @param session The {@link Session} object
-     * @throws OXException
-     */
-    void resetRecentError(String accountId, Session session) throws OXException;
+    public static Property RETRY_AFTER_ERROR = DefaultProperty.valueOf("com.openexchange.file.storage.xox.retryAfterError", I(3600 /* seconds = 1h */));
 }

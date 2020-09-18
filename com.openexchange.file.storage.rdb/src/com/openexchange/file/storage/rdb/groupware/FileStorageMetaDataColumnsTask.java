@@ -47,78 +47,40 @@
  *
  */
 
-package com.openexchange.file.storage.mail;
+package com.openexchange.file.storage.rdb.groupware;
 
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.update.ExtendedColumnCreationTask;
+import com.openexchange.tools.update.Column;
 
 /**
- * {@link MailDriveFileStorageAccount} - The special account for Mail Drive.
+ * {@link FileStorageMetaDataColumnsTask}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v7.10.5
  */
-public final class MailDriveFileStorageAccount implements FileStorageAccount {
+public class FileStorageMetaDataColumnsTask extends ExtendedColumnCreationTask {
 
-    private static final long serialVersionUID = 8675168697186715107L;
+    private static final String TABLE_NAME = "filestorageAccount";
+    private static final String[] DEPENDENCIES = new String[] {};
 
-    private static final String ACCOUNT_ID = MailDriveConstants.ACCOUNT_ID;
-    private static final String ACCOUNT_DISPLAY_NAME = MailDriveStrings.NAME_ATTACHMENTS_ALL;
+    //@formatter:off
+    private final static Column[] NEW_COLUMNS = {
+        new Column("metaData", "BLOB")
+    };
+    //@formatter:on
 
-    // --------------------------------------------------------------------------------------------------------------
-
-    private final MailDriveFileStorageService service;
-    private final Locale locale;
-
-    /**
-     * Initializes a new {@link FileStorageAccountImplementation}.
-     */
-    MailDriveFileStorageAccount(MailDriveFileStorageService service, Session session) {
-        super();
-        this.service = service;
-        locale = getLocaleFor(session);
-    }
-
-    private Locale getLocaleFor(Session session) {
-        try {
-            return MailDriveFolder.getSessionUserLocale(session);
-        } catch (OXException e) {
-            Logger logger = org.slf4j.LoggerFactory.getLogger(MailDriveFileStorageAccount.class);
-            logger.error("Error getting locale for session. Using en_US as fall-back", e);
-            return Locale.US;
-        }
+    @Override
+    public String[] getDependencies() {
+        return DEPENDENCIES;
     }
 
     @Override
-    public String getId() {
-        return ACCOUNT_ID;
+    protected String getTableName() {
+        return TABLE_NAME;
     }
 
     @Override
-    public FileStorageService getFileStorageService() {
-        return service;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return StringHelper.valueOf(locale).getString(ACCOUNT_DISPLAY_NAME);
-    }
-
-    @Override
-    public Map<String, Object> getConfiguration() {
-        return Collections.emptyMap();
-    }
-
-    @Override
-    public JSONObject getMetadata() {
-        return new JSONObject();
+    protected Column[] getColumns() {
+        return NEW_COLUMNS;
     }
 }

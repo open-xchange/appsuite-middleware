@@ -1,3 +1,4 @@
+
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -47,78 +48,90 @@
  *
  */
 
-package com.openexchange.file.storage.mail;
+package com.openexchange.file.storage.xox;
 
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import org.json.JSONObject;
-import org.slf4j.Logger;
+import com.openexchange.annotation.NonNull;
+
+import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.session.Session;
+import java.util.Date;
+import java.util.Objects;
 
 /**
- * {@link MailDriveFileStorageAccount} - The special account for Mail Drive.
+ * {@link FileStorageAccountError}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v7.10.5
  */
-public final class MailDriveFileStorageAccount implements FileStorageAccount {
+public class FileStorageAccountError {
 
-    private static final long serialVersionUID = 8675168697186715107L;
-
-    private static final String ACCOUNT_ID = MailDriveConstants.ACCOUNT_ID;
-    private static final String ACCOUNT_DISPLAY_NAME = MailDriveStrings.NAME_ATTACHMENTS_ALL;
-
-    // --------------------------------------------------------------------------------------------------------------
-
-    private final MailDriveFileStorageService service;
-    private final Locale locale;
+    private OXException exception;
+    private Date timeStamp;
 
     /**
-     * Initializes a new {@link FileStorageAccountImplementation}.
+     * Initializes a new {@link FileStorageAccountError}.
      */
-    MailDriveFileStorageAccount(MailDriveFileStorageService service, Session session) {
-        super();
-        this.service = service;
-        locale = getLocaleFor(session);
+    public FileStorageAccountError() {
+        this(null, null);
     }
 
-    private Locale getLocaleFor(Session session) {
-        try {
-            return MailDriveFolder.getSessionUserLocale(session);
-        } catch (OXException e) {
-            Logger logger = org.slf4j.LoggerFactory.getLogger(MailDriveFileStorageAccount.class);
-            logger.error("Error getting locale for session. Using en_US as fall-back", e);
-            return Locale.US;
-        }
+    /**
+     * Initializes a new {@link FileStorageAccountError} with the current time as time stamp
+     *
+     * @param exception The exception
+     */
+    public FileStorageAccountError(@NonNull OXException exception) {
+        this(Objects.requireNonNull(exception, "exception must not be null"), null);
     }
 
-    @Override
-    public String getId() {
-        return ACCOUNT_ID;
+    /**
+     * Initializes a new {@link FileStorageAccountError}.
+     *
+     * @param exception The error code, might be <code>null</code>
+     * @param timeStamp The time stamp of when the error occurred, might be <code>null</code>
+     */
+    public FileStorageAccountError(@Nullable OXException exception, @Nullable Date timeStamp) {
+        this.exception = exception;
+        this.timeStamp = timeStamp != null ? timeStamp : new Date();
     }
 
-    @Override
-    public FileStorageService getFileStorageService() {
-        return service;
+    /**
+     * Gets the error code
+     *
+     * @return The errorCode
+     */
+    public @Nullable OXException getException() {
+        return exception;
     }
 
-    @Override
-    public String getDisplayName() {
-        return StringHelper.valueOf(locale).getString(ACCOUNT_DISPLAY_NAME);
+    /**
+     * Sets the error code
+     *
+     * @param exception The exception to set, might be <code>null</code>
+     * @return this
+     */
+    public FileStorageAccountError setException(@Nullable OXException exception) {
+        this.exception = exception;
+        return this;
     }
 
-    @Override
-    public Map<String, Object> getConfiguration() {
-        return Collections.emptyMap();
+    /**
+     * Gets the time stamp
+     *
+     * @return The time stamp of when the error occurred, or <code>null</code>
+     */
+    public @Nullable Date getTimeStamp() {
+        return timeStamp;
     }
 
-    @Override
-    public JSONObject getMetadata() {
-        return new JSONObject();
+    /**
+     * Sets the time stamp
+     *
+     * @param timeStamp The timeStamp to set, might be <code>null</code>
+     * @return this
+     */
+    public FileStorageAccountError setTimeStamp(@Nullable Date timeStamp) {
+        this.timeStamp = timeStamp;
+        return this;
     }
 }
