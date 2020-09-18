@@ -2,3 +2,4 @@ requests:
   - FilestoreRequest.yaml
   - GetRequest.yaml
   - MailRequest.yaml
+  - UnifiedRequest.yaml

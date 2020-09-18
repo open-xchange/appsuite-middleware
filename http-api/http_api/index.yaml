@@ -96,8 +96,8 @@ tags:
       in a single request.
   - name: Quota
     description: >-
-      The filestore module allows accessing information about the use and quota of
-      the filestore.
+      The quota module allows accessing information about the limit and current
+      usage of a certain storage type.
   - name: Import
     description: >-
       The module import allows to import specific module data (like Contacts,
