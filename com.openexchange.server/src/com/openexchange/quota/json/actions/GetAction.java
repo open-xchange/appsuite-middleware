@@ -49,21 +49,24 @@
 
 package com.openexchange.quota.json.actions;
 
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.AccountQuotas;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.quota.QuotaType;
+import com.openexchange.quota.json.QuotaAJAXRequest;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -74,20 +77,17 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class GetAction implements AJAXActionService {
-
-    private final ServiceLookup services;
+public class GetAction extends AbstractUnifiedQuotaAction {
 
     /**
      * Initializes a new {@link GetAction}.
      */
-    public GetAction(ServiceLookup services) {
-        super();
-        this.services = services;
+    public GetAction(ServiceListing<UnifiedQuotaService> unifiedQuotaServices, ServiceLookup services) {
+        super(unifiedQuotaServices, services);
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData req, ServerSession session) throws OXException {
+    protected AJAXRequestResult perform(QuotaAJAXRequest req) throws OXException, JSONException {
         String module = req.getParameter("module");
         String accountID = req.getParameter("account");
 
@@ -97,18 +97,20 @@ public class GetAction implements AJAXActionService {
         }
 
         try {
-            JSONValue result = performRequest(quotaService, session, module, accountID);
-            return new AJAXRequestResult(result, "json");
+            List<OXException> warnings = new LinkedList<>();
+            JSONValue result = performRequest(quotaService, req.getSession(), module, accountID, warnings);
+            return new AJAXRequestResult(result, "json").addWarnings(warnings);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
     }
 
-    private JSONValue performRequest(QuotaService quotaService, ServerSession session, String module, String accountID) throws JSONException, OXException {
+    private JSONValue performRequest(QuotaService quotaService, ServerSession session, String module, String accountID, List<OXException> warnings) throws JSONException, OXException {
         if (module == null) {
             JSONObject allQuotas = new JSONObject();
             for (QuotaProvider provider : quotaService.getAllProviders()) {
-                List<AccountQuota> accountQuotas = provider.getFor(session);
+                AccountQuotas accountQuotas = provider.getFor(session);
+                warnings.addAll(accountQuotas.getWarnings());
                 JSONArray jQuotas = buildQuotasJSON(accountQuotas);
                 if (!jQuotas.isEmpty()) {
                     JSONObject jProvider = new JSONObject();
@@ -118,17 +120,49 @@ public class GetAction implements AJAXActionService {
                 }
             }
 
+            UnifiedQuotaService unifiedQuotaService = getHighestRankedBackendService(session.getUserId(), session.getContextId());
+            if (unifiedQuotaService != null) {
+                JSONObject jQuota = buildUnifiedQuotaJSON(unifiedQuotaService, session);
+
+                JSONArray jQuotas = new JSONArray(1).put(jQuota);
+
+                JSONObject jProvider = new JSONObject();
+                jProvider.put("display_name", StringHelper.valueOf(session.getUser().getLocale()).getString("Unified Quota"));
+                jProvider.put("accounts", jQuotas);
+                allQuotas.put(UnifiedQuotaService.MODE, jProvider);
+            }
+
             return allQuotas;
         }
 
         // Module available...
+        if (UnifiedQuotaService.MODE.equals(module)) {
+            UnifiedQuotaService unifiedQuotaService = getHighestRankedBackendService(session.getUserId(), session.getContextId());
+            if (unifiedQuotaService == null) {
+                throw ServiceExceptionCode.absentService(UnifiedQuotaService.class);
+            }
+
+            if (accountID == null) {
+                JSONObject jQuota = buildUnifiedQuotaJSON(unifiedQuotaService, session);
+                return new JSONArray(1).put(jQuota);
+            }
+
+            if (!UnifiedQuotaService.MODE.equals(accountID)) {
+                throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("No account '" + accountID + "' exists for module '" + module + "'.");
+            }
+
+            return buildUnifiedQuotaJSON(unifiedQuotaService, session);
+        }
+
         QuotaProvider provider = quotaService.getProvider(module);
         if (provider == null) {
             throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("No provider exists for module '" + module + "'.");
         }
 
         if (accountID == null) {
-            return buildQuotasJSON(provider.getFor(session));
+            AccountQuotas accountQuotas = provider.getFor(session);
+            warnings.addAll(accountQuotas.getWarnings());
+            return buildQuotasJSON(accountQuotas);
         }
 
         // Account available...
@@ -140,7 +174,16 @@ public class GetAction implements AJAXActionService {
         return buildQuotaJSON(quota);
     }
 
-    private static JSONArray buildQuotasJSON(List<AccountQuota> accountQuotas) throws JSONException {
+    private JSONObject buildUnifiedQuotaJSON(UnifiedQuotaService unifiedQuotaService, ServerSession session) throws JSONException, OXException {
+        JSONObject jQuota = new JSONObject(8);
+        jQuota.put("account_id", UnifiedQuotaService.MODE);
+        jQuota.put("account_name", "Unified Quota");
+        jQuota.put("quota", unifiedQuotaService.getLimit(session.getUserId(), session.getContextId()));
+        jQuota.put("use", unifiedQuotaService.getUsage(session.getUserId(), session.getContextId()).getTotal());
+        return jQuota;
+    }
+
+    private static JSONArray buildQuotasJSON(AccountQuotas accountQuotas) throws JSONException {
         JSONArray jQuotas = new JSONArray(accountQuotas.size());
         for (AccountQuota accountQuota : accountQuotas) {
             JSONObject jQuota = buildQuotaJSON(accountQuota);

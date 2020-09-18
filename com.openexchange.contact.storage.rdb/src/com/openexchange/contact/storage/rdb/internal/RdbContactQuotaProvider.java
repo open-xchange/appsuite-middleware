@@ -51,14 +51,13 @@ package com.openexchange.contact.storage.rdb.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.rdb.sql.Executor;
 import com.openexchange.contact.storage.rdb.sql.Table;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.AccountQuotas;
 import com.openexchange.quota.DefaultAccountQuota;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -121,8 +120,8 @@ public class RdbContactQuotaProvider implements QuotaProvider {
     }
 
     @Override
-    public List<AccountQuota> getFor(Session session) throws OXException {
-        return Collections.singletonList(getFor(session, "0"));
+    public AccountQuotas getFor(Session session) throws OXException {
+        return new AccountQuotas(getFor(session, "0"));
     }
 
 }

@@ -49,12 +49,11 @@
 
 package com.openexchange.snippet.rdb.groupware;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.AccountQuotas;
 import com.openexchange.quota.DefaultAccountQuota;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -132,8 +131,8 @@ public class RdbSnippetQuotaProvider implements QuotaProvider {
     }
 
     @Override
-    public List<AccountQuota> getFor(Session session) throws OXException {
-        return Collections.singletonList(getFor(session, "0"));
+    public AccountQuotas getFor(Session session) throws OXException {
+        return new AccountQuotas(getFor(session, "0"));
     }
 
 }

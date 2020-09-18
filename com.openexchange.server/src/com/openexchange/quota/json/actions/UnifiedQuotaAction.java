@@ -47,45 +47,55 @@
  *
  */
 
-package com.openexchange.quota.json.osgi;
+package com.openexchange.quota.json.actions;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.filestore.unified.UnifiedQuotaService;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.json.QuotaActionFactory;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.filestore.unified.UsageResult;
+import com.openexchange.osgi.ServiceListing;
+import com.openexchange.quota.json.QuotaAJAXRequest;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link QuotaJSONActivator}
+ * {@link UnifiedQuotaAction} - The quota action for unified quota.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.5
  */
-public final class QuotaJSONActivator extends AJAXModuleActivator {
+public class UnifiedQuotaAction extends AbstractUnifiedQuotaAction {
 
     /**
-     * Initializes a new {@link QuotaJSONActivator}.
+     * Initializes a new {@link UnifiedQuotaAction}.
+     *
+     * @param unifiedQuotaServices The tracked unified quota services
+     * @param services The service look-up
      */
-    public QuotaJSONActivator() {
-        super();
+    public UnifiedQuotaAction(ServiceListing<UnifiedQuotaService> unifiedQuotaServices, ServiceLookup services) {
+        super(unifiedQuotaServices, services);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
+    protected AJAXRequestResult perform(QuotaAJAXRequest req) throws OXException, JSONException {
+        ServerSession session = req.getSession();
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
 
-    @Override
-    protected void startBundle() throws Exception {
-        trackService(QuotaService.class);
+        UnifiedQuotaService unifiedQuotaService = getHighestRankedBackendService(userId, contextId);
+        if (unifiedQuotaService == null) {
+            throw ServiceExceptionCode.absentService(UnifiedQuotaService.class);
+        }
 
-        RankingAwareNearRegistryServiceTracker<UnifiedQuotaService> unifiedQuotaServices = new RankingAwareNearRegistryServiceTracker<>(context, UnifiedQuotaService.class);
-        rememberTracker(unifiedQuotaServices);
+        long limit = unifiedQuotaService.getLimit(userId, contextId);
+        UsageResult usage = unifiedQuotaService.getUsage(userId, contextId);
 
-        openTrackers();
-
-        registerModule(new QuotaActionFactory(unifiedQuotaServices, new ExceptionOnAbsenceServiceLookup(this)), "quota");
+        JSONObject data = new JSONObject(4).put("quota", limit).put("use", usage.getTotal());
+        return new AJAXRequestResult(data, "json");
     }
 
 }

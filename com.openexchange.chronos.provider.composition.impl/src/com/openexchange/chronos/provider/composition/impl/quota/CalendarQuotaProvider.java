@@ -49,11 +49,11 @@
 
 package com.openexchange.chronos.provider.composition.impl.quota;
 
-import java.util.List;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.composition.impl.CompositingIDBasedCalendarQuotaProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.AccountQuotas;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -70,9 +70,9 @@ public class CalendarQuotaProvider implements QuotaProvider {
     private final ServiceLookup            services;
 
     /**
-     * 
+     *
      * Initializes a new {@link CalendarQuotaProvider}.
-     * 
+     *
      * @param services The {@link ServiceLookup} to get different services from
      * @param registry The {@link CalendarProviderRegistry} for {@link CompositingIDBasedCalendarQuotaProvider}
      * @throws OXException In case a service is unavailable
@@ -100,8 +100,8 @@ public class CalendarQuotaProvider implements QuotaProvider {
     }
 
     @Override
-    public List<AccountQuota> getFor(Session session) throws OXException {
+    public AccountQuotas getFor(Session session) throws OXException {
         CompositingIDBasedCalendarQuotaProvider provider = new CompositingIDBasedCalendarQuotaProvider(session, registry, services);
-        return provider.get();
+        return new AccountQuotas(provider.get(), null);
     }
 }

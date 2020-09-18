@@ -50,11 +50,12 @@
 package com.openexchange.quota.json;
 
 import java.util.Map;
-import org.osgi.framework.BundleContext;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.unified.UnifiedQuotaService;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.quota.json.actions.GetAction;
 import com.openexchange.server.ServiceLookup;
 
@@ -70,16 +71,18 @@ public class QuotaActionFactory implements AJAXActionServiceFactory {
     /**
      * Initializes a new {@link QuotaActionFactory}.
      *
+     * @param unifiedQuotaServices The tracked unified quota services
      * @param services The service look-up
      */
-    public QuotaActionFactory(final ServiceLookup services, final BundleContext context) {
+    public QuotaActionFactory(ServiceListing<UnifiedQuotaService> unifiedQuotaServices, ServiceLookup services) {
         super();
         ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        GetAction getAction = new com.openexchange.quota.json.actions.GetAction(services);
+        GetAction getAction = new com.openexchange.quota.json.actions.GetAction(unifiedQuotaServices, services);
         actions.put("get", getAction);
         actions.put("GET", getAction);
         actions.put("filestore", new com.openexchange.quota.json.actions.FilestoreAction(services));
         actions.put("mail", new com.openexchange.quota.json.actions.MailAction(services));
+        actions.put(UnifiedQuotaService.MODE, new com.openexchange.quota.json.actions.UnifiedQuotaAction(unifiedQuotaServices, services));
         this.actions = actions.build();
     }
 

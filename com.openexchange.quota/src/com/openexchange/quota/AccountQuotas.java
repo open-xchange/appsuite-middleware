@@ -47,45 +47,77 @@
  *
  */
 
-package com.openexchange.quota.json.osgi;
+package com.openexchange.quota;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.filestore.unified.UnifiedQuotaService;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.json.QuotaActionFactory;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
-
+import java.util.Iterator;
+import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link QuotaJSONActivator}
+ * {@link AccountQuotas} - A collection of account quotas with accompanying warnings.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.5
  */
-public final class QuotaJSONActivator extends AJAXModuleActivator {
+public class AccountQuotas implements Iterable<AccountQuota> {
+
+    private final List<AccountQuota> accountQuotas;
+    private final List<OXException> warnings;
 
     /**
-     * Initializes a new {@link QuotaJSONActivator}.
+     * Initializes a new listing containing a single element.
+     *
+     * @param accountQuota The account quota
      */
-    public QuotaJSONActivator() {
+    public AccountQuotas(AccountQuota accountQuota) {
         super();
+        this.accountQuotas = accountQuota == null ? ImmutableList.of() : ImmutableList.of(accountQuota);
+        this.warnings = ImmutableList.of();
+    }
+
+    /**
+     * Initializes a new listing.
+     *
+     * @param accountQuotas The collected account quotas or <code>null</code>
+     * @param warnings The collected warnings or <code>null</code>
+     */
+    public AccountQuotas(List<AccountQuota> accountQuotas, List<OXException> warnings) {
+        super();
+        this.accountQuotas = accountQuotas == null ? ImmutableList.of() : ImmutableList.copyOf(accountQuotas);
+        this.warnings = warnings == null ? ImmutableList.of() : ImmutableList.copyOf(warnings);
+    }
+
+    /**
+     * Gets the collected warnings.
+     *
+     * @return The warnings or an empty list
+     */
+    public List<OXException> getWarnings() {
+        return warnings;
+    }
+
+    /**
+     * Gets the collected account quotas.
+     *
+     * @return The collected account quotas
+     */
+    public List<AccountQuota> getAccountQuotas() {
+        return accountQuotas;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public Iterator<AccountQuota> iterator() {
+        return accountQuotas.iterator();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        trackService(QuotaService.class);
-
-        RankingAwareNearRegistryServiceTracker<UnifiedQuotaService> unifiedQuotaServices = new RankingAwareNearRegistryServiceTracker<>(context, UnifiedQuotaService.class);
-        rememberTracker(unifiedQuotaServices);
-
-        openTrackers();
-
-        registerModule(new QuotaActionFactory(unifiedQuotaServices, new ExceptionOnAbsenceServiceLookup(this)), "quota");
+    /**
+     * Gets the number of collected account quotas.
+     *
+     * @return The number of account quotas
+     */
+    public int size() {
+        return accountQuotas.size();
     }
 
 }

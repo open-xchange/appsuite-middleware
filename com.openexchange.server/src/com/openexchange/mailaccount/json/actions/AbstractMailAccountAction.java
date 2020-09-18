@@ -343,14 +343,14 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * Checks if specified {@link MailAccount} is considered as default aka primary account.
      *
      * @param mailAccount The mail account to examine
-     * @return <code>true</code> if specified {@link MailAccount} is considered as defaul account; otherwise <code>false</code>
+     * @return <code>true</code> if specified {@link MailAccount} is considered as default account; otherwise <code>false</code>
      */
     protected static boolean isDefaultMailAccount(final MailAccount mailAccount) {
         return mailAccount.isDefaultAccount() || MailAccount.DEFAULT_ID == mailAccount.getId();
     }
 
     /**
-     * Checks if specified {@link MailAccountDescription} is considered as default aka primary account.
+     * Checks if specified {@link MailAccountDescription} is considered as default aka. primary account.
      *
      * @param mailAccount The mail account description to examine
      * @return <code>true</code> if specified {@link MailAccountDescription} is considered as default account; otherwise <code>false</code>

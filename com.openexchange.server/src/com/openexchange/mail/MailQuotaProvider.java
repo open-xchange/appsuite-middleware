@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
@@ -59,7 +60,9 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.AccountQuotas;
 import com.openexchange.quota.DefaultAccountQuota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
@@ -102,9 +105,12 @@ public class MailQuotaProvider implements QuotaProvider {
             if (MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
                 throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, getModuleID());
             }
-
             throw e;
         } catch (NumberFormatException e) {
+            throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, getModuleID());
+        }
+
+        if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
             throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, getModuleID());
         }
 
@@ -112,20 +118,31 @@ public class MailQuotaProvider implements QuotaProvider {
     }
 
     @Override
-    public List<AccountQuota> getFor(Session session) throws OXException {
-        List<AccountQuota> quotas = new LinkedList<AccountQuota>();
+    public AccountQuotas getFor(Session session) throws OXException {
         MailAccount[] mailAccounts = mailAccountService.getUserMailAccounts(session.getUserId(), session.getContextId());
+        List<AccountQuota> quotas = new ArrayList<AccountQuota>(mailAccounts.length);
+        List<OXException> warnings = null;
         for (MailAccount mailAccount : mailAccounts) {
-            quotas.add(getForMailAccount(mailAccount, session));
+            if (false == UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+                try {
+                    quotas.add(getForMailAccount(mailAccount, session));
+                } catch (OXException e) {
+                    if (warnings == null) {
+                        warnings = new LinkedList<>();
+                    }
+                    warnings.add(e);
+                }
+            }
         }
 
-        return quotas;
+        return new AccountQuotas(quotas, warnings);
     }
 
     private AccountQuota getForMailAccount(MailAccount mailAccount, Session session) throws OXException {
-        MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = mailService.getMailAccess(session, mailAccount.getId());
-        mailAccess.connect();
+        MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = null;
         try {
+            mailAccess = mailService.getMailAccess(session, mailAccount.getId());
+            mailAccess.connect();
             DefaultAccountQuota accountQuota = new DefaultAccountQuota(String.valueOf(mailAccount.getId()), mailAccount.getName());
             IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             Quota storageQuota = folderStorage.getStorageQuota("INBOX");
@@ -150,7 +167,9 @@ public class MailQuotaProvider implements QuotaProvider {
 
             return accountQuota;
         } finally {
-            mailAccess.close();
+            if (mailAccess != null) {
+                mailAccess.close();
+            }
         }
     }
 

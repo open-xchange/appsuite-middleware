@@ -49,8 +49,8 @@
 
 package com.openexchange.quota;
 
-import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.Service;
 import com.openexchange.session.Session;
 
 
@@ -61,6 +61,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
+@Service
 public interface QuotaProvider {
 
     /**
@@ -101,6 +102,6 @@ public interface QuotaProvider {
      *  empty, if no account exists.
      * @throws OXException If an error occurs while calculating quota and usage.
      */
-    List<AccountQuota> getFor(Session session) throws OXException;
+    AccountQuotas getFor(Session session) throws OXException;
 
 }
