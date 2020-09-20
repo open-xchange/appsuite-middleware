@@ -65,11 +65,11 @@ public enum PasswordExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Cannot change password for any reason.
      */
-    PASSWORD_FAILED("Cannot change password < %s >, see log files for details.", OXExceptionStrings.MESSAGE, CATEGORY_PERMISSION_DENIED, 1),
+    PASSWORD_FAILED("Cannot change password < %s >, see log files for details.", PasswordExceptionMessage.PASSWORD_FAILED_MSG, CATEGORY_PERMISSION_DENIED, 1),
     /**
      * Cannot change password: %1$s
      */
-    PASSWORD_FAILED_WITH_MSG("Cannot change password: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_PERMISSION_DENIED, 1),
+    PASSWORD_FAILED_WITH_MSG("Cannot change password: %1$s", PasswordExceptionMessage.PASSWORD_FAILED_MSG, CATEGORY_PERMISSION_DENIED, 1),
     /**
      * New password too short.
      */
