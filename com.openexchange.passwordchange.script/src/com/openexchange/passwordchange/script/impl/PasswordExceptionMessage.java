@@ -58,14 +58,13 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class PasswordExceptionMessage implements LocalizableStrings {
 
-    /**
-     * New password too short.
-     */
+    // Failed to change password for any reason. E.g. the script used to change a user's password advertised an error (return code)
+    public final static String PASSWORD_FAILED_MSG = "Failed to change password for any reason.";
+
+    // New password too short.
     public final static String PASSWORD_SHORT_MSG = "The entered password is too short. Please try again using a longer password.";
 
-    /**
-     * New password too weak.
-     */
+    // New password too weak.
     public final static String PASSWORD_WEAK_MSG = "The entered password is too weak. Please try again using a more complex password.";
 
 
