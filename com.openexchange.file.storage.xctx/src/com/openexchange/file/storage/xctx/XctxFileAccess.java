@@ -87,7 +87,7 @@ public class XctxFileAccess extends AbstractInfostoreFileAccess {
         super(guestSession, accountAccess.getServiceSafe(InfostoreFacade.class), accountAccess.getServiceSafe(InfostoreSearchEngine.class));
         this.localSession = localSession;
         this.accountAccess = accountAccess;
-        this.fileConverter = new XctxFileConverter(localSession, guestSession);
+        this.fileConverter = new XctxFileConverter(accountAccess, localSession, guestSession);
     }
     
     @Override

@@ -87,7 +87,7 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess {
         super(guestSession);
         this.localSession = localSession;
         this.accountAccess = accountAccess;
-        this.folderConverter = new XctxFolderConverter(localSession, guestSession);
+        this.folderConverter = new XctxFolderConverter(accountAccess, localSession, guestSession);
     }
 
     @Override

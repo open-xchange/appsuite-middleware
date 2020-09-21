@@ -103,10 +103,9 @@ public class GetEntityInfoCall extends AbstractGetCall<EntityInfo> {
                     String firstName = data.optString("first_name");
                     String lastName = data.optString("last_name");
                     String email1 = data.optString("email1");
-                    int entity = data.optInt("user_id");
                     String imageUrl = data.optString("image1_url");
                     Type type = Type.USER;
-                    return new EntityInfo(getEntityIdentifier(), displayName, title, firstName, lastName, email1, entity, imageUrl, type);
+                    return new EntityInfo(getEntityIdentifier(), displayName, title, firstName, lastName, email1, -1, imageUrl, type);
                 }
                 return null;
             }

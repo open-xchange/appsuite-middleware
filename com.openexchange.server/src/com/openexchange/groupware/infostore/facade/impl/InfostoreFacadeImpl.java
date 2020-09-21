@@ -102,7 +102,6 @@ import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.EffectiveObjectPermission;
@@ -4143,14 +4142,29 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     private TimedResult<DocumentMetadata> getDocuments(Context context, final User user, ServerSession optSession, UserPermissionBits permissionBits, final long folderId, Metadata[] columns, Metadata sort, int order, int start, int end) throws OXException {
         /*
-         * get appropriate infostore iterator
+         * check requested metadata
          */
         boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
-        Metadata[] cols = addSequenceNumberIfNeeded(columns);
-        cols = addDateFieldsIfNeeded(cols, sort);
+        Set<Metadata> set = Metadata.contains(columns, Metadata.LOCKED_UNTIL_LITERAL, Metadata.NUMBER_OF_VERSIONS_LITERAL, Metadata.OBJECT_PERMISSIONS_LITERAL, Metadata.SHAREABLE_LITERAL, Metadata.CREATED_FROM_LITERAL, Metadata.MODIFIED_FROM_LITERAL);
+        boolean addLocked = set.contains(Metadata.LOCKED_UNTIL_LITERAL);
+        boolean addNumberOfVersions = set.contains(Metadata.NUMBER_OF_VERSIONS_LITERAL);
+        boolean addObjectPermissions = set.contains(Metadata.OBJECT_PERMISSIONS_LITERAL);
+        boolean addShareable = set.contains(Metadata.SHAREABLE_LITERAL);
+        boolean addCreatedFrom = set.contains(Metadata.CREATED_FROM_LITERAL);
+        boolean addModifiedFrom = set.contains(Metadata.MODIFIED_FROM_LITERAL);
+        Metadata[] cols = addDateFieldsIfNeeded(addSequenceNumberIfNeeded(columns), sort);
         if (shouldTriggerMediaDataExtraction) {
             cols = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(cols);
         }
+        if (addCreatedFrom) {
+            cols = Metadata.addIfAbsent(columns, Metadata.CREATED_BY_LITERAL);
+        }
+        if (addModifiedFrom) {
+            cols = Metadata.addIfAbsent(columns, Metadata.MODIFIED_BY_LITERAL);
+        }        
+        /*
+         * get appropriate infostore iterator
+         */
         final long sharedFilesFolderID = getSharedFilesFolderID();
         final EffectiveInfostoreFolderPermission folderPermission;
         InfostoreIterator iterator = null;
@@ -4201,17 +4215,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 }
             }
             /*
-             * check requested metadata
+             * stick to plain infostore timed result if no further metadata is needed
              */
-            Set<Metadata> set = Metadata.contains(columns, Metadata.LOCKED_UNTIL_LITERAL, Metadata.NUMBER_OF_VERSIONS_LITERAL, Metadata.OBJECT_PERMISSIONS_LITERAL, Metadata.SHAREABLE_LITERAL);
-            boolean addLocked = set.contains(Metadata.LOCKED_UNTIL_LITERAL);
-            boolean addNumberOfVersions = set.contains(Metadata.NUMBER_OF_VERSIONS_LITERAL);
-            boolean addObjectPermissions = set.contains(Metadata.OBJECT_PERMISSIONS_LITERAL);
-            boolean addShareable = set.contains(Metadata.SHAREABLE_LITERAL);
-            if (false == addLocked && false == addNumberOfVersions && false == addObjectPermissions && false == addShareable) {
-                /*
-                 * stick to plain infostore timed result if no further metadata is needed
-                 */
+            if (false == addLocked && false == addNumberOfVersions && false == addObjectPermissions && false == addShareable && false == addCreatedFrom && false == addModifiedFrom) {
                 InfostoreTimedResult timedResult = new InfostoreTimedResult(iterator);
                 iterator = null; // Avoid premature closing
                 return timedResult;
@@ -4228,21 +4234,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             for (DocumentMetadata document : documents) {
                 maxSequenceNumber = Math.max(maxSequenceNumber, document.getSequenceNumber());
                 objectIDs.add(Integer.valueOf(document.getId()));
-            }
-            if (null != optSession && (Metadata.contains(columns, Metadata.CREATED_FROM_LITERAL) || Metadata.contains(columns, Metadata.MODIFIED_FROM_LITERAL))) {
-                EntityInfoLoader loader = new EntityInfoLoader();
-                if (Metadata.contains(columns, Metadata.CREATED_FROM_LITERAL)) {
-                    for (DocumentMetadata document : documents) {
-                        EntityInfo entityInfo = loader.load(document.getCreatedBy(), optSession);
-                        document.setCreatedFrom(entityInfo);
-                    }
-                }
-                if (Metadata.contains(columns, Metadata.MODIFIED_FROM_LITERAL)) {
-                    for (DocumentMetadata document : documents) {
-                        EntityInfo entityInfo = loader.load(document.getModifiedBy(), optSession);
-                        document.setModifiedFrom(entityInfo);
-                    }
-                }
             }
             final long sequenceNumber = maxSequenceNumber;
             TimedResult<DocumentMetadata> timedResult = new TimedResult<DocumentMetadata>() {
@@ -4285,6 +4276,22 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                              * set "shareable" flag based on folder permissions
                              */
                             document.setShareable(null != folderPermission && (folderPermission.canWriteAllObjects() || folderPermission.canWriteOwnObjects() && document.getCreatedBy() == user.getId()));
+                        }
+                        return document;
+                    }
+                });
+            }
+            if (null != optSession && (addCreatedFrom || addModifiedFrom)) {
+                EntityInfoLoader loader = new EntityInfoLoader();
+                timedResult = new CustomizableTimedResult<>(timedResult, new Customizer<DocumentMetadata>() {
+
+                    @Override
+                    public DocumentMetadata customize(DocumentMetadata document) throws OXException {
+                        if (addCreatedFrom && 0 < document.getCreatedBy()) {
+                            document.setCreatedFrom(loader.load(document.getCreatedBy(), optSession));
+                        }
+                        if (addModifiedFrom && 0 < document.getModifiedBy()) {
+                            document.setModifiedFrom(loader.load(document.getModifiedBy(), optSession));
                         }
                         return document;
                     }

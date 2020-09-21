@@ -71,7 +71,7 @@ public class EntityInfo {
     private final static String LAST_NAME = "lastName";
     private final static String EMAIL1 = "email1";
     private final static String IMAGE_URL = "imageUrl";
-    private final static String INTERNAL_USER_ID = "internalUserId";
+    private final static String ENTITY = "entity";
     private final static String CONTACT = "contact";
 
     private final String identifier;
@@ -80,11 +80,11 @@ public class EntityInfo {
     private final String firstName;
     private final String lastName;
     private final String email1;
-    private final int internalUserId;
+    private final int entity;
     private final String imageUrl;
     private final Type type;
 
-    public EntityInfo(String identifier, String displayName, String title, String firstName, String lastName, String email1, int internalUserId, String imageUrl, Type type) {
+    public EntityInfo(String identifier, String displayName, String title, String firstName, String lastName, String email1, int entity, String imageUrl, Type type) {
         super();
         this.identifier = identifier;
         this.displayName = displayName;
@@ -92,7 +92,7 @@ public class EntityInfo {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email1 = email1;
-        this.internalUserId = internalUserId;
+        this.entity = entity;
         this.imageUrl = imageUrl;
         this.type = type;
     }
@@ -117,8 +117,8 @@ public class EntityInfo {
         return lastName;
     }
 
-    public int getInternalUserId() {
-        return internalUserId;
+    public int getEntity() {
+        return entity;
     }
 
     public String getEmail1() {
@@ -139,8 +139,8 @@ public class EntityInfo {
             json.put(IDENTIFER, identifier);
             json.put(TYPE, type.getType());
             json.put(DISPLAY_NAME, displayName);
-            if (0 < internalUserId) {
-                json.put(INTERNAL_USER_ID, internalUserId);
+            if (0 < entity) {
+                json.put(ENTITY, entity);
             }
             JSONObject contact = new JSONObject(6);
             if (Strings.isNotEmpty(title)) {
@@ -171,7 +171,7 @@ public class EntityInfo {
         }
         String identifier = entityInfo.optString(IDENTIFER);
         String displayName = entityInfo.optString(DISPLAY_NAME);
-        int internalUserId = entityInfo.optInt(INTERNAL_USER_ID);
+        int entity = entityInfo.has(ENTITY) ? entityInfo.optInt(ENTITY) : -1;
         Type type = Type.forName(entityInfo.optString(TYPE));
         JSONObject contact = entityInfo.optJSONObject(CONTACT);
         if (false == JSONObject.NULL.equals(contact)) {
@@ -180,14 +180,14 @@ public class EntityInfo {
             String lastName = entityInfo.optString(LAST_NAME);
             String email1 = entityInfo.optString(EMAIL1);
             String imageUrl = entityInfo.optString(IMAGE_URL);
-            return new EntityInfo(identifier, displayName, title, firstName, lastName, email1, internalUserId, imageUrl, type);
+            return new EntityInfo(identifier, displayName, title, firstName, lastName, email1, entity, imageUrl, type);
         }
-        return new EntityInfo(identifier, displayName, null, null, null, null, internalUserId, null, type);
+        return new EntityInfo(identifier, displayName, null, null, null, null, entity, null, type);
     }
 
     @Override
     public String toString() {
-        return "EntityInfo [" + identifier + "," + title + "," + displayName + "," + email1 + "," + internalUserId + "," + type.getType() + "]";
+        return "EntityInfo [" + identifier + "," + title + "," + displayName + "," + email1 + "," + entity + "," + type.getType() + "]";
     }
 
     public enum Type {

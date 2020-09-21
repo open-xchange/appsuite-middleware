@@ -105,6 +105,9 @@ public class EntityInfoLoader {
         User user = userService.getUser(userId, session.getContextId());
         String displayName = user.getDisplayName();
         String email1 = user.getMail();
+        if (user.isGuest()) {
+            return new EntityInfo(identifier, displayName, null, user.getGivenName(), user.getSurname(), email1, user.getId(), null, Type.GUEST);
+        }
         Contact contact;
         Type type;
         try {
