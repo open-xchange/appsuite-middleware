@@ -187,6 +187,7 @@ public class PermissionConfigurationCheckerImpl implements Reloadable, Permissio
         Map<String, Object> yamlInFolder = configService.getYamlInFolder("contextSets");
         yamlInFolder.entrySet()
                     .stream()
+                    .filter((e) -> e.getValue() != null)
                     .forEach((e) -> containsPermissions(e.getValue().toString()).ifPresent((perm) -> LOG.error("Permissions must not be defined in context sets. Please remove '{}' from {}", perm, e.getKey())));
     }
 
