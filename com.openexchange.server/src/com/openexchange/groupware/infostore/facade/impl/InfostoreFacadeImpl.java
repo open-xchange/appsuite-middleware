@@ -4231,14 +4231,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
             if (null != optSession && (Metadata.contains(columns, Metadata.CREATED_FROM_LITERAL) || Metadata.contains(columns, Metadata.MODIFIED_FROM_LITERAL))) {
                 EntityInfoLoader loader = new EntityInfoLoader();
-                if (Metadata.contains(columns, Metadata.CREATED_FROM_LITERAL)) {
-                    for (DocumentMetadata document : documents) {
+                for (DocumentMetadata document : documents) {
+                    if (Metadata.contains(columns, Metadata.CREATED_FROM_LITERAL)) {
                         EntityInfo entityInfo = loader.load(document.getCreatedBy(), optSession);
                         document.setCreatedFrom(entityInfo);
                     }
-                }
-                if (Metadata.contains(columns, Metadata.MODIFIED_FROM_LITERAL)) {
-                    for (DocumentMetadata document : documents) {
+                    if (Metadata.contains(columns, Metadata.MODIFIED_FROM_LITERAL)) {
                         EntityInfo entityInfo = loader.load(document.getModifiedBy(), optSession);
                         document.setModifiedFrom(entityInfo);
                     }
