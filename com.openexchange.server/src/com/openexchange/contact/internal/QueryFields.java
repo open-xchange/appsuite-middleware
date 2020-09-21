@@ -113,6 +113,8 @@ public class QueryFields {
                         // add attachment information
                         this.needsAttachmentInfo = true;
                         preparedFields.add(ContactField.NUMBER_OF_ATTACHMENTS);
+                    } else if (ContactField.IMAGE1_URL.equals(field)) {
+                        preparedFields.add(ContactField.IMAGE_LAST_MODIFIED);
                     }
                 }
 		    } else {
@@ -126,6 +128,8 @@ public class QueryFields {
                             // add attachment information
                             this.needsAttachmentInfo = true;
                             preparedFields.add(ContactField.NUMBER_OF_ATTACHMENTS);
+                        } else if (ContactField.IMAGE1_URL.equals(field)) {
+                            preparedFields.add(ContactField.IMAGE_LAST_MODIFIED);
                         }
                     }
                 }

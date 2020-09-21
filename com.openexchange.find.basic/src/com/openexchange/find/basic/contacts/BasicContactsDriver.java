@@ -204,7 +204,6 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         if (0 == columnIDs.length) {
             columnIDs = ColumnParser.parseColumns("list");
         }
-        contactFields = ColumnParser.getFieldsToQuery(columnIDs, SORT_FIELDS);
         /*
          * exclude context admin if requested
          */

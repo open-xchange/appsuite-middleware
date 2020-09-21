@@ -49,6 +49,9 @@
 
 package com.openexchange.contacts.json.mapping;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -75,12 +78,15 @@ public class ColumnParser {
      * @throws OXException
      */
     public static ContactField[] getFieldsToQuery(int[] columnIDs, ContactField...mandatoryFields) throws OXException {
+        Set<ContactField> mandatory = new HashSet<>();
+        mandatory.addAll(Arrays.asList(mandatoryFields));
         /*
          * check for special handling
          */
         for (int i = 0; i < columnIDs.length; i++) {
             if (Contact.IMAGE1_URL == columnIDs[i] || Contact.IMAGE1 == columnIDs[i]) {
                 columnIDs[i] = Contact.NUMBER_OF_IMAGES; // query NUMBER_OF_IMAGES to set image URL afterwards
+                mandatory.add(ContactField.IMAGE_LAST_MODIFIED);
             } else if (DataObject.LAST_MODIFIED_UTC == columnIDs[i]) {
                 columnIDs[i] = DataObject.LAST_MODIFIED; // query LAST_MODIFIED to set LAST_MODIFIED_UTC afterwards
             }
@@ -88,7 +94,7 @@ public class ColumnParser {
         /*
          * get mapped fields
          */
-        return ContactMapper.getInstance().getFields(columnIDs, ContactAction.VIRTUAL_FIELDS, mandatoryFields);
+        return ContactMapper.getInstance().getFields(columnIDs, ContactAction.VIRTUAL_FIELDS, mandatory.toArray(new ContactField[mandatory.size()]));
     }
 
     /**

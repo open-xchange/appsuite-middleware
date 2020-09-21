@@ -203,9 +203,9 @@ public class ContactUtil {
      * @throws OXException If services or parameter are missing
      */
     public static String generateImageUrl(Session session, Contact con) throws OXException {
-        ContactPictureURLService service = ServerServiceRegistry.getInstance().getService(ContactPictureURLService.class, true);
         if (0 < con.getNumberOfImages() || con.containsImage1() && null != con.getImage1()) {
             Date lastModified = con.getImageLastModified();
+            ContactPictureURLService service = ServerServiceRegistry.getInstance().getService(ContactPictureURLService.class, true);
             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == con.getParentFolderID() && con.containsInternalUserId()) {
                 return service.getUserPictureUrl(con.getInternalUserId(), session, lastModified == null ? null : L(lastModified.getTime()), true);
             }
