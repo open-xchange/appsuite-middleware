@@ -54,7 +54,6 @@ ox_update_permissions "/opt/open-xchange/etc/ldapauth.properties" root:open-xcha
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/ldapauth.properties
-%doc com.openexchange.authentication.ldap/ChangeLog
 
 %changelog
 * Wed Aug 05 2020 Marcus Klein <marcus.klein@open-xchange.com>

@@ -60,7 +60,6 @@ sed -i -e 's;%{buildroot};;' %{manlist}
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/etc/plugin
 %config(noreplace) /opt/open-xchange/etc/plugin/*
-%doc com.openexchange.admin.contextrestore/ChangeLog
 
 %changelog
 * Wed Aug 05 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>

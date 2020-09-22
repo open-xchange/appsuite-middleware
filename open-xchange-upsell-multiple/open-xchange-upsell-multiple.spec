@@ -55,7 +55,6 @@ ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchang
 %config(noreplace) /opt/open-xchange/etc/*
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/upsell.properties
 %config(noreplace) /opt/open-xchange/etc/settings/*
-%doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
 * Wed Aug 05 2020 Carsten Hoeger <choeger@open-xchange.com>

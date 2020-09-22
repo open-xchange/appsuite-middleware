@@ -63,7 +63,6 @@ sed -i -e 's;%{buildroot};;' %{manlist}
 %dir /opt/open-xchange/etc/plugin
 %config(noreplace) /opt/open-xchange/etc/plugin/*
 %doc com.openexchange.admin.reseller.rmi/javadoc
-%doc ./com.openexchange.admin.reseller/ChangeLog
 
 %changelog
 * Wed Aug 05 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>

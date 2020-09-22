@@ -68,7 +68,6 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/*
-%doc com.openexchange.authentication.imap/ChangeLog
 
 %changelog
 * Wed Aug 05 2020 Marcus Klein <marcus.klein@open-xchange.com>

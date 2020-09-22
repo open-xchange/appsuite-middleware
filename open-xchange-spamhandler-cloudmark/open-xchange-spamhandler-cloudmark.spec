@@ -56,7 +56,6 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/*
-%doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
 * Wed Aug 05 2020 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>

@@ -64,7 +64,6 @@ sed -i -e 's;%{buildroot};;' %{manlist}
 /opt/open-xchange/sbin/*
 %dir /opt/open-xchange/lib
 /opt/open-xchange/lib/*
-%doc com.openexchange.admin.user.copy/ChangeLog
 
 %changelog
 * Wed Aug 05 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>

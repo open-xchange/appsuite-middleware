@@ -64,7 +64,6 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*.properties
 %dir /opt/open-xchange/etc/settings/
 %config(noreplace) /opt/open-xchange/etc/settings/parallels-ui.properties
-%doc com.openexchange.parallels/ChangeLog
 
 %changelog
 * Wed Aug 05 2020 Marcus Klein <marcus.klein@open-xchange.com>
