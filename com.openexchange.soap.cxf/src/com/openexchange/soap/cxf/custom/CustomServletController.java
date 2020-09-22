@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,52 +49,74 @@
 
 package com.openexchange.soap.cxf.custom;
 
-import java.lang.reflect.Field;
+import java.net.URI;
+import java.util.Optional;
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.cxf.transport.http.DestinationRegistry;
-import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
+import org.apache.cxf.transport.servlet.BaseUrlHelper;
 import org.apache.cxf.transport.servlet.ServletController;
-import org.apache.cxf.transport.servlet.servicelist.ServiceListGeneratorServlet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * {@link CXFOsgiServlet}
+ * {@link CustomServletController} is a custom {@link ServletController} which creates the base url based on the X-Forwarded-Proto header if present.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.5
  */
-public class CXFOsgiServlet extends CXFNonSpringServlet {
+public class CustomServletController extends ServletController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CXFOsgiServlet.class);
+    private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
+    private static final String X_FORWARDED_PORT = "X-Forwarded-Port";
+    private static final String HTTPS = "https";
 
-    /** serialVersionUID */
-    private static final long serialVersionUID = 2941782846712141279L;
-
-    @Override
-    protected void finalizeServletInit(ServletConfig servletConfig) throws ServletException {
-        // do not call super.finalizeServletInit(...) as reading files from WEB-INF folder is not possible
+    /**
+     * Initializes a new {@link CustomServletController}.
+     *
+     * @param destinationRegistry
+     * @param config
+     * @param serviceListGenerator
+     */
+    public CustomServletController(DestinationRegistry destinationRegistry, ServletConfig config, HttpServlet serviceListGenerator) {
+        super(destinationRegistry, config, serviceListGenerator);
     }
 
     @Override
-    protected ServletController createServletController(ServletConfig servletConfig) {
-        Field f = null;
-        try {
-            f = CXFNonSpringServlet.class.getDeclaredField("destinationRegistry");
-            f.setAccessible(true);
-            DestinationRegistry registry = (DestinationRegistry) f.get(this);
-
-            HttpServlet serviceListGeneratorServlet = new ServiceListGeneratorServlet(registry, bus);
-            return new CustomServletController(registry, servletConfig, serviceListGeneratorServlet);
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-            LOG.error("Unable to create custom ServletController. Falling back to the default one.", e);
-            return super.createServletController(servletConfig);
-        } finally {
-            if (f != null) {
-                f.setAccessible(false);
-            }
+    protected String getBaseURL(HttpServletRequest request) {
+        if (forcedBaseAddress != null) {
+            return forcedBaseAddress;
         }
+
+        String proto = request.getHeader(X_FORWARDED_PROTO);
+        if (proto != null && proto.equalsIgnoreCase(HTTPS)) {
+            Optional<String> optPort = Optional.ofNullable(request.getHeader(X_FORWARDED_PORT));
+            return getBaseUrl(request, HTTPS, optPort.orElse("443"));
+        }
+        return BaseUrlHelper.getBaseURL(request);
     }
+
+    /**
+     * Similar to {@link BaseUrlHelper#getBaseURL(HttpServletRequest)} but uses the given url scheme and port
+     *
+     * @param request The {@link HttpServletRequest}
+     * @param scheme The scheme to use
+     * @param port The port to use
+     * @return The base url
+     */
+    private String getBaseUrl(HttpServletRequest request, String scheme, String port) {
+        StringBuilder sb = new StringBuilder();
+        URI uri = URI.create(request.getRequestURL().toString());
+        sb.append(scheme).append("://").append(uri.getHost()).append(":").append(port);
+        String contextPath = request.getContextPath();
+        if (contextPath != null) {
+            sb.append(contextPath);
+        }
+        String servletPath = request.getServletPath();
+        if (servletPath != null) {
+            sb.append(servletPath);
+        }
+
+        return sb.toString();
+    }
+
 }
