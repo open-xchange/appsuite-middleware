@@ -181,7 +181,7 @@ public class EventPatches {
     public static ICalParameters applyIgnoredProperties(EventResource resource, ICalParameters parameters) {
         if (null != parameters) {
             DAVUserAgent userAgent = resource.getUserAgent();
-            if (false == DAVUserAgent.EM_CLIENT.equals(userAgent)) {
+            if (false == DAVUserAgent.EM_CLIENT.equals(userAgent) && false == DAVUserAgent.EM_CLIENT_FOR_APPSUITE.equals(userAgent)) {
                 /*
                  * forcibly ignore X-MICROSOFT-CDO-ALLDAYEVENT and X-MICROSOFT-CDO-BUSYSTATUS for clients other than em client
                  */
@@ -400,8 +400,8 @@ public class EventPatches {
                  */
                 adjustMozillaLastAcknowledged(importedEvent, importedSeriesMaster, calendar);
             }
-            if (DAVUserAgent.THUNDERBIRD_LIGHTNING.equals(resource.getUserAgent()) || DAVUserAgent.EM_CLIENT.equals(resource.getUserAgent())) {
-
+            if (DAVUserAgent.THUNDERBIRD_LIGHTNING.equals(resource.getUserAgent()) || DAVUserAgent.EM_CLIENT.equals(resource.getUserAgent())||
+                DAVUserAgent.EM_CLIENT_FOR_APPSUITE.equals(resource.getUserAgent())) {
                 /*
                  * handle snoozing via X-MOZ-SNOOZE and X-MOZ-SNOOZE-TIME-...
                  */
@@ -760,7 +760,7 @@ public class EventPatches {
          * @param importedChangeExceptions The imported change exceptions as supplied by the client
          */
         private void restoreAttendeeForOrganizer(EventResource resource, Event importedEvent, List<Event> importedChangeExceptions) {
-            if (false == resource.exists() || null == importedEvent || false == DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()) || 
+            if (false == resource.exists() || null == importedEvent || false == DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()) ||
                 false == isGroupScheduled(importedEvent) || false == isOrganizer(resource.getEvent(), resource.getFactory().getUser().getId())) {
                 return; // not applicable
             }
@@ -869,7 +869,7 @@ public class EventPatches {
             if (!resource.exists()  || !AUTO_ORGANIZER_AGENTS.contains(resource.getUserAgent()) || !PublicType.getInstance().equals(resource.getParent().getFolder().getType())) {
                 return;
             }
-            
+
             Event orig = resource.getEvent();
             removeOrganizer(importedEvent, orig);
             if (importedChangeExceptions != null) {
@@ -891,7 +891,7 @@ public class EventPatches {
                 }
             }
         }
-        
+
         /**
          * Restores the participant status of attendees on incoming event patches if the client
          * set the status to {@link ParticipationStatus#NEEDS_ACTION}

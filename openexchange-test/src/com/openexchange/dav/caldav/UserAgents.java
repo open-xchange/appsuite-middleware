@@ -70,6 +70,8 @@ public final class UserAgents {
 
     public static final String EM_CLIENT_6_0 = "eM Client/6.0.24144.0";
 
+    public static final String EM_CLIENT_8_1 = "eMClient/8.1.172.0";
+
     public static final String[] MACOS_ALL = { MACOS_10_7_3
     };
 

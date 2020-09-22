@@ -144,7 +144,7 @@ public enum DAVUserAgent {
             if (userAgent.contains("eM Client for OX App Suite")) {
                 return EM_CLIENT_FOR_APPSUITE;
             }
-            if (userAgent.contains("eM Client")) {
+            if (userAgent.contains("eM Client") || userAgent.contains("eMClient")) {
                 return EM_CLIENT;
             }
         }

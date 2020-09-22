@@ -113,6 +113,7 @@ For environments where it is inconvenient to setup a virtual host there is also 
   RewriteCond %{HTTP_USER_AGENT}      CalDAV%20Sync%20Adapter [OR]
   RewriteCond %{HTTP_USER_AGENT}      accountsd          [OR]
   RewriteCond %{HTTP_USER_AGENT}      "eM Client"        [OR]
+  RewriteCond %{HTTP_USER_AGENT}      "eMClient"        [OR]
   RewriteCond %{HTTP_USER_AGENT}      "OX Sync"          [OR]
   RewriteCond %{HTTP_USER_AGENT}      CalDav             [OR]
   RewriteCond %{HTTP_USER_AGENT}      CoreDAV
