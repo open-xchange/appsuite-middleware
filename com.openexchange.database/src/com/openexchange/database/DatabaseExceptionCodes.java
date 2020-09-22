@@ -69,7 +69,7 @@ public enum DatabaseExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * An SQL error caused by an illegal or unsupported character string: %1$s
      */
-    STRING_LITERAL_ERROR("An SQL error caused by an illegal or unsupported character string: %1$s", DatabaseExceptionStrings.STRING_LITERAL_ERROR_MSG, Category.CATEGORY_USER_INPUT, 2),
+    STRING_LITERAL_ERROR("An SQL error caused by an illegal or unsupported character string: %1$s", DatabaseExceptionStrings.STRING_LITERAL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * The keystore could not be (re-)loaded: %1$s
      * <p>
