@@ -50,6 +50,9 @@
 package com.openexchange.file.storage.rdb.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import com.google.json.JsonSanitizer;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,6 +63,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONException;
+import org.json.JSONInputStream;
+import org.json.JSONObject;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
@@ -67,7 +73,6 @@ import com.openexchange.database.Databases;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageAccountError;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
@@ -75,6 +80,9 @@ import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
@@ -123,9 +131,88 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         super();
     }
 
-    private static final String SQL_SELECT = "SELECT confId, displayName, lastErrorCode, lastErrorTimeStamp FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
+    private static final String SQL_SELECT = "SELECT confId, displayName, metaData FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
     private static final String SQL_SELECT_CONFIDS_FOR_USER = "SELECT confId, account FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ?";
+
+    /**
+     * Reads the JSON content of the designated column in the current row of specified <code>ResultSet</code> object.
+     *
+     * @param columnName The column index
+     * @param resultSet The <code>ResultSet</code> object
+     * @return The JSON content or <code>null</code>
+     * @throws SQLException If JSON content cannot be read
+     */
+    private static JSONObject readJSON(int columnIndex, ResultSet resultSet) throws SQLException {
+        JSONObject retval;
+        InputStream inputStream = null;
+        try {
+            inputStream = resultSet.getBinaryStream(columnIndex);
+            retval = deserialize(inputStream);
+        } catch (SQLException e) {
+            if (false == JSONException.isParseException(e)) {
+                throw e;
+            }
+
+            // Try to sanitize corrupt input
+            Streams.close(inputStream);
+            inputStream = resultSet.getBinaryStream(columnIndex);
+            retval = deserialize(inputStream, true);
+        } finally {
+            Streams.close(inputStream);
+        }
+        return retval;
+    }
+
+    /**
+     * Deserializes a JSON object (as used in an account's configuration) from the supplied input stream.
+     *
+     * @param inputStream The input stream to deserialize
+     * @return The deserialized JSON object
+     */
+    private static JSONObject deserialize(InputStream inputStream) throws SQLException {
+        return deserialize(inputStream, false);
+    }
+
+    /**
+     * Deserializes a JSON object (as used in an account's configuration) from the supplied input stream.
+     *
+     * @param inputStream The input stream to deserialize
+     * @param withSanitize <code>true</code> if JSON content provided by input stream is supposed to be sanitized; otherwise <code>false</code> to read as-is
+     * @return The deserialized JSON object
+     */
+    private static JSONObject deserialize(InputStream inputStream, boolean withSanitize) throws SQLException {
+        if (null == inputStream) {
+            return null;
+        }
+
+        try {
+            if (withSanitize) {
+                String jsonish = JsonSanitizer.sanitize(Streams.reader2string(new AsciiReader(inputStream)));
+                return new JSONObject(jsonish);
+            }
+
+            return new JSONObject(new AsciiReader(inputStream));
+        } catch (JSONException e) {
+            throw new SQLException(e);
+        } catch (IOException e) {
+            throw new SQLException(e);
+        }
+    }
+
+    /**
+     * Serializes a JSON object (as used in an account's configuration) to an input stream.
+     *
+     * @param data The JSON object serialize, or <code>null</code>
+     * @return The serialized JSON object, or <code>null</code> if the passed object was <code>null</code> or an empty JSON-Object
+     */
+    private static InputStream serialize(JSONObject data) {
+        if (null == data || data.isEmpty()) {
+            return null;
+        }
+        return new JSONInputStream(data, Charsets.US_ASCII.name());
+    }
+
 
     @Override
     public FileStorageAccount getAccount(final String serviceId, final int id, final Session session) throws OXException {
@@ -153,12 +240,10 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             account.setId(String.valueOf(id));
             account.setFileStorageService(messagingService);
             account.setDisplayName(rs.getString(2));
-
-            String lastErrorCode = rs.getString(3);
-            if(lastErrorCode != null) {
-                account.setLastError(new FileStorageAccountError(lastErrorCode, rs.getTimestamp(4)));
+            JSONObject metaData = readJSON(3, rs);
+            if (metaData != null) {
+                account.setMetaData(metaData);
             }
-
             {
                 final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                 final Map<String, Object> configuration = new HashMap<String, Object>();
@@ -212,7 +297,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = rc.prepareStatement("SELECT confId, displayName, serviceId, lastErrorCode, lastErrorTimestamp FROM filestorageAccount WHERE cid = ? AND user = ? AND account = ?");
+            stmt = rc.prepareStatement("SELECT confId, displayName, serviceId, metaData FROM filestorageAccount WHERE cid = ? AND user = ? AND account = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, session.getUserId());
@@ -233,7 +318,10 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             account.setId(String.valueOf(accountId));
             account.setFileStorageService(fsService);
             account.setDisplayName(rs.getString(2));
-            account.setLastError(new FileStorageAccountError(rs.getString(4), rs.getTimestamp(5)));
+            JSONObject metaData = readJSON(4,rs);
+            if (metaData != null) {
+                account.setMetaData(metaData);
+            }
             {
                 final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                 final Map<String, Object> configuration = new HashMap<String, Object>();
@@ -269,7 +357,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         }
     }
 
-    private static final String SQL_SELECT_ACCOUNTS = "SELECT account, confId, displayName, lastErrorCode, lastErrorTimestamp FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ?";
+    private static final String SQL_SELECT_ACCOUNTS = "SELECT account, confId, displayName, metaData FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ?";
 
     @Override
     public List<FileStorageAccount> getAccounts(final String serviceId, final Session session) throws OXException {
@@ -305,7 +393,10 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                     account.setConfiguration(configuration);
                     account.setId(String.valueOf(rs.getInt(1)));
                     account.setFileStorageService(messagingService);
-                    account.setLastError(new FileStorageAccountError(rs.getString(4), rs.getTimestamp(5)));
+                    JSONObject metaData = readJSON(4, rs);
+                    if(metaData != null) {
+                        account.setMetaData(metaData);
+                    }
                     accounts.add(account);
                 } while (rs.next());
             } else {
@@ -612,7 +703,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         }
     }
 
-    private static final String SQL_UPDATE = "UPDATE filestorageAccount SET displayName = ?, lastErrorCode = ?, lastErrorTimestamp = ? WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
+    private static final String SQL_UPDATE = "UPDATE filestorageAccount SET displayName = ?, metaData = ? WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
     @Override
     public void updateAccount(final String serviceId, final FileStorageAccount account, final Session session) throws OXException {
@@ -625,7 +716,8 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         final Connection wc = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
         int rollback = 0;
-        try {
+
+        try(final InputStream metaDataStream = serialize(account.getMetadata())) {
             Databases.startTransaction(wc); // BEGIN
             rollback = 1;
             final int accountId = Integer.parseInt(account.getId());
@@ -659,26 +751,21 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
              * Update account data
              */
             final String displayName = account.getDisplayName();
-            final String lastErrorCode = account.getLastError() != null ? account.getLastError().getErrorCode() : null;
-            //@formatter:off
-            final java.sql.Timestamp lastErrorTimeStamp = account.getLastError() != null && account.getLastError().getTimeStamp() != null ?
-                new java.sql.Timestamp(account.getLastError().getTimeStamp().getTime()) :
-                null;
-            //@formatter:on
-            if (null != displayName || null != lastErrorCode) {
+            if (null != displayName || null != metaDataStream) {
                 stmt = wc.prepareStatement(SQL_UPDATE);
                 int pos = 1;
                 stmt.setString(pos++, displayName);
-                stmt.setString(pos++, lastErrorCode);
-                stmt.setTimestamp(pos++, lastErrorTimeStamp);
+                if(metaDataStream == null) {
+                    stmt.setNull(pos++, java.sql.Types.BLOB);
+                }
+                else {
+                    stmt.setBinaryStream(pos++, metaDataStream);
+                }
                 stmt.setInt(pos++, contextId);
                 stmt.setInt(pos++, session.getUserId());
                 stmt.setString(pos++, serviceId);
                 stmt.setInt(pos, accountId);
                 stmt.executeUpdate();
-            }
-            else {
-
             }
             wc.commit(); // COMMIT
             rollback = 2;

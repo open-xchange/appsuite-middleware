@@ -50,6 +50,7 @@
 package com.openexchange.file.storage;
 
 import java.util.Map;
+import org.json.JSONObject;
 
 
 /**
@@ -145,12 +146,7 @@ public final class SimFileStorageAccount implements FileStorageAccount {
     }
 
     @Override
-    public FileStorageAccountError getLastError() {
-        return null;
-    }
-
-    @Override
-    public void setLastError(FileStorageAccountError error) {
-        /*no-op*/
+    public JSONObject getMetadata() {
+        return new JSONObject();
     }
 }

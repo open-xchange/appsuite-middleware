@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
@@ -135,6 +136,16 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
      */
     private ApiClientService getApiClientService() throws OXException {
         return this.services.getServiceSafe(ApiClientService.class);
+    }
+
+    /**
+     * Gets the {@link ConversionService}
+     *
+     * @return The {@link ConversionService}
+     * @throws OXException
+     */
+    private ConversionService getConversionService() throws OXException {
+        return this.services.getServiceSafe(ConversionService.class);
     }
 
     /**
@@ -216,7 +227,7 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId(), I(session.getUserId()), I(session.getContextId()));
         }
         FileStorageAccount account = manager.getAccount(accountId, session);
-        return new XOXAccountAccess(this, getApiClientService(), account, session, getRetryAfterError(session));
+        return new XOXAccountAccess(this, getApiClientService(), getConversionService(), account, session, getRetryAfterError(session));
     }
 
     @Override
@@ -233,5 +244,11 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
         } catch (OXException e) {
             throw XOXFileStorageExceptionCodes.PING_FAILED.create(e.getCause(), (Object[]) null);
         }
+    }
+
+    @Override
+    public void resetRecentError(String accountId, Session session) throws OXException {
+        XOXAccountAccess accountAccess = (XOXAccountAccess) getAccountAccess(accountId, session);
+        accountAccess.resetRecentError();
     }
 }

@@ -107,12 +107,19 @@ public final class GetAction extends AbstractFolderAction {
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         // System.out.println("TOPMOST: " + folderId);
+        //@formatter:off
         final UserizedFolder folder =
             folderService.getFolder(
                 treeId,
                 folderId,
                 session,
-                new FolderServiceDecorator().setLocale(optLocale(request)).setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("suppressUnifiedMail", isSuppressUnifiedMail(session)));
+                new FolderServiceDecorator()
+                    .setLocale(optLocale(request))
+                    .setTimeZone(Tools.getTimeZone(timeZoneId))
+                    .setAllowedContentTypes(allowedContentTypes)
+                    .put("altNames", request.getParameter("altNames"))
+                    .put("suppressUnifiedMail", isSuppressUnifiedMail(session)));
+        //@formatter:on
 
         if (isOAuthRequest(request) && !mayReadViaOAuthRequest(folder.getContentType(), getOAuthAccess(request))) {
             throw new OAuthInsufficientScopeException(OAuthContentTypes.readScopeForContentType(folder.getContentType()));

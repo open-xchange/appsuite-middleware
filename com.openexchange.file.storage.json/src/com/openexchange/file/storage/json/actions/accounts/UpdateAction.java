@@ -57,7 +57,9 @@ import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
+import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.json.FileStorageAccountConstants;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -97,6 +99,11 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
 
         if (doConnectionCheck) {
             try {
+                FileStorageService fileStorageService = account.getFileStorageService();
+                if(fileStorageService instanceof SharingFileStorageService) {
+                    //Clear last recent error in order to try the new configuration
+                    ((SharingFileStorageService)fileStorageService).resetRecentError(account.getId(), session);
+                }
                 //test connection
                 ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
             } catch (OXException e) {

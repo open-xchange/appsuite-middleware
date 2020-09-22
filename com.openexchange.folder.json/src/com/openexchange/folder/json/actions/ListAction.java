@@ -125,13 +125,21 @@ public final class ListAction extends AbstractFolderAction {
          * Request subfolders from folder service
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        //@formatter:off
         final FolderResponse<UserizedFolder[]> subfoldersResponse =
             folderService.getSubfolders(
                 treeId,
                 parentId,
                 all,
                 session,
-                new FolderServiceDecorator().setLocale(optLocale(request)).setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("suppressUnifiedMail", isSuppressUnifiedMail(session)));
+                new FolderServiceDecorator()
+                    .setLocale(optLocale(request))
+                    .setTimeZone(Tools.getTimeZone(timeZoneId))
+                    .setAllowedContentTypes(allowedContentTypes)
+                    .put("altNames", request.getParameter("altNames"))
+                    .put("suppressUnifiedMail", isSuppressUnifiedMail(session))
+                    .put("forceRetry",request.getParameter("forceRetry")));
+        //@formatter:off
         /*
          * Determine max. last-modified time stamp
          */

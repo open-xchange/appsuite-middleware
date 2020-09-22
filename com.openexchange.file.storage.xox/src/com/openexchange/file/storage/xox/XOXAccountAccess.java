@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.Objects;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.api.client.Credentials;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -94,6 +95,7 @@ public class XOXAccountAccess implements CapabilityAware {
     public XOXAccountAccess(/* @formatter:off */
                             FileStorageService service,
                             ApiClientService clientFactory,
+                            ConversionService conversionService,
                             FileStorageAccount account,
                             Session session,
                             int retryAfterError
@@ -102,8 +104,7 @@ public class XOXAccountAccess implements CapabilityAware {
         this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory must not be null");
         this.account = Objects.requireNonNull(account, "account must not be null");
         this.session = Objects.requireNonNull(session, "session must not be null");
-
-        this.errorHandler = new XOXErrorHandler(this, retryAfterError);
+        this.errorHandler = new XOXErrorHandler(Objects.requireNonNull(conversionService, "conversionService must not be null"), this, retryAfterError);
     }
 
     /**
@@ -133,6 +134,13 @@ public class XOXAccountAccess implements CapabilityAware {
         if (!isConnected()) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
+    }
+
+    /**
+     * Resets the last known, recent, error for this account
+     */
+    void resetRecentError() throws OXException {
+        errorHandler.removeRecentException();
     }
 
     @Override

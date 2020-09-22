@@ -51,9 +51,16 @@ package com.openexchange.file.storage.xox;
 
 import java.time.Instant;
 import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.chronos.common.DataHandlers;
+import com.openexchange.conversion.ConversionResult;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageAccountError;
 
 /**
  * {@link XOXErrorHandler} - provides functionality to handle and persist errors occurred while accessing the XOX share.
@@ -63,16 +70,23 @@ import com.openexchange.file.storage.FileStorageAccountError;
  */
 public class XOXErrorHandler {
 
+    private static final String JSON_FIELD_EXCEPTION = "exception";
+    private static final String JSON_FIELD_TIMESTAMP = "timestamp";
+    private static final String JSON_FIELD_LAST_ERROR = "lastError";
+
     private final XOXAccountAccess accountAccess;
     private final int retryAfterError;
+    private final ConversionService conversionService;
 
     /**
      * Initializes a new {@link XOXErrorHandler}.
      *
+     * @param conversionService The required {@link ConversionService}
      * @param accountAccess The related {@link XOXAccountAccess}
      * @param retryAfterError The amount of time in seconds after which an persistent account error should be ignored.
      */
-    public XOXErrorHandler(XOXAccountAccess accountAccess, int retryAfterError) {
+    public XOXErrorHandler(ConversionService conversionService, XOXAccountAccess accountAccess, int retryAfterError) {
+        this.conversionService = conversionService;
         this.accountAccess = accountAccess;
         this.retryAfterError = retryAfterError;
     }
@@ -99,22 +113,30 @@ public class XOXErrorHandler {
      * @return The error occurred in the last t seconds, or null if there is no current error or it occurred longer than the given t seconds.
      * @throws OXException
      */
-    private FileStorageAccountError getResentError(int t) throws OXException {
-        final FileStorageAccount account = accountAccess.getService().getAccountManager().getAccount(accountAccess.getAccountId(), accountAccess.getSession());
-        final FileStorageAccountError lastError = account.getLastError();
-        final Date lastErrorTimeStamp = lastError != null ? lastError.getTimeStamp() : null;
-
-        if (lastError != null && lastErrorTimeStamp != null) {
-
-            //Check if the error occurred in the last n seconds
-            final Instant now = new Date().toInstant();
-            final Instant errorOccuredOn = lastErrorTimeStamp.toInstant();
-            if (errorOccuredOn.isAfter(now.minusSeconds(t))) {
-                //The error occurred in the last n seconds
-                return lastError;
+    private FileStorageAccountError getRecentError(int t) throws OXException {
+        try {
+            final FileStorageAccount account = accountAccess.getService().getAccountManager().getAccount(accountAccess.getAccountId(), accountAccess.getSession());
+            JSONObject metadata = account.getMetadata();
+            JSONObject lastError = metadata.optJSONObject(JSON_FIELD_LAST_ERROR);
+            if (lastError != null) {
+                JSONObject error = lastError.getJSONObject(JSON_FIELD_EXCEPTION);
+                Date lastErrorTimeStamp = new Date(lastError.getLong(JSON_FIELD_TIMESTAMP));
+                //Check if the error occurred in the last n seconds
+                final Instant now = new Date().toInstant();
+                final Instant errorOccuredOn = lastErrorTimeStamp.toInstant();
+                if (errorOccuredOn.isAfter(now.minusSeconds(t))) {
+                    DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.JSON2OXEXCEPTION);
+                    ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(error), new DataArguments(), null);
+                    if (result != null && result.getData() != null && OXException.class.isInstance(result.getData())) {
+                        //The error occurred in the last n seconds
+                        return new FileStorageAccountError((OXException) result.getData(), lastErrorTimeStamp);
+                    }
+                }
             }
+            return null;
+        } catch (JSONException e) {
+            throw XOXFileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-        return null;
     }
 
     /**
@@ -125,44 +147,12 @@ public class XOXErrorHandler {
      * @throws OXException
      */
     private OXException getRecentException(int t) throws OXException {
-
-        FileStorageAccountError lastError = getResentError(t);
-        if (lastError != null) {
-
-            //parse error number
-            String errorCode = lastError.getErrorCode();
-            int errorNumber = 9999;
-            if (errorCode != null && errorCode.contains("-")) {
-                errorNumber = Integer.parseInt(errorCode.substring(errorCode.indexOf("-") + 1));
-            }
-
-            //Create exception
-            //TODO: exception message arguments?
-            OXException oxException = new OXException(errorNumber);
-            return oxException;
+        FileStorageAccountError lastError = getRecentError(t);
+        OXException exception = lastError != null ? lastError.getException() : null;
+        if (exception != null) {
+            throw exception;
         }
         return null;
-    }
-
-    /**
-     * Asserts that there was no recent exception, in the last t (configured) seconds, accessing this account.
-     *
-     * @throws OXException if there was a known exception in the last t seconds
-     */
-    public void assertNoRecentException() throws OXException {
-        assertNoRecentException(retryAfterError, false);
-    }
-
-    /**
-     * Asserts that there was no recent exception, in the last t (configured) seconds, accessing this account.
-     *
-     * @param ignore If <code>true</code>, this method does actually nothing;
-     *            This is useful if the client of the file access wants to force a "retry" even in case of a known persistent error.
-     *            Allows a more fluent like style for the caller.
-     * @throws OXException if there was a known exception in the last t seconds
-     */
-    public void assertNoRecentException(boolean ignore) throws OXException {
-        assertNoRecentException(retryAfterError, ignore);
     }
 
     /**
@@ -172,13 +162,20 @@ public class XOXErrorHandler {
      * @param ignore If <code>ignore</code> is set to true, this method does actually nothing; useful for a more fluent like style for the caller
      * @throws OXException if there was a known exception in the last t seconds
      */
-    public void assertNoRecentException(int t, boolean ignore) throws OXException {
-        if (!ignore) {
-            OXException recentException = getRecentException(t);
-            if (recentException != null) {
-                throw recentException;
-            }
+    private void assertNoRecentException(int t) throws OXException {
+        OXException recentException = getRecentException(t);
+        if (recentException != null) {
+            throw recentException;
         }
+    }
+
+    /**
+     * Asserts that there was no recent exception, in the last t (configured) seconds, accessing this account.
+     *
+     * @throws OXException if there was a known exception in the last t seconds
+     */
+    public void assertNoRecentException() throws OXException {
+        assertNoRecentException(retryAfterError);
     }
 
     /**
@@ -188,12 +185,43 @@ public class XOXErrorHandler {
      * @throws OXException If the exception could not be saved
      */
     public OXException handleException(OXException exception) throws OXException {
-        if (exception != null && shouldSaveException(exception)) {
-            FileStorageAccount account = accountAccess.getAccount();
-            account.setLastError(new FileStorageAccountError().setErrorCode(exception));
-            accountAccess.getService().getAccountManager().updateAccount(account, accountAccess.getSession());
+        try {
+            if (exception != null && shouldSaveException(exception)) {
+                FileStorageAccount account = accountAccess.getAccount();
+                JSONObject metadata = account.getMetadata();
+                JSONObject lastError = metadata.optJSONObject(JSON_FIELD_LAST_ERROR);
+                if (lastError == null) {
+                    lastError = new JSONObject();
+                    metadata.put(JSON_FIELD_LAST_ERROR, lastError);
+                }
+                lastError.put(JSON_FIELD_TIMESTAMP, new Date().getTime());
+
+                DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.OXEXCEPTION2JSON);
+                ConversionResult result = dataHandler.processData(new SimpleData<OXException>(exception), new DataArguments(), null);
+                Object data = result.getData();
+                if (data != null && JSONObject.class.isInstance(data)) {
+                    lastError.put(JSON_FIELD_EXCEPTION, data);
+                }
+
+                accountAccess.getService().getAccountManager().updateAccount(account, accountAccess.getSession());
+            }
+            return exception;
+        } catch (JSONException e) {
+            throw XOXFileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-        return exception;
     }
 
+    /**
+     * Deletes the recent exception, if any
+     *
+     * @throws OXException
+     */
+    public void removeRecentException() throws OXException {
+        FileStorageAccount account = accountAccess.getAccount();
+        JSONObject metadata = account.getMetadata();
+        Object objectRemoved = metadata.remove(JSON_FIELD_LAST_ERROR);
+        if(objectRemoved != null) {
+            accountAccess.getService().getAccountManager().updateAccount(account, accountAccess.getSession());
+        }
+    }
 }

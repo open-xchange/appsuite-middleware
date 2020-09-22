@@ -58,6 +58,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -72,7 +73,6 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageAccountError;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -515,13 +515,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
             }
 
             @Override
-            public FileStorageAccountError getLastError() {
-                return null;
-            }
-
-            @Override
-            public void setLastError(FileStorageAccountError error) {
-                /*no-op*/
+            public JSONObject getMetadata() {
+                return new JSONObject();
             }
         };
         return Arrays.asList(account);

@@ -50,8 +50,8 @@
 package com.openexchange.file.storage.generic;
 
 import java.util.Map;
+import org.json.JSONObject;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageAccountError;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.ServiceAware;
 
@@ -91,9 +91,9 @@ public class DefaultFileStorageAccount implements FileStorageAccount, ServiceAwa
     protected transient FileStorageService fsService;
 
     /**
-     * The last known error occurred while accessing the storage
+     * The account's meta data
      */
-    protected FileStorageAccountError lastError;
+    protected JSONObject metaData = new JSONObject();
 
     /**
      * Initializes a new {@link DefaultFileStorageAccount}.
@@ -120,6 +120,11 @@ public class DefaultFileStorageAccount implements FileStorageAccount, ServiceAwa
     @Override
     public FileStorageService getFileStorageService() {
         return fsService;
+    }
+
+    @Override
+    public JSONObject getMetadata() {
+        return metaData;
     }
 
     @Override
@@ -173,6 +178,15 @@ public class DefaultFileStorageAccount implements FileStorageAccount, ServiceAwa
         serviceId = null == fsService ? null : fsService.getId();
     }
 
+    /**
+     * Sets the meta data
+     *
+     * @param metaData The meta data to set
+     */
+    public void setMetaData(JSONObject metaData) {
+        this.metaData = metaData;
+    }
+
     @Override
     public String toString() {
         final StringBuilder stringBuilder = new StringBuilder(64);
@@ -188,19 +202,4 @@ public class DefaultFileStorageAccount implements FileStorageAccount, ServiceAwa
         return stringBuilder.toString();
     }
 
-    @Override
-    public FileStorageAccountError getLastError() {
-        return lastError;
-    }
-
-
-    /**
-     * Sets the last error
-     *
-     * @param lastError The last error occurred while accessing the file storage account
-     */
-    @Override
-    public void setLastError(FileStorageAccountError lastError) {
-        this.lastError = lastError;
-    }
 }

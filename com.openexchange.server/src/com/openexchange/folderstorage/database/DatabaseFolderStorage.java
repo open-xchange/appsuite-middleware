@@ -1630,7 +1630,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     /*
                      * Add federal sharing folders
                      */
-                    SortableId[] sharedFolders = FederateSharingFolder.getFolders(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, storageParameters.getSession());
+                    boolean forceRetry = StorageParametersUtility.getBoolParameter("forceRetry", storageParameters);
+                    SortableId[] sharedFolders = FederateSharingFolder.getFolders(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, storageParameters.getSession(), forceRetry);
                     for(SortableId sharedFolder : sharedFolders){
                         ret.add(new FileStorageId(sharedFolder.getId(), ordinal++, sharedFolder.getName()));
                     }

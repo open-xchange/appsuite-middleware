@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -68,4 +69,12 @@ public interface SharingFileStorageService extends FileStorageService {
      */
     boolean hasCapability(Session session);
 
+    /**
+     * Resets the last known, recent, error for the account
+     *
+     * @param accountId The id of the account to reset the errors for
+     * @param session The {@link Session} object
+     * @throws OXException
+     */
+    void resetRecentError(String accountId, Session session) throws OXException;
 }

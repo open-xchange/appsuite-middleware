@@ -1,3 +1,4 @@
+
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -47,41 +48,90 @@
  *
  */
 
-package com.openexchange.file.storage.rdb.groupware;
+package com.openexchange.file.storage.xox;
 
-import com.openexchange.groupware.update.ExtendedColumnCreationTask;
-import com.openexchange.tools.update.Column;
+import com.openexchange.annotation.NonNull;
+
+import com.openexchange.annotation.Nullable;
+import com.openexchange.exception.OXException;
+import java.util.Date;
+import java.util.Objects;
 
 /**
- * {@link FileStorageAddLastErrorColumnsTask}
+ * {@link FileStorageAccountError}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class FileStorageAddLastErrorColumnsTask extends ExtendedColumnCreationTask {
+public class FileStorageAccountError {
 
-    private static final String TABLE_NAME = "filestorageAccount";
-    private static final String[] DEPENDENCIES = new String[] {};
+    private OXException exception;
+    private Date timeStamp;
 
-    //@formatter:off
-    private final static Column[] NEW_COLUMNS = {
-        new Column("lastErrorCode", "VARCHAR(64) COLLATE utf8_unicode_ci DEFAULT NULL"),
-        new Column("lastErrorTimestamp", "DATETIME DEFAULT NULL")
-    };
-    //@formatter:on
-
-    @Override
-    public String[] getDependencies() {
-        return DEPENDENCIES;
+    /**
+     * Initializes a new {@link FileStorageAccountError}.
+     */
+    public FileStorageAccountError() {
+        this(null, null);
     }
 
-    @Override
-    protected String getTableName() {
-        return TABLE_NAME;
+    /**
+     * Initializes a new {@link FileStorageAccountError} with the current time as time stamp
+     *
+     * @param exception The exception
+     */
+    public FileStorageAccountError(@NonNull OXException exception) {
+        this(Objects.requireNonNull(exception, "exception must not be null"), null);
     }
 
-    @Override
-    protected Column[] getColumns() {
-        return NEW_COLUMNS;
+    /**
+     * Initializes a new {@link FileStorageAccountError}.
+     *
+     * @param exception The error code, might be <code>null</code>
+     * @param timeStamp The time stamp of when the error occurred, might be <code>null</code>
+     */
+    public FileStorageAccountError(@Nullable OXException exception, @Nullable Date timeStamp) {
+        this.exception = exception;
+        this.timeStamp = timeStamp != null ? timeStamp : new Date();
+    }
+
+    /**
+     * Gets the error code
+     *
+     * @return The errorCode
+     */
+    public @Nullable OXException getException() {
+        return exception;
+    }
+
+    /**
+     * Sets the error code
+     *
+     * @param exception The exception to set, might be <code>null</code>
+     * @return this
+     */
+    public FileStorageAccountError setException(@Nullable OXException exception) {
+        this.exception = exception;
+        return this;
+    }
+
+    /**
+     * Gets the time stamp
+     *
+     * @return The time stamp of when the error occurred, or <code>null</code>
+     */
+    public @Nullable Date getTimeStamp() {
+        return timeStamp;
+    }
+
+    /**
+     * Sets the time stamp
+     *
+     * @param timeStamp The timeStamp to set, might be <code>null</code>
+     * @return this
+     */
+    public FileStorageAccountError setTimeStamp(@Nullable Date timeStamp) {
+        this.timeStamp = timeStamp;
+        return this;
     }
 }

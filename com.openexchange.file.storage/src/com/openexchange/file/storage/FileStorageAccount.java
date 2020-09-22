@@ -51,6 +51,7 @@ package com.openexchange.file.storage;
 
 import java.io.Serializable;
 import java.util.Map;
+import org.json.JSONObject;
 
 /**
  * {@link FileStorageAccount} - A file storage account.
@@ -95,16 +96,9 @@ public interface FileStorageAccount extends Serializable, FileStorageConstants {
     FileStorageService getFileStorageService();
 
     /**
-     * Indicates if there is a problem with accessing the corresponding file storage and returns the last known error occurred.
+     * Gets the account's meta data
      *
-     * @return The last known error occurred, or null if no error occurred
+     * @return The meta data of the account
      */
-    FileStorageAccountError getLastError();
-
-    /**
-     * Sets the last known error for the account
-     *
-     * @param error The last known error, or <code>null</code>
-     */
-    void setLastError(FileStorageAccountError error);
+    JSONObject getMetadata();
 }

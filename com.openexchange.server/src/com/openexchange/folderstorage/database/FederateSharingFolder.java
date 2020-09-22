@@ -107,6 +107,18 @@ public class FederateSharingFolder {
      * @return The list of federated shared folders for the given session
      */
     public static SortableId[] getFolders(final int parentFolder, final Session session) {
+        return getFolders(parentFolder, session, false);
+    }
+
+    /**
+     * Gets a list of federated shared folders for the given {@link Session}
+     *
+     * @param parentFolder the ID of the parent folder to get the subfolders for
+     * @param session The {@link Session} to get the federated shared folders for
+     * @param forceRetry Forces a retry of listing the folders, even if the account is "error-"flagged for some time and would throw the error without trying to access the remote share.
+     * @return The list of federated shared folders for the given session
+     */
+    public static SortableId[] getFolders(final int parentFolder, final Session session, final boolean forceRetry) {
         List<SortableId> ret = new ArrayList<>();
         int ordinal = 0;
         try {
@@ -118,6 +130,10 @@ public class FederateSharingFolder {
                     List<FileStorageAccount> accounts = ((AccountAware) service).getAccounts(session);
                     for (FileStorageAccount account : accounts) {
                         try {
+                            if (forceRetry) {
+                                //Remove any known, recent, errors if forced
+                                ((SharingFileStorageService) service).resetRecentError(account.getId(), session);
+                            }
                             FileStorageAccountAccess access = account.getFileStorageService().getAccountAccess(account.getId(), session);
                             access.connect();
                             FileStorageFolderAccess folderAccess = access.getFolderAccess();
@@ -126,8 +142,7 @@ public class FederateSharingFolder {
                                 String folderId = IDMangler.mangle(service.getId(), account.getId(), sharedFolder.getId());
                                 ret.add(new FileStorageId(folderId, ordinal++, sharedFolder.getName()));
                             }
-                        }
-                        catch(Exception e) {
+                        } catch (Exception e) {
                             LOG.error("Unable to list federate sharing account " + account.getId(), e);
                         }
                     }
