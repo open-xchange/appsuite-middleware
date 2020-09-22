@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange PNS transport apns HTTP/2 utility bundle
 Bundle-SymbolicName: com.openexchange.pns.transport.apns_http2.util
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.pns.transport.apns_http2.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
