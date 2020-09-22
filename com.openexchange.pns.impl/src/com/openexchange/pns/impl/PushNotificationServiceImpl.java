@@ -445,13 +445,23 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             }
             for (Entry<ContextAndTopicKey, Map<Integer, List<PushNotification>>> entry : polledNotificationsPerUser.entrySet()) {
                 ContextAndTopicKey key = entry.getKey();
-                NotificationsHandler task = new NotificationsHandler(key.contextId, key.topic, entry.getValue(), numAdded);
+                Map<Integer, List<PushNotification>> notificationsPerUser = entry.getValue();
+                int numOfNotifications = count(notificationsPerUser);
+                NotificationsHandler task = new NotificationsHandler(key.contextId, key.topic, notificationsPerUser, numOfNotifications);
                 if (false == tryExecuteTask(task, -1, key.contextId)) {
                     // Processor rejected task execution. Perform with current thread.
                     task.run();
                 }
             }
         }
+    }
+
+    private int count(Map<Integer, List<PushNotification>> notificationsPerUser) {
+        int count = 0;
+        for (List<PushNotification> notifications : notificationsPerUser.values()) {
+            count += notifications.size();
+        }
+        return count;
     }
 
     private boolean tryExecuteTask(Runnable task, int userId, int contextId) {
