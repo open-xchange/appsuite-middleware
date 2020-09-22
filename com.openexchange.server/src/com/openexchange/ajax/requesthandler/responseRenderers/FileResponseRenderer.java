@@ -373,6 +373,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Denied to output possibly harmful content");
                         return;
                     }
+                    if (Strings.isNotEmpty(checkedDownload.getFileName())) {
+                        contentTypeByFileName = FileResponseRenderer.getContentTypeByFileName(checkedDownload.getFileName());
+                    }
                 }
                 /*
                  * Set stream
@@ -691,7 +694,11 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
-    private String getContentTypeByFileName(final String fileName) {
+    /**
+     * @param fileName
+     * @return
+     */
+    public static String getContentTypeByFileName(final String fileName) {
         return null == fileName ? null : MimeType2ExtMap.getContentType(fileName, null);
     }
 

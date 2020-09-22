@@ -100,6 +100,19 @@ public class ConfigServer extends AbstractConfigSource {
             String host = "autoconfig." + emailDomain;
             String uri = new StringBuilder("http://").append(host).append("/mail/config-v1.1.xml").toString();
             // Check if URI denotes an internal host
+            {
+                URL url;
+                try {
+                    url = new URL(uri);
+                } catch (MalformedURLException e) {
+                    LOG.warn("Unable to parse URL: {}. Skipping config server source for mail auto-config", uri, e);
+                    return null;
+                }
+                if (isInvalid(url)) {
+                    LOG.warn("Invalid URL: {}. Skipping config server source for mail auto-config", uri);
+                    return null;
+                }
+            }
             boolean handleRedirectsManually;
             try {
                 InetAddress inetAddress = InetAddress.getByName(host);
@@ -239,5 +252,36 @@ public class ConfigServer extends AbstractConfigSource {
         }
         return null;
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Checks whether the given URL is invalid or not
+     *
+     * @param url The URL to check
+     * @return <code>true</code> if the URL is invalid, <code>false</code> otherwise
+     */
+    private static boolean isInvalid(URL url) {
+        return isValid(url) == false;
+    }
+
+    /**
+     * Checks whether the given URL is valid or not
+     *
+     * @param url The URL to check
+     * @return <code>true</code> if the URL is valid, <code>false</code> otherwise
+     */
+    private static boolean isValid(URL url) {
+        try {
+            InetAddress inetAddress = InetAddress.getByName(url.getHost());
+            if (InetAddresses.isInternalAddress(inetAddress)) {
+                return false;
+            }
+        } catch (UnknownHostException e) {
+            return false;
+        }
+        return true;
+    }
+
 }
 
