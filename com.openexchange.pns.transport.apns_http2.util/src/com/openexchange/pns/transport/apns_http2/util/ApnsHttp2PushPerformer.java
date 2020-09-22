@@ -277,7 +277,7 @@ public class ApnsHttp2PushPerformer {
             try {
                 PushNotificationResponse<ApnsPushNotification> pushNotificationResponse = sendNotificationFuture.get();
                 if (pushNotificationResponse.isAccepted()) {
-                    LOG.debug("Push notification for drive event accepted by APNs gateway for device token: {}", deviceToken);
+                    LOG.debug("Push notification for push event accepted by APNs gateway for device token: {}", deviceToken);
                 } else {
                     if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
                         LOG.warn("Unsuccessful push notification due to inactive or invalid device token: {}", deviceToken);
@@ -299,10 +299,10 @@ public class ApnsHttp2PushPerformer {
                     }
                 }
             } catch (ExecutionException e) {
-                LOG.warn("Failed to send push notification for drive event for device token {}", deviceToken, e.getCause());
+                LOG.warn("Failed to send push notification for push event for device token {}", deviceToken, e.getCause());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                LOG.warn("Interrupted while sending push notification for drive event for device token {}", deviceToken, e.getCause());
+                LOG.warn("Interrupted while sending push notification for push event for device token {}", deviceToken, e.getCause());
                 return;
             }
         }
