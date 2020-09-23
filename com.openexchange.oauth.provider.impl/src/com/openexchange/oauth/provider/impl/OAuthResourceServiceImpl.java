@@ -50,6 +50,7 @@
 package com.openexchange.oauth.provider.impl;
 
 import static com.openexchange.osgi.Tools.requireService;
+
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -63,6 +64,7 @@ import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -74,25 +76,25 @@ import com.openexchange.session.Session;
  * @since v7.8.0
  */
 public class OAuthResourceServiceImpl implements OAuthResourceService {
-
-    private final OAuthAuthorizationService authService;
+	
+    private final ServiceListing<OAuthAuthorizationService>  authServices;
 
     private final ServiceLookup serviceLookup;
 
     private final SessionProvider sessionProvider;
 
-    public OAuthResourceServiceImpl(OAuthAuthorizationService authService, ServiceLookup serviceLookup) {
+	public OAuthResourceServiceImpl(ServiceListing<OAuthAuthorizationService> authServices, ServiceLookup serviceLookup) {
         super();
-        this.authService = authService;
+        this.authServices = authServices;
         this.serviceLookup = serviceLookup;
         sessionProvider = new SessionProvider(serviceLookup);
     }
-
+	
     @Override
     public OAuthAccess checkAccessToken(String accessToken, HttpServletRequest httpRequest) throws OXException {
         ValidationResponse response;
         try {
-            response = authService.validateAccessToken(accessToken);
+			response = authServices.getServiceList().get(0).validateAccessToken(accessToken);
         } catch (AuthorizationException e) {
             throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, "An error occurred while trying to validate an access token.");
         }
@@ -111,7 +113,6 @@ public class OAuthResourceServiceImpl implements OAuthResourceService {
                 throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
         }
     }
-
     @Override
     public boolean isProviderEnabled(int contextId, int userId) throws OXException {
         ConfigView configView = requireService(ConfigViewFactory.class, serviceLookup).getView(userId, contextId);

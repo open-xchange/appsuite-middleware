@@ -47,25 +47,75 @@
  *
  */
 
-package com.openexchange.oauth.provider.impl;
+package com.openexchange.oauth.provider.impl.jwt;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link OAuthProviderProperties}
+ * {@link OAuthJWTScopeHelper}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:sebastian.lutz@open-xchange.com">Sebastian Lutz</a>
  */
-public class OAuthProviderProperties {
-
-    public static final String ENABLED = "com.openexchange.oauth.provider.enabled";
-
-    public static final String AUTHCODE_TYPE = "com.openexchange.oauth.provider.authcode.type";
-
-    public static final String ENCRYPTION_KEY = "com.openexchange.oauth.provider.encryptionKey";
-
-    public static final String IS_AUTHORIZATION_SERVER = "com.openexchange.oauth.provider.isAuthorizationServer";
+public class OAuthJWTScopeHelper {
     
-    public static final String EXPECT_JWT = "com.openexchange.oauth.provider.jwt.expectJWT";
+    
+    /**
+     * Scope-mapping from external Authorization Server scopes to internal MW scopes
+     *
+     * @param  scopes Authorization Server scopes
+     * @return        resolved Scopes
+     * @throws        OXException
+     */
+    static List<String> resolveScopes(String scopes) throws OXException {
+        List<String> parsedScopes = parse(scopes);
+        
+        Map<String, String> oauthJWTScopeProperties = OAuthJWTScopeConfig.getInternalScopes();
+        if(oauthJWTScopeProperties == null) {
+            return parsedScopes;
+        }
+        
+        List<String> resolvedScopes = new ArrayList<String>();
+        for (String scope : parsedScopes) {
+            String fqn = OAuthJWTScopeConfig.getScopePrefix() + scope;
+            if(oauthJWTScopeProperties.containsKey(fqn)) {
+                String scopeProperty = oauthJWTScopeProperties.get(fqn);
+                if(!scopeProperty.isEmpty()) {
+                    resolvedScopes.addAll(parse(scopeProperty));
+                }
+            }else {
+                resolvedScopes.add(scope);
+            }
+        }
+        
+        return resolvedScopes;
+    }
+    
+    /**
+     * Splits given scopes string by space or comma
+     * 
+     * @param scopes the string to split
+     * @return       the split string
+     */
+    private static List<String> parse(final String scopes) {
+        if (scopes == null)
+            return null;
+
+        if (scopes.trim().isEmpty())
+            return null;
+
+        List<String> scope = new ArrayList<>();
+
+        // OAuth specifies space as delimiter, also support comma (old draft)
+        StringTokenizer st = new StringTokenizer(scopes, " ,");
+
+        while (st.hasMoreTokens())
+            scope.add(st.nextToken());
+
+        return scope;
+    }
 
 }

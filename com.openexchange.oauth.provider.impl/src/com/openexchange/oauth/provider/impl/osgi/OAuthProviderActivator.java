@@ -64,6 +64,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
@@ -104,6 +105,7 @@ import com.openexchange.oauth.provider.impl.groupware.CreateOAuthGrantTableServi
 import com.openexchange.oauth.provider.impl.groupware.CreateOAuthGrantTableTask;
 import com.openexchange.oauth.provider.impl.groupware.OAuthGrantConvertUtf8ToUtf8mb4Task;
 import com.openexchange.oauth.provider.impl.groupware.OAuthProviderDeleteListener;
+import com.openexchange.oauth.provider.impl.jwt.OAuthJwtAuthorizationService;
 import com.openexchange.oauth.provider.impl.servlets.AuthorizationEndpoint;
 import com.openexchange.oauth.provider.impl.servlets.RevokeEndpoint;
 import com.openexchange.oauth.provider.impl.servlets.TokenEndpoint;
@@ -112,7 +114,7 @@ import com.openexchange.oauth.provider.impl.servlets.TokenIntrospection;
 import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.sessiond.SessiondService;
@@ -139,7 +141,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class,
+        return new Class<?>[] { DatabaseService.class, LeanConfigurationService.class, ConfigurationService.class, ContextService.class, UserService.class,
             HttpService.class, DispatcherPrefixService.class, CryptoService.class, CacheService.class, ServerConfigService.class,
             SessiondService.class, CapabilityService.class, ConfigViewFactory.class, NotificationMailFactory.class, HazelcastConfigurationService.class };
     }
@@ -183,23 +185,19 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             }
         }
 
-        track(OAuthAuthorizationService.class, new SimpleRegistryListener<OAuthAuthorizationService>() {
 
-            @SuppressWarnings("synthetic-access")
-            @Override
-            public void added(ServiceReference<OAuthAuthorizationService> ref, OAuthAuthorizationService service) {
-                registerService(OAuthResourceService.class, new OAuthResourceServiceImpl(service, serviceLookup));
-            }
+        boolean expectJWT = configService.getBoolProperty(OAuthProviderProperties.EXPECT_JWT, false);
+        if(!isAuthorizationServer && expectJWT) {
+            startJWTService();
+        }
 
-            @SuppressWarnings("synthetic-access")
-            @Override
-            public void removed(ServiceReference<OAuthAuthorizationService> ref, OAuthAuthorizationService service) {
-                unregisterService(service);
-            }
+        RankingAwareNearRegistryServiceTracker<OAuthAuthorizationService> oAuthAuthorizationService = new RankingAwareNearRegistryServiceTracker<OAuthAuthorizationService>(context, OAuthAuthorizationService.class);
 
-        });
+        rememberTracker(oAuthAuthorizationService);
 
         openTrackers();
+
+        registerService(OAuthResourceService.class, new OAuthResourceServiceImpl(oAuthAuthorizationService, serviceLookup));
     }
 
     @Override
@@ -269,6 +267,12 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             httpService.registerServlet(tokenIntrospectionAlias, tokenIntrospection, null, httpService.createDefaultHttpContext());
             registeredServlets.add(tokenIntrospectionAlias);
         }
+    }
+
+    private void startJWTService() {
+    	LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
+        OAuthJwtAuthorizationService jwtAuthorizationService = new OAuthJwtAuthorizationService(leanConfigService);
+        registerService(OAuthAuthorizationService.class, jwtAuthorizationService, null);
     }
 
     private void stopAuthorizationServer() {
