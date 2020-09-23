@@ -455,7 +455,8 @@ public class ChronosCopyTask implements CopyUserTaskService {
     }
 
     private void initDestinationCalendarStorage(Context dstCtx, final Connection writeCon) throws OXException {
-        this.dstCalendarStorage = createCalendarStorage(dstCtx, DefaultCalendarAccount.DEFAULT_ACCOUNT.getAccountId(), writeCon, writeCon);
+        CalendarStorage calendarStorage = createCalendarStorage(dstCtx, DefaultCalendarAccount.DEFAULT_ACCOUNT.getAccountId(), writeCon, writeCon);
+        this.dstCalendarStorage = services.getService(CalendarStorageFactory.class).makeResilient(calendarStorage);
     }
 
     private CalendarUser createCalendarUser(Context dstCtx, int dstUsrId, CalendarUser srcCalendarUser, int srcUsrId) {
