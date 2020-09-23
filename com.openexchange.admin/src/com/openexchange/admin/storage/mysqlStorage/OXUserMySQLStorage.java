@@ -90,7 +90,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -1549,9 +1548,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final SettingStorage settStor = SettingStorage.getInstance(ctx.getId().intValue(), userId);
         final Map<String, String> guiPreferences = user.getGuiPreferences();
         if (guiPreferences != null) {
-            final Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
-            while (iter.hasNext()) {
-                final Entry<String, String> entry = iter.next();
+            for (Iterator<Map.Entry<String, String>> iter = guiPreferences.entrySet().iterator(); iter.hasNext();) {
+                final Map.Entry<String, String> entry = iter.next();
                 final String key = entry.getKey();
                 final String value = entry.getValue();
                 if (null != key && null != value) {
@@ -1963,12 +1961,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         public String toString() {
                             StringBuilder stringBuilder = new StringBuilder("User: ");
                             stringBuilder.append(un);
-                            Iterator<Entry<String, String>> i = guiPrefs.entrySet().iterator();
-                            while (i.hasNext()) {
-                                Entry<String, String> entry = i.next();
-                                String key = entry.getKey();
-                                String value = entry.getValue();
-                                stringBuilder.append('\t').append(key).append('=').append(value).append('\n');
+                            for (Iterator<Map.Entry<String, String>> i = guiPrefs.entrySet().iterator(); i.hasNext();) {
+                                Map.Entry<String, String> entry = i.next();
+                                stringBuilder.append('\t').append(entry.getKey()).append('=').append(entry.getValue()).append('\n');
                             }
                             return stringBuilder.toString();
                         }
