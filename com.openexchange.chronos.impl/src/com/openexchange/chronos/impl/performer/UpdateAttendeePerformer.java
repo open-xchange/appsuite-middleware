@@ -207,11 +207,13 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             /*
              * also 'touch' the series master in case of an exception update
              */
-            Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
-            resultTracker.rememberOriginalEvent(originalSeriesMaster);
-            touch(originalEvent.getSeriesId());
-            Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId());
-            resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
+            Event originalSeriesMaster = optEventData(originalEvent.getSeriesId());
+            if (null != originalSeriesMaster) {
+                resultTracker.rememberOriginalEvent(originalSeriesMaster);
+                touch(originalEvent.getSeriesId());
+                Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId());
+                resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
+            }
             /*
              * track single 'reply' message for occurrence if applicable
              */
