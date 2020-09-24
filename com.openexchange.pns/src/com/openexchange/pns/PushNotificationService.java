@@ -50,6 +50,7 @@
 package com.openexchange.pns;
 
 import java.util.Collection;
+import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -63,14 +64,32 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface PushNotificationService {
 
     /**
-     * Handles the specified notification.
+     * Handles the specified notification with high priority.
      * <p>
      * Looks up associated subscriptions and delivers the notification using the appropriate {@link PushNotificationTransport transport}.
      *
      * @param notification The push notification to handle
      * @throws OXException If handling push notification fails
      */
-    void handle(PushNotification notification) throws OXException;
+    default void handle(PushNotification notification) throws OXException {
+        if (notification == null) {
+            return;
+        }
+
+        handle(notification, PushPriority.HIGH);
+    }
+
+    /**
+     * Handles the specified notifications with high priority.
+     * <p>
+     * Looks up associated subscriptions and delivers the notifications using the appropriate {@link PushNotificationTransport transport}.
+     *
+     * @param notifications The push notifications to handl
+     * @throws OXException If handling push notifications fails
+     */
+    default void handle(Collection<PushNotification> notifications) throws OXException {
+        handle(notifications, PushPriority.HIGH);
+    }
 
     /**
      * Handles the specified notification.
@@ -80,7 +99,13 @@ public interface PushNotificationService {
      * @param notification The push notification to handle
      * @throws OXException If handling push notification fails
      */
-    void handle(PushNotification notification, PushPriority priority) throws OXException;
+    default void handle(PushNotification notification, PushPriority priority) throws OXException {
+        if (notification == null) {
+            return;
+        }
+
+        handle(Collections.singletonList(notification), priority);
+    }
 
     /**
      * Handles the specified notifications.

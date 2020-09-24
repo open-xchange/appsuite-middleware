@@ -17,7 +17,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -57,7 +56,7 @@ import com.openexchange.user.UserService;
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class DovecotPushRESTService {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushRESTService.class);
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushRESTService.class);
 
     private final ServiceLookup services;
 
@@ -92,7 +91,7 @@ public class DovecotPushRESTService {
          *   "imap-uidvalidity":123412341,
          *   "imap-uid":2345,
          *   "folder":"INBOX",
-         *   "event":"MessageNew",
+         *   "event":"messageNew",
          *   "from":"alice@barfoo.org",
          *   "subject":"Test",
          *   "snippet":"Hey guys\nThis is only a test..."
@@ -241,6 +240,7 @@ public class DovecotPushRESTService {
             .messageData(messageData)
             .build();
         pushNotificationService.handle(notification);
+        LOGGER.info("Successfully submitted '{}' notification for user {} in context {} to notification service", KnownTopic.MAIL_NEW.getName(), I(userId), I(contextId));
     }
 
     private void setEventProperties(long uid, String fullName, String from, String subject, int unread, Map<String, Object> props) {
