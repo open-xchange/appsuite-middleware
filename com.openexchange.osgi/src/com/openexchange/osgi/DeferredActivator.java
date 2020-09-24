@@ -451,6 +451,23 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     }
                     LOG.error("{}Start-up of bundle \"{}\" failed: {}", Strings.getLineSeparator(), bundle.getSymbolicName(), errorMsg, t);
                     reset(context);
+                    /*
+                     * Shut-down
+                     */
+                    if (Bundle.STARTING == bundle.getState()) {
+                        /*
+                         * Bundle cannot be stopped by same thread if still in STARTING state
+                         */
+                        new Thread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                shutDownBundle(bundle);
+                            }
+                        }).start();
+                    } else {
+                        shutDownBundle(bundle);
+                    }
                 }
             }
         }
