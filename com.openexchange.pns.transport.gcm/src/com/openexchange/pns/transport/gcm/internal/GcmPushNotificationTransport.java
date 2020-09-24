@@ -59,7 +59,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -240,15 +239,6 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
     }
 
     @Override
-    public void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException {
-        if (null != notifications && 0 < notifications.size()) {
-            for (Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
-                transport(entry.getKey(), entry.getValue());
-            }
-        }
-    }
-
-    @Override
     public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
         if (null != notification && null != matches) {
             Map<String, List<PushMatch>> clientMatches = categorize(matches);
@@ -259,61 +249,64 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
     }
 
     private void transport(String client, PushNotification notification, List<PushMatch> matches) throws OXException {
-        if (null != notification && null != matches) {
-            int size = matches.size();
-            if (size <= 0) {
-                return;
+        if (null == notification || null == matches) {
+            return;
+        }
+
+        LOG.debug("Going to send notification \"{}\" via transport '{}' for user {} in context {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()));
+        int size = matches.size();
+        if (size <= 0) {
+            return;
+        }
+
+        Sender sender = optSender(client);
+        if (null == sender) {
+            return;
+        }
+
+        final List<String> registrationIDs = new ArrayList<String>(size);
+        for (int i = 0; i < size; i += MULTICAST_LIMIT) {
+            // Prepare chunk
+            int length = Math.min(size, i + MULTICAST_LIMIT) - i;
+            registrationIDs.clear();
+            for (int j = 0; j < length; j++) {
+                registrationIDs.add(matches.get(i + j).getToken());
             }
 
-            Sender sender = optSender(client);
-            if (null == sender) {
-                return;
-            }
+            // Send chunk
+            if (!registrationIDs.isEmpty()) {
+                MulticastResult result = null;
+                try {
+                    // result = sender.sendNoRetry(getMessage(client, notification), registrationIDs, Endpoint.FCM);
+                    result = sender.send(getMessage(client, notification), registrationIDs, 3, Endpoint.FCM);
 
-            final List<String> registrationIDs = new ArrayList<String>(size);
-            for (int i = 0; i < size; i += MULTICAST_LIMIT) {
-                // Prepare chunk
-                int length = Math.min(size, i + MULTICAST_LIMIT) - i;
-                registrationIDs.clear();
-                for (int j = 0; j < length; j++) {
-                    registrationIDs.add(matches.get(i + j).getToken());
-                }
+                    // Log it
+                    Object ostr = new Object() {
 
-                // Send chunk
-                if (!registrationIDs.isEmpty()) {
-                    MulticastResult result = null;
-                    try {
-                        // result = sender.sendNoRetry(getMessage(client, notification), registrationIDs, Endpoint.FCM);
-                        result = sender.send(getMessage(client, notification), registrationIDs, 3, Endpoint.FCM);
-
-                        // Log it
-                        Object ostr = new Object() {
-
-                            @Override
-                            public String toString() {
-                                StringBuilder sb = new StringBuilder(registrationIDs.size() * 16);
-                                Iterator<String> it = registrationIDs.iterator();
-                                sb.append(it.next());
-                                while (it.hasNext()) {
-                                    sb.append(", ").append(it.next());
-                                }
-                                return sb.toString();
+                        @Override
+                        public String toString() {
+                            StringBuilder sb = new StringBuilder(registrationIDs.size() * 16);
+                            Iterator<String> it = registrationIDs.iterator();
+                            sb.append(it.next());
+                            while (it.hasNext()) {
+                                sb.append(", ").append(it.next());
                             }
-                        };
-                        if (null != result) {
-                            LOG.info("Sent notification \"{}\" via transport '{}' for user {} in context {} to registration ID(s): {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), ostr);
-                            LOG.debug("{}", result);
-                        } else {
-                            LOG.info("Failed to send notification \"{}\" via transport '{}' for user {} in context {} to registration ID(s): {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), ostr);
+                            return sb.toString();
                         }
-                    } catch (IOException e) {
-                        LOG.warn("Error publishing push notification", e);
+                    };
+                    if (null != result) {
+                        LOG.info("Sent notification \"{}\" via transport '{}' for user {} in context {} to registration ID(s): {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), ostr);
+                        LOG.debug("{}", result);
+                    } else {
+                        LOG.info("Failed to send notification \"{}\" via transport '{}' for user {} in context {} to registration ID(s): {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), ostr);
                     }
-                    /*
-                     * process results
-                     */
-                    processResult(notification, registrationIDs, result);
+                } catch (IOException e) {
+                    LOG.warn("Error publishing push notification", e);
                 }
+                /*
+                 * process results
+                 */
+                processResult(notification, registrationIDs, result);
             }
         }
     }

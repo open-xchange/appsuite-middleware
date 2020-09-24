@@ -58,7 +58,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import org.osgi.framework.BundleContext;
@@ -238,7 +237,7 @@ public class WnsPushNotificationTransport extends ServiceTracker<WnsOptionsProvi
     @Override
     public void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException {
         if (null != notifications && 0 < notifications.size()) {
-            for (Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
+            for (Map.Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
                 transport(entry.getKey(), entry.getValue());
             }
         }
@@ -255,62 +254,45 @@ public class WnsPushNotificationTransport extends ServiceTracker<WnsOptionsProvi
     }
 
     private void transport(String client, PushNotification notification, List<PushMatch> matches) throws OXException {
-        if (null != notification && null != matches) {
-            int size = matches.size();
-            if (size <= 0) {
-                return;
-            }
+        if (null == notification || null == matches) {
+            return;
+        }
 
-            WnsService service = optWnsService(client);
-            if (null == service) {
-                return;
-            }
+        LOG.debug("Going to send notification \"{}\" via transport '{}' for user {} in context {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()));
+        int size = matches.size();
+        if (size <= 0) {
+            return;
+        }
 
-            for (PushMatch match : matches) {
-                String channelUri = match.getToken();
-                WnsTile tile = getTile(client, notification);
+        WnsService service = optWnsService(client);
+        if (null == service) {
+            return;
+        }
 
-                try {
-                    boolean stop = false;
-                    for (int retryCount = 0; stop && retryCount < 6; retryCount++) {
-                        stop = true;
-                        WnsNotificationResponse response = service.pushTile(channelUri, tile);
+        for (PushMatch match : matches) {
+            String channelUri = match.getToken();
+            WnsTile tile = getTile(client, notification);
 
-                        int code = response.code;
-                        if (code == 200) {
-                            // The notification was accepted by WNS. Check status as well
-                            String status = response.notificationStatus;
-                            if (ar.com.fernandospr.wns.model.types.WnsNotificationStatusType.RECEIVED.equals(status)) {
-                                // All fine
-                                LOG.info("Sent notification \"{}\" via transport '{}' to channel URI \"{}\" for user {} in context {}", notification.getTopic(), ID, channelUri, I(notification.getUserId()), I(notification.getContextId()));
-                                retryCount = 6;
-                            } else if (ar.com.fernandospr.wns.model.types.WnsNotificationStatusType.DROPPED.equals(status)) {
-                                // The notification was explicitly dropped because of an error or because the client has explicitly rejected these notifications.
-                                LOG.warn("WNS service dropped push notification to channel URI {}", channelUri);
-                                retryCount = 6;
-                            } else if (ar.com.fernandospr.wns.model.types.WnsNotificationStatusType.CHANNELTHROTTLED.equals(status)) {
-                                // The notification was dropped because the app server exceeded the rate limit for this specific channel.
-                                // Handle rate limit using exponential backoff
-                                int retry = retryCount + 1;
-                                if (retry > 5) {
-                                    // Repeatedly exceeded rate limit
-                                    throw new WnsException("Repeatedly exceeded rate limit. Surrender publishing push notification to channel URI: " + channelUri);
-                                }
-                                long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
-                                LockSupport.parkNanos(nanosToWait);
-                                stop = false;
-                            }
-                        } else if (code == 403) {
-                            // The cloud service is not authorized to send a notification to this URI even though they are authenticated.
-                            // The access token provided in the request does not match the credentials of the app that requested the channel URI.
-                            // Ensure that your package name in your app's manifest matches the cloud service credentials given to your app in the Dashboard.
-                            LOG.warn("WNS service denied push notification to channel URI: {}", channelUri);
-                        } else if (code == 404) {
-                            // The channel URI is not valid or is not recognized by WNS.
-                            // Do not send further notifications to this channel; notifications to this address will fail.
-                            LOG.warn("Channel URI invalid: {}", channelUri);
-                            removeChannelUri(notification, channelUri);
-                        } else if (code == 406) {
+            try {
+                boolean stop = false;
+                for (int retryCount = 0; stop && retryCount < 6; retryCount++) {
+                    stop = true;
+                    WnsNotificationResponse response = service.pushTile(channelUri, tile);
+
+                    int code = response.code;
+                    if (code == 200) {
+                        // The notification was accepted by WNS. Check status as well
+                        String status = response.notificationStatus;
+                        if (ar.com.fernandospr.wns.model.types.WnsNotificationStatusType.RECEIVED.equals(status)) {
+                            // All fine
+                            LOG.info("Sent notification \"{}\" via transport '{}' to channel URI \"{}\" for user {} in context {}", notification.getTopic(), ID, channelUri, I(notification.getUserId()), I(notification.getContextId()));
+                            retryCount = 6;
+                        } else if (ar.com.fernandospr.wns.model.types.WnsNotificationStatusType.DROPPED.equals(status)) {
+                            // The notification was explicitly dropped because of an error or because the client has explicitly rejected these notifications.
+                            LOG.warn("WNS service dropped push notification to channel URI {}", channelUri);
+                            retryCount = 6;
+                        } else if (ar.com.fernandospr.wns.model.types.WnsNotificationStatusType.CHANNELTHROTTLED.equals(status)) {
+                            // The notification was dropped because the app server exceeded the rate limit for this specific channel.
                             // Handle rate limit using exponential backoff
                             int retry = retryCount + 1;
                             if (retry > 5) {
@@ -320,28 +302,48 @@ public class WnsPushNotificationTransport extends ServiceTracker<WnsOptionsProvi
                             long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
                             LockSupport.parkNanos(nanosToWait);
                             stop = false;
-                        } else if (code == 413) {
-                            // The notification payload exceeds the 5000 byte size limit.
-                            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(I(MAX_TOTAL_BYTE_SIZE), I(-1));
-                        } else {
-                            // All other...
-                            String errorDescription = response.errorDescription;
-                            if (null == errorDescription) {
-                                errorDescription = "<unknown>";
-                            }
-                            String deviceConnectionStatus = response.deviceConnectionStatus;
-                            if (null == deviceConnectionStatus) {
-                                deviceConnectionStatus = "";
-                            } else {
-                                deviceConnectionStatus = deviceConnectionStatus + " ";
-                            }
-                            LOG.warn("Failed publishing push notification to {}device using channel URI {} with status code {}: {}", deviceConnectionStatus, channelUri, I(code), errorDescription);
                         }
+                    } else if (code == 403) {
+                        // The cloud service is not authorized to send a notification to this URI even though they are authenticated.
+                        // The access token provided in the request does not match the credentials of the app that requested the channel URI.
+                        // Ensure that your package name in your app's manifest matches the cloud service credentials given to your app in the Dashboard.
+                        LOG.warn("WNS service denied push notification to channel URI: {}", channelUri);
+                    } else if (code == 404) {
+                        // The channel URI is not valid or is not recognized by WNS.
+                        // Do not send further notifications to this channel; notifications to this address will fail.
+                        LOG.warn("Channel URI invalid: {}", channelUri);
+                        removeChannelUri(notification, channelUri);
+                    } else if (code == 406) {
+                        // Handle rate limit using exponential backoff
+                        int retry = retryCount + 1;
+                        if (retry > 5) {
+                            // Repeatedly exceeded rate limit
+                            throw new WnsException("Repeatedly exceeded rate limit. Surrender publishing push notification to channel URI: " + channelUri);
+                        }
+                        long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                        LockSupport.parkNanos(nanosToWait);
+                        stop = false;
+                    } else if (code == 413) {
+                        // The notification payload exceeds the 5000 byte size limit.
+                        throw PushExceptionCodes.MESSAGE_TOO_BIG.create(I(MAX_TOTAL_BYTE_SIZE), I(-1));
+                    } else {
+                        // All other...
+                        String errorDescription = response.errorDescription;
+                        if (null == errorDescription) {
+                            errorDescription = "<unknown>";
+                        }
+                        String deviceConnectionStatus = response.deviceConnectionStatus;
+                        if (null == deviceConnectionStatus) {
+                            deviceConnectionStatus = "";
+                        } else {
+                            deviceConnectionStatus = deviceConnectionStatus + " ";
+                        }
+                        LOG.warn("Failed publishing push notification to {}device using channel URI {} with status code {}: {}", deviceConnectionStatus, channelUri, I(code), errorDescription);
                     }
-
-                } catch (WnsException e) {
-                    LOG.warn("Error publishing push notification to channel URI", channelUri, e);
                 }
+
+            } catch (WnsException e) {
+                LOG.warn("Error publishing push notification to channel URI", channelUri, e);
             }
         }
     }

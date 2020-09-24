@@ -216,8 +216,7 @@ public class ApnsHttp2PushNotificationTransport extends ServiceTracker<ApnsHttp2
 
     @Override
     public void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException {
-        ApnsHttp2PushPerformer performer = new ApnsHttp2PushPerformer(ID, trackedProviders.getSnapshot(), subscriptionRegistry, generatorRegistry);
-        performer.sendPush(notifications);
+        new ApnsHttp2PushPerformer(ID, trackedProviders.getSnapshot(), subscriptionRegistry, generatorRegistry).sendPush(notifications);
     }
 
     @Override

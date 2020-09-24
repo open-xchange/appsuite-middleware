@@ -77,6 +77,7 @@ public class RoundRobinProcessor implements Processor {
     /** The logger */
     static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(RoundRobinProcessor.class);
 
+    private final String name;
     private final ExecutorService pool;
     private final int numThreads;
     final BlockingDeque<TaskManager> roundRobinQueue;
@@ -90,6 +91,7 @@ public class RoundRobinProcessor implements Processor {
      */
     public RoundRobinProcessor(String name, int numThreads) {
         super();
+        this.name = name;
         if (numThreads <= 0) {
             throw new IllegalArgumentException("numThreads must not be equal to/less than zero");
         }
@@ -110,6 +112,11 @@ public class RoundRobinProcessor implements Processor {
             newPool.execute(new Selector());
             numberOfActiveSelectors.incrementAndGet();
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
