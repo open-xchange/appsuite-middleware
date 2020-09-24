@@ -61,6 +61,7 @@ import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.session.Session;
 
 /**
@@ -73,37 +74,67 @@ public class XctxFolderConverter extends FolderConverter {
     
     private final Session guestSession;
     private final Session localSession;
-    
+    private final EntityHelper entityHelper;
+
     /**
      * Initializes a new {@link XctxFolderConverter}.
      * 
+     * @param accountAccess The parent account access
      * @param localSession The user's <i>local</i> session associated with the file storage account
      * @param guestSession The <i>remote</i> session of the guest user used to access the contents of the foreign context
      */
-    public XctxFolderConverter(Session localSession, Session guestSession) {
+    public XctxFolderConverter(XctxAccountAccess accountAccess, Session localSession, Session guestSession) {
         super();
         this.guestSession = guestSession;
         this.localSession = localSession;
+        this.entityHelper = new EntityHelper(accountAccess, localSession, guestSession);
     }
 
     @Override
     public Folder getFolder(FileStorageFolder storageFolder) throws OXException {
+        /*
+         * get folder with entities under perspective of local session in storage account's context
+         */
         Folder folder = super.getFolder(storageFolder);
-        folder.setCreatedBy(0);
-        folder.setModifiedBy(0);
+        /*
+         * restore previously mangled entities for context of guest session
+         */
+        EntityInfo remoteCreatedFrom = entityHelper.unmangleLocalEntity(folder.getCreatedFrom());
+        folder.setCreatedFrom(remoteCreatedFrom);
+        folder.setCreatedBy(null != remoteCreatedFrom ? remoteCreatedFrom.getEntity() : 0);
+        EntityInfo remoteModifiedFrom = entityHelper.unmangleLocalEntity(folder.getModifiedFrom());
+        folder.setModifiedFrom(remoteModifiedFrom);
+        folder.setModifiedBy(null != remoteModifiedFrom ? remoteModifiedFrom.getEntity() : 0);
+        /*
+         * restore previously adjusted entities in permissions for context of guest session
+         */
+        //TODO
         folder.setPermissions(tranferForeignPermissions(folder.getPermissions()));
         return folder;
     }
-
+    
     @Override
     public UserizedFileStorageFolder getStorageFolder(UserizedFolder folder) throws OXException {
+        /*
+         * get storage folder with entities under perspective of remote guest session in foreign context
+         */
         UserizedFileStorageFolder storageFolder = super.getStorageFolder(folder);
+        /*
+         * qualify remote entities for usage in local session in storage account's context  
+         */
+        storageFolder.setCreatedFrom(entityHelper.mangleRemoteUserEntity(folder.getCreatedFrom(), folder.getCreatedBy()));
         storageFolder.setCreatedBy(0);
+        storageFolder.setModifiedFrom(entityHelper.mangleRemoteUserEntity(folder.getModifiedFrom(), folder.getModifiedBy()));
         storageFolder.setModifiedBy(0);
-        storageFolder.setCreatedFrom(folder.getCreatedFrom());
-        storageFolder.setModifiedFrom(folder.getModifiedFrom());
-        storageFolder.setPermissions(tranferForeignPermissions(storageFolder.getPermissions()));
+        /*
+         * adjust remote guest user id to local session user's id in own permissions
+         */
         storageFolder.setOwnPermission(tranferForeignPermission(storageFolder.getOwnPermission()));
+        /*
+         * adjust remote entities in folder permission
+         */
+        //TODO entityinfo in FileStoragePermission? or extended interface? 
+        storageFolder.setPermissions(tranferForeignPermissions(storageFolder.getPermissions()));
         return storageFolder;
     }
 

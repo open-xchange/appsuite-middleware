@@ -51,10 +51,12 @@ package com.openexchange.file.storage.xctx;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.infostore.FileConverter;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.session.Session;
 
@@ -68,24 +70,62 @@ public class XctxFileConverter extends FileConverter {
 
     private final Session guestSession;
     private final Session localSession;
+    private final EntityHelper entityHelper;
     
     /**
-     * Initializes a new {@link XctxFolderConverter}.
+     * Initializes a new {@link XctxFileConverter}.
      * 
+     * @param accountAccess The parent account access
      * @param localSession The user's <i>local</i> session associated with the file storage account
      * @param guestSession The <i>remote</i> session of the guest user used to access the contents of the foreign context
      */
-    public XctxFileConverter(Session localSession, Session guestSession) {
+    public XctxFileConverter(XctxAccountAccess accountAccess, Session localSession, Session guestSession) {
         super();
         this.guestSession = guestSession;
         this.localSession = localSession;
+        this.entityHelper = new EntityHelper(accountAccess, localSession, guestSession);
+    }
+
+    @Override
+    public DocumentMetadata getMetadata(File file) throws OXException {
+        /*
+         * get metadata with entities under perspective of local session in storage account's context
+         */
+        DocumentMetadata metadata = super.getMetadata(file);
+        /*
+         * restore previously mangled entities for context of guest session
+         */
+        EntityInfo remoteCreatedFrom = entityHelper.unmangleLocalEntity(metadata.getCreatedFrom());
+        metadata.setCreatedFrom(remoteCreatedFrom);
+        metadata.setCreatedBy(null != remoteCreatedFrom ? remoteCreatedFrom.getEntity() : 0);
+        EntityInfo remoteModifiedFrom = entityHelper.unmangleLocalEntity(metadata.getModifiedFrom());
+        metadata.setModifiedFrom(remoteModifiedFrom);
+        metadata.setModifiedBy(null != remoteModifiedFrom ? remoteModifiedFrom.getEntity() : 0);
+        /*
+         * restore previously adjusted entities in object permissions for context of guest session
+         */
+        //TODO
+        //metadata.setObjectPermissions(tranferForeignPermissions(metadata.getObjectPermissions()));
+        return metadata;
     }
 
     @Override
     public File getFile(DocumentMetadata metadata) {
+        /*
+         * get file with entities under perspective of remote guest session in foreign context
+         */
         File file = super.getFile(metadata);
+        /*
+         * qualify remote entities for usage in local session in storage account's context
+         */
+        file.setCreatedFrom(entityHelper.mangleRemoteUserEntity(file.getCreatedFrom(), file.getCreatedBy()));
         file.setCreatedBy(0);
+        file.setModifiedFrom(entityHelper.mangleRemoteUserEntity(file.getModifiedFrom(), file.getModifiedBy()));
         file.setModifiedBy(0);
+        /*
+         * adjust remote entities in object permission
+         */
+        //TODO entityinfo in FileStorageObjectPermission? or extended interface? 
         file.setObjectPermissions(tranferForeignPermissions(file.getObjectPermissions()));
         return file;
     }

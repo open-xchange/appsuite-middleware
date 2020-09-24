@@ -56,11 +56,14 @@ import static com.openexchange.share.AuthenticationMode.GUEST_PASSWORD;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE_WITH_PASSWORD;
 import static com.openexchange.share.subscription.ShareLinkState.INACCESSIBLE;
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.xctx.XctxFileStorageService;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -71,9 +74,12 @@ import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.subscription.AbstractFileStorageSubscriptionProvider;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareTool;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
 import com.openexchange.share.subscription.ShareLinkState;
 import com.openexchange.share.subscription.ShareSubscriptionInformation;
+import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -130,6 +136,8 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
         return 60;
     }
 
+
+    
     @Override
     public ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException {
         requireAccess(session);
@@ -142,6 +150,10 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
          * Try to resolve the token to a guest and if found announce that it can be added
          */
         GuestInfo guestInfo = services.getServiceSafe(ShareService.class).resolveGuest(ShareLinks.extractBaseToken(shareLink));
+        boolean requireMatchingMail = false;
+        if (requireMatchingMail && false == matchesByMail(ServerSessionAdapter.valueOf(session).getUser(), guestInfo)) {
+            return new ShareLinkAnalyzeResult(INACCESSIBLE, new ShareSubscriptionInformation(getId(), null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
+        }
         ShareLinkState state = INACCESSIBLE;
         if (null != guestInfo && null != guestInfo.getAuthentication()) {
             AuthenticationMode mode = guestInfo.getAuthentication();
@@ -163,4 +175,27 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
         }
         return false;
     }
+
+    private static boolean matchesByMail(User user, GuestInfo guestInfo) {
+        if (null == guestInfo || false == RecipientType.GUEST.equals(guestInfo.getRecipientType()) || Strings.isEmpty(guestInfo.getEmailAddress())) {
+            return false;
+        }
+        return UserAliasUtility.isAlias(guestInfo.getEmailAddress(), getAliases(user));
+    }
+
+    private static Set<String> getAliases(User user) {
+        Set<String> possibleAliases = new HashSet<String>();
+        if (Strings.isNotEmpty(user.getMail())) {
+            possibleAliases.add(user.getMail());
+        }
+        if (null != user.getAliases()) {
+            for (String alias : user.getAliases()) {
+                if (Strings.isNotEmpty(alias)) {
+                    possibleAliases.add(alias);
+                }
+            }
+        }
+        return possibleAliases;
+    }
+
 }
