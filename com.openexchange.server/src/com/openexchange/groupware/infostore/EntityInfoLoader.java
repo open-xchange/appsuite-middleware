@@ -86,7 +86,7 @@ public class EntityInfoLoader {
         if (null == session) {
             return null;
         }
-        String identifier = new String(session.getContextId() + "/" + userId);
+        String identifier = String.valueOf(userId);
         if (knownUsers.containsKey(identifier)) {
             return knownUsers.get(identifier);
         }

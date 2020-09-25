@@ -697,6 +697,18 @@ public class InfostoreQueryCatalog {
         return builder.toString();
     }
 
+    public String getCreatedModifiedBy(String field, int documentCount) {
+        StringBuilder builder = new StringBuilder(STR_SELECT).append("infostore_id,").append(field)
+            .append(" FROM infostore_document WHERE cid = ?")
+            .append(" AND infostore_id IN (");
+        for (int i = 0; i < documentCount; i++) {
+            builder.append("?,");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        builder.append(")");
+        return builder.toString();
+    }
+
     public String getNewDocumentsQuery(final long folderId, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
         final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId).append(" AND infostore.creating_date >= ").append(since);
