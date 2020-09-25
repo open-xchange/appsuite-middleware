@@ -57,7 +57,7 @@ import com.openexchange.exception.OXExceptionStrings;
 
 /**
  *
- * {@link CompositionSpaceErrorCode}
+ * {@link CompositionSpaceErrorCode} - Error codes for composition space module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.10.1
