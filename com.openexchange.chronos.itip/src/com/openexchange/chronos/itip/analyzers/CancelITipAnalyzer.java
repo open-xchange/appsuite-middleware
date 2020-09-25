@@ -113,7 +113,7 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer {
         }
         analysis.setUid(event.getUid());
         Event toDelete = getToDelete(session, event);
-        session.getUtilities().adjustTimeZones(session.getUserId(), event, toDelete);
+        session.getUtilities().adjustTimeZones(session.getSession(), session.getUserId(), event, toDelete);
         if (toDelete == null) {
             analysis.addAnnotation(new ITipAnnotation(Messages.CANCEL_UNKNOWN_APPOINTMENT, locale));
             analysis.recommendAction(ITipAction.IGNORE);
