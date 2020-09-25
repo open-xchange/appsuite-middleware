@@ -1098,7 +1098,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * @param events The events to prepare
      * @return The prepared events, mapped by their unique identifier (events without UID are mapped to <code>null</code>)
      */
-    private static Map<String, List<Event>> prepareExternalEvents(List<Event> events) {
+    private Map<String, List<Event>> prepareExternalEvents(List<Event> events) {
         if (null == events) {
             return Collections.emptyMap();
         }
@@ -1121,6 +1121,15 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             } catch (OXException e) {
                 LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", event.getUid(), e.getMessage());
                 continue;
+            }
+
+            /*
+             * Adjust timezones
+             */
+            try {
+                Services.getService(CalendarUtilities.class).adjustTimeZones(session, session.getUserId(), event, null);
+            } catch (OXException e) {
+                LOG.error("Unable to adjust timezone for event with identifier {} and uid {}.", event.getId(), event.getUid(), e);
             }
             /*
              * map events by UID
