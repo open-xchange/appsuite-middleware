@@ -309,11 +309,17 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
 
     private boolean deleteFileStorageLocation(UUID compositionSpaceId, Session session) throws OXException {
         DatabaseService databaseService = requireDatabaseService();
+        boolean deleted = false;
         Connection con = databaseService.getWritable(session.getContextId());
         try {
-            return deleteFileStorageLocation(compositionSpaceId, session, con);
+            deleted = deleteFileStorageLocation(compositionSpaceId, session, con);
+            return deleted;
         } finally {
-            databaseService.backWritable(session.getContextId(), con);
+            if (deleted) {
+                databaseService.backWritable(session.getContextId(), con);
+            } else {
+                databaseService.backWritableAfterReading(session.getContextId(), con);
+            }
         }
     }
 

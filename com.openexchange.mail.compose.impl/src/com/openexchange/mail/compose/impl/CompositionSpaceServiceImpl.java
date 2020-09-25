@@ -640,12 +640,15 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         }
 
         if (deleteAfterTransport) {
-            boolean closed = closeCompositionSpace(compositionSpaceId, session);
-            if (!closed) {
-                String sCompositionSpaceId = getUnformattedString(compositionSpaceId);
-                LOG.warn("Compositon space {} could not be closed after transport.", sCompositionSpaceId);
-            } else {
-                LOG.debug("Closed composition space '{}' after transport", getUnformattedString(compositionSpaceId));
+            try {
+                boolean closed = closeCompositionSpace(compositionSpaceId, session);
+                if (!closed) {
+                    LOG.warn("Compositon space {} could not be closed after transport.", getUnformattedString(compositionSpaceId));
+                } else {
+                    LOG.debug("Closed composition space '{}' after transport", getUnformattedString(compositionSpaceId));
+                }
+            } catch (OXException e) {
+                LOG.warn("Failed to close composition space {} after being transported", getUnformattedString(compositionSpaceId), e);
             }
         }
 
@@ -932,12 +935,15 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             mailInterface = null;
 
             if (deleteAfterSave) {
-                boolean closed = closeCompositionSpace(compositionSpaceId, session);
-                if (!closed) {
-                    String sCompositionSpaceId = getUnformattedString(compositionSpaceId);
-                    LOG.warn("Compositon space {} could not be closed after saving it to a draft mail.", sCompositionSpaceId);
-                } else {
-                    LOG.debug("Closed composition space '{}' after saved as draft", getUnformattedString(compositionSpaceId));
+                try {
+                    boolean closed = closeCompositionSpace(compositionSpaceId, session);
+                    if (!closed) {
+                        LOG.warn("Compositon space {} could not be closed after saving it to a draft mail.", getUnformattedString(compositionSpaceId));
+                    } else {
+                        LOG.debug("Closed composition space '{}' after saved as draft", getUnformattedString(compositionSpaceId));
+                    }
+                } catch (OXException e) {
+                    LOG.warn("Failed to close composition space {} after being saved to draft mail {}", getUnformattedString(compositionSpaceId), draftPath, e);
                 }
             }
 
@@ -1994,14 +2000,18 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
     @Override
     public boolean closeCompositionSpace(UUID compositionSpaceId, Session session) throws OXException {
-        AttachmentStorage attachmentStorage = getAttachmentStorage(session);
 
         boolean closed = getStorageService().closeCompositionSpace(session, compositionSpaceId);
         if (closed) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Closed composition space: {}", getUnformattedString(compositionSpaceId));
             }
-            attachmentStorage.deleteAttachmentsByCompositionSpace(compositionSpaceId, session);
+            try {
+                AttachmentStorage attachmentStorage = getAttachmentStorage(session);
+                attachmentStorage.deleteAttachmentsByCompositionSpace(compositionSpaceId, session);
+            } catch (Exception e) {
+                LOG.warn("Failed to delete possible attachment association with composition space: {}", getUnformattedString(compositionSpaceId), e);
+            }
         }
         return closed;
     }
@@ -2013,13 +2023,17 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Closed expired composition spaces: {}", toStringFor(deleted));
             }
-            AttachmentStorage attachmentStorage = getAttachmentStorage(session);
-            for (UUID compositionSpaceId : deleted) {
-                try {
-                    attachmentStorage.deleteAttachmentsByCompositionSpace(compositionSpaceId, session);
-                } catch (Exception e) {
-                    LOG.warn("Failed to delete attachments associated with composition space {}", getUnformattedString(compositionSpaceId), e);
+            try {
+                AttachmentStorage attachmentStorage = getAttachmentStorage(session);
+                for (UUID compositionSpaceId : deleted) {
+                    try {
+                        attachmentStorage.deleteAttachmentsByCompositionSpace(compositionSpaceId, session);
+                    } catch (Exception e) {
+                        LOG.warn("Failed to delete possible attachments associated with composition space {}", getUnformattedString(compositionSpaceId), e);
+                    }
                 }
+            } catch (Exception e) {
+                LOG.warn("Failed to obtain attachment storage service needed to delete possible attachments associated with expired (and therefore closed) composition spaces", e);
             }
         }
     }
