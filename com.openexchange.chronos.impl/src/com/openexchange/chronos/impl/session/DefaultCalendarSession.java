@@ -134,7 +134,7 @@ public class DefaultCalendarSession implements CalendarSession {
 
     @Override
     public CalendarUtilities getUtilities() {
-        return new DefaultCalendarUtilities(Services.getServiceLookup(), this);
+        return new DefaultCalendarUtilities(Services.getServiceLookup());
     }
 
     @Override

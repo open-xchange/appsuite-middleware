@@ -57,7 +57,6 @@ import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.Utils;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventUpdate;
@@ -65,6 +64,7 @@ import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link DefaultCalendarUtilities}
@@ -74,7 +74,6 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DefaultCalendarUtilities implements CalendarUtilities {
 
-    private final CalendarSession session;
     private final ServiceLookup services;
 
     /**
@@ -83,19 +82,7 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
      * @param services A service lookup reference
      */
     public DefaultCalendarUtilities(ServiceLookup services) {
-        this(services, null);
-    }
-
-    /**
-     * Initializes a new {@link DefaultCalendarUtilities}.
-     *
-     * @param services A service lookup reference
-     * @param session The underlying calendar session, or <code>null</code> if not bound to a specific session
-     */
-    public DefaultCalendarUtilities(ServiceLookup services, CalendarSession session) {
-        super();
         this.services = services;
-        this.session = session;
     }
 
     @Override
@@ -110,9 +97,6 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
 
     @Override
     public EntityResolver getEntityResolver(int contextId) throws OXException {
-        if (null != session && session.getContextId() == contextId) {
-            return session.getEntityResolver();
-        }
         return new DefaultEntityResolver(contextId, services);
     }
 
@@ -149,12 +133,12 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
     }
 
     @Override
-    public TimeZone selectTimeZone(int calendarUserId, TimeZone timeZone, TimeZone originalTimeZone) throws OXException {
+    public TimeZone selectTimeZone(Session session, int calendarUserId, TimeZone timeZone, TimeZone originalTimeZone) throws OXException {
         return Utils.selectTimeZone(session, calendarUserId, timeZone, originalTimeZone);
     }
 
     @Override
-    public void adjustTimeZones(int calendarUserId, Event event, Event originalEvent) throws OXException {
+    public void adjustTimeZones(Session session, int calendarUserId, Event event, Event originalEvent) throws OXException {
         Consistency.adjustTimeZones(session, calendarUserId, event, originalEvent);
     }
 

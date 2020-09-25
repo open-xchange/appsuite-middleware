@@ -196,7 +196,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Check.startAndEndDate(session, eventData);
         EventMapper.getInstance().copy(eventData, event, EventField.START_DATE, EventField.END_DATE);
         Consistency.adjustAllDayDates(event);
-        Consistency.adjustTimeZones(session, calendarUserId, event, null);
+        Consistency.adjustTimeZones(session.getSession(), calendarUserId, event, null);
         /*
          * attendees, attachments
          */

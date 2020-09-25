@@ -86,7 +86,7 @@ public class InternalITipAnalyzer extends AbstractITipAnalyzer {
     public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, CalendarSession session) throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
         Event event = message.getEvent();
-        session.getUtilities().adjustTimeZones(message.getOwner() > 0 ? message.getOwner() : session.getUserId(), event, null);
+        session.getUtilities().adjustTimeZones(session.getSession(), message.getOwner() > 0 ? message.getOwner() : session.getUserId(), event, null);
 
         ITipAnnotation annotation = new ITipAnnotation(Messages.INTERNAL_MAIL, locale);
         annotation.setEvent(event);
