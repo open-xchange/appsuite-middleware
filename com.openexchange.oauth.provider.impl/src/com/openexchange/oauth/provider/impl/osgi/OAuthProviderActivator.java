@@ -191,6 +191,10 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             startJWTService();
         }
 
+        boolean tokenIntrospection = configService.getBoolProperty(OAuthProviderProperties.TOKEN_INTROSPECTION, false);
+        if(!isAuthorizationServer && !expectJWT && tokenIntrospection) {
+            startTokenIntrospectionService(configService);
+        }
         RankingAwareNearRegistryServiceTracker<OAuthAuthorizationService> oAuthAuthorizationService = new RankingAwareNearRegistryServiceTracker<OAuthAuthorizationService>(context, OAuthAuthorizationService.class);
 
         rememberTracker(oAuthAuthorizationService);
@@ -273,6 +277,12 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
     	LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
         OAuthJwtAuthorizationService jwtAuthorizationService = new OAuthJwtAuthorizationService(leanConfigService);
         registerService(OAuthAuthorizationService.class, jwtAuthorizationService, null);
+    }
+
+    private void startTokenIntrospectionService(ConfigurationService configService) {
+        LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
+        OAuthIntrospectionAuthorizationService tokenIntrospectionAuthorizationService = new OAuthIntrospectionAuthorizationService(leanConfigService);
+        registerService(OAuthAuthorizationService.class, tokenIntrospectionAuthorizationService, null);
     }
 
     private void stopAuthorizationServer() {

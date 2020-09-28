@@ -26,6 +26,13 @@ Import-Package: com.google.common.base,
  com.nimbusds.jose.proc,
  com.nimbusds.jwt,
  com.nimbusds.jwt.proc,
+ com.nimbusds.jwt.util,
+ com.nimbusds.oauth2.sdk,
+ com.nimbusds.oauth2.sdk.auth,
+ com.nimbusds.oauth2.sdk.http,
+ com.nimbusds.oauth2.sdk.id,
+ com.nimbusds.oauth2.sdk.token,
+ com.nimbusds.oauth2.sdk.util,
  com.openexchange.ajax,
  com.openexchange.ajax.login,
  com.openexchange.authentication,
@@ -98,6 +105,7 @@ Import-Package: com.google.common.base,
  javax.net.ssl,
  javax.servlet,
  javax.servlet.http,
+ net.minidev.json,
  org.apache.commons.codec,
  org.apache.commons.codec.binary,
  org.apache.commons.codec.digest,
@@ -109,7 +117,9 @@ Import-Package: com.google.common.base,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker,
- org.slf4j
-Bundle-ClassPath: .
+ org.slf4j,
+ sun.misc
+Bundle-ClassPath: .,
+ lib/caffeine-2.8.5.jar
 Bundle-Activator: com.openexchange.oauth.provider.impl.osgi.OAuthProviderActivator
 Automatic-Module-Name: com.openexchange.oauth.provider.impl

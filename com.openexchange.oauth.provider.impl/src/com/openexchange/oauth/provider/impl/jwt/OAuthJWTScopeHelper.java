@@ -70,16 +70,14 @@ public class OAuthJWTScopeHelper {
      * @return        resolved Scopes
      * @throws        OXException
      */
-    static List<String> resolveScopes(String scopes) throws OXException {
-        List<String> parsedScopes = parse(scopes);
-        
+    public static List<String> resolveScopes(List<String> scopes) throws OXException {        
         Map<String, String> oauthJWTScopeProperties = OAuthJWTScopeConfig.getInternalScopes();
         if(oauthJWTScopeProperties == null) {
-            return parsedScopes;
+            return scopes;
         }
         
         List<String> resolvedScopes = new ArrayList<String>();
-        for (String scope : parsedScopes) {
+        for (String scope : scopes) {
             String fqn = OAuthJWTScopeConfig.getScopePrefix() + scope;
             if(oauthJWTScopeProperties.containsKey(fqn)) {
                 String scopeProperty = oauthJWTScopeProperties.get(fqn);
@@ -92,6 +90,10 @@ public class OAuthJWTScopeHelper {
         }
         
         return resolvedScopes;
+    }
+    
+    public static List<String> resolveScopes(String scopes) throws OXException {
+        return resolveScopes(parse(scopes));
     }
     
     /**
@@ -117,5 +119,4 @@ public class OAuthJWTScopeHelper {
 
         return scope;
     }
-
 }

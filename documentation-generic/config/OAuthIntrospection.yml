@@ -1,0 +1,121 @@
+feature_name: OAuth Introspection
+feature_description: |
+  Configuration for validation of opaque OAuth Access Tokens via Token Introspection.
+properties:
+  - key: com.openexchange.oauth.provider.introspection.enabled
+    description: |
+      If set to "true" token introspection will be used to validate opaque OAuth Access Tokens.
+    defaultValue: false
+    version: 7.10.5
+    reloadable: false
+    configcascadeAware: true
+    related: 
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth", "Introspection"]
+  - key: com.openexchange.oauth.provider.introspection.endpoint
+    description: |
+      A OAuth2-compliant Token Introspection Endpoint which clients can use to query the server to determine the active state of a Token.
+    defaultValue: true
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: 
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth", "Introspection"]
+  - key: com.openexchange.oauth.provider.introspection.basicAuthEnabled
+    description: |
+      Indicates if HTTP basic auth should be used for Token Information Request
+    defaultValue: true
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: 
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth", "Introspection"]
+  - key: com.openexchange.oauth.provider.introspection.clientID
+    description: |
+      The client identifier.
+    defaultValue:
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: 
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth", "Introspection"]
+  - key: com.openexchange.oauth.provider.introspection.clientSecret
+    description: |
+      The client secret.
+    defaultValue: 
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: 
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth", "Introspection"]
+  - key: com.openexchange.oauth.provider.introspection.contextLookupProperty
+    description: |
+      Name of the claim that will be used to resolve a context.
+    defaultValue: sub
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: com.openexchange.oauth.provider.introspection.contextLookupNamePart
+    file: 
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth", "Introspection"]
+  - key: com.openexchange.oauth.provider.introspection.contextLookupNamePart
+    description: |
+      Gets the name part of the claim value used for
+      determining the context of a user. Possible values are
+    
+      full - The full string as returned by the authorization server
+      local-part - The local part of an email address (local-part@domain),
+                   if the provided name matches such. In case the name does not match
+                   an email address, the full string is taken.
+      domain - The domain part of an email address (local-part@domain),
+               if the provided name matches such. In case the name does not match
+               an email address, "defaultcontext" is taken.
+    defaultValue: domain
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: com.openexchange.oauth.provider.introspection.contextLookupProperty
+    file: 
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth", "Introspection"]
+  - key: com.openexchange.oauth.provider.introspection.userLookupProperty
+    description: |
+      Name of the claim that will be used to resolve a user.
+    defaultValue: sub
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: 
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth", "Introspection"]
+  - key: com.openexchange.oauth.provider.introspection.userLookupNamePart
+    description: |
+      Gets the name part of the claim value used for
+      determining a user within a context. Possible values are
+    
+      full - The full string as returned by the authorization server
+      local-part - The local part of an email address (local-part@domain),
+                   if the provided name matches such. In case the name does not match
+                   an email address, the full string is taken.
+      domain - The domain part of an email address (local-part@domain),
+               if the provided name matches such. In case the name does not match
+               an email address, the full string is taken.
+    defaultValue: local-part
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: 
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth", "Introspection"]

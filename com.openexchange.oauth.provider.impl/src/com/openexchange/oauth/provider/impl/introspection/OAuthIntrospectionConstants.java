@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,26 +47,35 @@
  *
  */
 
-package com.openexchange.oauth.provider.impl;
+package com.openexchange.oauth.provider.impl.introspection;
 
 
 /**
- * {@link OAuthProviderProperties}
+ * {@link OAuthIntrospectionConstants}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:sebastian.lutz@open-xchange.com">Sebastian Lutz</a>
  */
-public class OAuthProviderProperties {
-
-    public static final String ENABLED = "com.openexchange.oauth.provider.enabled";
-
-    public static final String AUTHCODE_TYPE = "com.openexchange.oauth.provider.authcode.type";
-
-    public static final String ENCRYPTION_KEY = "com.openexchange.oauth.provider.encryptionKey";
-
-    public static final String IS_AUTHORIZATION_SERVER = "com.openexchange.oauth.provider.isAuthorizationServer";
+public interface OAuthIntrospectionConstants {
     
-    public static final String EXPECT_JWT = "com.openexchange.oauth.provider.expectJWT";
+    public static final String SCOPE = "scope";
     
-    public static final String TOKEN_INTROSPECTION = "com.openexchange.oauth.provider.introspection.enabled";
+    public static final String CLIENT_ID = "client_id";
+    
+    public static final String USERNAME = "username";
+    
+    public static final String TOKEN_TYPE = "token_type";
+    
+    public static final String EXPIRATION_TIME = "exp";
+    
+    public static final String ISSUE_TIME = "iat";
+    
+    public static final String NOT_BEFORE = "nbf";
+    
+    public static final String SUBJECT = "sub";
+    
+    public static final String AUDIENCE = "aud";
+    
+    public static final String ISSUER = "iss";
+    
+    public static final String JWTID = "jti";
 }
