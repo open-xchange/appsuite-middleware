@@ -365,99 +365,72 @@ Authors:
 
 %files
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-server
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-databaseonly
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-backend-ox6
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-ui-ox6
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-ui-ox6-compat
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-ui-appsuite
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-pubsub
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-messaging
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-singleserver
 %defattr(-,root,root)
-%doc README.TXT
-
-#%files -n open-xchange-meta-plesk
-#%defattr(-,root,root)
-#%doc README.TXT
 
 %files -n open-xchange-meta-parallels
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-parallels-ui-ox6
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-parallels-ui-appsuite
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-mobility
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-mobility-ui-ox6
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-mobility-ui-appsuite
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-cpanel
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-linkedin
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-calendar-printing
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-realtime-core
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-realtime-json
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-realtime-events
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-realtime-events-json
 %defattr(-,root,root)
-%doc README.TXT
 
 %changelog
 * Wed Aug 05 2020 Carsten Hoeger <choeger@open-xchange.com>
