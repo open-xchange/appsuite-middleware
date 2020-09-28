@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -2290,13 +2291,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     useraliases = dbuser.getAliases();
                 }
                 if (null != useraliases) {
-                    Set<String> tmp = new HashSet<String>(useraliases.size());
+                    Set<String> tmp = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
                     for (String email : useraliases) {
                         tmp.add(IDNA.toIDN(email));
                     }
                     useraliases = tmp;
-                } else {
-                    useraliases = new HashSet<String>(1);
                 }
 
                 if (newPrimaryEmail != null && newEmail1 != null && !newPrimaryEmail.equalsIgnoreCase(newEmail1)) {
@@ -2304,8 +2303,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     throw new InvalidDataException("email1 not equal with primarymail!");
                 }
 
-                {
-                    Set<String> useraliasesAddresses = new HashSet<>(useraliases.size());
+                if (useraliases == null) {
+                    useraliases = Collections.emptySet();
+                } else {
+                    Set<String> useraliasesAddresses = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
                     for (String sAddr : useraliases) {
                         try {
                             QuotedInternetAddress addr = new QuotedInternetAddress(sAddr, false);
