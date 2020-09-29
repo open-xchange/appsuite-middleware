@@ -88,11 +88,11 @@ public class ApiClientServiceImpl implements ApiClientService {
 
     private final Cache<String, ApiClient> cachedClients;
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link ApiClientServiceImpl}.
-     * 
+     *
      * @param services The service lookup
      */
     public ApiClientServiceImpl(ServiceLookup services) {
@@ -122,7 +122,7 @@ public class ApiClientServiceImpl implements ApiClientService {
 
         String cacheKey = generateCacheKey(contextId, userId, url);
         try {
-            ApiClient client = cachedClients.get(cacheKey, () -> chooseClient(contextId, userId, url, credentials));
+            ApiClient client = cachedClients.get(cacheKey, () -> loginClient(chooseClient(contextId, userId, url, credentials)));
             if (client.isClosed()) {
                 /*
                  * Remove from cache and create a new instance
@@ -130,7 +130,6 @@ public class ApiClientServiceImpl implements ApiClientService {
                 close(client);
                 return getApiClient(contextId, userId, loginLink, credentials);
             }
-            client.login();
             return client;
         } catch (ExecutionException e) {
             /*
@@ -251,6 +250,18 @@ public class ApiClientServiceImpl implements ApiClientService {
         if (null == client) {
             throw ApiClientExceptions.UNKOWN_API.create();
         }
+        return client;
+    }
+
+    /**
+     * Performs a login for the given client
+     *
+     * @param client The client to login
+     * @return The logged in client
+     * @throws OXException
+     */
+    protected ApiClient loginClient(ApiClient client) throws OXException {
+        client.login();
         return client;
     }
 
