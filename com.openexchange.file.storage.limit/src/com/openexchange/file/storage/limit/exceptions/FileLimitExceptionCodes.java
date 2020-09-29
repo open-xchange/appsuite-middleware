@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * 
+ *
  * {@link FileLimitExceptionCodes}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -72,7 +72,7 @@ public enum FileLimitExceptionCodes implements DisplayableOXExceptionCode {
 
     FILE_QUOTA_PER_REQUEST_EXCEEDED("'%1$s' (%2$s) exceeds the allowed size of %3$s per file.", Category.CATEGORY_USER_INPUT, LimitExceptionMessages.FILE_QUOTA_PER_REQUEST_EXCEEDED_MSG, 4004),
 
-    NOT_ALLOWED("The user is not allowed to upload files to folder %1$s.", Category.CATEGORY_USER_INPUT, LimitExceptionMessages.NOT_ALLOWED_MSG, 4004),
+    NOT_ALLOWED("The user is not allowed to upload files to folder %1$s.", Category.CATEGORY_USER_INPUT, LimitExceptionMessages.NOT_ALLOWED_MSG, 4005),
     ;
 
     public static final String PREFIX = "FILE-LIMIT";
