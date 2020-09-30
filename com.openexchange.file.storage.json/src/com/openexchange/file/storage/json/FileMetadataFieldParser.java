@@ -126,7 +126,7 @@ public class FileMetadataFieldParser {
             JSONArray jsonArray = (JSONArray) val;
             List<FileStorageObjectPermission> objectPermissions = new ArrayList<FileStorageObjectPermission>(jsonArray.length());
             for (int i = 0; i < jsonArray.length(); i++) {
-                objectPermissions.add(parseObjetPermission(jsonArray.getJSONObject(i)));
+                objectPermissions.add(parseObjectPermission(jsonArray.getJSONObject(i)));
             }
             return objectPermissions;
         case LAST_MODIFIED:
@@ -159,7 +159,7 @@ public class FileMetadataFieldParser {
      * @param jsonObject The JSON object to parse
      * @return The parsed permission
      */
-    private static FileStorageObjectPermission parseObjetPermission(JSONObject jsonObject) throws OXException, JSONException {
+    private static FileStorageObjectPermission parseObjectPermission(JSONObject jsonObject) throws OXException, JSONException {
         if (false == jsonObject.hasAndNotNull("bits")) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create("bits");
         }
@@ -185,6 +185,7 @@ public class FileMetadataFieldParser {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create("entity");
         }
         parsedPermission.setEntity(jsonObject.getInt("entity"));
+        parsedPermission.setIdentifier(jsonObject.optString("identifier", null));
         if (jsonObject.has("group")) {
             parsedPermission.setGroup(jsonObject.getBoolean("group"));
         } else if (null != type) {

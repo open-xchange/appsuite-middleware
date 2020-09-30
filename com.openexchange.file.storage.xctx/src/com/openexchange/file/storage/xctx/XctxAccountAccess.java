@@ -49,6 +49,9 @@
 
 package com.openexchange.file.storage.xctx;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -60,12 +63,14 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.core.tools.ShareLinks;
+import com.openexchange.share.subscription.XctxHostData;
 import com.openexchange.share.subscription.XctxSessionManager;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -107,6 +112,31 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
      */
     public <S extends Object> S getServiceSafe(Class<? extends S> clazz) throws OXException {
         return services.getServiceSafe(clazz);
+    }
+    
+    /**
+     * Gets a {@link HostData} implementation under the perspective of the guest user.
+     * 
+     * @return The host data for the guest
+     */
+    public HostData getGuestHostData() throws OXException {
+        String shareUrl = (String) account.getConfiguration().get("url");
+        if (Strings.isEmpty(shareUrl)) {
+            throw FileStorageExceptionCodes.MISSING_CONFIG.create("url", account.getId());
+        }
+        URI uri;
+        try {
+            uri = new URI(shareUrl);
+        } catch (URISyntaxException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+        }
+        return new XctxHostData(uri, guestSession) {
+
+            @Override
+            protected DispatcherPrefixService getDispatcherPrefixService() throws OXException {
+                return getServiceSafe(DispatcherPrefixService.class);
+            }
+        };
     }
 
     @Override

@@ -11,12 +11,15 @@ properties:
       - 0 
       - 1 
       - 2 
+  identifier:
+    type: string
+    description: The qualified identifier of the entity associated with this permission.
   entity:
     type: integer
-    description: User ID of the user or group to which this permission applies.
+    description: Internal identifier of the user or group to which this permission applies.
   group:
     type: boolean
-    description: 'Is `true` if entity refers to a group, `false` if it refers to a user.'
+    description: Is `true` if entity refers to a group, `false` if it refers to a user.
   type:
     type: string
     description: >-
@@ -32,7 +35,7 @@ properties:
     description: The e-mail address of the recipient (for type "guest").
   display_name:
     type: string
-    description: 'The display name of the recipient (for type "guest", optional).'
+    description: The display name of the recipient (for type "guest", optional).
   contact_id:
     type: string
     description: >-

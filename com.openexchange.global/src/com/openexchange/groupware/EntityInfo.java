@@ -84,6 +84,15 @@ public class EntityInfo {
     private final String imageUrl;
     private final Type type;
 
+    /**
+     * Initializes a new {@link EntityInfo}, initialized with the data from another one.
+     * 
+     * @param entityInfo The entity info to use for initialization
+     */
+    public EntityInfo(EntityInfo entityInfo) {
+        this(entityInfo.getIdentifier(), entityInfo.getDisplayName(), entityInfo.getTitle(), entityInfo.getFirstName(), entityInfo.getLastName(), entityInfo.getEmail1(), entityInfo.getEntity(), entityInfo.getImageUrl(), entityInfo.getType());
+    }
+
     public EntityInfo(String identifier, String displayName, String title, String firstName, String lastName, String email1, int entity, String imageUrl, Type type) {
         super();
         this.identifier = identifier;
@@ -96,7 +105,7 @@ public class EntityInfo {
         this.imageUrl = imageUrl;
         this.type = type;
     }
-
+    
     public String getIdentifier() {
         return identifier;
     }

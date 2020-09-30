@@ -47,71 +47,92 @@
  *
  */
 
-package com.openexchange.file.storage.xctx.osgi;
+package com.openexchange.share.subscription;
 
 import static org.slf4j.LoggerFactory.getLogger;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.context.ContextService;
+import java.net.URI;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.xctx.XctxFileStorageService;
-import com.openexchange.file.storage.xctx.subscription.XctxShareSubscriptionProvider;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.InfostoreSearchEngine;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.subscription.ShareSubscriptionProvider;
-import com.openexchange.share.subscription.XctxSessionManager;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserPermissionService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.session.Session;
 
 /**
- * {@link XctxFileStorageActivator}
+ * {@link XctxHostData}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public class XctxFileStorageActivator extends HousekeepingActivator {
+public abstract class XctxHostData implements HostData {
+
+    private final URI shareUri;
+    private final Session guestSession;
+    private final HostData guestHostData;
 
     /**
-     * Initializes a new {@link XctxFileStorageActivator}.
+     * Initializes a new {@link XctxHostData}.
+     * 
+     * @param shareUri The share URI
+     * @param guestSession The guest session, or <code>null</code> if not available
      */
-    public XctxFileStorageActivator() {
+    public XctxHostData(URI shareUri, Session guestSession) {
         super();
+        this.shareUri = shareUri;
+        this.guestSession = guestSession;
+        this.guestHostData = null != guestSession ? (HostData) guestSession.getParameter(HostnameService.PARAM_HOST_DATA) : null;
+    }
+
+    /**
+     * Gets the dispatcher prefix service.
+     * 
+     * @return The dispatcher prefix service
+     */
+    protected abstract DispatcherPrefixService getDispatcherPrefixService() throws OXException;
+
+    @Override
+    public String getHTTPSession() {
+        return null != guestHostData ? guestHostData.getHTTPSession() : null;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { XctxSessionManager.class, ContextService.class, UserService.class, GroupService.class, ShareService.class, 
-            FileStorageAccountManagerLookupService.class, FolderService.class, InfostoreFacade.class, InfostoreSearchEngine.class, 
-            DispatcherPrefixService.class, CapabilityService.class, UserPermissionService.class
-        };
+    public String getRoute() {
+        return null != guestHostData ? guestHostData.getRoute() : null;
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    public String getHost() {
+        return shareUri.getHost();
+    }
+
+    @Override
+    public int getPort() {
+        return shareUri.getPort();
+    }
+
+    @Override
+    public boolean isSecure() {
+        return null != shareUri.getScheme() && shareUri.getScheme().startsWith("https");
+    }
+
+    @Override
+    public String getDispatcherPrefix() {
+        String path = shareUri.getPath();
+        if (null != path) {
+            int idx = path.indexOf("/share");
+            if (-1 != idx) {
+                return path.substring(0, idx + 1);
+            }
+        }
+        HostData guestHostData = null != guestSession ? (HostData) guestSession.getParameter(HostnameService.PARAM_HOST_DATA) : null;
+        if (null != guestHostData) {
+            return guestHostData.getDispatcherPrefix();
+        }
         try {
-            getLogger(XctxFileStorageActivator.class).info("starting bundle {}", context.getBundle());
-            /*
-             * register cross-context file storage service
-             */
-            XctxFileStorageService fileStorageService = new XctxFileStorageService(this);
-            registerService(FileStorageService.class, fileStorageService);
-            registerService(ShareSubscriptionProvider.class, new XctxShareSubscriptionProvider(this, fileStorageService));
-        } catch (Exception e) {
-            getLogger(XctxFileStorageActivator.class).error("error starting {}", context.getBundle(), e);
-            throw e;
+            return getDispatcherPrefixService().getPrefix();
+        } catch (OXException e) {
+            getLogger(XctxHostData.class).warn("Error getting dispatcher prefix, falling back to \"/ajax/\".", e);
+            return "/ajax/";
         }
     }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        getLogger(XctxFileStorageActivator.class).info("stopping bundle {}", context.getBundle());
-        super.stopBundle();
-    }
-
 
 }

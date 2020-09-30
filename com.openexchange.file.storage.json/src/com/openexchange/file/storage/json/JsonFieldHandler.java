@@ -358,8 +358,9 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
                         }
                     } else if (obj instanceof FileStorageObjectPermission) {
                         FileStorageObjectPermission permission = (FileStorageObjectPermission) obj;
-                        JSONObject json = new JSONObject(3);
+                        JSONObject json = new JSONObject(4);
                         try {
+                            json.put("identifier", permission.getIdentifier());
                             json.put("entity", permission.getEntity());
                             json.put("group", permission.isGroup());
                             json.put("bits", permission.getPermissions());
