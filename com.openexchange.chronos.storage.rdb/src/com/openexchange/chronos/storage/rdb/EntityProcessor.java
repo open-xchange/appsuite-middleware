@@ -164,7 +164,7 @@ public class EntityProcessor {
              * track entity & remove redundant properties for non-individual internal attendees
              */
             usedEntities.add(I(attendee.getEntity()));
-            if (CalendarUserType.GROUP.equals(attendee.getCuType()) || CalendarUserType.RESOURCE.equals(attendee.getCuType()) || 
+            if (CalendarUserType.GROUP.equals(attendee.getCuType()) || CalendarUserType.RESOURCE.equals(attendee.getCuType()) ||
                 CalendarUserType.ROOM.equals(attendee.getCuType())) {
                 AttendeeField[] preservedFields = Arrays.remove(AttendeeField.values(), AttendeeField.CN, AttendeeField.COMMENT);
                 attendee = com.openexchange.chronos.common.mapping.AttendeeMapper.getInstance().copy(attendee, null, preservedFields);
@@ -356,6 +356,7 @@ public class EntityProcessor {
     private static String writeVObjectProperty(VObjectProperty property) throws OXException {
         try (StringWriter stringWriter = new StringWriter(256);
             VObjectWriter vObjectWriter = new VObjectWriter(stringWriter, SyntaxStyle.NEW)) {
+            vObjectWriter.getFoldedLineWriter().setLineLength(null);
             vObjectWriter.setCaretEncodingEnabled(true);
             vObjectWriter.writeProperty(property);
             return stringWriter.toString();

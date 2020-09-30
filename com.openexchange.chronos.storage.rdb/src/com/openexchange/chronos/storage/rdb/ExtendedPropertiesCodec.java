@@ -233,7 +233,7 @@ public class ExtendedPropertiesCodec {
     }
 
     private static void encodeDeflatedJson(JSONValue json, ByteArrayOutputStream outputStream) throws IOException, JSONException {
-        try (DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream); 
+        try (DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream);
             AsciiWriter writer = new AsciiWriter(deflaterOutputStream)) {
             json.write(writer, true);
             writer.flush();
@@ -255,6 +255,7 @@ public class ExtendedPropertiesCodec {
     private static void encodeVObjectProperties(ExtendedProperties extendedProperties, ByteArrayOutputStream outputStream) throws IOException {
         try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, Charsets.UTF_8);
             VObjectWriter vObjectWriter = new VObjectWriter(writer, SyntaxStyle.NEW)) {
+            vObjectWriter.getFoldedLineWriter().setLineLength(null);
             for (ExtendedProperty extendedProperty : extendedProperties) {
                 vObjectWriter.writeProperty(encodeVObjectProperty(extendedProperty));
             }
@@ -265,6 +266,7 @@ public class ExtendedPropertiesCodec {
     private static void encodeVObjectParameters(List<ExtendedPropertyParameter> parameters, ByteArrayOutputStream outputStream) throws IOException {
         try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, Charsets.UTF_8); VObjectWriter vObjectWriter = new VObjectWriter(writer, SyntaxStyle.NEW)) {
             ExtendedProperty extendedProperty = new ExtendedProperty("X", null, parameters);
+            vObjectWriter.getFoldedLineWriter().setLineLength(null);
             vObjectWriter.writeProperty(encodeVObjectProperty(extendedProperty));
             vObjectWriter.flush();
         }
