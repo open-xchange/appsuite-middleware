@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>javapns.notification.management</name>
+	<name>com.openexchange.pns.transport.apns_http2.util</name>
 	<comment></comment>
 	<projects>
 	</projects>

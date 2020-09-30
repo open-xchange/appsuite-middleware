@@ -47,11 +47,13 @@
  *
  */
 
-package com.openexchange.pns.transport.apns_http2;
+package com.openexchange.pns.transport.apns_http2.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -124,7 +126,7 @@ public class ApnsHttp2Options {
     private final String teamId;
 
     private final String password;
-    private final File keystore;
+    private final Object keystore;
 
     private final boolean production;
     private final String topic;
@@ -149,7 +151,7 @@ public class ApnsHttp2Options {
      * @param bundleIdentifier The bundle identifier of the app
      * @param topic The app's topic, which is typically the bundle ID of the app
      */
-    public ApnsHttp2Options(String clientId, File keystore, String password, boolean production, String topic) {
+    public ApnsHttp2Options(String clientId, Object keystore, String password, boolean production, String topic) {
         super();
         this.clientId = clientId;
         clientReference = new AtomicReference<ApnsClient>(null);
@@ -211,7 +213,7 @@ public class ApnsHttp2Options {
      *
      * @return The keystore
      */
-    public File getKeystore() {
+    public Object getKeystore() {
         return keystore;
     }
 
@@ -282,14 +284,23 @@ public class ApnsHttp2Options {
 
     private ApnsClient createNewApnsClient() throws OXException {
         try {
-            ApnsClientBuilder clientBuilder;
+            ApnsClientBuilder clientBuilder = new ApnsClientBuilder();
             if (AuthType.CERTIFICATE == getAuthType()) {
-                clientBuilder = new ApnsClientBuilder()
-                    .setApnsServer(isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
-                    .setClientCredentials(getKeystore(), getPassword());
+                if (File.class.isInstance(keystore)) {
+                    File keyStore = (File) keystore;
+                    clientBuilder.setApnsServer(isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
+                        .setClientCredentials(keyStore, getPassword());
+                } else if (InputStream.class.isInstance(keystore)) {
+                    InputStream keyStore = (InputStream) keystore;
+                    clientBuilder.setApnsServer(isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
+                        .setClientCredentials(keyStore, getPassword());
+                } else {
+                    byte[] keyStore = (byte[]) keystore;
+                    clientBuilder.setApnsServer(isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
+                    .setClientCredentials(new ByteArrayInputStream(keyStore), getPassword());
+                }
             } else {
-                clientBuilder = new ApnsClientBuilder()
-                    .setApnsServer(isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
+                clientBuilder.setApnsServer(isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
                     .setSigningKey(ApnsSigningKey.loadFromPkcs8File(getPrivateKey(), getTeamId(), getKeyId()));
             }
             return clientBuilder.build();

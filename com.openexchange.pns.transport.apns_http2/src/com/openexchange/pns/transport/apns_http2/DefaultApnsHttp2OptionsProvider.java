@@ -47,14 +47,14 @@
  *
  */
 
-package com.openexchange.pns.transport.apns_http2.internal;
+package com.openexchange.pns.transport.apns_http2;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import com.openexchange.pns.transport.apns_http2.ApnsHttp2Options;
-import com.openexchange.pns.transport.apns_http2.ApnsHttp2OptionsPerClient;
-import com.openexchange.pns.transport.apns_http2.ApnsHttp2OptionsProvider;
+import com.openexchange.pns.transport.apns_http2.util.ApnsHttp2Options;
+import com.openexchange.pns.transport.apns_http2.util.ApnsHttp2OptionsPerClient;
+import com.openexchange.pns.transport.apns_http2.util.ApnsHttp2OptionsProvider;
 
 
 /**

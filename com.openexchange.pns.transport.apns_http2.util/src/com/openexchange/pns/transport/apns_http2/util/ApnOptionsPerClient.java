@@ -47,27 +47,27 @@
  *
  */
 
-package com.openexchange.pns.transport.apns_http2;
+package com.openexchange.pns.transport.apns_http2.util;
 
 
 /**
- * {@link ApnsHttp2OptionsPerClient} - A pair of client identifier and associated APNS HTTP/2 options.
+ * {@link ApnOptionsPerClient} - A pair of client identifier and associated APNS options.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @since v7.8.3
  */
-public class ApnsHttp2OptionsPerClient {
+public class ApnOptionsPerClient {
 
     private final String client;
-    private final ApnsHttp2Options options;
+    private final ApnOptions options;
 
     /**
-     * Initializes a new {@link ApnsHttp2OptionsPerClient}.
+     * Initializes a new {@link ApnOptionsPerClient}.
      *
      * @param client The client
-     * @param options The associated APNS HTTP/2 options
+     * @param options The associated APNS options
      */
-    public ApnsHttp2OptionsPerClient(String client, ApnsHttp2Options options) {
+    public ApnOptionsPerClient(String client, ApnOptions options) {
         super();
         this.client = client;
         this.options = options;
@@ -83,11 +83,11 @@ public class ApnsHttp2OptionsPerClient {
     }
 
     /**
-     * Gets the APNS HTTP/2 options
+     * Gets the options
      *
-     * @return The APNS HTTP/2 options
+     * @return The options
      */
-    public ApnsHttp2Options getOptions() {
+    public ApnOptions getOptions() {
         return options;
     }
 

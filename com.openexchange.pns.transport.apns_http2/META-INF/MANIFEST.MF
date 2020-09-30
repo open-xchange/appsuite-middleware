@@ -45,17 +45,12 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.osgi,
  com.openexchange.osgi.util,
  com.openexchange.pns,
+ com.openexchange.pns.transport.apns_http2.util,
  com.openexchange.server,
- com.openexchange.timer,
  com.openexchange.tools.arrays,
  com.openexchange.tools.strings,
- com.turo.pushy.apns;version="0.13.3",
- com.turo.pushy.apns.auth;version="0.13.3",
- com.turo.pushy.apns.util;version="0.13.3",
- com.turo.pushy.apns.util.concurrent;version="0.13.3",
- org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.pns.transport.apns_http2
 Bundle-Activator: com.openexchange.pns.transport.apns_http2.osgi.ApnsHttp2PushNotificationTransportActivator
+Export-Package: com.openexchange.pns.transport.apns_http2

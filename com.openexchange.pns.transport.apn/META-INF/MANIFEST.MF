@@ -16,18 +16,14 @@ Import-Package: com.google.common.annotations,
  com.openexchange.osgi,
  com.openexchange.osgi.util,
  com.openexchange.pns,
+ com.openexchange.pns.transport.apns_http2,
+ com.openexchange.pns.transport.apns_http2.util,
  com.openexchange.server,
- com.openexchange.timer,
  com.openexchange.tools.arrays,
  com.openexchange.tools.strings,
- javapns,
- javapns.communication.exceptions,
- javapns.devices,
- javapns.devices.exceptions,
- javapns.notification,
- org.json,
+ org.apache.commons.io,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.pns.transport.apn
 Bundle-Activator: com.openexchange.pns.transport.apn.osgi.ApnPushNotificationTransportActivator
+Export-Package: com.openexchange.pns.transport.apn
