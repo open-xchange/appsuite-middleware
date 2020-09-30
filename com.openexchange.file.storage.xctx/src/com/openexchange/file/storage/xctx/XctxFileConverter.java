@@ -49,10 +49,9 @@
 
 package com.openexchange.file.storage.xctx;
 
-import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.infostore.FileConverter;
@@ -102,10 +101,9 @@ public class XctxFileConverter extends FileConverter {
         metadata.setModifiedFrom(remoteModifiedFrom);
         metadata.setModifiedBy(null != remoteModifiedFrom ? remoteModifiedFrom.getEntity() : 0);
         /*
-         * restore previously adjusted entities in object permissions for context of guest session
+         * restore previously mangled entities in object permissions for context of guest session
          */
-        //TODO
-        //metadata.setObjectPermissions(tranferForeignPermissions(metadata.getObjectPermissions()));
+        file.setObjectPermissions(entityHelper.unmangleLocalPermissions(file.getObjectPermissions()));
         return metadata;
     }
 
@@ -114,51 +112,26 @@ public class XctxFileConverter extends FileConverter {
         /*
          * get file with entities under perspective of remote guest session in foreign context
          */
-        File file = super.getFile(metadata);
+        DefaultFile file = new DefaultFile(super.getFile(metadata));
         /*
-         * qualify remote entities for usage in local session in storage account's context
+         * qualify remote entities for usage in local session in storage account's context & erase ambiguous numerical identifiers
          */
-        file.setCreatedFrom(entityHelper.mangleRemoteUserEntity(file.getCreatedFrom(), file.getCreatedBy()));
+        //        file.setCreatedFrom(entityHelper.mangleRemoteUserEntity(file.getCreatedFrom(), file.getCreatedBy()));
+        file.setCreatedFrom(entityHelper.mangleRemoteEntity(file.getCreatedFrom()));
         file.setCreatedBy(0);
-        file.setModifiedFrom(entityHelper.mangleRemoteUserEntity(file.getModifiedFrom(), file.getModifiedBy()));
+        //        file.setModifiedFrom(entityHelper.mangleRemoteUserEntity(file.getModifiedFrom(), file.getModifiedBy()));
+        file.setModifiedFrom(entityHelper.mangleRemoteEntity(file.getModifiedFrom()));
         file.setModifiedBy(0);
         /*
-         * adjust remote entities in object permission
+         * enhance & qualify remote entities in object permissions for usage in local session in storage account's context
          */
-        //TODO entityinfo in FileStorageObjectPermission? or extended interface? 
-        file.setObjectPermissions(tranferForeignPermissions(file.getObjectPermissions()));
+        List<FileStorageObjectPermission> objectPermissions = entityHelper.addEntityInfos(guestSession, file.getObjectPermissions());
+        file.setObjectPermissions(entityHelper.mangleRemotePermissions(objectPermissions));
+        /*
+         * assume not shareable by default
+         */
+        file.setShareable(false);
         return file;
-    }
-
-    private List<FileStorageObjectPermission> tranferForeignPermissions(List<FileStorageObjectPermission> foreignPermissions) {
-        if (null == foreignPermissions) {
-            return null;
-        }
-        final boolean SKIP_UNKNOWN = true; //TODO: client does not like unknown entities for now
-
-        List<FileStorageObjectPermission> storagePermissions = new ArrayList<FileStorageObjectPermission>(foreignPermissions.size());
-        for (FileStorageObjectPermission foreignPermission : foreignPermissions) {
-            FileStorageObjectPermission storagePermission = tranferForeignPermission(foreignPermission);
-            if (SKIP_UNKNOWN && 0 >= storagePermission.getEntity()) {
-                continue;
-            }
-            storagePermissions.add(storagePermission);
-        }
-        return storagePermissions;
-    }
-
-    private FileStorageObjectPermission tranferForeignPermission(FileStorageObjectPermission foreignPermission) {
-        if (null == foreignPermission) {
-            return null;
-        }
-        DefaultFileStorageObjectPermission storagePermission = new DefaultFileStorageObjectPermission(
-            foreignPermission.getEntity(), foreignPermission.isGroup(), foreignPermission.getPermissions());
-        if (storagePermission.getEntity() == guestSession.getUserId()) {
-            storagePermission.setEntity(localSession.getUserId());
-        } else {
-            storagePermission.setEntity(0);
-        }
-        return storagePermission;
     }
 
 }

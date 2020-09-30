@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage;
 
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link DefaultFileStorageObjectPermission}
@@ -57,7 +58,9 @@ package com.openexchange.file.storage;
  */
 public class DefaultFileStorageObjectPermission implements FileStorageObjectPermission {
 
+    private String identifier;
     private int entity;
+    private EntityInfo entityInfo;
     private boolean group;
     private int permissions;
 
@@ -70,17 +73,45 @@ public class DefaultFileStorageObjectPermission implements FileStorageObjectPerm
 
     /**
      * Initializes a new {@link DefaultFileStorageObjectPermission}.
+     * <p/>
+     * The passed entity is implicitly applied as qualified <i>identifier</i>, too.
      *
      * @param entity The entity associated with this permission
      * @param group <code>true</code> if this permission represents a group, <code>false</code>, otherwise
      * @param permissions The numerical permission value (also known as permission bits)
-     *
      */
     public DefaultFileStorageObjectPermission(int entity, boolean group, int permissions) {
+        this(String.valueOf(entity), entity, group, permissions);
+    }
+
+    /**
+     * Initializes a new {@link DefaultFileStorageObjectPermission}.
+     *
+     * @param identifier The qualified identifier of the entity associated with this permission
+     * @param entity The entity associated with this permission
+     * @param group <code>true</code> if this permission represents a group, <code>false</code>, otherwise
+     * @param permissions The numerical permission value (also known as permission bits)
+     */
+    public DefaultFileStorageObjectPermission(String identifier, int entity, boolean group, int permissions) {
         super();
+        this.identifier = identifier;
         this.entity = entity;
         this.group = group;
         this.permissions = permissions;
+    }
+
+    @Override
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    /**
+     * Sets the identifier
+     * 
+     * @param identifier The qualified identifier of the entity associated with this permission
+     */
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     @Override
@@ -96,6 +127,20 @@ public class DefaultFileStorageObjectPermission implements FileStorageObjectPerm
      */
     public void setEntity(int entity) {
         this.entity = entity;
+    }
+
+    @Override
+    public EntityInfo getEntityInfo() {
+        return entityInfo;
+    }
+
+    /**
+     * Sets the entity info.
+     * 
+     * @param entityInfo The additional information about the entity associated with this permission
+     */
+    public void setEntityInfo(EntityInfo entityInfo) {
+        this.entityInfo = entityInfo;
     }
 
     @Override

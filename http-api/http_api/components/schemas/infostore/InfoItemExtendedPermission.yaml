@@ -1,8 +1,13 @@
 type: object
 properties:
+  identifier:
+    type: string
+    description: >-
+      The qualified identifier of the entity associated with this permission. Should be used to associate the entry 
+      with its 'extended' permission version equivalent.
   entity:
     type: integer
-    description: 'Identifier of the permission entity (i.e. user-, group- or guest-ID).'
+    description: Internal identifier of the permission entity (i.e. user-, group- or guest-ID).
   bits:
     type: integer
     description: |

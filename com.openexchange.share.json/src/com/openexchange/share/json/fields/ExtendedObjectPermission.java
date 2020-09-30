@@ -50,13 +50,15 @@
 package com.openexchange.share.json.fields;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.slf4j.LoggerFactory.getLogger;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.groupware.EntityInfo;
+import com.openexchange.groupware.LinkEntityInfo;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.core.tools.PermissionResolver;
@@ -69,11 +71,6 @@ import com.openexchange.user.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ExtendedObjectPermission extends ExtendedPermission {
-
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ExtendedObjectPermission.class);
-    }
 
     private final File file;
     private final FileStorageObjectPermission permission;
@@ -99,32 +96,61 @@ public class ExtendedObjectPermission extends ExtendedPermission {
      */
     public JSONObject toJSON(AJAXRequestData requestData) throws JSONException, OXException {
         JSONObject jsonObject = new JSONObject();
+        jsonObject.put("identifier", permission.getIdentifier());
         jsonObject.put("entity", permission.getEntity());
         jsonObject.put("bits", permission.getPermissions());
         if (permission.isGroup()) {
             jsonObject.put("type", "group");
-            addGroupInfo(requestData, jsonObject, resolver.getGroup(permission.getEntity()));
+            if (null != permission.getEntityInfo()) {
+                addEntityInfo(jsonObject, permission.getEntityInfo());
+            } else {
+                addGroupInfo(requestData, jsonObject, resolver.getGroup(permission.getEntity()));
+            }
         } else {
-            User user = resolver.getUser(permission.getEntity());
-            if (null == user) {
-                LoggerHolder.LOGGER.debug("Can't resolve user permission entity {} for file {}", I(permission.getEntity()), file);
-            } else if (user.isGuest()) {
-                GuestInfo guest = resolver.getGuest(user.getId());
-                if (guest == null) {
-                    int contextId = requestData.getSession() == null ? -1 : requestData.getSession().getContextId();
-                    throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Could not resolve guest info for ID " + user.getId() + " in context " + contextId + ". " +
-                        "It might have been deleted in the mean time or is in an inconsistent state.");
-                }
-
-                jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
-                if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
-                    addShareInfo(requestData, jsonObject, resolver.getLink(file, permission.getEntity()));
+            if (null != permission.getEntityInfo()) {
+                /*
+                 * add extended information based on provided entity info object
+                 */
+                if (LinkEntityInfo.class.isInstance(permission.getEntityInfo())) {
+                    jsonObject.put("type", "anonymous");
+                    addLinkEntityInfo(requestData, jsonObject, (LinkEntityInfo) permission.getEntityInfo());
+                } else if (EntityInfo.Type.GUEST.equals(permission.getEntityInfo().getType())) {
+                    jsonObject.put("type", "guest");
+                    addEntityInfo(jsonObject, permission.getEntityInfo());
+                } else if (EntityInfo.Type.GROUP.equals(permission.getEntityInfo().getType())) {
+                    jsonObject.put("type", "group");
+                    addEntityInfo(jsonObject, permission.getEntityInfo());
                 } else {
+                    jsonObject.put("type", "user");
+                    addEntityInfo(jsonObject, permission.getEntityInfo());
+                }
+            } else if (0 >= permission.getEntity()) {
+                getLogger(ExtendedObjectPermission.class).debug("Can't resolve user permission entity {} for file {}", I(permission.getEntity()), file);
+            } else {
+                /*
+                 * lookup and add extended information for internal user/guest
+                 */
+                User user = resolver.getUser(permission.getEntity());
+                if (null == user) {
+                    getLogger(ExtendedObjectPermission.class).debug("Can't resolve user permission entity {} for file {}", I(permission.getEntity()), file);
+                } else if (user.isGuest()) {
+                    GuestInfo guest = resolver.getGuest(user.getId());
+                    if (guest == null) {
+                        int contextId = requestData.getSession() == null ? -1 : requestData.getSession().getContextId();
+                        throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Could not resolve guest info for ID " + user.getId() + " in context " + contextId + ". " +
+                            "It might have been deleted in the mean time or is in an inconsistent state.");
+                    }
+    
+                    jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
+                    if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
+                        addShareInfo(requestData, jsonObject, resolver.getLink(file, permission.getEntity()));
+                    } else {
+                        addUserInfo(requestData, jsonObject, user);
+                    }
+                } else {
+                    jsonObject.put("type", "user");
                     addUserInfo(requestData, jsonObject, user);
                 }
-            } else {
-                jsonObject.put("type", "user");
-                addUserInfo(requestData, jsonObject, user);
             }
         }
         return jsonObject;
