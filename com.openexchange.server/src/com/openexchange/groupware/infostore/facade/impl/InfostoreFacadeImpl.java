@@ -3768,7 +3768,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          */
         int sharedFilesFolderID = FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
         boolean containsSharedFilesResults = null != permissionsByFolderID && permissionsByFolderID.containsKey(I(sharedFilesFolderID));
-        Set<Metadata> set = Metadata.contains(fields, Metadata.LOCKED_UNTIL_LITERAL, Metadata.NUMBER_OF_VERSIONS_LITERAL, Metadata.OBJECT_PERMISSIONS_LITERAL, Metadata.SHAREABLE_LITERAL);
+        Set<Metadata> set = Metadata.contains(fields, Metadata.LOCKED_UNTIL_LITERAL, Metadata.NUMBER_OF_VERSIONS_LITERAL, Metadata.OBJECT_PERMISSIONS_LITERAL, Metadata.SHAREABLE_LITERAL, Metadata.CREATED_FROM_LITERAL, Metadata.MODIFIED_FROM_LITERAL);
         boolean addLocked = set.contains(Metadata.LOCKED_UNTIL_LITERAL);
         boolean addNumberOfVersions = set.contains(Metadata.NUMBER_OF_VERSIONS_LITERAL);
         boolean addObjectPermissions = set.contains(Metadata.OBJECT_PERMISSIONS_LITERAL);
