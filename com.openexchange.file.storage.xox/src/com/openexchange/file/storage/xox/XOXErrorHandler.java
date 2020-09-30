@@ -61,6 +61,7 @@ import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountMetaDataUtil;
 
 /**
  * {@link XOXErrorHandler} - provides functionality to handle and persist errors occurred while accessing the XOX share.
@@ -69,10 +70,6 @@ import com.openexchange.file.storage.FileStorageAccount;
  * @since v7.10.5
  */
 public class XOXErrorHandler {
-
-    private static final String JSON_FIELD_EXCEPTION = "exception";
-    private static final String JSON_FIELD_TIMESTAMP = "timestamp";
-    private static final String JSON_FIELD_LAST_ERROR = "lastError";
 
     private final XOXAccountAccess accountAccess;
     private final int retryAfterError;
@@ -116,11 +113,10 @@ public class XOXErrorHandler {
     private FileStorageAccountError getRecentError(int t) throws OXException {
         try {
             final FileStorageAccount account = accountAccess.getService().getAccountManager().getAccount(accountAccess.getAccountId(), accountAccess.getSession());
-            JSONObject metadata = account.getMetadata();
-            JSONObject lastError = metadata.optJSONObject(JSON_FIELD_LAST_ERROR);
+            JSONObject lastError = FileStorageAccountMetaDataUtil.getAccountError(account);
             if (lastError != null) {
-                JSONObject error = lastError.getJSONObject(JSON_FIELD_EXCEPTION);
-                Date lastErrorTimeStamp = new Date(lastError.getLong(JSON_FIELD_TIMESTAMP));
+                JSONObject error = lastError.getJSONObject(FileStorageAccountMetaDataUtil.JSON_FIELD_EXCEPTION);
+                Date lastErrorTimeStamp = new Date(lastError.getLong(FileStorageAccountMetaDataUtil.JSON_FIELD_TIMESTAMP));
                 //Check if the error occurred in the last n seconds
                 final Instant now = new Date().toInstant();
                 final Instant errorOccuredOn = lastErrorTimeStamp.toInstant();
@@ -140,7 +136,7 @@ public class XOXErrorHandler {
     }
 
     /**
-     * Gets the last known exception for this account, occurred during the last n seconds.
+     * Gets the last known exception for this account, occurred during the last t seconds.
      *
      * @param t The time in seconds
      * @return The exception occurred in the last t seconds, or null if there is no current error or it occurred longer than the given t seconds.
@@ -148,11 +144,18 @@ public class XOXErrorHandler {
      */
     private OXException getRecentException(int t) throws OXException {
         FileStorageAccountError lastError = getRecentError(t);
-        OXException exception = lastError != null ? lastError.getException() : null;
-        if (exception != null) {
-            throw exception;
-        }
-        return null;
+        return  lastError != null ? lastError.getException() : null;
+    }
+
+    /**
+     * Gets the last known exception for this account, occurred during the last t (configured) seconds.
+     * getRecentException
+     *
+     * @return The exception occurred in the last t (configured) seconds, or null if there is no current error or it occurred longer than the given t seconds.
+     * @throws OXException
+     */
+    public OXException getRecentException() throws OXException {
+        return getRecentException(retryAfterError);
     }
 
     /**
@@ -179,6 +182,16 @@ public class XOXErrorHandler {
     }
 
     /**
+     * Checks if there is a recent exception, in the last t (configured) seconds, accessing this account.
+     *
+     * @return <code>true</code> if there was a recent exception in the last t (configured) seconds, <code>false</code> otherwise.
+     * @throws OXException
+     */
+    public boolean hasRecentException() throws OXException {
+        return getRecentException(retryAfterError) != null;
+    }
+
+    /**
      * Handles an exception; i.e. if the exception is found to be long-lasting, it is saved to the DB
      *
      * @param exception exception to save
@@ -188,19 +201,19 @@ public class XOXErrorHandler {
         try {
             if (exception != null && shouldSaveException(exception)) {
                 FileStorageAccount account = accountAccess.getAccount();
-                JSONObject metadata = account.getMetadata();
-                JSONObject lastError = metadata.optJSONObject(JSON_FIELD_LAST_ERROR);
+                JSONObject metadata = FileStorageAccountMetaDataUtil.getAccountMetaData(account);
+                JSONObject lastError = FileStorageAccountMetaDataUtil.getAccountError(account);
                 if (lastError == null) {
                     lastError = new JSONObject();
-                    metadata.put(JSON_FIELD_LAST_ERROR, lastError);
+                    metadata.put(FileStorageAccountMetaDataUtil.JSON_FIELD_LAST_ERROR, lastError);
                 }
-                lastError.put(JSON_FIELD_TIMESTAMP, new Date().getTime());
+                lastError.put(FileStorageAccountMetaDataUtil.JSON_FIELD_TIMESTAMP, new Date().getTime());
 
                 DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.OXEXCEPTION2JSON);
                 ConversionResult result = dataHandler.processData(new SimpleData<OXException>(exception), new DataArguments(), null);
                 Object data = result.getData();
                 if (data != null && JSONObject.class.isInstance(data)) {
-                    lastError.put(JSON_FIELD_EXCEPTION, data);
+                    lastError.put(FileStorageAccountMetaDataUtil.JSON_FIELD_EXCEPTION, data);
                 }
 
                 accountAccess.getService().getAccountManager().updateAccount(account, accountAccess.getSession());
@@ -219,7 +232,7 @@ public class XOXErrorHandler {
     public void removeRecentException() throws OXException {
         FileStorageAccount account = accountAccess.getAccount();
         JSONObject metadata = account.getMetadata();
-        Object objectRemoved = metadata.remove(JSON_FIELD_LAST_ERROR);
+        Object objectRemoved = metadata.remove(FileStorageAccountMetaDataUtil.JSON_FIELD_LAST_ERROR);
         if(objectRemoved != null) {
             accountAccess.getService().getAccountManager().updateAccount(account, accountAccess.getSession());
         }

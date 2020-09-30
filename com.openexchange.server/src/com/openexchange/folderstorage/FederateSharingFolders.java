@@ -47,36 +47,98 @@
  *
  */
 
-package com.openexchange.folderstorage.database;
+package com.openexchange.folderstorage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
+import org.apache.commons.lang.mutable.MutableInt;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.CacheAware;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
+import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAccountMetaDataUtil;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.filestorage.FileStorageId;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.id.IDMangler;
 
 /**
- * {@link FederateSharingFolder} - Handling for folders shared from other OX installations
+ * {@link FederateSharingFolders} - Handling for folders shared from other OX installations
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class FederateSharingFolder {
+public class FederateSharingFolders {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FederateSharingFolder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FederateSharingFolders.class);
+
+    /**
+     * {@link DefectiveFolder} represents a folder which is defective and will not be cached
+     *
+     * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+     * @since v7.10.5
+     */
+    static class DefectiveFolder extends DefaultFileStorageFolder implements CacheAware {
+
+        @Override
+        public boolean cacheable() {
+            //Do not cache corrupt folders
+            return false;
+        }
+
+    }
+
+    /**
+     * Internal method to transform an array of {@link FileStorageFolder} to a list of {@link SortableId}.
+     *
+     * @param folders The array of folders to transform.
+     * @param serviceId The ID of the related file storage service
+     * @param accountId The ID of the related file storage account
+     * @param ordinal The ordinal number to set and increment
+     * @return A list of {@link SortableId}
+     */
+    private static List<SortableId> toSortableIds(final FileStorageFolder[] folders, String serviceId, String accountId, MutableInt ordinal) {
+        ArrayList<SortableId> ret = new ArrayList<SortableId>(folders.length);
+        for (FileStorageFolder folder : folders) {
+            ret.add(toSortableId(folder, serviceId, accountId, ordinal));
+        }
+
+        return ret;
+
+    }
+
+    /**
+     * Internal method to transform a {@link FileStorageFolder} to a {@link SortableId}
+     *
+     * @param folder The folder to transform
+     * @param serviceId The ID of the related file storage service
+     * @param accountId The ID of the related file storage account
+     * @param ordinal The ordinal number to set and increment
+     * @return The {@link SortabaleId}
+     */
+    private static SortableId toSortableId(final FileStorageFolder folder, String serviceId, String accountId, MutableInt ordinal) {
+        String folderId = IDMangler.mangle(serviceId, accountId, folder.getId());
+        FileStorageId fileStorageId = new FileStorageId(folderId, ordinal.intValue(), folder.getName());
+        ordinal.increment();
+        return fileStorageId;
+    }
 
     /**
      * Returns if there is at least one Federal Sharing account for the given session
@@ -120,7 +182,7 @@ public class FederateSharingFolder {
      */
     public static SortableId[] getFolders(final int parentFolder, final Session session, final boolean forceRetry) {
         List<SortableId> ret = new ArrayList<>();
-        int ordinal = 0;
+        MutableInt ordinal = new MutableInt(0);
         try {
             FileStorageServiceRegistry registry = ServerServiceRegistry.getInstance().getService(FileStorageServiceRegistry.class);
             List<FileStorageService> allServices = registry.getAllServices();
@@ -138,12 +200,24 @@ public class FederateSharingFolder {
                             access.connect();
                             FileStorageFolderAccess folderAccess = access.getFolderAccess();
                             FileStorageFolder[] sharedFolders = folderAccess.getSubfolders(String.valueOf(parentFolder), true);
-                            for (FileStorageFolder sharedFolder : sharedFolders) {
-                                String folderId = IDMangler.mangle(service.getId(), account.getId(), sharedFolder.getId());
-                                ret.add(new FileStorageId(folderId, ordinal++, sharedFolder.getName()));
-                            }
+
+                            ret.addAll(toSortableIds(sharedFolders, service.getId(), account.getId(), ordinal));
+
+                            //persist the folders to the account so they can be returned as "dummies" the next time the account has errors and is not able to get the real folders
+                            storeSubFolders(account, sharedFolders, session);
                         } catch (Exception e) {
-                            LOG.error("Unable to list federate sharing account " + account.getId(), e);
+                            try {
+                                //Error: We do add all last known sub folders in case of an error.
+                                //Those folders get decorated with an error when loaded later and thus can be displayed by the client
+                                LOG.debug("Unable to load federate sharing folders for account " + account.getId() + ": " + e.getMessage());
+                                FileStorageFolder[] storedSubFolders = getLastKnownFolders(account, session);
+                                if (storedSubFolders.length == 0) {
+                                    LOG.debug("There are no last known federated sharing folders for account " + account.getId());
+                                }
+                                ret.addAll(toSortableIds(storedSubFolders, service.getId(), account.getId(), ordinal));
+                            } catch (Exception e2) {
+                                LOG.error("Unable to load last known federate sharing folders for account " + account.getId(), e2);
+                            }
                         }
                     }
                 }
@@ -152,5 +226,89 @@ public class FederateSharingFolder {
             LOG.error("Unable to list federate sharing folders", e);
         }
         return ret.toArray(new SortableId[ret.size()]);
+    }
+
+    /**
+     * Gets a sub folder from the list of known subfolders
+     *
+     * @param account The account
+     * @param folderId The ID of the folder to get
+     * @param session The session
+     * @return The {@link FileStorageFolder} if it is present in the list of last known sub folders, null if unknown.
+     * @throws OXException
+     */
+    public static FileStorageFolder getLastKnownFolder(FileStorageAccount account, String folderId, Session session) throws OXException {
+        Optional<FileStorageFolder> folder = Arrays.asList(getLastKnownFolders(account, session)).stream().filter(f -> folderId.equals(f.getId())).findFirst();
+        return folder.orElse(null);
+    }
+
+    /**
+     * Gets the last known folders for the given account
+     *
+     * @param account The account
+     * @return A list of last known folders for the given account
+     * @throws OXException
+     */
+    public static FileStorageFolder[] getLastKnownFolders(FileStorageAccount account, Session session) throws OXException {
+        try {
+            JSONArray lastKnownFolders = FileStorageAccountMetaDataUtil.getLastKnownFolders(account);
+            if (lastKnownFolders != null) {
+                ArrayList<FileStorageFolder> ret = new ArrayList<FileStorageFolder>(lastKnownFolders.length());
+                for (int i = 0; i < lastKnownFolders.length(); i++) {
+                    JSONObject jsonFolder = lastKnownFolders.getJSONObject(i);
+
+                    DefectiveFolder folder = new DefectiveFolder();
+                    folder.setId(jsonFolder.getString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_ID));
+                    folder.setName("ERROR: " + jsonFolder.getString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_NAME));
+
+                    folder.setExists(true);
+                    folder.setSubscribed(true);
+
+                    folder.setProperties(new HashMap<String, Object>());
+
+                    //default permissions
+                    List<FileStoragePermission> permissions = new ArrayList<FileStoragePermission>(1);
+                    final DefaultFileStoragePermission defaultPermission = DefaultFileStoragePermission.newInstance();
+                    defaultPermission.setEntity(session.getUserId());
+                    permissions.add(defaultPermission);
+                    folder.setPermissions(permissions);
+
+                    ret.add(folder);
+                }
+                return ret.toArray(new FileStorageFolder[ret.size()]);
+            }
+            return new FileStorageFolder[0];
+        } catch (JSONException e) {
+            throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Internal method to store the last known sub folders for a {@link FileStorageAccount}
+     *
+     * @param account The account to store the folders for
+     * @param folderd The list of sub folders to store
+     * @param session The session
+     * @throws OXException
+     */
+    private static void storeSubFolders(FileStorageAccount account, FileStorageFolder[] folders, Session session) throws OXException {
+        if (folders != null && folders.length > 0) {
+
+            try {
+                JSONArray lastKnownFolders = new JSONArray(folders.length);
+                for (FileStorageFolder folder : folders) {
+                    JSONObject jsonFolder = new JSONObject();
+                    jsonFolder.put(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_ID, folder.getId());
+                    jsonFolder.put(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_NAME, folder.getName());
+                    lastKnownFolders.put(jsonFolder);
+                }
+                FileStorageAccountMetaDataUtil.setLastKnownFolders(account, lastKnownFolders);
+
+                //Save
+                account.getFileStorageService().getAccountManager().updateAccount(account, session);
+            } catch (JSONException e) {
+                throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
+            }
+        }
     }
 }

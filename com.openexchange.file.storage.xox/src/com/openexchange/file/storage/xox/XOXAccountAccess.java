@@ -64,6 +64,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.folderstorage.FederateSharingFolders;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
@@ -81,6 +82,7 @@ public class XOXAccountAccess implements CapabilityAware {
     private final ApiClientService clientFactory;
     private final XOXErrorHandler errorHandler;
 
+    private boolean isConnected;
     private ShareClient shareClient;
 
     /**
@@ -151,12 +153,23 @@ public class XOXAccountAccess implements CapabilityAware {
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
         assertConnected();
+        this.errorHandler.assertNoRecentException();
         return new XOXFileAccess(this, shareClient);
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
         assertConnected();
+
+        OXException recentException = this.errorHandler.getRecentException();
+        if (recentException != null) {
+            //In case of an error state: we return an implementation which will only allow to get the last known folders
+            //@formatter:off
+            return new ErrorStateFolderAccess(
+                recentException,
+                (String folderId) -> FederateSharingFolders.getLastKnownFolder(account, folderId, session));
+            //@formatter:on
+        }
         return new XOXFolderAccess(this, shareClient);
     }
 
@@ -186,17 +199,25 @@ public class XOXAccountAccess implements CapabilityAware {
         String password = (String) configuration.get(XOXStorageConstants.PASSWORD);
         Credentials credentials = new Credentials("", password);
 
-        errorHandler.assertNoRecentException();
+        boolean hasKnownError = errorHandler.hasRecentException();
+        if (hasKnownError) {
+            //We do not really connect because we have known errors,
+            //but dummy folders should still be returned
+            isConnected = true;
+            return;
+        }
+
         try {
             this.shareClient = new ShareClient(session, clientFactory.getApiClient(session, shareUrl, credentials), errorHandler);
         } catch (OXException e) {
             throw errorHandler.handleException(e);
         }
+        isConnected = true;
     }
 
     @Override
     public boolean isConnected() {
-        return shareClient != null;
+        return isConnected;
     }
 
     @Override
