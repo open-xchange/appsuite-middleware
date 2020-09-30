@@ -168,6 +168,7 @@ public class ShareClient {
      * @throws OXException if the ping failed
      */
     public void ping() throws OXException {
+        errorHandler.assertNoRecentException();
         ajaxClient.execute(new WhoamiCall());
     }
 
@@ -861,5 +862,4 @@ public class ShareClient {
             throw errorHandler.handleException(e);
         }
     }
-
 }

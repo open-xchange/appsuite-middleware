@@ -66,10 +66,10 @@ import java.util.List;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FederateSharingFolders;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.AltNameLocalizedDatabaseFolder;
 import com.openexchange.folderstorage.database.DatabaseFolder;
-import com.openexchange.folderstorage.database.FederateSharingFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -158,7 +158,7 @@ public final class SystemInfostoreFolder {
                         if (1 < visibleSubfolderIDs.size() ||
                             1 == visibleSubfolderIDs.size() && false == visibleSubfolderIDs.remove(getDefaultInfoStoreFolderId(session, context, connection)) ||
                             0 < new OXFolderAccess(connection, context).getItemCount(folder, session, context) ||
-                            FederateSharingFolder.hasFederalSharingAccount(session)) {
+                            FederateSharingFolders.hasFederalSharingAccount(session)) {
                             subfolderIDs.add(0, new String[] { String.valueOf(folder.getObjectID()), stringHelper.getString(SYSTEM_USER_FILES_FOLDER_NAME) });
                         }
                     } else {

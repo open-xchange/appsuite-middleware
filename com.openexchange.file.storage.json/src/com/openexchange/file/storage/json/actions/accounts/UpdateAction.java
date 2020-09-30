@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountMetaDataUtil;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
@@ -93,6 +94,8 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
 
         //load existing account for resetting if the connection check failed
         FileStorageAccount existingAccount = doConnectionCheck ? account.getFileStorageService().getAccountManager().getAccount(account.getId(), session) : null;
+        //Preserve account meta data when updating
+        FileStorageAccountMetaDataUtil.copy(existingAccount, account);
 
         //perform update
         account.getFileStorageService().getAccountManager().updateAccount(account, session);

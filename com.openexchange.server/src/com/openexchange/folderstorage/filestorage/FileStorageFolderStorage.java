@@ -112,8 +112,6 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
 
     private static final String ALT_NAMES = "altNames";
 
-    private static final String FORCE_RETRY = "forceRetry";
-
     /**
      * <code>"infostore"</code>
      */
@@ -455,7 +453,6 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
         FileStorageFolder fsFolder = folderAccess.getFolder(fid);
         boolean altNames = StorageParametersUtility.getBoolParameter(ALT_NAMES, storageParameters);
-        boolean forceRetry = StorageParametersUtility.getBoolParameter(FORCE_RETRY, storageParameters);
         String accountID = FileStorageAccounts.getQualifiedID(fid.getService(), fid.getAccountId());
         Session session = storageParameters.getSession();
         FileStorageFolderImpl retval;
