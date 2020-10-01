@@ -75,7 +75,7 @@ import com.sun.mail.smtp.SMTPTransport;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class MailValidator {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MailValidator.class);
 
     private static final int DEFAULT_CONNECT_TIMEOUT = 1000;
@@ -94,6 +94,7 @@ public class MailValidator {
     public static boolean validateImap(String host, int port, ConnectMode connectMode, String user, String pwd) {
         Store store = null;
         try {
+            ConfigurationService configuration = Services.getService(ConfigurationService.class);
             SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
             String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
             Properties props = new Properties();
@@ -108,13 +109,13 @@ public class MailValidator {
                 props.put("mail.imap.starttls.enable", Boolean.TRUE);
                 props.put("mail.imap.ssl.trust", "*");
                 {
-                    final ConfigurationService configuration = Services.getService(ConfigurationService.class);
-                    final String sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
+                    String defaultValue = "SSLv3 TLSv1";
+                    String sslProtocols = configuration == null ? defaultValue : configuration.getProperty("com.openexchange.imap.ssl.protocols", defaultValue).trim();
                     props.put("mail.imap.ssl.protocols", sslProtocols);
                 }
                 {
-                    final ConfigurationService configuration = Services.getService(ConfigurationService.class);
-                    final String cipherSuites = configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", "").trim();
+                    String defaultValue = "";
+                    String cipherSuites = configuration == null ? defaultValue : configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", defaultValue).trim();
                     if (Strings.isNotEmpty(cipherSuites)) {
                         props.put("mail.imap.ssl.ciphersuites", cipherSuites);
                     }
@@ -124,6 +125,14 @@ public class MailValidator {
             props.put("mail.imap.connectiontimeout", I(DEFAULT_CONNECT_TIMEOUT));
             props.put("mail.imap.timeout", I(DEFAULT_TIMEOUT));
             props.put("mail.imap.socketFactory.port", I(port));
+
+            if (configuration != null) {
+                String authenc = configuration.getProperty("com.openexchange.imap.imapAuthEnc", "UTF-8").trim();
+                if (Strings.isNotEmpty(authenc)) {
+                    props.put("mail.imap.login.encoding", authenc);
+                }
+            }
+
             Session session = Session.getInstance(props, null);
             store = session.getStore("imap");
             store.connect(host, port, user, pwd);
@@ -318,7 +327,7 @@ public class MailValidator {
     public static boolean tryPop3Connect(String host, int port, boolean secure) {
         return tryConnect(host, port, secure, "QUIT\r\n");
     }
-    
+
     private static boolean tryConnect(String host, int port, boolean secure, String closePhrase) {
         try (Socket s = secure ? Services.getService(SSLSocketFactoryProvider.class).getDefault().createSocket() : new Socket()) {
             /*
