@@ -46,6 +46,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
@@ -651,8 +652,13 @@ public class IMAPProtocol extends Protocol {
     try {
     authenticatedStatusChanging0(true, u, p);
     Argument args = new Argument();
-    args.writeString(u);
-    args.writeString(p);
+
+    // Write user name and password to "LOGIN" arguments
+    {        
+        Charset charset = getLoginEncoding();
+        args.writeString(u, charset);
+        args.writeString(p, charset);
+    }
 
     Response[] r = null;
     try {
@@ -3940,6 +3946,26 @@ public class IMAPProtocol extends Protocol {
         }
 
         return c == null ? chars : new String(c);
+    }
+
+    private Charset getLoginEncoding() {
+    Object oval = props.get(prefix + ".login.encoding");
+    if (oval == null) {
+        return StandardCharsets.UTF_8;
+    }
+    
+    String csn = oval.toString().trim();
+    if ("UTF-8".equals(toUpperCase(csn))) {
+        // Fast return for default value
+        return StandardCharsets.UTF_8;
+    }
+    
+    try {
+        return Charset.isSupported(csn) ? Charset.forName(csn) : StandardCharsets.UTF_8;
+    } catch (Exception ex) {
+        logger.log(Level.FINE, "Login Charset Look-Up Exception for '" + csn + "'. Using UTF-8 as fallback.", ex);
+        return StandardCharsets.UTF_8;
+    }
     }
 
     /**
