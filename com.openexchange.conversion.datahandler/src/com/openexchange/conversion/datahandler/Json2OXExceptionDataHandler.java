@@ -47,61 +47,61 @@
  *
  */
 
-package com.openexchange.folderstorage.filestorage.osgi;
+package com.openexchange.conversion.datahandler;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.BundleActivator;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.folderstorage.FolderField;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.filestorage.AccountErrorField;
-import com.openexchange.folderstorage.filestorage.FileStorageFolderStorage;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.ajax.parser.ResponseParser;
+import com.openexchange.conversion.ConversionResult;
+import com.openexchange.conversion.Data;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataExceptionCodes;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
- * {@link FileStorageFolderStorageActivator} - {@link BundleActivator Activator} for file storage folder storage.
+ * {@link Json2OXExceptionDataHandler}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public final class FileStorageFolderStorageActivator extends HousekeepingActivator {
+public class Json2OXExceptionDataHandler implements DataHandler {
 
     /**
-     * Initializes a new {@link FileStorageFolderStorageActivator}.
+     * Initializes a new {@link Json2OXExceptionDataHandler}.
      */
-    public FileStorageFolderStorageActivator() {
+    public Json2OXExceptionDataHandler() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageServiceRegistry.class, IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class };
+    public String[] getRequiredArguments() {
+        return new String[0];
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FileStorageFolderStorageActivator.class);
+    public Class<?>[] getTypes() {
+        return new Class<?>[] { JSONObject.class };
+    }
+
+    @Override
+    public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
+        ConversionResult result = new ConversionResult();
+        Object sourceData = data.getData();
         try {
-            Services.setServiceLookup(this);
-            // Register folder storage
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>();
-            dictionary.put("tree", FolderStorage.REAL_TREE_ID);
-            registerService(FolderStorage.class, new FileStorageFolderStorage(this), dictionary);
-
-            //register custom folder fields
-            registerService(FolderField.class, AccountErrorField.getInstance());
-        } catch (Exception e) {
-            logger.error("", e);
-            throw e;
+            if (null == sourceData) {
+                result.setData(null);
+            } else if (JSONObject.class.isInstance(sourceData)) {
+                result.setData(ResponseParser.parseException((JSONObject) sourceData));
+            } else {
+                throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(sourceData.getClass().toString());
+            }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+        return result;
     }
 
 }

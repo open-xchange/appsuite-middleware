@@ -98,6 +98,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
+import com.openexchange.file.storage.FileStorageAccountErrorHandler;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
@@ -129,7 +130,7 @@ public class ShareClient {
 
     private final ApiClient ajaxClient;
     private final Session session;
-    private final XOXErrorHandler errorHandler;
+    private final FileStorageAccountErrorHandler errorHandler;
 
     private static final String SYSTEM_ROOT_FOLDER_ID = "0";
     private static final String TREE_ID = FolderStorage.REAL_TREE_ID;
@@ -150,9 +151,9 @@ public class ShareClient {
      *
      * @param session A session
      * @param client The underlying {@link ApiClient} to use
-     * @param errorHandler The {@link XOXErrorHandler} to use
+     * @param errorHandler The {@link FileStorageAccountErrorHandler} to use
      */
-    public ShareClient(Session session, ApiClient client, XOXErrorHandler errorHandler) {
+    public ShareClient(Session session, ApiClient client, FileStorageAccountErrorHandler errorHandler) {
         this.session = Objects.requireNonNull(session, "session must not be null");
         this.ajaxClient = Objects.requireNonNull(client, "client must not be null");
         this.errorHandler = Objects.requireNonNull(errorHandler, "errorHandler must not be null");

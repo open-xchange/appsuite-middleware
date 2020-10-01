@@ -79,6 +79,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.control"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.control.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.conversion"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.conversion.datahandler"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.conversion.simple"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.conversion.engine"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.conversion.servlet"/>

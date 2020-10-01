@@ -52,10 +52,15 @@ package com.openexchange.file.storage.xctx;
 import java.net.URI;
 import java.net.URISyntaxException;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.conversion.datahandler.DataHandlers;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
+import com.openexchange.file.storage.ErrorStateFolderAccess;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAccountErrorHandler;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -64,6 +69,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.folderstorage.FederatedSharingFolders;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.server.ServiceLookup;
@@ -86,8 +92,10 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
     private final FileStorageAccount account;
     private final ServerSession session;
     private final ServiceLookup services;
+    private final FileStorageAccountErrorHandler errorHandler;
 
     private ServerSession guestSession;
+    private boolean isConnected;
 
     /**
      * Initializes a new {@link XctxAccountAccess}.
@@ -95,12 +103,18 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
      * @param services A service lookup reference
      * @param account The account
      * @param session The user's session
+     * @param retryAfterError The amount of seconds after which accessing an error afflicted account should be retried.
      */
-    protected XctxAccountAccess(ServiceLookup services, FileStorageAccount account, Session session) throws OXException {
+    protected XctxAccountAccess(ServiceLookup services, FileStorageAccount account, Session session, int retryAfterError) throws OXException {
         super();
         this.services = services;
         this.account = account;
         this.session = ServerSessionAdapter.valueOf(session);
+
+        ConversionService conversionService = getServiceSafe(ConversionService.class);
+        DataHandler ox2jsonDataHandler = conversionService.getDataHandler(DataHandlers.OXEXCEPTION2JSON);
+        DataHandler json2oxDataHandler = conversionService.getDataHandler(DataHandlers.JSON2OXEXCEPTION);
+        this.errorHandler = new FileStorageAccountErrorHandler(ox2jsonDataHandler, json2oxDataHandler, this, session, retryAfterError);
     }
     /**
      * Gets the service of specified type. Throws error if service is absent.
@@ -113,10 +127,10 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
     public <S extends Object> S getServiceSafe(Class<? extends S> clazz) throws OXException {
         return services.getServiceSafe(clazz);
     }
-    
+
     /**
      * Gets a {@link HostData} implementation under the perspective of the guest user.
-     * 
+     *
      * @return The host data for the guest
      */
     public HostData getGuestHostData() throws OXException {
@@ -158,17 +172,33 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
         if (null == baseToken) {
             throw ShareExceptionCodes.INVALID_LINK.create(shareUrl);
         }
-        this.guestSession = ServerSessionAdapter.valueOf(services.getServiceSafe(XctxSessionManager.class).getGuestSession(session, baseToken, password));
+
+        boolean hasKnownError = errorHandler.hasRecentException();
+        if (hasKnownError) {
+            //We do not really connect because we have known errors,
+            //but dummy folders should still be returned
+            isConnected = true;
+            return;
+        }
+
+        try {
+            this.guestSession = ServerSessionAdapter.valueOf(services.getServiceSafe(XctxSessionManager.class).getGuestSession(session, baseToken, password));
+        } catch (OXException e) {
+            throw errorHandler.handleException(e);
+        }
+
+        isConnected = true;
     }
 
     @Override
     public boolean isConnected() {
-        return null != guestSession;
+        return isConnected;
     }
 
     @Override
     public void close() {
         this.guestSession = null; // guest session still kept in cache
+        isConnected = false;
     }
 
     @Override
@@ -191,6 +221,7 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
         if (false == isConnected()) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
+        this.errorHandler.assertNoRecentException();
         return new XctxFileAccess(this, session, guestSession);
     }
 
@@ -198,6 +229,15 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
     public FileStorageFolderAccess getFolderAccess() throws OXException {
         if (false == isConnected()) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
+        }
+        OXException recentException = this.errorHandler.getRecentException();
+        if (recentException != null) {
+            //In case of an error state: we return an implementation which will only allow to get the last known folders
+            //@formatter:off
+            return new ErrorStateFolderAccess(
+                recentException,
+                (String folderId) -> FederatedSharingFolders.getLastKnownFolder(account, folderId, session));
+            //@formatter:on
         }
         return new XctxFolderAccess(this, session, guestSession);
     }

@@ -47,46 +47,59 @@
  *
  */
 
-package com.openexchange.file.storage.xox;
+package com.openexchange.file.storage;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageAccountMetaDataUtil;
+import com.openexchange.session.Session;
 
 /**
- * {@link XOXErrorHandler} - provides functionality to handle and persist errors occurred while accessing the XOX share.
+ * {@link FileStorageAccountErrorHandler} - provides functionality to handle and persist errors occurred while accessing a {@link FileStorageAccount}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class XOXErrorHandler {
+public class FileStorageAccountErrorHandler {
 
-    private final XOXAccountAccess accountAccess;
+    private final FileStorageAccountAccess accountAccess;
     private final int retryAfterError;
-    private final ConversionService conversionService;
+    private final Session session;
+    private final DataHandler json2error;
+    private final DataHandler error2json;
 
     /**
-     * Initializes a new {@link XOXErrorHandler}.
+     * Initializes a new {@link FileStorageAccountErrorHandler}.
      *
      * @param conversionService The required {@link ConversionService}
+     * @param error2jsonDataHandler A {@link DataHandler} which will used to serialize an error
+     * @param json2errorDataHandler A {@link DataHandler} which will used to de-serialze an error
      * @param accountAccess The related {@link XOXAccountAccess}
+     * @param session The {@link Session}
      * @param retryAfterError The amount of time in seconds after which an persistent account error should be ignored.
      */
-    public XOXErrorHandler(ConversionService conversionService, XOXAccountAccess accountAccess, int retryAfterError) {
-        this.conversionService = conversionService;
-        this.accountAccess = accountAccess;
+    //@formatter:off
+    public FileStorageAccountErrorHandler(
+            DataHandler error2jsonDataHandler,
+            DataHandler json2errorDataHandler,
+            FileStorageAccountAccess accountAccess,
+            Session session,
+            int retryAfterError) {
+        this.json2error = Objects.requireNonNull(json2errorDataHandler, "json2errorDataHandler must not be null");
+        this.error2json = Objects.requireNonNull(error2jsonDataHandler, "error2JsonDataHandler must not be null");
+        this.accountAccess = Objects.requireNonNull(accountAccess, "accountAccess must not be null");
+        this.session = Objects.requireNonNull(session, "session must not be null");
         this.retryAfterError = retryAfterError;
     }
+    //@formatter:on
 
     /**
      * Checks whether or not the given exception should be saved to the DB
@@ -96,11 +109,13 @@ public class XOXErrorHandler {
      */
     private boolean shouldSaveException(OXException exception) {
         if (exception != null) {
-
-            //TODO: check whether or not we want to store the exception
             return true;
         }
         return false;
+    }
+
+    private FileStorageAccount getAccount() throws OXException {
+        return accountAccess.getService().getAccountManager().getAccount(accountAccess.getAccountId(), session);
     }
 
     /**
@@ -112,7 +127,7 @@ public class XOXErrorHandler {
      */
     private FileStorageAccountError getRecentError(int t) throws OXException {
         try {
-            final FileStorageAccount account = accountAccess.getService().getAccountManager().getAccount(accountAccess.getAccountId(), accountAccess.getSession());
+            final FileStorageAccount account = getAccount();
             JSONObject lastError = FileStorageAccountMetaDataUtil.getAccountError(account);
             if (lastError != null) {
                 JSONObject error = lastError.getJSONObject(FileStorageAccountMetaDataUtil.JSON_FIELD_EXCEPTION);
@@ -121,8 +136,7 @@ public class XOXErrorHandler {
                 final Instant now = new Date().toInstant();
                 final Instant errorOccuredOn = lastErrorTimeStamp.toInstant();
                 if (errorOccuredOn.isAfter(now.minusSeconds(t))) {
-                    DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.JSON2OXEXCEPTION);
-                    ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(error), new DataArguments(), null);
+                    ConversionResult result = json2error.processData(new SimpleData<JSONObject>(error), new DataArguments(), null);
                     if (result != null && result.getData() != null && OXException.class.isInstance(result.getData())) {
                         //The error occurred in the last n seconds
                         return new FileStorageAccountError((OXException) result.getData(), lastErrorTimeStamp);
@@ -131,7 +145,7 @@ public class XOXErrorHandler {
             }
             return null;
         } catch (JSONException e) {
-            throw XOXFileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -144,7 +158,7 @@ public class XOXErrorHandler {
      */
     private OXException getRecentException(int t) throws OXException {
         FileStorageAccountError lastError = getRecentError(t);
-        return  lastError != null ? lastError.getException() : null;
+        return lastError != null ? lastError.getException() : null;
     }
 
     /**
@@ -199,8 +213,8 @@ public class XOXErrorHandler {
      */
     public OXException handleException(OXException exception) throws OXException {
         try {
-            if (exception != null && shouldSaveException(exception)) {
-                FileStorageAccount account = accountAccess.getAccount();
+            if (shouldSaveException(exception)) {
+                FileStorageAccount account = getAccount();
                 JSONObject metadata = FileStorageAccountMetaDataUtil.getAccountMetaData(account);
                 JSONObject lastError = FileStorageAccountMetaDataUtil.getAccountError(account);
                 if (lastError == null) {
@@ -209,18 +223,17 @@ public class XOXErrorHandler {
                 }
                 lastError.put(FileStorageAccountMetaDataUtil.JSON_FIELD_TIMESTAMP, new Date().getTime());
 
-                DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.OXEXCEPTION2JSON);
-                ConversionResult result = dataHandler.processData(new SimpleData<OXException>(exception), new DataArguments(), null);
+                ConversionResult result = error2json.processData(new SimpleData<OXException>(exception), new DataArguments(), null);
                 Object data = result.getData();
                 if (data != null && JSONObject.class.isInstance(data)) {
                     lastError.put(FileStorageAccountMetaDataUtil.JSON_FIELD_EXCEPTION, data);
                 }
 
-                accountAccess.getService().getAccountManager().updateAccount(account, accountAccess.getSession());
+                accountAccess.getService().getAccountManager().updateAccount(account, session);
             }
             return exception;
         } catch (JSONException e) {
-            throw XOXFileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -230,11 +243,11 @@ public class XOXErrorHandler {
      * @throws OXException
      */
     public void removeRecentException() throws OXException {
-        FileStorageAccount account = accountAccess.getAccount();
+        FileStorageAccount account = getAccount();
         JSONObject metadata = account.getMetadata();
         Object objectRemoved = metadata.remove(FileStorageAccountMetaDataUtil.JSON_FIELD_LAST_ERROR);
-        if(objectRemoved != null) {
-            accountAccess.getService().getAccountManager().updateAccount(account, accountAccess.getSession());
+        if (objectRemoved != null) {
+            accountAccess.getService().getAccountManager().updateAccount(account, session);
         }
     }
 }
