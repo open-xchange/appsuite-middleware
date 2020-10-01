@@ -147,7 +147,7 @@ public class MediaMetadataExtractorRegistry implements MediaMetadataExtractorSer
     }
 
     @Override
-    public EstimationResult estimateEffort(InputStreamProvider provider, DocumentMetadata document) throws OXException {
+    public EstimationResult estimateEffort(Session session, InputStreamProvider provider, DocumentMetadata document) throws OXException {
         if (null == provider) {
             throw OXException.general("Stream must not be null.");
         }
@@ -188,7 +188,7 @@ public class MediaMetadataExtractorRegistry implements MediaMetadataExtractorSer
                         arguments = new HashMap<String, Object>();
                     }
 
-                    switch (extractor.estimateEffort(bufferedStream, document, arguments)) {
+                    switch (extractor.estimateEffort(session, bufferedStream, document, arguments)) {
                         case LOW_EFFORT:
                             any = true;
                             lowEffortExtractor = extractor;

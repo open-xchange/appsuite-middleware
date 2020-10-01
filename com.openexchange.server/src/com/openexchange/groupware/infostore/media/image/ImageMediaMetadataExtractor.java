@@ -59,6 +59,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import com.drew.imaging.FileType;
@@ -93,6 +94,8 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ImageMediaMetadataExtractor} - The extractor for image files.
@@ -107,6 +110,7 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
     private static enum KnownArgument {
 
         FILE_TYPE("image.fileType"),
+        TIMEZONE("timezone")
         ;
 
         private final String id;
@@ -175,7 +179,7 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
     }
 
     @Override
-    public Effort estimateEffort(InputStream in, DocumentMetadata document, Map<String, Object> optArguments) throws OXException {
+    public Effort estimateEffort(Session session, InputStream in, DocumentMetadata document, Map<String, Object> optArguments) throws OXException {
         if (false == indicatesImage(document)) {
             return Effort.NOT_APPLICABLE;
         }
@@ -202,6 +206,7 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
 
         if (null != optArguments) {
             optArguments.put(KnownArgument.FILE_TYPE.getId(), detectedFileType);
+            optArguments.put(KnownArgument.TIMEZONE.getId(), TimeZone.getTimeZone(ServerSessionAdapter.valueOf(session).getUser().getTimeZone()));
         }
 
         Effort effort = fastTypes.contains(detectedFileType) ? Effort.LOW_EFFORT : Effort.HIGH_EFFORT;
@@ -307,7 +312,8 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                             case EXIF:
                                 if (directory instanceof ExifSubIFDDirectory) {
                                     ExifSubIFDDirectory exifSubIFDDirectory = (ExifSubIFDDirectory) directory;
-                                    Date dateOriginal = exifSubIFDDirectory.getDateOriginal();
+                                    TimeZone defTimezone = TimeZone.getTimeZone("UTC");
+                                    Date dateOriginal = exifSubIFDDirectory.getDateOriginal(arguments == null ? defTimezone : (TimeZone) arguments.getOrDefault(KnownArgument.TIMEZONE.getId(), defTimezone));
                                     if (null != dateOriginal) {
                                         document.setCaptureDate(dateOriginal);
                                     }

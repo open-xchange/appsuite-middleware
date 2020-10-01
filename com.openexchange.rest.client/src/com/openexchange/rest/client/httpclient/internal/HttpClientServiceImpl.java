@@ -82,6 +82,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.util.PublicSuffixMatcher;
 import org.apache.http.conn.util.PublicSuffixMatcherLoader;
 import org.apache.http.cookie.CookieSpecProvider;
+import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.CookieSpecRegistries;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -403,6 +404,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
          * Add common settings
          */
         builder.setKeepAliveStrategy(new KeepAliveStrategy(config.getKeepAliveDuration()));
+        builder.setConnectionReuseStrategy(DefaultConnectionReuseStrategy.INSTANCE);
         builder.setRedirectStrategy(DenyLocalRedirectStrategy.DENY_LOCAL_INSTANCE);
 
         PublicSuffixMatcher publicSuffixMatcher = PublicSuffixMatcherLoader.getDefault();

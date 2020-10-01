@@ -67,12 +67,13 @@ public interface MediaMetadataExtractorService {
     /**
      * Checks the effort of extracting media metadata from given input stream.
      *
+     * @param session The user session
      * @param provider The provider to obtain the input stream to examine
      * @param document The document associated with given stream
      * @return The effort estimation result
      * @throws OXException If effort estimation fails
      */
-    EstimationResult estimateEffort(InputStreamProvider provider, DocumentMetadata document) throws OXException;
+    EstimationResult estimateEffort(Session session, InputStreamProvider provider, DocumentMetadata document) throws OXException;
 
     /**
      * Extracts media metadata from given stream using specified extractor and applies them to specified document.

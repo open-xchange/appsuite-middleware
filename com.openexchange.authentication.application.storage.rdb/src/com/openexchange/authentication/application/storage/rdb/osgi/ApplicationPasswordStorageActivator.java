@@ -70,6 +70,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.mailmapping.MailResolverService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
@@ -95,6 +96,11 @@ public class ApplicationPasswordStorageActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { DatabaseService.class, ContextService.class, CryptoService.class, CapabilityService.class, LeanConfigurationService.class, UserService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { MailResolverService.class };
     }
 
     @Override

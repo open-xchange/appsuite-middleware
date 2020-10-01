@@ -5,7 +5,7 @@ BuildArch:     noarch
 BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 9
+%define        ox_release 10
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -104,6 +104,8 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/ox
 
 %changelog
+* Wed Sep 23 2020 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2020-09-29 (5869)
 * Fri Sep 11 2020 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2020-09-14 (5857)
 * Mon Aug 24 2020 Carsten Hoeger <choeger@open-xchange.com>

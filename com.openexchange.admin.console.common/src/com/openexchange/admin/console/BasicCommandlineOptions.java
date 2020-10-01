@@ -568,9 +568,6 @@ public abstract class BasicCommandlineOptions {
             password = ADMIN_PASSWORD;
         }
         String user = (String) parser.getOptionValue(this.adminUserOption);
-        if (user == null || password == null) {
-            throw new InvalidCredentialsException("Missing credentials");
-        }
         return new Credentials(user, password);
     }
 

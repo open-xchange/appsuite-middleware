@@ -1202,7 +1202,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             FileStorageInputStreamProvider streamProvider = new FileStorageInputStreamProvider(document.getFilestoreLocation(), fileStorage);
 
             // Check...
-            EstimationResult result = extractorService.estimateEffort(streamProvider, document);
+            EstimationResult result = extractorService.estimateEffort(session, streamProvider, document);
             if (result.isNotApplicable()) {
                 // No extractors or not applicable
                 document.setMediaStatus(MediaStatus.none());
