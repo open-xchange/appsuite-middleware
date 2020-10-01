@@ -52,7 +52,7 @@ package com.openexchange.pns.impl;
 import com.openexchange.pns.PushNotification;
 
 /**
- * Simple key that combines user and topic.
+ * Simple key that combines context identifier and topic.
  */
 class ContextAndTopicKey {
 

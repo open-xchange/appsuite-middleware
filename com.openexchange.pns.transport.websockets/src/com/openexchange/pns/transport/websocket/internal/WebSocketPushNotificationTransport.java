@@ -60,7 +60,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -341,7 +340,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     @Override
     public void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException {
         if (null != notifications && 0 < notifications.size()) {
-            for (Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
+            for (Map.Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
                 transport(entry.getKey(), entry.getValue());
             }
         }
@@ -383,6 +382,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         String textMessage = message.getMessage().toString();
         int userId = uac.getUserId();
         int contextId = uac.getContextId();
+        LOG.debug("Going to send notification \"{}\" via transport '{}' for user {} in context {}", notification.getTopic(), ID, I(userId), I(contextId));
         webSocketService.sendMessage(textMessage, notification.getSourceToken(), clientAndPathFilter.getPathFilter(), userId, contextId);
     }
 

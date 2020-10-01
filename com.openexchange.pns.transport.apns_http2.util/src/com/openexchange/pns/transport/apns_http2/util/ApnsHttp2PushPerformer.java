@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.transport.apns_http2.util;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -96,7 +97,7 @@ public class ApnsHttp2PushPerformer {
 
     /**
      * Initializes a new {@link ApnsHttp2PushPerformer}.
-     * 
+     *
      * @param ID The ID of the transport mechanism, see {@link KnownTransport}
      * @param providers A prior sorted list of {@link ApnsHttp2OptionsProvider}
      * @param subscriptionRegistry The PNS subscription registry
@@ -126,7 +127,8 @@ public class ApnsHttp2PushPerformer {
         Map<String, List<Entry<PushMatch, ApnsPushNotification>>> payloadsPerClient = new HashMap<String, List<Entry<PushMatch, ApnsPushNotification>>>();
         Map<String, ApnsHttp2Options> optionsPerClient = new HashMap<String, ApnsHttp2Options>();
         for (Map.Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
-            for (Entry<PushMatch, ApnsPushNotification> payload : getPayloadsPerDevice(entry.getKey(), entry.getValue(), optionsPerClient).entrySet()) {
+            PushNotification notification = entry.getKey();
+            for (Map.Entry<PushMatch, ApnsPushNotification> payload : getPayloadsPerDevice(notification, entry.getValue(), optionsPerClient).entrySet()) {
                 String client = payload.getKey().getClient();
                 com.openexchange.tools.arrays.Collections.put(payloadsPerClient, client, payload);
             }
@@ -134,7 +136,7 @@ public class ApnsHttp2PushPerformer {
         /*
          * perform transport to devices of each client
          */
-        for (Map.Entry<String, List<Entry<PushMatch, ApnsPushNotification>>> entry : payloadsPerClient.entrySet()) {
+        for (Map.Entry<String, List<Map.Entry<PushMatch, ApnsPushNotification>>> entry : payloadsPerClient.entrySet()) {
             transport(entry.getKey(), entry.getValue(), optionsPerClient);
         }
     }
@@ -145,6 +147,7 @@ public class ApnsHttp2PushPerformer {
             ApnsPushNotification payloadPerDevice = getPayloadPerDevice(notification, match, optionsPerClient);
             if (null != payloadPerDevice) {
                 payloadsPerDevice.put(match, payloadPerDevice);
+                LOG.debug("Going to send notification \"{}\" via transport '{}' for user {} in context {} to device token {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), payloadPerDevice.getToken());
             }
         }
         return payloadsPerDevice;
@@ -165,6 +168,9 @@ public class ApnsHttp2PushPerformer {
     }
 
     private ApnsPushNotification getPayload(Object messageObject, String deviceToken, String topic) throws OXException {
+        if (messageObject == null) {
+            throw PushExceptionCodes.UNSUPPORTED_MESSAGE_CLASS.create("null");
+        }
         if (messageObject instanceof ApnsPushNotification) {
             return (ApnsPushNotification) messageObject;
         }
@@ -177,7 +183,7 @@ public class ApnsHttp2PushPerformer {
         if (messageObject instanceof String) {
             return new SimpleApnsPushNotification(deviceToken, topic, (String) messageObject);
         }
-        throw PushExceptionCodes.UNSUPPORTED_MESSAGE_CLASS.create(null == messageObject ? "null" : messageObject.getClass().getName());
+        throw PushExceptionCodes.UNSUPPORTED_MESSAGE_CLASS.create(messageObject.getClass().getName());
     }
 
     private ApnsPushNotification toPayload(Map<String, Object> message, String deviceToken, String topic) {
@@ -248,9 +254,8 @@ public class ApnsHttp2PushPerformer {
         return builder.build();
     }
 
-    private void transport(String client, List<Entry<PushMatch, ApnsPushNotification>> payloads, Map<String, ApnsHttp2Options> optionsPerClient) throws OXException {
-        List<NotificationResponsePerDevice> notifications = null;
-        notifications = transport(optionsPerClient.get(client), getPayloadsPerDevice(payloads));
+    private void transport(String client, List<Map.Entry<PushMatch, ApnsPushNotification>> payloads, Map<String, ApnsHttp2Options> optionsPerClient) throws OXException {
+        List<NotificationResponsePerDevice> notifications = transport(optionsPerClient.get(client), getPayloadsPerDevice(payloads));
         processNotificationResults(notifications, payloads);
     }
 
@@ -264,7 +269,7 @@ public class ApnsHttp2PushPerformer {
         return results;
     }
 
-    private void processNotificationResults(List<NotificationResponsePerDevice> notifications, List<Entry<PushMatch, ApnsPushNotification>> payloads) {
+    private void processNotificationResults(List<NotificationResponsePerDevice> notifications, List<Map.Entry<PushMatch, ApnsPushNotification>> payloads) {
         if (null == notifications || notifications.isEmpty()) {
             return;
         }
@@ -316,7 +321,7 @@ public class ApnsHttp2PushPerformer {
         return "BadDeviceToken".equals(rejectionReason) || "Unregistered".equals(rejectionReason);
     }
 
-    private static PushMatch findMatching(String deviceToken, List<Entry<PushMatch, ApnsPushNotification>> payloads) {
+    private static PushMatch findMatching(String deviceToken, List<Map.Entry<PushMatch, ApnsPushNotification>> payloads) {
         if (null != deviceToken) {
             for (Map.Entry<PushMatch, ApnsPushNotification> entry : payloads) {
                 if (deviceToken.equals(entry.getValue().getToken())) {
@@ -356,9 +361,9 @@ public class ApnsHttp2PushPerformer {
         return false;
     }
 
-    private static List<ApnsPushNotification> getPayloadsPerDevice(List<Entry<PushMatch, ApnsPushNotification>> payloads) {
+    private static List<ApnsPushNotification> getPayloadsPerDevice(List<Map.Entry<PushMatch, ApnsPushNotification>> payloads) {
         List<ApnsPushNotification> payloadsPerDevice = new ArrayList<ApnsPushNotification>(payloads.size());
-        for (Entry<PushMatch, ApnsPushNotification> entry : payloads) {
+        for (Map.Entry<PushMatch, ApnsPushNotification> entry : payloads) {
             payloadsPerDevice.add(entry.getValue());
         }
         return payloadsPerDevice;

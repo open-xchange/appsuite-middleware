@@ -89,7 +89,13 @@ public interface PushNotificationTransport {
      * @param notifications The notifications with their corresponding push matches to transport
      * @throws OXException If given notification cannot be transported
      */
-    void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException;
+    default void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException {
+        if (null != notifications) {
+            for (Map.Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
+                transport(entry.getKey(), entry.getValue());
+            }
+        }
+    }
 
     /**
      * Gets this service's identifier.
