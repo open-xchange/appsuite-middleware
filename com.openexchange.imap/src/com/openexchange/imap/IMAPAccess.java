@@ -558,7 +558,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Try to connect to IMAP server
              */
             final IIMAPProperties imapConfProps = (IIMAPProperties) config.getMailProperties();
-            String tmpPass = getMailConfig().getPassword();
+            String tmpPass = config.getPassword();
             String login = config.getLogin();
             /*
              * Get properties
