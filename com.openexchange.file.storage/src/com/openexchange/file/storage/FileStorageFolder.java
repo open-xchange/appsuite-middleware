@@ -55,6 +55,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EntityInfo;
 
 /**
@@ -253,16 +254,24 @@ public interface FileStorageFolder extends FileStorageConstants {
 
     /**
      * Gets the entity info from folder creator
-     * 
+     *
      * @return The entity info
      */
     EntityInfo getCreatedFrom();
 
     /**
      * Gets the entity info from latest modificator
-     * 
+     *
      * @return The entity info
      */
     EntityInfo getModifiedFrom();
 
+    /**
+     * Gets an account error related to the folder.
+     *
+     * @return The account error of the folder
+     */
+    default OXException getAccountError() {
+       return null;
+    }
 }

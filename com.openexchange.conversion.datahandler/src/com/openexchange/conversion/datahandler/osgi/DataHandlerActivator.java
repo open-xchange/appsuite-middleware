@@ -1,4 +1,3 @@
-
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -48,90 +47,41 @@
  *
  */
 
-package com.openexchange.file.storage.xox;
+package com.openexchange.conversion.datahandler.osgi;
 
-import com.openexchange.annotation.NonNull;
-
-import com.openexchange.annotation.Nullable;
-import com.openexchange.exception.OXException;
-import java.util.Date;
-import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.conversion.datahandler.DataHandlers;
+import com.openexchange.conversion.datahandler.Json2OXExceptionDataHandler;
+import com.openexchange.conversion.datahandler.OXException2JsonDataHandler;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link FileStorageAccountError}
+ * {@link DataHandlerActivator}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class FileStorageAccountError {
+public class DataHandlerActivator extends HousekeepingActivator {
 
-    private OXException exception;
-    private Date timeStamp;
+    private static final Logger LOG = LoggerFactory.getLogger(DataHandlerActivator.class);
 
-    /**
-     * Initializes a new {@link FileStorageAccountError}.
-     */
-    public FileStorageAccountError() {
-        this(null, null);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
-    /**
-     * Initializes a new {@link FileStorageAccountError} with the current time as time stamp
-     *
-     * @param exception The exception
-     */
-    public FileStorageAccountError(@NonNull OXException exception) {
-        this(Objects.requireNonNull(exception, "exception must not be null"), null);
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
+        registerService(DataHandler.class, new Json2OXExceptionDataHandler(), singletonDictionary("identifier", DataHandlers.JSON2OXEXCEPTION));
+        registerService(DataHandler.class, new OXException2JsonDataHandler(), singletonDictionary("identifier", DataHandlers.OXEXCEPTION2JSON));
     }
 
-    /**
-     * Initializes a new {@link FileStorageAccountError}.
-     *
-     * @param exception The error code, might be <code>null</code>
-     * @param timeStamp The time stamp of when the error occurred, might be <code>null</code>
-     */
-    public FileStorageAccountError(@Nullable OXException exception, @Nullable Date timeStamp) {
-        this.exception = exception;
-        this.timeStamp = timeStamp != null ? timeStamp : new Date();
-    }
-
-    /**
-     * Gets the error code
-     *
-     * @return The errorCode
-     */
-    public @Nullable OXException getException() {
-        return exception;
-    }
-
-    /**
-     * Sets the error code
-     *
-     * @param exception The exception to set, might be <code>null</code>
-     * @return this
-     */
-    public FileStorageAccountError setException(@Nullable OXException exception) {
-        this.exception = exception;
-        return this;
-    }
-
-    /**
-     * Gets the time stamp
-     *
-     * @return The time stamp of when the error occurred, or <code>null</code>
-     */
-    public @Nullable Date getTimeStamp() {
-        return timeStamp;
-    }
-
-    /**
-     * Sets the time stamp
-     *
-     * @param timeStamp The timeStamp to set, might be <code>null</code>
-     * @return this
-     */
-    public FileStorageAccountError setTimeStamp(@Nullable Date timeStamp) {
-        this.timeStamp = timeStamp;
-        return this;
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
+        super.stopBundle();
     }
 }

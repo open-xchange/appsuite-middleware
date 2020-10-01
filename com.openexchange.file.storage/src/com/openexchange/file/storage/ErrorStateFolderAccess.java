@@ -47,15 +47,12 @@
  *
  */
 
-package com.openexchange.file.storage.xox;
+package com.openexchange.file.storage;
 
 import java.util.Objects;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStorageFolderAccess;
-import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.java.Functions.OXFunction;
 
 /**
  * {@link ErrorStateFolderAccess} - A {@link FileStorageFolderAccess} implementation which can be used in case of an account error.
@@ -67,23 +64,40 @@ import com.openexchange.file.storage.Quota.Type;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-class ErrorStateFolderAccess implements FileStorageFolderAccess {
+public class ErrorStateFolderAccess implements FileStorageFolderAccess {
 
     private final OXException error;
-    private final ErrorStateFolderAccess.OXFunction<String, FileStorageFolder> getFolderFunction;
+    private final OXFunction<String, FileStorageFolderStub, OXException> getFolderFunction;
 
     /**
-     * {@link OXFunction} Represents a OXException aware function that accepts one argument and produces a result.
+     * {@link FileStorageFolderStub} represents a folder which is defective and will not be cached
      *
      * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
      * @since v7.10.5
-     * @param <T> The type of the input to the function
-     * @param <R> The type of the result of the function
      */
-    @FunctionalInterface
-    public interface OXFunction<T, R> {
+    public static class FileStorageFolderStub extends DefaultFileStorageFolder implements CacheAware {
 
-        R apply(T t) throws OXException;
+        private OXException accountError;
+
+        @Override
+        public boolean cacheable() {
+            //Do not cache corrupt folders
+            return false;
+        }
+
+        @Override
+        public OXException getAccountError() {
+            return accountError;
+        }
+
+        /**
+         * Sets the account error as {@link OXException}
+         *
+         * @param accountError The account error as {@link OXException}
+         */
+        public void setAccountError(OXException accountError) {
+            this.accountError = accountError;
+        }
     }
 
     /**
@@ -92,7 +106,7 @@ class ErrorStateFolderAccess implements FileStorageFolderAccess {
      * @param error The current problem preventing to query the remote folders
      * @param getFolderFunction A function which will be used to retrieve the last known folder, when loaded
      */
-    public ErrorStateFolderAccess(OXException error, OXFunction<String, FileStorageFolder> getFolderFunction) {
+    public ErrorStateFolderAccess(OXException error, OXFunction<String, FileStorageFolderStub, OXException> getFolderFunction) {
         this.error = Objects.requireNonNull(error, "error must not be null");
         this.getFolderFunction = Objects.requireNonNull(getFolderFunction, "getFolderFunction must not be null");
     }
@@ -104,15 +118,13 @@ class ErrorStateFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
-        FileStorageFolder lastKnownFolder = this.getFolderFunction.apply(folderId);
+        FileStorageFolderStub lastKnownFolder = this.getFolderFunction.apply(folderId);
         if (lastKnownFolder == null) {
             throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
         }
 
-        lastKnownFolder.getProperties().put("accountError", error);
-
-        //TODO remove FolderAccountErrorField
-        //lastKnownFolder.getProperties().put(FolderAccountErrorField.getInstance(), error);
+        //Set the last known error as "account error" when returning the folder
+        lastKnownFolder.setAccountError(error);
         return lastKnownFolder;
     }
 

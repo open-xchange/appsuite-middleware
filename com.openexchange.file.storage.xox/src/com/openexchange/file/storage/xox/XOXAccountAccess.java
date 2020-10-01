@@ -54,9 +54,13 @@ import java.util.Objects;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.conversion.datahandler.DataHandlers;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
+import com.openexchange.file.storage.ErrorStateFolderAccess;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountErrorHandler;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -64,7 +68,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.folderstorage.FederateSharingFolders;
+import com.openexchange.folderstorage.FederatedSharingFolders;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
@@ -80,7 +84,7 @@ public class XOXAccountAccess implements CapabilityAware {
     private final FileStorageService service;
     private final Session session;
     private final ApiClientService clientFactory;
-    private final XOXErrorHandler errorHandler;
+    private final FileStorageAccountErrorHandler errorHandler;
 
     private boolean isConnected;
     private ShareClient shareClient;
@@ -106,7 +110,11 @@ public class XOXAccountAccess implements CapabilityAware {
         this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory must not be null");
         this.account = Objects.requireNonNull(account, "account must not be null");
         this.session = Objects.requireNonNull(session, "session must not be null");
-        this.errorHandler = new XOXErrorHandler(Objects.requireNonNull(conversionService, "conversionService must not be null"), this, retryAfterError);
+
+        conversionService = Objects.requireNonNull(conversionService, "conversionService must not be null");
+        DataHandler ox2jsonDataHandler = conversionService.getDataHandler(DataHandlers.OXEXCEPTION2JSON);
+        DataHandler json2oxDataHandler = conversionService.getDataHandler(DataHandlers.JSON2OXEXCEPTION);
+        this.errorHandler = new FileStorageAccountErrorHandler(ox2jsonDataHandler, json2oxDataHandler, this, session, retryAfterError);
     }
 
     /**
@@ -167,7 +175,7 @@ public class XOXAccountAccess implements CapabilityAware {
             //@formatter:off
             return new ErrorStateFolderAccess(
                 recentException,
-                (String folderId) -> FederateSharingFolders.getLastKnownFolder(account, folderId, session));
+                (String folderId) -> FederatedSharingFolders.getLastKnownFolder(account, folderId, session));
             //@formatter:on
         }
         return new XOXFolderAccess(this, shareClient);
@@ -223,6 +231,7 @@ public class XOXAccountAccess implements CapabilityAware {
     @Override
     public void close() {
         shareClient = null;
+        isConnected = false;
     }
 
     @Override

@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Common conversion datahandler
+Bundle-SymbolicName: com.openexchange.conversion.datahandler
+Bundle-Version: 7.10.4
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.conversion.datahandler
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.ajax.parser,
+ com.openexchange.ajax.writer,
+ com.openexchange.conversion,
+ com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.session,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ com.openexchange.user,
+ org.json,
+ org.osgi.framework,
+ org.slf4j
+Export-Package: com.openexchange.conversion.datahandler
+Bundle-Activator: com.openexchange.conversion.datahandler.osgi.DataHandlerActivator

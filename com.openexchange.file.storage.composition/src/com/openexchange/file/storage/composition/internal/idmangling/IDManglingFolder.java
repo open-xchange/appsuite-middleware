@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CacheAware;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
@@ -279,4 +280,8 @@ public class IDManglingFolder implements TypeAware, CacheAware, OriginAwareFileS
         return null;
     }
 
+    @Override
+    public OXException getAccountError() {
+        return delegate.getAccountError();
+    }
 }

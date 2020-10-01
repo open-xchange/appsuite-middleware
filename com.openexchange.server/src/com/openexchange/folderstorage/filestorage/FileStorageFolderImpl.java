@@ -49,8 +49,11 @@
 
 package com.openexchange.folderstorage.filestorage;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.config.cascade.ConfigView;
@@ -65,6 +68,9 @@ import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderProperty;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
@@ -90,7 +96,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FileStorageFolderImpl extends AbstractFolder {
+public final class FileStorageFolderImpl extends AbstractFolder implements ParameterizedFolder {
 
     private static final long serialVersionUID = 6445442372690458946L;
 
@@ -104,6 +110,8 @@ public final class FileStorageFolderImpl extends AbstractFolder {
     private static final String CAPABILITY_CASE_INSENSITIVE = Strings.asciiLowerCase(FileStorageCapability.CASE_INSENSITIVE.name());
     private static final String CAPABILITY_AUTO_RENAME_FOLDERS = Strings.asciiLowerCase(FileStorageCapability.AUTO_RENAME_FOLDERS.name());
     private static final String CAPABILITY_RESTORE = Strings.asciiLowerCase(FileStorageCapability.RESTORE.name());
+
+    private static final FolderField ACCOUNT_ERROR = AccountErrorField.getInstance();
 
     /**
      * <code>"9"</code>
@@ -165,6 +173,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
 
     private boolean cacheable;
     private final FileStorageDefaultFolderType defaultFolderType;
+    private final Map<FolderField, FolderProperty> properties;
 
     /**
      * The private folder identifier.
@@ -284,6 +293,9 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         modifiedBy = fsFolder.getModifiedBy();
         createdFrom = fsFolder.getCreatedFrom();
         modifiedFrom = fsFolder.getModifiedFrom();
+
+        properties = new HashMap<FolderField, FolderProperty>(1);
+        setProperty(ACCOUNT_ERROR, fsFolder.getAccountError());
     }
 
     private Set<String> getSupportedCapabilities(FileStorageFolder fsFolder, IDBasedFolderAccess folderAccess) {
@@ -437,6 +449,20 @@ public final class FileStorageFolderImpl extends AbstractFolder {
     @Override
     public boolean isGlobalID() {
         return false;
+    }
+
+    @Override
+    public void setProperty(FolderField name, Object value) {
+        if (null == value) {
+            properties.remove(name);
+        } else {
+            properties.put(name, new FolderProperty(name.getName(), value));
+        }
+    }
+
+    @Override
+    public Map<FolderField, FolderProperty> getProperties() {
+        return Collections.unmodifiableMap(properties);
     }
 
 }

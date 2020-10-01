@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
@@ -145,13 +146,13 @@ public class XctxFileStorageService implements FileStorageService, AccountAware,
     public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
         assertCapability(session);
         FileStorageAccount account = getAccountManager().getAccount(accountId, session);
-        return new XctxAccountAccess(services, account, session);
+        return new XctxAccountAccess(services, account, session, getRetryAfterError(session));
     }
 
     @Override
     public void testConnection(FileStorageAccount account, Session session) throws OXException {
         assertCapability(session);
-        XctxAccountAccess accountAccess = new XctxAccountAccess(services, account, session);
+        XctxAccountAccess accountAccess = new XctxAccountAccess(services, account, session, getRetryAfterError(session));
         accountAccess.connect();
         accountAccess.close();
     }
@@ -166,6 +167,18 @@ public class XctxFileStorageService implements FileStorageService, AccountAware,
         if (!hasCapability(session)) {
             throw ShareExceptionCodes.NO_SUBSCRIBE_SHARE_PERMISSION.create();
         }
+    }
+
+    /**
+     * Returns the configured retryAfter value which indicates after which time access to an error afflicted account can be retried.
+     *
+     * @param session The session
+     * @return The configured amount of time in seconds
+     * @throws OXException
+     */
+    private int getRetryAfterError(Session session) throws OXException {
+        LeanConfigurationService configuration = this.services.getServiceSafe(LeanConfigurationService.class);
+        return configuration.getIntProperty(session.getUserId(), session.getContextId(), XctxFileStorageProperties.RETRY_AFTER_ERROR);
     }
 
     @Override
