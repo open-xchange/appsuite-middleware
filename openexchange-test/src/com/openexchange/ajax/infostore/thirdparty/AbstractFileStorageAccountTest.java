@@ -49,6 +49,18 @@
 
 package com.openexchange.ajax.infostore.thirdparty;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -58,10 +70,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import org.jcodec.common.io.IOUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.jcodec.common.io.IOUtils;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.groupware.modules.Module;
@@ -90,12 +102,6 @@ import com.openexchange.testing.httpclient.modules.ConfigApi;
 import com.openexchange.testing.httpclient.modules.FilestorageApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.InfostoreApi;
-
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.B;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
 
 /**
  * {@link AbstractFileStorageAccountTest}
@@ -412,7 +418,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
     protected List<String> deleteFolder(FoldersApi foldersApi, String folderId, boolean hardDelete) throws ApiException {
         final boolean failOnError = true;
         final boolean extendedResponse = false;
-        FoldersCleanUpResponse response = foldersApi.deleteFolders(foldersApi.getApiClient().getSession(), Collections.singletonList(folderId), null, null, null, B(hardDelete), B(failOnError), B(extendedResponse), null);
+        FoldersCleanUpResponse response = foldersApi.deleteFolders(foldersApi.getApiClient().getSession(), Collections.singletonList(folderId), null, null, null, B(hardDelete), B(failOnError), B(extendedResponse), null, null);
         return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
     }
 

@@ -211,7 +211,22 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
      * @throws ApiException
      */
     protected static ShareLinkData getOrCreateShareLink(FolderManager folderManager, ShareManagementApi smApi, String folder) throws ApiException {
+        return getOrCreateShareLink(folderManager, smApi, folder, null);
+    }
+    
+    /**
+     * Creates a new share link for the given folder
+     *
+     * @param folderManager The folder manger to adjust the timestamp in after the link was created
+     * @param smApi The API to use
+     * @param folder The folder to create a share link for
+     * @param item The item id
+     * @return The guest id of for the new link
+     * @throws ApiException
+     */
+    protected static ShareLinkData getOrCreateShareLink(FolderManager folderManager, ShareManagementApi smApi, String folder, String item) throws ApiException {
         ShareTargetData data = new ShareTargetData();
+        data.setItem(item);
         data.setFolder(folder);
         data.setModule(INFOSTORE);
         ShareLinkResponse shareLink = smApi.getShareLink(folderManager.getSession(), data);
@@ -261,11 +276,10 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
      * @param smApi The API to use
      * @param shareLink The share link to add ass storage
      * @param password The optional password to set
-     * @param providerId The provider ID the response must be from
      * @return The account ID
      * @throws ApiException
      */
-    protected String addOXShareAccount(ShareManagementApi smApi, String shareLink, String password, String providerId) throws ApiException {
+    protected String addOXShareAccount(ShareManagementApi smApi, String shareLink, String password) throws ApiException {
         ExtendedMountShareBody body = getExtendedBody(shareLink, password, "Share from " + testUser.getLogin());
         MountShareResponse mountResponse = smApi.mount(smApi.getApiClient().getSession(), body);
 
@@ -277,7 +291,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         assertThat(data.getModule(), is(String.valueOf(Module.INFOSTORE.getFolderConstant())));
         addTearDownOperation(() -> deleteOXShareAccount(smApi, shareLink));
 
-        analyze(smApi, shareLink, StateEnum.SUBSCRIBED, providerId);
+        analyze(smApi, shareLink, StateEnum.SUBSCRIBED);
         return accountId;
     }
 
@@ -292,12 +306,11 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
      * @param smApi The API to use
      * @param shareLinkData The data
      * @param expectedState The expected state
-     * @param providerId The ID of the provider the response must be from
      * @return The response
      * @throws ApiException In case of error
      */
-    protected static ShareLinkAnalyzeResponseData analyze(ShareManagementApi smApi, ShareLinkData shareLinkData, StateEnum expectedState, String providerId) throws ApiException {
-        return analyze(smApi, shareLinkData.getUrl(), expectedState, providerId);
+    protected static ShareLinkAnalyzeResponseData analyze(ShareManagementApi smApi, ShareLinkData shareLinkData, StateEnum expectedState) throws ApiException {
+        return analyze(smApi, shareLinkData.getUrl(), expectedState);
     }
 
     /**
@@ -306,11 +319,10 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
      * @param smApi The API to use
      * @param shareLink The link to analyze
      * @param expectedState The expected state
-     * @param providerId The ID of the provider the response must be from
      * @return The response
      * @throws ApiException In case of error
      */
-    protected static ShareLinkAnalyzeResponseData analyze(ShareManagementApi smApi, String shareLink, StateEnum expectedState, String providerId) throws ApiException {
+    protected static ShareLinkAnalyzeResponseData analyze(ShareManagementApi smApi, String shareLink, StateEnum expectedState) throws ApiException {
         ShareLinkAnalyzeResponse analyzeShareLink = smApi.analyzeShareLink(smApi.getApiClient().getSession(), getBody(shareLink));
         checkResponse(analyzeShareLink.getError(), analyzeShareLink.getErrorDesc(), analyzeShareLink.getData());
         ShareLinkAnalyzeResponseData response = analyzeShareLink.getData();
@@ -327,7 +339,6 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
             assertThat(response.getFolder(), notNullValue());
         }
 
-        assertThat(response.getService(), is(providerId));
         return response;
     }
 

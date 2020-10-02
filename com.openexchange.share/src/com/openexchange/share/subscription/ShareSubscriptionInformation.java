@@ -59,8 +59,6 @@ public final class ShareSubscriptionInformation {
 
     private final String accountId;
 
-    private final String providerId;
-
     private final String module;
 
     private final String folder;
@@ -68,27 +66,15 @@ public final class ShareSubscriptionInformation {
     /**
      * Initializes a new {@link ShareSubscriptionInformation}.
      * 
-     * @param providerId The provider identifier that created the account
      * @param accountId The account ID of the subscription
      * @param module The module ID
      * @param folder The folder ID
      */
-    public ShareSubscriptionInformation(String providerId, String accountId, String module, String folder) {
+    public ShareSubscriptionInformation(String accountId, String module, String folder) {
         super();
         this.accountId = accountId;
-        this.providerId = providerId;
-
         this.module = module;
         this.folder = folder;
-    }
-
-    /**
-     * Gets the providerId
-     *
-     * @return The providerId
-     */
-    public String getProviderId() {
-        return providerId;
     }
 
     /**
@@ -120,6 +106,6 @@ public final class ShareSubscriptionInformation {
 
     @Override
     public String toString() {
-        return "ShareSubscriptionInformation [accountId=" + accountId + ", providerId=" + providerId + ", module=" + module + ", folder=" + folder + "]";
+        return "ShareSubscriptionInformation [accountId=" + accountId + ", module=" + module + ", folder=" + folder + "]";
     }
 }

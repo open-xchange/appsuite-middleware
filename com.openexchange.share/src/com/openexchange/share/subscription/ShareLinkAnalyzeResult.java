@@ -57,9 +57,8 @@ package com.openexchange.share.subscription;
  */
 public final class ShareLinkAnalyzeResult {
 
-    private final ShareSubscriptionInformation infos;
-
     private final ShareLinkState state;
+    private final ShareSubscriptionInformation infos;
 
     /**
      * Initializes a new {@link ShareLinkAnalyzeResult}.
@@ -69,17 +68,8 @@ public final class ShareLinkAnalyzeResult {
      */
     public ShareLinkAnalyzeResult(ShareLinkState state, ShareSubscriptionInformation infos) {
         super();
-        this.infos = infos;
         this.state = state;
-    }
-
-    /**
-     * Gets the infos
-     *
-     * @return The infos
-     */
-    public ShareSubscriptionInformation getInfos() {
-        return infos;
+        this.infos = infos;
     }
 
     /**
@@ -91,9 +81,18 @@ public final class ShareLinkAnalyzeResult {
         return state;
     }
 
+    /**
+     * Gets the infos
+     *
+     * @return The infos
+     */
+    public ShareSubscriptionInformation getInfos() {
+        return infos;
+    }
+
     @Override
     public String toString() {
-        return "ShareLinkAnalyzeResult [infos=" + (null != infos ? infos.toString() : "null") + ", state=" + state + "]";
+        return "ShareLinkAnalyzeResult [state=" + state + ", infos=" + (null != infos ? infos.toString() : "null") + "]";
     }
 
 }

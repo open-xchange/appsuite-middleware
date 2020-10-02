@@ -100,15 +100,15 @@ public class XctxLoginMethod implements LoginMethodClosure {
          */
         GuestInfo guestInfo = services.getServiceSafe(ShareService.class).resolveGuest(baseToken);
         if (null == guestInfo) {
-            return null;
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(baseToken);
         }
         Context context = services.getServiceSafe(ContextService.class).getContext(guestInfo.getContextID());
         if (false == context.isEnabled()) {
-            return null;
+            throw LoginExceptionCodes.USER_NOT_ACTIVE.create();
         }
         User guestUser = services.getServiceSafe(UserService.class).getUser(guestInfo.getGuestID(), context);
         if (false == guestUser.isMailEnabled()) {
-            return null;
+            throw LoginExceptionCodes.USER_NOT_ACTIVE.create();
         }
         /*
          * authenticate as needed
@@ -118,25 +118,18 @@ public class XctxLoginMethod implements LoginMethodClosure {
             case GUEST:
                 return new XctxAuthenticated(guestUser, context);
             case ANONYMOUS_PASSWORD:
-                checkPasswordIsSet();
-                if (password.equals(services.getServiceSafe(PasswordMechRegistry.class).get(ShareConstants.PASSWORD_MECH_ID).decode(guestUser.getUserPassword(), guestUser.getSalt()))) {
+                if (Strings.isNotEmpty(password) && password.equals(services.getServiceSafe(PasswordMechRegistry.class).get(ShareConstants.PASSWORD_MECH_ID).decode(guestUser.getUserPassword(), guestUser.getSalt()))) {
                     return new XctxAuthenticated(guestUser, context);
                 }
-                return null;
+                throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
             case GUEST_PASSWORD:
-                checkPasswordIsSet();
-                if (services.getServiceSafe(GuestService.class).authenticate(guestUser, context.getContextId(), password)) {
+                if (Strings.isNotEmpty(password) && services.getServiceSafe(GuestService.class).authenticate(guestUser, context.getContextId(), password)) {
                     return new XctxAuthenticated(guestUser, context);
                 }
-                return null;
+                throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
             default:
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unknown authentication " + guestInfo.getAuthentication());
         }
     }
 
-    private void checkPasswordIsSet() throws OXException {
-        if (Strings.isEmpty(password)) {
-            throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-        }
-    }
 }

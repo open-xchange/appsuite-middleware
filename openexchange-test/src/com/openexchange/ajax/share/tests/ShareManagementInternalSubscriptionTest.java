@@ -68,7 +68,6 @@ import com.openexchange.testing.httpclient.modules.ShareManagementApi;
  */
 public class ShareManagementInternalSubscriptionTest extends AbstractShareManagementTest {
 
-    private static final String INTERNAL_CTX_ID = "ictx";
     private ShareManagementApi smApi2;
 
     @Override
@@ -80,7 +79,7 @@ public class ShareManagementInternalSubscriptionTest extends AbstractShareManage
     @Test
     public void testInternalLink_Error() throws Exception {
         String shareLink = "http://localhost/appsuite/ui!&app=io.ox/2&folder=9001&id=9001";
-        analyze(smApi2, shareLink, StateEnum.INACCESSIBLE, INTERNAL_CTX_ID);
+        analyze(smApi2, shareLink, StateEnum.INACCESSIBLE);
     }
 
     @Test
@@ -101,13 +100,13 @@ public class ShareManagementInternalSubscriptionTest extends AbstractShareManage
          * Receive mail as user and extract share link
          */
         String shareLink = receiveShareLink(apiClient2, testUser.getLogin());
-        analyze(smApi2, shareLink, StateEnum.SUBSCRIBED, INTERNAL_CTX_ID);
+        analyze(smApi2, shareLink, StateEnum.SUBSCRIBED);
 
         /*
          * Remove user from folder permission
          */
         folderId = setFolderPermission(folderId, originalPermissions);
-        analyze(smApi2, shareLink, StateEnum.INACCESSIBLE, INTERNAL_CTX_ID);
+        analyze(smApi2, shareLink, StateEnum.INACCESSIBLE);
 
         ExtendedMountShareBody body = getExtendedBody(shareLink, null, "Share from " + testUser.getLogin());
         MountShareResponse mountShareResponse = smApi2.mount(smApi2.getApiClient().getSession(), body);

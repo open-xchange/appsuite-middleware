@@ -52,15 +52,19 @@ package com.openexchange.file.storage.xox.subscription;
 import static com.openexchange.api.client.common.OXExceptionParser.matches;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE_WITH_PASSWORD;
-import static com.openexchange.share.subscription.ShareLinkState.INACCESSIBLE;
+import static com.openexchange.share.subscription.ShareLinkState.FORBIDDEN;
+import static com.openexchange.share.subscription.ShareLinkState.UNRESOLVABLE;
 import com.openexchange.api.client.ApiClient;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.ApiClientService;
+import com.openexchange.api.client.LoginInformation;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.xox.XOXFileStorageService;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -70,6 +74,7 @@ import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
 import com.openexchange.share.subscription.ShareLinkState;
 import com.openexchange.share.subscription.ShareSubscriptionInformation;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -123,7 +128,13 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
 
     @Override
     public ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException {
+        /*
+         * Check that the share can be subscribed
+         */
         requireAccess(session);
+        if (isSingleFileShare(shareLink)) {
+            return new ShareLinkAnalyzeResult(FORBIDDEN, new ShareSubscriptionInformation(null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
+        }
         /*
          * Check if account exists and still accessible
          */
@@ -138,13 +149,24 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
          */
         ApiClientService apiClientService = services.getServiceSafe(ApiClientService.class);
         ApiClient apiClient = null;
-        ShareLinkState state = INACCESSIBLE;
+        ShareLinkState state = UNRESOLVABLE;
         try {
             /*
              * If creation of the client throws no error, the share has been access successfully
              */
             apiClient = apiClientService.getApiClient(session, shareLink, null);
-            state = ADDABLE;
+            LoginInformation loginInformation = apiClient.getLoginInformation();
+            if (null != loginInformation) {
+                state = ADDABLE;
+                if (Strings.isNotEmpty(loginInformation.getLoginType()) && loginInformation.getLoginType().startsWith("guest")) {
+                    if (false == UserAliasUtility.isAlias(loginInformation.getRemoteMailAddress(), getAliases(ServerSessionAdapter.valueOf(session).getUser()))) {
+                        /*
+                         * Share is not for the current user
+                         */
+                        state = ShareLinkState.FORBIDDEN;
+                    }
+                }
+            }
         } catch (OXException e) {
             /*
              * Check if credentials are missing
@@ -159,7 +181,7 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
              */
             apiClientService.close(apiClient);
         }
-        return new ShareLinkAnalyzeResult(state, new ShareSubscriptionInformation(getId(), null, null, String.valueOf(Module.INFOSTORE.getFolderConstant())));
+        return new ShareLinkAnalyzeResult(state, new ShareSubscriptionInformation(null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
     }
 
     @Override
@@ -181,6 +203,11 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
     @Override
     public boolean isPasswordMissing(OXException e) {
         return matches(e, ApiClientExceptions.MISSING_CREDENTIALS, LoginExceptionCodes.INVALID_CREDENTIALS, LoginExceptionCodes.INVALID_GUEST_PASSWORD);
+    }
+
+    @Override
+    protected boolean isFolderRemoved(OXException e) {
+        return matches(e, ApiClientExceptions.NO_ACCESS, ApiClientExceptions.ACCESS_REVOKED, FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE);
     }
 
     /**

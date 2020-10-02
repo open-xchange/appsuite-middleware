@@ -25,4 +25,3 @@
       description: >-
         A JSON object containing the data for the update
       required: true
-

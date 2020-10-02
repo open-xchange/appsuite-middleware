@@ -56,6 +56,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.session.Session;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
+import com.openexchange.share.subscription.ShareLinkState;
 import com.openexchange.share.subscription.ShareSubscriptionExceptions;
 import com.openexchange.share.subscription.ShareSubscriptionInformation;
 import com.openexchange.share.subscription.ShareSubscriptionProvider;
@@ -68,6 +69,8 @@ import com.openexchange.share.subscription.ShareSubscriptionRegistry;
  * @since v7.10.5
  */
 public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServiceTracker<ShareSubscriptionProvider> implements ShareSubscriptionRegistry {
+
+    private static final ShareLinkAnalyzeResult UNRESOLVABLE = new ShareLinkAnalyzeResult(ShareLinkState.UNRESOLVABLE, null);
 
     /**
      * Initializes a new {@link ShareSubscriptionRegistryImpl}.
@@ -83,13 +86,13 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
         checkLinkIsUsable(shareLink);
         ShareSubscriptionProvider provider = getProvider(session, shareLink);
         if (null == provider) {
-            throw ShareSubscriptionExceptions.NOT_USABLE.create(shareLink);
+            return UNRESOLVABLE;
         }
         ShareLinkAnalyzeResult infos = provider.analyze(session, shareLink);
         if (null != infos) {
             return infos;
         }
-        throw ShareSubscriptionExceptions.NOT_USABLE.create(shareLink);
+        return UNRESOLVABLE;
     }
 
     @Override
@@ -107,7 +110,6 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
         checkLinkIsUsable(shareLink);
         ShareSubscriptionProvider provider = getProvider(session, shareLink);
         if (null != provider) {
-            checkPasswordIsSet(password);
             return provider.remount(session, shareLink, shareName, password);
         }
         throw ShareSubscriptionExceptions.MISSING_SUBSCRIPTION.create(shareLink);
@@ -117,7 +119,7 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
     public void unmount(Session session, String shareLink) throws OXException {
         checkLinkIsUsable(shareLink);
         /*
-         * Try all provider as "isSupported()" might not be true anymore
+         * Try all providers because the link might not be marked supported by the actual provider anymore
          */
         for (Iterator<ShareSubscriptionProvider> iterator = iterator(); iterator.hasNext();) {
             if (iterator.next().unmount(session, shareLink)) {
@@ -134,12 +136,6 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
     private void checkLinkIsUsable(String shareLink) throws OXException {
         if (Strings.isEmpty(shareLink)) {
             throw ShareSubscriptionExceptions.MISSING_LINK.create();
-        }
-    }
-
-    private void checkPasswordIsSet(String password) throws OXException {
-        if (Strings.isEmpty(password)) {
-            throw ShareSubscriptionExceptions.MISSING_CREDENTIALS.create();
         }
     }
 

@@ -153,7 +153,7 @@ public abstract class AbstractShareSubscriptionAction implements AJAXActionServi
      * @throws JSONException In case setting of values fails
      */
     protected AJAXRequestResult createResponse(ShareSubscriptionInformation infos) throws JSONException {
-        return createResponse(infos, new JSONObject(4));
+        return createResponse(infos, new JSONObject(3));
     }
 
     /**
@@ -165,10 +165,11 @@ public abstract class AbstractShareSubscriptionAction implements AJAXActionServi
      * @throws JSONException In case setting of values fails
      */
     protected AJAXRequestResult createResponse(ShareSubscriptionInformation infos, JSONObject response) throws JSONException {
-        response.put("account", infos.getAccountId());
-        response.put("module", infos.getModule());
-        response.put("folder", infos.getFolder());
-        response.put("service", infos.getProviderId());
+        if (null != infos) {
+            response.put("account", infos.getAccountId());
+            response.put("module", infos.getModule());
+            response.put("folder", infos.getFolder());
+        }
         return new AJAXRequestResult(response, new Date(System.currentTimeMillis()));
     }
 }

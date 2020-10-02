@@ -55,13 +55,13 @@ import static com.openexchange.share.AuthenticationMode.GUEST;
 import static com.openexchange.share.AuthenticationMode.GUEST_PASSWORD;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE_WITH_PASSWORD;
-import static com.openexchange.share.subscription.ShareLinkState.INACCESSIBLE;
-import java.util.HashSet;
-import java.util.Set;
+import static com.openexchange.share.subscription.ShareLinkState.FORBIDDEN;
+import static com.openexchange.share.subscription.ShareLinkState.UNRESOLVABLE;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.xctx.XctxFileStorageService;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.java.Strings;
@@ -72,7 +72,6 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.subscription.AbstractFileStorageSubscriptionProvider;
-import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
@@ -112,12 +111,8 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
         if (Module.INFOSTORE.getFolderConstant() != targetPath.getModule()) {
             return false;
         }
-        String baseToken = ShareTool.extractBaseToken(shareLink);
-        if (Strings.isEmpty(baseToken)) {
-            return false;
-        }
         try {
-            GuestInfo guestInfo = services.getServiceSafe(ShareService.class).resolveGuest(baseToken);
+            GuestInfo guestInfo = resolveGuest(shareLink);
             if (null == guestInfo) {
                 return false;
             }
@@ -136,11 +131,16 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
         return 60;
     }
 
-
-    
     @Override
     public ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException {
+        /*
+         * Check that the share can be subscribed 
+         */
         requireAccess(session);
+        if (isSingleFileShare(shareLink)) {
+            return new ShareLinkAnalyzeResult(FORBIDDEN, new ShareSubscriptionInformation(null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
+        }
+
         FileStorageAccountAccess accountAccess = getStorageAccountAccess(session, shareLink);
         if (null != accountAccess) {
             ShareLinkState state = checkAccessible(accountAccess, shareLink);
@@ -149,12 +149,11 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
         /*
          * Try to resolve the token to a guest and if found announce that it can be added
          */
-        GuestInfo guestInfo = services.getServiceSafe(ShareService.class).resolveGuest(ShareLinks.extractBaseToken(shareLink));
-        boolean requireMatchingMail = false;
-        if (requireMatchingMail && false == matchesByMail(ServerSessionAdapter.valueOf(session).getUser(), guestInfo)) {
-            return new ShareLinkAnalyzeResult(INACCESSIBLE, new ShareSubscriptionInformation(getId(), null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
+        GuestInfo guestInfo = resolveGuest(shareLink);
+        if (false == matchesByMail(ServerSessionAdapter.valueOf(session).getUser(), guestInfo)) {
+            return new ShareLinkAnalyzeResult(FORBIDDEN, new ShareSubscriptionInformation(null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
         }
-        ShareLinkState state = INACCESSIBLE;
+        ShareLinkState state = UNRESOLVABLE;
         if (null != guestInfo && null != guestInfo.getAuthentication()) {
             AuthenticationMode mode = guestInfo.getAuthentication();
             if (GUEST_PASSWORD.equals(mode) || ANONYMOUS_PASSWORD.equals(mode)) {
@@ -163,7 +162,7 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
                 state = ADDABLE;
             }
         }
-        return new ShareLinkAnalyzeResult(state, new ShareSubscriptionInformation(getId(), null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
+        return new ShareLinkAnalyzeResult(state, new ShareSubscriptionInformation(null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
     }
 
     @Override
@@ -176,26 +175,42 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
         return false;
     }
 
+    @Override
+    protected boolean isFolderRemoved(OXException e) {
+        if (FolderExceptionErrorMessage.prefix().equals(e.getPrefix())) {
+            if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.getNumber() == e.getCode()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Matches if the user is the correct recipient of the share
+     *
+     * @param user The user to match
+     * @param guestInfo The guest information of the share
+     * @return <code>true</code> if the share is for anonymous users or if an alias of the user matches as recipient, <code>false</code> otherwise
+     */
     private static boolean matchesByMail(User user, GuestInfo guestInfo) {
-        if (null == guestInfo || false == RecipientType.GUEST.equals(guestInfo.getRecipientType()) || Strings.isEmpty(guestInfo.getEmailAddress())) {
+        if (null == guestInfo || RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType())) {
+            /*
+             * Share is anonymous, can't apply check
+             */
+            return true;
+        }
+        if (Strings.isEmpty(guestInfo.getEmailAddress())) {
             return false;
         }
         return UserAliasUtility.isAlias(guestInfo.getEmailAddress(), getAliases(user));
     }
 
-    private static Set<String> getAliases(User user) {
-        Set<String> possibleAliases = new HashSet<String>();
-        if (Strings.isNotEmpty(user.getMail())) {
-            possibleAliases.add(user.getMail());
+    private GuestInfo resolveGuest(String shareLink) throws OXException {
+        String baseToken = ShareTool.getBaseToken(shareLink);
+        if (Strings.isEmpty(baseToken)) {
+            return null;
         }
-        if (null != user.getAliases()) {
-            for (String alias : user.getAliases()) {
-                if (Strings.isNotEmpty(alias)) {
-                    possibleAliases.add(alias);
-                }
-            }
-        }
-        return possibleAliases;
+        return services.getServiceSafe(ShareService.class).resolveGuest(baseToken);
     }
 
 }

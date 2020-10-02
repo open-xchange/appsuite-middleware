@@ -114,6 +114,13 @@ public interface LoginInformation {
      * @return The item
      */
     String getItem();
+    
+    /**
+     * Get the login type the remote system announced for the share 
+     *
+     * @return The login type, e.g. <code>guest</code> or <code>message</code>
+     */
+    String getLoginType();
 
     /**
      * Get an additional value that was gathered along the login request

@@ -73,6 +73,7 @@ public class DefaultLoginInformation implements LoginInformation {
     private String folderId;
     private String module;
     private String item;
+    private String loginType;
 
     /**
      * Initializes a new {@link DefaultLoginInformation}.
@@ -117,6 +118,11 @@ public class DefaultLoginInformation implements LoginInformation {
     @Override
     public String getItem() {
         return item;
+    }
+
+    @Override
+    public String getLoginType() {
+        return loginType;
     }
 
     @Override
@@ -197,8 +203,16 @@ public class DefaultLoginInformation implements LoginInformation {
     public void setItem(String item) {
         this.item = item;
     }
-    
-    
+
+    /**
+     * Sets the loginType
+     *
+     * @param loginType The loginType to set
+     */
+    public void setLoginType(String loginType) {
+        this.loginType = loginType;
+    }
+
     /**
      * Parses the values of the map to a {@link DefaultLoginInformation}
      * <p>
@@ -253,6 +267,9 @@ public class DefaultLoginInformation implements LoginInformation {
                 return true;
             case "i":
                 information.setItem(parseString(value));
+                return true;
+            case "login_type":
+                information.setLoginType(parseString(value));
                 return true;
             default:
                 // Fall trough

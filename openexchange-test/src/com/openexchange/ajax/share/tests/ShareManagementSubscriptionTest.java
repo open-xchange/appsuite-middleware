@@ -56,21 +56,16 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 import com.openexchange.ajax.folder.manager.FolderApi;
 import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
 import com.openexchange.ajax.share.GuestClient;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -78,9 +73,11 @@ import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
+import com.openexchange.testing.httpclient.models.InfoItemUpdateResponse;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponse;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponseData.StateEnum;
 import com.openexchange.testing.httpclient.models.ShareLinkData;
+import com.openexchange.testing.httpclient.modules.InfostoreApi;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 
 /**
@@ -92,38 +89,12 @@ import com.openexchange.testing.httpclient.modules.ShareManagementApi;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-@RunWith(Parameterized.class)
 public class ShareManagementSubscriptionTest extends AbstractShareManagementTest {
-
-    //@formatter:off
-    @Parameters(name = "{0}")
-    public static Iterable<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-            { "filestorage_xox", "xox" + Module.INFOSTORE.getFolderConstant() },
-            { "filestorage_xctx", "xctx" + Module.INFOSTORE.getFolderConstant() },
-        });
-    }
-    //@formatter:on
-
-    private final String capability;
-    private final String filtestorage;
-
-    /**
-     * Initializes a new {@link ShareManagementSubscriptionTest}.
-     * 
-     * @param capability The capability to set
-     * @param filtestorage The provider ID to match in analyze
-     */
-    public ShareManagementSubscriptionTest(String capability, String filtestorage) {
-        super();
-        this.capability = capability;
-        this.filtestorage = filtestorage;
-    }
 
     @Override
     protected Map<String, String> getNeededConfigurations() {
         HashMap<String, String> configuration = new HashMap<String, String>();
-        configuration.put("com.openexchange.capability." + capability, Boolean.TRUE.toString());
+        configuration.put("com.openexchange.capability.xctx", Boolean.TRUE.toString());
         configuration.put("com.openexchange.api.client.blacklistedHosts", "");
         return configuration;
     }
@@ -177,9 +148,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
 
     @Test
     public void testSomeLink_APIException() throws Exception {
-        ShareLinkAnalyzeResponse analyzeShareLink = smApiC2.analyzeShareLink(apiClientC2.getSession(), getBody("https://example.org/no/share/link"));
-        assertNull(analyzeShareLink.getData());
-        assertNotNull(analyzeShareLink.getError(), analyzeShareLink.getErrorDesc());
+        analyze("https://example.org/no/share/link", StateEnum.UNRESOLVABLE);
     }
 
     @Test
@@ -191,6 +160,15 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
     }
 
     @Test
+    public void testSingleFile_Forbidden() throws Exception {
+        String folderId = createFolder();
+
+        String item = createFile(folderId, "file" + sharedFolderName);
+        ShareLinkData shareLink = getOrCreateShareLink(folderManager, smApi, folderId, item);
+        analyze(shareLink, StateEnum.FORBIDDEN);
+    }
+
+    @Test
     public void testAnonymousLinkWithPassword_Addable() throws Exception {
         String folderId = createFolder();
         ShareLinkData shareLink = getOrCreateShareLink(folderManager, smApi, folderId);
@@ -198,16 +176,16 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         analyze(shareLink, StateEnum.ADDABLE);
 
         updateLinkWithPassword(folderManager, smApi, folderId);
-        analyze(smApiC2, getOrCreateShareLink(folderManager, smApi, folderId), StateEnum.ADDABLE_WITH_PASSWORD, filtestorage);
+        analyze(smApiC2, getOrCreateShareLink(folderManager, smApi, folderId), StateEnum.ADDABLE_WITH_PASSWORD);
     }
 
     @Test
-    public void testAnonymousLink_Inaccessible() throws Exception {
+    public void testAnonymousLink_Unresovable() throws Exception {
         String folderId = createFolder();
         ShareLinkData shareLink = getOrCreateShareLink(folderManager, smApi, folderId);
         deleteShareLink(folderManager, smApi, folderId);
 
-        analyze(shareLink, StateEnum.INACCESSIBLE);
+        analyze(shareLink, StateEnum.UNRESOLVABLE);
     }
 
     /**
@@ -239,13 +217,13 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         /*
          * Add share and verify analyze changed
          */
-        addOXShareAccount(smApiC2, shareLink, null, filtestorage);
+        addOXShareAccount(smApiC2, shareLink, null);
 
         /*
          * Remove guest from folder permission
          */
         folderId = setFolderPermission(folderId, originalPermissions);
-        analyze(shareLink, StateEnum.INACCESSIBLE);
+        analyze(shareLink, StateEnum.REMOVED);
 
         /*
          * Re-add guest, account should still exist
@@ -289,7 +267,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         /*
          * Add share and verify analyze changed
          */
-        addOXShareAccount(smApiC2, shareLink, null, filtestorage);
+        addOXShareAccount(smApiC2, shareLink, null);
 
         /*
          * Change password of guest and verify response.
@@ -314,7 +292,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
          * Delete guest from share and verify analyze changed
          */
         folderId = setFolderPermission(folderId, originalPermissions);
-        analyze(shareLink, StateEnum.INACCESSIBLE);
+        analyze(shareLink, StateEnum.REMOVED);
 
         /*
          * Re-add guest, account should still exist and session of the guest still be valid
@@ -330,10 +308,26 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
     }
 
     private void analyze(ShareLinkData shareLink, StateEnum e) throws ApiException {
-        analyze(smApiC2, shareLink, e, filtestorage);
+        analyze(smApiC2, shareLink, e);
     }
 
     private void analyze(String shareLink, StateEnum e) throws ApiException {
-        analyze(smApiC2, shareLink, e, filtestorage);
+        analyze(smApiC2, shareLink, e);
+    }
+
+    /**
+     * 
+     * Creates a file with the given file name, owner and shared user.
+     *
+     * @param folderId The ID of the folder to put the file in
+     * @param fileName The name of the file.
+     * @return An entry with the object id of the file.
+     * @throws ApiException
+     */
+    private String createFile(String folderId, String fileName) throws ApiException {
+        InfoItemUpdateResponse uploadResponse = new InfostoreApi(apiClient).uploadInfoItem(folderManager.getSession(), folderId, fileName, new byte[] { 34, 45, 35, 23 }, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        assertNotNull(uploadResponse);
+        assertNull(uploadResponse.getErrorDesc(), uploadResponse.getError());
+        return uploadResponse.getData();
     }
 }

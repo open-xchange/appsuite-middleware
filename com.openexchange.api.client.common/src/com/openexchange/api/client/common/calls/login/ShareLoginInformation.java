@@ -64,7 +64,6 @@ public class ShareLoginInformation extends DefaultLoginInformation {
 
     private String redirectUrl;
     private String token;
-    private String loginType;
     private String loginName;
     private String share;
     private String target;
@@ -97,14 +96,6 @@ public class ShareLoginInformation extends DefaultLoginInformation {
         return token;
     }
 
-    /**
-     * The login type
-     *
-     * @return The login type
-     */
-    public String getLoginType() {
-        return loginType;
-    }
 
     /**
      * The login name of the user on the remote system
@@ -176,15 +167,6 @@ public class ShareLoginInformation extends DefaultLoginInformation {
      */
     public void setToken(String token) {
         this.token = token;
-    }
-
-    /**
-     * Sets the loginType
-     *
-     * @param loginType The loginType to set
-     */
-    public void setLoginType(String loginType) {
-        this.loginType = loginType;
     }
 
     /**
@@ -262,9 +244,6 @@ public class ShareLoginInformation extends DefaultLoginInformation {
             switch (key) {
                 case "token":
                     information.setToken(parseString(value));
-                    break;
-                case "login_type":
-                    information.setLoginType(parseString(value));
                     break;
                 case "login_name":
                     information.setLoginName(parseString(value));
