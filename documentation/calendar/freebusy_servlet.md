@@ -19,7 +19,8 @@ To use the free busy servlet configurations must be made. Furthermore the maximu
 
 First of all the servlet must be enabled generally, otherwise it won't be registered during server startup:
 
-    com.openexchange.calendar.enableInternetFreeBusy.enabled=true
+    com.openexchange.calendar.enableInternetFreeBusy=true
+
 After changing the property a restart is necessary.
 
 To get free busy data for a user in a context, the property for publishing must be enabled explicitly. This can either be done globally, or using the config-cascade down to the "context" level:
