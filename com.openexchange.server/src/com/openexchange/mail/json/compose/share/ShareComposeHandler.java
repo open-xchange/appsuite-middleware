@@ -73,6 +73,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
+import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.idn.IDNA;
@@ -318,6 +319,30 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 .build();
         }
 
+        // Differentiate attachments to store and those to keep attached to mail (inline images)
+        List<MailPart> attachmentsToStore = null;
+        List<MailPart> attachmentsToKeep = null;
+        for (MailPart mailPart : context.getAllParts()) {
+            if (mailPart.containsContentDisposition() && Part.INLINE.equals(mailPart.getContentDisposition().getDisposition())) {
+                attachmentsToKeep = addMailPart(mailPart, attachmentsToKeep);
+            } else {
+                attachmentsToStore = addMailPart(mailPart, attachmentsToStore);
+            }
+        }
+
+        // Check if there are any attachments to store
+        if (attachmentsToStore == null) {
+            // No attachments to store
+            ComposedMailMessage composeMessage = createRegularComposeMessage(context);
+            DelegatingComposedMailMessage transportMessage = new DelegatingComposedMailMessage(composeMessage);
+            transportMessage.setAppendToSentFolder(false);
+            return DefaultComposeTransportResult.builder()
+                .withTransportMessages(Collections.<ComposedMailMessage> singletonList(transportMessage), true)
+                .withSentMessage(composeMessage)
+                .withTransportEqualToSent()
+                .build();
+        }
+
         // Get the basic source message
         ServerSession session = composeRequest.getSession();
         ComposedMailMessage source = context.getSourceMessage();
@@ -369,8 +394,12 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         boolean rollback = false;
         Map<String, ThresholdFileHolder> previewImages = null;
         try {
+            // Compose context should only advertise attachments to store
+            ForwardingComposeContext contextToPass = new ForwardingComposeContext(context);
+            contextToPass.setAllParts(attachmentsToStore);
+
             // Store attachments associated with compose context
-            attachmentsControl = attachmentStorage.storeAttachments(source, password, expirationDate, autoDelete, context);
+            attachmentsControl = attachmentStorage.storeAttachments(source, password, expirationDate, autoDelete, contextToPass);
             rollback = true;
 
             // The share target for an anonymous user
@@ -430,6 +459,11 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                         generatedTransportMessage.setAppendToSentFolder(false);
                         for (MailPart imagePart : imageParts) {
                             generatedTransportMessage.addEnclosedPart(imagePart);
+                        }
+                        if (attachmentsToKeep != null) {
+                            for (MailPart part : attachmentsToKeep) {
+                                generatedTransportMessage.addEnclosedPart(part);
+                            }
                         }
                         transportMessages.add(generatedTransportMessage);
                     }
@@ -767,6 +801,12 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             return previewService.getPreviewFor(data, PreviewOutput.IMAGE, session, 0);
         }
 
+    }
+
+    private static List<MailPart> addMailPart(MailPart mailPart, List<MailPart> parts) {
+        List<MailPart> list = parts == null ? new LinkedList<>() : parts;
+        list.add(mailPart);
+        return list;
     }
 
 }

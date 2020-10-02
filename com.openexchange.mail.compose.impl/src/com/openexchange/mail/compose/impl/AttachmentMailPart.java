@@ -140,7 +140,7 @@ public class AttachmentMailPart extends MailPart implements ComposedMailPart {
         setFileName(preparedFileName);
         setSize(attachment.getSize());
         final ContentDisposition cd = new ContentDisposition();
-        cd.setDisposition(Part.ATTACHMENT);
+        cd.setDisposition(Attachment.ContentDisposition.INLINE == attachment.getContentDisposition() ? Part.INLINE : Part.ATTACHMENT);
         cd.setFilenameParameter(getFileName());
         setContentDisposition(cd);
     }
