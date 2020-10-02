@@ -104,6 +104,7 @@ public class DeprecatedLogstashSocketAppenderMBeanRegisterer implements ServiceT
                 ObjectName logstashConfName = new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
                 managementService.registerMBean(logstashConfName, logstashSocketAppender);
                 this.logstashConfName = logstashConfName;
+                LOGGER.warn("DeprecatedLogstashAppenderMBean registered. The 'com.openexchange.logback.extensions.logstash.LogstashSocketAppender' is deprecated and subject to be removed. Please use 'com.openexchange.logback.extensions.appenders.logstash.LogstashAppender' instead. ");
             } catch (Exception e) {
                 LOGGER.error("Could not register LogstashSocketAppenderMBean", e);
             }

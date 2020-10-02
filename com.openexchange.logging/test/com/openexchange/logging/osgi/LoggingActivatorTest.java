@@ -75,17 +75,17 @@ import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.classic.spi.TurboFilterList;
 
 /**
- * Unit tests for {@link com.openexchange.logging.osgi.Activator}
+ * Unit tests for {@link com.openexchange.logging.osgi.LoggingActivator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.2
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ LoggerFactory.class, LoggerContext.class, Logger.class })
-public class ActivatorTest {
+public class LoggingActivatorTest {
 
     @InjectMocks
-    private Activator activator;
+    private LoggingActivator activator;
 
     @Mock
     private LoggerContext loggerContext;
@@ -105,7 +105,7 @@ public class ActivatorTest {
 
         Mockito.when(LoggerFactory.getILoggerFactory()).thenReturn(loggerContext);
 
-        MockUtils.injectValueIntoPrivateField(Activator.class, "LOGGER", activatorLogger);
+        MockUtils.injectValueIntoPrivateField(LoggingActivator.class, "LOGGER", activatorLogger);
     }
 
     @Test
@@ -194,11 +194,11 @@ public class ActivatorTest {
         Mockito.when(bundleContext.getBundle()).thenReturn(bundle);
         PowerMockito.when(loggerContext.getTurboFilterList()).thenReturn(new TurboFilterList());
 
-        Activator activatorSpy = Mockito.spy(activator);
+        LoggingActivator activatorSpy = Mockito.spy(activator);
         Mockito.doNothing().when(activatorSpy).overrideLoggerLevels(loggerContext);
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
         Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator(loggerContext);
-        Mockito.doNothing().when(activatorSpy).registerDeprecatedLogstashAppenderMBean(Matchers.eq(bundleContext));
+        Mockito.doNothing().when(activatorSpy).registerDeprecatedLogstashAppenderMBeanTracker(Matchers.eq(bundleContext));
 
         activatorSpy.start(bundleContext);
 
@@ -212,11 +212,11 @@ public class ActivatorTest {
         Mockito.when(bundleContext.getBundle()).thenReturn(bundle);
         PowerMockito.when(loggerContext.getTurboFilterList()).thenReturn(new TurboFilterList());
 
-        Activator activatorSpy = Mockito.spy(activator);
+        LoggingActivator activatorSpy = Mockito.spy(activator);
         Mockito.doNothing().when(activatorSpy).overrideLoggerLevels(loggerContext);
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
         Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator(loggerContext);
-        Mockito.doNothing().when(activatorSpy).registerDeprecatedLogstashAppenderMBean(Matchers.eq(bundleContext));
+        Mockito.doNothing().when(activatorSpy).registerDeprecatedLogstashAppenderMBeanTracker(Matchers.eq(bundleContext));
 
         activatorSpy.start(bundleContext);
 
@@ -225,7 +225,7 @@ public class ActivatorTest {
 
     @Test
     public void testInstallJulLevelChangePropagator_propagatorNotAvailable_addPropagator() {
-        Activator activatorSpy = Mockito.spy(activator);
+        LoggingActivator activatorSpy = Mockito.spy(activator);
         Mockito.doReturn(Boolean.FALSE).when(activatorSpy).hasInstanceOf(ArgumentMatchers.anyCollection(), ArgumentMatchers.any(Class.class));
 
         activatorSpy.installJulLevelChangePropagator(loggerContext);
@@ -235,7 +235,7 @@ public class ActivatorTest {
 
     @Test
     public void testInstallJulLevelChangePropagator_propagatorAvailable_DoNothing() {
-        Activator activatorSpy = Mockito.spy(activator);
+        LoggingActivator activatorSpy = Mockito.spy(activator);
         Mockito.doReturn(Boolean.TRUE).when(activatorSpy).hasInstanceOf(ArgumentMatchers.anyCollection(), ArgumentMatchers.any(Class.class));
 
         activatorSpy.installJulLevelChangePropagator(loggerContext);

@@ -88,15 +88,15 @@ import ch.qos.logback.core.status.StatusListenerAsList;
 import ch.qos.logback.core.status.StatusManager;
 
 /**
- * {@link Activator}
+ * {@link LoggingActivator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Activator implements BundleActivator, Reloadable {
+public class LoggingActivator implements BundleActivator, Reloadable {
 
     /** The logger */
-    protected static Logger LOGGER = LoggerFactory.getLogger(Activator.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(LoggingActivator.class);
 
     protected static final String LOGIN_PERFORMER = "com.openexchange.login.internal.LoginPerformer";
     protected static final String SESSION_HANDLER = "com.openexchange.sessiond.impl.SessionHandler";
@@ -119,7 +119,7 @@ public class Activator implements BundleActivator, Reloadable {
      * Do not implement HousekeepingActivator, track services if you need them!
      * This bundle must start as early as possible to configure the java.util.logging bridge.
      */
-    public Activator() {
+    public LoggingActivator() {
         super();
     }
 
@@ -156,8 +156,7 @@ public class Activator implements BundleActivator, Reloadable {
 
         // Register services
         final IncludeStackTraceServiceImpl stackTraceService = new IncludeStackTraceServiceImpl();
-        registerRemoteAppenderMBeans(context);
-        //registerLogstashAppenderMBean(context);
+        registerRemoteAppenderMBeansTrackers(context);
         registerExceptionCategoryFilter(context, rankingAwareTurboFilterList, stackTraceService);
         registerIncludeStackTraceService(stackTraceService, context);
         reloadable = context.registerService(Reloadable.class, this, null);
@@ -306,36 +305,24 @@ public class Activator implements BundleActivator, Reloadable {
      *
      * @param context The bundle context
      */
-    protected synchronized void registerRemoteAppenderMBeans(BundleContext context) {
-        try {
-            this.kafkaManagementTracker = registerRemoteAppenderMBean(context, new KafkaAppenderMBeanRegisterer(context));
-        } catch (Exception e) {
-            LOGGER.error("Could not register KafkaAppenderMBean", e);
-        }
-        try {
-            this.logstashManagementTracker = registerRemoteAppenderMBean(context, new LogstashAppenderMBeanRegisterer(context));
-        } catch (Exception e) {
-            LOGGER.error("Could not register LogstashAppenderMBean", e);
-        }
-        
-        registerDeprecatedLogstashAppenderMBean(context);
-        
-        LOGGER.info("LogstashAppenderMBean successfully registered.");
+    protected synchronized void registerRemoteAppenderMBeansTrackers(BundleContext context) {
+        this.kafkaManagementTracker = registerRemoteAppenderMBeanTracker(context, new KafkaAppenderMBeanRegisterer(context));
+        this.logstashManagementTracker = registerRemoteAppenderMBeanTracker(context, new LogstashAppenderMBeanRegisterer(context));
+        registerDeprecatedLogstashAppenderMBeanTracker(context);
     }
 
     /**
      * Registers the {@link DeprecatedLogstashSocketAppenderMBeanRegisterer}
      */
-    protected synchronized void registerDeprecatedLogstashAppenderMBean(BundleContext context) {
+    protected synchronized void registerDeprecatedLogstashAppenderMBeanTracker(BundleContext context) {
         try {
             DeprecatedLogstashSocketAppenderMBeanRegisterer logstashAppenderRegistration = new DeprecatedLogstashSocketAppenderMBeanRegisterer(context);
             ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, logstashAppenderRegistration);
             this.deprecatedLogstashManagementTracker = tracker;
             tracker.open();
         } catch (Exception e) {
-            LOGGER.error("Could not register LogstashAppenderMBean", e);
+            LOGGER.error("Failed to track LogstashAppenderMBean registerer.", e);
         }
-        LOGGER.warn("DeprecatedLogstashAppenderMBean registered. The 'com.openexchange.logback.extensions.logstash.LogstashSocketAppender' is deprecated and subject to be removed. Please use 'com.openexchange.logback.extensions.appenders.logstash.LogstashAppender' instead. ");
     }
 
     /**
@@ -344,12 +331,10 @@ public class Activator implements BundleActivator, Reloadable {
      * @param context The bundle context
      * @param registerer The registerer
      * @return The service tracker
-     * @throws Exception if an error is occurred
      */
-    private synchronized ServiceTracker<ManagementService, ManagementService> registerRemoteAppenderMBean(BundleContext context, AbstractRemoteAppenderMBeanRegisterer registerer) throws Exception {
+    private synchronized ServiceTracker<ManagementService, ManagementService> registerRemoteAppenderMBeanTracker(BundleContext context, AbstractRemoteAppenderMBeanRegisterer registerer) {
         ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, registerer);
         tracker.open();
-        LOGGER.info("{} successfully registered.", registerer.getClass().getSimpleName());
         return tracker;
     }
 
