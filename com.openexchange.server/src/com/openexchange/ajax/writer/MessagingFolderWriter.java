@@ -585,7 +585,7 @@ public final class MessagingFolderWriter {
                             fo.setModule(FolderObject.MESSAGING);
                             fo.setType(FolderObject.MESSAGING);
                             fo.setCreatedBy(-1);
-                            jsonContainer.put(folderField.getColumnName(), folderField.renderJSON(null, folderField.getValue(fo, session)));
+                            jsonContainer.put(folderField.getColumnName(), folderField.renderJSON(null, folderField.getValue(Folder.turnIntoStorageFolder(fo), session)));
                         } catch (JSONException e) {
                             throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                         }

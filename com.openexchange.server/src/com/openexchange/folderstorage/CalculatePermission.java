@@ -104,7 +104,7 @@ public final class CalculatePermission {
             Permission staticPermission = staticPermissions[index];
             if (0 == staticPermission.getSystem()) {
                 // A non-system permission
-                if (staticPermission.isGroup()) {
+                if (staticPermission.isGroup() || 0 >= staticPermission.getEntity()) {
                     userizedPermissions[index] = staticPermission;
                 } else {
                     // Load appropriate user configuration
@@ -283,7 +283,7 @@ public final class CalculatePermission {
         int dp = 0;
         boolean admin = false;
         for (Permission cur : permissions) {
-            if (ids.contains(cur.getEntity())) {
+            if ((0 < cur.getEntity() || cur.isGroup() && 0 == cur.getEntity()) && ids.contains(cur.getEntity())) {
                 // Folder permission
                 int tmp = cur.getFolderPermission();
                 if (tmp > fp) {

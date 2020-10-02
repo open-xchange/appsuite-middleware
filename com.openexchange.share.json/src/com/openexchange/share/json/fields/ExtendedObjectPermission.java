@@ -57,8 +57,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
-import com.openexchange.groupware.EntityInfo;
-import com.openexchange.groupware.LinkEntityInfo;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.core.tools.PermissionResolver;
@@ -96,13 +94,15 @@ public class ExtendedObjectPermission extends ExtendedPermission {
      */
     public JSONObject toJSON(AJAXRequestData requestData) throws JSONException, OXException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("identifier", permission.getIdentifier());
-        jsonObject.put("entity", permission.getEntity());
+        jsonObject.put("identifier", null != permission.getIdentifier() ? permission.getIdentifier() : String.valueOf(permission.getEntity()));
+        if (0 < permission.getEntity() || 0 == permission.getEntity() && permission.isGroup()) {
+            jsonObject.put("entity", permission.getEntity());
+        }
         jsonObject.put("bits", permission.getPermissions());
         if (permission.isGroup()) {
             jsonObject.put("type", "group");
             if (null != permission.getEntityInfo()) {
-                addEntityInfo(jsonObject, permission.getEntityInfo());
+                addEntityInfo(requestData, jsonObject, permission.getEntityInfo());
             } else {
                 addGroupInfo(requestData, jsonObject, resolver.getGroup(permission.getEntity()));
             }
@@ -111,19 +111,7 @@ public class ExtendedObjectPermission extends ExtendedPermission {
                 /*
                  * add extended information based on provided entity info object
                  */
-                if (LinkEntityInfo.class.isInstance(permission.getEntityInfo())) {
-                    jsonObject.put("type", "anonymous");
-                    addLinkEntityInfo(requestData, jsonObject, (LinkEntityInfo) permission.getEntityInfo());
-                } else if (EntityInfo.Type.GUEST.equals(permission.getEntityInfo().getType())) {
-                    jsonObject.put("type", "guest");
-                    addEntityInfo(jsonObject, permission.getEntityInfo());
-                } else if (EntityInfo.Type.GROUP.equals(permission.getEntityInfo().getType())) {
-                    jsonObject.put("type", "group");
-                    addEntityInfo(jsonObject, permission.getEntityInfo());
-                } else {
-                    jsonObject.put("type", "user");
-                    addEntityInfo(jsonObject, permission.getEntityInfo());
-                }
+                addEntityInfo(requestData, jsonObject, permission.getEntityInfo());
             } else if (0 >= permission.getEntity()) {
                 getLogger(ExtendedObjectPermission.class).debug("Can't resolve user permission entity {} for file {}", I(permission.getEntity()), file);
             } else {

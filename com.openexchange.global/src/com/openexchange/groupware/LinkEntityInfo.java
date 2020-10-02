@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -57,7 +58,9 @@ import java.util.Date;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
-public class LinkEntityInfo extends EntityInfo {
+public class LinkEntityInfo extends EntityInfo implements Serializable, Cloneable {
+
+    private static final long serialVersionUID = 1907071021467621978L;
 
     private final String shareUrl;
     private final String password;
@@ -115,6 +118,12 @@ public class LinkEntityInfo extends EntityInfo {
      */
     public boolean isIncludeSubfolders() {
         return includeSubfolders;
+    }
+
+    @Override
+    public Object clone() {
+        Date expiryDate = null != this.expiryDate ? new Date(this.expiryDate.getTime()) : null;
+        return new LinkEntityInfo(this, shareUrl, password, expiryDate, includeSubfolders);
     }
 
 }

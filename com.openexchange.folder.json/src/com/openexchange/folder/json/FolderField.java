@@ -173,6 +173,10 @@ public enum FolderField {
      */
     BITS(-1, "bits"),
     /**
+     * The permission's identifier
+     */
+    IDENTIFIER(-1, "identifier"),
+    /**
      * The permission's entity
      */
     ENTITY(-1, "entity"),

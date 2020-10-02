@@ -50,7 +50,7 @@
 package com.openexchange.ajax.customizer.folder;
 
 import com.openexchange.ajax.customizer.AdditionalField;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.folderstorage.Folder;
 
 /**
  * {@link AdditionalFolderField}
@@ -58,7 +58,7 @@ import com.openexchange.groupware.container.FolderObject;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface AdditionalFolderField extends AdditionalField<FolderObject> {
+public interface AdditionalFolderField extends AdditionalField<Folder> {
 
     // Marker interface
 }

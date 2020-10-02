@@ -55,7 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -105,9 +105,9 @@ public class BulkFolderField implements AdditionalFolderField {
     }
 
     @Override
-    public Object getValue(FolderObject f, ServerSession session) {
-        Object key = f.getFullName();
-        Object value = values.get(key == null ? Integer.valueOf(f.getObjectID()) : key);
+    public Object getValue(Folder f, ServerSession session) {
+        Object key = f.getID();
+        Object value = null != key ? values.get(key) : null;
         if (null == value) {
             // Not yet contained in cache
             value = getValues(Collections.singletonList(f), session).get(0);
@@ -116,15 +116,15 @@ public class BulkFolderField implements AdditionalFolderField {
     }
 
     @Override
-    public List<Object> getValues(List<FolderObject> folders, ServerSession session) {
+    public List<Object> getValues(List<Folder> folders, ServerSession session) {
         if (values.isEmpty()) {
             return warmUp(folders, session);
         }
 
-        List<FolderObject> fl = new ArrayList<FolderObject>(folders.size());
-        for (FolderObject f : folders) {
-            Object key = f.getFullName();
-            if (!values.containsKey(key == null ? Integer.valueOf(f.getObjectID()) : key)) {
+        List<Folder> fl = new ArrayList<Folder>(folders.size());
+        for (Folder f : folders) {
+            Object key = f.getID();
+            if (null != key && !values.containsKey(key)) {
                 fl.add(f);
             }
         }
@@ -132,9 +132,12 @@ public class BulkFolderField implements AdditionalFolderField {
             warmUp(fl, session);
         }
         List<Object> vals = new ArrayList<Object>(folders.size());
-        for (FolderObject f : folders) {
-            Object key = f.getFullName();
-            Object value = values.get(key == null ? Integer.valueOf(f.getObjectID()) : key);
+        for (Folder f : folders) {
+            Object key = f.getID();
+            Object value = null != key ? values.get(key) : null;
+            if (null == value) {
+                value = delegate.getValue(f, session);
+            }
             vals.add(NULL == value ? null : value);
         }
         return vals;
@@ -151,13 +154,15 @@ public class BulkFolderField implements AdditionalFolderField {
      * @param folders The folders
      * @param session The session
      */
-    public List<Object> warmUp(List<FolderObject> folders, ServerSession session) {
+    public List<Object> warmUp(List<Folder> folders, ServerSession session) {
         List<Object> vals = delegate.getValues(folders, session);
         int i = 0;
-        for (FolderObject f : folders) {
-            Object key = f.getFullName();
+        for (Folder f : folders) {
+            Object key = f.getID();
             Object value = vals.get(i++);
-            values.put(key == null ? Integer.valueOf(f.getObjectID()) : key, null == value ? NULL : value);
+            if (null != key) {
+                values.put(key, null == value ? NULL : value);
+            }
         }
         return vals;
     }

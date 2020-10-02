@@ -72,6 +72,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.java.Enums;
+import com.openexchange.java.Strings;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.recipient.RecipientType;
 
@@ -234,16 +235,24 @@ public final class FolderParser {
              * parse as already known permission entity
              */
             Permission parsedPermission = new BasicPermission();
-            if (false == jsonObject.has(FolderField.ENTITY.getName())) {
-                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.ENTITY.getName());
+            if (jsonObject.has(FolderField.ENTITY.getName())) {
+                parsedPermission.setEntity(jsonObject.getInt(FolderField.ENTITY.getName()));
             }
-            parsedPermission.setEntity(jsonObject.getInt(FolderField.ENTITY.getName()));
+            if (jsonObject.has(FolderField.IDENTIFIER.getName())) {
+                parsedPermission.setIdentifier(jsonObject.getString(FolderField.IDENTIFIER.getName()));
+            }
             if (jsonObject.has(FolderField.GROUP.getName())) {
                 parsedPermission.setGroup(jsonObject.getBoolean(FolderField.GROUP.getName()));
             } else if (null != type) {
                 parsedPermission.setGroup(RecipientType.GROUP == type);
             } else {
                 throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.GROUP.getName());
+            }
+            /*
+             * ensure the targeted entity can be identified properly
+             */
+            if ((0 > parsedPermission.getEntity() || 0 == parsedPermission.getEntity() && false == parsedPermission.isGroup()) && Strings.isEmpty(parsedPermission.getIdentifier())) {
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.ENTITY.getName());
             }
             permission = parsedPermission;
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
@@ -61,7 +62,9 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.5
  */
-public class EntityInfo {
+public class EntityInfo implements Serializable, Cloneable {
+
+    private static final long serialVersionUID = 2803304999527402064L;
 
     private final static String IDENTIFER = "id";
     private final static String TYPE = "type";
@@ -194,6 +197,11 @@ public class EntityInfo {
         return new EntityInfo(identifier, displayName, null, null, null, null, entity, null, type);
     }
 
+    @Override
+    public Object clone() {
+        return new EntityInfo(this);
+    }
+    
     @Override
     public String toString() {
         return "EntityInfo [" + identifier + "," + title + "," + displayName + "," + email1 + "," + entity + "," + type.getType() + "]";

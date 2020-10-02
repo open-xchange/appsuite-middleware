@@ -111,6 +111,10 @@ public class DefaultCalendarPermission implements CalendarPermission {
         super();
     }
 
+    public DefaultCalendarPermission(CalendarPermission permission) {
+        this(permission.getEntity(), permission.getFolderPermission(), permission.getReadPermission(), permission.getWritePermission(), permission.getDeletePermission(), permission.isAdmin(), permission.isGroup(), permission.getSystem());
+    }
+
     public DefaultCalendarPermission(int entiy, int folderPermission, int readPermission, int writePermission, int deletePermission, boolean admin, boolean group, int system) {
         super();
         this.system = system;

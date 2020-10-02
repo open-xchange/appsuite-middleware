@@ -361,7 +361,9 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
                         JSONObject json = new JSONObject(4);
                         try {
                             json.put("identifier", permission.getIdentifier());
-                            json.put("entity", permission.getEntity());
+                            if (0 < permission.getEntity() || 0 == permission.getEntity() && permission.isGroup()) {
+                                json.put("entity", permission.getEntity());
+                            }
                             json.put("group", permission.isGroup());
                             json.put("bits", permission.getPermissions());
                             jPermissions.put(json);

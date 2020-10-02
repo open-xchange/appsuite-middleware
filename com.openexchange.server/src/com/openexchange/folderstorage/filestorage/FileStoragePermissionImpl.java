@@ -74,7 +74,9 @@ public final class FileStoragePermissionImpl extends BasicPermission {
         super();
         admin = fsPermission.isAdmin();
         deletePermission = fsPermission.getDeletePermission();
+        identifier = fsPermission.getIdentifier();
         entity = fsPermission.getEntity();
+        entityInfo = fsPermission.getEntityInfo();
         folderPermission = fsPermission.getFolderPermission();
         group = fsPermission.isGroup();
         readPermission = fsPermission.getReadPermission();

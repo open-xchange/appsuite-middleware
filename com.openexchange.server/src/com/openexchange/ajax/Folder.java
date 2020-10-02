@@ -100,6 +100,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -442,7 +443,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                      */
                     final Queue<FolderObject> q =
                         ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicTaskFolders()).asQueue();
-                    fieldList.warmUp(q, session);
+                    fieldList.warmUp(turnIntoStorageFolders(q), session);
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
@@ -464,7 +465,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                      */
                     final Queue<FolderObject> q =
                         ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicCalendarFolders()).asQueue();
-                    fieldList.warmUp(q, session);
+                    fieldList.warmUp(turnIntoStorageFolders(q), session);
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
@@ -486,7 +487,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                      */
                     final Queue<FolderObject> q =
                         ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicContactFolders()).asQueue();
-                    fieldList.warmUp(q, session);
+                    fieldList.warmUp(turnIntoStorageFolders(q), session);
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
@@ -508,7 +509,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                      */
                     final Queue<FolderObject> q =
                         ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders()).asQueue();
-                    fieldList.warmUp(q, session);
+                    fieldList.warmUp(turnIntoStorageFolders(q), session);
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
@@ -555,7 +556,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             }
                         }
                     }
-                    fieldList.warmUp(l, session);
+                    fieldList.warmUp(turnIntoStorageFolders(l), session);
                     final Iterator<FolderObject> iter = l.iterator();
                     for (int i = 0; i < size; i++) {
                         final FolderObject fo = iter.next();
@@ -785,7 +786,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         }
                     }
                     final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getSubfolders(parentId, null)).asQueue();
-                    fieldList.warmUp(q, session);
+                    fieldList.warmUp(turnIntoStorageFolders(q), session);
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
@@ -901,7 +902,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
                 final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
                 final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getSharedFoldersFrom(sharedOwner, null)).asQueue();
-                fieldList.warmUp(q, session);
+                fieldList.warmUp(turnIntoStorageFolders(q), session);
                 final int size = q.size();
                 final Iterator<FolderObject> iter = q.iterator();
                 for (int i = 0; i < size; i++) {
@@ -1356,7 +1357,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
              * Get all updated OX folders
              */
             Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getAllModifiedFolders(timestamp)).asQueue();
-            fieldList.warmUp(q, session);
+            fieldList.warmUp(turnIntoStorageFolders(q), session);
             final OXFolderAccess access = new OXFolderAccess(ctx);
             final Queue<FolderObject> updatedQueue = new LinkedList<FolderObject>();
             final Queue<FolderObject> deletedQueue = ignoreDeleted ? null : new LinkedList<FolderObject>();
@@ -2332,7 +2333,22 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         }
         return intArray;
     }
+    
+    public static com.openexchange.folderstorage.Folder turnIntoStorageFolder(FolderObject folderObject) {
+        return new DatabaseFolder(folderObject);
+    }
 
+    public static List<com.openexchange.folderstorage.Folder> turnIntoStorageFolders(Collection<FolderObject> folderObjects) {
+        if (null == folderObjects) {
+            return null;
+        }
+        List<com.openexchange.folderstorage.Folder> folders = new ArrayList<com.openexchange.folderstorage.Folder>(folderObjects.size());
+        for (FolderObject folderObject : folderObjects) {
+            folders.add(turnIntoStorageFolder(folderObject));
+        }
+        return folders;
+    }
+    
     /**
      * Writes an account's root folder into a JSON array.
      */

@@ -51,6 +51,7 @@ package com.openexchange.folder.json.writer;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -274,8 +275,7 @@ public final class FolderWriter {
 
         @Override
         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
-            FolderObject fo = turnIntoFolderObject(folder);
-            Object value = aff.getValue(fo, requestData.getSession());
+            Object value = aff.getValue(folder, requestData.getSession());
             jsonPutter.put(jsonPutter.withKey() ? aff.getColumnName() : null, aff.renderJSON(requestData, value));
         }
     }
@@ -616,8 +616,11 @@ public final class FolderWriter {
                                 continue;
                             }
                             final JSONObject jo = new JSONObject(4);
+                            jo.put(FolderField.IDENTIFIER.getName(), null != permission.getIdentifier() ? permission.getIdentifier() : String.valueOf(permission.getEntity()));
                             jo.put(FolderField.BITS.getName(), Permissions.createPermissionBits(permission));
-                            jo.put(FolderField.ENTITY.getName(), permission.getEntity());
+                            if (0 < permission.getEntity() || 0 == permission.getEntity() && permission.isGroup()) {
+                                jo.put(FolderField.ENTITY.getName(), permission.getEntity());
+                            }
                             jo.put(FolderField.GROUP.getName(), permission.isGroup());
                             ja.put(jo);
                         }
@@ -841,7 +844,7 @@ public final class FolderWriter {
                 AdditionalFolderField aff = additionalFolderFieldList.opt(curCol);
                 if (null != aff) {
                     aff = new BulkFolderField(aff, folders.length);
-                    aff.getValues(turnIntoFolderObjects(folders), requestData.getSession());
+                    aff.getValues(Arrays.asList(folders), requestData.getSession());
                     ffw = new AdditionalFolderFieldWriter(requestData, aff);
                 } else {
                     ffw = getPropertyByField(curCol, fieldSet);
