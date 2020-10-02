@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.customizer.AdditionalFieldsUtils;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.tools.session.ServerSession;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -190,7 +190,7 @@ public class AdditionalFolderFieldList {
         }
 
         @Override
-        public Object getValue(final FolderObject folder, final ServerSession session) {
+        public Object getValue(final Folder folder, final ServerSession session) {
             return null;
         }
 
@@ -200,7 +200,7 @@ public class AdditionalFolderFieldList {
         }
 
         @Override
-        public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
+        public List<Object> getValues(List<Folder> folder, ServerSession session) {
             return AdditionalFieldsUtils.bulk(this, folder, session);
         }
 

@@ -56,7 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.tools.session.ServerSession;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -115,8 +115,8 @@ public class BulkAdditionalFolderFieldsList extends AdditionalFolderFieldList {
         return bff;
     }
 
-    public void warmUp(final Collection<FolderObject> folders, final ServerSession session) {
-        final List<FolderObject> folderObjects = new ArrayList<FolderObject>(folders);
+    public void warmUp(final Collection<Folder> folders, final ServerSession session) {
+        final List<Folder> folderObjects = new ArrayList<Folder>(folders);
         for(final BulkFolderField field : fields) {
             field.warmUp(folderObjects, session);
         }

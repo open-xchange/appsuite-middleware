@@ -65,7 +65,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.services.Services;
@@ -166,8 +166,8 @@ public class ExtAccountFolderField implements AdditionalFolderField {
     }
 
     @Override
-    public Object getValue(FolderObject folder, ServerSession session) {
-        String fullName = folder.getFullName();
+    public Object getValue(Folder folder, ServerSession session) {
+        String fullName = folder.getID();
         if (Strings.isEmpty(fullName)) {
             return JSONObject.NULL;
         }
@@ -212,7 +212,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
     }
 
     @Override
-    public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
+    public List<Object> getValues(List<Folder> folder, ServerSession session) {
         return AdditionalFieldsUtils.bulk(this, folder, session);
     }
 

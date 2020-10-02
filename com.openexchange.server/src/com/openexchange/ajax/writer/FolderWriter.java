@@ -681,7 +681,8 @@ public final class FolderWriter extends DataWriter {
                                 }
                                 jsonwriter.key(folderField.getColumnName());
                             }
-                            jsonwriter.value(folderField.renderJSON(null, folderField.getValue(fo, session)));
+
+                            jsonwriter.value(folderField.renderJSON(null, folderField.getValue(Folder.turnIntoStorageFolder(fo), session)));
                         }
                     };
                 }

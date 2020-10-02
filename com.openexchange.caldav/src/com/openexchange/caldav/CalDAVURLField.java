@@ -58,9 +58,10 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -95,7 +96,7 @@ public class CalDAVURLField implements AdditionalFolderField {
     }
 
     @Override
-    public Object getValue(FolderObject item, ServerSession session) {
+    public Object getValue(Folder item, ServerSession session) {
         String resourceName = getCalDAVResourceName(session, item);
         if (null == resourceName) {
             return null;
@@ -104,10 +105,10 @@ public class CalDAVURLField implements AdditionalFolderField {
     }
 
     @Override
-    public List<Object> getValues(List<FolderObject> items, ServerSession session) {
+    public List<Object> getValues(List<Folder> items, ServerSession session) {
         List<Object> values = new ArrayList<Object>(items.size());
         String urlTemplate = getURLTemplate(session);
-        for (FolderObject item : items) {
+        for (Folder item : items) {
             String resourceName = getCalDAVResourceName(session, item);
             if (null != resourceName) {
                 values.add(urlTemplate.replaceAll("\\[folderId\\]", resourceName));
@@ -140,19 +141,23 @@ public class CalDAVURLField implements AdditionalFolderField {
         return defaultValue;
     }
 
-    private static String getCalDAVResourceName(ServerSession session, FolderObject folder) {
-        switch (folder.getModule()) {
+    private static String getCalDAVResourceName(ServerSession session, Folder folder) {
+        ContentType contentType = folder.getContentType();
+        if (null == contentType) {
+            return null;
+        }
+        switch (contentType.getModule()) {
             case FolderObject.CALENDAR:
                 if (false == session.getUserConfiguration().hasCalendar() || false == session.getUserConfiguration().hasPermission(Permission.CALDAV)) {
                     return null;
                 }
-                String id = folder.getFullName();
-                return Tools.encodeFolderId(Strings.isEmpty(id) ? Tools.DEFAULT_ACCOUNT_PREFIX + folder.getObjectID() : id);
+                String id = folder.getID();
+                return Tools.encodeFolderId(id);
             case FolderObject.TASK:
                 if (false == session.getUserConfiguration().hasTask() || false == session.getUserConfiguration().hasPermission(Permission.CALDAV)) {
                     return null;
                 }
-                return Tools.encodeFolderId(String.valueOf(folder.getObjectID()));
+                return Tools.encodeFolderId(folder.getID());
             default:
                 return null;
         }

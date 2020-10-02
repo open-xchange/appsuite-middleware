@@ -70,6 +70,7 @@ import com.openexchange.config.admin.HideAdminService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.osgi.CacheFolderStorageActivator;
@@ -84,7 +85,6 @@ import com.openexchange.folderstorage.mail.osgi.MailFolderStorageActivator;
 import com.openexchange.folderstorage.messaging.osgi.MessagingFolderStorageActivator;
 import com.openexchange.folderstorage.outlook.osgi.OutlookFolderStorageActivator;
 import com.openexchange.folderstorage.virtual.osgi.VirtualFolderStorageActivator;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.objectusecount.ObjectUseCountService;
@@ -120,7 +120,7 @@ public final class FolderStorageActivator implements BundleActivator {
         }
 
         @Override
-        public Object getValue(final FolderObject folder, final ServerSession session) {
+        public Object getValue(final Folder folder, final ServerSession session) {
             final int createdBy = folder.getCreatedBy();
             if (createdBy <= 0) {
                 return JSONObject.NULL;
@@ -154,7 +154,7 @@ public final class FolderStorageActivator implements BundleActivator {
         }
 
         @Override
-        public List<Object> getValues(final List<FolderObject> folder, final ServerSession session) {
+        public List<Object> getValues(final List<Folder> folder, final ServerSession session) {
             return AdditionalFieldsUtils.bulk(this, folder, session);
         }
 

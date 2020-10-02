@@ -58,9 +58,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.tools.session.ServerSession;
 
@@ -95,25 +95,25 @@ public class ExtendedFolderPermissionsField implements AdditionalFolderField {
     }
 
     @Override
-    public Object getValue(FolderObject folder, ServerSession session) {
+    public Object getValue(Folder folder, ServerSession session) {
         return getValues(Collections.singletonList(folder), session).iterator().next();
     }
 
     @Override
-    public List<Object> getValues(List<FolderObject> folders, ServerSession session) {
+    public List<Object> getValues(List<Folder> folders, ServerSession session) {
         if (null == folders) {
             return null;
         }
         PermissionResolver resolver = new PermissionResolver(services, session);
         resolver.cacheFolderPermissionEntities(folders);
         List<Object> values = new ArrayList<Object>();
-        for (FolderObject folder : folders) {
-            List<OCLPermission> oclPermissions = folder.getPermissions();
+        for (Folder folder : folders) {
+            Permission[] oclPermissions = folder.getPermissions();
             if (null == oclPermissions) {
                 values.add(null);
             } else {
-                List<ExtendedFolderPermission> extendedPermissions = new ArrayList<ExtendedFolderPermission>(oclPermissions.size());
-                for (OCLPermission oclPermission : oclPermissions) {
+                List<ExtendedFolderPermission> extendedPermissions = new ArrayList<ExtendedFolderPermission>(oclPermissions.length);
+                for (Permission oclPermission : oclPermissions) {
                     extendedPermissions.add(new ExtendedFolderPermission(resolver, folder, oclPermission));
                 }
                 values.add(extendedPermissions);
