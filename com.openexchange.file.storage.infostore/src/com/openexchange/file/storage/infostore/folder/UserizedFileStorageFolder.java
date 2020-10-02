@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.CacheAware;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -83,10 +84,12 @@ import com.openexchange.i18n.LocaleTools;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UserizedFileStorageFolder extends DefaultFileStorageFolder implements TypeAware, OriginAwareFileStorageFolder {
+public class UserizedFileStorageFolder extends DefaultFileStorageFolder implements CacheAware, TypeAware, OriginAwareFileStorageFolder {
 
     private final UserizedFolder folder;
+
     private FileStorageFolderType type;
+    private Boolean cacheable;
 
     /**
      * Initializes a new {@link UserizedFileStorageFolder} from the supplied userized folder
@@ -121,6 +124,20 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
         if (FileID.INFOSTORE_SERVICE_ID.equals(folderID.getService()) && FileID.INFOSTORE_ACCOUNT_ID.equals(folderID.getAccountId())) {
             setCapabilities(FileStorageFolder.ALL_CAPABILITIES);
         }
+    }
+
+    @Override
+    public boolean cacheable() {
+        return null != cacheable ? cacheable.booleanValue() : folder.isCacheable();
+    }
+
+    /**
+     * Sets if the folder is cacheable or not. If not specified, the delegate's {@link UserizedFolder#isCacheable()} is consulted.
+     * 
+     * @param cacheable {@link Boolean#TRUE} if the folder should indicate to be cacheable, {@link Boolean#FALSE} if not, or <code>null</code> to decide based on the delegate
+     */
+    public void setCacheable(Boolean cacheable) {
+        this.cacheable = cacheable;
     }
 
     @Override
