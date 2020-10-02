@@ -103,8 +103,28 @@ public abstract class ExtendedPermission {
         }
     }
 
-    protected void addEntityInfo(JSONObject jsonObject, EntityInfo entityInfo) throws JSONException {
-        if (null != entityInfo) {
+    protected void addEntityInfo(AJAXRequestData requestData, JSONObject jsonObject, EntityInfo entityInfo) throws JSONException {
+        if (LinkEntityInfo.class.isInstance(entityInfo)) {
+            jsonObject.put("type", "anonymous");
+            LinkEntityInfo linkEntityInfo = (LinkEntityInfo) entityInfo;
+            jsonObject.putOpt("share_url", linkEntityInfo.getShareUrl());
+            Date expiryDate = linkEntityInfo.getExpiryDate();
+            if (null != expiryDate) {
+                long time = null != requestData ? addTimeZoneOffset(expiryDate.getTime(), getTimeZone(requestData)) : expiryDate.getTime();
+                jsonObject.put("expiry_date", time);
+            }
+            jsonObject.putOpt("password", linkEntityInfo.getPassword());
+            if (linkEntityInfo.isIncludeSubfolders()) {
+                jsonObject.put("includeSubfolders", true);
+            }
+        } else if (EntityInfo.Type.GUEST.equals(entityInfo.getType())) {
+            jsonObject.put("type", "guest");
+            addContactInfo(jsonObject, entityInfo);
+        } else if (EntityInfo.Type.GROUP.equals(entityInfo.getType())) {
+            jsonObject.put("type", "group");
+            addContactInfo(jsonObject, entityInfo);
+        } else {
+            jsonObject.put("type", "user");
             addContactInfo(jsonObject, entityInfo);
         }
     }
@@ -180,21 +200,6 @@ public abstract class ExtendedPermission {
             if (share.getTarget().isFolder()) {
                 boolean includeSubfolders = SubfolderAwareShareInfo.class.isInstance(share) ? ((SubfolderAwareShareInfo) share).isIncludeSubfolders() : false;
                 jsonObject.putOpt("includeSubfolders", Boolean.valueOf(includeSubfolders));
-            }
-        }
-    }
-
-    protected void addLinkEntityInfo(AJAXRequestData requestData, JSONObject jsonObject, LinkEntityInfo linkEntityInfo) throws JSONException {
-        if (null != linkEntityInfo) {
-            jsonObject.putOpt("share_url", linkEntityInfo.getShareUrl());
-            Date expiryDate = linkEntityInfo.getExpiryDate();
-            if (null != expiryDate) {
-                long time = null != requestData ? addTimeZoneOffset(expiryDate.getTime(), getTimeZone(requestData)) : expiryDate.getTime();
-                jsonObject.put("expiry_date", time);
-            }
-            jsonObject.putOpt("password", linkEntityInfo.getPassword());
-            if (linkEntityInfo.isIncludeSubfolders()) {
-                jsonObject.put("includeSubfolders", true);
             }
         }
     }

@@ -616,8 +616,11 @@ public final class FolderWriter {
                                 continue;
                             }
                             final JSONObject jo = new JSONObject(4);
+                            jo.put(FolderField.IDENTIFIER.getName(), null != permission.getIdentifier() ? permission.getIdentifier() : String.valueOf(permission.getEntity()));
                             jo.put(FolderField.BITS.getName(), Permissions.createPermissionBits(permission));
-                            jo.put(FolderField.ENTITY.getName(), permission.getEntity());
+                            if (0 < permission.getEntity() || 0 == permission.getEntity() && permission.isGroup()) {
+                                jo.put(FolderField.ENTITY.getName(), permission.getEntity());
+                            }
                             jo.put(FolderField.GROUP.getName(), permission.isGroup());
                             ja.put(jo);
                         }

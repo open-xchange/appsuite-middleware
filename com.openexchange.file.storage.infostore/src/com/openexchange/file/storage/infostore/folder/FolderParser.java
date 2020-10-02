@@ -165,7 +165,7 @@ public final class FolderParser {
      * @param fileStoragePermissions The file storage permissions to parse
      * @return The parsed permissions
      */
-    private static Permission[] parsePermission(List<FileStoragePermission> fileStoragePermissions) throws OXException {
+    private static Permission[] parsePermission(List<FileStoragePermission> fileStoragePermissions) {
         if (null == fileStoragePermissions) {
             return null;
         }
@@ -179,7 +179,9 @@ public final class FolderParser {
             } else {
                 permission = new BasicPermission();
             }
+            permission.setIdentifier(fileStoragePermission.getIdentifier());
             permission.setEntity(fileStoragePermission.getEntity());
+            permission.setEntityInfo(fileStoragePermission.getEntityInfo());
             permission.setGroup(fileStoragePermission.isGroup());
             permission.setAdmin(fileStoragePermission.isAdmin());
             permission.setAllPermissions(fileStoragePermission.getFolderPermission(), fileStoragePermission.getReadPermission(),

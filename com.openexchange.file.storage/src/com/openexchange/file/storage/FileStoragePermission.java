@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage;
 
+import com.openexchange.groupware.EntityInfo;
+
 /**
  * {@link FileStoragePermission} - Represents a file storage's folder permission.
  *
@@ -187,6 +189,13 @@ public interface FileStoragePermission extends Cloneable {
     void setGroup(boolean group);
 
     /**
+     * Gets the qualified identifier of the entity associated with this permission.
+     * 
+     * @return The identifier
+     */
+    String getIdentifier();
+
+    /**
      * Gets this folder permission's entity identifier.
      *
      * @return This folder permission's entity identifier
@@ -199,6 +208,13 @@ public interface FileStoragePermission extends Cloneable {
      * @param entity The entity identifier
      */
     void setEntity(int entity);
+
+    /**
+     * Gets additional information about the entity associated with this permission.
+     * 
+     * @return The entity info, or <code>null</code> if not available
+     */
+    EntityInfo getEntityInfo();
 
     /**
      * Checks if this folder permission denotes its entity as a folder administrator.

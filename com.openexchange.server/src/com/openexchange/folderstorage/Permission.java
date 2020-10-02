@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage;
 
 import java.io.Serializable;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link Permission} - A folder permission.
@@ -195,6 +196,20 @@ public interface Permission extends Cloneable, Serializable {
     public boolean isVisible();
 
     /**
+     * Gets the qualified identifier of the entity associated with this permission.
+     * 
+     * @return The identifier
+     */
+    String getIdentifier();
+
+    /**
+     * Sets the qualified identifier of the entity associated with this permission.
+     * 
+     * @param identifier The identifier to set
+     */
+    void setIdentifier(String identifier);
+
+    /**
      * Gets this folder permission's entity identifier.
      *
      * @return This folder permission's entity identifier
@@ -207,6 +222,20 @@ public interface Permission extends Cloneable, Serializable {
      * @param entity The entity identifier
      */
     public void setEntity(int entity);
+
+    /**
+     * Gets additional information about the entity associated with this permission.
+     * 
+     * @return The entity info, or <code>null</code> if not available
+     */
+    EntityInfo getEntityInfo();
+
+    /**
+     * Sets additional information about the entity associated with this permission.
+     * 
+     * @param entityInfo The entity info to set
+     */
+    void setEntityInfo(EntityInfo entityInfo);
 
     /**
      * Checks if this folder permission denotes its entity as a folder administrator.
