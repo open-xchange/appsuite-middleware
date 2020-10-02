@@ -52,12 +52,15 @@ package com.openexchange.share.core.subscription;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.share.subscription.ShareLinkState.CREDENTIALS_REFRESH;
 import static com.openexchange.share.subscription.ShareLinkState.INACCESSIBLE;
+import static com.openexchange.share.subscription.ShareLinkState.REMOVED;
 import static com.openexchange.share.subscription.ShareLinkState.SUBSCRIBED;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
@@ -78,6 +81,7 @@ import com.openexchange.share.subscription.ShareSubscriptionExceptions;
 import com.openexchange.share.subscription.ShareSubscriptionInformation;
 import com.openexchange.share.subscription.ShareSubscriptionProvider;
 import com.openexchange.tools.id.IDMangler;
+import com.openexchange.user.User;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -141,10 +145,18 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         storageAccount.setConfiguration(configuration);
 
         /*
-         * Create new account and formulate a result
+         * Create new account and access it
          */
         String accountId = fileStorageService.getAccountManager().addAccount(storageAccount, session);
-        return generateInfos(session, accountId, shareLink);
+        try {
+            return generateInfos(session, accountId, shareLink);
+        } catch (OXException e) {
+            /**
+             * Account can't connect, remove it
+             */
+            fileStorageService.getAccountManager().deleteAccount(getStorageAccount(session, shareLink), session);
+            throw e;
+        }
     }
 
     @Override
@@ -175,9 +187,6 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         if (Strings.isEmpty(shareLink)) {
             ShareSubscriptionExceptions.MISSING_LINK.create(shareLink);
         }
-        if (Strings.isEmpty(password)) {
-            ShareSubscriptionExceptions.MISSING_CREDENTIALS.create();
-        }
         FileStorageAccount storageAccount = getStorageAccount(session, shareLink);
         if (null == storageAccount) {
             throw ShareSubscriptionExceptions.MISSING_SUBSCRIPTION.create(shareLink);
@@ -201,6 +210,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
          */
         fileStorageService.getAccountAccess(storageAccount.getId(), session).close();
         fileStorageService.getAccountManager().updateAccount(updated, session);
+
         return generateInfos(session, storageAccount.getId(), shareLink);
     }
 
@@ -213,6 +223,16 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      * @return <code>true</code> if the exception has anything to do with a missing password, <code>false</code> otherwise
      */
     protected abstract boolean isPasswordMissing(OXException e);
+
+    /**
+     * Gets a value indicating whether an {@link OXException} is about a removed
+     * folder or not. This is used to determine the correct {@link ShareLinkState} when
+     * accessing the share via {@link #checkAccessible(FileStorageAccountAccess, String)} fails
+     *
+     * @param The exception to analyze
+     * @return <code>true</code> if the exception has anything to do with a removed folder, <code>false</code> otherwise
+     */
+    protected abstract boolean isFolderRemoved(OXException e);
 
     /*
      * ============================== HELPERS ==============================
@@ -234,15 +254,6 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      */
     protected void logExcpetionDebug(OXException e) {
         LOGGER.debug("Resource is not accessible: {}", e.getMessage(), e);
-    }
-
-    /**
-     * Get the filestorage ID
-     *
-     * @return The ID
-     */
-    protected String getId() {
-        return fileStorageService.getId();
     }
 
     /**
@@ -357,6 +368,9 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
                  */
                 return CREDENTIALS_REFRESH;
             }
+            if (isFolderRemoved(e)) {
+                return REMOVED;
+            }
             logExcpetionDebug(e);
         } finally {
             accountAccess.close();
@@ -381,6 +395,8 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         FileStorageAccountAccess accountAccess = fileStorageService.getAccountAccess(accountId, session);
         try {
             accountAccess.connect();
+            String folderId = ShareTool.getShareTarget(shareLink).getFolder();
+            accountAccess.getFolderAccess().getFolder(folderId);
             return generateInfos(accountAccess, shareLink);
         } finally {
             accountAccess.close();
@@ -396,10 +412,9 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
     protected ShareSubscriptionInformation generateInfos(FileStorageAccountAccess accountAccess, String shareLink) {
         String folderId = ShareTool.getShareTarget(shareLink).getFolder();
         return new ShareSubscriptionInformation( // @formatter:off
-            getId(),
             accountAccess.getAccountId(),
             String.valueOf(Module.INFOSTORE.getFolderConstant()),
-            IDMangler.mangle(getId(), accountAccess.getAccountId(), folderId)); // @formatter:on
+            IDMangler.mangle(fileStorageService.getId(), accountAccess.getAccountId(), folderId)); // @formatter:on
     }
 
     /**
@@ -453,6 +468,32 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      */
     protected boolean hasCapability(Session session) {
         return fileStorageService.hasCapability(session);
+    }
+
+    protected static Set<String> getAliases(User user) {
+        Set<String> possibleAliases = new HashSet<String>();
+        if (Strings.isNotEmpty(user.getMail())) {
+            possibleAliases.add(user.getMail());
+        }
+        if (null != user.getAliases()) {
+            for (String alias : user.getAliases()) {
+                if (Strings.isNotEmpty(alias)) {
+                    possibleAliases.add(alias);
+                }
+            }
+        }
+        return possibleAliases;
+    }
+
+    /**
+     * Gets a value indicating whether the share is for a single file or not.
+     *
+     * @param shareLink The share link
+     * @return <code>true</code> if the link is about a single file, <code>false</code> if not, e.g. for a folder share
+     */
+    protected boolean isSingleFileShare(String shareLink) {
+        ShareTargetPath path = ShareTool.getShareTarget(shareLink);
+        return Strings.isNotEmpty(path.getItem());
     }
 
 }

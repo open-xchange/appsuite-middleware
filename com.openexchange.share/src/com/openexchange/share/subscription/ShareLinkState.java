@@ -61,10 +61,10 @@ public enum ShareLinkState {
      * State to indicate that the link belongs to a known share and is accessible.
      */
     SUBSCRIBED,
-    
+
     /**
      * State to indicate that the link belongs to a known share but is not accessible at the moment because the remote
-     * server indicates that credentials have been updated meanwhile. 
+     * server indicates that credentials have been updated meanwhile.
      */
     CREDENTIALS_REFRESH,
 
@@ -79,8 +79,23 @@ public enum ShareLinkState {
     ADDABLE_WITH_PASSWORD,
 
     /**
-     * State to indicate that the share link is inaccessible and thus can't be subscribed.
+     * State to indicate that the link belongs to a known share but is inaccessible at the moment.
      */
-    INACCESSIBLE;
+    INACCESSIBLE,
+
+    /**
+     * State to indicate that the link belongs to a known share but can no longer be accessed.
+     */
+    REMOVED,
+
+    /**
+     * State to indicate that the share link can't be resolved at all and thus can't be subscribed.
+     */
+    UNRESOLVABLE,
+
+    /**
+     * State to indicate that the subscription of the link is not allowed.
+     */
+    FORBIDDEN;
 
 }

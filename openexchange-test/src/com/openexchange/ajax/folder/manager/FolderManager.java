@@ -175,7 +175,7 @@ public class FolderManager {
      * @throws ApiException In case deletion fails
      */
     public List<String> deleteFolder(List<String> foldersToDelete) throws ApiException {
-        FoldersCleanUpResponse deleteFolders = folderApi.getFoldersApi().deleteFolders(folderApi.getSession(), foldersToDelete, tree, lastTimestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+        FoldersCleanUpResponse deleteFolders = folderApi.getFoldersApi().deleteFolders(folderApi.getSession(), foldersToDelete, tree, lastTimestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null);
         lastTimestamp = deleteFolders.getTimestamp();
         return checkResponse(deleteFolders.getError(), deleteFolders.getErrorDesc(), deleteFolders.getData());
     }

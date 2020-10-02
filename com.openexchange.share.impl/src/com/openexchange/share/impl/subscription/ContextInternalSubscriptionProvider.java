@@ -75,9 +75,9 @@ import com.openexchange.share.subscription.ShareSubscriptionProvider;
  */
 public class ContextInternalSubscriptionProvider implements ShareSubscriptionProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ContextInternalSubscriptionProvider.class);
+    private static final ShareLinkAnalyzeResult INACCESSIBLE = new ShareLinkAnalyzeResult(ShareLinkState.INACCESSIBLE, null);
 
-    private static final String PROVIDER_ID = "ictx";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContextInternalSubscriptionProvider.class);
 
     private static final String FOLDER = "folder";
     private final ServiceLookup services;
@@ -114,7 +114,7 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
         URL url = getUrl(shareLink);
         String ref = url.getRef();
         if (Strings.isEmpty(ref)) {
-            return inaccessible();
+            return INACCESSIBLE;
         }
         if (ref.startsWith(Links.FRAGMENT_APP)) {
             ref = ref.substring(Links.FRAGMENT_APP.length());
@@ -129,7 +129,7 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
             }
         }
         if (Strings.isEmpty(folderId)) {
-            return inaccessible();
+            return INACCESSIBLE;
         }
 
         /*
@@ -139,11 +139,11 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
         try {
             UserizedFolder folder = folderService.getFolder(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), folderId, session, null);
             int module = folder.getContentType().getModule();
-            return new ShareLinkAnalyzeResult(ShareLinkState.SUBSCRIBED, new ShareSubscriptionInformation(PROVIDER_ID, folder.getAccountID(), String.valueOf(module), folderId));
+            return new ShareLinkAnalyzeResult(ShareLinkState.SUBSCRIBED, new ShareSubscriptionInformation(folder.getAccountID(), String.valueOf(module), folderId));
         } catch (OXException e) {
             LOGGER.debug("Unable to access the folder", e);
         }
-        return inaccessible();
+        return INACCESSIBLE;
     }
 
     @Override
@@ -159,10 +159,6 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
     @Override
     public boolean unmount(Session session, String shareLink) throws OXException {
         return false;
-    }
-
-    private ShareLinkAnalyzeResult inaccessible() {
-        return new ShareLinkAnalyzeResult(ShareLinkState.INACCESSIBLE, new ShareSubscriptionInformation(PROVIDER_ID, null, null, null));
     }
 
     /**

@@ -82,7 +82,7 @@ public class AnalyzeAction extends AbstractShareSubscriptionAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, JSONObject json, String shareLink) throws OXException {
         ShareSubscriptionRegistry service = services.getServiceSafe(ShareSubscriptionRegistry.class);
         ShareLinkAnalyzeResult result = service.analyze(session, shareLink);
-        JSONObject jsonObject = new JSONObject(5);
+        JSONObject jsonObject = new JSONObject(4);
         try {
             jsonObject.put("state", result.getState());
             return createResponse(result.getInfos(), jsonObject);
