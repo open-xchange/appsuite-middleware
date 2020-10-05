@@ -273,10 +273,11 @@ public class FederatedSharingFolders {
                     jsonFolder.put(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_NAME, folder.getName());
                     lastKnownFolders.put(jsonFolder);
                 }
-                FileStorageAccountMetaDataUtil.setLastKnownFolders(account, lastKnownFolders);
 
-                //Save
-                account.getFileStorageService().getAccountManager().updateAccount(account, session);
+                //Save if needed
+                if (FileStorageAccountMetaDataUtil.setLastKnownFolders(account, lastKnownFolders)) {
+                    account.getFileStorageService().getAccountManager().updateAccount(account, session);
+                }
             } catch (JSONException e) {
                 throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
             }
