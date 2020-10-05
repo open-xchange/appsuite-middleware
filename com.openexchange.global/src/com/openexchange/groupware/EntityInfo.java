@@ -66,14 +66,14 @@ public class EntityInfo implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 2803304999527402064L;
 
-    private final static String IDENTIFER = "id";
+    private final static String IDENTIFER = "identifier";
     private final static String TYPE = "type";
-    private final static String DISPLAY_NAME = "displayName";
+    private final static String DISPLAY_NAME = "display_name";
     private final static String TITLE = "title";
-    private final static String FIRST_NAME = "firstName";
-    private final static String LAST_NAME = "lastName";
+    private final static String FIRST_NAME = "first_name";
+    private final static String LAST_NAME = "last_name";
     private final static String EMAIL1 = "email1";
-    private final static String IMAGE_URL = "imageUrl";
+    private final static String IMAGE_URL = "image1_url";
     private final static String ENTITY = "entity";
     private final static String CONTACT = "contact";
 
