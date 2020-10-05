@@ -84,6 +84,7 @@ public final class MailAccountStorageInit implements Initialization {
         ServerServiceRegistry.getInstance().addService(MailAccountStorageService.class, newMailAccountStorageService());
         ServerServiceRegistry.getInstance().addService(UnifiedInboxManagement.class, newUnifiedINBOXManagement());
         DeleteListenerRegistry.initInstance();
+        DeleteListenerRegistry.getInstance().addDeleteListener(new OAuthMailAccountDeleteListener());
         LOG.info("MailAccountStorageService successfully injected to server service registry");
     }
 

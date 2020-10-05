@@ -92,38 +92,37 @@ public final class DeleteAction extends AbstractMailAccountAction {
         if (null == jBody) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
-        final JSONArray jsonArray = jBody.toArray();
-        final int len = jsonArray.length();
+        JSONArray jsonArray = jBody.toArray();
+        int len = jsonArray.length();
         /*
          * Delete
          */
         try {
-            final JSONArray responseArray = new JSONArray(len);
             if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
                 for (int i = 0; i < len; i++) {
-                    final int id = jsonArray.getInt(i);
-                    if (MailAccount.DEFAULT_ID != id) {
+                    int accountId = jsonArray.getInt(i);
+                    if (MailAccount.DEFAULT_ID != accountId) {
                         throw MailAccountExceptionCodes.NOT_ENABLED.create(
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId()));
                     }
                 }
             }
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            JSONArray responseArray = new JSONArray(len);
             for (int i = 0; i < len; i++) {
-                final int id = jsonArray.getInt(i);
-                final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+                int accountId = jsonArray.getInt(i);
+                MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
 
                 if (!isUnifiedINBOXAccount(mailAccount)) {
                     storageService.deleteMailAccount(
-                        id,
-                        Collections.<String, Object> emptyMap(),
+                        accountId,
+                        Collections.singletonMap("com.openexchange.mailaccount.session", session),
                         session.getUserId(),
                         session.getContextId());
                 }
 
-                responseArray.put(id);
+                responseArray.put(accountId);
             }
             /*
              * Return appropriate result

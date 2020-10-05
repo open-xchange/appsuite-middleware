@@ -78,6 +78,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
@@ -99,6 +100,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -1019,47 +1021,118 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionCodes.NO_DEFAULT_DELETE.create(I(userId), I(contextId));
         }
         dropPOP3StorageFolders(userId, contextId);
-        final Connection con = Database.get(contextId, true);
+
+        ConnectionProvider connectionProvider;
+        {
+            Optional<Session> optionalSession = MailAccounts.tryGetSession(properties, userId, contextId);
+            if (optionalSession.isPresent()) {
+                Connection con = (Connection) optionalSession.get().getParameter("__connection");
+                if (null != con) {
+                    try {
+                        if (Databases.isInTransaction(con)) {
+                            // Given connection is already in transaction. Invoke & return immediately.
+                            return deleteMailAccount(id, properties, userId, contextId, deletePrimary, con);
+                        }
+                    } catch (SQLException e) {
+                        throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                    }
+
+                    // Use given connection
+                    connectionProvider = new InstanceConnectionProvider(con);
+                } else {
+                    // Acquire a connection using DatabaseService
+                    DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+                    connectionProvider = new DatabaseServiceConnectionProvider(contextId, databaseService);
+                }
+            } else {
+                // Acquire a connection using DatabaseService
+                DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+                connectionProvider = new DatabaseServiceConnectionProvider(contextId, databaseService);
+            }
+        }
+
+        Connection con = connectionProvider.getConnection();
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
+            rollback = 1;
+
             boolean deleted = deleteMailAccount(id, properties, userId, contextId, deletePrimary, con);
+
             con.commit();
+            rollback = 2;
             return deleted;
         } catch (SQLException e) {
-            rollback(con);
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (OXException e) {
-            rollback(con);
-            throw e;
-        } catch (Exception e) {
-            rollback(con);
+        } catch (RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            Database.back(contextId, true, con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(con);
+                }
+                autocommit(con);
+            }
+            connectionProvider.ungetConnection(con);
         }
     }
 
     @Override
     public void deleteTransportAccount(final int id, final int userId, final int contextId) throws OXException {
         dropPOP3StorageFolders(userId, contextId);
-        final Connection con = Database.get(contextId, true);
+
+        ConnectionProvider connectionProvider;
+        {
+            Optional<Session> optionalSession = MailAccounts.tryGetSession(Collections.emptyMap(), userId, contextId);
+            if (optionalSession.isPresent()) {
+                Connection con = (Connection) optionalSession.get().getParameter("__connection");
+                if (null != con) {
+                    try {
+                        if (Databases.isInTransaction(con)) {
+                            // Given connection is already in transaction. Invoke & return immediately.
+                            deleteTransportAccount(id, userId, contextId, con);
+                            return;
+                        }
+                    } catch (SQLException e) {
+                        throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                    }
+
+                    // Use given connection
+                    connectionProvider = new InstanceConnectionProvider(con);
+                } else {
+                    // Acquire a connection using DatabaseService
+                    DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+                    connectionProvider = new DatabaseServiceConnectionProvider(contextId, databaseService);
+                }
+            } else {
+                // Acquire a connection using DatabaseService
+                DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+                connectionProvider = new DatabaseServiceConnectionProvider(contextId, databaseService);
+            }
+        }
+
+        Connection con = connectionProvider.getConnection();
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
+            rollback = 1;
+
             deleteTransportAccount(id, userId, contextId, con);
+
             con.commit();
+            rollback = 2;
         } catch (SQLException e) {
-            rollback(con);
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (OXException e) {
-            rollback(con);
-            throw e;
-        } catch (Exception e) {
-            rollback(con);
+        } catch (RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            Database.back(contextId, true, con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(con);
+                }
+                autocommit(con);
+            }
+            connectionProvider.ungetConnection(con);
         }
     }
 
@@ -1110,8 +1183,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         int deletedRows = 0;
         try {
+            Map<String, Object> eventProps = properties == null ? new HashMap<>(2) : new HashMap<>(properties);
             final DeleteListenerRegistry registry = DeleteListenerRegistry.getInstance();
-            registry.triggerOnBeforeDeletion(id, properties, userId, contextId, con);
+            registry.triggerOnBeforeDeletion(id, eventProps, userId, contextId, con);
             // First delete properties
             deleteProperties(contextId, userId, id, false, con);
             deleteProperties(contextId, userId, id, true, con);
@@ -1127,7 +1201,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(2, id);
             stmt.setLong(3, userId);
             deletedRows += stmt.executeUpdate();
-            registry.triggerOnAfterDeletion(id, properties, userId, contextId, con);
+            registry.triggerOnAfterDeletion(id, eventProps, userId, contextId, con);
             return deletedRows > 0;
         } catch (SQLException e) {
             final String className = e.getClass().getName();
@@ -4717,6 +4791,71 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
          * TODO: Re-think about invalid characters
          */
         return (null != name && 0 != name.length());
+    }
+
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /** Simple helper class to acquire/release a connection */
+    private static interface ConnectionProvider {
+
+        /**
+         * Gets the connection to use
+         *
+         * @return The connection
+         * @throws OXException If connection cannot be obtained
+         */
+        Connection getConnection() throws OXException;
+
+        /**
+         * Ungets previously acquired connection.
+         *
+         * @param con The connection to unget
+         */
+        void ungetConnection(Connection con);
+
+    }
+
+    private static class DatabaseServiceConnectionProvider implements ConnectionProvider {
+
+        private final int contextId;
+        private final DatabaseService databaseService;
+
+        DatabaseServiceConnectionProvider(int contextId, DatabaseService databaseService) {
+            super();
+            this.contextId = contextId;
+            this.databaseService = databaseService;
+        }
+
+        @Override
+        public Connection getConnection() throws OXException {
+            return databaseService.getWritable(contextId);
+        }
+
+        @Override
+        public void ungetConnection(Connection con) {
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    private static class InstanceConnectionProvider implements ConnectionProvider {
+
+        private final Connection con;
+
+        InstanceConnectionProvider(Connection con) {
+            super();
+            this.con = con;
+        }
+
+        @Override
+        public Connection getConnection() throws OXException {
+            return con;
+        }
+
+        @Override
+        public void ungetConnection(Connection con) {
+            // Nothing to do
+        }
     }
 
 }

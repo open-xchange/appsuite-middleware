@@ -203,7 +203,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             // Pass the connection and the hint about the scopes to the FileStorageAccountManager
             // as a session parameter.
             session.setParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, eventProps.get(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES));
-            session.setParameter("__file.storage.delete.connection", con);
+            session.setParameter("__connection", con);
             try {
                 for (FileStorageAccount deleteMe : toDelete) {
                     accountManager.deleteAccount(deleteMe, session);
@@ -214,7 +214,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
                     }
                 }
             } finally {
-                session.setParameter("__file.storage.delete.connection", null);
+                session.setParameter("__connection", null);
                 session.setParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, null);
             }
         } catch (Exception e) {
@@ -266,7 +266,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             return;
         }
 
-        session.setParameter("__file.storage.delete.connection", con);
+        session.setParameter("__connection", con);
         try {
             OAuthService storage = services.getService(OAuthService.class);
             if (storage == null) {
@@ -302,7 +302,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             // Update the account
             storage.updateAccount(session, accountId, eventProps);
         } finally {
-            session.setParameter("__file.storage.delete.connection", null);
+            session.setParameter("__connection", null);
         }
     }
 

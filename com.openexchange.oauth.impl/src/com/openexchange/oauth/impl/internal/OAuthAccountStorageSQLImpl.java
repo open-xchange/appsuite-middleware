@@ -150,7 +150,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
 
     @Override
     public OAuthAccount getAccount(Session session, int accountId) throws OXException {
-        Connection connection = (Connection) session.getParameter("__file.storage.delete.connection");
+        Connection connection = (Connection) session.getParameter("__connection");
         try {
             if (connection != null && Databases.isInTransaction(connection)) {
                 // Given connection is already in transaction. Invoke & return immediately.
@@ -189,7 +189,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         int userId = session.getUserId();
         int contextId = session.getContextId();
 
-        Connection connection = (Connection) session.getParameter("__file.storage.delete.connection");
+        Connection connection = (Connection) session.getParameter("__connection");
         if (connection != null) {
             try {
                 if (Databases.isInTransaction(connection)) {
@@ -312,7 +312,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         if (list.isEmpty()) {
             return;
         }
-        Connection connection = (Connection) session.getParameter("__file.storage.delete.connection");
+        Connection connection = (Connection) session.getParameter("__connection");
         try {
             if (connection != null && Databases.isInTransaction(connection)) {
                 // Given connection is already in transaction. Invoke & return immediately.

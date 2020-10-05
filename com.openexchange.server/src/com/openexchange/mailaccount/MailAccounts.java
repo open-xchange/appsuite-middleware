@@ -51,6 +51,7 @@ package com.openexchange.mailaccount;
 
 import static com.openexchange.mailaccount.Constants.MAIL_PROTOCOL_GUARD_GUEST;
 import java.util.Map;
+import java.util.Optional;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -164,5 +165,22 @@ public final class MailAccounts {
 
         // Appears to be matching IMAP account
         return true;
+    }
+
+    /**
+     * Tries to get session from either given properties or from current thread.
+     *
+     * @param properties The properties possibly providing a session
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The optional session
+     */
+    public static Optional<Session> tryGetSession(Map<String, Object> properties, int userId, int contextId) {
+        Session session = (Session) properties.get("com.openexchange.mailaccount.session");
+        if (session != null) {
+            return Optional.of(session);
+        }
+
+        return com.openexchange.session.Sessions.getValidatedSessionForCurrentThread(userId, contextId);
     }
 }

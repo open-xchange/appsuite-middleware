@@ -492,7 +492,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
     public void deleteAccounts(String serviceId, FileStorageAccount[] accounts, int[] genericConfIds, Session session) throws OXException {
         ConnectionProvider connectionProvider;
         {
-            Connection con = (Connection) session.getParameter("__file.storage.delete.connection");
+            Connection con = (Connection) session.getParameter("__connection");
             if (null != con) {
                 try {
                     if (Databases.isInTransaction(con)) {

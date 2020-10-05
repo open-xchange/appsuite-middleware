@@ -190,7 +190,7 @@ public interface MailAccountStorageService {
      * @return The mail account
      * @throws OXException If the mail account cannot be returned
      */
-    MailAccount getMailAccount(int id, int userId, int cid, Connection con) throws OXException;
+    MailAccount getMailAccount(int id, int userId, int contextId, Connection con) throws OXException;
 
     /**
      * Gets the transport account identified by specified identifier.
@@ -234,7 +234,7 @@ public interface MailAccountStorageService {
      * @return The user's mail accounts
      * @throws OXException If the mail accounts cannot be returned
      */
-    TransportAccount[] getUserTransportAccounts(int userId, int cid, Connection con) throws OXException;
+    TransportAccount[] getUserTransportAccounts(int userId, int contextId, Connection con) throws OXException;
 
     /**
      * Gets the mail accounts belonging to specified user in given context.
@@ -264,7 +264,7 @@ public interface MailAccountStorageService {
      * @return The user's mail accounts
      * @throws OXException If the mail accounts cannot be returned
      */
-    MailAccount[] getUserMailAccounts(int userId, int cid, Connection con) throws OXException;
+    MailAccount[] getUserMailAccounts(int userId, int contextId, Connection con) throws OXException;
 
     /**
      * Gets the default mail account belonging to specified user in given context.
@@ -325,7 +325,7 @@ public interface MailAccountStorageService {
      * @param session The session
      * @throws OXException If the mail account cannot be updated
      */
-    void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int cid, Session session) throws OXException;
+    void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int contextId, Session session) throws OXException;
 
     /**
      * Updates mail account's value taken specified {@code MailAccountDescription} instance.
@@ -339,7 +339,7 @@ public interface MailAccountStorageService {
      * @param changePrimary <code>true</code> to change primary account, too.
      * @throws OXException If the mail account cannot be updated
      */
-    void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int cid, Session session, Connection con, boolean changePrimary) throws OXException;
+    void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int contextId, Session session, Connection con, boolean changePrimary) throws OXException;
 
     /**
      * Updates mail account's value taken from specified {@code MailAccountDescription} instance.
@@ -362,7 +362,7 @@ public interface MailAccountStorageService {
      * @param session The session
      * @throws OXException If the mail account cannot be updated
      */
-    void updateMailAccount(MailAccountDescription mailAccount, int userId, int cid, Session session) throws OXException;
+    void updateMailAccount(MailAccountDescription mailAccount, int userId, int contextId, Session session) throws OXException;
 
     /**
      * Updates transport account's value taken from specified transport account.
@@ -373,7 +373,7 @@ public interface MailAccountStorageService {
      * @param session The session
      * @throws OXException If the mail account cannot be updated
      */
-    void updateTransportAccount(TransportAccountDescription transportAccount, int userId, int cid, Session session) throws OXException;
+    void updateTransportAccount(TransportAccountDescription transportAccount, int userId, int contextId, Session session) throws OXException;
 
     /**
      * Updates the given attributes of specified transport account
@@ -500,7 +500,7 @@ public interface MailAccountStorageService {
      * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws OXException If the mail account cannot be deleted
      */
-    boolean deleteMailAccount(int id, Map<String, Object> properties, int userId, int cid, boolean deletePrimary) throws OXException;
+    boolean deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary) throws OXException;
 
     /**
      * Deletes the mail account identified by specified identifier.
@@ -514,7 +514,7 @@ public interface MailAccountStorageService {
      * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws OXException If the mail account cannot be deleted
      */
-    boolean deleteMailAccount(int id, Map<String, Object> properties, int userId, int cid, boolean deletePrimary, Connection con) throws OXException;
+    boolean deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary, Connection con) throws OXException;
 
     /**
      * Gets the mail accounts of the users whose login matches specified login.

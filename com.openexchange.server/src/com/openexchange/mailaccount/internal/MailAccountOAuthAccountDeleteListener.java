@@ -96,7 +96,7 @@ public class MailAccountOAuthAccountDeleteListener extends MailAccountOAuthAccou
         boolean deleted = false;
         if (mailAccount.isMailOAuthAble()) {
             if (mailAccount.getMailOAuthId() == oauthAccountId) {
-                mass.deleteMailAccount(mailAccount.getId(), Collections.<String, Object> emptyMap(), user, cid, false, con);
+                mass.deleteMailAccount(mailAccount.getId(), Collections.singletonMap("com.openexchange.mailaccount.deleteOrigin", "oauth"), user, cid, false, con);
                 deleted = true;
             }
         }
