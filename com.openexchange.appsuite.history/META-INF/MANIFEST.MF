@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.openexchange.appsuite.history
 Bundle-SymbolicName: com.openexchange.appsuite.history
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Automatic-Module-Name: test
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.annotation,

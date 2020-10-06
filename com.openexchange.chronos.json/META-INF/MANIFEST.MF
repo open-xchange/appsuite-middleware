@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Chronos Json interface
 Bundle-SymbolicName: com.openexchange.chronos.json
 Automatic-Module-Name: com.openexchange.chronos.json
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.collect,

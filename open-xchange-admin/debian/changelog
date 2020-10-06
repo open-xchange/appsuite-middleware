@@ -1,3 +1,9 @@
+open-xchange-admin (7.10.5-0) unstable; urgency=medium
+
+  * prepare for 7.10.5 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 06 Oct 2020 09:28:06 +0200
+
 open-xchange-admin (7.10.4-7) stable; urgency=medium
 
   * Fifth candidate for 7.10.4 release

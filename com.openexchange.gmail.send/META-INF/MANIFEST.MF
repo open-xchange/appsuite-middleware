@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Gmail Transport
 Bundle-SymbolicName: com.openexchange.gmail.send
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.google.api.client.auth.oauth2,
  com.google.api.client.googleapis.auth.oauth2,

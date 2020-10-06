@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Micrometer
 Bundle-SymbolicName: com.openexchange.metrics.micrometer
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.metrics.micrometer
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

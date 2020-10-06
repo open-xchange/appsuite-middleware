@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RDB storage for backup string multifactor devices
 Bundle-SymbolicName: com.openexchange.multifactor.provider.backupString.storage.rdb
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.multifactor.provider.backupString.storage.rdb
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
