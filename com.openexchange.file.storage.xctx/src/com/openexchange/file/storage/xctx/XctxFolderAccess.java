@@ -124,4 +124,11 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess {
         throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
     }
 
+    @Override
+    public String toString() {
+        return "XctxFolderAccess [accountId=" + accountAccess.getAccountId() + 
+            ", localUser=" + localSession.getUserId() + '@' + localSession.getContextId() + 
+            ", guestUser=" + super.session.getUserId() + '@' + super.session.getContextId() + ']';
+    }
+
 }

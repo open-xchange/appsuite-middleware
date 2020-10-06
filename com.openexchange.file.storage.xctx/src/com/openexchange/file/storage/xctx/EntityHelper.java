@@ -56,7 +56,11 @@ import java.util.List;
 import java.util.Objects;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
+import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.folderstorage.BasicPermission;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.EntityInfo;
@@ -80,22 +84,18 @@ import com.openexchange.user.UserService;
  */
 public class EntityHelper {
 
+    private static int NOT_SET = -1;
+
     private final XctxAccountAccess accountAccess;
-    private final Session guestSession;
-    private final Session localSession;
 
     /**
      * Initializes a new {@link EntityHelper}.
      * 
      * @param accountAccess The parent account access
-     * @param localSession The user's <i>local</i> session associated with the file storage account
-     * @param guestSession The <i>remote</i> session of the guest user used to access the contents of the foreign context
      */
-    public EntityHelper(XctxAccountAccess accountAccess, Session localSession, Session guestSession) {
+    public EntityHelper(XctxAccountAccess accountAccess) {
         super();
         this.accountAccess = accountAccess;
-        this.guestSession = guestSession;
-        this.localSession = localSession;
     }
 
     /**
@@ -121,7 +121,7 @@ public class EntityHelper {
             // TODO: encode service/account?
             imageUrl = null;
         }
-        EntityInfo mangledEntityInfo = new EntityInfo(identifier, entityInfo.getDisplayName(), entityInfo.getTitle(), entityInfo.getFirstName(), entityInfo.getLastName(), entityInfo.getEmail1(), -1, imageUrl, entityInfo.getType());
+        EntityInfo mangledEntityInfo = new EntityInfo(identifier, entityInfo.getDisplayName(), entityInfo.getTitle(), entityInfo.getFirstName(), entityInfo.getLastName(), entityInfo.getEmail1(), NOT_SET, imageUrl, entityInfo.getType());
         if (LinkEntityInfo.class.isInstance(entityInfo)) {
             LinkEntityInfo linkEntityInfo = (LinkEntityInfo) entityInfo;
             mangledEntityInfo = new LinkEntityInfo(mangledEntityInfo, linkEntityInfo.getShareUrl(), linkEntityInfo.getPassword(), linkEntityInfo.getExpiryDate(), linkEntityInfo.isIncludeSubfolders());
@@ -167,13 +167,13 @@ public class EntityHelper {
      * @param permissions The permissions to enhance
      * @return A list with new object permissions, enhanced with additional details of the underlying entity
      */
-    public List<FileStorageObjectPermission> addEntityInfos(Session session, List<FileStorageObjectPermission> permissions) {
+    public List<FileStorageObjectPermission> addObjectPermissionEntityInfos(Session session, List<FileStorageObjectPermission> permissions) {
         if (null == permissions) {
             return null;
         }
         List<FileStorageObjectPermission> enhancedPermissions = new ArrayList<FileStorageObjectPermission>(permissions.size());
         for (FileStorageObjectPermission permission : permissions) {
-            enhancedPermissions.add(addEntityInfo(session, permission));
+            enhancedPermissions.add(addObjectPermissionEntityInfo(session, permission));
         }
         return enhancedPermissions;
     }
@@ -187,7 +187,7 @@ public class EntityHelper {
      * @return A new object permission, enhanced with additional details of the underlying entity, or the passed permission as is if no
      *         info could be resolved
      */
-    public FileStorageObjectPermission addEntityInfo(Session session, FileStorageObjectPermission permission) {
+    public FileStorageObjectPermission addObjectPermissionEntityInfo(Session session, FileStorageObjectPermission permission) {
         if (null == permission) {
             return null;
         }
@@ -197,6 +197,47 @@ public class EntityHelper {
         }
         DefaultFileStorageObjectPermission enhancedPermission = new DefaultFileStorageObjectPermission(
             permission.getIdentifier(), permission.getEntity(), permission.isGroup(), permission.getPermissions());
+        enhancedPermission.setEntityInfo(entityInfo);
+        return enhancedPermission;
+    }
+
+    /**
+     * Resolves and builds additional entity info for the users and groups referenced by the supplied permissions under perspective of
+     * the passed session's user, and returns a list of new permissions enriched by these entity info.
+     * 
+     * @param session The session to use to resolve the entities in
+     * @param permissions The permissions to enhance
+     * @return A list with new object permissions, enhanced with additional details of the underlying entity
+     */
+    public List<FileStoragePermission> addPermissionEntityInfos(Session session, List<FileStoragePermission> permissions) {
+        if (null == permissions) {
+            return null;
+        }
+        List<FileStoragePermission> enhancedPermissions = new ArrayList<FileStoragePermission>(permissions.size());
+        for (FileStoragePermission permission : permissions) {
+            enhancedPermissions.add(addPermissionEntityInfo(session, permission));
+        }
+        return enhancedPermissions;
+    }
+
+    /**
+     * Resolves and builds additional entity info for a certain user or group under perspective of the passed session's user, and returns
+     * a new permission enriched by these entity info.
+     * 
+     * @param session The session to use to resolve the entity in
+     * @param permission The permission to enhance
+     * @return A new permission, enhanced with additional details of the underlying entity, or the passed permission as is if no
+     *         info could be resolved
+     */
+    public FileStoragePermission addPermissionEntityInfo(Session session, FileStoragePermission permission) {
+        if (null == permission) {
+            return null;
+        }
+        EntityInfo entityInfo = lookupEntity(session, permission.getEntity(), permission.isGroup());
+        if (null == entityInfo) {
+            return permission;
+        }
+        DefaultFileStoragePermission enhancedPermission = DefaultFileStoragePermission.newInstance(permission);
         enhancedPermission.setEntityInfo(entityInfo);
         return enhancedPermission;
     }
@@ -212,12 +253,34 @@ public class EntityHelper {
      * @param permission The permission to mangle the identifiers in
      * @return A new permission with qualified remote entity identifiers
      */
-    public FileStorageObjectPermission mangleRemotePermission(FileStorageObjectPermission permission) {
+    public FileStorageObjectPermission mangleRemoteObjectPermission(FileStorageObjectPermission permission) {
         if (null == permission) {
             return null;
         }
         DefaultFileStorageObjectPermission mangledPermission = new DefaultFileStorageObjectPermission(
-            mangleRemoteEntity(permission.getEntity()), -1, permission.isGroup(), permission.getPermissions());
+            mangleRemoteEntity(permission.getEntity()), NOT_SET, permission.isGroup(), permission.getPermissions());
+        mangledPermission.setEntityInfo(mangleRemoteEntity(permission.getEntityInfo()));
+        return mangledPermission;
+    }
+
+    /**
+     * <i>Mangles</i> the identifiers found in the supplied folder permission from the <i>remote</i> context, so that it can be used
+     * within the local session of the storage account's context.
+     * <p/>
+     * The mangled permission's <code>identifier</code> will be constructed based on the remote entity id, while the <code>entity</code>
+     * itself will no longer be set in the resulting permission. The same is done with a potentially set {@link EntityInfo} in the
+     * supplied foreign permission.
+     * 
+     * @param permission The permission to mangle the identifiers in
+     * @return A new permission with qualified remote entity identifiers
+     */
+    public FileStoragePermission mangleRemotePermission(FileStoragePermission permission) {
+        if (null == permission) {
+            return null;
+        }
+        DefaultFileStoragePermission mangledPermission = DefaultFileStoragePermission.newInstance(permission);
+        mangledPermission.setIdentifier(mangleRemoteEntity(permission.getEntity()));
+        mangledPermission.setEntity(NOT_SET);
         mangledPermission.setEntityInfo(mangleRemoteEntity(permission.getEntityInfo()));
         return mangledPermission;
     }
@@ -233,29 +296,74 @@ public class EntityHelper {
      * @param permissions The permissions to mangle the identifiers in
      * @return A list with new permissions with qualified remote entity identifiers
      */
-    public List<FileStorageObjectPermission> mangleRemotePermissions(List<FileStorageObjectPermission> permissions) {
+    public List<FileStorageObjectPermission> mangleRemoteObjectPermissions(List<FileStorageObjectPermission> permissions) {
         if (null == permissions) {
             return null;
         }
         List<FileStorageObjectPermission> mangledPermissions = new ArrayList<FileStorageObjectPermission>(permissions.size());
         for (FileStorageObjectPermission permission : permissions) {
-            mangledPermissions.add(mangleRemotePermission(permission));
+            mangledPermissions.add(mangleRemoteObjectPermission(permission));
         }
         return mangledPermissions;
     }
     
     /**
-     * <i>Unmangles</i> the identifiers found in the supplied object permission from the <i>local</i> context, so that it can be used
+     * <i>Mangles</i> the identifiers found in the supplied folder permissions from the <i>remote</i> context, so that they can be used
+     * within the local session of the storage account's context.
+     * <p/>
+     * For each permission entry, the mangled permission's <code>identifier</code> will be constructed based on the remote entity id,
+     * while the <code>entity</code> itself will no longer be set in the resulting permission. The same is done with a potentially set
+     * {@link EntityInfo} in the supplied foreign permission.
+     * 
+     * @param permissions The permissions to mangle the identifiers in
+     * @return A list with new permissions with qualified remote entity identifiers
+     */
+    public List<FileStoragePermission> mangleRemotePermissions(List<FileStoragePermission> permissions) {
+        if (null == permissions) {
+            return null;
+        }
+        List<FileStoragePermission> mangledPermissions = new ArrayList<FileStoragePermission>(permissions.size());
+        for (FileStoragePermission permission : permissions) {
+            mangledPermissions.add(mangleRemotePermission(permission));
+        }
+        return mangledPermissions;
+    }
+
+    /**
+     * <i>Unmangles</i> the identifiers found in the supplied folder permission from the <i>local</i> context, so that it can be used
      * within the guest session of the foreign context.
      * <p/>
-     * The passed permission's <code>identifier</code> will used to extract the original entity identifier again, which will get applied 
+     * The passed permission's <code>identifier</code> will be used to extract the original entity identifier again, which will get applied
      * in the resulting permission object. The same is done with the identifiers found in a potentially set {@link EntityInfo} in the
      * supplied local permission.
      * 
      * @param permission The permission to unmangle the identifiers in
      * @return A new permission with relative entity identifiers
      */
-    public FileStorageObjectPermission unmangleLocalPermission(FileStorageObjectPermission permission) {
+    public Permission unmangleLocalPermission(Permission permission) {
+        if (null == permission) {
+            return null;
+        }
+        int entity = unmangleLocalEntity(permission.getIdentifier());
+        BasicPermission unmangledPermission = new BasicPermission(permission);
+        unmangledPermission.setEntity(entity);
+        unmangledPermission.setIdentifier(String.valueOf(entity));
+        unmangledPermission.setEntityInfo(unmangleLocalEntity(permission.getEntityInfo()));
+        return unmangledPermission;
+    }
+
+    /**
+     * <i>Unmangles</i> the identifiers found in the supplied object permission from the <i>local</i> context, so that it can be used
+     * within the guest session of the foreign context.
+     * <p/>
+     * The passed permission's <code>identifier</code> will be used to extract the original entity identifier again, which will get applied
+     * in the resulting permission object. The same is done with the identifiers found in a potentially set {@link EntityInfo} in the
+     * supplied local permission.
+     * 
+     * @param permission The permission to unmangle the identifiers in
+     * @return A new permission with relative entity identifiers
+     */
+    public FileStorageObjectPermission unmangleLocalObjectPermission(FileStorageObjectPermission permission) {
         if (null == permission) {
             return null;
         }
@@ -267,23 +375,45 @@ public class EntityHelper {
     }
 
     /**
-     * <i>Unmangles</i> the identifiers found in the supplied list of object permission from the <i>local</i> context, so that it can be
+     * <i>Unmangles</i> the identifiers found in the supplied list of folder permission from the <i>local</i> context, so that it can be
      * used within the guest session of the foreign context.
      * <p/>
-     * The passed permission's <code>identifier</code> will used to extract the original entity identifier again, which will get applied
+     * The passed permission's <code>identifier</code> will be used to extract the original entity identifier again, which will get applied
      * in the resulting permission object. The same is done with the identifiers found in a potentially set {@link EntityInfo} in the
      * supplied local permission.
      * 
      * @param permissions The permissions to unmangle the identifiers in
      * @return A list with new permissions with relative entity identifiers
      */
-    public List<FileStorageObjectPermission> unmangleLocalPermissions(List<FileStorageObjectPermission> permissions) {
+    public Permission[] unmangleLocalPermissions(Permission[] permissions) {
+        if (null == permissions) {
+            return null;
+        }
+        Permission[] unmangledPermissions = new Permission[permissions.length];
+        for (int i = 0; i < permissions.length; i++) {
+            unmangledPermissions[i] = unmangleLocalPermission(permissions[i]);
+        }
+        return unmangledPermissions;
+    }
+
+    /**
+     * <i>Unmangles</i> the identifiers found in the supplied list of object permission from the <i>local</i> context, so that it can be
+     * used within the guest session of the foreign context.
+     * <p/>
+     * The passed permission's <code>identifier</code> will be used to extract the original entity identifier again, which will get applied
+     * in the resulting permission object. The same is done with the identifiers found in a potentially set {@link EntityInfo} in the
+     * supplied local permission.
+     * 
+     * @param permissions The permissions to unmangle the identifiers in
+     * @return A list with new permissions with relative entity identifiers
+     */
+    public List<FileStorageObjectPermission> unmangleLocalObjectPermissions(List<FileStorageObjectPermission> permissions) {
         if (null == permissions) {
             return null;
         }
         List<FileStorageObjectPermission> unmangledPermissions = new ArrayList<FileStorageObjectPermission>(permissions.size());
         for (FileStorageObjectPermission permission : permissions) {
-            unmangledPermissions.add(unmangleLocalPermission(permission));
+            unmangledPermissions.add(unmangleLocalObjectPermission(permission));
         }
         return unmangledPermissions;
     }
@@ -302,7 +432,7 @@ public class EntityHelper {
     }
 
     private String mangleRemoteEntity(int entity) {
-        if (0 >= entity) {
+        if (0 > entity) {
             return null;
         }
         return IDMangler.mangle(accountAccess.getService().getId(), accountAccess.getAccountId(), String.valueOf(entity));
@@ -387,19 +517,6 @@ public class EntityHelper {
         return new EntityInfo(String.valueOf(group.getIdentifier()), group.getDisplayName(), null, null, null, null, group.getIdentifier(), null, Type.GROUP);
     }
 
-    private EntityInfo lookupUserEntity(Session session, int userId) {
-        User user;
-        try {
-            user = accountAccess.getServiceSafe(UserService.class).getUser(userId, session.getContextId());
-        } catch (OXException e) {
-            getLogger(EntityHelper.class).warn("Error looking up user {} in context {}", I(userId), I(session.getContextId()), e);
-            return null;
-        }
-        //TODO anonymization required although it's still a "peer" permission?
-        EntityInfo.Type type = user.isGuest() ? Type.GUEST : Type.USER;
-        return new EntityInfo(String.valueOf(user.getId()), user.getDisplayName(), null, user.getGivenName(), user.getSurname(), user.getMail(), user.getId(), null, type);
-    }
-
     private int unmangleLocalEntity(String identifier) {
         if (null != identifier) {
             List<String> components = IDMangler.unmangle(identifier);
@@ -412,11 +529,6 @@ public class EntityHelper {
             }
         }
         return -1;
-    }
-
-    EntityInfo mangleRemoteUserEntity(EntityInfo entityInfo, int userId) {
-        EntityInfo remoteEntityInfo = null != entityInfo ? entityInfo : 0 < userId ? lookupUserEntity(guestSession, userId) : null;
-        return mangleRemoteEntity(remoteEntityInfo);
     }
 
     private boolean matchesAccount(List<String> unmangledComponents) {
