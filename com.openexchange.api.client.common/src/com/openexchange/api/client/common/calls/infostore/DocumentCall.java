@@ -181,6 +181,7 @@ public class DocumentCall extends AbstractGetCall<DocumentResponse> {
         };
     }
 
+    @SuppressWarnings("null")
     @Override
     @NonNull
     public Map<String, String> getHeaders() {

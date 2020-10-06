@@ -94,6 +94,7 @@ public class XOXAccountAccess implements CapabilityAware {
      *
      * @param service The {@link FileStorageService}
      * @param clientFactory The {@link ApiClientService}
+     * @param conversionService The {@link ConversionService}
      * @param account The {@link FileStorageAccount}
      * @param session The {@link Session}
      * @param retryAfterError The amount of seconds after which accessing an error afflicted account should be retried.
@@ -111,7 +112,7 @@ public class XOXAccountAccess implements CapabilityAware {
         this.account = Objects.requireNonNull(account, "account must not be null");
         this.session = Objects.requireNonNull(session, "session must not be null");
 
-        conversionService = Objects.requireNonNull(conversionService, "conversionService must not be null");
+        Objects.requireNonNull(conversionService, "conversionService must not be null");
         DataHandler ox2jsonDataHandler = conversionService.getDataHandler(DataHandlers.OXEXCEPTION2JSON);
         DataHandler json2oxDataHandler = conversionService.getDataHandler(DataHandlers.JSON2OXEXCEPTION);
         this.errorHandler = new FileStorageAccountErrorHandler(ox2jsonDataHandler, json2oxDataHandler, this, session, retryAfterError);

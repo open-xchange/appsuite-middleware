@@ -61,6 +61,7 @@ import com.openexchange.session.Session;
  * {@link MediaStatusMapping}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @param <O> The object type
  * @since v7.10.5
  */
 public abstract class MediaStatusMapping<O> extends DefaultJsonMapping<MediaStatus, O> {

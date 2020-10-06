@@ -49,10 +49,9 @@
 
 package com.openexchange.file.storage.xox;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.Property;
-
-import static com.openexchange.java.Autoboxing.I;
 
 /**
  * {@link XOXFileStorageProperties}
@@ -65,5 +64,5 @@ public class XOXFileStorageProperties {
     /**
      * The time, in seconds, after which the access to an an error afflicted XOX account should be retried.
      */
-    public static Property RETRY_AFTER_ERROR = DefaultProperty.valueOf("com.openexchange.file.storage.xox.retryAfterError", I(3600 /* seconds = 1h */));
+    public static final Property RETRY_AFTER_ERROR = DefaultProperty.valueOf("com.openexchange.file.storage.xox.retryAfterError", I(3600 /* seconds = 1h */));
 }

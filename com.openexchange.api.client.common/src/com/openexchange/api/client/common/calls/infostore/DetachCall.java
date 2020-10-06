@@ -49,6 +49,7 @@
 
 package com.openexchange.api.client.common.calls.infostore;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -64,8 +65,6 @@ import com.openexchange.api.client.common.calls.AbstractPutCall;
 import com.openexchange.api.client.common.parser.AbstractHttpResponseParser;
 import com.openexchange.api.client.common.parser.CommonApiResponse;
 import com.openexchange.exception.OXException;
-
-import static com.openexchange.java.Autoboxing.I;
 
 /**
  * {@link DetachCall} - Deletes version of an infoitem
@@ -85,7 +84,7 @@ public class DetachCall extends AbstractPutCall<List<Integer>> {
     /**
      * Initializes a new {@link DetachCall}.
      *
-     * @param id The ID of the file to delte the versions for
+     * @param id The ID of the file to delete the versions for
      * @param folder The folder ID of the file
      * @param timestamp The timestamp / sequencenumber
      * @param versionsToDelete A list of versions to delete
@@ -121,7 +120,7 @@ public class DetachCall extends AbstractPutCall<List<Integer>> {
     @Nullable
     public HttpEntity getBody() throws OXException, JSONException {
         JSONArray jsonArray = new JSONArray(versionsToDelete.length);
-        for(int i=0; i < versionsToDelete.length; i++) {
+        for (int i = 0; i < versionsToDelete.length; i++) {
             jsonArray.put(versionsToDelete[i]);
         }
         return ApiClientUtils.createJsonBody(jsonArray);
@@ -136,7 +135,7 @@ public class DetachCall extends AbstractPutCall<List<Integer>> {
                 JSONArray jsonArray = commonResponse.getJSONArray();
                 List<Integer> ret = new ArrayList<>(jsonArray.length());
                 for (int i = 0; i < jsonArray.length(); i++) {
-                    if(!jsonArray.isNull(i)) {
+                    if (!jsonArray.isNull(i)) {
                         ret.add(I(jsonArray.getInt(i)));
                     }
                 }

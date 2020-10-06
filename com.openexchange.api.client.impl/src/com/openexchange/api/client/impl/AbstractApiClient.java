@@ -217,7 +217,7 @@ public abstract class AbstractApiClient implements ApiClient {
             /**
              * Check if the request was enqueued on the remote side, because it takes longer.
              */
-            if(enquedRequest) {
+            if (enquedRequest) {
                 //We poll for the request until it's finished
                 return reDo(parser, response);
             }
@@ -231,11 +231,10 @@ public abstract class AbstractApiClient implements ApiClient {
                 ret = (T) new ResourceReleasingInputStream(request, response);
                 request = null;
                 response = null;
-            }
-            else if (ret instanceof InputStreamAwareResponse) {
+            } else if (ret instanceof InputStreamAwareResponse) {
                 //Do not release resources yet if we return an InputStreamResponse
                 final InputStreamAwareResponse inputStreamResponse = (InputStreamAwareResponse) ret;
-                if(inputStreamResponse.getInputStream() != null) {
+                if (inputStreamResponse.getInputStream() != null) {
                     inputStreamResponse.setInputStream(new ResourceReleasingInputStream(request, response, inputStreamResponse.getInputStream()));
                     request = null;
                     response = null;

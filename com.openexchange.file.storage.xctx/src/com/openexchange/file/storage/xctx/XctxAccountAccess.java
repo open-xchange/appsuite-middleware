@@ -51,10 +51,10 @@ package com.openexchange.file.storage.xctx;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.datahandler.DataHandlers;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.ErrorStateFolderAccess;
@@ -68,8 +68,8 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.folderstorage.FederatedSharingFolders;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.server.ServiceLookup;
@@ -119,6 +119,7 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
     /**
      * Gets the service of specified type. Throws error if service is absent.
      *
+     * @param <S> The class type 
      * @param clazz The service's class
      * @return The service instance
      * @throws ShutDownRuntimeException If system is currently shutting down
@@ -132,6 +133,7 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
      * Gets a {@link HostData} implementation under the perspective of the guest user.
      *
      * @return The host data for the guest
+     * @throws OXException In case URL is missing or invalid
      */
     public HostData getGuestHostData() throws OXException {
         String shareUrl = (String) account.getConfiguration().get("url");

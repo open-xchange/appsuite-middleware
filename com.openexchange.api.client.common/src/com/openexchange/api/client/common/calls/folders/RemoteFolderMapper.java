@@ -49,6 +49,10 @@
 
 package com.openexchange.api.client.common.calls.folders;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.b;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
@@ -62,11 +66,6 @@ import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
-
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.java.Autoboxing.B;
-import static com.openexchange.java.Autoboxing.b;
 
 /**
  * {@link RemoteFolderMapper}
@@ -169,9 +168,6 @@ public class RemoteFolderMapper extends DefaultJsonMapper<RemoteFolder, RemoteFo
                 object.setCreatedBy(-1);
             }
         });
-
-
-
 
         mappings.put(RemoteFolderField.CREATION_DATE, new DateMapping<RemoteFolder>(RemoteFolderField.CREATION_DATE.getName(), I(RemoteFolderField.CREATION_DATE.getColumn())) {
 

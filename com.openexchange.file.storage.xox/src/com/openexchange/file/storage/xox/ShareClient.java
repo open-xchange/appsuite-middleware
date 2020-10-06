@@ -134,13 +134,13 @@ public class ShareClient {
 
     private static final String SYSTEM_ROOT_FOLDER_ID = "0";
     private static final String TREE_ID = FolderStorage.REAL_TREE_ID;
-    private static final List<Field> ALL_FIELDS;
     private static final String MODULE_FILES = "files";
     private static final String TIMEZONE_UTC = "UTC";
     private static final String SEARCH_FACET_FOLDER = "folder";
     private static final String SEARCH_FACET_ACCOUNT = "account";
     private static final String INFOSTORE = "infostore";
     private static final String INFOSTORE_ACCOUNT_ID = "com.openexchange.infostore://infostore";
+    private static final List<Field> ALL_FIELDS;
 
     static {
         ALL_FIELDS = Arrays.asList(Field.values());

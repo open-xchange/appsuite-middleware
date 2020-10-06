@@ -105,7 +105,7 @@ public enum RemoteFolderField {
      */
     SUBFOLDERS(304, "subfolders"),
 
-    /*
+    /**
      * Permissions which apply to the current user
      */
     OWN_RIGHTS(305, "own_rights"),
