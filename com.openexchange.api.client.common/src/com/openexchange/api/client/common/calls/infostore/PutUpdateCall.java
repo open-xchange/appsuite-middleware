@@ -80,6 +80,13 @@ public class PutUpdateCall extends AbstractPutCall<String> {
     private final int[] columns;
     private final String pushToken;
 
+    /**
+     * Initializes a new {@link PutUpdateCall}.
+     *
+     * @param file The file to update
+     * @param timestamp the last known timestamp/sequencenumber
+     * @param columns the column IDs of the file's fields to update
+     */
     public PutUpdateCall(DefaultFile file, long timestamp, int[] columns) {
         this(file.getId(), file, timestamp, columns, null);
     }

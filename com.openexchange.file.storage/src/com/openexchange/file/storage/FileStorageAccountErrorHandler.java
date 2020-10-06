@@ -55,7 +55,6 @@ import java.util.Objects;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.conversion.ConversionResult;
-import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.SimpleData;
@@ -79,7 +78,6 @@ public class FileStorageAccountErrorHandler {
     /**
      * Initializes a new {@link FileStorageAccountErrorHandler}.
      *
-     * @param conversionService The required {@link ConversionService}
      * @param error2jsonDataHandler A {@link DataHandler} which will used to serialize an error
      * @param json2errorDataHandler A {@link DataHandler} which will used to de-serialze an error
      * @param accountAccess The related {@link XOXAccountAccess}
@@ -123,7 +121,7 @@ public class FileStorageAccountErrorHandler {
      *
      * @param t The time in seconds
      * @return The error occurred in the last t seconds, or null if there is no current error or it occurred longer than the given t seconds.
-     * @throws OXException
+     * @throws OXException In case of an JSON error
      */
     private FileStorageAccountError getRecentError(int t) throws OXException {
         try {
@@ -154,7 +152,7 @@ public class FileStorageAccountErrorHandler {
      *
      * @param t The time in seconds
      * @return The exception occurred in the last t seconds, or null if there is no current error or it occurred longer than the given t seconds.
-     * @throws OXException
+     * @throws OXException In case of an JSON error
      */
     private OXException getRecentException(int t) throws OXException {
         FileStorageAccountError lastError = getRecentError(t);
@@ -166,7 +164,7 @@ public class FileStorageAccountErrorHandler {
      * getRecentException
      *
      * @return The exception occurred in the last t (configured) seconds, or null if there is no current error or it occurred longer than the given t seconds.
-     * @throws OXException
+     * @throws OXException In case of an JSON error
      */
     public OXException getRecentException() throws OXException {
         return getRecentException(retryAfterError);
@@ -199,7 +197,7 @@ public class FileStorageAccountErrorHandler {
      * Checks if there is a recent exception, in the last t (configured) seconds, accessing this account.
      *
      * @return <code>true</code> if there was a recent exception in the last t (configured) seconds, <code>false</code> otherwise.
-     * @throws OXException
+     * @throws OXException In case of an JSON error
      */
     public boolean hasRecentException() throws OXException {
         return getRecentException(retryAfterError) != null;
@@ -209,6 +207,7 @@ public class FileStorageAccountErrorHandler {
      * Handles an exception; i.e. if the exception is found to be long-lasting, it is saved to the DB
      *
      * @param exception exception to save
+     * @return The exception
      * @throws OXException If the exception could not be saved
      */
     public OXException handleException(OXException exception) throws OXException {
@@ -240,7 +239,7 @@ public class FileStorageAccountErrorHandler {
     /**
      * Deletes the recent exception, if any
      *
-     * @throws OXException
+     * @throws OXException In case of account errors
      */
     public void removeRecentException() throws OXException {
         FileStorageAccount account = getAccount();

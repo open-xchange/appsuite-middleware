@@ -273,6 +273,11 @@ public class QueryCall<O, E extends Enum<E>> extends AbstractPutCall<FindRespons
             return this;
         }
 
+        /**
+         * Builds the query
+         *
+         * @return The query
+         */
         public QueryBody build() {
             return queryBody;
         }
@@ -484,7 +489,7 @@ public class QueryCall<O, E extends Enum<E>> extends AbstractPutCall<FindRespons
                         final E[] mappedFields = columns != null ?
                             resultObjectMapper.getMappedFields(columns) :
                             resultObjectMapper.getMappedFields(calendarFields);
-                        //@formatter:on
+                    //@formatter:on
                     results = new ArrayList<>(resultArray.length());
                     for (int i = 0; i < resultArray.length(); i++) {
                         results.add(resultObjectMapper.deserialize(resultArray.getJSONObject(i), mappedFields));

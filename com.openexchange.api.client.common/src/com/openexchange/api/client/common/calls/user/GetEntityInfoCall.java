@@ -74,12 +74,24 @@ public class GetEntityInfoCall extends AbstractGetCall<EntityInfo> {
     private final String entityIdentifier;
     private final String id;
 
-    public GetEntityInfoCall(String entityIdentififer, String id) {
+    /**
+     * Initializes a new {@link GetEntityInfoCall}.
+     * 
+     * @param entityIdentifier The entity ID
+     * @param id The user ID
+     */
+    public GetEntityInfoCall(String entityIdentifier, String id) {
         super();
-        this.entityIdentifier = entityIdentififer;
+        this.entityIdentifier = entityIdentifier;
         this.id = id;
     }
 
+    /**
+     * Initializes a new {@link GetEntityInfoCall}.
+     * 
+     * @param entityIdentifier The entity ID
+     * @param id The user ID
+     */
     public GetEntityInfoCall(String entityIdentifier, int id) {
         this(entityIdentifier, String.valueOf(id));
     }
@@ -123,7 +135,7 @@ public class GetEntityInfoCall extends AbstractGetCall<EntityInfo> {
         return "get";
     }
 
-    public String getEntityIdentifier() {
+    protected String getEntityIdentifier() {
         return entityIdentifier;
     }
 

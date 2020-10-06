@@ -86,7 +86,7 @@ public class GetAllCall extends AbstractGetCall<List<DefaultFile>> {
         this(folderId,
             new int[] { DataObject.OBJECT_ID,
                         File.Field.TITLE.getNumber(),
-                       File.Field.FILENAME.getNumber()},
+                        File.Field.FILENAME.getNumber() },
             null,
             SortDirection.DEFAULT);
         //@formatter:on

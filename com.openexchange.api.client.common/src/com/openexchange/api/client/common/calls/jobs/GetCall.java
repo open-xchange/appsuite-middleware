@@ -59,6 +59,7 @@ import com.openexchange.api.client.common.calls.AbstractGetCall;
  * {@link GetCall} - Gets the result of a certain job
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @param <T> The type of the response
  * @since v7.10.5
  */
 public class GetCall<T> extends AbstractGetCall<T> {
@@ -70,7 +71,7 @@ public class GetCall<T> extends AbstractGetCall<T> {
      * Initializes a new {@link GetCall}.
      *
      * @param id The ID of the job to get
-     * @param responeParser The parser to use for the actual expected result
+     * @param responseParser The parser to use for the actual expected result
      */
     public GetCall(String id, HttpResponseParser<T> responseParser) {
         this.id = Objects.requireNonNull(id, "id must not be null");

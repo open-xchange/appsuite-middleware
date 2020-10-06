@@ -63,10 +63,21 @@ import com.openexchange.exception.OXExceptionStrings;
  */
 public enum XOXFileStorageExceptionCodes implements DisplayableOXExceptionCode {
 
+    /**
+     * <li>{@value XOXFileStorageExceptionMessages#PING_FAILED}</li>
+     * <li><code>The connection check failed.</code></li>
+     */
     PING_FAILED("The connection check failed.", CATEGORY_CONNECTIVITY, 1, XOXFileStorageExceptionMessages.PING_FAILED),
 
+    /**
+     * <li>{@value XOXFileStorageExceptionMessages#MISSING_CAP_MSG}</li>
+     * <li><code>Missing capability for file storage %1$s</code></li>
+     */
     MISSING_CAPABILITY("Missing capability for file storage %1$s", Category.CATEGORY_PERMISSION_DENIED, 2, XOXFileStorageExceptionMessages.MISSING_CAP_MSG),
 
+    /**
+     * <li><code>JSON error: %1$s</code></li>
+     */
     JSON_ERROR("JSON error: %1$s", Category.CATEGORY_ERROR, 3),
 
     ;

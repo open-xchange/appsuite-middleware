@@ -70,17 +70,6 @@ public class DocumentResponse implements InputStreamAwareResponse {
     public DocumentResponse() {}
 
     /**
-     * Initializes a new {@link DocumentResponse}.
-     *
-     * @param inputStream The document's binary data, or null if no binary are present
-     * @param eTag The document's ETag
-     */
-    public DocumentResponse(InputStream inputStream, String eTag) {
-        this.inputStream = inputStream;
-        this.eTag = eTag;
-    }
-
-    /**
      * Gets the inputStream
      *
      * @return The inputStream, or <code>null</code> if the response does not contain any data
@@ -113,7 +102,6 @@ public class DocumentResponse implements InputStreamAwareResponse {
      * Sets the ETag
      *
      * @param eTag The ETag to set
-     * @return this
      */
     public void setETag(String eTag) {
         this.eTag = eTag;

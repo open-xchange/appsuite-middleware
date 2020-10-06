@@ -111,6 +111,7 @@ public abstract class AbstractApiCall<T> implements ApiCall<T> {
         return parameters;
     }
 
+    @SuppressWarnings("null")
     @Override
     @NonNull
     public Map<String, String> getHeaders() {
