@@ -4,7 +4,6 @@
 .DS_Store
 .lint4jprefs
 .attach*
-*.attach*
 bin
 bin/
 .git-rewrite/
