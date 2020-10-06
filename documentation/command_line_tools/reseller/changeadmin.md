@@ -48,12 +48,12 @@ See [createadmin(1)](createadmin#options) for available default restrictions.
 : Restriction to remove (can be specified multiple times).
 
 **--capabilities-to-add** *capabilities-to-add*
-: The capabilities to add as a comma-separated string; e.g. "portal, -autologin".
+: The capabilities to add as a comma-separated string; e.g. "portal, autologin".
 
-**--capabilities-to-remove** *capabilities-to-add*
+**--capabilities-to-remove** *capabilities-to-remove*
 : The capabilities to remove as a comma-separated string; e.g. "cap2, cap2"
 
-**--capabilities-to-drop** *capabilities-to-add*
+**--capabilities-to-drop** *capabilities-to-drop*
 : The capabilities to drop (clean from storage) as a comma-separated string; e.g. "cap2, cap2"
 
 **--config**

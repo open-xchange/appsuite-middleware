@@ -536,7 +536,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
                 GuestCapabilityMode capMode = getGuestCapabilityMode(user, context);
                 if (capMode == GuestCapabilityMode.INHERIT) {
                     applyConfigCascade(filteredCaps, user.getCreatedBy(), contextId);
-                    applyResellerCapabilities(filteredCaps, contextId, allowCache);
+                    applyResellerCapabilities(filteredCaps, contextId);
                     applyContextCapabilities(filteredCaps, contextId, allowCache);
                     applyUserCapabilities(filteredCaps, user.getCreatedBy(), contextId, allowCache);
                     applyUserCapabilities(filteredCaps, userId, contextId, allowCache);
@@ -548,13 +548,13 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
                 }
             } else {
                 applyConfigCascade(filteredCaps, userId, contextId);
-                applyResellerCapabilities(filteredCaps, contextId, allowCache);
+                applyResellerCapabilities(filteredCaps, contextId);
                 applyContextCapabilities(filteredCaps, contextId, allowCache);
                 applyUserCapabilities(filteredCaps, userId, contextId, allowCache);
             }
         } else {
             applyConfigCascade(filteredCaps, userId, contextId);
-            applyResellerCapabilities(filteredCaps, contextId, allowCache);
+            applyResellerCapabilities(filteredCaps, contextId);
             applyContextCapabilities(filteredCaps, contextId, allowCache);
         }
     }
@@ -680,7 +680,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * @param allowCache Whether caching of loaded capabilities is allowed
      * @throws OXException
      */
-    private void applyResellerCapabilities(FilteringCapabilities capabilities, int contextId, boolean allowCache) throws OXException {
+    private void applyResellerCapabilities(FilteringCapabilities capabilities, int contextId) throws OXException {
         if (contextId <= 0) {
             return;
         }
@@ -691,7 +691,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
         if (false == resellerService.isEnabled()) {
             return;
         }
-        applySet(capabilities, getResellerCaps(contextId, allowCache).stream().map(r -> r.getId()).collect(Collectors.toSet()), CapabilitySource.RESELLER);
+        applySet(capabilities, getResellerCaps(contextId).stream().map(r -> r.getId()).collect(Collectors.toSet()), CapabilitySource.RESELLER);
     }
 
     /**
@@ -1167,7 +1167,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
                 Set<String> removees = new HashSet<String>();
 
                 // Reseller-sensitive
-                for (ResellerCapability resellerCapability : getResellerCaps(contextId, false)) {
+                for (ResellerCapability resellerCapability : getResellerCaps(contextId)) {
                     if (null == resellerCapability) {
                         continue;
                     }
@@ -1391,11 +1391,10 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * Loads the reseller capabilities for the specified context.
      *
      * @param contextId The context identifier
-     * @param allowCache Whether to utilise cache for this operation
      * @return A Set with all reseller capabilities.
      * @throws OXException
      */
-    private Set<ResellerCapability> getResellerCaps(int contextId, boolean allowCache) throws OXException {
+    private Set<ResellerCapability> getResellerCaps(int contextId) throws OXException {
         if (contextId <= 0) {
             return ImmutableSet.of();
         }

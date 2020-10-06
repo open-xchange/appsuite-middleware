@@ -930,23 +930,4 @@ public class AdminCache {
     public boolean isAllowMasterOverride() {
         return allowMasterOverride;
     }
-
-    //    /**
-    //     * {@link Encrypter} - Password encrypter interface
-    //     *
-    //     * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
-    //     * @since v7.10.0
-    //     */
-    //    private interface Encrypter {
-    //
-    //        /**
-    //         * Encrypts the specified password and returns it
-    //         *
-    //         * @param password The password to encrypt
-    //         * @return The encrypted password
-    //         * @throws UnsupportedEncodingException
-    //         * @throws NoSuchAlgorithmException
-    //         */
-    //        String encrypt(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException;
-    //    }
 }
