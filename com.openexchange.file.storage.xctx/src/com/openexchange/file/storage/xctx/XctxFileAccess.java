@@ -87,7 +87,7 @@ public class XctxFileAccess extends AbstractInfostoreFileAccess {
         super(guestSession, accountAccess.getServiceSafe(InfostoreFacade.class), accountAccess.getServiceSafe(InfostoreSearchEngine.class));
         this.localSession = localSession;
         this.accountAccess = accountAccess;
-        this.fileConverter = new XctxFileConverter(accountAccess, localSession, guestSession);
+        this.fileConverter = new XctxFileConverter(accountAccess, guestSession);
     }
     
     @Override
@@ -112,6 +112,13 @@ public class XctxFileAccess extends AbstractInfostoreFileAccess {
     @Override
     protected FileConverter getConverter() {
         return fileConverter;
+    }
+
+    @Override
+    public String toString() {
+        return "XctxFileAccess [accountId=" + accountAccess.getAccountId() + 
+            ", localUser=" + localSession.getUserId() + '@' + localSession.getContextId() + 
+            ", guestUser=" + super.session.getUserId() + '@' + super.session.getContextId() + ']';
     }
 
 }

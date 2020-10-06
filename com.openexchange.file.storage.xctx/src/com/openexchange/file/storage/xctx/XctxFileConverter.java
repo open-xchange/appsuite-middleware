@@ -68,7 +68,6 @@ import com.openexchange.session.Session;
 public class XctxFileConverter extends FileConverter {
 
     private final Session guestSession;
-    private final Session localSession;
     private final EntityHelper entityHelper;
     
     /**
@@ -78,11 +77,35 @@ public class XctxFileConverter extends FileConverter {
      * @param localSession The user's <i>local</i> session associated with the file storage account
      * @param guestSession The <i>remote</i> session of the guest user used to access the contents of the foreign context
      */
-    public XctxFileConverter(XctxAccountAccess accountAccess, Session localSession, Session guestSession) {
+    public XctxFileConverter(XctxAccountAccess accountAccess, Session guestSession) {
         super();
         this.guestSession = guestSession;
-        this.localSession = localSession;
-        this.entityHelper = new EntityHelper(accountAccess, localSession, guestSession);
+        this.entityHelper = new EntityHelper(accountAccess);
+    }
+
+    @Override
+    public File getFile(DocumentMetadata metadata) {
+        /*
+         * get file with entities under perspective of remote guest session in foreign context
+         */
+        DefaultFile file = new DefaultFile(super.getFile(metadata));
+        /*
+         * qualify remote entities for usage in local session in storage account's context & erase ambiguous numerical identifiers
+         */
+        file.setCreatedFrom(entityHelper.mangleRemoteEntity(file.getCreatedFrom()));
+        file.setCreatedBy(0);
+        file.setModifiedFrom(entityHelper.mangleRemoteEntity(file.getModifiedFrom()));
+        file.setModifiedBy(0);
+        /*
+         * enhance & qualify remote entities in object permissions for usage in local session in storage account's context
+         */
+        List<FileStorageObjectPermission> objectPermissions = entityHelper.addObjectPermissionEntityInfos(guestSession, file.getObjectPermissions());
+        file.setObjectPermissions(entityHelper.mangleRemoteObjectPermissions(objectPermissions));
+        /*
+         * assume not shareable by default
+         */
+        file.setShareable(false);
+        return file;
     }
 
     @Override
@@ -103,35 +126,8 @@ public class XctxFileConverter extends FileConverter {
         /*
          * restore previously mangled entities in object permissions for context of guest session
          */
-        file.setObjectPermissions(entityHelper.unmangleLocalPermissions(file.getObjectPermissions()));
+        file.setObjectPermissions(entityHelper.unmangleLocalObjectPermissions(file.getObjectPermissions()));
         return metadata;
-    }
-
-    @Override
-    public File getFile(DocumentMetadata metadata) {
-        /*
-         * get file with entities under perspective of remote guest session in foreign context
-         */
-        DefaultFile file = new DefaultFile(super.getFile(metadata));
-        /*
-         * qualify remote entities for usage in local session in storage account's context & erase ambiguous numerical identifiers
-         */
-        //        file.setCreatedFrom(entityHelper.mangleRemoteUserEntity(file.getCreatedFrom(), file.getCreatedBy()));
-        file.setCreatedFrom(entityHelper.mangleRemoteEntity(file.getCreatedFrom()));
-        file.setCreatedBy(0);
-        //        file.setModifiedFrom(entityHelper.mangleRemoteUserEntity(file.getModifiedFrom(), file.getModifiedBy()));
-        file.setModifiedFrom(entityHelper.mangleRemoteEntity(file.getModifiedFrom()));
-        file.setModifiedBy(0);
-        /*
-         * enhance & qualify remote entities in object permissions for usage in local session in storage account's context
-         */
-        List<FileStorageObjectPermission> objectPermissions = entityHelper.addEntityInfos(guestSession, file.getObjectPermissions());
-        file.setObjectPermissions(entityHelper.mangleRemotePermissions(objectPermissions));
-        /*
-         * assume not shareable by default
-         */
-        file.setShareable(false);
-        return file;
     }
 
 }
