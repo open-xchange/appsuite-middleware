@@ -4,7 +4,6 @@ Name:          open-xchange-dav
 BuildArch:     noarch
 BuildRequires: ant
 BuildRequires: open-xchange-core >= @OXVERSION@
-BuildRequires: open-xchange-pns-impl >= @OXVERSION@
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
 %define        ox_release 7
@@ -17,7 +16,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange CardDAV and CalDAV implementation
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
-Requires:      open-xchange-pns-impl >= @OXVERSION@
 Provides:      open-xchange-caldav = %{version}
 Obsoletes:     open-xchange-caldav < %{version}
 Provides:      open-xchange-carddav = %{version}
