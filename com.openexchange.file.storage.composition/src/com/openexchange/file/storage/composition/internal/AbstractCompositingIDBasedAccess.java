@@ -330,7 +330,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>(allFileStorageServices.size());
         for (FileStorageService fsService : getFileStorageServiceRegistry().getAllServices()) {
 
-            if (filter != null && filter.test(fsService)) {
+            if (filter != null && false == filter.test(fsService)) {
                 //ignore filtered services
                 continue;
             }
