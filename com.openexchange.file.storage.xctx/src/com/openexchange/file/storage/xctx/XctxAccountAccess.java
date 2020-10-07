@@ -119,7 +119,7 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
     /**
      * Gets the service of specified type. Throws error if service is absent.
      *
-     * @param <S> The class type 
+     * @param <S> The class type
      * @param clazz The service's class
      * @return The service instance
      * @throws ShutDownRuntimeException If system is currently shutting down
@@ -153,6 +153,15 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
                 return getServiceSafe(DispatcherPrefixService.class);
             }
         };
+    }
+
+    /**
+     * Resets the last known, recent, error for this account
+     *
+     * @throws OXException
+     */
+    public void resetRecentError() throws OXException {
+        errorHandler.removeRecentException();
     }
 
     @Override
@@ -253,5 +262,4 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
     public FileStorageService getService() {
         return account.getFileStorageService();
     }
-
 }

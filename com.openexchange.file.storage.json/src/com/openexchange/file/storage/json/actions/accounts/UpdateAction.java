@@ -90,6 +90,11 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
         }
 
         final FileStorageAccount account = parser.parse(data);
+        FileStorageService fileStorageService = account.getFileStorageService();
+        if(fileStorageService instanceof SharingFileStorageService) {
+            //Clear last recent error in order to try the new configuration
+            ((SharingFileStorageService)fileStorageService).resetRecentError(account.getId(), session);
+        }
         final boolean doConnectionCheck = account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension;
 
         //load existing account for resetting if the connection check failed
@@ -102,11 +107,6 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
 
         if (doConnectionCheck) {
             try {
-                FileStorageService fileStorageService = account.getFileStorageService();
-                if(fileStorageService instanceof SharingFileStorageService) {
-                    //Clear last recent error in order to try the new configuration
-                    ((SharingFileStorageService)fileStorageService).resetRecentError(account.getId(), session);
-                }
                 //test connection
                 ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
             } catch (OXException e) {

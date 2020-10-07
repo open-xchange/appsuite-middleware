@@ -183,7 +183,8 @@ public class XctxFileStorageService implements FileStorageService, AccountAware,
 
     @Override
     public void resetRecentError(String accountId, Session session) throws OXException {
-        /* no-op */
+        XctxAccountAccess accountAccess = (XctxAccountAccess) getAccountAccess(accountId, session);
+        accountAccess.resetRecentError();
     }
 
 }
