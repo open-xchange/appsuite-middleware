@@ -75,7 +75,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess /* TODO-MW1380 check which marker interface to add here */ {
+public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess {
 
     private final Session session;
     private final XOXAccountAccess accountAccess;
@@ -192,7 +192,6 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
         XOXFolder rootFolder = new XOXFolder(session.getUserId());
-        //TODO: created by get from remote
         rootFolder.setRootFolder(true);
         rootFolder.setHoldsFiles(true);
         rootFolder.setHoldsFolders(true);

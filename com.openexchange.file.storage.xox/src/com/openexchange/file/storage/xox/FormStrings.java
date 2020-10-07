@@ -59,8 +59,13 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class FormStrings implements LocalizableStrings {
 
+    /**
+     * The share link label
+     */
     public static final String SHARE_LINK_LABEL = "OX share link";
 
+    /**
+     * The password label
+     */
     public static final String PASSWORD = "OX share link password";
-
 }

@@ -54,6 +54,8 @@ import java.util.Date;
 import java.util.Objects;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataHandler;
@@ -69,11 +71,59 @@ import com.openexchange.session.Session;
  */
 public class FileStorageAccountErrorHandler {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(FileStorageAccountErrorHandler.class);
+
     private final FileStorageAccountAccess accountAccess;
     private final int retryAfterError;
     private final Session session;
     private final DataHandler json2error;
     private final DataHandler error2json;
+
+    /**
+     * {@link ErrorHandledOperation} - represents an operation for which error handling is applied
+     *
+     * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+     * @since v7.10.5
+     * @param <T> The result type of the operation
+     */
+    public static abstract class ErrorHandledOperation<T> {
+
+        /**
+         * Executes the operation
+         *
+         * @return The result of the operation
+         * @throws OXException
+         */
+        protected abstract T execute() throws OXException;
+
+        /**
+         * Executes the operation and applies necessary error handling
+         *
+         * @param errorHandler The {@link FileStorageAccountErrorHandler} to use for applying error handling
+         * @return T The result of the operation
+         * @throws OXException
+         */
+        public T executeOperation(FileStorageAccountErrorHandler errorHandler) throws OXException {
+            errorHandler.assertNoRecentException();
+            try {
+                return execute();
+            } catch (OXException e) {
+                throw errorHandler.handleException(e);
+            }
+        }
+    }
+
+    /**
+     * Executes an {@link ErrorHandledOperation} with error handling applied
+     *
+     * @param <T> The result type of the operation
+     * @param operation The operation to apply
+     * @return The result of the operation
+     * @throws OXException In case the operation throws an {@link OXException}
+     */
+    public <T> T executeOperation(ErrorHandledOperation<T> operation) throws OXException {
+        return operation.executeOperation(this);
+    }
 
     /**
      * Initializes a new {@link FileStorageAccountErrorHandler}.
@@ -135,9 +185,13 @@ public class FileStorageAccountErrorHandler {
                 final Instant errorOccuredOn = lastErrorTimeStamp.toInstant();
                 if (errorOccuredOn.isAfter(now.minusSeconds(t))) {
                     ConversionResult result = json2error.processData(new SimpleData<JSONObject>(error), new DataArguments(), null);
-                    if (result != null && result.getData() != null && OXException.class.isInstance(result.getData())) {
+                    if (result.getData() != null && OXException.class.isInstance(result.getData())) {
                         //The error occurred in the last n seconds
                         return new FileStorageAccountError((OXException) result.getData(), lastErrorTimeStamp);
+                    } else if (result.getData() == null) {
+                        LOGGER.warn("Cannot parse exception from empty result data.");
+                    } else {
+                        LOGGER.warn("Cannot parse exception from unknown result data.");
                     }
                 }
             }

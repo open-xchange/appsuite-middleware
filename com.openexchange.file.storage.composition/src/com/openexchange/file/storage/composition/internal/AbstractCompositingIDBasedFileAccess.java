@@ -114,6 +114,7 @@ import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.Range;
+import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.UserizedIDTuple;
 import com.openexchange.file.storage.composition.FileID;
@@ -534,7 +535,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     @Override
     public SearchIterator<File> getUserSharedDocuments(List<Field> fields, Field sort, SortDirection order) throws OXException {
         List<SearchIterator<File>> searchIterators = new ArrayList<>();
-        List<FileStorageFileAccess> fileStorageAccesses = getAllFileStorageAccesses();
+        List<FileStorageFileAccess> fileStorageAccesses = getAllFileStorageAccesses( (fs) -> fs instanceof SharingFileStorageService);
         for (FileStorageFileAccess fileAccess : fileStorageAccesses) {
             if (ObjectPermissionAware.class.isInstance(fileAccess)) {
                 SearchIterator<File> searchIterator = ((ObjectPermissionAware) fileAccess).getUserSharedDocuments(fields, sort, order);

@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptions;
@@ -315,9 +316,25 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
      * @return The account accesses.
      */
     protected List<FileStorageFileAccess> getAllFileStorageAccesses() throws OXException {
+        return getAllFileStorageAccesses(null);
+    }
+
+    /**
+     * Gets a list of all file storage account accesses.
+     *
+     * @param filter A predicate which defines the {@link FileStorageService}s which should be ignored
+     * @return The account accesses.
+     */
+    protected List<FileStorageFileAccess> getAllFileStorageAccesses(Predicate<FileStorageService> filter) throws OXException {
         List<FileStorageService> allFileStorageServices = getFileStorageServiceRegistry().getAllServices();
         List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>(allFileStorageServices.size());
         for (FileStorageService fsService : getFileStorageServiceRegistry().getAllServices()) {
+
+            if (filter != null && filter.test(fsService)) {
+                //ignore filtered services
+                continue;
+            }
+
             List<FileStorageAccount> accounts = null;
             if (fsService instanceof AccountAware) {
                 accounts = ((AccountAware) fsService).getAccounts(session);
