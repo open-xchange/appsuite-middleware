@@ -217,7 +217,9 @@ public class XOXAccountAccess implements CapabilityAware {
         }
 
         try {
-            this.shareClient = new ShareClient(session, clientFactory.getApiClient(session, shareUrl, credentials), errorHandler);
+            shareClient = new ShareClient(session, clientFactory.getApiClient(session, shareUrl, credentials));
+            //the client might just come from a cache so we ensure that we can access the remote by performing a ping
+            shareClient.ping();
         } catch (OXException e) {
             throw errorHandler.handleException(e);
         }
