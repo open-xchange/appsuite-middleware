@@ -146,7 +146,7 @@ public class RemoteFolderMapper extends DefaultJsonMapper<RemoteFolder, RemoteFo
 
             @Override
             public boolean isSet(RemoteFolder object) {
-                return object.getCreatedBy() != -1;
+                return object.getModifiedBy() != -1;
             }
 
             @Override
@@ -160,12 +160,12 @@ public class RemoteFolderMapper extends DefaultJsonMapper<RemoteFolder, RemoteFo
 
             @Override
             public String get(RemoteFolder object) {
-                return String.valueOf(object.getCreatedBy());
+                return String.valueOf(object.getModifiedBy());
             }
 
             @Override
             public void remove(RemoteFolder object) {
-                object.setCreatedBy(-1);
+                object.setModifiedBy(-1);
             }
         });
 

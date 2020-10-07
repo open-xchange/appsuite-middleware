@@ -178,7 +178,7 @@ public class XctxFileStorageService implements FileStorageService, AccountAware,
      */
     private int getRetryAfterError(Session session) throws OXException {
         LeanConfigurationService configuration = this.services.getServiceSafe(LeanConfigurationService.class);
-        return configuration.getIntProperty(session.getUserId(), session.getContextId(), XctxFileStorageProperties.RETRY_AFTER_ERROR);
+        return configuration.getIntProperty(session.getUserId(), session.getContextId(), XctxFileStorageProperties.RETRY_AFTER_ERROR_INTERVAL);
     }
 
     @Override

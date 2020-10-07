@@ -63,7 +63,7 @@ import static com.openexchange.java.Autoboxing.I;
 public class XctxFileStorageProperties {
 
     /**
-     * The time, in seconds, after which the access to an an error afflicted Xctx account should be retried.
+     * The time interval, in seconds, after which the access to an error afflicted account should be retried.
      */
-    public static Property RETRY_AFTER_ERROR = DefaultProperty.valueOf("com.openexchange.file.storage.xctx.retryAfterError", I(3600 /* seconds = 1h */));
+    public static Property RETRY_AFTER_ERROR_INTERVAL = DefaultProperty.valueOf("com.openexchange.file.storage.xctx.retryAfterErrorInterval", I(3600 /* seconds = 1h */));
 }

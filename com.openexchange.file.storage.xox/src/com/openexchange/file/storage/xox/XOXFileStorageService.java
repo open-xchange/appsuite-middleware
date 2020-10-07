@@ -180,7 +180,7 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
      */
     private int getRetryAfterError(Session session) throws OXException {
         LeanConfigurationService configuration = this.services.getServiceSafe(LeanConfigurationService.class);
-        return configuration.getIntProperty(session.getUserId(), session.getContextId(), XOXFileStorageProperties.RETRY_AFTER_ERROR);
+        return configuration.getIntProperty(session.getUserId(), session.getContextId(), XOXFileStorageProperties.RETRY_AFTER_ERROR_INTERVAL);
     }
 
     @Override

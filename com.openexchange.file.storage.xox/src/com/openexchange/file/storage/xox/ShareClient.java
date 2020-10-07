@@ -99,6 +99,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccountErrorHandler;
+import com.openexchange.file.storage.FileStorageAccountErrorHandler.ErrorHandledOperation;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
@@ -132,16 +133,16 @@ public class ShareClient {
     private final Session session;
     private final FileStorageAccountErrorHandler errorHandler;
 
-    private static final String SYSTEM_ROOT_FOLDER_ID = "0";
-    private static final String TREE_ID = FolderStorage.REAL_TREE_ID;
-    private static final String MODULE_FILES = "files";
-    private static final String TIMEZONE_UTC = "UTC";
-    private static final String SEARCH_FACET_FOLDER = "folder";
-    private static final String SEARCH_FACET_ACCOUNT = "account";
-    private static final String INFOSTORE = "infostore";
-    private static final String INFOSTORE_ACCOUNT_ID = "com.openexchange.infostore://infostore";
-    private static final List<Field> ALL_FIELDS;
+    protected static final String SYSTEM_ROOT_FOLDER_ID = "0";
+    protected static final String TREE_ID = FolderStorage.REAL_TREE_ID;
+    protected static final String MODULE_FILES = "files";
+    protected static final String TIMEZONE_UTC = "UTC";
+    protected static final String SEARCH_FACET_FOLDER = "folder";
+    protected static final String SEARCH_FACET_ACCOUNT = "account";
+    protected static final String INFOSTORE = "infostore";
+    protected static final String INFOSTORE_ACCOUNT_ID = "com.openexchange.infostore://infostore";
 
+    protected static final List<Field> ALL_FIELDS;
     static {
         ALL_FIELDS = Arrays.asList(Field.values());
     }
@@ -159,8 +160,32 @@ public class ShareClient {
         this.errorHandler = Objects.requireNonNull(errorHandler, "errorHandler must not be null");
     }
 
-    private String getFolderId(String folderId) {
+    /**
+     * Gets the folderId
+     *
+     * @param folderId The given ID
+     * @return The root folder ID if the given ID is null or empty, the given id otherwise
+     */
+    protected String getFolderId(String folderId) {
         return Strings.isEmpty(folderId) ? SYSTEM_ROOT_FOLDER_ID : folderId;
+    }
+
+    /**
+     * Gets the underlying {@link ApiClient}
+     *
+     * @return The {@link ApiClient}
+     */
+    protected ApiClient getApiClient() {
+        return ajaxClient;
+    }
+
+    /**
+     * Gets the {@link Session}
+     *
+     * @return The {@link Session}
+     */
+    protected Session getSession() {
+        return session;
     }
 
     /**
@@ -179,7 +204,7 @@ public class ShareClient {
      * @param fields The fields
      * @return An array of IDs for the given fields
      */
-    private int[] toIdList(List<Field> fields) {
+    protected int[] toIdList(List<Field> fields) {
         return fields.stream().mapToInt(f -> f.getNumber()).toArray();
     }
 
@@ -189,7 +214,7 @@ public class ShareClient {
      * @param tupleData The data to create the IDTuple from
      * @return The IDTUple, or null if no tuple could be created from the given data
      */
-    private IDTuple toIDTuple(String tupleData) {
+    protected IDTuple toIDTuple(String tupleData) {
         if (tupleData != null && tupleData.contains("/")) {
             int i = tupleData.indexOf("/");
             return new IDTuple(tupleData.substring(0, i), tupleData.substring(i + 1));
@@ -204,7 +229,7 @@ public class ShareClient {
      * @param fileStoragePermissions The permissions to transform
      * @return An array of transformed permissions
      */
-    private static Permission[] parsePermission(List<FileStoragePermission> fileStoragePermissions) {
+    protected static Permission[] parsePermission(List<FileStoragePermission> fileStoragePermissions) {
         if (null == fileStoragePermissions) {
             return null;
         }
@@ -237,24 +262,26 @@ public class ShareClient {
      * @throws OXException If either folder does not exist or could not be fetched
      */
     public XOXFolder getFolder(String folderId) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            RemoteFolder remoteFolder = ajaxClient.execute(new GetFolderCall(folderId));
-            final int userId = session.getUserId();
-            XOXFolder folder = new XOXFolder(userId, remoteFolder);
-            XOXEntityInfoLoader loader = new XOXEntityInfoLoader(ajaxClient);
-            if (0 < remoteFolder.getCreatedBy()) {
-                EntityInfo entityInfo = loader.load(remoteFolder.getID(), folder.getCreatedBy());
-                folder.setCreatedFrom(entityInfo);
+
+        return errorHandler.executeOperation(new ErrorHandledOperation<XOXFolder>() {
+
+            @Override
+            protected XOXFolder execute() throws OXException {
+                RemoteFolder remoteFolder = getApiClient().execute(new GetFolderCall(folderId));
+                final int userId = getSession().getUserId();
+                XOXFolder folder = new XOXFolder(userId, remoteFolder);
+                XOXEntityInfoLoader loader = new XOXEntityInfoLoader(getApiClient());
+                if (0 < remoteFolder.getCreatedBy()) {
+                    EntityInfo entityInfo = loader.load(remoteFolder.getID(), folder.getCreatedBy());
+                    folder.setCreatedFrom(entityInfo);
+                }
+                if (0 < remoteFolder.getModifiedBy()) {
+                    EntityInfo entityInfo = loader.load(remoteFolder.getID(), folder.getModifiedBy());
+                    folder.setModifiedFrom(entityInfo);
+                }
+                return folder;
             }
-            if (0 < remoteFolder.getModifiedBy()) {
-                EntityInfo entityInfo = loader.load(remoteFolder.getID(), folder.getModifiedBy());
-                folder.setModifiedFrom(entityInfo);
-            }
-            return folder;
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        });
     }
 
     /**
@@ -264,30 +291,31 @@ public class ShareClient {
      * @return An array of {@link FileStorageFolder} representing the subfolders
      * @throws OXException If either parent folder does not exist or its subfolders cannot be delivered
      */
-    public XOXFolder[] getSubFolders(String parentId) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            List<RemoteFolder> folders = ajaxClient.execute(new ListFoldersCall(getFolderId(parentId)));
-            final int userId = session.getUserId();
-            //        List<XOXFolder> ret = folders.stream().map(f -> new XOXFolder(userId, f)).collect(Collectors.toList());
-            XOXEntityInfoLoader loader = new XOXEntityInfoLoader(ajaxClient);
-            List<XOXFolder> ret = new ArrayList<XOXFolder>(folders.size());
-            for (RemoteFolder folder : folders) {
-                XOXFolder f = new XOXFolder(userId, folder);
-                if (0 < folder.getCreatedBy()) {
-                    EntityInfo entityInfo = loader.load(folder.getID(), folder.getCreatedBy());
-                    f.setCreatedFrom(entityInfo);
+    public XOXFolder[] getSubFolders(final String parentId) throws OXException {
+
+        return errorHandler.executeOperation(new ErrorHandledOperation<XOXFolder[]>() {
+
+            @Override
+            protected XOXFolder[] execute() throws OXException {
+                List<RemoteFolder> folders = getApiClient().execute(new ListFoldersCall(getFolderId(parentId)));
+                final int userId = getSession().getUserId();
+                XOXEntityInfoLoader loader = new XOXEntityInfoLoader(getApiClient());
+                List<XOXFolder> ret = new ArrayList<XOXFolder>(folders.size());
+                for (RemoteFolder folder : folders) {
+                    XOXFolder f = new XOXFolder(userId, folder);
+                    if (0 < folder.getCreatedBy()) {
+                        EntityInfo entityInfo = loader.load(folder.getID(), folder.getCreatedBy());
+                        f.setCreatedFrom(entityInfo);
+                    }
+                    if (0 < folder.getModifiedBy()) {
+                        EntityInfo entityInfo = loader.load(folder.getID(), folder.getModifiedBy());
+                        f.setModifiedFrom(entityInfo);
+                    }
+                    ret.add(f);
                 }
-                if (0 < folder.getModifiedBy()) {
-                    EntityInfo entityInfo = loader.load(folder.getID(), folder.getModifiedBy());
-                    f.setModifiedFrom(entityInfo);
-                }
-                ret.add(f);
+                return ret.toArray(new XOXFolder[ret.size()]);
             }
-            return ret.toArray(new XOXFolder[ret.size()]);
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        });
     }
 
     /**
@@ -301,12 +329,13 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public DocumentResponse getDocument(String folderId, String id, @Nullable String version, String eTag) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            return ajaxClient.execute(new DocumentCall(folderId, id, version, DocumentCall.DELIVERY_METHOD_DOWNLOAD, eTag));
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new FileStorageAccountErrorHandler.ErrorHandledOperation<DocumentResponse>() {
+
+            @Override
+            public DocumentResponse execute() throws OXException {
+                return getApiClient().execute(new DocumentCall(folderId, id, version, DocumentCall.DELIVERY_METHOD_DOWNLOAD, eTag));
+            }
+        });
     }
 
     /**
@@ -319,12 +348,13 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public DocumentResponse getDocument(String folderId, String id, @Nullable String version) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            return ajaxClient.execute(new DocumentCall(folderId, id, version, DocumentCall.DELIVERY_METHOD_DOWNLOAD));
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new ErrorHandledOperation<DocumentResponse>() {
+
+            @Override
+            protected DocumentResponse execute() throws OXException {
+                return getApiClient().execute(new DocumentCall(folderId, id, version, DocumentCall.DELIVERY_METHOD_DOWNLOAD));
+            }
+        });
     }
 
     /**
@@ -337,13 +367,14 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public IDTuple saveNewDocument(File file, InputStream data, boolean tryAddVersion) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            String idTuple = ajaxClient.execute(new NewCall(new DefaultFile(file), data, B(tryAddVersion)));
-            return toIDTuple(idTuple);
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new ErrorHandledOperation<IDTuple>() {
+
+            @Override
+            protected IDTuple execute() throws OXException {
+                String idTuple = getApiClient().execute(new NewCall(new DefaultFile(file), data, B(tryAddVersion)));
+                return toIDTuple(idTuple);
+            }
+        });
     }
 
     /**
@@ -357,13 +388,14 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public IDTuple updateDocument(File file, InputStream data, long sequenceNumber, int[] columns) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            String idTuple = ajaxClient.execute(new PostUpdateCall(new DefaultFile(file), data, sequenceNumber, columns));
-            return toIDTuple(idTuple);
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new ErrorHandledOperation<IDTuple>() {
+
+            @Override
+            protected IDTuple execute() throws OXException {
+                String idTuple = getApiClient().execute(new PostUpdateCall(new DefaultFile(file), data, sequenceNumber, columns));
+                return toIDTuple(idTuple);
+            }
+        });
     }
 
     /**
@@ -377,13 +409,14 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public IDTuple updateDocument(String id, File file, long sequenceNumber, int[] columns) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            String idTuple = ajaxClient.execute(new PutUpdateCall(id, new DefaultFile(file), sequenceNumber, columns));
-            return toIDTuple(idTuple);
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new ErrorHandledOperation<IDTuple>() {
+
+            @Override
+            protected IDTuple execute() throws OXException {
+                String idTuple = getApiClient().execute(new PutUpdateCall(id, new DefaultFile(file), sequenceNumber, columns));
+                return toIDTuple(idTuple);
+            }
+        });
     }
 
     /**
@@ -396,13 +429,14 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public IDTuple updateDocument(File file, long sequenceNumber, int[] columns) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            String idTuple = ajaxClient.execute(new PutUpdateCall(new DefaultFile(file), sequenceNumber, columns));
-            return toIDTuple(idTuple);
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new ErrorHandledOperation<IDTuple>() {
+
+            @Override
+            protected IDTuple execute() throws OXException {
+                String idTuple = getApiClient().execute(new PutUpdateCall(new DefaultFile(file), sequenceNumber, columns));
+                return toIDTuple(idTuple);
+            }
+        });
     }
 
     /**
@@ -429,17 +463,18 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public IDTuple copyDocument(String id, File file, int[] columns, @Nullable InputStream data) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            //@formatter:off
-            String idTuple = data != null ?
-                ajaxClient.execute(new PostCopyCall(id, new DefaultFile(file), data, columns)) :
-                ajaxClient.execute(new PutCopyCall(id, new DefaultFile(file), columns));
-            //@formatter:on
-            return toIDTuple(idTuple);
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new ErrorHandledOperation<IDTuple>() {
+
+            @Override
+            protected IDTuple execute() throws OXException {
+                //@formatter:off
+                String idTuple = data != null ?
+                        getApiClient().execute(new PostCopyCall(id, new DefaultFile(file), data, columns)) :
+                        getApiClient().execute(new PutCopyCall(id, new DefaultFile(file), columns));
+                //@formatter:on
+                return toIDTuple(idTuple);
+            }
+        });
     }
 
     /**
@@ -452,13 +487,14 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public IDTuple moveDocument(String id, String destinationFolder, long timestamp) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            String newId = ajaxClient.execute(new MoveCall(id, destinationFolder, timestamp));
-            return toIDTuple(newId);
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new ErrorHandledOperation<IDTuple>() {
+
+            @Override
+            protected IDTuple execute() throws OXException {
+                String newId = getApiClient().execute(new MoveCall(id, destinationFolder, timestamp));
+                return toIDTuple(newId);
+            }
+        });
     }
 
     /**
@@ -471,13 +507,15 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public XOXFile getMetaData(String folderId, String id, @Nullable String version) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            DefaultFile file = ajaxClient.execute(new GetCall(folderId, id, version));
-            return new XOXFile(file);
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new ErrorHandledOperation<XOXFile>() {
+
+            @Override
+            protected XOXFile execute() throws OXException {
+                DefaultFile file = getApiClient().execute(new GetCall(folderId, id, version));
+                return new XOXFile(file);
+            }
+
+        });
     }
 
     /**
@@ -506,46 +544,48 @@ public class ShareClient {
      * @throws OXException
      */
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order, Range range) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
-            boolean requestCreatedFrom = fields == null;
-            boolean requestModifiedFrom = fields == null;
-            // TODO: Detect 7.10.5 OX to request those fields directly
-            if (fieldsToQuery.contains(Field.CREATED_FROM)) {
-                fieldsToQuery.remove(Field.CREATED_FROM);
-                requestCreatedFrom = true;
-            }
-            if (fieldsToQuery.contains(Field.MODIFIED_FROM)) {
-                fieldsToQuery.remove(Field.MODIFIED_FROM);
-                requestModifiedFrom = true;
-            }
-            //@formatter:off
-            List<? extends File> files = ajaxClient.execute(
-                new GetAllCall(getFolderId(folderId),
-                              toIdList(fieldsToQuery),
-                              sort != null ? I(sort.getNumber()) : null,
-                              order,
-                              range != null ? I(range.from) : null,
-                              range != null ? I(range.to) : null));
-            //@formatter:on
-            if (requestCreatedFrom || requestModifiedFrom) {
-                XOXEntityInfoLoader loader = new XOXEntityInfoLoader(ajaxClient);
-                for (File file : files) {
-                    if (requestCreatedFrom) {
-                        EntityInfo info = loader.load(file.getFolderId(), file.getCreatedBy());
-                        file.setCreatedFrom(info);
-                    }
-                    if (requestModifiedFrom) {
-                        EntityInfo info = loader.load(file.getFolderId(), file.getModifiedBy());
-                        file.setModifiedFrom(info);
+        return errorHandler.executeOperation(new ErrorHandledOperation<TimedResult<File>>() {
+
+            @Override
+            protected TimedResult<File> execute() throws OXException {
+                final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
+                boolean requestCreatedFrom = fields == null;
+                boolean requestModifiedFrom = fields == null;
+                // TODO: Detect 7.10.5 OX to request those fields directly
+                if (fieldsToQuery.contains(Field.CREATED_FROM)) {
+                    fieldsToQuery.remove(Field.CREATED_FROM);
+                    requestCreatedFrom = true;
+                }
+                if (fieldsToQuery.contains(Field.MODIFIED_FROM)) {
+                    fieldsToQuery.remove(Field.MODIFIED_FROM);
+                    requestModifiedFrom = true;
+                }
+                //@formatter:off
+                List<? extends File> files = getApiClient().execute(
+                    new GetAllCall(getFolderId(folderId),
+                                  toIdList(fieldsToQuery),
+                                  sort != null ? I(sort.getNumber()) : null,
+                                  order,
+                                  range != null ? I(range.from) : null,
+                                  range != null ? I(range.to) : null));
+                //@formatter:on
+                if (requestCreatedFrom || requestModifiedFrom) {
+                    XOXEntityInfoLoader loader = new XOXEntityInfoLoader(getApiClient());
+                    for (File file : files) {
+                        if (requestCreatedFrom) {
+                            EntityInfo info = loader.load(file.getFolderId(), file.getCreatedBy());
+                            file.setCreatedFrom(info);
+                        }
+                        if (requestModifiedFrom) {
+                            EntityInfo info = loader.load(file.getFolderId(), file.getModifiedBy());
+                            file.setModifiedFrom(info);
+                        }
                     }
                 }
+                return new FileTimedResult((List<File>) files);
             }
-            return new FileTimedResult((List<File>) files);
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+
+        });
     }
 
     /**
@@ -557,19 +597,21 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
-            if (ids != null && !ids.isEmpty()) {
-                List<InfostoreTuple> filesToQuery = ids.stream().map(t -> new InfostoreTuple(t.getFolder(), t.getId())).collect(Collectors.toList());
-                List<? extends File> result = ajaxClient.execute(new ListCall(filesToQuery, toIdList(fieldsToQuery)));
-                return new FileTimedResult((List<File>) result);
+        return errorHandler.executeOperation(new ErrorHandledOperation<TimedResult<File>>() {
+
+            @Override
+            protected TimedResult<File> execute() throws OXException {
+                final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
+                if (ids != null && !ids.isEmpty()) {
+                    List<InfostoreTuple> filesToQuery = ids.stream().map(t -> new InfostoreTuple(t.getFolder(), t.getId())).collect(Collectors.toList());
+                    List<? extends File> result = getApiClient().execute(new ListCall(filesToQuery, toIdList(fieldsToQuery)));
+                    return new FileTimedResult((List<File>) result);
+                }
+
+                return new FileTimedResult(Collections.emptyList());
             }
 
-            return new FileTimedResult(Collections.emptyList());
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        });
     }
 
     /**
@@ -583,20 +625,21 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public TimedResult<File> getVersions(String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
+        return errorHandler.executeOperation(new ErrorHandledOperation<TimedResult<File>>() {
+
+            @Override
+            protected TimedResult<File> execute() throws OXException {
+                final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
             //@formatter:off
-            List<? extends File> versions = ajaxClient.execute(
+            List<? extends File> versions = getApiClient().execute(
                 new VersionsCall(id,
                                  toIdList(fieldsToQuery),
                                  sort != null ? I(sort.getNumber()) : null,
                                  order));
             //@formatter:on
-            return new FileTimedResult((List<File>) versions);
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+                return new FileTimedResult((List<File>) versions);
+            }
+        });
     }
 
     /**
@@ -611,14 +654,16 @@ public class ShareClient {
      * @throws OXException
      */
     public String[] deleteVersions(String id, String folder, long timestamp, String[] versionsToDelete) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            int[] versions = Arrays.asList(versionsToDelete).stream().mapToInt(v -> Integer.parseInt(v)).toArray();
-            List<Integer> execute = ajaxClient.execute(new DetachCall(id, folder, timestamp, versions));
-            return execute.stream().map(v -> v.toString()).toArray(String[]::new);
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new ErrorHandledOperation<String[]>() {
+
+            @Override
+            protected String[] execute() throws OXException {
+                int[] versions = Arrays.asList(versionsToDelete).stream().mapToInt(v -> Integer.parseInt(v)).toArray();
+                List<Integer> execute = getApiClient().execute(new DetachCall(id, folder, timestamp, versions));
+                return execute.stream().map(v -> v.toString()).toArray(String[]::new);
+            }
+
+        });
     }
 
     /**
@@ -630,15 +675,17 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public void removeDocuments(List<IDTuple> filesToDelete, long sequenceNumber, boolean hardDelete) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            if (!filesToDelete.isEmpty()) {
-                List<InfostoreTuple> filesToDelete2 = filesToDelete.stream().map(t -> new InfostoreTuple(t.getFolder(), t.getId())).collect(Collectors.toList());
-                ajaxClient.execute(new DeleteCall(filesToDelete2, sequenceNumber, hardDelete));
+        errorHandler.executeOperation(new ErrorHandledOperation<Void>() {
+
+            @Override
+            protected Void execute() throws OXException {
+                if (!filesToDelete.isEmpty()) {
+                    List<InfostoreTuple> filesToDelete2 = filesToDelete.stream().map(t -> new InfostoreTuple(t.getFolder(), t.getId())).collect(Collectors.toList());
+                    getApiClient().execute(new DeleteCall(filesToDelete2, sequenceNumber, hardDelete));
+                }
+                return null;
             }
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        });
     }
 
     /**
@@ -649,12 +696,14 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public void lock(String id, long diff) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            ajaxClient.execute(new LockCall(id, L(diff)));
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        errorHandler.executeOperation(new ErrorHandledOperation<Void>() {
+
+            @Override
+            protected Void execute() throws OXException {
+                getApiClient().execute(new LockCall(id, L(diff)));
+                return null;
+            }
+        });
     }
 
     /**
@@ -663,13 +712,15 @@ public class ShareClient {
      * @param id The id of the item to lock
      * @throws OXException In case of error
      */
-    public void Unlock(String id) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            ajaxClient.execute(new UnlockCall(id));
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+    public void unlock(String id) throws OXException {
+        errorHandler.executeOperation(new ErrorHandledOperation<Void>() {
+
+            @Override
+            protected Void execute() throws OXException {
+                getApiClient().execute(new UnlockCall(id));
+                return null;
+            }
+        });
     }
 
     /**
@@ -681,17 +732,18 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public String createaFolder(FileStorageFolder folder, boolean autoRename) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            RemoteFolder newRemoteFolder = new RemoteFolder(INFOSTORE);
-            newRemoteFolder.setParentID(folder.getParentId());
-            newRemoteFolder.setID(folder.getId());
-            newRemoteFolder.setName(folder.getName());
-            FolderBody newFolder = new FolderBody(newRemoteFolder);
-            return ajaxClient.execute(new com.openexchange.api.client.common.calls.folders.NewCall(newRemoteFolder.getParentID(), newFolder, autoRename));
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new ErrorHandledOperation<String>() {
+
+            @Override
+            protected String execute() throws OXException {
+                RemoteFolder newRemoteFolder = new RemoteFolder(INFOSTORE);
+                newRemoteFolder.setParentID(folder.getParentId());
+                newRemoteFolder.setID(folder.getId());
+                newRemoteFolder.setName(folder.getName());
+                FolderBody newFolder = new FolderBody(newRemoteFolder);
+                return getApiClient().execute(new com.openexchange.api.client.common.calls.folders.NewCall(newRemoteFolder.getParentID(), newFolder, autoRename));
+            }
+        });
     }
 
     /**
@@ -706,15 +758,17 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public String moveFolder(String folderId, String newParentId, String newName, long timestamp, boolean autoRename) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            RemoteFolder updatedFolder = new RemoteFolder(INFOSTORE);
-            updatedFolder.setName(newName);
-            updatedFolder.setParentID(newParentId);
-            return ajaxClient.execute(new UpdateCall(folderId, new FolderBody(updatedFolder), Boolean.FALSE, timestamp, B(autoRename)));
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new ErrorHandledOperation<String>() {
+
+            @Override
+            protected String execute() throws OXException {
+                RemoteFolder updatedFolder = new RemoteFolder(INFOSTORE);
+                updatedFolder.setName(newName);
+                updatedFolder.setParentID(newParentId);
+                return getApiClient().execute(new UpdateCall(folderId, new FolderBody(updatedFolder), Boolean.FALSE, timestamp, B(autoRename)));
+            }
+
+        });
     }
 
     /**
@@ -728,14 +782,15 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public String updateFolder(String folderId, FileStorageFolder folder, long timestamp, boolean autoRename) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            RemoteFolder updatedFolder = new RemoteFolder(INFOSTORE);
-            updatedFolder.setPermissions(parsePermission(folder.getPermissions()));
-            return ajaxClient.execute(new UpdateCall(folderId, new FolderBody(updatedFolder), timestamp, B(autoRename)));
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new ErrorHandledOperation<String>() {
+
+            @Override
+            protected String execute() throws OXException {
+                RemoteFolder updatedFolder = new RemoteFolder(INFOSTORE);
+                updatedFolder.setPermissions(parsePermission(folder.getPermissions()));
+                return getApiClient().execute(new UpdateCall(folderId, new FolderBody(updatedFolder), timestamp, B(autoRename)));
+            }
+        });
     }
 
     /**
@@ -747,17 +802,18 @@ public class ShareClient {
      * @throws OXException In case the folder can't be deleted
      */
     public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            long timestamp = System.currentTimeMillis();
-            List<String> notDeleted = ajaxClient.execute(new DeleteFolderCall(Collections.singletonList(folderId), TREE_ID, timestamp, null, null, hardDelete, true));
-            if (notDeleted.isEmpty()) {
-                return folderId;
+        return errorHandler.executeOperation(new ErrorHandledOperation<String>() {
+
+            @Override
+            protected String execute() throws OXException {
+                long timestamp = System.currentTimeMillis();
+                List<String> notDeleted = getApiClient().execute(new DeleteFolderCall(Collections.singletonList(folderId), TREE_ID, timestamp, null, null, hardDelete, true));
+                if (notDeleted.isEmpty()) {
+                    return folderId;
+                }
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("Unable to delete folder {}", folderId);
             }
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("Unable to delete folder {}", folderId);
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        });
     }
 
     /**
@@ -767,15 +823,16 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public AccountQuota getInfostoreQuota() throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            final String module = "filestorage";
-            final String account = INFOSTORE;
-            List<AccountQuota> accountQuota = ajaxClient.execute(new com.openexchange.api.client.common.calls.quota.GetCall(module, account));
-            return accountQuota.get(0);
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        return errorHandler.executeOperation(new ErrorHandledOperation<AccountQuota>() {
+
+            @Override
+            protected AccountQuota execute() throws OXException {
+                final String module = "filestorage";
+                final String account = INFOSTORE;
+                List<AccountQuota> accountQuota = getApiClient().execute(new com.openexchange.api.client.common.calls.quota.GetCall(module, account));
+                return accountQuota.get(0);
+            }
+        });
     }
 
     /**
@@ -792,30 +849,31 @@ public class ShareClient {
      */
     @SuppressWarnings("unchecked")
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            UpdatesCall.SortOrder sortOrder = null;
-            if (sort != null && order != null) {
-                sortOrder = order == SortDirection.DESC ? UpdatesCall.SortOrder.DESC : UpdatesCall.SortOrder.ASC;
+        return errorHandler.executeOperation(new ErrorHandledOperation<Delta<File>>() {
+
+            @Override
+            protected Delta<File> execute() throws OXException {
+                UpdatesCall.SortOrder sortOrder = null;
+                if (sort != null && order != null) {
+                    sortOrder = order == SortDirection.DESC ? UpdatesCall.SortOrder.DESC : UpdatesCall.SortOrder.ASC;
+                }
+
+                //@formatter:off
+                UpdatesResponse response = getApiClient().execute(new UpdatesCall(folderId,
+                    toIdList(fields),
+                    L(updateSince),
+                    ignoreDeleted ? new UpdatesCall.UpdateType[] { UpdatesCall.UpdateType.DELETED } : null,
+                    sort != null ? sort.getName() : null,
+                    sortOrder,
+                    null));
+                //@formatter:on
+
+                List<? extends File> newFiles = response.getNewFiles();
+                List<? extends File> modifiedFiles = response.getModifiedFiles();
+                List<? extends File> deletedFiles = response.getDeletedFiles();
+                return new FileDelta((List<File>) newFiles, (List<File>) modifiedFiles, (List<File>) deletedFiles, response.getSequenceNumber());
             }
-
-            //@formatter:off
-            UpdatesResponse response = ajaxClient.execute(new UpdatesCall(folderId,
-                toIdList(fields),
-                L(updateSince),
-                ignoreDeleted ? new UpdatesCall.UpdateType[] { UpdatesCall.UpdateType.DELETED } : null,
-                sort != null ? sort.getName() : null,
-                sortOrder,
-                null));
-            //@formatter:on
-
-            List<? extends File> newFiles = response.getNewFiles();
-            List<? extends File> modifiedFiles = response.getModifiedFiles();
-            List<? extends File> deletedFiles = response.getDeletedFiles();
-            return new FileDelta((List<File>) newFiles, (List<File>) modifiedFiles, (List<File>) deletedFiles, response.getSequenceNumber());
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        });
     }
 
     /**
@@ -834,33 +892,34 @@ public class ShareClient {
      */
     @SuppressWarnings("unchecked")
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
-        errorHandler.assertNoRecentException();
-        try {
-            //Build the query
-            //@formatter:off
-            final QueryBuilder builder = new QueryBuilder()
-                .withStart(start)
-                .withSize(end - start)
-                .withTimezone(TIMEZONE_UTC)
-                .withFacet(SEARCH_FACET_ACCOUNT, INFOSTORE_ACCOUNT_ID)
-                .withFacet(SEARCH_FACET_FOLDER, folderId)
-                .withFacet("file_name", "file_name:" + pattern,new FacetFilter().setFields(Field.FILENAME.getName()).setQueries(pattern))
-                .includeSubfolders(includeSubfolders);
-            //@formatter:on
+        return errorHandler.executeOperation(new ErrorHandledOperation<SearchIterator<File>>() {
 
-            //Add sorting
-            QueryCall.SortOrder sortOrder = null;
-            if (sort != null && order != null) {
-                sortOrder = order == SortDirection.DESC ? QueryCall.SortOrder.DESC : QueryCall.SortOrder.ASC;
-                builder.sortBy(sort.getNumber()).withSortOrder(sortOrder);
+            @Override
+            protected SearchIterator<File> execute() throws OXException {
+                //Build the query
+                //@formatter:off
+                final QueryBuilder builder = new QueryBuilder()
+                    .withStart(start)
+                    .withSize(end - start)
+                    .withTimezone(TIMEZONE_UTC)
+                    .withFacet(SEARCH_FACET_ACCOUNT, INFOSTORE_ACCOUNT_ID)
+                    .withFacet(SEARCH_FACET_FOLDER, folderId)
+                    .withFacet("file_name", "file_name:" + pattern,new FacetFilter().setFields(Field.FILENAME.getName()).setQueries(pattern))
+                    .includeSubfolders(includeSubfolders);
+                //@formatter:on
+
+                //Add sorting
+                QueryCall.SortOrder sortOrder = null;
+                if (sort != null && order != null) {
+                    sortOrder = order == SortDirection.DESC ? QueryCall.SortOrder.DESC : QueryCall.SortOrder.ASC;
+                    builder.sortBy(sort.getNumber()).withSortOrder(sortOrder);
+                }
+
+                //Search
+                FindResponse<DefaultFile> result = getApiClient().execute(new QueryCall<DefaultFile, File.Field>(MODULE_FILES, toIdList(fields), builder.build(), new DefaultFileMapper()));
+                List<? extends File> resultFiles = result.getResultObjects();
+                return new SearchIteratorAdapter<File>((Iterator<File>) resultFiles.iterator(), resultFiles.size());
             }
-
-            //Search
-            FindResponse<DefaultFile> result = ajaxClient.execute(new QueryCall<DefaultFile, File.Field>(MODULE_FILES, toIdList(fields), builder.build(), new DefaultFileMapper()));
-            List<? extends File> resultFiles = result.getResultObjects();
-            return new SearchIteratorAdapter<File>((Iterator<File>) resultFiles.iterator(), resultFiles.size());
-        } catch (OXException e) {
-            throw errorHandler.handleException(e);
-        }
+        });
     }
 }

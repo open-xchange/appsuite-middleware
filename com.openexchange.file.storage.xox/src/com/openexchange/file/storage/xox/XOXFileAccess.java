@@ -205,10 +205,10 @@ public class XOXFileAccess implements /*@formatter:off*/
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
         IDTuple newId = client.moveDocument(source.getId(), destFolder, sequenceNumber);
-        if (modifiedFields != null) {
+        if (update != null && modifiedFields != null) {
             XOXFile movedFile = new XOXFile(update);
             movedFile.setSequenceNumber(getMetadata(newId.getFolder(), newId.getId(), CURRENT_VERSION).getSequenceNumber());
-            return update != null ? saveFileMetadata(movedFile, movedFile.getSequenceNumber(), modifiedFields) : newId;
+            return saveFileMetadata(movedFile, movedFile.getSequenceNumber(), modifiedFields);
         }
         return newId;
     }
@@ -416,7 +416,7 @@ public class XOXFileAccess implements /*@formatter:off*/
 
     @Override
     public void unlock(String folderId, String id) throws OXException {
-        client.Unlock(id);
+        client.unlock(id);
     }
 
     @Override
