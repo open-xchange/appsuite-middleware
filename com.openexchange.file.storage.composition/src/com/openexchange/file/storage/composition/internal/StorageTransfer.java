@@ -178,7 +178,6 @@ public class StorageTransfer {
         targetFolder.setName(null != newName ? newName : sourceFolder.getName());
         targetFolder.setParentId(targetParentFolderID.getFolderId());
         targetFolder.setSubscribed(sourceFolder.isSubscribed());
-        targetFolder.setPermissions(sourceFolder.getPermissions());
         /*
          * collect warnings beforehand, create folder when not in dry-run mode
          */
@@ -252,15 +251,15 @@ public class StorageTransfer {
 
     private List<OXException> collectWarnings(File sourceFile, FileStorageFolder[] sourcePath, FolderID targetFolderID) throws OXException {
         List<OXException> warnings = new ArrayList<OXException>();
-        if (Strings.isNotEmpty(sourceFile.getDescription())) {
+        if (Strings.isNotEmpty(sourceFile.getDescription()) && false == FileStorageTools.supports(targetFileAccess, FileStorageCapability.EXTENDED_METADATA)) {
             warnings.add(FileStorageExceptionCodes.LOSS_OF_NOTES.create(sourceFile.getFileName(), getPathString(sourcePath),
                 getAccountName(compositingAccess, targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
         }
-        if (Strings.isNotEmpty(sourceFile.getCategories())) {
+        if (Strings.isNotEmpty(sourceFile.getCategories()) && false == FileStorageTools.supports(targetFileAccess, FileStorageCapability.EXTENDED_METADATA)) {
             warnings.add(FileStorageExceptionCodes.LOSS_OF_CATEGORIES.create(sourceFile.getFileName(), getPathString(sourcePath),
                 getAccountName(compositingAccess, targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
         }
-        if (1 < sourceFile.getNumberOfVersions()) {
+        if (1 < sourceFile.getNumberOfVersions() && false == FileStorageTools.supports(targetFileAccess, FileStorageCapability.FILE_VERSIONS)) {
             warnings.add(FileStorageExceptionCodes.LOSS_OF_VERSIONS.create(sourceFile.getFileName(), getPathString(sourcePath),
                 getAccountName(compositingAccess, targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
         }
@@ -293,6 +292,7 @@ public class StorageTransfer {
         toCreate.setId(null);
         toCreate.setFolderId(targetFolderID.getFolderId());
         toCreate.setVersion(null);
+        toCreate.setObjectPermissions(null);
         InputStream contents = null;
         try {
             contents = sourceFileAccess.getDocument(file.getFolderId(), file.getId(), FileStorageFileAccess.CURRENT_VERSION);
@@ -313,6 +313,7 @@ public class StorageTransfer {
                 DefaultFile toCreate = new DefaultFile(version);
                 toCreate.setId(null == id ? FileStorageFileAccess.NEW : id.getId());
                 toCreate.setFolderId(targetFolderID.getFolderId());
+                toCreate.setObjectPermissions(null);
                 InputStream contents = null;
                 try {
                     contents = sourceFileAccess.getDocument(version.getFolderId(), version.getId(), version.getVersion());
