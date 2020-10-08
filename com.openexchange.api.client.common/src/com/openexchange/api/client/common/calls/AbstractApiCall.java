@@ -166,6 +166,22 @@ public abstract class AbstractApiCall<T> implements ApiCall<T> {
      * @param object The value to set
      * @return <code>true</code> if the value has been set, false otherwise
      */
+    protected boolean putIfNotEmpty(Map<String, String> parameters, String key, Integer value) {
+        if (null == value) {
+            return false;
+        }
+        return putIfNotEmpty(parameters, key, value.toString());
+    }
+
+    /**
+     * Puts the given {@link String} value into the map if it is not the String <code>"null"</code>
+     * and is not empty as per {@link Strings#isNotEmpty(String)}.
+     *
+     * @param parameters The parameters to set the value in
+     * @param key The key to set
+     * @param object The value to set
+     * @return <code>true</code> if the value has been set, false otherwise
+     */
     protected boolean putIfNotEmpty(Map<String, String> parameters, String key, String value) {
         if (Strings.isNotEmpty(value) && false == "null".equals(value)) {
             parameters.put(key, value);

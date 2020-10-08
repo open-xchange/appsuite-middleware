@@ -172,7 +172,7 @@ public class DocumentCall extends AbstractGetCall<DocumentResponse> {
                 ret.setETag(ApiClientUtils.getHeaderValue(response, HEADER_ETAG));
                 if (response.getStatusLine() != null && response.getStatusLine().getStatusCode() != HttpStatus.SC_NOT_MODIFIED) {
                     InputStream stream = new InputStreamParser().parse(response, httpContext);
-                    if(stream != null) {
+                    if (stream != null) {
                         ret.setInputStream(stream);
                     }
                 }
