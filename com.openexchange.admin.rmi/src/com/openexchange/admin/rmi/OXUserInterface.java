@@ -113,130 +113,89 @@ public interface OXUserInterface extends Remote {
     /**
      * Creates a new user within the given context.
      *
-     * @param ctx
-     *            Context in which the new user will exist.
-     * @param usrdata
-     *            User containing user data.
-     * @param auth
-     *            Credentials for authenticating against server.
-     * @param access
-     *            UserModuleAccess containing module access for the user.
-     * @param primaryAccountName
-     *            The name of the primary mail account
-     * @return int containing the id of the new user.
+     * @param ctx Context in which the new user will exist.
+     * @param usrdata User containing user data.
+     * @param access UserModuleAccess containing module access for the user.
+     * @param auth Credentials for authenticating against server.
+     * @return iThe identifier of the new user
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occurred.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      */
-    public User create(final Context ctx, final User usrdata, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
-
+    User create(final Context ctx, final User usrdata, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Creates a new user within the given context.
      *
-     * @param ctx
-     *            Context in which the new user will exist.
-     * @param usrdata
-     *            User containing user data.
-     * @param auth
-     *            Credentials for authenticating against server.
-     * @param access_combination_name
-     *            Access combination name identifying the module rights for the new user.
-     * @param primaryAccountName
-     *            The name of the primary mail account
+     * @param ctx Context in which the new user will exist.
+     * @param usrdata User containing user data.
+     * @param access_combination_name Access combination name identifying the module rights for the new user.
+     * @param auth Credentials for authenticating against server.
      *
-     * @return int containing the id of the new user.
+     * @return The identifier of the new user
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occurred.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      */
-    public User create(final Context ctx, final User usrdata, final String access_combination_name, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
-
+    User create(final Context ctx, final User usrdata, final String access_combination_name, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Creates a new user within the given context.<br>
      * Default context access rights are used!
      *
-     * @param ctx
-     *            Context in which the new user will exist.
-     * @param usrdata
-     *            User containing user data.
-     * @param auth
-     *            Credentials for authenticating against server.
-     * @param primaryAccountName
-     *            The name of the primary mail account
+     * @param ctx Context in which the new user will exist.
+     * @param usrdata User containing user data.
+     * @param auth Credentials for authenticating against server.
      *
-     * @return int containing the id of the new user.
+     * @return The identifier of the new user
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occurred.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      */
-    public User create(final Context ctx, final User usrdata, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+    User create(final Context ctx, final User usrdata, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
 
     /**
-     * Returns the module access rights of the context-admin
+     * Returns the module access rights of the context administrator
      *
-     * @param ctx
-     *            The context
-     * @param auth
-     *            Credentials for authenticating against server.
+     * @param ctx The context
+     * @param auth Credentials for authenticating against server.
      *
-     * @return int containing the id of the new user.
+     * @return The module access rights of the context administrator
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occurred.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      */
-    public UserModuleAccess getContextAdminUserModuleAccess(Context ctx, Credentials auth)  throws RemoteException, StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+    UserModuleAccess getContextAdminUserModuleAccess(Context ctx, Credentials auth)  throws RemoteException, StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 
     /**
-     * Returns the Context admin {@link User} object
+     * Returns the context administrator's {@link User} object
      *
      * @param ctx The context from which to obtain the administrator
      * @param auth The credentials
-     * @return
+     * @return The user representing the context administrator
      * @throws RemoteException
      * @throws InvalidCredentialsException
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public User getContextAdmin(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException;
+    User getContextAdmin(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException;
 
     /**
      * Gets specified user's capabilities.
@@ -253,7 +212,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
-    public Set<String> getCapabilities(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    Set<String> getCapabilities(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Changes specified user's capabilities.
@@ -272,7 +231,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
-    public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Changes the personal part of specified user's E-Mail address.
@@ -289,7 +248,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
-    public void changeMailAddressPersonal(Context ctx, User user, String personal, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    void changeMailAddressPersonal(Context ctx, User user, String personal, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from one storage to another.
@@ -310,7 +269,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveUserFilestore(Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    int moveUserFilestore(Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from his own storage to the storage of specified master.
@@ -331,7 +290,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveFromUserFilestoreToMaster(Context ctx, User user, User masterUser, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    int moveFromUserFilestoreToMaster(Context ctx, User user, User masterUser, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from a master account to his own storage.
@@ -354,7 +313,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveFromMasterToUserFilestore(Context ctx, User user, User masterUser, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    int moveFromMasterToUserFilestore(Context ctx, User user, User masterUser, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from a context to his own storage.
@@ -376,7 +335,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveFromContextToUserFilestore(Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    int moveFromContextToUserFilestore(Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from his own to a context storage.
@@ -396,189 +355,134 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveFromUserToContextFilestore(Context ctx, User user, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    int moveFromUserToContextFilestore(Context ctx, User user, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
-     * Manipulate user data within the given context.
+     * Changes user data within the given context.
      *
-     * @param ctx
-     *            Context in which the new user will be modified.
-     * @param usrdata
-     *            User containing user data.
-     * @param auth
-     *            Credentials for authenticating against server.
+     * @param ctx Context in which the new user will be modified.
+     * @param usrdata User containing user data.
+     * @param auth Credentials for authenticating against server.
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occurred.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
-    public void change(final Context ctx, final User usrdata, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    void change(final Context ctx, final User usrdata, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
-     * Delete user from given context.
+     * Deletes specified users from given context.
      *
-     * @param ctx
-     *            Context in which the new user will be deleted.
-     * @param users
-     *            user array containing user object.
-     * @param auth
-     *            Credentials for authenticating against server.
-     * @param destUser
-     *            The user id of the the user shared data is assigned to. If set to null the context admin and the context filestore will be used instead. If set to 0 or below the data will be removed instead.
+     * @param ctx Context in which the new user will be deleted.
+     * @param users Array containing user object.
+     * @param destUser The identifier of the the user shared data is assigned to. If set to <code>null</code> the context administrator and
+     *                 the context-associated file storage will be used instead. If set to equal or less than <code>0</code> (zero) the data
+     *                 will be removed instead.
+     * @param auth Credentials for authenticating against server.
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occurred.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
-    public void delete(final Context ctx, final User[] users, Integer destUser, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    void delete(final Context ctx, final User[] users, Integer destUser, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
-     * Delete user from given context.
+     * Deletes specified user from given context.
      *
-     * @param ctx
-     *            Context in which the new user will be deleted.
-     * @param user
-     *            user object.
-     * @param destUser
-     *            The user id of the the user shared data is assigned to. If set to null the context admin and the context filestore will be used instead. If set to 0 or below the data will be removed instead.
-     * @param auth
-     *            Credentials for authenticating against server.
+     * @param ctx Context in which the new user will be deleted.
+     * @param user user object.
+     * @param destUser The identifier of the the user shared data is assigned to. If set to <code>null</code> the context administrator and
+     *                 the context-associated file storage will be used instead. If set to equal or less than <code>0</code> (zero) the data
+     *                 will be removed instead.
+     * @param auth Credentials for authenticating against server.
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occurred.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
-    public void delete(final Context ctx, final User user, final Integer destUser, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    void delete(final Context ctx, final User user, final Integer destUser, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Use {@link #delete(Context, User[], Integer, Credentials)} instead.
      *
-     * @param ctx
-     *            Context in which the new user will be deleted.
-     * @param users
-     *            user array containing user object.
-     * @param auth
-     *            Credentials for authenticating against server.
-     * @param destUser
-     *            The user id of the the user shared data is assigned to.
+     * @param ctx Context in which the new user will be deleted.
+     * @param users user array containing user object.
+     * @param auth Credentials for authenticating against server.
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occurred.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
     @Deprecated
-    public void delete(final Context ctx, final User[] users, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    void delete(final Context ctx, final User[] users, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Use {@link #delete(Context, User, Integer, Credentials)} instead.
      *
-     * @param ctx
-     *            Context in which the new user will be deleted.
-     * @param user
-     *            user object.
-     * @param destUser
-     *            The user id of the the user shared data is assigned to.
-     * @param auth
-     *            Credentials for authenticating against server.
+     * @param ctx Context in which the new user will be deleted.
+     * @param user user object.
+     * @param auth Credentials for authenticating against server.
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occurred.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
     @Deprecated
-    public void delete(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    void delete(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
-     * Retrieve the ModuleAccess for an user.
+     * Retrieve the ModuleAccess for given name.
      *
-     * @param accessCombinationName
-     *            The access combination name
-     * @param auth
-     *            Credentials for authenticating against server.
+     * @param accessCombinationName The access combination name
      * @return UserModuleAccess containing the module access rights.
      *
      * @throws RemoteException General RMI Exception
      */
-    public UserModuleAccess moduleAccessForName(final String accessCombinationName) throws RemoteException;
+    UserModuleAccess moduleAccessForName(final String accessCombinationName) throws RemoteException;
 
     /**
-     * Retrieve the ModuleAccess for an user.
+     * Retrieve the ModuleAccess for given user.
      *
-     * @param ctx
-     *            Context
-     * @param user_id
-     *            int containing the user id.
-     * @param auth
-     *            Credentials for authenticating against server.
-     * @return UserModuleAccess containing the module access rights.
+     * @param ctx Context
+     * @param user user object.
+     * @param auth Credentials for authenticating against server.
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occurred.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
-    public UserModuleAccess getModuleAccess(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
-
+    UserModuleAccess getModuleAccess(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Get current access combination name of an user!
      *
-     * @param ctx
-     * @param user
-     * @param auth
+     * @param ctx Context
+     * @param user user object.
+     * @param auth Credentials for authenticating against server.
      * @return Access combination name or null if current access rights cannot be mapped to an access combination name.
      * @throws RemoteException
      * @throws InvalidCredentialsException
@@ -586,63 +490,45 @@ public interface OXUserInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public String getAccessCombinationName(final Context ctx,final User user,final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,
+    String getAccessCombinationName(final Context ctx,final User user,final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,
 	InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
 
     /**
      * Manipulate user module access within the given context.
      *
-     * @param ctx
-     *            Context object.
-     * @param user_id
-     *            int containing the user id.
-     * @param moduleAccess
-     *            UserModuleAccess containing module access.
-     * @param auth
-     *            Credentials for authenticating against server.
+     * @param ctx Context object.
+     * @param user The user
+     * @param moduleAccess UserModuleAccess containing module access.
+     * @param auth Credentials for authenticating against server.
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occurred.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
-    public void changeModuleAccess(final Context ctx, final User user, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    void changeModuleAccess(final Context ctx, final User user, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Manipulate user module access within the given context.
      *
-     * @param ctx
-     *            Context object.
-     * @param user_id
-     *            int containing the user id.
-     * @param access
-     *            String containing access combination name.
-     * @param auth
-     *            Credentials for authenticating against server.
+     * @param ctx Context object.
+     * @param user The user
+     * @param access String containing access combination name.
+     * @param auth Credentials for authenticating against server.
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occurred.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException nWhen an error in the subsystems occurred.
+     * @throws InvalidCredentialsException nWhen the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
-    public void changeModuleAccess(final Context ctx, final User user, final String access_combination_name, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    void changeModuleAccess(final Context ctx, final User user, final String access_combination_name, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * This method changes module Permissions for all (!) users in all (!) contexts. This can be filtered by already existing access combinations.
@@ -657,7 +543,7 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      */
-    public void changeModuleAccessGlobal(String filter, UserModuleAccess addAccess, UserModuleAccess removeAccess, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException;
+    void changeModuleAccessGlobal(String filter, UserModuleAccess addAccess, UserModuleAccess removeAccess, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException;
 
     /**
      * Retrieve user objects for a range of users by username or id.
