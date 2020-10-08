@@ -3209,6 +3209,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL)) {
             documents = objectPermissionLoader.add(documents, context, (Map<Integer, List<ObjectPermission>>) null);
         }
+        if (contains(columns, Metadata.CREATED_FROM_LITERAL)) {
+            CreatedFromLoader createdFromLoader = new CreatedFromLoader(this, entityInfoLoader, session);
+            documents = createdFromLoader.add(documents, context, (Map<Integer, EntityInfo>) null);
+        }
+        if (contains(columns, Metadata.MODIFIED_FROM_LITERAL)) {
+            ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(this, entityInfoLoader, session);
+            documents = modifiedFromLoader.add(documents, context, (Map<Integer, EntityInfo>) null);
+        }
         return new InfostoreTimedResult(new SearchIteratorAdapter<>(documents.iterator(), documents.size()));
     }
 
@@ -3267,6 +3275,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
             if (contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL)) {
                 timedResult = objectPermissionLoader.add(timedResult, context, Collections.singleton(I(id)));
+            }
+            if (contains(columns, Metadata.CREATED_FROM_LITERAL)) {
+                CreatedFromLoader createdFromLoader = new CreatedFromLoader(this, entityInfoLoader, session);
+                timedResult = createdFromLoader.add(timedResult, context, Collections.singleton(I(id)));
+            }
+            if (contains(columns, Metadata.MODIFIED_FROM_LITERAL)) {
+                ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(this, entityInfoLoader, session);
+                timedResult = modifiedFromLoader.add(timedResult, context, Collections.singleton(I(id)));
             }
             iter = null; // Avoid premature closing
             return timedResult;
