@@ -63,6 +63,9 @@ public enum PictureRequestParameter {
     /** Parameter name for the folder ID */
     CONTACT_FOLDER("folder_id"),
 
+    /** Parameter name for the account ID */
+    ACCOUNT_ID("account_id"),
+    
     /** Parameter name for mail addresses */
     MAIL("email"),
 

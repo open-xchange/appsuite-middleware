@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.picture.json;
 
+import static com.openexchange.contact.picture.json.PictureRequestParameter.ACCOUNT_ID;
 import static com.openexchange.contact.picture.json.PictureRequestParameter.CONTACT;
 import static com.openexchange.contact.picture.json.PictureRequestParameter.CONTACT_FOLDER;
 import static com.openexchange.contact.picture.json.PictureRequestParameter.MAIL;
@@ -130,10 +131,11 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
         if (folderId == null && contactId != null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(CONTACT_FOLDER.getParameter());
         }
-        String email = requestData.getParameter(MAIL.getParameter());
         Integer userId = requestData.getParameter(USER.getParameter(), Integer.class, true);
+        String accountId = requestData.getParameter(ACCOUNT_ID.getParameter());
+        String email = requestData.getParameter(MAIL.getParameter());
 
-        return new PictureSearchData(userId, folderId, contactId, email == null ? null : Collections.singleton(email));
+        return new PictureSearchData(userId, accountId, folderId, contactId, email == null ? null : Collections.singleton(email));
     }
 
     @Override

@@ -84,7 +84,7 @@ public class ContactUserFinder extends AbstractContactFinder {
 
     @Override
     public PictureSearchData modfiyResult(Contact contact) {
-        return new PictureSearchData(null, I(contact.getParentFolderID()), I(contact.getObjectID()), null);
+        return new PictureSearchData(null, null, I(contact.getParentFolderID()), I(contact.getObjectID()), null);
     }
 
     @Override

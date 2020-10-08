@@ -51,11 +51,13 @@ package com.openexchange.file.storage.xctx.osgi;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.xctx.XctxFileStorageService;
+import com.openexchange.file.storage.xctx.subscription.XctxContactPictureFinder;
 import com.openexchange.file.storage.xctx.subscription.XctxShareSubscriptionProvider;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
@@ -85,9 +87,7 @@ public class XctxFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { XctxSessionManager.class, ContextService.class, UserService.class, GroupService.class, ShareService.class, 
-            FileStorageAccountManagerLookupService.class, FolderService.class, InfostoreFacade.class, InfostoreSearchEngine.class, 
-            DispatcherPrefixService.class, CapabilityService.class, UserPermissionService.class
+        return new Class[] { XctxSessionManager.class, ContextService.class, UserService.class, GroupService.class, ShareService.class, FileStorageAccountManagerLookupService.class, FolderService.class, InfostoreFacade.class, InfostoreSearchEngine.class, DispatcherPrefixService.class, CapabilityService.class, UserPermissionService.class
         };
     }
 
@@ -101,6 +101,7 @@ public class XctxFileStorageActivator extends HousekeepingActivator {
             XctxFileStorageService fileStorageService = new XctxFileStorageService(this);
             registerService(FileStorageService.class, fileStorageService);
             registerService(ShareSubscriptionProvider.class, new XctxShareSubscriptionProvider(this, fileStorageService));
+            registerService(ContactPictureFinder.class, new XctxContactPictureFinder(this, fileStorageService));
         } catch (Exception e) {
             getLogger(XctxFileStorageActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;
@@ -112,6 +113,5 @@ public class XctxFileStorageActivator extends HousekeepingActivator {
         getLogger(XctxFileStorageActivator.class).info("stopping bundle {}", context.getBundle());
         super.stopBundle();
     }
-
 
 }

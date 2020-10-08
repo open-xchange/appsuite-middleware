@@ -63,28 +63,31 @@ import java.util.stream.Collectors;
 public class PictureSearchData {
 
     private final Integer userId;
-
     private final Integer folderId;
-
     private final Integer contactId;
-
+    private final String accountId;
     private final Set<String> emails;
 
-    public static final PictureSearchData EMPTY_DATA = new PictureSearchData(null, null, null, null);
+    /**
+     * Search result representing an unsuccessful search
+     */
+    public static final PictureSearchData EMPTY_DATA = new PictureSearchData(null, null, null, null, null);
 
     /**
      * Initializes a new {@link PictureSearchData}.
      *
      * @param userId The user identifier
+     * @param accountId The account identifier
      * @param folderId The folder identifier
      * @param contactId The contact identifier
      * @param emails The email addresses
      *
      */
-    public PictureSearchData(Integer userId, Integer folderId, Integer contactId, Collection<String> emails) {
+    public PictureSearchData(Integer userId, String accountId, Integer folderId, Integer contactId, Collection<String> emails) {
         this.userId = userId;
         this.folderId = folderId;
         this.contactId = contactId;
+        this.accountId = accountId;
         this.emails = emails == null ? new LinkedHashSet<>() : new LinkedHashSet<>(emails);
     }
 
@@ -105,6 +108,25 @@ public class PictureSearchData {
      */
     public boolean hasUser() {
         return null != userId && userId.intValue() > 0;
+    }
+
+    /**
+     * Get the identifier of the account to get the picture for
+     *
+     * @return The identifier or <code>null</code>
+     */
+    public final String getAccountId() {
+        return accountId;
+    }
+
+    /**
+     * A value indicating if the account identifier is set
+     *
+     * @return <code>true</code> if the account identifier is set,
+     *         <code>false</code> otherwise
+     */
+    public boolean hasAccount() {
+        return null != accountId;
     }
 
     /**
@@ -166,7 +188,7 @@ public class PictureSearchData {
 
     @Override
     public String toString() {
-        return "ContactPictureRequestData [userId=" + userId + ", folderId=" + folderId + ", contactId=" + contactId + ", emails=" + emails.stream().map(String::valueOf).collect(Collectors.joining(",")) + "]";
+        return "ContactPictureRequestData [userId=" + userId + ", accountId=" + accountId + ", folderId=" + folderId + ", contactId=" + contactId + ", emails=" + emails.stream().map(String::valueOf).collect(Collectors.joining(",")) + "]";
     }
 
 }

@@ -64,8 +64,10 @@ import com.openexchange.java.Strings;
  */
 public class ContactPicture {
 
+    /** The date to indicate that a picture wasn't modified */
     public static final Date UNMODIFIED = new Date(0);
 
+    /** Static reference that indicates that no picture was found */
     public static final ContactPicture NOT_FOUND = new ContactPicture("NOT_FOUND", null, UNMODIFIED);
 
     private final String eTag;
