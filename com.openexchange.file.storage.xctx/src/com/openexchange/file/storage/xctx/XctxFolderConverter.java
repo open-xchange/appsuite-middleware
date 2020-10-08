@@ -49,7 +49,9 @@
 
 package com.openexchange.file.storage.xctx;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -119,6 +121,11 @@ public class XctxFolderConverter extends FolderConverter {
         DefaultFileStoragePermission systemPermission = DefaultFileStoragePermission.newInstance(ownStoragePermission);
         systemPermission.setSystem(1);
         storageFolder.addPermission(systemPermission);
+        /*
+         * adjust capabilities from remote folder & clear type to disable certain functionality
+         */
+        storageFolder.setCapabilities(getStorageCapabilities(storageFolder.getCapabilities()));
+        storageFolder.setType(null); // if not: parent folder may get exchanged to 15 or 10 at c.o.folderstorage.filestorage.FileStorageFolderImpl.FileStorageFolderImpl(FileStorageFolder, String, boolean, IDBasedFolderAccess)  
         return storageFolder;
     }
 
@@ -142,6 +149,16 @@ public class XctxFolderConverter extends FolderConverter {
          */
         folder.setPermissions(entityHelper.unmangleLocalPermissions(folder.getPermissions()));
         return folder;
+    }
+
+    private static Set<String> getStorageCapabilities(Set<String> capabilities) {
+        if (null == capabilities) {
+            return null;
+        }
+        HashSet<String> storageCapabilities = new HashSet<String>(capabilities);
+        storageCapabilities.remove(FileStorageFolder.CAPABILITY_SUBSCRIPTION);
+        storageCapabilities.remove(FileStorageFolder.CAPABILITY_PERMISSIONS);
+        return storageCapabilities;
     }
 
 }
