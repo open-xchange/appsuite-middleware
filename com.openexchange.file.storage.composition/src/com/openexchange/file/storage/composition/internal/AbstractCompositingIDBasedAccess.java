@@ -82,6 +82,12 @@ import com.openexchange.tx.TransactionException;
  */
 public abstract class AbstractCompositingIDBasedAccess extends AbstractService<Transaction> implements WarningsAware {
 
+    /** The identifier of the shared infostore root folder */
+    static final String SHARED_INFOSTORE_ID = "10"; // com.openexchange.groupware.container.FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID
+
+    /** The identifier of the public infostore root folder */
+    static final String PUBLIC_INFOSTORE_ID = "15"; // com.openexchange.groupware.container.FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID
+
     private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
     private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
 

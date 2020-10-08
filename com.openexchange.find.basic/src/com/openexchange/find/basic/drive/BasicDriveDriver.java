@@ -59,11 +59,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
@@ -78,7 +74,6 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -111,14 +106,9 @@ import com.openexchange.find.spi.AbstractModuleSearchDriver;
 import com.openexchange.find.spi.SearchConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.id.IDMangler;
-import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
@@ -224,12 +214,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     @Override
     public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
         FileStorageAccountAccess accountAccess = getAccountAccess(searchRequest, session);
-        //TODO MW-1409: error handling: an error must not cause loading others to "fail"
-        List<FileStorageAccountAccess> sharingAwareAccountAccesses = getAdditionalAccountAccesses(accountAccess, searchRequest, session);
         accountAccess.connect();
-        for(FileStorageAccountAccess a : sharingAwareAccountAccesses) {
-            a.connect();
-        }
         try {
             // Determine account-relative folder ID
             String folderId = searchRequest.getFolderId();
@@ -238,12 +223,6 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                 if (!folderAccess.exists(new FolderID(searchRequest.getFolderId()).getFolderId())) {
                     throw FindExceptionCode.INVALID_FOLDER_ID.create(folderId, Module.DRIVE.getIdentifier());
                 }
-                for (Iterator<FileStorageAccountAccess> iter = sharingAwareAccountAccesses.iterator(); iter.hasNext();) {
-                    FileStorageAccountAccess a = iter.next();
-                    if (!a.getFolderAccess().exists(new FolderID(searchRequest.getFolderId()).getFolderId())) {
-                        iter.remove();
-                    }
-                }
             }
 
             List<Field> fields = DEFAULT_FIELDS;
@@ -251,6 +230,8 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             if (columns.length > 0) {
                 fields = Field.get(columns);
             }
+
+            IDBasedFileAccess fileAccess = Services.getIdBasedFileAccessFactory().createAccess(session);
 
             boolean includeSubfolders = searchRequest.getOptions().getBoolOption("includeSubfolders", true);
 
@@ -271,131 +252,17 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                 }
             }
 
-            List<FileStorageAccountAccess> accessesToSearch = new ArrayList<FileStorageAccountAccess>(sharingAwareAccountAccesses.size() + 1);
-            accessesToSearch.add(accountAccess);
-            accessesToSearch.addAll(sharingAwareAccountAccesses);
-            return search(searchRequest, accessesToSearch, session, fields, includeSubfolders, sortField, sortDirection);
+            if (supportsSearchByTerm(accountAccess)) {
+                return advancedSearch(searchRequest, accountAccess, fileAccess, fields, includeSubfolders, sortField, sortDirection);
+            }
+
+            return simpleSearch(searchRequest, accountAccess, fileAccess, fields, includeSubfolders, sortField, sortDirection);
         } finally {
             accountAccess.close();
-            sharingAwareAccountAccesses.forEach(a -> a.close());
         }
     }
 
-    @SuppressWarnings({ "resource", "unchecked" })
-    private SearchResult search(SearchRequest searchRequest, List<FileStorageAccountAccess> accountAccesses, ServerSession session, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection) throws OXException {
-
-        List<FileStorageAccountAccess> advancedSearches = new ArrayList<FileStorageAccountAccess>();
-        List<FileStorageAccountAccess> simpleSearches = new ArrayList<FileStorageAccountAccess>();
-
-        for(FileStorageAccountAccess a : accountAccesses) {
-           if(supportsSearchByTerm(a)) {
-               advancedSearches.add(a);
-           }
-           else {
-               simpleSearches.add(a);
-           }
-        }
-
-
-        final boolean querySingleStorage = advancedSearches.size() + simpleSearches.size() == 1;
-        List<SearchIterator<File>> searchResults = new ArrayList<>();
-        try {
-            if(querySingleStorage) {
-                /*
-                 * Search in single storage
-                 */
-                IDBasedFileAccess fileAccess = Services.getIdBasedFileAccessFactory().createAccess(session);
-                if(!advancedSearches.isEmpty()) {
-                    searchResults.add(advancedSearch(searchRequest, advancedSearches.get(0), fileAccess, fields, includeSubfolders, sortField, sortDirection, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize())) ;
-                }
-                else if(!simpleSearches.isEmpty()) {
-                    searchResults.add(simpleSearch(searchRequest, simpleSearches.get(0), fileAccess, fields, includeSubfolders, sortField, sortDirection, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize()));
-                }
-            }
-            else {
-                /*
-                 * Search in multiple storages; sort and slice later
-                 */
-                ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                CompletionService<SearchIterator<File>> completionService = null != threadPool ? new ThreadPoolCompletionService<>(threadPool) : new CallerRunsCompletionService<>();
-                int count = 0;
-
-                for(FileStorageAccountAccess advancedSearch : advancedSearches) {
-                    completionService.submit(new Callable<SearchIterator<File>>() {
-
-                        @SuppressWarnings("synthetic-access")
-                        @Override
-                        public SearchIterator<File> call() throws Exception {
-                            IDBasedFileAccess fileAccess = Services.getIdBasedFileAccessFactory().createAccess(session);
-                            return advancedSearch(searchRequest, advancedSearch, fileAccess, fields, includeSubfolders, sortField, sortDirection, 0, Integer.MAX_VALUE);
-                        }
-                    });
-                    count++;
-                }
-
-                for(final FileStorageAccountAccess simpleSearch : simpleSearches) {
-                    completionService.submit(new Callable<SearchIterator<File>>() {
-
-                        @SuppressWarnings("synthetic-access")
-                        @Override
-                        public SearchIterator<File> call() throws Exception {
-                            IDBasedFileAccess fileAccess = Services.getIdBasedFileAccessFactory().createAccess(session);
-                            return simpleSearch(searchRequest, simpleSearch, fileAccess, fields, includeSubfolders, sortField, sortDirection, 0, Integer.MAX_VALUE);
-                        }
-                    });
-                    count++;
-                }
-
-                for (int i = 0; i < count; i++) {
-                    try {
-                        SearchIterator<File> searchIterator = completionService.take().get();
-                        if (searchIterator != null) {
-                            searchResults.add(searchIterator);
-                        }
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        throw FindExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-                    } catch (ExecutionException e) {
-                        Throwable cause = e.getCause();
-                        if (null != cause && OXException.class.isInstance(e.getCause())) {
-                            throw (OXException) cause;
-                        }
-                        throw FindExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-                    }
-                }
-            }
-
-
-            SearchIterator<File>[] array = (SearchIterator<File>[]) searchResults.toArray(new SearchIterator<?>[searchResults.size()]);
-            CombinedSearchIterator<File> resultIterator = new CombinedSearchIterator<File>(searchResults.toArray(array));
-
-            List<File> resultFiles = SearchIterators.asList(resultIterator);
-
-            // Filter according to file type facet if defined
-            String fileType = extractFileType(searchRequest.getActiveFacets(DriveFacetType.FILE_TYPE));
-            if (null != fileType) {
-                resultFiles = filter(resultFiles, fileType);
-            }
-            List<Document> resultDocuments = new ArrayList<Document>(resultFiles.size());
-            for (final File file : resultFiles) {
-                resultDocuments.add(new FileDocument(file));
-            }
-
-            if(!querySingleStorage) {
-                //sort
-                resultFiles.sort(sortDirection.comparatorBy(sortField));
-
-                //slice
-                resultFiles = resultFiles.subList(searchRequest.getStart(), searchRequest.getStart() + Math.min(searchRequest.getSize(), resultFiles.size()));
-            }
-
-            return new SearchResult(-1, searchRequest.getStart(), resultDocuments, searchRequest.getActiveFacets());
-        } finally {
-            searchResults.forEach(searchIterator -> searchIterator.close());
-        }
-    }
-
-    private SearchIterator<File> advancedSearch(SearchRequest searchRequest, FileStorageAccountAccess accountAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection, int start, int end) throws OXException {
+    private SearchResult advancedSearch(SearchRequest searchRequest, FileStorageAccountAccess accountAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection) throws OXException {
         // Search by term only if supported
         SearchTerm<?> term = prepareSearchTerm(searchRequest);
         if (term == null) {
@@ -428,10 +295,20 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             }
         }
 
-        return fileAccess.search(folderID, includeSubfolders, term, fields, sortField, sortDirection, start, end);
+        List<Document> results = new ArrayList<Document>();
+        SearchIterator<File> searchIterator = null;
+        try {
+            searchIterator = fileAccess.search(folderID, includeSubfolders, term, fields, sortField, sortDirection, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize());
+            while (searchIterator.hasNext()) {
+                results.add(new FileDocument(searchIterator.next()));
+            }
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+        return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
     }
 
-    private SearchIterator<File> simpleSearch(SearchRequest searchRequest, FileStorageAccountAccess accountAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection, int start, int end) throws OXException {
+    private SearchResult simpleSearch(SearchRequest searchRequest, FileStorageAccountAccess accountAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection) throws OXException {
         // Search by simple pattern as fallback and filter folders manually
         List<String> queries = searchRequest.getQueries();
         String pattern = null != queries && 0 < queries.size() ? queries.get(0) : "*";
@@ -443,47 +320,24 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                 folderID = FileStorageFileAccess.ALL_FOLDERS;
             }
         }
-        else {
-            if(IDMangler.unmangle(folderID).size() != 3) {
-                folderID = new FolderID(accountAccess.getService().getId(), accountAccess.getAccountId(), folderID).toUniqueID();
-            }
+        List<File> files;
+        SearchIterator<File> searchIterator = null;
+        try {
+            searchIterator = fileAccess.search(pattern, fields, folderID, includeSubfolders, sortField, sortDirection, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize());
+            files = SearchIterators.asList(searchIterator);
+        } finally {
+            SearchIterators.close(searchIterator);
         }
-
-        return fileAccess.search(pattern, fields, folderID, includeSubfolders, sortField, sortDirection, start, end);
-    }
-
-    /**
-     * Internal method to get additional file storages which should be considered for the search
-     *
-     * @param accountAccess The primary {@link FileStorageAccountAccess}
-     * @param request The current search request
-     * @param session The session
-     * @return A list of additional file storage accounts to perform the search in
-     * @throws OXException
-     */
-    private List<FileStorageAccountAccess> getAdditionalAccountAccesses(FileStorageAccountAccess accountAccess, AbstractFindRequest request, ServerSession session) throws OXException {
-
-        ArrayList<FileStorageAccountAccess> accesses = new ArrayList<>();
-
-        //@formatter:off
-        if(accountAccess.getService().getId().equals(FileID.INFOSTORE_SERVICE_ID) &&
-           (request.getFolderId() == null  /*Search in all folders*/ ||
-            request.getFolderId().equals("10") ||
-            request.getFolderId().equals("15"))
-          ){
-
-            //We need to search in federated sharing accounts as well
-            List<FileStorageAccount> sharingAwareAccounts = getFileStorageAccounts(session).stream()
-                .filter(a -> a.getFileStorageService() instanceof SharingFileStorageService)
-                .collect(Collectors.toList());
-
-            for(FileStorageAccount a : sharingAwareAccounts) {
-               accesses.add(a.getFileStorageService().getAccountAccess(a.getId(), session));
-            }
+        // Filter according to file type facet if defined
+        String fileType = extractFileType(searchRequest.getActiveFacets(DriveFacetType.FILE_TYPE));
+        if (null != fileType) {
+            files = filter(files, fileType);
         }
-        //@formatter:on
-
-        return accesses;
+        List<Document> results = new ArrayList<Document>(files.size());
+        for (final File file : files) {
+            results.add(new FileDocument(file));
+        }
+        return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
     }
 
     private FileStorageAccountAccess getAccountAccess(AbstractFindRequest request, ServerSession session) throws OXException {

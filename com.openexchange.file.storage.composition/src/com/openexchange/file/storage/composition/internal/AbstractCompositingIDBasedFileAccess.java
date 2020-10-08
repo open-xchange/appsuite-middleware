@@ -141,8 +141,8 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.MergingSearchIterator;
+import com.openexchange.tools.iterator.RangeAwareSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -1513,42 +1513,49 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             /*
              * collect & filter results
              */
-            return new FilteringSearchIterator<File>(collectSearchResults(completionService, count, sort, order)) {
-
-                int index = 0;
-
-                @Override
-                public boolean accept(File thing) throws OXException {
-                    try {
-                        if (0 < start && index < start || 0 < end && index >= end) {
-                            return false;
-                        }
-                        return true;
-                    } finally {
-                        index++;
-                    }
-                }
-            };
+            return collectSearchResults(completionService, count, sort, order, start, end);
         }
     }
 
     @Override
     public SearchIterator<File> search(String folderId, boolean includeSubfolders, final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        /*
-         * perform search in single storage
-         */
-        FolderID folderID = new FolderID(folderId);
-        FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
-        if (false == FileStorageTools.supports(fileAccess, FileStorageCapability.SEARCH_BY_TERM)) {
-            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(fileAccess.getAccountAccess().getService());
-        }
-        SearchIterator<File> searchIterator = ((FileStorageAdvancedSearchFileAccess) fileAccess).search(
-            folderID.getFolderId(), includeSubfolders, searchTerm, fields, sort, order, start, end);
-        if (null == searchIterator) {
+        Map<FileStorageFileAccess, List<String>> foldersByFileAccess = getFoldersByFileAccess(Collections.singletonList(folderId));
+        if (foldersByFileAccess.isEmpty()) {
             return SearchIteratorAdapter.emptyIterator();
         }
-        FileStorageAccountAccess accountAccess = fileAccess.getAccountAccess();
-        return fixIDs(searchIterator, accountAccess.getService().getId(), accountAccess.getAccountId());
+        if (1 == foldersByFileAccess.size()) {
+            /*
+             * perform search in single storage
+             */
+            FolderID folderID = new FolderID(folderId);
+            FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
+            if (false == FileStorageTools.supports(fileAccess, FileStorageCapability.SEARCH_BY_TERM)) {
+                throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(fileAccess.getAccountAccess().getService());
+            }
+            SearchIterator<File> searchIterator = ((FileStorageAdvancedSearchFileAccess) fileAccess).search(folderID.getFolderId(), includeSubfolders, searchTerm, fields, sort, order, start, end);
+            if (null == searchIterator) {
+                return SearchIteratorAdapter.emptyIterator();
+            }
+            FileStorageAccountAccess accountAccess = fileAccess.getAccountAccess();
+            return fixIDs(searchIterator, accountAccess.getService().getId(), accountAccess.getAccountId());
+        }
+        /*
+         * schedule tasks to perform search in multiple storages concurrently
+         */
+        ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        CompletionService<SearchIterator<File>> completionService = null != threadPool ? new ThreadPoolCompletionService<>(threadPool) : new CallerRunsCompletionService<>();
+        int count = 0;
+        for (Entry<FileStorageFileAccess, List<String>> entry : foldersByFileAccess.entrySet()) {
+            if (FileStorageTools.supports(entry.getKey(), FileStorageCapability.SEARCH_BY_TERM)) {
+                FileStorageAdvancedSearchFileAccess fileAccess = (FileStorageAdvancedSearchFileAccess) entry.getKey();
+                completionService.submit(getSearchCallable(fileAccess, folderId, includeSubfolders, searchTerm, fields, sort, order));
+                count++;
+            }
+        }
+        /*
+         * collect & filter results
+         */
+        return collectSearchResults(completionService, count, sort, order, start, end);
     }
 
     @Override
@@ -1920,28 +1927,44 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             return Collections.emptyMap();
         } else if (1 == folderIds.size()) {
             FolderID folderID = new FolderID(folderIds.get(0));
-            return Collections.singletonMap(getFileAccess(folderID.getService(), folderID.getAccountId()),
-                Collections.singletonList(folderID.getFolderId()));
+            FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
+            List<String> folders = Collections.singletonList(folderID.getFolderId());
+            if (PUBLIC_INFOSTORE_ID.equals(folderID.getFolderId()) || SHARED_INFOSTORE_ID.equals(folderID.getFolderId())) {
+                List<FileStorageFileAccess> additionalFileAccesses = getAllFileStorageAccesses((fs) -> fs instanceof SharingFileStorageService);
+                if (null != additionalFileAccesses && 0 < additionalFileAccesses.size()) {
+                    Map<FileStorageFileAccess, List<String>> foldersByFileAccess = new HashMap<FileStorageFileAccess, List<String>>(additionalFileAccesses.size() + 1);
+                    foldersByFileAccess.put(fileAccess, folders);
+                    for (FileStorageFileAccess additionalFileAccess : additionalFileAccesses) {
+                        foldersByFileAccess.put(additionalFileAccess, folders);
+                    }
+                    return foldersByFileAccess;
+                }
+            }
+            return Collections.singletonMap(fileAccess, folders);
         } else {
             Map<String, FileStorageFileAccess> fileAccessesByAccount = new HashMap<>();
             Map<String, List<String>> foldersByAccount = new HashMap<>();
             for (String uniqueID : folderIds) {
                 FolderID folderID = new FolderID(uniqueID);
                 String key = folderID.getService() + '/' + folderID.getAccountId();
-                List<String> folders = foldersByAccount.get(key);
-                if (null == folders) {
-                    folders = new ArrayList<>();
-                    foldersByAccount.put(key, folders);
-                }
-                folders.add(folderID.getFolderId());
+                com.openexchange.tools.arrays.Collections.put(foldersByAccount, key, folderID.getFolderId());
                 FileStorageFileAccess fileAccess = fileAccessesByAccount.get(key);
                 if (null == fileAccess) {
                     fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
                     fileAccessesByAccount.put(key, fileAccess);
                 }
+                if (PUBLIC_INFOSTORE_ID.equals(folderID.getFolderId()) || SHARED_INFOSTORE_ID.equals(folderID.getFolderId())) {
+                    List<FileStorageFileAccess> additionalFileAccesses = getAllFileStorageAccesses((fs) -> fs instanceof SharingFileStorageService);
+                    if (null != additionalFileAccesses && 0 < additionalFileAccesses.size()) {
+                        for (FileStorageFileAccess additionalFileAccess : additionalFileAccesses) {
+                            String additionalKey = additionalFileAccess.getAccountAccess().getService().getId() + '/' + additionalFileAccess.getAccountAccess().getAccountId();
+                            com.openexchange.tools.arrays.Collections.put(foldersByAccount, additionalKey, folderID.getFolderId());
+                            fileAccessesByAccount.putIfAbsent(additionalKey, fileAccess);
+                        }
+                    }
+                }
             }
-            Map<FileStorageFileAccess, List<String>> foldersByFileAccess =
-                new HashMap<>(foldersByAccount.size());
+            Map<FileStorageFileAccess, List<String>> foldersByFileAccess = new HashMap<>(foldersByAccount.size());
             for (Entry<String, FileStorageFileAccess> entry : fileAccessesByAccount.entrySet()) {
                 foldersByFileAccess.put(entry.getValue(), foldersByAccount.get(entry.getKey()));
             }
@@ -2030,10 +2053,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      * @param count The number of results to take
      * @param sort The field to sort
      * @param order The sort order
+     * @param start The inclusive start index for the search results, or <code>-1</code> if not defined
+     * @param end The exclusive end index for the search results, or <code>-1</code> if not defined
      * @return A merged search iterator
-     * @throws OXException
      */
-    private static SearchIterator<File> collectSearchResults(CompletionService<SearchIterator<File>> completionService, int count, Field sort, SortDirection order) throws OXException {
+    private static SearchIterator<File> collectSearchResults(CompletionService<SearchIterator<File>> completionService, int count, Field sort, SortDirection order, int start, int end) throws OXException {
         List<SearchIterator<File>> searchIterators = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             SearchIterator<File> searchIterator = null;
@@ -2053,7 +2077,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 searchIterators.add(searchIterator);
             }
         }
-        return new MergingSearchIterator<>(order.comparatorBy(sort), order.equals(SortDirection.ASC), searchIterators);
+        return new RangeAwareSearchIterator<File>(new MergingSearchIterator<>(order.comparatorBy(sort), order.equals(SortDirection.ASC), searchIterators), start, end);
     }
 
     /**
@@ -2076,6 +2100,39 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 try {
                     searchIterator = fileAccess.search(
                         folderIds, searchTerm, fields, sort, order, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                } catch (Exception e) {
+                    // Ignore failed one in composite search results
+                    LOG.warn("Error searching in file storage {}", fileAccess, e);
+                }
+                if (null == searchIterator) {
+                    return SearchIteratorAdapter.emptyIterator();
+                }
+                FileStorageAccountAccess accountAccess = fileAccess.getAccountAccess();
+                return fixIDs(searchIterator, accountAccess.getService().getId(), accountAccess.getAccountId());
+            }
+        };
+    }
+
+    /**
+     * Constructs a callable task to search in a specific file storage access.
+     *
+     * @param fileAccess The file access to query
+     * @param folderId The (relative) folder ID to pass to the storage
+     * @param includeSubfolders <code>true</code> to include subfolders, <code>false</code>, otherwise
+     * @param searchTerm The search term to pass to the storage
+     * @param fields The fields to pass to the storage
+     * @param sort The sort field to pass to the storage
+     * @param order The sort order to pass to the storage
+     * @return The callable
+     */
+    private static Callable<SearchIterator<File>> getSearchCallable(final FileStorageAdvancedSearchFileAccess fileAccess, String folderId, boolean includeSubfolders, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order) {
+        return new Callable<SearchIterator<File>>() {
+
+            @Override
+            public SearchIterator<File> call() throws Exception {
+                SearchIterator<File> searchIterator = null;
+                try {
+                    searchIterator = fileAccess.search(folderId, includeSubfolders, searchTerm, fields, sort, order, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
                 } catch (Exception e) {
                     // Ignore failed one in composite search results
                     LOG.warn("Error searching in file storage {}", fileAccess, e);

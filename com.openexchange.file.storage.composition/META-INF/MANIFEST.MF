@@ -3,6 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: File Storage Composition Plug-in
 Bundle-SymbolicName: com.openexchange.file.storage.composition
 Bundle-Version: 7.10.5
+Automatic-Module-Name: com.openexchange.file.storage.composition
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.config,
@@ -30,6 +31,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.share.recipient,
  com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
+ com.openexchange.tools.arrays,
  com.openexchange.tools.id,
  com.openexchange.tools.iterator,
  com.openexchange.tx,
