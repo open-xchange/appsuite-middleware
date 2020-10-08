@@ -106,7 +106,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
     public ContactPicture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
         final ContactPicture picture = getPicture0(contactQuery, session, true);
         if (null == picture) {
-            return services.getServiceSafe(ContactPictureService.class).getPicture(session, new PictureSearchData(null == contactQuery.getUser() ? null : I(contactQuery.getUser().getId()), null, I(contactQuery.getContact().getObjectID()), null));
+            return services.getServiceSafe(ContactPictureService.class).getPicture(session, new PictureSearchData(null == contactQuery.getUser() ? null : I(contactQuery.getUser().getId()), null, null, I(contactQuery.getContact().getObjectID()), null));
         }
         return picture;
     }
@@ -115,7 +115,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
     public String getPictureETag(HaloContactQuery contactQuery, ServerSession session) throws OXException {
         final ContactPicture picture = getPicture0(contactQuery, session, true);
         if (null == picture) {
-            return services.getServiceSafe(ContactPictureService.class).getETag(session, new PictureSearchData(null == contactQuery.getUser() ? null : I(contactQuery.getUser().getId()), null, I(contactQuery.getContact().getObjectID()), null));
+            return services.getServiceSafe(ContactPictureService.class).getETag(session, new PictureSearchData(null == contactQuery.getUser() ? null : I(contactQuery.getUser().getId()), null, null, I(contactQuery.getContact().getObjectID()), null));
         }
         return picture.getETag();
     }

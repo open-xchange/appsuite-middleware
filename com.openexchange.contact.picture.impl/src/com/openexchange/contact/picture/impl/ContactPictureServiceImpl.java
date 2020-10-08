@@ -140,13 +140,14 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
 
         // Use client parameters prior the data we found out
         Integer userId = data.hasUser() ? data.getUserId() : modified.getUserId();
+        String accountId = data.hasAccount() ? data.getAccountId() : modified.getAccountId();
         Integer folderId = data.hasFolder() ? data.getFolderId() : modified.getFolderId();
         Integer contactId = data.hasContact() ? data.getContactId() : modified.getContactId();
 
         LinkedHashSet<String> set = new LinkedHashSet<>(data.getEmails());
         set.addAll(modified.getEmails());
 
-        return new PictureSearchData(userId, folderId, contactId, set);
+        return new PictureSearchData(userId, accountId, folderId, contactId, set);
     }
 
     // ---------------------------------------------------------------------------------------------

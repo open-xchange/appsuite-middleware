@@ -23,6 +23,14 @@
         schema:
           type: string
       - in: query
+        name: accoutn_id
+        description: |
+          The account identifier of an specific account belonging to the user of the session.
+          If the account ID is set, the search will be delegated to the matching account, if found.
+        required: false
+        schema:
+          type: string
+      - in: query
         name: contact_id
         description: |
           The contact identifier.

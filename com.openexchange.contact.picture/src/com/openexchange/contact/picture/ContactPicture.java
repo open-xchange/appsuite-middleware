@@ -64,9 +64,16 @@ import com.openexchange.java.Strings;
  */
 public class ContactPicture {
 
+    /**
+     * Static reference that indicates that no picture was found and thus the ETag not found too
+     */
+    public static final String ETAG_NOT_FOUND = "NOT_FOUND";
+
+    /** The date to indicate that a picture wasn't modified */
     public static final Date UNMODIFIED = new Date(0);
 
-    public static final ContactPicture NOT_FOUND = new ContactPicture("NOT_FOUND", null, UNMODIFIED);
+    /** Static reference that indicates that no picture was found */
+    public static final ContactPicture NOT_FOUND = new ContactPicture(ETAG_NOT_FOUND, null, UNMODIFIED);
 
     private final String eTag;
 

@@ -119,7 +119,7 @@ public final class UserImageDataSource implements ImageDataSource {
             throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ID_ARGUMENT, argument);
         }
 
-        PictureSearchData contactPictureRequestData = new PictureSearchData(I(userID), null, null, null);
+        PictureSearchData contactPictureRequestData = new PictureSearchData(I(userID), null, null, null, null);
         ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData);
         IFileHolder fileHolder = picture.getFileHolder();
 
@@ -196,7 +196,7 @@ public final class UserImageDataSource implements ImageDataSource {
 
     @Override
     public String getETag(ImageLocation imageLocation, Session session) throws OXException {
-        PictureSearchData contactPictureRequestData = new PictureSearchData(I(Tools.getUnsignedInteger(imageLocation.getId())), null, null, null);
+        PictureSearchData contactPictureRequestData = new PictureSearchData(I(Tools.getUnsignedInteger(imageLocation.getId())), null, null, null, null);
         return services.getServiceSafe(ContactPictureService.class).getETag(session, contactPictureRequestData);
     }
 
@@ -211,12 +211,10 @@ public final class UserImageDataSource implements ImageDataSource {
 
     private Contact optUser(Session session, int userID, ContactField... fields) throws OXException {
         ContactService contactService = services.getServiceSafe(ContactService.class);
-        if (null != contactService) {
-            try {
-                return contactService.getUser(session, userID, fields);
-            } catch (OXException e) {
-                LOG.debug("error getting user contact", e);
-            }
+        try {
+            return contactService.getUser(session, userID, fields);
+        } catch (OXException e) {
+            LOG.debug("error getting user contact", e);
         }
         return null;
     }

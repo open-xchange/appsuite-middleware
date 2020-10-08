@@ -61,6 +61,7 @@ import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -163,6 +164,10 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     // ---------------------------------------------------------------------------------------------
 
     private Contact getContact0(Session session, PictureSearchData data, SearchFields fields) {
+        if (Strings.isNotEmpty(data.getAccountId())) {
+            return null;
+        }
+
         Contact contact = null;
         try {
             contact = getContact(session, data, fields.getContactFields());

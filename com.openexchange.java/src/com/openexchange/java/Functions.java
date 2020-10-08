@@ -49,6 +49,9 @@
 
 package com.openexchange.java;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+
 /**
  * {@link Functions}
  *
@@ -69,5 +72,46 @@ public class Functions {
     public interface OXFunction<T, R, E extends Exception> {
 
         R apply(T t) throws E;
+
+        /**
+         * Applies this function to the given argument. In case of error
+         * the exception will be given to the consumer
+         *
+         * @param t The function argument
+         * @param log The consumer to log the exception
+         * @return The function result or an empty optional
+         */
+        default Optional<R> consumeError(T t, Consumer<Exception> log) {
+            try {
+                return Optional.ofNullable(apply(t));
+            } catch (Exception e) {
+                log.accept(e);
+            }
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * {@link ExceptionThrowingBiFunction} Represents an exception aware function that accepts one argument and produces a result.
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v7.10.5
+     * @param <T> The type of the input to the function
+     * @param <U> the type of the second argument to the function
+     * @param <R> The type of the result of the function
+     * @param <E> The type of exception
+     */
+    @FunctionalInterface
+    public interface ExceptionThrowingBiFunction<T, U, R, E extends Exception> {
+
+        /**
+         * Applies this function to the given argument.
+         *
+         * @param t The function argument
+         * @param u The second function argument
+         * @return The function result
+         * @throws E In case the result can't be formulated
+         */
+        R apply(T t, U u) throws E;
     }
 }

@@ -52,11 +52,13 @@ package com.openexchange.file.storage.xox.osgi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.api.client.ApiClientService;
+import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.xox.XOXFileStorageService;
+import com.openexchange.file.storage.xox.subscription.XOXContactPicutreFinder;
 import com.openexchange.file.storage.xox.subscription.XOXShareSubscriptionProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.subscription.ShareSubscriptionProvider;
@@ -90,6 +92,7 @@ public class Activator extends HousekeepingActivator {
         XOXFileStorageService fileStorageService = new XOXFileStorageService(this);
         registerService(FileStorageService.class, fileStorageService);
         registerService(ShareSubscriptionProvider.class, new XOXShareSubscriptionProvider(this, fileStorageService));
+        registerService(ContactPictureFinder.class, new XOXContactPicutreFinder(this, fileStorageService));
     }
 
     @Override

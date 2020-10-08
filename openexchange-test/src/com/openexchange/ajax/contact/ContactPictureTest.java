@@ -216,7 +216,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         assertImage(contactPicture);
 
         deleteContact(contactId);
-        
+
         assertThatPictureIsMissing(null, contactId, null);
     }
 
@@ -227,13 +227,13 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
     }
 
     private byte[] getContactPicture(String userID, String contactId, String mail, String contactFolderID) throws ApiException {
-        return contactsApi.getContactPicture(getSessionId(), userID, contactId, contactFolderID, mail, null, null, null, null, null, null, null, null, null);
+        return contactsApi.getContactPicture(getSessionId(), userID, null, contactId, contactFolderID, mail, null, null, null, null, null, null, null, null, null);
     }
-    
+
     private void assertThatPictureIsMissing(String userID, String contactId, String mail) {
         assertThatPictureIsMissing(userID, contactId, mail, contactFolderId);
     }
-    
+
     private void assertThatPictureIsMissing(String userID, String contactId, String mail, String contactFolderID) throws IllegalStateException {
         try {
             getContactPicture(userID, contactId, mail, contactFolderID);

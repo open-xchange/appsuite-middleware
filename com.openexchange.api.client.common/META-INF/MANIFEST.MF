@@ -6,10 +6,13 @@ Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.container,
  com.openexchange.ajax.fields,
+ com.openexchange.ajax.fileholder,
  com.openexchange.annotation,
  com.openexchange.api.client,
  com.openexchange.config.lean,
+ com.openexchange.contact.picture,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.folderstorage,
@@ -49,6 +52,7 @@ Import-Package: com.openexchange.ajax,
  org.slf4j
 Export-Package: com.openexchange.api.client.common,
  com.openexchange.api.client.common.calls,
+ com.openexchange.api.client.common.calls.contact.picture,
  com.openexchange.api.client.common.calls.find,
  com.openexchange.api.client.common.calls.folders,
  com.openexchange.api.client.common.calls.infostore,

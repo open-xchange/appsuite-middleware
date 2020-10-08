@@ -67,7 +67,7 @@ public interface ContactPictureService {
      * 
      * @param session The session
      * @param data The {@link PictureSearchData} to get the picture for
-     * @return The {@link ContactPicture} and never <code>null</code>. If no picture is found {@link ContactPicture#FALLBACK_PICTURE} is used
+     * @return The {@link ContactPicture} and never <code>null</code>. If no picture is found {@link ContactPicture#NOT_FOUND} is used
      */
     ContactPicture getPicture(Session session, PictureSearchData data);
 
@@ -76,7 +76,7 @@ public interface ContactPictureService {
      * 
      * @param session The session
      * @param data The {@link PictureSearchData} to get the pictures ETag for
-     * @return The ETag and never <code>null</code>. If no picture is found {@link ContactPicture#FALLBACK_PICTURE} is used to get the ETag
+     * @return The ETag and never <code>null</code>. If no picture is found {@link ContactPicture#NOT_FOUND} is used to get the ETag
      */
     String getETag(Session session, PictureSearchData data);
 

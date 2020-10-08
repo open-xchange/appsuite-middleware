@@ -98,7 +98,7 @@ public class ContactIDFinder extends AbstractContactFinder {
         if (contact.containsEmail3() && Strings.isNotEmpty(contact.getEmail3())) {
             set.add(contact.getEmail3());
         }
-        return new PictureSearchData(null, null, null, set);
+        return new PictureSearchData(null, null, null, null, set);
     }
 
     @Override

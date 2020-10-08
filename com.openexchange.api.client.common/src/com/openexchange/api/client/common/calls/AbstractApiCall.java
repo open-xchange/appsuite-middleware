@@ -59,8 +59,6 @@ import org.apache.http.entity.InputStreamEntity;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.ApiCall;
 import com.openexchange.java.Charsets;
@@ -75,8 +73,6 @@ import com.openexchange.java.Strings;
  * @since v7.10.5
  */
 public abstract class AbstractApiCall<T> implements ApiCall<T> {
-
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractApiCall.class);
 
     /**
      * The sort order
