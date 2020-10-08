@@ -1,8 +1,8 @@
-feature_name: Filestore XOX
+feature_name: Filestore XCTX
 feature_description: |
-  These properties configure access to file storages located on other OX App Suite installations.
+  These properties configure access to file storages located on other OX App Suite contexts.
 properties:
-    - key: com.openexchange.file.storage.xox.retryAfterErrorInterval
+    - key: com.openexchange.file.storage.xctx.retryAfterErrorInterval
       description: |
         The time interval, in seconds, after which access to an error afflicted account should be retried.
       defaultValue:  3600
@@ -11,9 +11,9 @@ properties:
       configcascadeAware: true
       related: 
       file: filestorage.properties
-      packageName: open-xchange-file-storage-xox
-      tags: ["Federated Sharing", "XOX"]
-    - key: com.openexchange.capability.filestorage_xox
+      packageName: open-xchange-file-storage-xctx
+      tags: ["Federated Sharing", "XCTX"]
+    - key: com.openexchange.capability.filestorage_xctx
       description: |
         Allows the user to integrate a share link from a different OX App Suite installation as filestorage.
       defaultValue:  false
@@ -22,5 +22,5 @@ properties:
       configcascadeAware: true
       related: 
       file: filestorage.properties
-      packageName: open-xchange-file-storage-xox
-      tags: ["Federated Sharing", "XOX"]
+      packageName: open-xchange-file-storage-xctx
+      tags: ["Federated Sharing", "XCTX"]

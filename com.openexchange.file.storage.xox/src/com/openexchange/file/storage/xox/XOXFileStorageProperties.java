@@ -62,7 +62,7 @@ import com.openexchange.config.lean.Property;
 public class XOXFileStorageProperties {
 
     /**
-     * The time, in seconds, after which the access to an an error afflicted XOX account should be retried.
+     * The time interval, in seconds, after which the access to an an error afflicted XOX (cross ox) sharing account should be retried.
      */
-    public static final Property RETRY_AFTER_ERROR = DefaultProperty.valueOf("com.openexchange.file.storage.xox.retryAfterError", I(3600 /* seconds = 1h */));
+    public static final Property RETRY_AFTER_ERROR_INTERVAL = DefaultProperty.valueOf("com.openexchange.file.storage.xox.retryAfterErrorInterval", I(3600 /* seconds = 1h */));
 }
