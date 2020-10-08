@@ -292,8 +292,10 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         if (null != permissions && permissions.length > 0) {
             final List<FileStoragePermission> fsPermissions = new ArrayList<>(permissions.length);
             for (final Permission permission : permissions) {
-                final FileStoragePermission fsPerm = DefaultFileStoragePermission.newInstance();
+                final DefaultFileStoragePermission fsPerm = DefaultFileStoragePermission.newInstance();
                 fsPerm.setEntity(permission.getEntity());
+                fsPerm.setIdentifier(permission.getIdentifier());
+                fsPerm.setEntityInfo(permission.getEntityInfo());
                 fsPerm.setAllPermissions(
                     permission.getFolderPermission(),
                     permission.getReadPermission(),
@@ -321,23 +323,15 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
                 }
                 fsFolder.setPermissions(Arrays.asList(messagingPermissions));
             } else {
-                final FileStorageFolder parent = folderAccess.getFolder(folder.getParentID());
-                final List<FileStoragePermission> parentPermissions = parent.getPermissions();
-                final FileStoragePermission[] ffPermissions = new FileStoragePermission[parentPermissions.size()];
-                int i = 0;
-                for (final FileStoragePermission parentPerm : parentPermissions) {
-                    final FileStoragePermission fsPerm = DefaultFileStoragePermission.newInstance();
-                    fsPerm.setEntity(parentPerm.getEntity());
-                    fsPerm.setAllPermissions(
-                        parentPerm.getFolderPermission(),
-                        parentPerm.getReadPermission(),
-                        parentPerm.getWritePermission(),
-                        parentPerm.getDeletePermission());
-                    fsPerm.setAdmin(parentPerm.isAdmin());
-                    fsPerm.setGroup(parentPerm.isGroup());
-                    ffPermissions[i++] = fsPerm;
+                List<FileStoragePermission> parentPermissions = folderAccess.getFolder(folder.getParentID()).getPermissions();
+                List<FileStoragePermission> ffPermissions = new ArrayList<FileStoragePermission>(parentPermissions.size());
+                for (FileStoragePermission parentPermission : parentPermissions) {
+                    if (0 < parentPermission.getSystem()) {
+                        continue; // don't inherit system permission
+                    }
+                    ffPermissions.add(DefaultFileStoragePermission.newInstance(parentPermission));
                 }
-                fsFolder.setPermissions(Arrays.asList(ffPermissions));
+                fsFolder.setPermissions(ffPermissions);
             }
         }
 
