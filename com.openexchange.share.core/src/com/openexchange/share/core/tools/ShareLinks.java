@@ -155,6 +155,9 @@ public class ShareLinks {
      * @return The token or <code>null</code> if no token is embedded in the path
      */
     public static String extractBaseToken(String shareUrl) {
+        if (Strings.isEmpty(shareUrl)) {
+            return null;
+        }
         URI uri;
         try {
             uri = new URI(shareUrl);

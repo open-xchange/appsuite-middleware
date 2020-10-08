@@ -11,7 +11,7 @@ properties:
       configcascadeAware: true
       related: 
       file: filestorage.properties
-      packageName: open-xchange-file-storage-xox
+      packageName: open-xchange-subscribe
       tags: ["Federated Sharing", "XOX"]
     - key: com.openexchange.capability.filestorage_xox
       description: |
@@ -22,5 +22,5 @@ properties:
       configcascadeAware: true
       related: 
       file: filestorage.properties
-      packageName: open-xchange-file-storage-xox
+      packageName: open-xchange-subscribe
       tags: ["Federated Sharing", "XOX"]
