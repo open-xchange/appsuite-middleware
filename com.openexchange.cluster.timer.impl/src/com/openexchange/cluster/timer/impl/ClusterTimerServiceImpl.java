@@ -118,8 +118,8 @@ public class ClusterTimerServiceImpl implements ClusterTimerService {
     private long getEffectiveInitialDelay(String id, long initialDelay, long interval) {
         HazelcastInstance hazelcastInstance = services.getOptionalService(HazelcastInstance.class);
         if (null == hazelcastInstance) {
-            LOG.warn("No {} available, unable to determine effective initial delay for task {} on this node.",
-                HazelcastInstance.class.getName(), id);
+            LOG.debug("No {} available yet, using {}ms as initial delay for task {} on this node.",
+                HazelcastInstance.class.getName(), Long.valueOf(initialDelay), id);
             return initialDelay;
         }
         IAtomicLong clusterExecutionTime = hazelcastInstance.getCPSubsystem().getAtomicLong(id);
