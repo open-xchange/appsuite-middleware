@@ -52,7 +52,6 @@ package com.openexchange.share.impl;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
-import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,11 +87,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
-import com.openexchange.quota.AccountQuota;
-import com.openexchange.quota.Quota;
-import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.QuotaType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -117,6 +112,7 @@ import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.impl.cleanup.GuestLastModifiedMarker;
+import com.openexchange.share.impl.quota.ShareQuotas;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
@@ -290,8 +286,9 @@ public class DefaultShareService implements ShareService {
         try {
             connectionHelper.start();
             /*
-             * Initial checks
+             * perform initial checks & get current quota usages
              */
+            ShareQuotas shareQuotas = new ShareQuotas(requireService(QuotaService.class), session);
             checkRecipients(recipients, session);
             /*
              * prepare guest users and resulting shares
@@ -308,10 +305,9 @@ public class DefaultShareService implements ShareService {
                 }
             }
             /*
-             * check quota restrictions & commit transaction
-             * store shares
+             * check quota, commit transaction & return result
              */
-            checkQuota(session, sharesInfos);
+            shareQuotas.checkAllowsNewShares(createdGuests);
             connectionHelper.commit();
             LOG.info("Accounts at {} in context {} configured: {}", target, I(session.getContextId()), sharesByRecipient.values());
             return new CreatedSharesImpl(sharesByRecipient);
@@ -991,55 +987,6 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
-     * Stores one or more shares in the storage. This includes only share for external entities, i.e. for anonymous or named guest users.
-     * Share infos pointing to internal users and groups are skipped implicitly.
-     *
-     * @param session The session
-     * @param shareInfos The shares to store
-     */
-    private void checkQuota(Session session, List<ShareInfo> shareInfos) throws OXException {
-        if (null == shareInfos || 0 == shareInfos.size()) {
-            return;
-        }
-        /*
-         * distinguish between links and invitations for quota checks
-         */
-        List<ShareInfo> anonymousShares = new ArrayList<ShareInfo>();
-        List<ShareInfo> guestShares = new ArrayList<ShareInfo>();
-        for (ShareInfo shareInfo : shareInfos) {
-            if (RecipientType.ANONYMOUS.equals(shareInfo.getGuest().getRecipientType())) {
-                anonymousShares.add(shareInfo);
-            } else if (RecipientType.GUEST.equals(shareInfo.getGuest().getRecipientType())) {
-                guestShares.add(shareInfo);
-            }
-        }
-        if (0 < anonymousShares.size()) {
-            /*
-             * check quota restrictions & capability for anonymous links
-             */
-            AccountQuota quota = requireService(QuotaService.class).getProvider("share_links").getFor(session, "0");
-            if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
-                Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
-                if (amountQuota.isExceeded() || amountQuota.willExceed(anonymousShares.size())) {
-                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARE_LINKS.create(L(amountQuota.getUsage()), L(amountQuota.getLimit()));
-                }
-            }
-        }
-        if (0 < guestShares.size()) {
-            /*
-             * check quota restrictions & capability for inviting guests
-             */
-            AccountQuota quota = requireService(QuotaService.class).getProvider("invite_guests").getFor(session, "0");
-            if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
-                Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
-                if (amountQuota.isExceeded() || amountQuota.willExceed(guestShares.size())) {
-                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_INVITE_GUESTS.create(L(amountQuota.getUsage()), L(amountQuota.getLimit()));
-                }
-            }
-        }
-    }
-
-    /**
      * Updates the guest user behind the anonymous recipient as needed, i.e. adjusts the defined password mechanism and the password
      * itself in case it differs from the updated recipient.
      *
@@ -1203,18 +1150,19 @@ public class DefaultShareService implements ShareService {
                 return new DefaultShareLink(existingLink, targetProxy.getTimestamp(), false);
             }
             /*
-             * create new anonymous recipient for this target
+             * check quota & create new anonymous recipient for this target
              */
+            new ShareQuotas(requireService(QuotaService.class), session).checkAllowsNewLinks(1);
             AnonymousRecipient recipient = new AnonymousRecipient(LINK_PERMISSION_BITS, null, null);
             LOG.info("Adding new share link to {} for {} in context {}...", target, recipient, I(session.getContextId()));
-
-            checkRecipients(Collections.singletonList(recipient), session);
-
-            ShareInfo shareInfo = prepareShare(connectionHelper, session, recipient, target).getSecond();
-            checkQuota(session, Collections.singletonList(shareInfo));
             /*
-             * apply new permission entity for this target
+             * perform initial checks
              */
+            checkRecipients(Collections.singletonList(recipient), session);
+            /*
+             * prepare link share & apply new permission entity for this target
+             */
+            ShareInfo shareInfo = prepareShare(connectionHelper, session, recipient, target).getSecond();
             TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, recipient.getBits(), FolderPermissionType.LEGATOR.getTypeNumber(), null, 0);
 
             targetProxy.applyPermissions(Collections.singletonList(targetPermission));
