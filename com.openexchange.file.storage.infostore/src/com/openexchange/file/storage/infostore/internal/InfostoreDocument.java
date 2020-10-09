@@ -50,9 +50,11 @@
 package com.openexchange.file.storage.infostore.internal;
 
 import java.io.InputStream;
+import java.util.function.Function;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
-import com.openexchange.file.storage.infostore.InfostoreFile;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.infostore.FileConverter;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
@@ -71,12 +73,22 @@ public class InfostoreDocument extends Document {
      * @param documentAndMetadata The underlying document and metadata
      */
     public InfostoreDocument(DocumentAndMetadata documentAndMetadata) {
+        this(documentAndMetadata, new FileConverter());
+    }
+
+    /**
+     * Initializes a new {@link InfostoreDocument}.
+     *
+     * @param documentAndMetadata The underlying document and metadata
+     * @param converter The converter to get the file from the document metadata
+     */
+    public InfostoreDocument(DocumentAndMetadata documentAndMetadata, Function<DocumentMetadata, File> converter) {
         super();
         this.documentAndMetadata = documentAndMetadata;
         setEtag(documentAndMetadata.getETag());
         DocumentMetadata metadata = documentAndMetadata.getMetadata();
         if (null != metadata) {
-            setFile(new InfostoreFile(metadata));
+            setFile(converter.apply(metadata));
             setMimeType(metadata.getFileMIMEType());
             setName(metadata.getFileName());
             setSize(metadata.getFileSize());

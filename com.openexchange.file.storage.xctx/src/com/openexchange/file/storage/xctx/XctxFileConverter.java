@@ -85,6 +85,9 @@ public class XctxFileConverter extends FileConverter {
 
     @Override
     public File getFile(DocumentMetadata metadata) {
+        if (null == metadata) {
+            return null;
+        }
         /*
          * get file with entities under perspective of remote guest session in foreign context
          */
