@@ -1728,13 +1728,13 @@ public final class OXFolderAdminHelper {
              */
             switch (folderDefaultMode) {
                 case NORMAL:
-                    InfoStoreFolderAdminHelper.addDefaultFoldersDeletable(writeCon, contextId, userId, LocaleTools.getLocale(language));
+                    InfoStoreFolderAdminHelper.addDefaultFoldersDeletable(writeCon, contextId, userId, LocaleTools.getLocale(language), Optional.of(displayName));
                     break;
                 case NONE:
-                    InfoStoreFolderAdminHelper.addDefaultFoldersNone(writeCon, contextId, userId);
+                    InfoStoreFolderAdminHelper.addDefaultFoldersNone(writeCon, contextId, userId, Optional.of(displayName));
                     break;
                 default:
-                    InfoStoreFolderAdminHelper.addDefaultFolders(writeCon, contextId, userId);
+                    InfoStoreFolderAdminHelper.addDefaultFolders(writeCon, contextId, userId, Optional.of(displayName));
             }
 
             LOG.debug("All user default folders were successfully created");

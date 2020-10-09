@@ -59,6 +59,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -550,10 +551,10 @@ public class OXFolderAccess {
                 int folderType = -1 == type ? FolderObject.PUBLIC : type;
                 if (folderType == FolderObject.TRASH) {
                     ConditionTreeMapManagement.dropFor(contextId);
-                    folderId = InfoStoreFolderAdminHelper.addDefaultFolder(wc, contextId, userId, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, folderType, userLocale);
+                    folderId = InfoStoreFolderAdminHelper.addDefaultFolder(wc, contextId, userId, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, folderType, userLocale, Optional.empty());
                 } else if (folderType == FolderObject.PUBLIC){
                     ConditionTreeMapManagement.dropFor(contextId);
-                    folderId = InfoStoreFolderAdminHelper.addDefaultFolder(wc, contextId, userId, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, folderType, userLocale);
+                    folderId = InfoStoreFolderAdminHelper.addDefaultFolder(wc, contextId, userId, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, folderType, userLocale, Optional.empty());
                 }
                 created = true;
             }
