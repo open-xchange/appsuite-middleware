@@ -539,7 +539,7 @@ public interface OXUserInterface extends Remote {
      * @param removeAccess Access rights to be removed
      * @param auth Credentials for authenticating against server. Must be the master Admin.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws StorageException When an error in the subsystems occured.
+     * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      */
@@ -550,80 +550,62 @@ public interface OXUserInterface extends Remote {
      *
      * @see User.getUsername().
      *
-     * @param ctx
-     *            Context object.
-     * @param users
-     *            User[] with users to get data for.
-     * @param auth
-     *            Credentials for authenticating against server.
+     * @param ctx Context object.
+     * @param users User[] with users to get data for.
+     * @param auth Credentials for authenticating against server.
+     *
      * @return User[] containing result objects.
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occured.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws NoSuchUserException
      * @throws DatabaseUpdateException
      */
-    public User[] getData(final Context ctx, final User[] users, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException;
+    User[] getData(final Context ctx, final User[] users, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException;
 
     /**
      * Retrieve user objects for a range of users by username or id.
      *
      * @see User.getUsername().
      *
-     * @param ctx
-     *            Context object.
-     * @param user
-     *            user object with user to get data for.
-     * @param auth
-     *            Credentials for authenticating against server.
+     * @param ctx Context object.
+     * @param user user object with user to get data for.
+     * @param auth Credentials for authenticating against server.
+     *
      * @return User containing result object.
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occured.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws NoSuchUserException
      * @throws DatabaseUpdateException
      */
-    public User getData(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException;
+    User getData(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException;
 
     /**
-     * Retrieve all user objects with given filestore for a given context.
-     * If filestore_id is null all user objects with a own filestore for a given context are retrieved instead.
+     * Retrieve all user objects with given file storage for a given context.
+     * <p>
+     * If <code>filestore_id</code> is <code>null</code> all user objects with a own file storage for a given context are retrieved instead.
      *
-     * @param context
-     *            Context object.
-     * @param auth
-     *            Credentials for authenticating against server.
+     * @param context Context object.
+     * @param auth Credentials for authenticating against server.
+     * @param filestore_id The identifier of the file storage
+     *
      * @return User[] with currently ONLY id set in each User.
      *
-     * @throws RemoteException
-     *             General RMI Exception
-     * @throws StorageException
-     *             When an error in the subsystems occured.
-     * @throws InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException
-     *             If the context does not exist in the system.
-     * @throws InvalidDataException
-     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      */
-    public User[] listUsersWithOwnFilestore(final Context context, final Credentials auth, final Integer filestore_id) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+    User[] listUsersWithOwnFilestore(final Context context, final Credentials auth, final Integer filestore_id) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Retrieve all users for a given context.
