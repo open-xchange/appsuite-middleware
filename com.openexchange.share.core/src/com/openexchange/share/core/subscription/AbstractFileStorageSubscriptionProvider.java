@@ -55,6 +55,8 @@ import static com.openexchange.share.subscription.ShareLinkState.INACCESSIBLE;
 import static com.openexchange.share.subscription.ShareLinkState.REMOVED;
 import static com.openexchange.share.subscription.ShareLinkState.SUBSCRIBED;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -129,7 +131,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         storageAccount.setServiceId(fileStorageService.getId());
         storageAccount.setFileStorageService(fileStorageService);
         storageAccount.setId(null);
-        storageAccount.setDisplayName(shareName);
+        storageAccount.setDisplayName(Strings.isNotEmpty(shareName) ? shareName : extractAccountName(shareLink));
 
         /*
          * Set share specific configuration
@@ -494,6 +496,16 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
     protected boolean isSingleFileShare(String shareLink) {
         ShareTargetPath path = ShareTool.getShareTarget(shareLink);
         return Strings.isNotEmpty(path.getItem());
+    }
+
+    private static String extractAccountName(String shareLink) {
+        String hostname = null;
+        try {
+            hostname = new URI(shareLink).getHost();
+        } catch (URISyntaxException e) {
+            LOGGER.warn("Error extracting host name from share link {}", shareLink);
+        }
+        return Strings.isNotEmpty(hostname) ? hostname : shareLink;
     }
 
 }
