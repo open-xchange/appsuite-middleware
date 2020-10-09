@@ -47,86 +47,71 @@
  *
  */
 
-package com.openexchange.oauth.provider.impl.jwt;
+package com.openexchange.oauth.provider.impl;
 
-import com.openexchange.authentication.NamePart;
-import com.openexchange.config.lean.Property;
+import com.openexchange.oauth.provider.impl.introspection.OAuthIntrospectionAuthorizationService;
+import com.openexchange.oauth.provider.impl.jwt.OAuthJwtAuthorizationService;
 
 /**
- * {@link OAuthJWTProperty}
+ * {@link OAuthProviderMode} - defines available modes for OAuth provider
  *
  * @author <a href="mailto:sebastian.lutz@open-xchange.com">Sebastian Lutz</a>
  * @since v7.10.5
  */
-public enum OAuthJWTProperty implements Property {
+public enum OAuthProviderMode {
 
     /**
-     * Specifies a JWKS endpoint used to fetch signature keys for validation.
+     * The OAuth provider also acts as a authorization server.
+     * This mode enables {@link DefaultAuthorizationService}.
      */
-    JWKS_ENDPOINT("jwks.endpoint", OAuthJWTProperty.EMPTY),
+    AUTH_SEVER("auth_server"),
 
     /**
-     * Path to locally populated keystore if JWKs are not fetched from remote.
+     * The OAuth provider expects JWT and is able to parse and validate it.
+     * This mode enables {@link OAuthJwtAuthorizationService}
      */
-    KEYSTORE_PATH("keystore.path", OAuthJWTProperty.EMPTY),
+    EXPECT_JWT("expect_jwt"),
 
     /**
-     * Password for the locally populated keystore.
+     * The OAuthProvider uses token introspection to verify a received token.
+     * This mode enables {@link OAuthIntrospectionAuthorizationService}
      */
-    KEYSTORE_PASSWORD("keystore.password", OAuthJWTProperty.EMPTY),
+    TOKEN_INTROSPECTION("token_introspection");
+
+    private final String mode;
 
     /**
-     * The keystore type.
+     * Initializes a new {@link OAuthProviderMode}.
      */
-    KEYSTORE_TYPE("keystore.type", "JKS"),
-
-    /**
-     * A comma sperated list of issuer names (JWT claim "iss") that tokens are accepted from.
-     * If this property is empty, tokens are accepted from all issuers.
-     */
-    ALLOWED_ISSUER("allowedIssuer", OAuthJWTProperty.EMPTY),
-
-    /**
-     * Name of the JWT claim that will be used to resolve a context.
-     */
-    CONTEXT_LOOKUP_CLAIM("contextLookupClaim", "sub"),
-
-    /**
-     * Gets the {@link NamePart} used for determining the context
-     * of a user for which a jwt has been obtained. The part
-     * is taken from the value of the according {@link LookupSource}.
-     */
-    CONTEXT_LOOKUP_NAME_PART("contextLookupNamePart", NamePart.DOMAIN.getConfigName()),
-
-    /**
-     * Name of the JWT claim that will be used to resolve a user.
-     */
-    USER_LOOKUP_CLAIM("userLookupClaim", "sub"),
-
-    /**
-     * Gets the {@link NamePart} used for determining the user for
-     * which a jwt has been obtained. The part is taken from
-     * the value of the according {@link LookupSource}.
-     */
-    USER_LOOKUP_NAME_PART("userLookupNamePart", NamePart.LOCAL_PART.getConfigName());
-
-    public static final String PREFIX = "com.openexchange.oauth.provider.jwt.";
-    private static final String EMPTY = "";
-    private final String fqn;
-    private final Object defaultValue;
-
-    private OAuthJWTProperty(String suffix, Object defaultValue) {
-        this.fqn = PREFIX + suffix;
-        this.defaultValue = defaultValue;
+    private OAuthProviderMode(String mode) {
+        this.mode = mode;
     }
 
-    @Override
-    public String getFQPropertyName() {
-        return fqn;
+    /**
+     * Returns the mode string associated with the {@link OAuthProviderMode}.
+     *
+     * @return the mode string
+     */
+    public String getProviderModeString() {
+        return mode;
     }
 
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
+    /**
+     * Return the corresponding {@link OAuthProviderMode} or {@link OAuthProviderMode#AUTH_SEVER} in case the given mode string is unknown.
+     * 
+     * @param mode String representation of an {@link OAuthProviderMode}.
+     * @return The corresponding {@link OAuthProviderMode}
+     */
+    public static OAuthProviderMode getProviderMode(String mode) {
+        switch (mode) {
+            case "auth_server":
+                return AUTH_SEVER;
+            case "expect_jwt":
+                return EXPECT_JWT;
+            case "token_introspection":
+                return TOKEN_INTROSPECTION;
+            default:
+                return AUTH_SEVER;
+        }
     }
 }

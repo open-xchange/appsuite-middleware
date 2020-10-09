@@ -1,0 +1,68 @@
+feature_name: OAuth provider
+feature_description: |
+  Configuration for usage of OAuth provider. The feature is disabled by default and must be activated manually.
+properties:
+  - key: com.openexchange.oauth.provider.enabled
+    description: |
+      Set to 'true' to basically enable the OAuth 2.0 provider. This setting can then be overridden
+      via config cascade to disallow granting access for certain users. If the provider is enabled,
+      an encryption key (see below) must be set!
+    defaultValue: false
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: ["com.openexchange.oauth.provider.authcode.type", "com.openexchange.oauth.provider.encryptionKey"]
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth", "Provider"]
+  - key: com.openexchange.oauth.provider.mode
+    description: |
+      Besides the functionality to act as an OAuth 2.0 provider, there are three different modes to choose from. 
+      <ol>
+      <li><pre>auth_server</pre>
+      Defines whether the enabled OAuth 2.0 provider does not only act as resource server but also
+      as authorization server. The following functionality will be provided:
+      <ol>
+      <li>An authorization endpoint, token endpoint and revocation endpoint are made available via HTTP</li>
+      <li>API calls for revoking access to external clients are made available, access can be revoked via App Suite</li>
+      <li> UI Provisioning interfaces to manage trusted clients are enabled</li>
+      </ol>
+      </li>
+      <li><pre>expect_jwt</pre>
+      Defines whether the enabled OAuth 2.0 provider is accesible with OAuth 2.0 Bearer Access Tokens that are JWTs, 
+      which were issued by an external Identity & Access management System.</li>
+      <li><pre>token_introspection</pre>
+      Defines whether the enabled OAuth 2.0 provider is able to grant access based on opaque bearer tokens through token introspection.</li>
+      </ol>
+    defaultValue: auth_server
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth", "Provider"]
+  - key: com.openexchange.oauth.provider.authcode.type
+    description: | 
+      Specify how authorization codes shall be stored, to enable OAuth in multi-node environments. Options are Hazelcast ('hz') or database ('db').
+    defaultValue: hz
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: com.openexchange.oauth.provider.enabled
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth", "Provider"]
+  - key: com.openexchange.oauth.provider.encryptionKey
+    description: | 
+      The key to encrypt client secrets that are stored within the database. 
+      A value must be set to enable the registration of OAuth 2.0 client applications. 
+      It must be the same on every node. After the first client has been registered, the key must not be changed anymore.
+    defaultValue: 
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: com.openexchange.oauth.provider.enabled
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth", "Provider"]

@@ -75,6 +75,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse;
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse.TokenStatus;
+import com.openexchange.oauth.provider.impl.jwt.OAuthJWTScopeService;
 import com.openexchange.oauth.provider.impl.osgi.Services;
 import com.openexchange.user.UserService;
 
@@ -90,8 +91,8 @@ import static com.openexchange.java.Autoboxing.I;
 public class OAuthIntrospectionAuthorizationServiceTest {
     
     class OAuthIntrospectionAuthorizationServiceMock extends OAuthIntrospectionAuthorizationService {
-        public OAuthIntrospectionAuthorizationServiceMock(LeanConfigurationService leanConfigurationService) {
-            super(leanConfigurationService);
+        public OAuthIntrospectionAuthorizationServiceMock(LeanConfigurationService leanConfigurationService, OAuthJWTScopeService scopeService) {
+            super(leanConfigurationService, scopeService);
         }
         
         @Override
@@ -112,6 +113,8 @@ public class OAuthIntrospectionAuthorizationServiceTest {
     }
     
     private OAuthIntrospectionAuthorizationServiceMock service;
+    
+    private OAuthJWTScopeService scopeService;
         
     private String accessToken = "c1MGYwNDJiYmYxNDFkZjVkOGI0MSAgLQ";
     
@@ -141,7 +144,9 @@ public class OAuthIntrospectionAuthorizationServiceTest {
 
         Mockito.when(contextService.getContext(ArgumentMatchers.anyInt())).thenReturn(new ContextImpl(1));
         Mockito.when(userService.getUserId(ArgumentMatchers.anyString(), (Context) ArgumentMatchers.any())).thenReturn(I(3));
-        this.service = new OAuthIntrospectionAuthorizationServiceMock(leanConfigurationService); 
+        
+        this.scopeService = new OAuthJWTScopeService(leanConfigurationService);
+        this.service = new OAuthIntrospectionAuthorizationServiceMock(leanConfigurationService, scopeService); 
     }
     
     

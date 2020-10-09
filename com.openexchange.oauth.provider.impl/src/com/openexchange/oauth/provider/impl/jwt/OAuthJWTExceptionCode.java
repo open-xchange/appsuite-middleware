@@ -55,14 +55,15 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link OAuthJWTExceptionCode}
+ * {@link OAuthJWTExceptionCode} - defines exception codes for {@link OAuthJWTExceptionCode}
  *
  * @author <a href="mailto:sebastian.lutz@open-xchange.com">Sebastian Lutz</a>
+ * @since v7.10.5
  */
 public enum OAuthJWTExceptionCode implements OXExceptionCode {
 
     /**
-     * The JWT rejected because the issuer is invalid: '%1$s'
+     * The JWT is rejected because the issuer is invalid: '%1$s'
      */
     IVALID_ISSUER("JWT validation failed because of invalid issuer: '%1$s'", Category.CATEGORY_ERROR, 1),
 

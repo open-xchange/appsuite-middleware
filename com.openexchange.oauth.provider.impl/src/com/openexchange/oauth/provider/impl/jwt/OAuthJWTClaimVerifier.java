@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,74 +49,66 @@
 
 package com.openexchange.oauth.provider.impl.jwt;
 
-import java.util.ArrayList;
+import java.text.ParseException;
 import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import com.openexchange.exception.OXException;
+import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.proc.BadJWTException;
+import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 
 /**
- * {@link OAuthJWTScopeHelper}
+ * {@link OAuthJWTClaimVerifier}
  *
  * @author <a href="mailto:sebastian.lutz@open-xchange.com">Sebastian Lutz</a>
+ * @since v7.10.5
  */
-public class OAuthJWTScopeHelper {
-    
-    
+public class OAuthJWTClaimVerifier<T extends SecurityContext> extends DefaultJWTClaimsVerifier<T> {
+
+    public static final String SCOPE_CLAIM_NAME = "scope";
+    public static final String AUTHORIZED_PARTY_CLAIM_NAME = "azp";
+
+    private List<String> issuer;
+
     /**
-     * Scope-mapping from external Authorization Server scopes to internal MW scopes
-     *
-     * @param  scopes Authorization Server scopes
-     * @return        resolved Scopes
-     * @throws        OXException
-     */
-    public static List<String> resolveScopes(List<String> scopes) throws OXException {        
-        Map<String, String> oauthJWTScopeProperties = OAuthJWTScopeConfig.getInternalScopes();
-        if(oauthJWTScopeProperties == null) {
-            return scopes;
-        }
-        
-        List<String> resolvedScopes = new ArrayList<String>();
-        for (String scope : scopes) {
-            String fqn = OAuthJWTScopeConfig.getScopePrefix() + scope;
-            if(oauthJWTScopeProperties.containsKey(fqn)) {
-                String scopeProperty = oauthJWTScopeProperties.get(fqn);
-                if(!scopeProperty.isEmpty()) {
-                    resolvedScopes.addAll(parse(scopeProperty));
-                }
-            }else {
-                resolvedScopes.add(scope);
-            }
-        }
-        
-        return resolvedScopes;
-    }
-    
-    public static List<String> resolveScopes(String scopes) throws OXException {
-        return resolveScopes(parse(scopes));
-    }
-    
-    /**
-     * Splits given scopes string by space or comma
+     * Initializes a new {@link OAuthJWTClaimVerifier}.
      * 
-     * @param scopes the string to split
-     * @return       the split string
+     * @param issuer Allowed JWT issuer
      */
-    private static List<String> parse(final String scopes) {
-        if (scopes == null)
-            return null;
-
-        if (scopes.trim().isEmpty())
-            return null;
-
-        List<String> scope = new ArrayList<>();
-
-        // OAuth specifies space as delimiter, also support comma (old draft)
-        StringTokenizer st = new StringTokenizer(scopes, " ,");
-
-        while (st.hasMoreTokens())
-            scope.add(st.nextToken());
-
-        return scope;
+    public OAuthJWTClaimVerifier(List<String> issuer) {
+        super();
+        this.issuer = issuer;
     }
+
+    
+    
+    @Override
+    public void verify(JWTClaimsSet claimsSet, T context) throws BadJWTException {
+        super.verify(claimsSet, context);
+        verify(claimsSet);
+    }
+
+
+    @Override
+    public void verify(JWTClaimsSet claimsSet) throws BadJWTException {
+        try {
+            //Verify that the JWT issuer matches the configured issuer and therefore is allowed.
+            if (!issuer.get(0).isEmpty() && !issuer.contains(claimsSet.getIssuer())) {
+                throw new BadJWTException("JWT validation failed because of invalid issuer: " + claimsSet.getIssuer());
+            }
+
+            //Verify that the clientname claim is not empty.
+            if (claimsSet.getStringClaim(AUTHORIZED_PARTY_CLAIM_NAME) == null) {
+                throw new BadJWTException("Clientname claim is empty");
+            }
+
+            //Verify that the scope claim is not empty.
+            if (claimsSet.getStringClaim(OAuthJWTClaimVerifier.SCOPE_CLAIM_NAME) == null || claimsSet.getStringClaim(OAuthJWTClaimVerifier.SCOPE_CLAIM_NAME).isEmpty()) {
+                throw new BadJWTException("Scope is null or empty");
+            }
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

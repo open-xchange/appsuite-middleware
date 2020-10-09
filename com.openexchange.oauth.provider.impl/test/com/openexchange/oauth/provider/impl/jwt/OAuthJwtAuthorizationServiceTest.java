@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.impl.jwt;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -66,7 +67,6 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
@@ -76,6 +76,8 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.openexchange.authentication.NamePart;
@@ -84,30 +86,44 @@ import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.junit.Assert;
+import com.openexchange.oauth.provider.authorizationserver.spi.AuthorizationException;
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse;
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse.TokenStatus;
 import com.openexchange.oauth.provider.impl.osgi.Services;
 import com.openexchange.user.UserService;
 
-import static com.openexchange.java.Autoboxing.I;
 /**
  * {@link OAuthJwtAuthorizationServiceTest}
  *
  * @author <a href="mailto:sebastian.lutz@open-xchange.com">Sebastian Lutz</a>
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Services.class, LeanConfigurationService.class, OAuthJwtAuthorizationService.class})
+@PrepareForTest({ Services.class, LeanConfigurationService.class, OAuthJwtAuthorizationService.class })
 public class OAuthJwtAuthorizationServiceTest {
 
-    private OAuthJwtAuthorizationService service;
+    class OAuthJwtAuthorizationServiceMock extends OAuthJwtAuthorizationService {
 
-    private String jwt;
+        public OAuthJwtAuthorizationServiceMock(LeanConfigurationService leanConfService, OAuthJWTScopeService scopeService) {
+            super(leanConfService, scopeService);
+        }
+
+        @Override
+        JWKSource<SecurityContext> getKeySource() {
+            return new ImmutableJWKSet<>(new JWKSet(jwk));
+        }
+    }
+
+    private OAuthJwtAuthorizationServiceMock service;
+
+    private OAuthJWTScopeService scopeService;
 
     private JWK jwk;
 
+    private KeyPair keyPair;
+
     @Mock
     private LeanConfigurationService leanConfigurationService;
-    
+
     @Mock
     private ContextService contextService;
 
@@ -121,71 +137,125 @@ public class OAuthJwtAuthorizationServiceTest {
         PowerMockito.when(Services.requireService(LeanConfigurationService.class)).thenReturn(leanConfigurationService);
         PowerMockito.when(Services.requireService(ContextService.class)).thenReturn(contextService);
         PowerMockito.when(Services.requireService(UserService.class)).thenReturn(userService);
-        
-        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.ALLOWED_ISSUER)).thenReturn("");
+
+        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.JWKS_ENDPOINT)).thenReturn("https://example.com");
+        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.KEYSTORE_PATH)).thenReturn("");
+        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.KEYSTORE_PASSWORD)).thenReturn("");
+        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.ALLOWED_ISSUER)).thenReturn("https://example.com");
 
         Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.CONTEXT_LOOKUP_CLAIM)).thenReturn("sub");
         Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.CONTEXT_LOOKUP_NAME_PART)).thenReturn(NamePart.DOMAIN.getConfigName());
 
         Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.USER_LOOKUP_CLAIM)).thenReturn("sub");
         Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.USER_LOOKUP_NAME_PART)).thenReturn(NamePart.LOCAL_PART.getConfigName());
-        
+
         Mockito.when(contextService.getContext(org.mockito.ArgumentMatchers.anyInt())).thenReturn(new ContextImpl(1));
         Mockito.when(userService.getUserId(org.mockito.ArgumentMatchers.anyString(), (Context) ArgumentMatchers.any())).thenReturn(I(3));
 
-        this.service = new OAuthJwtAuthorizationService(leanConfigurationService);     
-
-        generateJWT();
+        this.scopeService = new OAuthJWTScopeService(leanConfigurationService);
+        this.keyPair = generateKeyPair();
+        this.jwk = generateJWK(keyPair);
+        this.service = new OAuthJwtAuthorizationServiceMock(leanConfigurationService, scopeService);
     }
 
     @Test
-    public void testJwtValidation() throws Exception {
-        OAuthJwtAuthorizationService spy = PowerMockito.spy(service);
-
-        PowerMockito.doReturn( new ImmutableJWKSet<>(new JWKSet(jwk))).when(spy, "getLocalKeystore");
-        ValidationResponse value = spy.validateAccessToken(jwt);
-
-        Assert.assertEquals(value.getTokenStatus(), TokenStatus.VALID);
-    }
-    
-
-    private void generateJWT() throws JOSEException, NoSuchAlgorithmException {
-        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-        gen.initialize(2048);
-        KeyPair keyPair = gen.generateKeyPair();
-
-        // Convert to JWK format
-        jwk = new RSAKey.Builder((RSAPublicKey)keyPair.getPublic())
-            .privateKey((RSAPrivateKey)keyPair.getPrivate())
-            .keyUse(KeyUse.SIGNATURE)
-            .keyID(UUID.randomUUID().toString())
-            .build();
+    public void testJwtValidationForValidToken() throws Exception {
+        OAuthJwtAuthorizationServiceMock spy = PowerMockito.spy(service);
+        //PowerMockito.doReturn(new ImmutableJWKSet<>(new JWKSet(jwk))).when(spy, "getLocalKeystore");
 
         // Create RSA-signer with the private key
-        JWSSigner signer = new RSASSASigner((RSAPrivateKey)keyPair.getPrivate());
+        JWSSigner signer = new RSASSASigner((RSAPrivateKey) keyPair.getPrivate());
 
         // Prepare JWT with claims set
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-            .subject("anton@context1.ox.test")
-            .issuer("https://example.com")
-            .claim("azp", "testClient")
-            .claim("scope", "testScope")
-            .expirationTime(new Date(new Date().getTime() + 60 * 1000))
-            .build();
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject("anton@context1.ox.test").issuer("https://example.com").claim("azp", "testClient").claim("scope", "testScope").expirationTime(new Date(new Date().getTime() + 60 * 1000)).build();
 
-        SignedJWT signedJWT = new SignedJWT(
-            new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(jwk.getKeyID()).build(),
-            claimsSet);
+        SignedJWT signedJWT = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(jwk.getKeyID()).build(), claimsSet);
 
         // Compute the RSA signature
         signedJWT.sign(signer);
 
-        // Serialize to compact form, produces something like
-        // eyJhbGciOiJSUzI1NiJ9.SW4gUlNBIHdlIHRydXN0IQ.IRMQENi4nJyp4er2L
-        // mZq3ivwoAjqa1uUkSBKFIX7ATndFF5ivnt-m8uApHO4kfIFOrW7w2Ezmlg3Qd
-        // maXlS9DhN0nUk_hGI3amEjkKd0BWYCB8vfUbUv0XGjQip78AI4z1PrFRNidm7
-        // -jPDm5Iq0SZnjKjCNS5Q15fokXZc8u0A
-        jwt = signedJWT.serialize();
+        String jwt = signedJWT.serialize();
+
+        ValidationResponse value = spy.validateAccessToken(jwt);
+
+        Assert.assertEquals(value.getTokenStatus(), TokenStatus.VALID);
     }
 
+    @Test(expected = AuthorizationException.class)
+    public void testJWTValidationForExpiredToken() throws Exception {
+        OAuthJwtAuthorizationServiceMock spy = PowerMockito.spy(service);
+        PowerMockito.doReturn(new ImmutableJWKSet<>(new JWKSet(jwk))).when(spy, "getLocalKeystore");
+
+        // Create RSA-signer with the private key
+        JWSSigner signer = new RSASSASigner((RSAPrivateKey) keyPair.getPrivate());
+
+        // Prepare JWT with claims set
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject("anton@context1.ox.test").issuer("https://example.com").claim("azp", "testClient").claim("scope", "testScope").expirationTime(new Date(new Date().getTime() - 60 * 1000)).build();
+
+        SignedJWT signedJWT = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(jwk.getKeyID()).build(), claimsSet);
+
+        // Compute the RSA signature
+        signedJWT.sign(signer);
+
+        String jwt = signedJWT.serialize();
+
+        spy.validateAccessToken(jwt);
+    }
+
+    @Test(expected = AuthorizationException.class)
+    public void testJWTValidationForUnexpectedTokenIssuer() throws Exception {
+        OAuthJwtAuthorizationServiceMock spy = PowerMockito.spy(service);
+        //PowerMockito.doReturn(new ImmutableJWKSet<>(new JWKSet(jwk))).when(spy, "getLocalKeystore");
+        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.ALLOWED_ISSUER)).thenReturn("https://example.com");
+
+        // Create RSA-signer with the private key
+        JWSSigner signer = new RSASSASigner((RSAPrivateKey) keyPair.getPrivate());
+
+        // Prepare JWT with claims set
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject("anton@context1.ox.test").issuer("https://example.de").claim("azp", "testClient").claim("scope", "testScope").expirationTime(new Date(new Date().getTime() + 60 * 1000)).build();
+
+        SignedJWT signedJWT = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(jwk.getKeyID()).build(), claimsSet);
+
+        // Compute the RSA signature
+        signedJWT.sign(signer);
+
+        String jwt = signedJWT.serialize();
+
+        spy.validateAccessToken(jwt);
+    }
+
+    @Test(expected = AuthorizationException.class)
+    public void testJWTValidationForMissingScopes() throws Exception {
+        OAuthJwtAuthorizationServiceMock spy = PowerMockito.spy(service);
+        //PowerMockito.doReturn(new ImmutableJWKSet<>(new JWKSet(jwk))).when(spy, "getLocalKeystore");
+        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.ALLOWED_ISSUER)).thenReturn("https://example.com");
+
+        // Create RSA-signer with the private key
+        JWSSigner signer = new RSASSASigner((RSAPrivateKey) keyPair.getPrivate());
+
+        // Prepare JWT with claims set
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject("anton@context1.ox.test").issuer("https://example.com").claim("azp", "testClient").claim("scope", "").expirationTime(new Date(new Date().getTime() + 60 * 1000)).build();
+
+        SignedJWT signedJWT = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(jwk.getKeyID()).build(), claimsSet);
+
+        // Compute the RSA signature
+        signedJWT.sign(signer);
+
+        String jwt = signedJWT.serialize();
+
+        spy.validateAccessToken(jwt);
+    }
+
+    private KeyPair generateKeyPair() throws NoSuchAlgorithmException {
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+        gen.initialize(2048);
+        KeyPair keyPair = gen.generateKeyPair();
+
+        return keyPair;
+    }
+
+    private JWK generateJWK(KeyPair keyPair) {
+        JWK jwk = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic()).privateKey((RSAPrivateKey) keyPair.getPrivate()).keyUse(KeyUse.SIGNATURE).keyID(UUID.randomUUID().toString()).build();
+        return jwk;
+    }
 }

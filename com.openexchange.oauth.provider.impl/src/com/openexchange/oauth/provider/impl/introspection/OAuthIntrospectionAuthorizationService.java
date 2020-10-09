@@ -53,8 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +81,6 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.NamePart;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -95,9 +92,7 @@ import com.openexchange.oauth.provider.authorizationserver.spi.DefaultValidation
 import com.openexchange.oauth.provider.authorizationserver.spi.OAuthAuthorizationService;
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse;
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse.TokenStatus;
-import com.openexchange.oauth.provider.impl.jwt.OAuthJWTProperty;
-import com.openexchange.oauth.provider.impl.jwt.OAuthJWTScopeConfig;
-import com.openexchange.oauth.provider.impl.jwt.OAuthJWTScopeHelper;
+import com.openexchange.oauth.provider.impl.jwt.OAuthJWTScopeService;
 import com.openexchange.oauth.provider.impl.osgi.Services;
 import com.openexchange.user.UserService;
 
@@ -111,11 +106,13 @@ public class OAuthIntrospectionAuthorizationService implements OAuthAuthorizatio
     private static final Logger LOG = LoggerFactory.getLogger(OAuthIntrospectionAuthorizationService.class);    
 
     private LeanConfigurationService leanConfService;
+    private OAuthJWTScopeService scopeService;
     private final LoadingCache<String, TokenIntrospectionSuccessResponse> cache;
 
-    public OAuthIntrospectionAuthorizationService(LeanConfigurationService leanConfService) {
+    public OAuthIntrospectionAuthorizationService(LeanConfigurationService leanConfService, OAuthJWTScopeService scopeService) {
         super();
         this.leanConfService = leanConfService;
+        this.scopeService = scopeService;
         this.cache = Caffeine.newBuilder().expireAfter(new Expiry<String, TokenIntrospectionSuccessResponse>() {
 
             public long expireAfterCreate(String key, TokenIntrospectionSuccessResponse resp, long currentTime) {
@@ -167,7 +164,7 @@ public class OAuthIntrospectionAuthorizationService implements OAuthAuthorizatio
 
             List<String> scopes = (List<String>) claims.get(OAuthIntrospectionConstants.SCOPE);
 
-            List<String> resolvedScopes = OAuthJWTScopeHelper.resolveScopes(scopes);
+            List<String> resolvedScopes = scopeService.getInternalScopes(scopes);
             validationResponse.setScope(resolvedScopes);
 
             validationResponse.setTokenStatus(TokenStatus.VALID);

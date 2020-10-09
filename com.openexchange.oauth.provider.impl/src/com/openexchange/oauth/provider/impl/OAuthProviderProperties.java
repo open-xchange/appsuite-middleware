@@ -63,10 +63,6 @@ public class OAuthProviderProperties {
     public static final String AUTHCODE_TYPE = "com.openexchange.oauth.provider.authcode.type";
 
     public static final String ENCRYPTION_KEY = "com.openexchange.oauth.provider.encryptionKey";
-
-    public static final String IS_AUTHORIZATION_SERVER = "com.openexchange.oauth.provider.isAuthorizationServer";
     
-    public static final String EXPECT_JWT = "com.openexchange.oauth.provider.expectJWT";
-    
-    public static final String TOKEN_INTROSPECTION = "com.openexchange.oauth.provider.introspection.enabled";
+    public static final String MODE = "com.openexchange.oauth.provider.mode";
 }
