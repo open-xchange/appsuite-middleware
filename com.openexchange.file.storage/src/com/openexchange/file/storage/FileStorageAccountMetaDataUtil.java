@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage;
 
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import org.json.JSONArray;
@@ -73,6 +74,7 @@ public class FileStorageAccountMetaDataUtil {
     //-----------------------------------------------------------------------
     // "lastKnownFolders" - The last known root folders for an account
     public static final String JSON_ARRAY_LAST_KNOWN_FOLDERS = "lastKnownFolders";
+    public static final String JSON_FIELD_FOLDER_PARENT_ID = "parentId";
     public static final String JSON_FIELD_FOLDER_ID = "folderId";
     public static final String JSON_FIELD_FOLDER_NAME = "folderName";
 
@@ -112,6 +114,17 @@ public class FileStorageAccountMetaDataUtil {
      * Sets the last known folders for the given account
      *
      * @param account The account to set the last known folders for
+     * @param lastKnownFolders The folders to set as as list of JSONObjects
+     * @return <code>true</code> if the account's metadata has been modified, <code>false</code>, otherwise
+     */
+    public static boolean setLastKnownFolders(FileStorageAccount account, List<JSONObject> lastKnownFolders) {
+        return setLastKnownFolders(account, new JSONArray(lastKnownFolders));
+    }
+
+    /**
+     * Sets the last known folders for the given account
+     *
+     * @param account The account to set the last known folders for
      * @param lastKnownFolders The folders to set as JSON array
      * @return <code>true</code> if the account's metadata has been modified, <code>false</code>, otherwise
      */
@@ -119,6 +132,7 @@ public class FileStorageAccountMetaDataUtil {
         JSONObject metadata = account.getMetadata();
         if (false == Objects.equals(lastKnownFolders, metadata.opt(JSON_ARRAY_LAST_KNOWN_FOLDERS))) {
             metadata.putSafe(JSON_ARRAY_LAST_KNOWN_FOLDERS, lastKnownFolders);
+            return true;
         }
         return false;
     }

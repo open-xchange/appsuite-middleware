@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.lang.mutable.MutableInt;
 import org.json.JSONArray;
@@ -175,13 +176,13 @@ public class FederatedSharingFolders {
                             ret.addAll(toSortableIds(sharedFolders, service.getId(), account.getId(), ordinal));
 
                             //persist the folders to the account so they can be returned as "dummies" the next time the account has errors and is not able to get the real folders
-                            storeSubFolders(account, sharedFolders, session);
+                            storeSubFolders(account, sharedFolders, parentFolder, session);
                         } catch (Exception e) {
                             try {
                                 //Error: We do add all last known sub folders in case of an error.
                                 //Those folders get decorated with an error when loaded later and thus can be displayed by the client
                                 LOG.debug("Unable to load federate sharing folders for account " + account.getId() + ": " + e.getMessage());
-                                FileStorageFolderStub[] storedSubFolders = getLastKnownFolders(account, session);
+                                FileStorageFolderStub[] storedSubFolders = getLastKnownFolders(account, String.valueOf(parentFolder), session);
                                 if (storedSubFolders.length == 0) {
                                     LOG.debug("There are no last known federated sharing folders for account " + account.getId());
                                 }
@@ -214,6 +215,20 @@ public class FederatedSharingFolders {
     }
 
     /**
+     * Gets the last known folders for a given parent and account
+     *
+     * @param account The account
+     * @param parentId The parent ID to get the folders for
+     * @param session
+     * @return A list of last known folders with the given parent ID for the given account
+     * @throws OXException
+     */
+    public static FileStorageFolderStub[] getLastKnownFolders(FileStorageAccount account, String parentId, Session session) throws OXException {
+        List<FileStorageFolderStub> allKnownFolders = Arrays.asList(getLastKnownFolders(account, session));
+        return allKnownFolders.stream().filter(folder -> Objects.equals(folder.getParentId(), parentId)).toArray(FileStorageFolderStub[]::new);
+    }
+
+    /**
      * Gets the last known folders for the given account
      *
      * @param account The account
@@ -231,6 +246,7 @@ public class FederatedSharingFolders {
                     FileStorageFolderStub folder = new FileStorageFolderStub();
                     folder.setId(jsonFolder.getString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_ID));
                     folder.setName(jsonFolder.getString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_NAME));
+                    folder.setParentId(jsonFolder.getString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_PARENT_ID));
 
                     folder.setExists(true);
                     folder.setSubscribed(true);
@@ -255,23 +271,36 @@ public class FederatedSharingFolders {
     }
 
     /**
-     * Internal method to store the last known sub folders for a {@link FileStorageAccount}
+     * Internal method to store the last known sub folders for a {@link FileStorageAccount} and the given parent
      *
      * @param account The account to store the folders for
      * @param folderd The list of sub folders to store
+     * @param parentId The parentID to store the folders for
      * @param session The session
      * @throws OXException
      */
-    private static void storeSubFolders(FileStorageAccount account, FileStorageFolder[] folders, Session session) throws OXException {
+    private static void storeSubFolders(FileStorageAccount account, FileStorageFolder[] folders, int parentId, Session session) throws OXException {
         if (folders != null && folders.length > 0) {
 
             try {
-                JSONArray lastKnownFolders = new JSONArray(folders.length);
+                List<JSONObject> lastKnownFolders = new ArrayList<JSONObject>();
                 for (FileStorageFolder folder : folders) {
                     JSONObject jsonFolder = new JSONObject();
                     jsonFolder.put(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_ID, folder.getId());
                     jsonFolder.put(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_NAME, folder.getName());
-                    lastKnownFolders.put(jsonFolder);
+                    jsonFolder.put(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_PARENT_ID, parentId);
+                    lastKnownFolders.add(jsonFolder);
+                }
+
+                //preserve folders with a different parent
+                JSONArray currentKnownFolders = FileStorageAccountMetaDataUtil.getLastKnownFolders(account);
+                if (currentKnownFolders != null) {
+                    for (int i = 0; i < currentKnownFolders.length(); i++) {
+                        JSONObject knownFolder = currentKnownFolders.getJSONObject(i);
+                        if (knownFolder.getInt(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_PARENT_ID) != parentId) {
+                            lastKnownFolders.add(knownFolder);
+                        }
+                    }
                 }
 
                 //Save if needed
