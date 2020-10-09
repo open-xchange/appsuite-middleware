@@ -86,7 +86,7 @@ public interface ShareSubscriptionProvider extends Ranked {
      *
      * @param session The user session to bind the share to
      * @param shareLink The share link to mount
-     * @param shareName The name to set for the share to mount
+     * @param shareName The name to set for the share to mount, or <code>null</code> to use a default name
      * @param password The optional password for the share
      * @return The information about the mount
      * @throws OXException In case of error
@@ -98,7 +98,7 @@ public interface ShareSubscriptionProvider extends Ranked {
      *
      * @param session The user session
      * @param shareLink The share link to identify the mounted object
-     * @param shareName The optional name to set for the share
+     * @param shareName The optional name to set for the share, or <code>null</code> to keep the existing one
      * @param password The password to set for the object
      * @return The information about the mount
      * @throws OXException In case of error

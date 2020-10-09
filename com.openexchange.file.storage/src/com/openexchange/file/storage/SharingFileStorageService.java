@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public interface SharingFileStorageService extends FileStorageService {
+public interface SharingFileStorageService extends FileStorageService, AccountAware {
 
     /**
      * Gets a value indicating if the user represented by the session has the capability to
