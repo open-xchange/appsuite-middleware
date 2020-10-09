@@ -84,7 +84,6 @@ import com.openexchange.file.storage.FileStorageZippableFolderFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.infostore.internal.FieldMapping;
-import com.openexchange.file.storage.infostore.internal.InfostoreDeltaWrapper;
 import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;
@@ -332,13 +331,13 @@ public abstract class AbstractInfostoreFileAccess extends InfostoreAccess implem
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, boolean ignoreDeleted) throws OXException {
         Delta<DocumentMetadata> delta = getInfostore(folderId).getDelta(FOLDERID(folderId), updateSince, FieldMapping.getMatching(fields), ignoreDeleted, session);
-        return new InfostoreDeltaWrapper(delta);
+        return getConverter().getFileDelta(delta);
     }
 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
         Delta<DocumentMetadata> delta = getInfostore(folderId).getDelta(FOLDERID(folderId), updateSince, FieldMapping.getMatching(fields), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), ignoreDeleted, session);
-        return new InfostoreDeltaWrapper(delta);
+        return getConverter().getFileDelta(delta);
     }
 
     @Override

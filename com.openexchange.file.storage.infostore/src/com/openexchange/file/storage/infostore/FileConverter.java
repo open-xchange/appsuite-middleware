@@ -49,16 +49,16 @@
 
 package com.openexchange.file.storage.infostore;
 
+import java.util.function.Function;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.infostore.internal.InfostoreDeltaWrapper;
 import com.openexchange.file.storage.infostore.internal.InfostoreDocument;
-import com.openexchange.file.storage.infostore.internal.InfostoreTimedResult;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.tools.iterator.ConvertingSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -67,7 +67,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public class FileConverter {
+public class FileConverter implements Function<DocumentMetadata, File> {
 
     /**
      * Initializes a new {@link FileConverter}.
@@ -76,24 +76,66 @@ public class FileConverter {
         super();
     }
 
+    @Override
+    public File apply(DocumentMetadata metadata) {
+        return getFile(metadata);
+    }
+
     public File getFile(DocumentMetadata metadata) {
-        return new InfostoreFile(metadata);
+        return null == metadata ? null : new InfostoreFile(metadata);
     }
 
     public Document getFileDocument(DocumentAndMetadata metadataDocument) {
-        return new InfostoreDocument(metadataDocument);
+        return new InfostoreDocument(metadataDocument, this);
     }
 
     public TimedResult<File> getFileTimedResult(TimedResult<DocumentMetadata> metadataTimedResult) {
-        return new InfostoreTimedResult(metadataTimedResult);
+        return new TimedResult<File>() {
+
+            @Override
+            public SearchIterator<File> results() throws OXException {
+                return getFileSearchIterator(metadataTimedResult.results());
+            }
+
+            @Override
+            public long sequenceNumber() throws OXException {
+                return metadataTimedResult.sequenceNumber();
+            }
+        };
     }
 
     public Delta<File> getFileDelta(Delta<DocumentMetadata> metadataDelta) {
-        return new InfostoreDeltaWrapper(metadataDelta);
+        return new Delta<File>() {
+
+            @Override
+            public SearchIterator<File> results() throws OXException {
+                return getFileSearchIterator(metadataDelta.results());
+            }
+
+            @Override
+            public long sequenceNumber() throws OXException {
+                return metadataDelta.sequenceNumber();
+            }
+
+            @Override
+            public SearchIterator<File> getNew() {
+                return getFileSearchIterator(metadataDelta.getNew());
+            }
+
+            @Override
+            public SearchIterator<File> getModified() {
+                return getFileSearchIterator(metadataDelta.getModified());
+            }
+
+            @Override
+            public SearchIterator<File> getDeleted() {
+                return getFileSearchIterator(metadataDelta.getDeleted());
+            }
+        };
     }
 
     public SearchIterator<File> getFileSearchIterator(SearchIterator<DocumentMetadata> metadataSearchIterator) {
-        return new InfostoreSearchIterator(metadataSearchIterator);
+        return null == metadataSearchIterator ? null : new ConvertingSearchIterator<DocumentMetadata, File>(metadataSearchIterator, this);
     }
 
     public DocumentMetadata getMetadata(File file) throws OXException {
