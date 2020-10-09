@@ -210,6 +210,8 @@ public abstract class AbstractApiClient implements ApiClient {
                 if (matches(SessionExceptionCodes.SESSION_EXPIRED, oxException)) {
                     clean();
                     isClosed.set(true);
+                    //do not throw the original session_expired exception to prevent confusion with the local session
+                    throw ApiClientExceptions.SESSION_EXPIRED.create();
                 }
                 throw oxException;
             }

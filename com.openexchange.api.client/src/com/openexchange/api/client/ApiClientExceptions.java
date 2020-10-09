@@ -101,6 +101,10 @@ public enum ApiClientExceptions implements DisplayableOXExceptionCode {
 
     /** The remote server responded with a server error code of %1$d. */
     REMOTE_SERVER_ERROR("A parameter for the request is missing.", Category.CATEGORY_SERVICE_DOWN, 500),
+
+    /** The remote session is expired **/
+    SESSION_EXPIRED("The remote session expired", Category.CATEGORY_TRY_AGAIN, 600, OXExceptionStrings.MESSAGE_RETRY);
+
     ;
 
     /**
@@ -121,7 +125,7 @@ public enum ApiClientExceptions implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link ApiClientExceptions}.
-     * 
+     *
      * @param message The message
      * @param category The category
      * @param detailNumber The exception number
@@ -132,7 +136,7 @@ public enum ApiClientExceptions implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link ApiClientExceptions}.
-     * 
+     *
      * @param message The message
      * @param category The category
      * @param detailNumber The exception number
@@ -177,7 +181,7 @@ public enum ApiClientExceptions implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
