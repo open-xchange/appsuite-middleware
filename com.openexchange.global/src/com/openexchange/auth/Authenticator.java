@@ -100,7 +100,7 @@ public interface Authenticator {
      *
      * @param authdata The credentials for context administrator to check
      * @param contextId The context identifier
-     * @param plugInAware If set to <code>true</code> a PlugInAwareAuthenticator is used, if set to <code>false</code> a NonPlugInAwareAuthenticator
+     * @param plugInAware If set to <code>true</code> possibly registered {@link BasicAuthenticatorPluginInterface} instances are respected; otherwise such instances are <b>ignored</b>
      * @throws OXException If credentials are invalid
      */
     void doAuthentication(Credentials authdata, int contextId, boolean plugInAware) throws OXException;
