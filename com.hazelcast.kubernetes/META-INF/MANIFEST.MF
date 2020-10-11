@@ -7,5 +7,5 @@ Bundle-Version: 2.0.1
 Bundle-Vendor: Hazelcast, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.hazelcast;bundle-version="4.0.3"
-Bundle-ClassPath: lib/hazelcast-kubernetes-2.0.1.jar,
+Bundle-ClassPath: lib/hazelcast-kubernetes-2.0.2.jar,
  .
