@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Hazelcast Kubernetes Plugin
+Bundle-Name: Kubernetes Discovery Plugin for Hazelcast
 Bundle-SymbolicName: com.hazelcast.kubernetes
 Bundle-Description: Hazelcast Kubernetes Plugin
 Bundle-Version: 2.0.1
-Bundle-Vendor: Hazelcast
+Bundle-Vendor: Hazelcast, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Fragment-Host: com.hazelcast;bundle-version="4.0.2"
+Fragment-Host: com.hazelcast;bundle-version="4.0.3"
 Bundle-ClassPath: lib/hazelcast-kubernetes-2.0.1.jar,
  .
