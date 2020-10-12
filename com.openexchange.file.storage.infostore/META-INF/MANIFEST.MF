@@ -2,10 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Infostore File Storage Adapater
 Bundle-SymbolicName: com.openexchange.file.storage.infostore
+Automatic-Module-Name: com.openexchange.file.storage.infostore
 Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.google.common.base;version="23.0.0",
+Import-Package: com.google.common.base,
  com.google.common.collect,
  com.openexchange.api2,
  com.openexchange.config,
@@ -20,6 +21,7 @@ Import-Package: com.google.common.base;version="23.0.0",
  com.openexchange.file.storage.search,
  com.openexchange.folderstorage,
  com.openexchange.folderstorage.database.contentType,
+ com.openexchange.folderstorage.filestorage,
  com.openexchange.folderstorage.type,
  com.openexchange.groupware,
  com.openexchange.groupware.container,
