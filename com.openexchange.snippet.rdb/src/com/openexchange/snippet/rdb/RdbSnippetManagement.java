@@ -454,13 +454,14 @@ public final class RdbSnippetManagement implements SnippetManagement {
                             attachment.setStreamProvider(new BlobStreamProvider(referenceId, contextId));
                             attachments.add(attachment);
 
-                            Object misc = snippet.getMisc();
-                            final String imageId = SnippetUtils.getImageId(misc);
-                            ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
-                            if (!Strings.isEmpty(imageId) && !mfm.contains(imageId)) {
-                                ManagedFile mf = mfm.createManagedFile(imageId, attachment.getInputStream());
-                                mf.setContentDisposition(attachment.getContentDisposition());
-                                mf.setContentType(attachment.getContentType());
+                            String optionalImageId = SnippetUtils.getImageId(snippet.getMisc());
+                            if (optionalImageId != null && Strings.isNotEmpty(optionalImageId)) {
+                                ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
+                                if (!mfm.contains(optionalImageId)) {
+                                    ManagedFile mf = mfm.createManagedFile(optionalImageId, attachment.getInputStream());
+                                    mf.setContentDisposition(attachment.getContentDisposition());
+                                    mf.setContentType(attachment.getContentType());
+                                }
                             }
                         }
                     } while (rs.next());

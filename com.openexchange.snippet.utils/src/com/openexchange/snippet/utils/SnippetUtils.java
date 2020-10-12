@@ -174,23 +174,23 @@ public final class SnippetUtils {
     }
 
     /**
-     * Get the image identifier stored in the misc JSONObject of the snippet.
+     * Gets the image identifier stored in the <code>"misc"</code> JSON object of the snippet.
      *
-     * @param misc The misc JSONObject of the snippet
-     * @return The image identifier or null
+     * @param misc The <code>"misc"</code> JSON object
+     * @return The image identifier or <code>null</code>
      * @throws OXException
      */
     public static String getImageId(final Object misc) throws OXException {
-        String imageId = null;
+        if (misc == null) {
+            return null;
+        }
+
         try {
-            if (misc != null) {
-                JSONObject m = new JSONObject(misc.toString());
-                imageId = m.optString("imageId");
-            }
+            JSONObject m = new JSONObject(misc.toString());
+            return m.optString("imageId");
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
         }
-        return imageId;
     }
 
 }
