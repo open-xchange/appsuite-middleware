@@ -2093,7 +2093,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
 
                     sortedSeqNums = new int[numToCopy];
-                    if (OrderDirection.ASC.equals(order)) {
+                    if (OrderDirection.DESC.equals(order)) {
                         int length = Math.min(unflaggedSeqNums.length - fromIndex, numToCopy);
                         if (length < 0) {
                             length = 0;
