@@ -53,10 +53,13 @@ import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.filemanagement.DistributedFileUtils;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.filemanagement.internal.DistributedFileUtilsImpl;
 import com.openexchange.filemanagement.internal.ManagedFileManagementImpl;
 import com.openexchange.osgi.DependentServiceRegisterer;
 import com.openexchange.timer.TimerService;
@@ -69,6 +72,7 @@ import com.openexchange.timer.TimerService;
 public final class ManagedFileManagementActivator implements BundleActivator {
 
     private List<ServiceTracker<?,?>> trackers = null;
+    private ServiceRegistration<DistributedFileUtils> distributedFileUtilsRegistration;
 
     /**
      * Initializes a new {@link ManagedFileManagementActivator}.
@@ -90,10 +94,18 @@ public final class ManagedFileManagementActivator implements BundleActivator {
         for (ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
         }
+
+        distributedFileUtilsRegistration = context.registerService(DistributedFileUtils.class, new DistributedFileUtilsImpl(), null);
     }
 
     @Override
     public synchronized void stop(BundleContext context) {
+        ServiceRegistration<DistributedFileUtils> distributedFileUtilsRegistration = this.distributedFileUtilsRegistration;
+        if (distributedFileUtilsRegistration != null) {
+            this.distributedFileUtilsRegistration = null;
+            distributedFileUtilsRegistration.unregister();
+        }
+
         List<ServiceTracker<?,?>> trackers = this.trackers;
         if (trackers != null) {
             this.trackers = null;
