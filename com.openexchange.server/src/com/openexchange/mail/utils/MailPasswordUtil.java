@@ -341,9 +341,8 @@ public final class MailPasswordUtil {
      *
      * @param key The key string
      * @return A secret key generated from specified key string
-     * @throws GeneralSecurityException If generating secret key fails
      */
-    public static Key generateSecretKey(final String key) throws GeneralSecurityException {
+    public static Key generateSecretKey(final String key) {
         if (null == key) {
             return null;
         }

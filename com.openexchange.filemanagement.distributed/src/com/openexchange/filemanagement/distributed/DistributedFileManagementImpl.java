@@ -67,6 +67,7 @@ import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.map.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.DistributedFileManagement;
+import com.openexchange.filemanagement.DistributedFileUtils;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceExceptionCode;
@@ -122,6 +123,10 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
         }
     }
 
+    private String encodeId(String rawId) throws OXException {
+        return services.getServiceSafe(DistributedFileUtils.class).encodeId(rawId);
+    }
+
     /**
      * Handles special {@link HazelcastInstanceNotActiveException} exception instance.
      *
@@ -165,7 +170,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
             String url = map().get(id);
             if (url != null) {
                 try {
-                    return loadFile("http://" + url + "/" + id);
+                    return loadFile("http://" + url + "/" + encodeId(id));
                 } catch (IOException e) {
                     throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
                 }
@@ -186,7 +191,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
             String url = map().get(id);
             if (url != null) {
                 try {
-                    URL remoteUrl = new URL("http://" + url + "/" + id);
+                    URL remoteUrl = new URL("http://" + url + "/" + encodeId(id));
                     HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
                     con.setRequestMethod("POST");
                     con.setConnectTimeout(CONNECT_TIMEOUT);
@@ -251,7 +256,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
             String url = map().get(id);
             if (url != null) {
                 try {
-                    URL remoteUrl = new URL("http://" + url + "/" + id);
+                    URL remoteUrl = new URL("http://" + url + "/" + encodeId(id));
                     HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
                     con.setRequestMethod("DELETE");
                     con.setConnectTimeout(CONNECT_TIMEOUT);
@@ -273,7 +278,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
     }
 
     /**
-     * Gets the associyated Hazelcast map.
+     * Gets the associated Hazelcast map.
      *
      * @return The Hazelcast map
      * @throws OXException If Hazelcast map cannot be returned

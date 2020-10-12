@@ -47,46 +47,36 @@
  *
  */
 
-package com.openexchange.filemanagement.distributed.servlet.osgi;
+package com.openexchange.filemanagement;
 
-import org.osgi.service.http.HttpService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.filemanagement.DistributedFileUtils;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.filemanagement.distributed.servlet.DistributedFileServlet;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * Activator for "com.openexchange.filemanagement.distributed.servlet" bundle.
+ * {@link DistributedFileUtils} - Utilities for distributed files.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+@SingletonService
+public interface DistributedFileUtils {
 
-    private String alias;
+    /**
+     * Encodes given identifier for being safely transferred.
+     *
+     * @param rawId The raw identifier
+     * @return The encoded identifier
+     * @throws OXException If encoding fails
+     */
+    String encodeId(String rawId) throws OXException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, ManagedFileManagement.class, ConfigurationService.class, DistributedFileUtils.class };
-    }
-
-    @Override
-    protected synchronized void startBundle() throws Exception {
-        HttpService service = getService(HttpService.class);
-        String alias = com.openexchange.filemanagement.DistributedFileManagement.PATH;
-        service.registerServlet(alias, new DistributedFileServlet(this), null, null);
-        this.alias = alias;
-    }
-
-    @Override
-    protected synchronized void stopBundle() throws Exception {
-        HttpService service = getService(HttpService.class);
-        if (null != service) {
-            String alias = this.alias;
-            if (null != alias) {
-                this.alias = null;
-                service.unregister(alias);
-            }
-        }
-        super.stopBundle();
-    }
+    /**
+     * Decodes given encoded identifier.
+     *
+     * @param encodedId The encoded identifier
+     * @return The decoded/raw identifier
+     * @throws OXException If decoding fails
+     */
+    String decodeId(String encodedId) throws OXException;
 
 }
