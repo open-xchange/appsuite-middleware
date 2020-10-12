@@ -49,18 +49,12 @@
 
 package com.openexchange.jslob.json.osgi;
 
-import javax.servlet.ServletException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.jslob.json.JSlobActionFactory;
 import com.openexchange.jslob.json.converter.JSlobJSONResultConverter;
-import com.openexchange.jslob.json.rest.jslob.JSlobRestServlet;
 import com.openexchange.jslob.registry.JSlobServiceRegistry;
-import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -80,27 +74,6 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JSlobJSONActivator.class);
         registerModule(new JSlobActionFactory(this), "jslob");
         registerService(ResultConverter.class, new JSlobJSONResultConverter());
-
-        final DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
-        track(HttpService.class, new SimpleRegistryListener<HttpService>() {
-
-            @Override
-            public void added(final ServiceReference<HttpService> ref, final HttpService service) {
-                try {
-                    service.registerServlet("/jslob", new JSlobRestServlet(dispatcherPrefixService.getPrefix()), null, null);
-                } catch (ServletException e) {
-                    log.error("Servlet registration failed: {}", JSlobRestServlet.class.getName(), e);
-                } catch (NamespaceException e) {
-                    log.error("Servlet registration failed: {}", JSlobRestServlet.class.getName(), e);
-                }
-            }
-
-            @Override
-            public void removed(final ServiceReference<HttpService> ref, final HttpService service) {
-                service.unregister("/jslob");
-            }
-        });
-        openTrackers();
         log.info("Bundle successfully started: com.openexchange.jslob.json");
     }
 
