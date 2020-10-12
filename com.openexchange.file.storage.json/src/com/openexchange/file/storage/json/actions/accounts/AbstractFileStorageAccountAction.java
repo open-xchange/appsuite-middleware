@@ -55,7 +55,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.json.FileStorageAccountParser;
 import com.openexchange.file.storage.json.FileStorageAccountWriter;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction;
@@ -90,6 +92,23 @@ public abstract class AbstractFileStorageAccountAction implements AJAXActionServ
             return doIt(requestData, session);
         } catch (JSONException x) {
             throw FileStorageExceptionCodes.JSON_ERROR.create(x,x.toString());
+        }
+    }
+
+    /**
+     * Optionally gets the account's root folder from a file storage account.
+     *
+     * @param access The file storage account access to get the root folder from
+     * @return The root folder, or <code>null</code> if there is none
+     */
+    protected FileStorageFolder optRootFolder(FileStorageAccountAccess access) throws OXException {
+        try {
+            return access.getRootFolder();
+        } catch (OXException e) {
+            if (FileStorageExceptionCodes.NO_SUCH_FOLDER.equals(e)) {
+                return null;
+            }
+            throw e;
         }
     }
 
