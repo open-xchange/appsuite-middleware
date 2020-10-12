@@ -193,13 +193,7 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
      * @return <code>true</code> if the share is for anonymous users or if an alias of the user matches as recipient, <code>false</code> otherwise
      */
     private static boolean matchesByMail(User user, GuestInfo guestInfo) {
-        if (null == guestInfo || RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType())) {
-            /*
-             * Share is anonymous, can't apply check
-             */
-            return true;
-        }
-        if (Strings.isEmpty(guestInfo.getEmailAddress())) {
+        if (null == guestInfo || false == RecipientType.GUEST.equals(guestInfo.getRecipientType()) || Strings.isEmpty(guestInfo.getEmailAddress())) {
             return false;
         }
         return UserAliasUtility.isAlias(guestInfo.getEmailAddress(), getAliases(user));
