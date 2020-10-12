@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.provider;
 
+import com.openexchange.groupware.EntityInfo;
+
 /**
  * {@link CalendarPermission}
  *
@@ -159,6 +161,20 @@ public interface CalendarPermission extends Cloneable {
     void setGroup(boolean group);
 
     /**
+     * Gets the qualified identifier of the entity associated with this permission.
+     * 
+     * @return The identifier
+     */
+    String getIdentifier();
+
+    /**
+     * Sets the qualified identifier of the entity associated with this permission.
+     * 
+     * @param identifier The identifier to set
+     */
+    void setIdentifier(String identifier);
+
+    /**
      * Gets this folder permission's entity identifier.
      *
      * @return This folder permission's entity identifier
@@ -171,6 +187,20 @@ public interface CalendarPermission extends Cloneable {
      * @param entity The entity identifier
      */
     void setEntity(int entity);
+
+    /**
+     * Gets additional information about the entity associated with this permission.
+     * 
+     * @return The entity info, or <code>null</code> if not available
+     */
+    EntityInfo getEntityInfo();
+
+    /**
+     * Sets additional information about the entity associated with this permission.
+     * 
+     * @param entityInfo The entity info to set
+     */
+    void setEntityInfo(EntityInfo entityInfo);
 
     /**
      * Checks if this folder permission denotes its entity as a folder administrator.
