@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
+Automatic-Module-Name: com.openexchange.server
 Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.server.osgi.ServerCompositeActivator
 Bundle-Vendor: OX Software GmbH
@@ -535,6 +536,7 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.folderstorage.cache.service,
  com.openexchange.folderstorage.calendar.contentType,
  com.openexchange.folderstorage.database.contentType,
+ com.openexchange.folderstorage.filestorage,
  com.openexchange.folderstorage.filestorage.contentType,
  com.openexchange.folderstorage.mail,
  com.openexchange.folderstorage.mail.contentType,

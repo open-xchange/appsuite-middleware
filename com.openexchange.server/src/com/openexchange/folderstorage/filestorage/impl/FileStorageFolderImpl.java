@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folderstorage.filestorage;
+package com.openexchange.folderstorage.filestorage.impl;
 
 import java.util.Collections;
 import java.util.HashMap;

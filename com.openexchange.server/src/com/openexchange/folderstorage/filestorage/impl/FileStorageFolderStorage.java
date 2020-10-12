@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folderstorage.filestorage;
+package com.openexchange.folderstorage.filestorage.impl;
 
 import java.sql.Connection;
 import java.text.Collator;
@@ -89,6 +89,7 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.SubfolderListingFolderStorage;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UpdateOperation;
+import com.openexchange.folderstorage.filestorage.FileStorageId;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.type.FileStorageType;
