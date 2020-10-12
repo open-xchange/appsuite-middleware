@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folderstorage.filestorage;
+package com.openexchange.folderstorage.filestorage.impl;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;

@@ -47,56 +47,83 @@
  *
  */
 
-package com.openexchange.folderstorage.filestorage;
+package com.openexchange.folderstorage.filestorage.impl;
 
-import java.util.Collections;
-import com.openexchange.file.storage.DefaultFileStorageFolder;
-import com.openexchange.file.storage.DefaultFileStoragePermission;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStorageFolderType;
-import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.file.storage.TypeAware;
-
+import java.util.List;
+import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.filestorage.osgi.Services;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.tools.id.IDMangler;
 
 /**
- * {@link FileStorageRootFolder}
+ * {@link FileStorageFolderType} - The folder type for file storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
  */
-public class FileStorageRootFolder extends DefaultFileStorageFolder implements TypeAware {
-
-    private final FileStorageFolderType type;
+public final class FileStorageFolderType implements FolderType {
 
     /**
-     * Initializes a new {@link FileStorageRootFolder}.
+     * The private folder identifier.
      */
-    public FileStorageRootFolder(int userId, String accountDisplayName) {
+    private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+
+    private static final FileStorageFolderType instance = new FileStorageFolderType();
+
+    /**
+     * Gets the {@link FileStorageFolderType} instance.
+     *
+     * @return The {@link FileStorageFolderType} instance
+     */
+    public static FileStorageFolderType getInstance() {
+        return instance;
+    }
+
+    /*-
+     * Member stuff
+     */
+
+    /**
+     * Initializes a new {@link FileStorageFolderType}.
+     */
+    private FileStorageFolderType() {
         super();
-        type = FileStorageFolderType.NONE;
-        id = FileStorageFolder.ROOT_FULLNAME;
-        holdsFiles = true;
-        b_holdsFiles = true;
-        holdsFolders = true;
-        b_holdsFolders = true;
-        exists = true;
-        subscribed = true;
-        b_subscribed = true;
-        final DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
-        permission.setEntity(userId);
-        permissions = Collections.<FileStoragePermission> singletonList(permission);
-        ownPermission = permission;
-        setParentId(null);
-        setName(accountDisplayName);
-        setSubfolders(true);
-        setSubscribedSubfolders(true);
-        createdBy = userId;
-        modifiedBy = userId;
     }
 
     @Override
-    public FileStorageFolderType getType() {
-        return type;
+    public boolean servesTreeId(final String treeId) {
+        return FolderStorage.REAL_TREE_ID.equals(treeId);
+    }
+
+    @Override
+    public boolean servesFolderId(final String folderId) {
+        if (null == folderId) {
+            return false;
+        }
+        // Check if a real service is defined
+        final List<String> components = IDMangler.unmangle(folderId);
+        if (2 > components.size()) {
+            return false;
+        }
+        /*
+         * Check if service exists
+         */
+        String serviceID = new FolderID(folderId).getService();
+        final FileStorageServiceRegistry registry = Services.getService(FileStorageServiceRegistry.class);
+        return null != registry && registry.containsFileStorageService(serviceID);
+    }
+
+    @Override
+    public boolean servesParentId(final String folderId) {
+        if (null == folderId) {
+            return false;
+        }
+        if (PRIVATE_FOLDER_ID.equals(folderId)) {
+            return true;
+        }
+        return servesFolderId(folderId);
     }
 
 }

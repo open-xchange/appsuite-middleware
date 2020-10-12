@@ -47,30 +47,43 @@
  *
  */
 
-package com.openexchange.folderstorage.filestorage;
+package com.openexchange.folderstorage.filestorage.impl;
+
+import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.folderstorage.BasicPermission;
+import com.openexchange.folderstorage.FolderPermissionType;
 
 /**
- * {@link FileStorageParameterConstants} - Constants for parameter names.
+ * {@link FileStoragePermissionImpl} - A file storage folder permission.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FileStorageParameterConstants {
+public final class FileStoragePermissionImpl extends BasicPermission {
 
     /**
-     * Initializes a new {@link FileStorageParameterConstants}.
+     * serialVersionUID
      */
-    private FileStorageParameterConstants() {
+    private static final long serialVersionUID = -7993745175182740679L;
+
+    /**
+     * Initializes a new {@link FileStoragePermissionImpl} from given messaging permission.
+     *
+     * @param fsPermission The file storage permission
+     */
+    public FileStoragePermissionImpl(final FileStoragePermission fsPermission) {
         super();
+        admin = fsPermission.isAdmin();
+        deletePermission = fsPermission.getDeletePermission();
+        identifier = fsPermission.getIdentifier();
+        entity = fsPermission.getEntity();
+        entityInfo = fsPermission.getEntityInfo();
+        folderPermission = fsPermission.getFolderPermission();
+        group = fsPermission.isGroup();
+        readPermission = fsPermission.getReadPermission();
+        system = fsPermission.getSystem();
+        type = fsPermission.getType() != null ? FolderPermissionType.getType(fsPermission.getType().getTypeNumber()) : FolderPermissionType.NORMAL;
+        legator = fsPermission.getPermissionLegator();
+        writePermission = fsPermission.getWritePermission();
     }
-
-    /**
-     * The parameter name for folder access.
-     */
-    public static final String PARAM_ID_BASED_FOLDER_ACCESS = "fs.folder.Access";
-
-    /**
-     * The parameter name for file access.
-     */
-    public static final String PARAM_ID_BASED_FILE_ACCESS = "fs.file.Access";
 
 }
