@@ -49,6 +49,9 @@
 
 package com.openexchange.chronos.provider;
 
+import java.util.Objects;
+import com.openexchange.groupware.EntityInfo;
+
 /**
  * {@link DefaultFileStoragePermission}
  *
@@ -65,7 +68,9 @@ public class DefaultCalendarPermission implements CalendarPermission {
      */
     public static CalendarPermission readOnlyPermissionsFor(int userID) {
         return new DefaultCalendarPermission(
+            String.valueOf(userID),
             userID,
+            null,
             CalendarPermission.READ_FOLDER,
             CalendarPermission.READ_ALL_OBJECTS,
             CalendarPermission.NO_PERMISSIONS,
@@ -84,7 +89,9 @@ public class DefaultCalendarPermission implements CalendarPermission {
      */
     public static CalendarPermission adminPermissionsFor(int userID) {
         return new DefaultCalendarPermission(
+            String.valueOf(userID),
             userID,
+            null,
             CalendarPermission.MAX_PERMISSION,
             CalendarPermission.READ_ALL_OBJECTS,
             CalendarPermission.NO_PERMISSIONS,
@@ -101,7 +108,9 @@ public class DefaultCalendarPermission implements CalendarPermission {
     private int readPermission;
     private int writePermission;
     private boolean admin;
+    private String identifier;
     private int entity;
+    private EntityInfo entityInfo;
     private boolean group;
 
     /**
@@ -112,11 +121,13 @@ public class DefaultCalendarPermission implements CalendarPermission {
     }
 
     public DefaultCalendarPermission(CalendarPermission permission) {
-        this(permission.getEntity(), permission.getFolderPermission(), permission.getReadPermission(), permission.getWritePermission(), permission.getDeletePermission(), permission.isAdmin(), permission.isGroup(), permission.getSystem());
+        this(permission.getIdentifier(), permission.getEntity(), permission.getEntityInfo(), permission.getFolderPermission(), permission.getReadPermission(), permission.getWritePermission(), permission.getDeletePermission(), permission.isAdmin(), permission.isGroup(), permission.getSystem());
     }
 
-    public DefaultCalendarPermission(int entiy, int folderPermission, int readPermission, int writePermission, int deletePermission, boolean admin, boolean group, int system) {
+    public DefaultCalendarPermission(String identifier, int entiy, EntityInfo entityInfo, int folderPermission, int readPermission, int writePermission, int deletePermission, boolean admin, boolean group, int system) {
         super();
+        this.identifier = identifier;
+        this.entityInfo = entityInfo;
         this.system = system;
         this.deletePermission = deletePermission;
         this.folderPermission = folderPermission;
@@ -125,7 +136,6 @@ public class DefaultCalendarPermission implements CalendarPermission {
         this.admin = admin;
         this.entity = entiy;
         this.group = group;
-
     }
 
     @Override
@@ -134,8 +144,18 @@ public class DefaultCalendarPermission implements CalendarPermission {
     }
 
     @Override
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    @Override
     public int getEntity() {
         return entity;
+    }
+
+    @Override
+    public EntityInfo getEntityInfo() {
+        return entityInfo;
     }
 
     @Override
@@ -187,8 +207,18 @@ public class DefaultCalendarPermission implements CalendarPermission {
     }
 
     @Override
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    @Override
     public void setEntity(final int entity) {
         this.entity = entity;
+    }
+
+    @Override
+    public void setEntityInfo(EntityInfo entityInfo) {
+        this.entityInfo = entityInfo;
     }
 
     @Override
@@ -250,6 +280,7 @@ public class DefaultCalendarPermission implements CalendarPermission {
         result = prime * result + (admin ? 1231 : 1237);
         result = prime * result + deletePermission;
         result = prime * result + entity;
+        result = prime * result + (null != identifier ? identifier.hashCode() : 0);
         result = prime * result + folderPermission;
         result = prime * result + (group ? 1231 : 1237);
         result = prime * result + readPermission;
@@ -274,6 +305,9 @@ public class DefaultCalendarPermission implements CalendarPermission {
             return false;
         }
         if (deletePermission != other.getDeletePermission()) {
+            return false;
+        }
+        if (false == Objects.equals(identifier, other.getIdentifier())) {
             return false;
         }
         if (entity != other.getEntity()) {

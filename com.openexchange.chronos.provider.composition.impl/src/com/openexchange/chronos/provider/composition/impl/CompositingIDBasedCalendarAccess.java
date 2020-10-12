@@ -1076,7 +1076,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         folder.setLastModified(settings.getLastModified());
         folder.setSubscribed(B(settings.isSubscribed()));
         folder.setUsedForSync(settings.getUsedForSync().orElse(UsedForSync.DEFAULT));
-        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(session.getUserId(),
+        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(
+            String.valueOf(session.getUserId()), session.getUserId(), null,
             CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS,
             CalendarPermission.NO_PERMISSIONS, false == autoProvisioned, false, 0)));
         folder.setSupportedCapabilites(CalendarCapability.getCapabilities(calendarAccess.getClass()));
@@ -1090,7 +1091,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         DefaultCalendarFolder folder = new DefaultCalendarFolder();
         folder.setId(BasicCalendarAccess.FOLDER_ID);
         folder.setLastModified(account.getLastModified());
-        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(session.getUserId(),
+        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(
+            String.valueOf(session.getUserId()), session.getUserId(), null,
             CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS,
             CalendarPermission.NO_PERMISSIONS, true, false, 0)));
         folder.setAccountError(accountError);

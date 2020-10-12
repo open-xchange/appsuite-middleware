@@ -51,7 +51,8 @@ package com.openexchange.folderstorage;
 
 import static com.openexchange.chronos.provider.CalendarCapability.getCapabilities;
 import static com.openexchange.chronos.provider.CalendarCapability.getCapabilityNames;
-import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.b;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -247,7 +248,9 @@ public class CalendarFolderConverter {
     public static Permission getStoragePermission(CalendarPermission calendarPermission) {
         BasicPermission permission = new BasicPermission();
         permission.setType(FolderPermissionType.NORMAL);
+        permission.setIdentifier(calendarPermission.getIdentifier());
         permission.setEntity(calendarPermission.getEntity());
+        permission.setEntityInfo(calendarPermission.getEntityInfo());
         permission.setGroup(calendarPermission.isGroup());
         permission.setAdmin(calendarPermission.isAdmin());
         permission.setSystem(calendarPermission.getSystem());
@@ -336,7 +339,9 @@ public class CalendarFolderConverter {
      */
     public static CalendarPermission getCalendarPermission(Permission permission) {
         return new DefaultCalendarPermission(
+            permission.getIdentifier(),
             permission.getEntity(),
+            permission.getEntityInfo(),
             permission.getFolderPermission(),
             permission.getReadPermission(),
             permission.getWritePermission(),
