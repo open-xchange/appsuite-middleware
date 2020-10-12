@@ -84,6 +84,14 @@ public interface ApiClient {
     URL getLoginLink();
 
     /**
+     * Gets the {@link Credentials}
+     *
+     * @return The credentials, or null if no credentials are set
+     */
+    @Nullable
+    Credentials getCredentials();
+
+    /**
      * Get information that were acquired during login
      *
      * @return The information or <code>null</code> if the client is not yet logged in

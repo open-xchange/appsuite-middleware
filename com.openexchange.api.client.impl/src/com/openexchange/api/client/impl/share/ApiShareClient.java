@@ -98,6 +98,12 @@ public class ApiShareClient extends AbstractApiClient {
     }
 
     @Override
+    @Nullable
+    public Credentials getCredentials() {
+        return credentials;
+    }
+
+    @Override
     protected synchronized void doLogin() throws OXException {
         AccessShareCall accessCall = new AccessShareCall(loginLink);
         ShareLoginInformation shareLoginInfos = execute(accessCall);
