@@ -139,7 +139,9 @@ public class FileStorageAccountWriter {
         accountJSON.put(FileStorageAccountConstants.QUALIFIED_ID, FileStorageAccounts.getQualifiedID(account));
         accountJSON.put(FileStorageAccountConstants.DISPLAY_NAME, account.getDisplayName());
         accountJSON.put(FileStorageAccountConstants.FILE_STORAGE_SERVICE, fsService.getId());
-        accountJSON.put(FileStorageAccountConstants.ROOT_FOLDER, new FolderID(fsService.getId(), account.getId(), rootFolder.getId()).toUniqueID());
+        if (null != rootFolder) {
+            accountJSON.put(FileStorageAccountConstants.ROOT_FOLDER, new FolderID(fsService.getId(), account.getId(), rootFolder.getId()).toUniqueID());
+        }
         accountJSON.put(FileStorageAccountConstants.IS_DEFAULT_ACCOUNT, FileStorageAccounts.isDefaultAccount(account));
 
         DynamicFormDescription formDescription = fsService.getFormDescription();
@@ -172,7 +174,7 @@ public class FileStorageAccountWriter {
         accountJSON.put(FileStorageAccountConstants.QUALIFIED_ID, FileStorageAccounts.getQualifiedID(account));
         accountJSON.put(FileStorageAccountConstants.DISPLAY_NAME, account.getDisplayName());
         accountJSON.put(FileStorageAccountConstants.FILE_STORAGE_SERVICE, fsService.getId());
-        if (rootFolder != null) {
+        if (null != rootFolder) {
             accountJSON.put(FileStorageAccountConstants.ROOT_FOLDER, new FolderID(fsService.getId(), account.getId(), rootFolder.getId()).toUniqueID());
         }
         accountJSON.put(FileStorageAccountConstants.IS_DEFAULT_ACCOUNT, FileStorageAccounts.isDefaultAccount(account));

@@ -98,7 +98,7 @@ public class GetAction extends AbstractFileStorageAccountAction {
         FileStorageAccount account = fsService.getAccountManager().getAccount(id, session);
 
         FileStorageAccountAccess access = fsService.getAccountAccess(account.getId(), session);
-        FileStorageFolder rootFolder = access.getRootFolder();
+        FileStorageFolder rootFolder = optRootFolder(access);
 
         // Check file storage capabilities
         Set<String> caps = new HashSet<String>(8, 0.9f);

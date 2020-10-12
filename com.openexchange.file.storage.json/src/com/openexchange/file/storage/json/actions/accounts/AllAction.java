@@ -124,18 +124,16 @@ public class AllAction extends AbstractFileStorageAccountAction {
                 FileStorageAccountAccess access = null;
                 try {
                     access = fsService.getAccountAccess(account.getId(), session);
-                    FileStorageFolder rootFolder = access.getRootFolder();
+                    FileStorageFolder rootFolder = optRootFolder(access);
 
                     //Extended connection check if requested by the client and supported by the FileStorage
                     if (Boolean.TRUE.equals(connectionCheck) && account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
                         ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
                     }
 
-                    if (null != rootFolder) {
-                        // Check file storage capabilities
-                        Set<String> caps = determineCapabilities(access);
-                        result.put(writer.write(account, rootFolder, caps));
-                    }
+                    // Check file storage capabilities
+                    Set<String> caps = determineCapabilities(access);
+                    result.put(writer.write(account, rootFolder, caps));
 
                 } catch (OXException e) {
                     LOG.debug(e.getMessage(), e);
