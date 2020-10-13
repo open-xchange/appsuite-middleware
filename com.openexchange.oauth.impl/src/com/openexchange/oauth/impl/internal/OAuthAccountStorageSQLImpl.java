@@ -551,11 +551,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
 
     @Override
     public void migrate(String oldSecret, String newSecret, ServerSession session) throws OXException {
-        boolean migrate = true;
-        if (!migrate) {
-            return;
-        }
-
         final CryptoService cryptoService = Services.getService(CryptoService.class);
         final int contextId = session.getContextId();
         final Context context = getContext(contextId);
