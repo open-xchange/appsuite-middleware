@@ -121,7 +121,7 @@ public class ApnsHttp2Options {
     private final String clientId;
     private final AuthType authType;
 
-    private final File privateKey;
+    private final Object privateKey;
     private final String keyId;
     private final String teamId;
 
@@ -176,7 +176,7 @@ public class ApnsHttp2Options {
      * @param bundleIdentifier The bundle identifier of the app
      * @param topic The app's topic, which is typically the bundle ID of the app
      */
-    public ApnsHttp2Options(String clientId, File privateKey, String keyId, String teamId, boolean production, String topic) {
+    public ApnsHttp2Options(String clientId, Object privateKey, String keyId, String teamId, boolean production, String topic) {
         super();
         this.clientId = clientId;
         clientReference = new AtomicReference<ApnsClient>(null);
@@ -249,7 +249,7 @@ public class ApnsHttp2Options {
      *
      * @return The APNS auth key
      */
-    public File getPrivateKey() {
+    public Object getPrivateKey() {
         return privateKey;
     }
 
@@ -300,8 +300,17 @@ public class ApnsHttp2Options {
                     .setClientCredentials(new ByteArrayInputStream(keyStore), getPassword());
                 }
             } else {
-                clientBuilder.setApnsServer(isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
-                    .setSigningKey(ApnsSigningKey.loadFromPkcs8File(getPrivateKey(), getTeamId(), getKeyId()));
+                Object privateKey = getPrivateKey();
+                if (File.class.isInstance(privateKey)) {
+                    clientBuilder.setApnsServer(isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
+                        .setSigningKey(ApnsSigningKey.loadFromPkcs8File((File) privateKey, getTeamId(), getKeyId()));
+                } else if (InputStream.class.isInstance(privateKey)) {
+                    clientBuilder.setApnsServer(isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
+                        .setSigningKey(ApnsSigningKey.loadFromInputStream((InputStream) privateKey, getTeamId(), getKeyId()));
+                } else {
+                    clientBuilder.setApnsServer(isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
+                    .setSigningKey(ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream((byte[]) privateKey), getTeamId(), getKeyId()));
+                }
             }
             return clientBuilder.build();
         } catch (FileNotFoundException e) {
