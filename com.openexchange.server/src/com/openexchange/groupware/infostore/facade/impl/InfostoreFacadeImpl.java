@@ -3262,6 +3262,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     } else {
                         document.setShareable(infoPerm.canShareObject());
                     }
+                    
+                    try {
+                        if (contains(columns, Metadata.CREATED_FROM_LITERAL)) {
+                            document.setCreatedFrom(entityInfoLoader.load(document.getCreatedBy(), session));
+                        }
+                        if (contains(columns, Metadata.MODIFIED_FROM_LITERAL)) {
+                            document.setModifiedFrom(entityInfoLoader.load(document.getModifiedBy(), session));
+                        }
+                    } catch (OXException e) {
+                        LoggerHolder.LOG.warn("Could not load entity info for document {} in context {}: {}.", I(document.getId()), I(context.getContextId()), e.getMessage());
+                    }
                     return document;
                 }
             };
@@ -3275,14 +3286,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
             if (contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL)) {
                 timedResult = objectPermissionLoader.add(timedResult, context, Collections.singleton(I(id)));
-            }
-            if (contains(columns, Metadata.CREATED_FROM_LITERAL)) {
-                CreatedFromLoader createdFromLoader = new CreatedFromLoader(this, entityInfoLoader, session);
-                timedResult = createdFromLoader.add(timedResult, context, Collections.singleton(I(id)));
-            }
-            if (contains(columns, Metadata.MODIFIED_FROM_LITERAL)) {
-                ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(this, entityInfoLoader, session);
-                timedResult = modifiedFromLoader.add(timedResult, context, Collections.singleton(I(id)));
             }
             iter = null; // Avoid premature closing
             return timedResult;
