@@ -57,6 +57,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
+import com.openexchange.api.client.common.calls.folders.mapping.ExtendedPermissionMapping;
 import com.openexchange.api.client.common.calls.folders.mapping.PermissionMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -356,6 +357,84 @@ public class RemoteFolderMapper extends DefaultJsonMapper<RemoteFolder, RemoteFo
             public void remove(RemoteFolder object) {
                 object.removeOwnRights();
             }
+        });
+
+        mappings.put(RemoteFolderField.SUBSCRIBED, new BooleanMapping<RemoteFolder>(RemoteFolderField.SUBSCRIBED.getName(), I(RemoteFolderField.SUBSCRIBED.getColumn())) {
+
+            @Override
+            public boolean isSet(RemoteFolder object) {
+                return object.containsSubscribed();
+            }
+
+            @Override
+            public void set(RemoteFolder object, Boolean value) throws OXException {
+                if (null != value) {
+                    object.setSubscribed(b(value));
+                } else {
+                    remove(object);
+                }
+            }
+
+            @Override
+            public Boolean get(RemoteFolder object) {
+                return B(object.isSubscribed());
+            }
+
+            @Override
+            public void remove(RemoteFolder object) {
+                object.removeSubscribed();
+            }
+        });
+
+        mappings.put(RemoteFolderField.SUBSCR_SUBFLDS, new BooleanMapping<RemoteFolder>(RemoteFolderField.SUBSCR_SUBFLDS.getName(), I(RemoteFolderField.SUBSCR_SUBFLDS.getColumn())) {
+
+            @Override
+            public boolean isSet(RemoteFolder object) {
+                return object.containsSubscribedSubfolders();
+            }
+
+            @Override
+            public void set(RemoteFolder object, Boolean value) throws OXException {
+                if (null != value) {
+                    object.setSubscribedSubfolders(b(value));
+                } else {
+                    remove(object);
+                }
+            }
+
+            @Override
+            public Boolean get(RemoteFolder object) {
+                return B(object.hasSubscribedSubfolders());
+            }
+
+            @Override
+            public void remove(RemoteFolder object) {
+                object.removeSubscribedSubfolders();
+            }
+        });
+
+        mappings.put(RemoteFolderField.EXTENDED_PERMISSIONS, new ExtendedPermissionMapping<RemoteFolder>(RemoteFolderField.EXTENDED_PERMISSIONS.getName(), I(RemoteFolderField.EXTENDED_PERMISSIONS.getColumn())) {
+
+            @Override
+            public boolean isSet(RemoteFolder object) {
+                return object.containsExtendedPermissions();
+            }
+
+            @Override
+            public void set(RemoteFolder object, ExtendedPermission[] value) throws OXException {
+                object.setExtendedPermissions(value);
+            }
+
+            @Override
+            public ExtendedPermission[] get(RemoteFolder object) {
+                return object.getExtendedPermissions();
+            }
+
+            @Override
+            public void remove(RemoteFolder object) {
+                object.removeExtendedPermissions();
+            }
+
         });
 
         return mappings;

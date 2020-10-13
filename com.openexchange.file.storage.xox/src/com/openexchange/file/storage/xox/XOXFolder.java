@@ -52,6 +52,7 @@ package com.openexchange.file.storage.xox;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.api.client.common.calls.folders.RemoteFolder;
+import com.openexchange.file.storage.CacheAware;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -67,9 +68,10 @@ import com.openexchange.folderstorage.Permissions;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class XOXFolder extends DefaultFileStorageFolder implements TypeAware {
+public class XOXFolder extends DefaultFileStorageFolder implements TypeAware, CacheAware {
 
     private FileStorageFolderType type;
+    private boolean cacheable;
 
     /**
      * Initializes a new {@link XOXFolder}.
@@ -87,6 +89,8 @@ public class XOXFolder extends DefaultFileStorageFolder implements TypeAware {
      * @param other The {@link RemoteFolder} to copy the values from
      */
     public XOXFolder(final int userId, final RemoteFolder other) {
+        super();
+        cacheable = true;
 
         id = other == null || other.getID() == null ? FileStorageFolder.ROOT_FULLNAME : other.getID();
         name = other != null ? other.getName() : null;
@@ -155,6 +159,20 @@ public class XOXFolder extends DefaultFileStorageFolder implements TypeAware {
     }
 
     @Override
+    public boolean cacheable() {
+        return cacheable;
+    }
+
+    /**
+     * Sets if the folder is cacheable or not.
+     * 
+     * @param cacheable <code>true</code> if cacheable, <code>false</code>, otherwise
+     */
+    public void setCacheable(boolean cacheable) {
+        this.cacheable = cacheable;
+    }
+
+    @Override
     public FileStorageFolderType getType() {
         return type;
     }
@@ -169,4 +187,5 @@ public class XOXFolder extends DefaultFileStorageFolder implements TypeAware {
         this.type = type;
         return this;
     }
+
 }
