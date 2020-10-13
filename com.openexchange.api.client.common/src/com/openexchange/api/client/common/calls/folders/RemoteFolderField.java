@@ -115,6 +115,20 @@ public enum RemoteFolderField {
      */
     PERMISSIONS(306, "permissions"),
 
+    /**
+     * Folder's subscription
+     */
+    SUBSCRIBED(314, "subscribed"),
+
+    /**
+     * Subscribed subfolders
+     */
+    SUBSCR_SUBFLDS(315, "subscr_subflds"),
+
+    /**
+     * Extended folder permissions
+     */
+    EXTENDED_PERMISSIONS(3060, "com.openexchange.share.extendedPermissions")
     ;
 
     private final int column;

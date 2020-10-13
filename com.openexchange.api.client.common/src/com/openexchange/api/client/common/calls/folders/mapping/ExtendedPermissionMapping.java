@@ -49,59 +49,65 @@
 
 package com.openexchange.api.client.common.calls.folders.mapping;
 
-import java.util.TimeZone;
+import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.api.client.common.calls.folders.ExtendedPermission;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Permissions;
-import com.openexchange.groupware.tools.mappings.json.ListItemMapping;
+import com.openexchange.groupware.tools.mappings.json.ArrayMapping;
 
 /**
- * {@link PermissionMapper}
+ * {@link ExtendedPermissionMapping}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @param <O> The class of list element
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
-public abstract class PermissionMapper<O> extends ListItemMapping<Permission, O, JSONObject> {
+public abstract class ExtendedPermissionMapping<O> extends ArrayMapping<ExtendedPermission, O> {
 
     /**
-     * Initializes a new {@link PermissionMapper}.
+     * Initializes a new {@link ExtendedPermissionMapping}.
      *
      * @param ajaxName The mapped ajax name
      * @param columnID the mapped column identifier
      */
-    public PermissionMapper(String ajaxName, Integer columnID) {
+    public ExtendedPermissionMapping(String ajaxName, Integer columnID) {
         super(ajaxName, columnID);
     }
 
     @Override
-    protected Permission deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
-        JSONObject jsonObject = array.getJSONObject(index);
-        return deserialize(jsonObject, timeZone);
+    public ExtendedPermission[] newArray(int size) {
+        return new ExtendedPermission[size];
     }
 
     @Override
-    public Permission deserialize(JSONObject from, TimeZone timeZone) throws JSONException {
-        //@formatter:off
-        Permission permission = Permissions.createPermission(
-            from.has("entity") ? from.getInt("entity") : 0,
-            from.has("group") && from.getBoolean("group"),
-            from.has("bits") ? from.getInt("bits") : 0);
-        //@formatter:on
-        permission.setIdentifier(from.optString("identifier", null));
+    protected ExtendedPermission deserialize(JSONArray array, int index) throws JSONException, OXException {
+        JSONObject jsonPermission = array.getJSONObject(index);
+        if (null == jsonPermission) {
+            return null;
+        }
+        ExtendedPermission permission = new ExtendedPermission();
+        permission.setBits(jsonPermission.optInt("bits"));
+        permission.setIdentifier(jsonPermission.optString("identifier", null));
+        permission.setEntity(jsonPermission.optInt("entity", -1));
+        permission.setType(jsonPermission.optString("type", null));
+        permission.setDisplayName(jsonPermission.optString("display_name", null));
+        permission.setInheritedFrom(jsonPermission.optString("isInheritedFrom", null));
+        permission.setShareUrl(jsonPermission.optString("share_url", null));
+        permission.setPassword(jsonPermission.optString("password", null));
+        permission.setExpiryDate(jsonPermission.has("expiry_date") ? new Date(jsonPermission.getLong("expiry_date")) : null);
+        permission.setInherited(jsonPermission.optBoolean("isInherited"));
+        JSONObject jsonContact = jsonPermission.optJSONObject("contact");
+        if (null != jsonContact) {
+            ExtendedPermission.Contact contact = new ExtendedPermission.Contact();
+            contact.setEmail1(jsonContact.optString("email1", null));
+            contact.setTitle(jsonContact.optString("title", null));
+            contact.setFirstName(jsonContact.optString("first_name", null));
+            contact.setLastName(jsonContact.optString("last_name", null));
+            contact.setImage1Url(jsonContact.optString("image1_url", null));
+            permission.setContact(contact);
+        }
         return permission;
     }
 
-    @Override
-    public JSONObject serialize(Permission from, TimeZone timeZone) throws JSONException {
-        JSONObject json = new JSONObject();
-        json.putOpt("identifier", from.getIdentifier());
-        json.put("entity", from.getEntity());
-        json.put("group", from.isGroup());
-        json.put("bits", Permissions.createPermissionBits(from));
-        return json;
-    }
 }

@@ -50,6 +50,7 @@
 package com.openexchange.api.client.common.calls.folders;
 
 import com.openexchange.folderstorage.AbstractFolder;
+import com.openexchange.folderstorage.SetterAwareFolder;
 
 /**
  * {@link RemoteFolder} - A remote folder
@@ -57,7 +58,7 @@ import com.openexchange.folderstorage.AbstractFolder;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class RemoteFolder extends AbstractFolder {
+public class RemoteFolder extends AbstractFolder implements SetterAwareFolder {
 
     private static final long serialVersionUID = -5400694241155511852L;
 
@@ -69,6 +70,12 @@ public class RemoteFolder extends AbstractFolder {
 
     private boolean hasSubfolders;
     private boolean bHasSubfolders;
+
+    private boolean containsSubscribed;
+    private boolean containsUsedForSync;
+    private boolean containsSubscribedSubfolders;
+    private ExtendedPermission[] extendedPermissions;
+    private boolean containsExtendedPermissions;
 
     /**
      * Initializes a new {@link RemoteFolder}.
@@ -203,4 +210,59 @@ public class RemoteFolder extends AbstractFolder {
         super.setSubfolderIDs(subfolderIds);
         setHasSubfolders(subfolderIds != null && subfolderIds.length > 0);
     }
+
+    @Override
+    public boolean containsSubscribed() {
+        return containsSubscribed;
+    }
+
+    @Override
+    public void setSubscribed(boolean subscribed) {
+        super.setSubscribed(subscribed);
+        containsSubscribed = true;
+    }
+
+    public void removeSubscribed() {
+        super.setSubscribed(false);
+        containsSubscribed = false;
+    }
+
+    public boolean containsSubscribedSubfolders() {
+        return containsSubscribedSubfolders;
+    }
+
+    @Override
+    public void setSubscribedSubfolders(boolean subscribedSubfolders) {
+        super.setSubscribedSubfolders(subscribedSubfolders);
+        containsSubscribedSubfolders = true;
+    }
+
+    public void removeSubscribedSubfolders() {
+        super.setSubscribedSubfolders(false);
+        containsSubscribedSubfolders = false;
+    }
+
+    @Override
+    public boolean containsUsedForSync() {
+        return containsUsedForSync;
+    }
+
+    public ExtendedPermission[] getExtendedPermissions() {
+        return extendedPermissions;
+    }
+
+    public void setExtendedPermissions(ExtendedPermission[] extendedPermissions) {
+        this.extendedPermissions = extendedPermissions;
+        containsExtendedPermissions = true;
+    }
+
+    public void removeExtendedPermissions() {
+        this.extendedPermissions = null;
+        containsExtendedPermissions = false;
+    }
+
+    public boolean containsExtendedPermissions() {
+        return containsExtendedPermissions;
+    }
+
 }

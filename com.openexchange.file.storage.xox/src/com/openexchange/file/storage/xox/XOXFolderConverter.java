@@ -56,11 +56,17 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.api.client.common.calls.folders.ExtendedPermission;
+import com.openexchange.api.client.common.calls.folders.ExtendedPermission.Contact;
 import com.openexchange.api.client.common.calls.folders.RemoteFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.folderstorage.BasicPermission;
+import com.openexchange.groupware.EntityInfo;
+import com.openexchange.groupware.LinkEntityInfo;
+import com.openexchange.groupware.EntityInfo.Type;
 import com.openexchange.share.core.subscription.EntityMangler;
 
 /**
@@ -100,6 +106,7 @@ public class XOXFolderConverter {
     public XOXFolder getStorageFolder(RemoteFolder remoteFolder) {
 
         XOXFolder folder = new XOXFolder(userId); //TODO empty default c'tor?
+        folder.setCacheable(false); //for now, maybe make configurable?
 
         folder.setId(remoteFolder.getID());
         folder.setParentId(remoteFolder.getParentID());
@@ -114,21 +121,92 @@ public class XOXFolderConverter {
         folder.setMeta(remoteFolder.getMeta());
         folder.setDefaultFolder(remoteFolder.isDefault());
         folder.setFileCount(remoteFolder.getTotal());
-        folder.setSubscribed(remoteFolder.isSubscribed());
-        folder.setSubfolders(remoteFolder.hasSubfolders());
-        folder.setSubscribedSubfolders(remoteFolder.hasSubscribedSubfolders());
-
-        //TODO
-        folder.setSubscribed(true);
-        folder.setSubscribedSubfolders(remoteFolder.hasSubfolders());
-
+        if (remoteFolder.containsSubscribed()) {
+            folder.setSubscribed(remoteFolder.isSubscribed());
+        }
+        if (remoteFolder.containsHasSubfolders()) {
+            folder.setSubfolders(remoteFolder.hasSubfolders());
+        }
+        if (remoteFolder.containsSubscribedSubfolders()) {
+            folder.setSubscribedSubfolders(remoteFolder.hasSubscribedSubfolders());
+        }
         folder.setOwnPermission(getFileStoragePermission(new BasicPermission(userId, false, remoteFolder.getOwnRights())));
-        folder.setPermissions(entityMangler.mangleRemotePermissions(getFileStoragePermissions(remoteFolder.getPermissions())));
+        List<FileStoragePermission> storagePermissions = addExtendedPermissions(getFileStoragePermissions(remoteFolder.getPermissions()), remoteFolder.getExtendedPermissions());
+        folder.setPermissions(entityMangler.mangleRemotePermissions(storagePermissions));
         DefaultFileStoragePermission systemPermission = DefaultFileStoragePermission.newInstance(folder.getOwnPermission());
         systemPermission.setSystem(1);
         folder.addPermission(systemPermission);
         folder.setCapabilities(getStorageCapabilities(remoteFolder.getSupportedCapabilities()));
         return folder;
+    }
+
+    private static List<FileStoragePermission> addExtendedPermissions(List<FileStoragePermission> permissions, ExtendedPermission[] extendedPermissions) {
+        if (null == permissions) {
+            return null;
+        }
+        List<FileStoragePermission> enhencedPermissions = new ArrayList<FileStoragePermission>(permissions.size());
+        for (FileStoragePermission permission : permissions) {
+            ExtendedPermission matchingPermission = findMatching(extendedPermissions, permission);
+            if (null == matchingPermission) {
+                enhencedPermissions.add(permission);
+            } else {
+                DefaultFileStoragePermission enhancedPermission = DefaultFileStoragePermission.newInstance(permission);
+                enhancedPermission.setEntityInfo(getEntityInfo(matchingPermission));
+                enhencedPermissions.add(enhancedPermission);
+            }
+        }
+        return enhencedPermissions;
+    }
+
+    private static EntityInfo getEntityInfo(ExtendedPermission extendedPermission) {
+        if (null == extendedPermission) {
+            return null;
+        }
+        Type type = getEntityInfoType(extendedPermission.getType());
+        Contact contact = extendedPermission.getContact();
+        EntityInfo entityInfo;
+        if (null == contact) {
+            entityInfo = new EntityInfo(extendedPermission.getIdentifier(), extendedPermission.getDisplayName(), null, null, null, null, 
+                extendedPermission.getEntity(), null, type);
+        } else {
+            entityInfo = new EntityInfo(extendedPermission.getIdentifier(), extendedPermission.getDisplayName(), contact.getTitle(), 
+                contact.getFirstName(), contact.getLastName(), contact.getEmail1(), extendedPermission.getEntity(), contact.getImage1Url(), type);
+        }
+        if (Type.ANONYMOUS.equals(type)) {
+            entityInfo = new LinkEntityInfo(entityInfo, extendedPermission.getShareUrl(), extendedPermission.getPassword(), extendedPermission.getExpiryDate(), extendedPermission.isInherited());
+        }
+        return entityInfo;
+    }
+
+    private static EntityInfo.Type getEntityInfoType(String extendedPermissionType) {
+        if (null == extendedPermissionType) {
+            return null;
+        }
+        switch (extendedPermissionType) {
+            case "guest":
+            case "anonymous":
+                return Type.GUEST;
+            case "group":
+                return Type.GROUP;
+            case "user":
+            default:
+                return Type.USER;
+        }
+    }
+
+    private static ExtendedPermission findMatching(ExtendedPermission[] extendedPermissions, FileStoragePermission permission) {
+        if (null == extendedPermissions) {
+            return null;
+        }
+        for (ExtendedPermission extendedPermission : extendedPermissions) {
+            if (null != permission.getIdentifier() && permission.getIdentifier().equals(extendedPermission.getIdentifier())) {
+                return extendedPermission;
+            }
+            if ((0 < permission.getEntity() || 0 == permission.getEntity() && permission.isGroup()) && permission.getEntity() == extendedPermission.getEntity()) {
+                return extendedPermission;
+            }
+        }
+        return null;
     }
 
     private static Set<String> getStorageCapabilities(Set<String> capabilities) {

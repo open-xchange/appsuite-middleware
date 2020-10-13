@@ -104,6 +104,8 @@ public class GetEntityInfoCall extends AbstractGetCall<EntityInfo> {
 
     @Override
     public HttpResponseParser<EntityInfo> getParser() {
+        String identifier = String.valueOf(id);
+        int entity = Integer.parseInt(id); //TODO: leave member as int
         return new AbstractHttpResponseParser<EntityInfo>() {
 
             @Override
@@ -117,7 +119,7 @@ public class GetEntityInfoCall extends AbstractGetCall<EntityInfo> {
                     String email1 = data.optString("email1");
                     String imageUrl = data.optString("image1_url");
                     Type type = Type.USER;
-                    return new EntityInfo(getEntityIdentifier(), displayName, title, firstName, lastName, email1, -1, imageUrl, type);
+                    return new EntityInfo(identifier, displayName, title, firstName, lastName, email1, entity, imageUrl, type);
                 }
                 return null;
             }
