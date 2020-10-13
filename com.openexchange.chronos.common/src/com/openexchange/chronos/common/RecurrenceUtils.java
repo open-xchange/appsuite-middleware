@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,39 +47,48 @@
  *
  */
 
-package com.openexchange.snippet;
+package com.openexchange.chronos.common;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
+import com.openexchange.chronos.Event;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SnippetStrings} - Provides localizable strings for snippet module.
+ * {@link RecurrenceUtils}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.10.4
  */
-public class SnippetStrings implements LocalizableStrings {
+public class RecurrenceUtils {
 
     /**
-     * Initializes a new {@link SnippetStrings}.
+     * Adjusts the recurrence rule according to the <a href="https://tools.ietf.org/html/rfc5545#section-3.3.10">RFC-5545, Section 3.3.10</a>
+     * specification, which ensures that the value type of the UNTIL part of the recurrence rule has the same value type as the DTSTART.
+     *
+     * @param event The event to adjust
+     * @throws OXException if the event has an invalid recurrence rule
      */
-    private SnippetStrings() {
-        super();
+    public static void adjustRecurrenceRule(Event event) throws OXException {
+        if (null == event.getRecurrenceRule()) {
+            return;
+        }
+        RecurrenceRule rule = CalendarUtils.initRecurrenceRule(event.getRecurrenceRule());
+        if (null == rule.getUntil()) {
+            return;
+        }
+        DateTime until = rule.getUntil();
+        TimeZone timeZone = event.getStartDate().getTimeZone();
+        boolean startAllDay = event.getStartDate().isAllDay();
+        boolean untilAllDay = until.isAllDay();
+        if (startAllDay && !untilAllDay) {
+            rule.setUntil(until.toAllDay());
+        } else if (!startAllDay && untilAllDay) {
+            rule.setUntil(new DateTime(until.getCalendarMetrics(), timeZone, until.getTimestamp()));
+        } else {
+            return;
+        }
+        event.setRecurrenceRule(rule.toString());
     }
-
-    // Thrown if a user tries to create a snippet/signature referencing to invalid or even harmful image data
-    public static final String INVALID_IMAGE_DATA_MSG = "Invalid or harmful image data detected";
-
-    // Thrown if a user tries to create a snippet/signature referencing to an image which is too big
-    public static final String MAXIMUM_IMAGE_SIZE_MSG = "The signature image exceeds the maximum allowed size of '%1$s'.";
-
-    // The signature size exceeds the maximum allowed size of '%1$s'.
-    public static final String MAXIMUM_SNIPPET_SIZE_MSG = "The signature size exceeds the maximum allowed size of '%1$s'.";
-
-    // Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
-    public static final String MAXIMUM_IMAGES_COUNT_MSG = "The maximum allowed number of '%1$s' images in the signature is reached.";
-
-    // Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
-    public static final String UPDATE_DENIED_MSG = "You are not allowed to modify the signature";
-
 }

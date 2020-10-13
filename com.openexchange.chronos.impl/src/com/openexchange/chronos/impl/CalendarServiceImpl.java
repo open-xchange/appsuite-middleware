@@ -153,7 +153,7 @@ public class CalendarServiceImpl implements CalendarService {
     public CalendarServiceUtilities getUtilities() {
         return utilities;
     }
-    
+
     @Override
     public SchedulingUtilities getSchedulingUtilities() {
         return schedulingUtils;
@@ -493,9 +493,10 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers & return userized result
          */
+        postProcess(services, results, false);
         List<ImportResult> importResults = new ArrayList<ImportResult>(results.size());
         for (InternalImportResult result : results) {
-            importResults.add(postProcess(services, result).getImportResult());
+            importResults.add(result.getImportResult());
         }
         return importResults;
     }

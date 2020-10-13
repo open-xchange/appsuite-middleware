@@ -51,9 +51,13 @@ package com.openexchange.importexport.actions.importer;
 
 import static com.openexchange.java.Autoboxing.I;
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
+import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.data.conversion.ical.TruncationInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
@@ -67,12 +71,23 @@ import com.openexchange.json.OXJSONWriter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-public abstract class AbstractImportAction implements AJAXActionService {
+@DispatcherNotes(enqueueable = true)
+public abstract class AbstractImportAction implements EnqueuableAJAXActionService {
 
     protected ServiceLookup services;
 
     public AbstractImportAction(ServiceLookup services) {
         this.services = services;
+    }
+
+    @Override
+    public Result isEnqueueable(AJAXRequestData request, ServerSession session) throws OXException {
+        JSONObject jKeyDesc = new JSONObject(3)
+            .putSafe("module", "import")
+            .putSafe("action", getFormat().getConstantName())
+            .putSafe("folder", request.getParameter(AJAXServlet.PARAMETER_FOLDERID))
+        ;
+        return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
     }
 
     @Override

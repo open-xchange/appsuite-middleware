@@ -53,17 +53,17 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
-import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.common.RecurrenceUtils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.session.Session;
 
 /**
- * {@link CalendarService}
+ * {@link Consistency}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
@@ -74,12 +74,12 @@ public class Consistency {
      * Checks and adjusts the timezones of the event's start- and end-time (in case they are <i>set</i>) to match well-known & valid
      * timezones, using different fallbacks if no exactly matching timezone is available.
      *
-     * @param session The calendar session
+     * @param session The session
      * @param calendarUserId The identifier of the user to get the fallback timezone from
      * @param event The event to set the timezones in
      * @param originalEvent The original event, or <code>null</code> if not applicable
      */
-    public static void adjustTimeZones(CalendarSession session, int calendarUserId, Event event, Event originalEvent) throws OXException {
+    public static void adjustTimeZones(Session session, int calendarUserId, Event event, Event originalEvent) throws OXException {
         if (event.containsStartDate()) {
             event.setStartDate(selectTimeZone(session, event.getStartDate(), calendarUserId, null == originalEvent ? null : originalEvent.getStartDate()));
         }
@@ -88,7 +88,7 @@ public class Consistency {
         }
     }
 
-    private static DateTime selectTimeZone(CalendarSession session, DateTime dateTime, int calendarUserId, DateTime originalDateTime) throws OXException {
+    private static DateTime selectTimeZone(Session session, DateTime dateTime, int calendarUserId, DateTime originalDateTime) throws OXException {
         if (null == dateTime || dateTime.isFloating() || null == dateTime.getTimeZone()) {
             return dateTime;
         }
@@ -124,25 +124,7 @@ public class Consistency {
      * @throws OXException if the event has an invalid recurrence rule
      */
     public static void adjustRecurrenceRule(Event event) throws OXException {
-        if (null == event.getRecurrenceRule()) {
-            return;
-        }
-        RecurrenceRule rule = CalendarUtils.initRecurrenceRule(event.getRecurrenceRule());
-        if (null == rule.getUntil()) {
-            return;
-        }
-        DateTime until = rule.getUntil();
-        TimeZone timeZone = event.getStartDate().getTimeZone();
-        boolean startAllDay = event.getStartDate().isAllDay();
-        boolean untilAllDay = until.isAllDay();
-        if (startAllDay && !untilAllDay) {
-            rule.setUntil(until.toAllDay());
-        } else if (!startAllDay && untilAllDay) {
-            rule.setUntil(new DateTime(until.getCalendarMetrics(), timeZone, until.getTimestamp()));
-        } else {
-            return;
-        }
-        event.setRecurrenceRule(rule.toString());
+        RecurrenceUtils.adjustRecurrenceRule(event);
     }
 
     /**

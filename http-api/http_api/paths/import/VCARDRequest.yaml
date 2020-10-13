@@ -11,6 +11,7 @@
        * vCalendar 1.0
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/glbQueryParamsAllowEnqueue'
       - in: query
         name: folder
         description: >-

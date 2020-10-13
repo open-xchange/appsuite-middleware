@@ -50,6 +50,7 @@
 package com.openexchange.snippet.utils;
 
 import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -77,6 +78,9 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
@@ -454,6 +458,10 @@ public class SnippetProcessor {
         if (isEmpty(content)) {
             return Collections.emptyList();
         }
+        long maxRawSnippetSize = getMaxSnippetSize();
+        if (content.length() > maxRawSnippetSize) {
+            throw SnippetExceptionCodes.MAXIMUM_RAW_SNIPPET_SIZE.create(L(maxRawSnippetSize), L(content.length()));
+        }
 
         boolean isSignature = "signature".equalsIgnoreCase(snippet.getType());
 
@@ -731,6 +739,18 @@ public class SnippetProcessor {
             }
         }
         return new MaxImageProps(maxImageSize, maxImageLimit);
+    }
+
+    Property MAX_SNIPPET_SIZE = DefaultProperty.valueOf("com.openexchange.mail.signature.maxRawSnippetSize", L(51200l));
+
+    /**
+     * Gets the maximum allowed snippet size without attachments like images
+     *
+     * @return the maximum allowed snippet size
+     */
+    private long getMaxSnippetSize() {
+        LeanConfigurationService lean = Services.getService(LeanConfigurationService.class);
+        return lean.getLongProperty(session.getUserId(), session.getContextId(), MAX_SNIPPET_SIZE);
     }
 
     // --------------------------------------------------------------------------------------------------------------------------- //

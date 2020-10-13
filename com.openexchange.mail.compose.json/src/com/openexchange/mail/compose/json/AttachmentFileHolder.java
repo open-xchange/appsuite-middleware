@@ -56,8 +56,12 @@ import java.util.List;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.Attachment;
+import com.openexchange.mail.compose.CompositionSpaceErrorCode;
+import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.RandomAccessAttachment;
+import com.openexchange.session.Session;
 
 /**
  * {@link AttachmentFileHolder} - A file holder backed by an attachment.
@@ -67,7 +71,14 @@ import com.openexchange.mail.compose.RandomAccessAttachment;
  */
 public class AttachmentFileHolder implements IFileHolder {
 
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentFileHolder.class);
+    }
+
+    private final Session session;
     private final Attachment attachment;
+    private final CompositionSpaceService compositionSpaceService;
     private String delivery;
     private final List<Runnable> tasks;
 
@@ -75,11 +86,25 @@ public class AttachmentFileHolder implements IFileHolder {
      * Initializes a new {@link AttachmentFileHolder}.
      *
      * @param attachment The attachment
+     * @param compositionSpaceService The composition space service
      */
-    public AttachmentFileHolder(Attachment attachment) {
+    public AttachmentFileHolder(Attachment attachment, CompositionSpaceService compositionSpaceService, Session session) {
         super();
         this.attachment = attachment;
+        this.compositionSpaceService = compositionSpaceService;
+        this.session = session;
         tasks = new LinkedList<Runnable>();
+    }
+
+    /**
+     * Safely deletes attachment
+     */
+    void deleteSafe() {
+        try {
+            compositionSpaceService.deleteAttachment(attachment.getCompositionSpaceId(), attachment.getId(), session);
+        } catch (Exception e) {
+            LoggerHolder.LOG.warn("Failed to delete non-existent attachment {} from composition space {}", UUIDs.getUnformattedString(attachment.getId()), UUIDs.getUnformattedString(attachment.getCompositionSpaceId()), e);
+        }
     }
 
     /**
@@ -103,7 +128,14 @@ public class AttachmentFileHolder implements IFileHolder {
 
     @Override
     public InputStream getStream() throws OXException {
-        return attachment.getData();
+        try {
+            return attachment.getData();
+        } catch (OXException e) {
+            if (CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_RESOURCE.equals(e)) {
+                deleteSafe();
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -117,7 +149,7 @@ public class AttachmentFileHolder implements IFileHolder {
             return null;
         }
 
-        return new AttachmentFileHolderRandomAccess(randomAccessAttachment);
+        return new AttachmentFileHolderRandomAccess(randomAccessAttachment, this);
     }
 
     @Override
@@ -161,15 +193,17 @@ public class AttachmentFileHolder implements IFileHolder {
 
     private static class AttachmentFileHolderRandomAccess implements IFileHolder.RandomAccess, IFileHolder.InputStreamClosure {
 
+        private final AttachmentFileHolder parent;
         private final RandomAccessAttachment attachment;
         private long pos = 0;
 
         /**
          * Initializes a new {@link AttachmentFileHolderRandomAccess}.
          */
-        AttachmentFileHolderRandomAccess(RandomAccessAttachment attachment) {
+        AttachmentFileHolderRandomAccess(RandomAccessAttachment attachment, AttachmentFileHolder parent) {
             super();
             this.attachment = attachment;
+            this.parent = parent;
         }
 
         @Override
@@ -200,6 +234,9 @@ public class AttachmentFileHolder implements IFileHolder {
                 pos += read;
                 return read;
             } catch (OXException e) {
+                if (CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_RESOURCE.equals(e)) {
+                    parent.deleteSafe();
+                }
                 Throwable cause = e.getCause();
                 if (cause instanceof IOException) {
                     throw (IOException) cause;
@@ -227,7 +264,14 @@ public class AttachmentFileHolder implements IFileHolder {
 
         @Override
         public InputStream newStream() throws OXException, IOException {
-            return attachment.getData();
+            try {
+                return attachment.getData();
+            } catch (OXException e) {
+                if (CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_RESOURCE.equals(e)) {
+                    parent.deleteSafe();
+                }
+                throw e;
+            }
         }
     }
 

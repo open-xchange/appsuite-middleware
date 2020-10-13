@@ -6,6 +6,7 @@
     summary: Imports calendar data from iCalendar file.
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/glbQueryParamsAllowEnqueue'
       - in: query
         name: folder
         description: >-

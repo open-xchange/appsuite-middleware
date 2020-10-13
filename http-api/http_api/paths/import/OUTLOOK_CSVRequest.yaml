@@ -21,6 +21,7 @@
       the English, French or German version of Outlook.
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/glbQueryParamsAllowEnqueue'
       - in: query
         name: folder
         description: >-

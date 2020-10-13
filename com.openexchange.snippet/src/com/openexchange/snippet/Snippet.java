@@ -51,6 +51,7 @@ package com.openexchange.snippet;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 
@@ -204,4 +205,11 @@ public interface Snippet {
      * @return The unnamed properties as an unmodifiable {@link Map map}
      */
     Map<String, Object> getUnnamedProperties();
+
+    /**
+     * Gets the error message for this snippet in case an error occurred while loading this snippet.
+     *
+     * @return the optional error message
+     */
+    public Optional<String> getError();
 }
