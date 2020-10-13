@@ -358,7 +358,7 @@ public class InternalEventUpdate implements EventUpdate {
 
     private void ensureConsistency(Event originalEvent, Event updatedEvent, Date timestamp) throws OXException {
         Consistency.adjustAllDayDates(updatedEvent);
-        Consistency.adjustTimeZones(session, calendarUser.getEntity(), updatedEvent, originalEvent);
+        Consistency.adjustTimeZones(session.getSession(), calendarUser.getEntity(), updatedEvent, originalEvent);
         Consistency.adjustRecurrenceRule(updatedEvent);
 
         /*

@@ -1,3 +1,9 @@
+open-xchange-munin-scripts (7.10.3-25) stable; urgency=medium
+
+  * Build for patch 2020-10-12 (5878)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 06 Oct 2020 11:58:23 +0000
+
 open-xchange-munin-scripts (7.10.3-24) stable; urgency=medium
 
   * Build for patch 2020-10-09 (5877)

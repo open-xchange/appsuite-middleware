@@ -53,6 +53,7 @@ import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.trackAttendeeUsage;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -474,9 +475,10 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers & return userized result
          */
+        postProcess(results, false);
         List<ImportResult> importResults = new ArrayList<ImportResult>(results.size());
         for (InternalImportResult result : results) {
-            importResults.add(postProcess(result).getImportResult());
+            importResults.add(result.getImportResult());
         }
         return importResults;
     }
@@ -508,34 +510,43 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     private <T extends InternalCalendarResult> T postProcess(T result, boolean trackAttendeeUsage) {
+        return postProcess(Collections.singletonList(result), trackAttendeeUsage).get(0);
+    }
+
+    private <T extends InternalCalendarResult> List<T> postProcess(List<T> results, boolean trackAttendeeUsage) {
+        if (null == results || results.isEmpty()) {
+            return results;
+        }
         ThreadPools.submitElseExecute(ThreadPools.task(() -> {
-            /*
-             * track attendee usage as needed & notify registered calendar handlers
-             */
-            CalendarEvent calendarEvent = result.getCalendarEvent();
-            if (trackAttendeeUsage) {
-                trackAttendeeUsage(result.getSession(), calendarEvent);
-            }
-            CalendarEventNotificationService notificationService = services.getService(CalendarEventNotificationService.class);
-            if (null != notificationService) {
-                notificationService.notifyHandlers(calendarEvent, false);
-            }
-            /*
-             * handle pending scheduling messages
-             */
-            SchedulingBroker schedulingBroker = services.getService(SchedulingBroker.class);
-            if (null != schedulingBroker) {
-                List<SchedulingMessage> messages = result.getSchedulingMessages();
-                if (null != messages && 0 < messages.size()) {
-                    schedulingBroker.handleScheduling(result.getSession().getSession(), messages);
+            for (T result : results) {
+                /*
+                 * track attendee usage as needed & notify registered calendar handlers
+                 */
+                CalendarEvent calendarEvent = result.getCalendarEvent();
+                if (trackAttendeeUsage) {
+                    trackAttendeeUsage(result.getSession(), calendarEvent);
                 }
-                List<ChangeNotification> notifications = result.getChangeNotifications();
-                if (null != notifications && 0 < notifications.size()) {
-                    schedulingBroker.handleNotifications(result.getSession().getSession(), notifications);
+                CalendarEventNotificationService notificationService = services.getService(CalendarEventNotificationService.class);
+                if (null != notificationService) {
+                    notificationService.notifyHandlers(calendarEvent, false);
+                }
+                /*
+                 * handle pending scheduling messages
+                 */
+                SchedulingBroker schedulingBroker = services.getService(SchedulingBroker.class);
+                if (null != schedulingBroker) {
+                    List<SchedulingMessage> messages = result.getSchedulingMessages();
+                    if (null != messages && 0 < messages.size()) {
+                        schedulingBroker.handleScheduling(result.getSession().getSession(), messages);
+                    }
+                    List<ChangeNotification> notifications = result.getChangeNotifications();
+                    if (null != notifications && 0 < notifications.size()) {
+                        schedulingBroker.handleNotifications(result.getSession().getSession(), notifications);
+                    }
                 }
             }
         }));
-        return result;
+        return results;
     }
 
 }

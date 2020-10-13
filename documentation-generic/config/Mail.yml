@@ -654,7 +654,7 @@ properties:
       related: 
       file: mail.properties
       packageName: open-xchange-core
-      tags: ["Mail", "Signature"]
+      tags: ["Mail", "Signature", "Limit"]
     - key: com.openexchange.mail.signature.maxImageLimit
       description: |
         Specified the maximum amount of images that are allowed in a single HTML mail signature.
@@ -665,7 +665,18 @@ properties:
       related: 
       file: mail.properties
       packageName: open-xchange-core
-      tags: ["Mail", "Signature"]
+      tags: ["Mail", "Signature", "Limit"]
+    - key: com.openexchange.mail.signature.maxRawSnippetSize
+      description: |
+        Specified the maximum allowed size in bytes of a raw signature. This excludes all kinds of attachments (e.g. images).
+      defaultValue: 51200
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Signature", "Limit"]      
     - key: com.openexchange.mail.useStaticDefaultFolders
       description: |
         Defines whether standard folder names should be initialized with the default values or not. 

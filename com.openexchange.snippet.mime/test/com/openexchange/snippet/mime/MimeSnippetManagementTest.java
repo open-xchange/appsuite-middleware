@@ -50,15 +50,12 @@
 package com.openexchange.snippet.mime;
 
 import static com.openexchange.java.Autoboxing.B;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Set;
 import javax.mail.BodyPart;
 import javax.mail.Header;
-import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
@@ -73,12 +70,10 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.snippet.DefaultSnippet;
 
 /**
  * {@link MimeSnippetManagementTest}
@@ -167,13 +162,6 @@ public class MimeSnippetManagementTest {
         Set<String> contentIDs = MimeSnippetManagement.extractContentIDs(htmlContent);
         assertNotNull(contentIDs);
         assertTrue(contentIDs.isEmpty());
-    }
-
-    @Test
-    public void testCreateSnippet_bug52100_ensureCreatedBySetToOriginUser() throws OXException, MessagingException, IOException {
-        DefaultSnippet snippet = MimeSnippetManagement.createSnippet(identifier, creator, "Signature", "io.ox/mail", "signature", false, mimeMessage);
-
-        assertEquals(creator, snippet.getCreatedBy());
     }
 
 }

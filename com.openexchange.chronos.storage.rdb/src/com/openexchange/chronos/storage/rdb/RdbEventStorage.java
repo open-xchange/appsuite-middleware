@@ -452,7 +452,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             for (Event event : events) {
-                MAPPER.validateAll(event);
+                validateEvent(event);
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, accountId);
                 parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), mappedFields);
@@ -482,7 +482,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             for (Event event : events) {
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, accountId);
-                MAPPER.validateAll(event);
+                validateEvent(event);
                 parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), mappedFields);
                 stmt.setLong(parameterIndex++, getRangeFrom(event));
                 stmt.setLong(parameterIndex++, getRangeUntil(event));
@@ -502,7 +502,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            MAPPER.validateAll(event);
+            validateEvent(event);
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), assignedfields);
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, accountId);
@@ -522,7 +522,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            MAPPER.validateAll(event);
+            validateEvent(event);
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), assignedfields);
             stmt.setLong(parameterIndex++, rangeFrom);
             stmt.setLong(parameterIndex++, rangeUntil);
@@ -778,6 +778,22 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
         }
         return entityProcessor.adjustAfterLoad(event);
+    }
+
+    private void validateEvent(Event event) throws OXException {
+        try {
+            MAPPER.validateAll(event);
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof SQLException) {
+                OXException oxe = asOXException((SQLException) cause, MAPPER, event, null, "calendar_event");
+                LOG.warn("Validation failed for event {}", event.getId(), oxe);
+                throw oxe;
+            }
+
+            LOG.warn("Validation failed for event {}", event.getId(), e);
+            throw e;
+        }
     }
 
     /**

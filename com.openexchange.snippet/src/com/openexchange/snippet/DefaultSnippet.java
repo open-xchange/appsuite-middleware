@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.json.JSONException;
@@ -121,6 +122,8 @@ public class DefaultSnippet implements Snippet {
      * The backing properties.
      */
     private final Map<String, Object> properties;
+
+    private String error = null;
 
     /**
      * Initializes a new {@link DefaultSnippet}.
@@ -533,6 +536,20 @@ public class DefaultSnippet implements Snippet {
             }
         }
         return this;
+    }
+
+    /**
+     * Sets the error
+     *
+     * @param error The error to set
+     */
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    @Override
+    public Optional<String> getError() {
+        return Optional.ofNullable(error);
     }
 
     /**

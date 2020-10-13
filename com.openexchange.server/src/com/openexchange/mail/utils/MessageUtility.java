@@ -219,9 +219,26 @@ public final class MessageUtility {
      * @param p The <code>javax.mail.Part</code> object
      * @param ct The part's content type
      * @return The string read from part's input stream or the empty string "" if everything failed
+     * @throws MaxBytesExceededMessagingException If {@link MailProperties#getBodyDisplaySize() default maximum size} is exceeded
      * @throws MessagingException If an error occurs in part's getter methods
      */
-    public static String readMimePart(final Part p, final ContentType ct) throws MessagingException {
+    public static String readMimePart(Part p, ContentType ct) throws MessagingException {
+        return readMimePart(p, ct, MailProperties.getInstance().getBodyDisplaySize());
+    }
+
+    /**
+     * Reads the string out of MIME part's input stream. On first try the input stream retrieved by
+     * <code>javax.mail.Part.getInputStream()</code> is used. If an I/O error occurs (<code>java.io.IOException</code>) then the next try is
+     * with part's raw input stream. If everything fails an empty string is returned.
+     *
+     * @param p The <code>javax.mail.Part</code> object
+     * @param ct The part's content type
+     * @param maxSize The maximum size to read or <code>-1</code>
+     * @return The string read from part's input stream or the empty string "" if everything failed
+     * @throws MaxBytesExceededMessagingException If maximum size is exceeded
+     * @throws MessagingException If an error occurs in part's getter methods
+     */
+    public static String readMimePart(Part p, ContentType ct, long maxSize) throws MessagingException {
         /*
          * Use specified charset if available else use default one
          */
@@ -229,7 +246,7 @@ public final class MessageUtility {
         if (null == charset) {
             charset = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
         }
-        return readMimePart(p, charset);
+        return readMimePart(p, charset, maxSize);
     }
 
     /**
@@ -240,9 +257,26 @@ public final class MessageUtility {
      * @param p The <code>javax.mail.Part</code> object
      * @param charset The charset
      * @return The string read from part's input stream or the empty string "" if everything failed
+     * @throws MaxBytesExceededMessagingException If {@link MailProperties#getBodyDisplaySize() default maximum size} is exceeded
      * @throws MessagingException If an error occurs in part's getter methods
      */
-    public static String readMimePart(final Part p, final String charset) throws MessagingException {
+    public static String readMimePart(Part p, String charset) throws MessagingException {
+        return readMimePart(p, charset, MailProperties.getInstance().getBodyDisplaySize());
+    }
+
+    /**
+     * Reads the string out of MIME part's input stream. On first try the input stream retrieved by
+     * <code>javax.mail.Part.getInputStream()</code> is used. If an I/O error occurs (<code>java.io.IOException</code>) then the next try is
+     * with part's raw input stream. If everything fails an empty string is returned.
+     *
+     * @param p The <code>javax.mail.Part</code> object
+     * @param charset The charset
+     * @param maxSize The maximum size to read or <code>-1</code>
+     * @return The string read from part's input stream or the empty string "" if everything failed
+     * @throws MaxBytesExceededMessagingException If maximum size is exceeded
+     * @throws MessagingException If an error occurs in part's getter methods
+     */
+    public static String readMimePart(Part p, String charset, long maxSize) throws MessagingException {
         try {
             final InputStreamProvider streamProvider = new AbstractInputStreamProvider() {
 
@@ -255,9 +289,9 @@ public final class MessageUtility {
                     }
                 }
             };
-            return readStream(streamProvider, charset);
+            return readStream(streamProvider, charset, false, maxSize);
         } catch (MaxBytesExceededIOException e) {
-            throw new MaxBytesExceededMessagingException(e.getMessage(), e);
+            throw new MaxBytesExceededMessagingException(e);
         } catch (IOException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof MessagingException) {
@@ -298,7 +332,7 @@ public final class MessageUtility {
                 return STR_EMPTY;
             }
             try {
-                return readStream(streamProvider, charset);
+                return readStream(streamProvider, charset, false, maxSize);
             } catch (IOException e1) {
                 LOG.error("", e1);
                 return STR_EMPTY;
