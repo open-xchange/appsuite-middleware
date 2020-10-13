@@ -50,6 +50,7 @@
 package com.openexchange.pns.loader.osgi;
 
 import static com.openexchange.osgi.Tools.withRanking;
+import com.openexchange.java.Strings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -67,8 +68,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.pns.loader.ClientIdentifierProvider;
 import com.openexchange.pns.transport.apn.DefaultApnOptionsProvider;
+import com.openexchange.pns.transport.apns_http2.DefaultApnsHttp2OptionsProvider;
 import com.openexchange.pns.transport.apns_http2.util.ApnOptions;
 import com.openexchange.pns.transport.apns_http2.util.ApnOptionsProvider;
+import com.openexchange.pns.transport.apns_http2.util.ApnsHttp2Options;
+import com.openexchange.pns.transport.apns_http2.util.ApnsHttp2OptionsProvider;
 import com.openexchange.pns.transport.gcm.DefaultGcmOptionsProvider;
 import com.openexchange.pns.transport.gcm.GcmOptions;
 import com.openexchange.pns.transport.gcm.GcmOptionsProvider;
@@ -126,8 +130,8 @@ public class PushSecretsRegisterer implements ServiceTrackerCustomizer<ClientIde
 
         loadAndRegisterGcmOptions(client, props);
         loadAndRegisterApnOptions(client, props);
+        loadAndRegisterApnsHttp2Options(client, props);
 
-        // TODO APNS HTTP2
         // TODO Websockets
         // TODO wns
     }
@@ -185,6 +189,29 @@ public class PushSecretsRegisterer implements ServiceTrackerCustomizer<ClientIde
         }
     }
 
+    private void loadAndRegisterApnsHttp2Options(String client, Properties props) {
+        ServiceRegistration<?> registration = null;
+        try {
+            ApnsHttp2Options apnsHttp2Options = loadApnsHttp2OptionsFromFragment(client, props);
+            if (null == apnsHttp2Options) {
+                // Property keystore is missing and we assume that no APN certificate is wanted.
+                return;
+            }
+
+            DefaultApnsHttp2OptionsProvider apnsHttp2OptionsProvider = new DefaultApnsHttp2OptionsProvider(Collections.singletonMap(client, apnsHttp2Options));
+            registration = context.registerService(ApnsHttp2OptionsProvider.class, apnsHttp2OptionsProvider, withRanking(1000));
+            rememberRegistration(client, registration);
+            registration = null; // Everything went fine
+            LOG.info("Loaded APNs HTTP/2 push configuration for client identifier {}", client);
+        } catch (IOException e) {
+            LOG.error("Failed to load APNs HTTP/2 configuration for push client {}", client, e);
+        } finally {
+            if (null != registration) {
+                registration.unregister();
+            }
+        }
+    }
+
     private void rememberRegistration(String client, ServiceRegistration<?> registration) {
         List<ServiceRegistration<?>> list = serviceRegistrations.get(client);
         if (null == list) {
@@ -224,22 +251,80 @@ public class PushSecretsRegisterer implements ServiceTrackerCustomizer<ClientIde
     }
 
     private static ApnOptions loadApnOptionsFromFragment(String client, Properties props) throws IOException {
-        String filename = props.getProperty("apnKeystoreFile");
-        if (null == filename) {
-            return null;
-        }
-
-        String password = props.getProperty("apnPassword");
-        if (null == password) {
-            throw new IOException(client + ".properties is missing property password for keystore password.");
-        }
-
-        boolean production = Boolean.parseBoolean(props.getProperty("apnProduction", Boolean.TRUE.toString()));
-        try (InputStream is = PushSecretsRegisterer.class.getClassLoader().getResourceAsStream(filename);) {
-            if (null == is) {
-                throw new IOException("Could not load resource " + filename + " from com.openexchange.pns.loader fragment.");
+        String privateKeyFile = props.getProperty("apnPrivatekeyFile");
+        if (Strings.isNotEmpty(privateKeyFile)) {
+            String keyId = props.getProperty("apnKeyId");
+            String teamId = props.getProperty("apnTeamId");
+            if (null == keyId) {
+                throw new IOException(client + ".properties is missing property keyId.");
             }
-            return new ApnOptions(IOUtils.toByteArray(is), password, production, TOPIC_IOS_VANILLA_MAILAPP, client);
+            if (null == teamId) {
+                throw new IOException(client + ".properties is missing property teamId.");
+            }
+            boolean production = Boolean.parseBoolean(props.getProperty("apnProduction", Boolean.TRUE.toString()));
+            try (InputStream is = PushSecretsRegisterer.class.getClassLoader().getResourceAsStream(privateKeyFile);) {
+                if (null == is) {
+                    throw new IOException("Could not load resource " + privateKeyFile + " from com.openexchange.pns.loader fragment.");
+                }
+                return new ApnOptions(IOUtils.toByteArray(is), keyId, teamId, production, TOPIC_IOS_VANILLA_MAILAPP, client);
+            }
         }
+        
+        String filename = props.getProperty("apnKeystoreFile");
+        if (Strings.isNotEmpty(filename)) {
+
+            String password = props.getProperty("apnPassword");
+            if (null == password) {
+                throw new IOException(client + ".properties is missing property password for keystore password.");
+            }
+
+            boolean production = Boolean.parseBoolean(props.getProperty("apnProduction", Boolean.TRUE.toString()));
+            try (InputStream is = PushSecretsRegisterer.class.getClassLoader().getResourceAsStream(filename);) {
+                if (null == is) {
+                    throw new IOException("Could not load resource " + filename + " from com.openexchange.pns.loader fragment.");
+                }
+                return new ApnOptions(IOUtils.toByteArray(is), password, production, TOPIC_IOS_VANILLA_MAILAPP, client);
+            }
+        }
+        return null;
+    }
+
+    private static ApnsHttp2Options loadApnsHttp2OptionsFromFragment(String client, Properties props) throws IOException {
+        String privateKeyFile = props.getProperty("apnsHttp2PrivatekeyFile");
+        if (Strings.isNotEmpty(privateKeyFile)) {
+            String keyId = props.getProperty("apnsHttp2KeyId");
+            String teamId = props.getProperty("apnsHttp2TeamId");
+            if (null == keyId) {
+                throw new IOException(client + ".properties is missing property keyId.");
+            }
+            if (null == teamId) {
+                throw new IOException(client + ".properties is missing property teamId.");
+            }
+            boolean production = Boolean.parseBoolean(props.getProperty("apnsHttp2Production", Boolean.TRUE.toString()));
+            try (InputStream is = PushSecretsRegisterer.class.getClassLoader().getResourceAsStream(privateKeyFile);) {
+                if (null == is) {
+                    throw new IOException("Could not load resource " + privateKeyFile + " from com.openexchange.pns.loader fragment.");
+                }
+                return new ApnsHttp2Options(client, IOUtils.toByteArray(is), keyId, teamId, production, TOPIC_IOS_VANILLA_MAILAPP);
+            }
+        }
+        
+        String filename = props.getProperty("apnsHttp2KeystoreFile");
+        if (Strings.isNotEmpty(filename)) {
+
+            String password = props.getProperty("apnsHttp2Password");
+            if (null == password) {
+                throw new IOException(client + ".properties is missing property password for keystore password.");
+            }
+
+            boolean production = Boolean.parseBoolean(props.getProperty("apnsHttp2Production", Boolean.TRUE.toString()));
+            try (InputStream is = PushSecretsRegisterer.class.getClassLoader().getResourceAsStream(filename);) {
+                if (null == is) {
+                    throw new IOException("Could not load resource " + filename + " from com.openexchange.pns.loader fragment.");
+                }
+                return new ApnsHttp2Options(client, IOUtils.toByteArray(is), password, production, TOPIC_IOS_VANILLA_MAILAPP);
+            }
+        }
+        return null;
     }
 }

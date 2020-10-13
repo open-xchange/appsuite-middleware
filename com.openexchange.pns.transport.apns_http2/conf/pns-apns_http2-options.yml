@@ -15,7 +15,7 @@
 #               For "certificate" the fields "keystore" and "Password" are required, for "jwt"
 #               the fields "privatekey", "keyid" and "teamid" are required.
 #
-#     keystore: <keystore-namek>
+#     keystore: <keystore-name>
 #       String. Specifies the path to the local keystore file (PKCS #12) containing the APNS
 #               certificate and keys for the client-associated iOS application
 #
