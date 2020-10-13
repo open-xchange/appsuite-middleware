@@ -246,7 +246,7 @@ public class FederatedSharingFolders {
                     FileStorageFolderStub folder = new FileStorageFolderStub();
                     folder.setId(jsonFolder.getString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_ID));
                     folder.setName(jsonFolder.getString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_NAME));
-                    folder.setParentId(jsonFolder.getString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_PARENT_ID));
+                    folder.setParentId(jsonFolder.optString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_PARENT_ID, "10"));
 
                     folder.setExists(true);
                     folder.setSubscribed(true);
@@ -288,7 +288,7 @@ public class FederatedSharingFolders {
                     JSONObject jsonFolder = new JSONObject();
                     jsonFolder.put(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_ID, folder.getId());
                     jsonFolder.put(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_NAME, folder.getName());
-                    jsonFolder.put(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_PARENT_ID, parentId);
+                    jsonFolder.put(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_PARENT_ID, String.valueOf(parentId));
                     lastKnownFolders.add(jsonFolder);
                 }
 
@@ -297,7 +297,7 @@ public class FederatedSharingFolders {
                 if (currentKnownFolders != null) {
                     for (int i = 0; i < currentKnownFolders.length(); i++) {
                         JSONObject knownFolder = currentKnownFolders.getJSONObject(i);
-                        if (knownFolder.getInt(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_PARENT_ID) != parentId) {
+                        if (false == Objects.equals(knownFolder.optString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_PARENT_ID, null), String.valueOf(parentId))) {
                             lastKnownFolders.add(knownFolder);
                         }
                     }

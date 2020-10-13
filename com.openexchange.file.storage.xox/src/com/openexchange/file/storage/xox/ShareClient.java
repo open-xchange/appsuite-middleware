@@ -55,6 +55,7 @@ import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -98,6 +99,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
+import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
@@ -129,6 +131,7 @@ public class ShareClient {
 
     private final ApiClient ajaxClient;
     private final Session session;
+    private final FileStorageAccount account;
 
     protected static final String SYSTEM_ROOT_FOLDER_ID = "0";
     protected static final String TREE_ID = FolderStorage.REAL_TREE_ID;
@@ -148,10 +151,13 @@ public class ShareClient {
      * Initializes a new {@link ShareClient}.
      *
      * @param session A session
+     * @param account The underlying file storage account
      * @param client The underlying {@link ApiClient} to use
      */
-    public ShareClient(Session session, ApiClient client) {
+    public ShareClient(Session session, FileStorageAccount account, ApiClient client) {
+        super();
         this.session = Objects.requireNonNull(session, "session must not be null");
+        this.account = account;
         this.ajaxClient = Objects.requireNonNull(client, "client must not be null");
     }
 
@@ -181,6 +187,15 @@ public class ShareClient {
      */
     protected Session getSession() {
         return session;
+    }
+
+    /**
+     * Gets the underlying file storage account
+     * 
+     * @return The file storage account
+     */
+    protected FileStorageAccount getAccount() {
+        return account;
     }
 
     /**
@@ -257,18 +272,8 @@ public class ShareClient {
      */
     public XOXFolder getFolder(String folderId) throws OXException {
         RemoteFolder remoteFolder = getApiClient().execute(new GetFolderCall(folderId));
-        final int userId = getSession().getUserId();
-        XOXFolder folder = new XOXFolder(userId, remoteFolder);
-        XOXEntityInfoLoader loader = new XOXEntityInfoLoader(getApiClient());
-        if (0 < remoteFolder.getCreatedBy()) {
-            EntityInfo entityInfo = loader.load(remoteFolder.getID(), folder.getCreatedBy());
-            folder.setCreatedFrom(entityInfo);
-        }
-        if (0 < remoteFolder.getModifiedBy()) {
-            EntityInfo entityInfo = loader.load(remoteFolder.getID(), folder.getModifiedBy());
-            folder.setModifiedFrom(entityInfo);
-        }
-        return folder;
+        remoteFolder = addEntityInfos(remoteFolder, new XOXEntityInfoLoader(getApiClient()));
+        return new XOXFolderConverter(getSession().getUserId(), account).getStorageFolder(remoteFolder);
     }
 
     /**
@@ -279,23 +284,10 @@ public class ShareClient {
      * @throws OXException If either parent folder does not exist or its subfolders cannot be delivered
      */
     public XOXFolder[] getSubFolders(final String parentId) throws OXException {
-        List<RemoteFolder> folders = getApiClient().execute(new ListFoldersCall(getFolderId(parentId)));
-        final int userId = getSession().getUserId();
-        XOXEntityInfoLoader loader = new XOXEntityInfoLoader(getApiClient());
-        List<XOXFolder> ret = new ArrayList<XOXFolder>(folders.size());
-        for (RemoteFolder folder : folders) {
-            XOXFolder f = new XOXFolder(userId, folder);
-            if (0 < folder.getCreatedBy()) {
-                EntityInfo entityInfo = loader.load(folder.getID(), folder.getCreatedBy());
-                f.setCreatedFrom(entityInfo);
-            }
-            if (0 < folder.getModifiedBy()) {
-                EntityInfo entityInfo = loader.load(folder.getID(), folder.getModifiedBy());
-                f.setModifiedFrom(entityInfo);
-            }
-            ret.add(f);
-        }
-        return ret.toArray(new XOXFolder[ret.size()]);
+        List<RemoteFolder> remoteFolders = getApiClient().execute(new ListFoldersCall(getFolderId(parentId)));
+        remoteFolders = addEntityInfos(remoteFolders, new XOXEntityInfoLoader(getApiClient()));
+        List<XOXFolder> storageFolders = new XOXFolderConverter(getSession().getUserId(), account).getStorageFolders(remoteFolders);
+        return storageFolders.toArray(new XOXFolder[storageFolders.size()]);
     }
 
     /**
@@ -750,4 +742,59 @@ public class ShareClient {
         List<? extends File> resultFiles = result.getResultObjects();
         return new SearchIteratorAdapter<File>((Iterator<File>) resultFiles.iterator(), resultFiles.size());
     }
+
+    //TODO: intergrate "addEntityInfos" methods into loader directly?
+
+    private List<RemoteFolder> addEntityInfos(Collection<RemoteFolder> remoteFolders, XOXEntityInfoLoader loader) {
+        if (null == remoteFolders) {
+            return null;
+        }
+        List<RemoteFolder> enhancedFolders = new ArrayList<RemoteFolder>(remoteFolders.size());
+        for (RemoteFolder remoteFolder : remoteFolders) {
+            enhancedFolders.add(addEntityInfos(remoteFolder, loader));
+        }
+        return enhancedFolders;
+    }
+
+    private RemoteFolder addEntityInfos(RemoteFolder remoteFolder, XOXEntityInfoLoader loader) {
+        if (null == remoteFolder) {
+            return null;
+        }
+        if (null == remoteFolder.getCreatedFrom() && 0 < remoteFolder.getCreatedBy()) {
+            remoteFolder.setCreatedFrom(loader.load("", remoteFolder.getCreatedBy())); //TODO: folderId parameter?!
+        }
+        if (null == remoteFolder.getModifiedFrom() && 0 < remoteFolder.getModifiedBy()) {
+            remoteFolder.setModifiedFrom(loader.load("", remoteFolder.getModifiedBy())); //TODO: folderId parameter?!
+        }
+        if (null != remoteFolder.getPermissions() && 0 < remoteFolder.getPermissions().length) {
+            remoteFolder.setPermissions(addEntityInfos(remoteFolder.getPermissions(), loader));
+        }
+        return remoteFolder;
+    }
+
+    private Permission[] addEntityInfos(Permission[] permissions, XOXEntityInfoLoader loader) {
+        if (null == permissions || 0 == permissions.length) {
+            return permissions;
+        }
+        Permission[] enhancedPermissions = new Permission[permissions.length];
+        for (int i = 0; i < permissions.length; i++) {
+            enhancedPermissions[i] = addEntityInfos(permissions[i], loader);
+        }
+        return enhancedPermissions;
+    }
+
+    private Permission addEntityInfos(Permission permission, XOXEntityInfoLoader loader) {
+        if (null == permission || null != permission.getEntityInfo() || 0 > permission.getEntity() || 0 == permission.getEntity() && false == permission.isGroup()) {
+            return permission;
+        }
+        if (permission.isGroup()) {
+            //TODO
+
+            return permission;
+        }
+        BasicPermission enhancedPermission = new BasicPermission(permission);
+        enhancedPermission.setEntityInfo(loader.load("", permission.getEntity()));
+        return enhancedPermission;
+    }
+
 }

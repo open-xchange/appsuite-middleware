@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folderstorage.filestorage.impl;
+package com.openexchange.folderstorage.filestorage;
 
 import com.openexchange.folderstorage.SortableId;
 

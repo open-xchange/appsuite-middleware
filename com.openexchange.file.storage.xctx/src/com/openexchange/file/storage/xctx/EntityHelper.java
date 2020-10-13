@@ -53,14 +53,11 @@ import static com.openexchange.java.Autoboxing.I;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.folderstorage.BasicPermission;
-import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.EntityInfo;
@@ -70,8 +67,8 @@ import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTargetPath;
+import com.openexchange.share.core.subscription.EntityMangler;
 import com.openexchange.share.core.tools.ShareTool;
-import com.openexchange.tools.id.IDMangler;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
@@ -82,9 +79,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public class EntityHelper {
-
-    private static int NOT_SET = -1;
+public class EntityHelper extends EntityMangler {
 
     private final XctxAccountAccess accountAccess;
 
@@ -94,69 +89,8 @@ public class EntityHelper {
      * @param accountAccess The parent account access
      */
     public EntityHelper(XctxAccountAccess accountAccess) {
-        super();
+        super(accountAccess.getService().getId(), accountAccess.getAccountId());
         this.accountAccess = accountAccess;
-    }
-
-    /**
-     * <i>Mangles</i> the identifiers of the passed {@link EntityInfo} object from the <i>remote</i> context, so that it can be used
-     * within the local session of the storage account's context.
-     * <p/>
-     * The mangled <code>identifier</code> will be constructed based on the remote entity id, while the <code>entity</code> itself will
-     * no longer be set in the resulting entity info object.
-     * 
-     * @param entityInfo The entity info to mangle the identifiers in
-     * @return A new entity info instance with qualified remote identifiers
-     */
-    public EntityInfo mangleRemoteEntity(EntityInfo entityInfo) {
-        if (null == entityInfo) {
-            return null;
-        }
-        String identifier = entityInfo.getIdentifier();
-        if (null != identifier) {
-            identifier = IDMangler.mangle(accountAccess.getService().getId(), accountAccess.getAccountId(), identifier);
-        }
-        String imageUrl = entityInfo.getImageUrl();
-        if (null != imageUrl) {
-            // TODO: encode service/account?
-            imageUrl = null;
-        }
-        EntityInfo mangledEntityInfo = new EntityInfo(identifier, entityInfo.getDisplayName(), entityInfo.getTitle(), entityInfo.getFirstName(), entityInfo.getLastName(), entityInfo.getEmail1(), NOT_SET, imageUrl, entityInfo.getType());
-        if (LinkEntityInfo.class.isInstance(entityInfo)) {
-            LinkEntityInfo linkEntityInfo = (LinkEntityInfo) entityInfo;
-            mangledEntityInfo = new LinkEntityInfo(mangledEntityInfo, linkEntityInfo.getShareUrl(), linkEntityInfo.getPassword(), linkEntityInfo.getExpiryDate(), linkEntityInfo.isIncludeSubfolders());
-        }
-        return mangledEntityInfo;
-    }
-
-    /**
-     * <i>Unmangles</i> the identifiers of the passed {@link EntityInfo} object from the <i>local</i> context, so that it can be used
-     * within the guest session of the foreign context.
-     * <p/>
-     * The <code>identifier</code> found in the passed entity info reference will used to extract the original entity identifier again,
-     * which will get applied in the resulting entity info object.
-     * 
-     * @param entityInfo The entity info to unmangle the identifiers in
-     * @return A new entity info instance with relative identifiers
-     */
-    public EntityInfo unmangleLocalEntity(EntityInfo entityInfo) {
-        if (null == entityInfo) {
-            return null;
-        }
-        String identifier = entityInfo.getIdentifier();
-        if (null != identifier) {
-            List<String> components = IDMangler.unmangle(identifier);
-            if (matchesAccount(components)) {
-                identifier = components.get(2);
-            }
-        }
-        int entity = Integer.parseInt(identifier);
-        String imageUrl = entityInfo.getImageUrl();
-        if (null != imageUrl) {
-            // TODO: decode service/account?
-            imageUrl = null;
-        }
-        return new EntityInfo(identifier, entityInfo.getDisplayName(), entityInfo.getTitle(), entityInfo.getFirstName(), entityInfo.getLastName(), entityInfo.getEmail1(), entity, imageUrl, entityInfo.getType());
     }
 
     /**
@@ -242,182 +176,6 @@ public class EntityHelper {
         return enhancedPermission;
     }
 
-    /**
-     * <i>Mangles</i> the identifiers found in the supplied object permission from the <i>remote</i> context, so that it can be used
-     * within the local session of the storage account's context.
-     * <p/>
-     * The mangled permission's <code>identifier</code> will be constructed based on the remote entity id, while the <code>entity</code>
-     * itself will no longer be set in the resulting permission. The same is done with a potentially set {@link EntityInfo} in the
-     * supplied foreign permission.
-     * 
-     * @param permission The permission to mangle the identifiers in
-     * @return A new permission with qualified remote entity identifiers
-     */
-    public FileStorageObjectPermission mangleRemoteObjectPermission(FileStorageObjectPermission permission) {
-        if (null == permission) {
-            return null;
-        }
-        DefaultFileStorageObjectPermission mangledPermission = new DefaultFileStorageObjectPermission(
-            mangleRemoteEntity(permission.getEntity()), NOT_SET, permission.isGroup(), permission.getPermissions());
-        mangledPermission.setEntityInfo(mangleRemoteEntity(permission.getEntityInfo()));
-        return mangledPermission;
-    }
-
-    /**
-     * <i>Mangles</i> the identifiers found in the supplied folder permission from the <i>remote</i> context, so that it can be used
-     * within the local session of the storage account's context.
-     * <p/>
-     * The mangled permission's <code>identifier</code> will be constructed based on the remote entity id, while the <code>entity</code>
-     * itself will no longer be set in the resulting permission. The same is done with a potentially set {@link EntityInfo} in the
-     * supplied foreign permission.
-     * 
-     * @param permission The permission to mangle the identifiers in
-     * @return A new permission with qualified remote entity identifiers
-     */
-    public FileStoragePermission mangleRemotePermission(FileStoragePermission permission) {
-        if (null == permission) {
-            return null;
-        }
-        DefaultFileStoragePermission mangledPermission = DefaultFileStoragePermission.newInstance(permission);
-        mangledPermission.setIdentifier(mangleRemoteEntity(permission.getEntity()));
-        mangledPermission.setEntity(NOT_SET);
-        mangledPermission.setEntityInfo(mangleRemoteEntity(permission.getEntityInfo()));
-        return mangledPermission;
-    }
-
-    /**
-     * <i>Mangles</i> the identifiers found in the supplied object permissions from the <i>remote</i> context, so that they can be used
-     * within the local session of the storage account's context.
-     * <p/>
-     * For each permission entry, the mangled permission's <code>identifier</code> will be constructed based on the remote entity id,
-     * while the <code>entity</code> itself will no longer be set in the resulting permission. The same is done with a potentially set
-     * {@link EntityInfo} in the supplied foreign permission.
-     * 
-     * @param permissions The permissions to mangle the identifiers in
-     * @return A list with new permissions with qualified remote entity identifiers
-     */
-    public List<FileStorageObjectPermission> mangleRemoteObjectPermissions(List<FileStorageObjectPermission> permissions) {
-        if (null == permissions) {
-            return null;
-        }
-        List<FileStorageObjectPermission> mangledPermissions = new ArrayList<FileStorageObjectPermission>(permissions.size());
-        for (FileStorageObjectPermission permission : permissions) {
-            mangledPermissions.add(mangleRemoteObjectPermission(permission));
-        }
-        return mangledPermissions;
-    }
-    
-    /**
-     * <i>Mangles</i> the identifiers found in the supplied folder permissions from the <i>remote</i> context, so that they can be used
-     * within the local session of the storage account's context.
-     * <p/>
-     * For each permission entry, the mangled permission's <code>identifier</code> will be constructed based on the remote entity id,
-     * while the <code>entity</code> itself will no longer be set in the resulting permission. The same is done with a potentially set
-     * {@link EntityInfo} in the supplied foreign permission.
-     * 
-     * @param permissions The permissions to mangle the identifiers in
-     * @return A list with new permissions with qualified remote entity identifiers
-     */
-    public List<FileStoragePermission> mangleRemotePermissions(List<FileStoragePermission> permissions) {
-        if (null == permissions) {
-            return null;
-        }
-        List<FileStoragePermission> mangledPermissions = new ArrayList<FileStoragePermission>(permissions.size());
-        for (FileStoragePermission permission : permissions) {
-            mangledPermissions.add(mangleRemotePermission(permission));
-        }
-        return mangledPermissions;
-    }
-
-    /**
-     * <i>Unmangles</i> the identifiers found in the supplied folder permission from the <i>local</i> context, so that it can be used
-     * within the guest session of the foreign context.
-     * <p/>
-     * The passed permission's <code>identifier</code> will be used to extract the original entity identifier again, which will get applied
-     * in the resulting permission object. The same is done with the identifiers found in a potentially set {@link EntityInfo} in the
-     * supplied local permission.
-     * 
-     * @param permission The permission to unmangle the identifiers in
-     * @return A new permission with relative entity identifiers
-     */
-    public Permission unmangleLocalPermission(Permission permission) {
-        if (null == permission) {
-            return null;
-        }
-        int entity = unmangleLocalEntity(permission.getIdentifier());
-        BasicPermission unmangledPermission = new BasicPermission(permission);
-        unmangledPermission.setEntity(entity);
-        unmangledPermission.setIdentifier(String.valueOf(entity));
-        unmangledPermission.setEntityInfo(unmangleLocalEntity(permission.getEntityInfo()));
-        return unmangledPermission;
-    }
-
-    /**
-     * <i>Unmangles</i> the identifiers found in the supplied object permission from the <i>local</i> context, so that it can be used
-     * within the guest session of the foreign context.
-     * <p/>
-     * The passed permission's <code>identifier</code> will be used to extract the original entity identifier again, which will get applied
-     * in the resulting permission object. The same is done with the identifiers found in a potentially set {@link EntityInfo} in the
-     * supplied local permission.
-     * 
-     * @param permission The permission to unmangle the identifiers in
-     * @return A new permission with relative entity identifiers
-     */
-    public FileStorageObjectPermission unmangleLocalObjectPermission(FileStorageObjectPermission permission) {
-        if (null == permission) {
-            return null;
-        }
-        int entity = unmangleLocalEntity(permission.getIdentifier());
-        DefaultFileStorageObjectPermission unmangledPermission = new DefaultFileStorageObjectPermission(
-            entity, permission.isGroup(), permission.getPermissions());
-        unmangledPermission.setEntityInfo(unmangleLocalEntity(permission.getEntityInfo()));
-        return unmangledPermission;
-    }
-
-    /**
-     * <i>Unmangles</i> the identifiers found in the supplied list of folder permission from the <i>local</i> context, so that it can be
-     * used within the guest session of the foreign context.
-     * <p/>
-     * The passed permission's <code>identifier</code> will be used to extract the original entity identifier again, which will get applied
-     * in the resulting permission object. The same is done with the identifiers found in a potentially set {@link EntityInfo} in the
-     * supplied local permission.
-     * 
-     * @param permissions The permissions to unmangle the identifiers in
-     * @return A list with new permissions with relative entity identifiers
-     */
-    public Permission[] unmangleLocalPermissions(Permission[] permissions) {
-        if (null == permissions) {
-            return null;
-        }
-        Permission[] unmangledPermissions = new Permission[permissions.length];
-        for (int i = 0; i < permissions.length; i++) {
-            unmangledPermissions[i] = unmangleLocalPermission(permissions[i]);
-        }
-        return unmangledPermissions;
-    }
-
-    /**
-     * <i>Unmangles</i> the identifiers found in the supplied list of object permission from the <i>local</i> context, so that it can be
-     * used within the guest session of the foreign context.
-     * <p/>
-     * The passed permission's <code>identifier</code> will be used to extract the original entity identifier again, which will get applied
-     * in the resulting permission object. The same is done with the identifiers found in a potentially set {@link EntityInfo} in the
-     * supplied local permission.
-     * 
-     * @param permissions The permissions to unmangle the identifiers in
-     * @return A list with new permissions with relative entity identifiers
-     */
-    public List<FileStorageObjectPermission> unmangleLocalObjectPermissions(List<FileStorageObjectPermission> permissions) {
-        if (null == permissions) {
-            return null;
-        }
-        List<FileStorageObjectPermission> unmangledPermissions = new ArrayList<FileStorageObjectPermission>(permissions.size());
-        for (FileStorageObjectPermission permission : permissions) {
-            unmangledPermissions.add(unmangleLocalObjectPermission(permission));
-        }
-        return unmangledPermissions;
-    }
-
     private String generateShareLink(GuestInfo guest) {
         try {
             if (null != guest.getLinkTarget()) {
@@ -429,13 +187,6 @@ public class EntityHelper {
             getLogger(EntityHelper.class).warn("Error generating share link for {}", guest, e);
             return null;
         }
-    }
-
-    private String mangleRemoteEntity(int entity) {
-        if (0 > entity) {
-            return null;
-        }
-        return IDMangler.mangle(accountAccess.getService().getId(), accountAccess.getAccountId(), String.valueOf(entity));
     }
 
     /**
@@ -515,26 +266,6 @@ public class EntityHelper {
     
     private EntityInfo getEntityInfo(Group group) {
         return new EntityInfo(String.valueOf(group.getIdentifier()), group.getDisplayName(), null, null, null, null, group.getIdentifier(), null, Type.GROUP);
-    }
-
-    private int unmangleLocalEntity(String identifier) {
-        if (null != identifier) {
-            List<String> components = IDMangler.unmangle(identifier);
-            if (matchesAccount(components)) {
-                try {
-                    return Integer.parseInt(components.get(2));
-                } catch (NumberFormatException e) {
-                    getLogger(EntityHelper.class).warn("Unexpected error extracting entity identifier from {}", identifier, e);
-                }
-            }
-        }
-        return -1;
-    }
-
-    private boolean matchesAccount(List<String> unmangledComponents) {
-        return null != unmangledComponents && 3 == unmangledComponents.size() && 
-            Objects.equals(unmangledComponents.get(0), accountAccess.getService().getId()) && 
-            Objects.equals(unmangledComponents.get(1), accountAccess.getAccountId());
     }
 
 }

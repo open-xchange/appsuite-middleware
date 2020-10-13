@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Core Bundle for Share
 Bundle-SymbolicName: com.openexchange.share.core
+Automatic-Module-Name: com.openexchange.share.core
 Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -23,6 +24,7 @@ Import-Package: com.google.common.collect,
  com.openexchange.file.storage.generic,
  com.openexchange.folderstorage,
  com.openexchange.group,
+ com.openexchange.groupware,
  com.openexchange.groupware.contact,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
