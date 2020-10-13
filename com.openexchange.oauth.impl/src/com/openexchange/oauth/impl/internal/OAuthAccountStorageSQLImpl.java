@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.impl.internal;
 
+import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.database.Databases.startTransaction;
@@ -149,12 +150,12 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     }
 
     @Override
-    public OAuthAccount getAccount(Session session, int accountId) throws OXException {
+    public OAuthAccount getAccount(Session session, int accountId, boolean loadSecrets) throws OXException {
         Connection connection = (Connection) session.getParameter("__connection");
         try {
             if (connection != null && Databases.isInTransaction(connection)) {
                 // Given connection is already in transaction. Invoke & return immediately.
-                return getAccount(session, accountId, connection);
+                return getAccount(session, accountId, loadSecrets, connection);
             }
         } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -163,7 +164,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         final Context context = getContext(session.getContextId());
         connection = getConnection(true, context);
         try {
-            return getAccount(session, accountId, connection);
+            return getAccount(session, accountId, loadSecrets, connection);
         } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -250,8 +251,8 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         int contextId = session.getContextId();
         int userId = session.getUserId();
         Context ctx = getContext(contextId);
-        Connection writeCon = getConnection(false, ctx);
         int rollback = 0;
+        Connection writeCon = getConnection(false, ctx);
         try {
             /*
              * Create UPDATE command
@@ -334,16 +335,16 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     }
 
     @Override
-    public OAuthAccount findByUserIdentity(Session session, String userIdentity, String serviceId) throws OXException {
+    public OAuthAccount findByUserIdentity(Session session, String userIdentity, String serviceId, boolean loadSecrets) throws OXException {
         final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
         final OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
         int contextId = session.getContextId();
         int userId = session.getUserId();
         final Context context = getContext(contextId);
-        Connection connection = getConnection(true, context);
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        Connection connection = getConnection(true, context);
         try {
             stmt = connection.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ? AND identity = ?");
             stmt.setInt(1, contextId);
@@ -360,15 +361,17 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             account.setId(accountId);
             String displayName = rs.getString(2);
             account.setDisplayName(displayName);
-            try {
-                account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, accountId)));
-                account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, accountId)));
-            } catch (OXException e) {
-                if (CryptoErrorMessage.BadPassword.equals(e)) {
-                    throw e;
-                }
+            if (loadSecrets) {
+                try {
+                    account.setToken(decryptToken(rs.getString(3), accountId, session, encryptionService));
+                    account.setSecret(decryptSecret(rs.getString(4), accountId, session, encryptionService));
+                } catch (OXException e) {
+                    if (CryptoErrorMessage.BadPassword.equals(e)) {
+                        throw e;
+                    }
 
-                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e.getCause(), displayName, I(accountId));
+                    throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e.getCause(), displayName, I(accountId));
+                }
             }
 
             account.setMetaData(registry.getService(rs.getString(5), userId, contextId));
@@ -397,10 +400,10 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         int userId = session.getUserId();
         int contextId = session.getContextId();
         final Context context = getContext(contextId);
-        final Connection con = getConnection(true, context);
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
-
+        final Connection con = getConnection(true, context);
         try {
             stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ?");
             stmt.setInt(1, contextId);
@@ -417,8 +420,8 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     account.setId(rs.getInt(1));
                     account.setDisplayName(rs.getString(2));
                     try {
-                        account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
-                        account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
+                        account.setToken(decryptToken(rs.getString(3), account.getId(), session, encryptionService));
+                        account.setSecret(decryptSecret(rs.getString(4), account.getId(), session, encryptionService));
                     } catch (OXException e) {
                         // Log for debug purposes and ignore...
                         LOG.debug("", e);
@@ -454,9 +457,10 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         int userId = session.getUserId();
         int contextId = session.getContextId();
         final Context context = getContext(contextId);
-        final Connection con = getConnection(true, context);
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        final Connection con = getConnection(true, context);
         try {
             stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
             stmt.setInt(1, contextId);
@@ -474,8 +478,8 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     account.setId(rs.getInt(1));
                     account.setDisplayName(rs.getString(2));
                     try {
-                        account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
-                        account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
+                        account.setToken(decryptToken(rs.getString(3), account.getId(), session, encryptionService));
+                        account.setSecret(decryptSecret(rs.getString(4), account.getId(), session, encryptionService));
                     } catch (OXException x) {
                         // Log for debug purposes and ignore...
                         LOG.debug("{}", x.getMessage(), x);
@@ -509,8 +513,8 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         b.append("UPDATE oauthAccounts SET ").append(customizationNote.field).append("= ? WHERE cid = ? AND id = ?");
 
         final Context context = getContext(customizationNote.cid);
-        Connection con = null;
         PreparedStatement stmt = null;
+        Connection con = null;
         try {
             con = getConnection(false, context);
             stmt = con.prepareStatement(b.toString());
@@ -530,8 +534,8 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     public boolean hasEncryptedItems(ServerSession session) throws OXException {
         final int contextId = session.getContextId();
         final Context context = getContext(contextId);
-        final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
+        final Connection con = getConnection(true, context);
         try {
             stmt = con.prepareStatement("SELECT 1 FROM oauthAccounts WHERE cid = ? AND user = ? LIMIT 1");
             stmt.setInt(1, contextId);
@@ -547,12 +551,17 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
 
     @Override
     public void migrate(String oldSecret, String newSecret, ServerSession session) throws OXException {
+        boolean migrate = true;
+        if (!migrate) {
+            return;
+        }
+
         final CryptoService cryptoService = Services.getService(CryptoService.class);
         final int contextId = session.getContextId();
         final Context context = getContext(contextId);
-        final Connection con = getConnection(false, context);
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        final Connection con = getConnection(false, context);
         try {
             stmt = con.prepareStatement("SELECT id, accessToken, accessSecret FROM oauthAccounts WHERE cid = ? AND user = ?");
             stmt.setInt(1, contextId);
@@ -582,13 +591,14 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     accounts.add(account);
                 }
             } while (rs.next());
-            closeSQLStuff(rs, stmt);
             if (accounts.isEmpty()) {
                 return;
             }
             /*
              * Update
              */
+            closeSQLStuff(rs, stmt);
+            rs = null; stmt = null;
             stmt = con.prepareStatement("UPDATE oauthAccounts SET accessToken = ?, accessSecret = ? WHERE cid = ? AND user = ? AND id = ?");
             stmt.setInt(3, contextId);
             stmt.setInt(4, session.getUserId());
@@ -612,10 +622,10 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         final CryptoService cryptoService = Services.getService(CryptoService.class);
         final int contextId = session.getContextId();
         final Context context = getContext(contextId);
-        final Connection con = getConnection(false, context);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         Boolean committed = null;
+        final Connection con = getConnection(false, context);
         try {
             stmt = con.prepareStatement("SELECT id, accessToken, accessSecret FROM oauthAccounts WHERE cid = ? AND user = ?");
             stmt.setInt(1, contextId);
@@ -668,10 +678,13 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (null != committed && !committed.booleanValue()) {
-                rollback(con);
-            }
             closeSQLStuff(rs, stmt);
+            if (null != committed) {
+                if (!committed.booleanValue()) {
+                    rollback(con);
+                }
+                autocommit(con);
+            }
             provider.releaseWriteConnection(context, con);
         }
     }
@@ -681,10 +694,10 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         final CryptoService cryptoService = Services.getService(CryptoService.class);
         final int contextId = session.getContextId();
         final Context context = getContext(contextId);
-        final Connection con = getConnection(false, context);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         Boolean committed = null;
+        final Connection con = getConnection(false, context);
         try {
             stmt = con.prepareStatement("SELECT id, accessToken, accessSecret FROM oauthAccounts WHERE cid = ? AND user = ?");
             stmt.setInt(1, contextId);
@@ -735,10 +748,13 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (null != committed && !committed.booleanValue()) {
-                rollback(con);
-            }
             closeSQLStuff(rs, stmt);
+            if (null != committed) {
+                if (!committed.booleanValue()) {
+                    rollback(con);
+                }
+                autocommit(con);
+            }
             provider.releaseWriteConnection(context, con);
         }
     }
@@ -825,7 +841,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      * @throws SQLException
      * @throws OXException
      */
-    private OAuthAccount getAccount(Session session, int accountId, Connection connection) throws SQLException, OXException {
+    private OAuthAccount getAccount(Session session, int accountId, boolean loadSecrets, Connection connection) throws SQLException, OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -844,16 +860,18 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             account.setId(accountId);
             String displayName = rs.getString(1);
             account.setDisplayName(displayName);
-            try {
-                SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
-                account.setToken(encryptionService.decrypt(session, rs.getString(2), new PWUpdate("accessToken", contextId, accountId)));
-                account.setSecret(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessSecret", contextId, accountId)));
-            } catch (OXException e) {
-                if (CryptoErrorMessage.BadPassword.equals(e)) {
-                    throw e;
-                }
+            if (loadSecrets) {
+                try {
+                    SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
+                    account.setToken(decryptToken(rs.getString(2), accountId, session, encryptionService));
+                    account.setSecret(decryptSecret(rs.getString(3), accountId, session, encryptionService));
+                } catch (OXException e) {
+                    if (CryptoErrorMessage.BadPassword.equals(e)) {
+                        throw e;
+                    }
 
-                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e.getCause(), displayName, I(accountId));
+                    throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e.getCause(), displayName, I(accountId));
+                }
             }
 
             if (Strings.isEmpty(account.getSecret())) {
@@ -911,14 +929,24 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      * @throws OXException
      */
     private String getUserIdentity(Session session, String serviceId, int accountId, Connection connection) throws OXException {
+        if (connection != null) {
+            // Use given connection
+            return doGetUserIdentity(session, serviceId, accountId, connection);
+        }
+
+        // Acquire connection...
+        final Context context = getContext(session.getContextId());
+        Connection con = getConnection(true, context);
+        try {
+            return doGetUserIdentity(session, serviceId, accountId, con);
+        } finally {
+            provider.releaseReadConnection(context, con);
+        }
+    }
+
+    private String doGetUserIdentity(Session session, String serviceId, int accountId, Connection connection) throws OXException {
         int contextId = session.getContextId();
         int userId = session.getUserId();
-        final Context context = getContext(contextId);
-        boolean releaseConnection = false;
-        if (connection == null) {
-            connection = getConnection(true, context);
-            releaseConnection = true;
-        }
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -929,17 +957,11 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             stmt.setString(3, serviceId);
             stmt.setInt(4, accountId);
             rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return null;
-            }
-            return rs.getString(1);
+            return rs.next() ? rs.getString(1) : null;
         } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            if (releaseConnection) {
-                provider.releaseReadConnection(context, connection);
-            }
         }
     }
 
@@ -1038,6 +1060,18 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
         final SecretEncryptionService<PWUpdate> service = Services.getService(SecretEncryptionFactoryService.class).createService(this);
         return service.encrypt(session, toEncrypt);
+    }
+
+    private static String decryptToken(String encrypted, int accountId, Session session, SecretEncryptionService<PWUpdate> encryptionService) throws OXException {
+        return decrypt(true, encrypted, accountId, session, encryptionService);
+    }
+
+    private static String decryptSecret(String encrypted, int accountId, Session session, SecretEncryptionService<PWUpdate> encryptionService) throws OXException {
+        return decrypt(false, encrypted, accountId, session, encryptionService);
+    }
+
+    private static String decrypt(boolean token, String encrypted, int accountId, Session session, SecretEncryptionService<PWUpdate> encryptionService) throws OXException {
+        return encryptionService.decrypt(session, encrypted, new PWUpdate(token ? "accessToken" : "accessSecret", session.getContextId(), accountId));
     }
 
     /**
