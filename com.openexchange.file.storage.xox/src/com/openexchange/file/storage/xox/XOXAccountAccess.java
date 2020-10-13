@@ -217,12 +217,12 @@ public class XOXAccountAccess implements CapabilityAware {
         }
 
         try {
-            shareClient = new ShareClient(session, clientFactory.getApiClient(session, shareUrl, credentials));
+            shareClient = new ShareClient(session, account, clientFactory.getApiClient(session, shareUrl, credentials));
             final Credentials cachedCredentials = shareClient.getApiClient().getCredentials();
             if(!Objects.equals(cachedCredentials, credentials)) {
                 //The credentials changed; we need to close the current client and create a new one
                 clientFactory.close(shareClient.getApiClient());
-                shareClient = new ShareClient(session, clientFactory.getApiClient(session, shareUrl, credentials));
+                shareClient = new ShareClient(session, account, clientFactory.getApiClient(session, shareUrl, credentials));
             }
             //the client might just come from a cache so we ensure that we can access the remote by performing a ping
             shareClient.ping();
