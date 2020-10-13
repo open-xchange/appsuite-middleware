@@ -95,12 +95,14 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
             //Clear last recent error in order to try the new configuration
             ((SharingFileStorageService)fileStorageService).resetRecentError(account.getId(), session);
         }
-        final boolean doConnectionCheck = account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension;
+        final boolean doConnectionCheck = account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension && account.getConfiguration() != null;
 
         //load existing account for resetting if the connection check failed
         FileStorageAccount existingAccount = doConnectionCheck ? account.getFileStorageService().getAccountManager().getAccount(account.getId(), session) : null;
-        //Preserve account meta data when updating
-        FileStorageAccountMetaDataUtil.copy(existingAccount, account);
+        if(existingAccount != null) {
+            //Preserve account meta data when updating
+            FileStorageAccountMetaDataUtil.copy(existingAccount, account);
+        }
 
         //perform update
         account.getFileStorageService().getAccountManager().updateAccount(account, session);
