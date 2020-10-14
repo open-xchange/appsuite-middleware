@@ -49,8 +49,11 @@
 
 package com.openexchange.groupware.tools.mappings.json;
 
+import java.util.List;
 import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
+import com.openexchange.session.Session;
 
 /**
  * {@link ListItemMapping}
@@ -92,5 +95,18 @@ public abstract class ListItemMapping<T,O,I> extends ListMapping<T,O> {
      * @throws JSONException
      */
     public abstract I serialize(T from, TimeZone timeZone) throws JSONException;
+
+    @Override
+    public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
+        List<T> value = get(from);
+        if (null == value) {
+            return null;
+        }
+        JSONArray jsonArray = new JSONArray(value.size());
+        for (int i = 0; i < value.size(); i++) {
+            jsonArray.add(i, serialize(value.get(i), timeZone));
+        }
+        return jsonArray;
+    }
 
 }
