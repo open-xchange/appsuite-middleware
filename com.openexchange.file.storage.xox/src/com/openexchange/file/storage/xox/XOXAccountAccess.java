@@ -184,8 +184,7 @@ public class XOXAccountAccess implements CapabilityAware {
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        connect();
-        return getFolderAccess().getRootFolder();
+        return XOXFolderAccess.getRootFolder(session, account);
     }
 
     @Override
@@ -227,7 +226,7 @@ public class XOXAccountAccess implements CapabilityAware {
             //the client might just come from a cache so we ensure that we can access the remote by performing a ping
             shareClient.ping();
         } catch (OXException e) {
-            throw errorHandler.handleException(e);
+            errorHandler.handleException(e);
         }
         isConnected = true;
     }
@@ -247,6 +246,7 @@ public class XOXAccountAccess implements CapabilityAware {
     public boolean ping() throws OXException {
         try {
             connect();
+            errorHandler.assertNoRecentException();
             shareClient.ping();
             return true;
         } finally {

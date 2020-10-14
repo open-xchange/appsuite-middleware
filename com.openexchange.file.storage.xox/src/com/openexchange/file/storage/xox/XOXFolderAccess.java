@@ -143,6 +143,24 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
         return client.getInfostoreQuota();
     }
 
+    /**
+     * Returns a stub root folder
+     *
+     * @param session The session
+     * @param account The account
+     * @return The stub
+     * @throws OXException
+     */
+    public static FileStorageFolder getRootFolder(Session session, FileStorageAccount account) {
+        XOXFolder rootFolder = new XOXFolder(session.getUserId());
+        rootFolder.setRootFolder(true);
+        rootFolder.setHoldsFiles(true);
+        rootFolder.setHoldsFolders(true);
+        rootFolder.setType(FileStorageFolderType.HOME_DIRECTORY);
+        rootFolder.setName(account.getDisplayName());
+        return rootFolder;
+    }
+
     @Override
     public boolean exists(String folderId) throws OXException {
         if (isRoot(folderId)) {
@@ -191,13 +209,7 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        XOXFolder rootFolder = new XOXFolder(session.getUserId());
-        rootFolder.setRootFolder(true);
-        rootFolder.setHoldsFiles(true);
-        rootFolder.setHoldsFolders(true);
-        rootFolder.setType(FileStorageFolderType.HOME_DIRECTORY);
-        rootFolder.setName(account.getDisplayName());
-        return rootFolder;
+        return getRootFolder(session, account);
     }
 
     @Override
