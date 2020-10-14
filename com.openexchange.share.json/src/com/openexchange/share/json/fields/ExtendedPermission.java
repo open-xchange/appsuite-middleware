@@ -117,14 +117,8 @@ public abstract class ExtendedPermission {
             if (linkEntityInfo.isIncludeSubfolders()) {
                 jsonObject.put("includeSubfolders", true);
             }
-        } else if (EntityInfo.Type.GUEST.equals(entityInfo.getType())) {
-            jsonObject.put("type", "guest");
-            addContactInfo(jsonObject, entityInfo);
-        } else if (EntityInfo.Type.GROUP.equals(entityInfo.getType())) {
-            jsonObject.put("type", "group");
-            addContactInfo(jsonObject, entityInfo);
         } else {
-            jsonObject.put("type", "user");
+            jsonObject.putOpt("type", null != entityInfo.getType() ? String.valueOf(entityInfo.getType()).toLowerCase() : null);
             addContactInfo(jsonObject, entityInfo);
         }
     }

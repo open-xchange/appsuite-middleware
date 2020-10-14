@@ -106,7 +106,8 @@ public class EntityInfoLoader {
         String displayName = user.getDisplayName();
         String email1 = user.getMail();
         if (user.isGuest()) {
-            return new EntityInfo(identifier, displayName, null, user.getGivenName(), user.getSurname(), email1, user.getId(), null, Type.GUEST);
+            EntityInfo.Type type = user.isAnonymousGuest() ? Type.ANONYMOUS : Type.GUEST;
+            return new EntityInfo(identifier, displayName, null, user.getGivenName(), user.getSurname(), email1, user.getId(), null, type);
         }
         Contact contact;
         Type type;
