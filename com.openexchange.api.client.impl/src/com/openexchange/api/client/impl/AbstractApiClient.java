@@ -181,7 +181,7 @@ public abstract class AbstractApiClient implements ApiClient {
     @Override
     public <T> T execute(HttpRequestBase request, HttpResponseParser<T> parser) throws OXException {
         if (isClosed.get()) {
-            throw ApiClientExceptions.UNEXPECTED_ERROR.create("Client is closing.");
+            throw ApiClientExceptions.SESSION_EXPIRED.create();
         }
         Checks.checkSameOrigin(request, loginLink);
 
@@ -527,7 +527,7 @@ public abstract class AbstractApiClient implements ApiClient {
             content = ApiClientUtils.getBody(response);
         }
 
-        LOGGER.trace("Request executed: {}. Received the following content:\n\n{}\n", request, content);
+        LOGGER.trace("Request executed: {}. Received the following content:\n\n{}\n", request, content, new OXException());
     }
 
     /**

@@ -98,7 +98,7 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
         final boolean doConnectionCheck = account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension && account.getConfiguration() != null;
 
         //load existing account for resetting if the connection check failed
-        FileStorageAccount existingAccount = doConnectionCheck ? account.getFileStorageService().getAccountManager().getAccount(account.getId(), session) : null;
+        FileStorageAccount existingAccount = account.getFileStorageService().getAccountManager().getAccount(account.getId(), session);
         if(existingAccount != null) {
             //Preserve account meta data when updating
             FileStorageAccountMetaDataUtil.copy(existingAccount, account);

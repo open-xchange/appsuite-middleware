@@ -204,7 +204,7 @@ public class ShareClient {
      * @throws OXException if the ping failed
      */
     public void ping() throws OXException {
-        ajaxClient.execute(new WhoamiCall());
+        getApiClient().execute(new WhoamiCall());
     }
 
     /**

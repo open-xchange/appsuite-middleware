@@ -195,7 +195,7 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
         try {
             this.guestSession = ServerSessionAdapter.valueOf(services.getServiceSafe(XctxSessionManager.class).getGuestSession(session, baseToken, password));
         } catch (OXException e) {
-            throw errorHandler.handleException(e);
+            errorHandler.handleException(e);
         }
 
         isConnected = true;

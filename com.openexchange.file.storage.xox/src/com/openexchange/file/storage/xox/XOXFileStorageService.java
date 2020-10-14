@@ -241,7 +241,7 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
             if (!getAccountAccess(account.getId(), session).ping()) {
                 throw XOXFileStorageExceptionCodes.PING_FAILED.create();
             }
-        } catch (OXException e) {
+        } catch (Exception e) {
             throw XOXFileStorageExceptionCodes.PING_FAILED.create(e.getCause(), (Object[]) null);
         }
     }
