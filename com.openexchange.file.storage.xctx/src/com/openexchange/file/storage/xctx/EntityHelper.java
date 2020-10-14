@@ -260,7 +260,7 @@ public class EntityHelper extends EntityMangler {
     }
     
     private EntityInfo getEntityInfo(User user) {
-        EntityInfo.Type type = user.isGuest() ? Type.GUEST : Type.USER;
+        EntityInfo.Type type = user.isGuest() ? (user.isAnonymousGuest() ? Type.ANONYMOUS : Type.GUEST) : Type.USER;
         return new EntityInfo(String.valueOf(user.getId()), user.getDisplayName(), null, user.getGivenName(), user.getSurname(), user.getMail(), user.getId(), null, type);
     }
     

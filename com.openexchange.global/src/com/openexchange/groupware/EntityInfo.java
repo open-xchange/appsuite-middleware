@@ -50,10 +50,9 @@
 package com.openexchange.groupware;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 
 /**
@@ -149,7 +148,7 @@ public class EntityInfo implements Serializable, Cloneable {
         JSONObject json = new JSONObject();
         try {
             json.put(IDENTIFER, identifier);
-            json.put(TYPE, type.getType());
+            json.put(TYPE, String.valueOf(type).toLowerCase());
             json.put(DISPLAY_NAME, displayName);
             if (0 < entity) {
                 json.put(ENTITY, entity);
@@ -181,17 +180,17 @@ public class EntityInfo implements Serializable, Cloneable {
         if (JSONObject.NULL.equals(entityInfo)) {
             return null;
         }
-        String identifier = entityInfo.optString(IDENTIFER);
-        String displayName = entityInfo.optString(DISPLAY_NAME);
-        int entity = entityInfo.has(ENTITY) ? entityInfo.optInt(ENTITY) : -1;
-        Type type = Type.forName(entityInfo.optString(TYPE));
+        String identifier = entityInfo.optString(IDENTIFER, null);
+        String displayName = entityInfo.optString(DISPLAY_NAME, null);
+        int entity = entityInfo.optInt(ENTITY, -1);
+        Type type = Enums.parse(Type.class, entityInfo.optString(TYPE, null), null);
         JSONObject contact = entityInfo.optJSONObject(CONTACT);
         if (false == JSONObject.NULL.equals(contact)) {
-            String title = entityInfo.optString(TITLE);
-            String firstName = entityInfo.optString(FIRST_NAME);
-            String lastName = entityInfo.optString(LAST_NAME);
-            String email1 = entityInfo.optString(EMAIL1);
-            String imageUrl = entityInfo.optString(IMAGE_URL);
+            String title = entityInfo.optString(TITLE, null);
+            String firstName = entityInfo.optString(FIRST_NAME, null);
+            String lastName = entityInfo.optString(LAST_NAME, null);
+            String email1 = entityInfo.optString(EMAIL1, null);
+            String imageUrl = entityInfo.optString(IMAGE_URL, null);
             return new EntityInfo(identifier, displayName, title, firstName, lastName, email1, entity, imageUrl, type);
         }
         return new EntityInfo(identifier, displayName, null, null, null, null, entity, null, type);
@@ -204,35 +203,28 @@ public class EntityInfo implements Serializable, Cloneable {
     
     @Override
     public String toString() {
-        return "EntityInfo [" + identifier + "," + title + "," + displayName + "," + email1 + "," + entity + "," + type.getType() + "]";
+        return "EntityInfo [" + identifier + "," + title + "," + displayName + "," + email1 + "," + entity + "," + type + "]";
     }
 
     public enum Type {
-        USER("user"),
-        GUEST("guest"),
-        GROUP("group"),
+        /**
+         * An internal user
+         */
+        USER,
+        /**
+         * An internal group
+         */
+        GROUP,
+        /**
+         * A named external guest
+         */
+        GUEST,
+        /**
+         * An anonymous external guest
+         */
+        ANONYMOUS,
+
         ;
-
-        private static final Map<String, Type> name2Type = new HashMap<String, Type>();
-        static {
-            for (Type t : values()) {
-                name2Type.put(t.type, t);
-            }
-        }
-
-        private final String type;
-
-        private Type(String type) {
-            this.type = type;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public static Type forName(String name) {
-            return name2Type.get(name);
-        }
     }
 
 }

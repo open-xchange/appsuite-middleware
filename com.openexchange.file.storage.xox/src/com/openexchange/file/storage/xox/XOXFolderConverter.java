@@ -67,6 +67,7 @@ import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.LinkEntityInfo;
 import com.openexchange.groupware.EntityInfo.Type;
+import com.openexchange.java.Enums;
 import com.openexchange.share.core.subscription.EntityMangler;
 
 /**
@@ -162,7 +163,7 @@ public class XOXFolderConverter {
         if (null == extendedPermission) {
             return null;
         }
-        Type type = getEntityInfoType(extendedPermission.getType());
+        Type type = Enums.parse(EntityInfo.Type.class, extendedPermission.getType(), null);
         Contact contact = extendedPermission.getContact();
         EntityInfo entityInfo;
         if (null == contact) {
@@ -176,22 +177,6 @@ public class XOXFolderConverter {
             entityInfo = new LinkEntityInfo(entityInfo, extendedPermission.getShareUrl(), extendedPermission.getPassword(), extendedPermission.getExpiryDate(), extendedPermission.isInherited());
         }
         return entityInfo;
-    }
-
-    private static EntityInfo.Type getEntityInfoType(String extendedPermissionType) {
-        if (null == extendedPermissionType) {
-            return null;
-        }
-        switch (extendedPermissionType) {
-            case "guest":
-            case "anonymous":
-                return Type.GUEST;
-            case "group":
-                return Type.GROUP;
-            case "user":
-            default:
-                return Type.USER;
-        }
     }
 
     private static ExtendedPermission findMatching(ExtendedPermission[] extendedPermissions, FileStoragePermission permission) {
