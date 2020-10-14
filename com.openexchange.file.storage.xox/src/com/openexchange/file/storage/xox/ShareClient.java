@@ -104,15 +104,13 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStorageGuestPermission;
-import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.Range;
-import com.openexchange.folderstorage.BasicGuestPermission;
 import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.groupware.EntityInfo;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Strings;
@@ -139,7 +137,7 @@ public class ShareClient {
     protected static final String TIMEZONE_UTC = "UTC";
     protected static final String SEARCH_FACET_FOLDER = "folder";
     protected static final String SEARCH_FACET_ACCOUNT = "account";
-    protected static final String INFOSTORE = "infostore";
+    protected static final String INFOSTORE = Module.INFOSTORE.getName();
     protected static final String INFOSTORE_ACCOUNT_ID = "com.openexchange.infostore://infostore";
 
     protected static final List<Field> ALL_FIELDS;
@@ -231,36 +229,6 @@ public class ShareClient {
         return null;
     }
 
-    /**
-     * Parses a list for {@link FileStoragePermissions} into a list of {@link Permission}
-     * parsePermission
-     *
-     * @param fileStoragePermissions The permissions to transform
-     * @return An array of transformed permissions
-     */
-    protected static Permission[] parsePermission(List<FileStoragePermission> fileStoragePermissions) {
-        if (null == fileStoragePermissions) {
-            return null;
-        }
-        List<Permission> permissions = new ArrayList<Permission>(fileStoragePermissions.size());
-        for (FileStoragePermission fileStoragePermission : fileStoragePermissions) {
-            Permission permission;
-            if (FileStorageGuestPermission.class.isInstance(fileStoragePermission)) {
-                BasicGuestPermission guestPermission = new BasicGuestPermission();
-                guestPermission.setRecipient(((FileStorageGuestPermission) fileStoragePermission).getRecipient());
-                permission = guestPermission;
-            } else {
-                permission = new BasicPermission();
-            }
-            permission.setEntity(fileStoragePermission.getEntity());
-            permission.setGroup(fileStoragePermission.isGroup());
-            permission.setAdmin(fileStoragePermission.isAdmin());
-            permission.setAllPermissions(fileStoragePermission.getFolderPermission(), fileStoragePermission.getReadPermission(), fileStoragePermission.getWritePermission(), fileStoragePermission.getDeletePermission());
-            permissions.add(permission);
-        }
-        return permissions.toArray(new Permission[fileStoragePermissions.size()]);
-    }
-
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     /**
@@ -273,7 +241,7 @@ public class ShareClient {
     public XOXFolder getFolder(String folderId) throws OXException {
         RemoteFolder remoteFolder = getApiClient().execute(new GetFolderCall(folderId));
         remoteFolder = addEntityInfos(remoteFolder, new XOXEntityInfoLoader(getApiClient()));
-        return new XOXFolderConverter(getSession().getUserId(), account).getStorageFolder(remoteFolder);
+        return new XOXFolderConverter(account, session).getStorageFolder(remoteFolder);
     }
 
     /**
@@ -286,7 +254,7 @@ public class ShareClient {
     public XOXFolder[] getSubFolders(final String parentId) throws OXException {
         List<RemoteFolder> remoteFolders = getApiClient().execute(new ListFoldersCall(getFolderId(parentId)));
         remoteFolders = addEntityInfos(remoteFolders, new XOXEntityInfoLoader(getApiClient()));
-        List<XOXFolder> storageFolders = new XOXFolderConverter(getSession().getUserId(), account).getStorageFolders(remoteFolders);
+        List<XOXFolder> storageFolders = new XOXFolderConverter(account, session).getStorageFolders(remoteFolders);
         return storageFolders.toArray(new XOXFolder[storageFolders.size()]);
     }
 
@@ -595,10 +563,7 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public String createaFolder(FileStorageFolder folder, boolean autoRename) throws OXException {
-        RemoteFolder newRemoteFolder = new RemoteFolder(INFOSTORE);
-        newRemoteFolder.setParentID(folder.getParentId());
-        newRemoteFolder.setID(folder.getId());
-        newRemoteFolder.setName(folder.getName());
+        RemoteFolder newRemoteFolder = new XOXFolderConverter(account, session).getFolder(folder);
         FolderBody newFolder = new FolderBody(newRemoteFolder);
         return getApiClient().execute(new com.openexchange.api.client.common.calls.folders.NewCall(newRemoteFolder.getParentID(), newFolder, autoRename));
     }
@@ -627,14 +592,14 @@ public class ShareClient {
      * @param folderId The ID of the folder to move
      * @param folder The new folder data
      * @param timestamp The timestamp
-     * @param autoRename <code>true</code> to rename the folder (e.g. adding <code>" (1)"</code> appendix) to avoid conflicts; otherwise <code>false</code>
+     * @param autoRename <code>null</code> if undefined, <code>true</code> to rename the folder (e.g. adding <code>" (1)"</code> appendix) to avoid conflicts; otherwise <code>false</code>
+     * @param cascadePermissions <code>null</code> if undefined, <code>true</code> to apply permission changes to all subfolders, <code>false</code>, otherwise
      * @return The ID of the updated folder
      * @throws OXException In case of error
      */
-    public String updateFolder(String folderId, FileStorageFolder folder, long timestamp, boolean autoRename) throws OXException {
-        RemoteFolder updatedFolder = new RemoteFolder(INFOSTORE);
-        updatedFolder.setPermissions(parsePermission(folder.getPermissions()));
-        return getApiClient().execute(new UpdateCall(folderId, new FolderBody(updatedFolder), timestamp, B(autoRename)));
+    public String updateFolder(String folderId, FileStorageFolder folder, long timestamp, Boolean autoRename, Boolean cascadePermissions) throws OXException {
+        RemoteFolder updatedFolder = new XOXFolderConverter(account, session).getFolder(folder);
+        return getApiClient().execute(new UpdateCall(folderId, new FolderBody(updatedFolder), null, timestamp, autoRename, cascadePermissions));
     }
 
     /**

@@ -58,7 +58,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import com.openexchange.api.client.common.calls.folders.mapping.ExtendedPermissionMapping;
-import com.openexchange.api.client.common.calls.folders.mapping.PermissionMapper;
+import com.openexchange.api.client.common.calls.folders.mapping.PermissionMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
@@ -284,7 +284,7 @@ public class RemoteFolderMapper extends DefaultJsonMapper<RemoteFolder, RemoteFo
             }
         });
 
-        mappings.put(RemoteFolderField.PERMISSIONS, new PermissionMapper<RemoteFolder>(RemoteFolderField.PERMISSIONS.getName(), I(RemoteFolderField.PERMISSIONS.getColumn())) {
+        mappings.put(RemoteFolderField.PERMISSIONS, new PermissionMapping<RemoteFolder>(RemoteFolderField.PERMISSIONS.getName(), I(RemoteFolderField.PERMISSIONS.getColumn())) {
 
             @Override
             public boolean isSet(RemoteFolder object) {

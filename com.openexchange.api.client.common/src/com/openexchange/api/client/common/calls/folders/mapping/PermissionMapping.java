@@ -59,21 +59,21 @@ import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.tools.mappings.json.ListItemMapping;
 
 /**
- * {@link PermissionMapper}
+ * {@link PermissionMapping}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @param <O> The class of list element
  * @since v7.10.5
  */
-public abstract class PermissionMapper<O> extends ListItemMapping<Permission, O, JSONObject> {
+public abstract class PermissionMapping<O> extends ListItemMapping<Permission, O, JSONObject> {
 
     /**
-     * Initializes a new {@link PermissionMapper}.
+     * Initializes a new {@link PermissionMapping}.
      *
      * @param ajaxName The mapped ajax name
      * @param columnID the mapped column identifier
      */
-    public PermissionMapper(String ajaxName, Integer columnID) {
+    public PermissionMapping(String ajaxName, Integer columnID) {
         super(ajaxName, columnID);
     }
 
@@ -87,7 +87,7 @@ public abstract class PermissionMapper<O> extends ListItemMapping<Permission, O,
     public Permission deserialize(JSONObject from, TimeZone timeZone) throws JSONException {
         //@formatter:off
         Permission permission = Permissions.createPermission(
-            from.has("entity") ? from.getInt("entity") : 0,
+            from.has("entity") ? from.getInt("entity") : -1,
             from.has("group") && from.getBoolean("group"),
             from.has("bits") ? from.getInt("bits") : 0);
         //@formatter:on
@@ -99,9 +99,12 @@ public abstract class PermissionMapper<O> extends ListItemMapping<Permission, O,
     public JSONObject serialize(Permission from, TimeZone timeZone) throws JSONException {
         JSONObject json = new JSONObject();
         json.putOpt("identifier", from.getIdentifier());
-        json.put("entity", from.getEntity());
+        if (0 < from.getEntity() || 0 == from.getEntity() && from.isGroup()) {
+            json.put("entity", from.getEntity());
+        }
         json.put("group", from.isGroup());
         json.put("bits", Permissions.createPermissionBits(from));
         return json;
     }
+
 }

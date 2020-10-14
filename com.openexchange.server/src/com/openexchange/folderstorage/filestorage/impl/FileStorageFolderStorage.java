@@ -90,6 +90,7 @@ import com.openexchange.folderstorage.SubfolderListingFolderStorage;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UpdateOperation;
 import com.openexchange.folderstorage.filestorage.FileStorageId;
+import com.openexchange.folderstorage.filestorage.FileStorageUtils;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.type.FileStorageType;
@@ -291,51 +292,19 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         // Permissions
         final Permission[] permissions = folder.getPermissions();
         if (null != permissions && permissions.length > 0) {
-            final List<FileStoragePermission> fsPermissions = new ArrayList<>(permissions.length);
-            for (final Permission permission : permissions) {
-                final DefaultFileStoragePermission fsPerm = DefaultFileStoragePermission.newInstance();
-                fsPerm.setEntity(permission.getEntity());
-                fsPerm.setIdentifier(permission.getIdentifier());
-                fsPerm.setEntityInfo(permission.getEntityInfo());
-                fsPerm.setAllPermissions(
-                    permission.getFolderPermission(),
-                    permission.getReadPermission(),
-                    permission.getWritePermission(),
-                    permission.getDeletePermission());
-                fsPerm.setAdmin(permission.isAdmin());
-                fsPerm.setGroup(permission.isGroup());
-                fsPermissions.add(fsPerm);
-            }
-            fsFolder.setPermissions(fsPermissions);
-        } else {
-            if (FileStorageFolder.ROOT_FULLNAME.equals(folder.getParentID())) {
-                final FileStoragePermission[] messagingPermissions = new FileStoragePermission[1];
-                {
-                    final FileStoragePermission fsPerm = DefaultFileStoragePermission.newInstance();
-                    fsPerm.setEntity(storageParameters.getUserId());
-                    fsPerm.setAllPermissions(
-                        MessagingPermission.MAX_PERMISSION,
-                        MessagingPermission.MAX_PERMISSION,
-                        MessagingPermission.MAX_PERMISSION,
-                        MessagingPermission.MAX_PERMISSION);
-                    fsPerm.setAdmin(true);
-                    fsPerm.setGroup(false);
-                    messagingPermissions[0] = fsPerm;
-                }
-                fsFolder.setPermissions(Arrays.asList(messagingPermissions));
-            } else {
-                List<FileStoragePermission> parentPermissions = folderAccess.getFolder(folder.getParentID()).getPermissions();
-                List<FileStoragePermission> ffPermissions = new ArrayList<FileStoragePermission>(parentPermissions.size());
-                for (FileStoragePermission parentPermission : parentPermissions) {
-                    if (0 < parentPermission.getSystem()) {
-                        continue; // don't inherit system permission
-                    }
-                    ffPermissions.add(DefaultFileStoragePermission.newInstance(parentPermission));
-                }
-                fsFolder.setPermissions(ffPermissions);
-            }
+            fsFolder.setPermissions(FileStorageUtils.getFileStoragePermissions(permissions));
+        } else if (FileStorageFolder.ROOT_FULLNAME.equals(folder.getParentID())) {
+            FileStoragePermission fsPerm = DefaultFileStoragePermission.newInstance();
+            fsPerm.setEntity(storageParameters.getUserId());
+            fsPerm.setAllPermissions(
+                MessagingPermission.MAX_PERMISSION,
+                MessagingPermission.MAX_PERMISSION,
+                MessagingPermission.MAX_PERMISSION,
+                MessagingPermission.MAX_PERMISSION);
+            fsPerm.setAdmin(true);
+            fsPerm.setGroup(false);
+            fsFolder.setPermissions(Collections.singletonList(fsPerm));
         }
-
         try {
             String fullName = folderAccess.createFolder(fsFolder);
             folder.setID(fullName);
@@ -816,43 +785,10 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         if (!SetterAwareFolder.class.isInstance(fileStorageFolder) || ((SetterAwareFolder) folder).containsSubscribed()) {
             fileStorageFolder.setSubscribed(folder.isSubscribed());
         }
-        fileStorageFolder.setPermissions(getfFileStoragePermissions(folder.getPermissions()));
+        fileStorageFolder.setPermissions(FileStorageUtils.getFileStoragePermissions(folder.getPermissions()));
         fileStorageFolder.setCreatedBy(folder.getCreatedBy());
         fileStorageFolder.setModifiedBy(folder.getModifiedBy());
         return fileStorageFolder;
-    }
-
-    /**
-     * Create file storage permissions equivalent to the supplied permissions.
-     *
-     * @param permissions The permissions to create the file storage permissions for
-     * @return The file storage permissions, or <code>null</code> if passed array was <code>null</code> or empty
-     */
-    private static List<FileStoragePermission> getfFileStoragePermissions(Permission[] permissions) {
-        if (null != permissions && 0 < permissions.length) {
-            List<FileStoragePermission> fileStoragePermissions = new ArrayList<>(permissions.length);
-            for (Permission permission : permissions) {
-                fileStoragePermissions.add(getfFileStoragePermissions(permission));
-            }
-            return fileStoragePermissions;
-        }
-        return null;
-    }
-
-    /**
-     * Creates a file storage permission equivalent to the supplied permission.
-     *
-     * @param permission The permission to create the file storage permission for
-     * @return The file storage permission
-     */
-    private static FileStoragePermission getfFileStoragePermissions(Permission permission) {
-        FileStoragePermission fileStoragePermission = DefaultFileStoragePermission.newInstance();
-        fileStoragePermission.setEntity(permission.getEntity());
-        fileStoragePermission.setAllPermissions(
-            permission.getFolderPermission(), permission.getReadPermission(), permission.getWritePermission(), permission.getDeletePermission());
-        fileStoragePermission.setAdmin(permission.isAdmin());
-        fileStoragePermission.setGroup(permission.isGroup());
-        return fileStoragePermission;
     }
 
     /**

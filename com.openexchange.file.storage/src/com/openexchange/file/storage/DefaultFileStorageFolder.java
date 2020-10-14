@@ -246,7 +246,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
     @Override
     public List<FileStoragePermission> getPermissions() {
         if (null == permissions) {
-            return Collections.emptyList();
+            return null;
         }
         return new ArrayList<FileStoragePermission>(permissions);
     }

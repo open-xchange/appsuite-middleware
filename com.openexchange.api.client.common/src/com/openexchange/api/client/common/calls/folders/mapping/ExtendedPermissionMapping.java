@@ -50,12 +50,14 @@
 package com.openexchange.api.client.common.calls.folders.mapping;
 
 import java.util.Date;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.api.client.common.calls.folders.ExtendedPermission;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.ArrayMapping;
+import com.openexchange.session.Session;
 
 /**
  * {@link ExtendedPermissionMapping}
@@ -108,6 +110,11 @@ public abstract class ExtendedPermissionMapping<O> extends ArrayMapping<Extended
             permission.setContact(contact);
         }
         return permission;
+    }
+
+    @Override
+    public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
+        throw new UnsupportedOperationException();
     }
 
 }
