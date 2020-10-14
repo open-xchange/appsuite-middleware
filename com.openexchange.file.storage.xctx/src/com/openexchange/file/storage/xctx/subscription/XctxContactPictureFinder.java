@@ -51,6 +51,7 @@ package com.openexchange.file.storage.xctx.subscription;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.picture.ContactPicture;
@@ -61,16 +62,17 @@ import com.openexchange.contact.picture.finder.PictureResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.xctx.XctxFileStorageService;
+import com.openexchange.java.Functions.ExceptionThrowingBiFunction;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.subscription.XctxSessionManager;
 import com.openexchange.tools.id.IDMangler;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link XctxContactPictureFinder}
+ * {@link XctxContactPictureFinder} - Finder for pictures on another internal context using a guest session
+ * of an existing Xctx filestorage account
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
@@ -101,53 +103,40 @@ public class XctxContactPictureFinder implements ContactPictureFinder {
     @Override
     public PictureResult getPicture(Session session, PictureSearchData data) throws OXException {
         Session guestSession = searchForGuest(session, data);
-        if (null != guestSession) {
-            boolean globalAddressBookEnabled = ServerSessionAdapter.valueOf(guestSession).getUserPermissionBits().isGlobalAddressBookEnabled();
-            LOGGER.info("GAB enabled: {}", globalAddressBookEnabled);
-            ContactPictureService contactPictureService = services.getServiceSafe(ContactPictureService.class);
-            PictureSearchData searchData = new PictureSearchData(null, null, null, null, data.getEmails());
-            ContactPicture picture = contactPictureService.getPicture(guestSession, searchData);
-            if (null != picture && false == ContactPicture.NOT_FOUND.getETag().equals(picture.getETag())) {
-                return new PictureResult(picture);
-            }
-        }
-        return new PictureResult(PictureSearchData.EMPTY_DATA);
+        Optional<ContactPicture> result = getResult(session, data, (s, d) -> s.getPicture(guestSession, d));
+        ContactPicture pic = result.orElseGet(() -> ContactPicture.NOT_FOUND);
+
+        return ContactPicture.ETAG_NOT_FOUND.equals(pic.getETag()) ? new PictureResult(data) : new PictureResult(pic);
     }
 
     @Override
     public PictureResult getETag(Session session, PictureSearchData data) throws OXException {
         Session guestSession = searchForGuest(session, data);
-        if (null != guestSession) {
-            ContactPictureService contactPictureService = services.getServiceSafe(ContactPictureService.class);
-            PictureSearchData searchData = new PictureSearchData(data.getUserId(), null, null, null, data.getEmails());
-            String eTag = contactPictureService.getETag(guestSession, searchData);
-            if (Strings.isNotEmpty(eTag) && false == ContactPicture.NOT_FOUND.getETag().equals(eTag)) {
-                return new PictureResult(true, new ContactPicture(eTag, null, ContactPicture.UNMODIFIED), null);
-            }
+        Optional<String> result = getResult(session, data, (s, d) -> s.getETag(guestSession, d));
+        String eTag = result.orElseGet(() -> ContactPicture.ETAG_NOT_FOUND);
+        if (false == ContactPicture.ETAG_NOT_FOUND.equals(eTag)) {
+            return new PictureResult(new ContactPicture(eTag, null, ContactPicture.UNMODIFIED));
         }
-        return new PictureResult(PictureSearchData.EMPTY_DATA);
+        return new PictureResult(data);
     }
 
     @Override
     public PictureResult getLastModified(Session session, PictureSearchData data) {
         try {
             Session guestSession = searchForGuest(session, data);
-            if (null != guestSession) {
-                ContactPictureService contactPictureService = services.getServiceSafe(ContactPictureService.class);
-                PictureSearchData searchData = new PictureSearchData(data.getUserId(), null, null, null, data.getEmails());
-                Date lastModified = contactPictureService.getLastModified(guestSession, searchData);
-                if (null != lastModified && false == ContactPicture.UNMODIFIED.equals(lastModified)) {
-                    return new PictureResult(true, new ContactPicture(null, null, lastModified), null);
-                }
+            Optional<Date> result = getResult(session, data, (s, d) -> s.getLastModified(guestSession, d));
+            Date lastModified = result.orElse(ContactPicture.UNMODIFIED);
+            if (false == ContactPicture.UNMODIFIED.equals(lastModified)) {
+                return new PictureResult(new ContactPicture(null, null, lastModified));
             }
         } catch (OXException e) {
-            LOGGER.debug("Unable to get last modified timestamp", e);
+            LOGGER.debug("Unable to get last modified", e);
         }
-        return new PictureResult(PictureSearchData.EMPTY_DATA);
+        return new PictureResult(data);
     }
 
     /**
-     * Performs the actual search of the contact picture.
+     * Retrieves the guest session for the account
      *
      * @param session The session to use
      * @param data The data to search with
@@ -155,6 +144,9 @@ public class XctxContactPictureFinder implements ContactPictureFinder {
      * @throws OXException In case response can't be get, e.g. a guest session can't be obtained
      */
     private Session searchForGuest(Session session, PictureSearchData data) throws OXException {
+        /*
+         * Check if account ID is like <code>xctx8://1/3</code>
+         */
         if (Strings.isEmpty(data.getAccountId()) || false == data.getAccountId().startsWith(fileStorageService.getId())) {
             return null;
         }
@@ -183,6 +175,25 @@ public class XctxContactPictureFinder implements ContactPictureFinder {
 
         XctxSessionManager sessionManager = services.getServiceSafe(XctxSessionManager.class);
         return sessionManager.getGuestSession(session, baseToken, password);
+    }
+
+    /**
+     * Executes a function on the {@link ContactPictureService} and returns the result
+     *
+     * @param <T> The type of return value
+     * @param session The session of the <b>guest</b>
+     * @param data The data to search the picture with
+     * @param f The function on the service
+     * @return The result if a guest session can be found, or an empty optional
+     * @throws OXException In case of error
+     */
+    private <T> Optional<T> getResult(Session guestSession, PictureSearchData data, ExceptionThrowingBiFunction<ContactPictureService, PictureSearchData, T, OXException> f) throws OXException {
+        if (null == guestSession) {
+            return Optional.empty();
+        }
+        ContactPictureService contactPictureService = services.getServiceSafe(ContactPictureService.class);
+        PictureSearchData searchData = new PictureSearchData(data.getUserId(), null, data.getFolderId(), data.getContactId(), data.getEmails());
+        return Optional.ofNullable(f.apply(contactPictureService, searchData));
     }
 
 }

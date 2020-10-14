@@ -60,6 +60,7 @@ import com.openexchange.contact.picture.finder.PictureResult;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
@@ -103,7 +104,7 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     private PictureResult provideUserData(Session session, PictureSearchData data) {
-        if (data.hasUser()) {
+        if (data.hasUser() && Strings.isEmpty(data.getAccountId())) {
             try {
                 User user = userService.getUser(i(data.getUserId()), session.getContextId());
                 if (null != user) {

@@ -70,7 +70,7 @@ import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.tools.id.IDMangler;
 
 /**
- * {@link XOXContactPicutreFinder}
+ * {@link XOXContactPicutreFinder} - Finder for pictures on remote OX systems using an existing XOX filestorage account
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
@@ -127,6 +127,9 @@ public class XOXContactPicutreFinder implements ContactPictureFinder {
      * @throws OXException In case account or service is missing
      */
     private PictureResult requestContactPicture(Session session, PictureSearchData data) throws OXException {
+        /*
+         * Check if account ID is like <code>xox8://1/3</code>
+         */
         if (Strings.isEmpty(data.getAccountId()) || false == data.getAccountId().startsWith(fileStorageService.getId())) {
             return new PictureResult(PictureSearchData.EMPTY_DATA);
         }
@@ -144,7 +147,7 @@ public class XOXContactPicutreFinder implements ContactPictureFinder {
         }
 
         /*
-         * Get information for the reuqest
+         * Get information for the request
          */
         String shareLink = (String) storageAccount.getConfiguration().get("url");
         String baseToken = ShareLinks.extractBaseToken(shareLink);
@@ -160,9 +163,9 @@ public class XOXContactPicutreFinder implements ContactPictureFinder {
         ApiClient apiClient = null;
         try {
             apiClient = apiClientService.getApiClient(session, shareLink, new Credentials(null, password));
-            PictureSearchData searchData = new PictureSearchData(data.getUserId(), null, null, null, data.getEmails());
+            PictureSearchData searchData = new PictureSearchData(data.getUserId(), null, data.getFolderId(), data.getContactId(), data.getEmails());
             ContactPicture contactPicture = apiClient.execute(new ContactPictureCall(searchData));
-            if (false == ContactPicture.NOT_FOUND.getETag().equals(contactPicture.getETag())) {
+            if (false == ContactPicture.ETAG_NOT_FOUND.equals(contactPicture.getETag())) {
                 return new PictureResult(contactPicture);
             }
         } catch (OXException e) {

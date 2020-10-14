@@ -51,6 +51,7 @@ package com.openexchange.file.storage.xctx.osgi;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -87,8 +88,12 @@ public class XctxFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { XctxSessionManager.class, ContextService.class, UserService.class, GroupService.class, ShareService.class, FileStorageAccountManagerLookupService.class, FolderService.class, InfostoreFacade.class, InfostoreSearchEngine.class, DispatcherPrefixService.class, CapabilityService.class, UserPermissionService.class
-        };
+        // @formatter:off
+        return new Class[] { XctxSessionManager.class, ContextService.class, UserService.class, GroupService.class, ShareService.class, 
+            FileStorageAccountManagerLookupService.class, FolderService.class, InfostoreFacade.class, InfostoreSearchEngine.class, 
+            DispatcherPrefixService.class, CapabilityService.class, UserPermissionService.class, ContactPictureService.class
+        }; 
+        // @formatter:on
     }
 
     @Override

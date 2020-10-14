@@ -23,6 +23,13 @@
         schema:
           type: string
       - in: query
+        name: accoutn_id
+        description: |
+          The account identifier of an specific account belonging to the user of the session
+        required: false
+        schema:
+          type: string
+      - in: query
         name: contact_id
         description: |
           The contact identifier.

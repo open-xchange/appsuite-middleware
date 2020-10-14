@@ -50,22 +50,30 @@
 package com.openexchange.api.client.common.calls.contact.picture;
 
 import java.io.InputStream;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.InputStreamAwareResponse;
 import com.openexchange.api.client.common.ApiClientUtils;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
 import com.openexchange.api.client.common.parser.InputStreamParser;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Functions.OXFunction;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link ContactPictureCall}
@@ -74,6 +82,8 @@ import com.openexchange.java.Strings;
  * @since v7.10.5
  */
 public class ContactPictureCall extends AbstractGetCall<ContactPicture> {
+
+    static final Logger LOGGER = LoggerFactory.getLogger(ContactPictureCall.class);
 
     /**
      * The Last-Modified header-name
@@ -84,6 +94,10 @@ public class ContactPictureCall extends AbstractGetCall<ContactPicture> {
      * The ETag header-name
      */
     private static final String HEADER_ETAG = "ETag";
+
+    final OXFunction<String, Date, ParseException> parseLastModified = (s) -> {
+        return Strings.isEmpty(s) ? null : Tools.parseHeaderDate(s);
+    };
 
     private final PictureSearchData data;
 
@@ -130,14 +144,51 @@ public class ContactPictureCall extends AbstractGetCall<ContactPicture> {
                 }
                 String eTag = ApiClientUtils.getHeaderValue(response, HEADER_ETAG);
                 String lastModified = ApiClientUtils.getHeaderValue(response, LAST_MODIFIED);
-                FileHolder fileHolder = null;
+                Date lm = parseLastModified.consumeError(lastModified, (e) -> LOGGER.debug("Unable to parse last modified", e)).orElse(null);
+
+                ContactPictureResponse contactPictureResponse = new ContactPictureResponse(eTag, lm);
                 InputStream stream = new InputStreamParser().parse(response, httpContext);
                 if (stream != null) {
-                    fileHolder = new FileHolder(stream, -1, null, null);
+                    contactPictureResponse.setInputStream(stream);
                 }
-                return new ContactPicture(eTag, fileHolder, Strings.isNotEmpty(lastModified) ? new Date(Long.parseLong(lastModified)) : null);
+                return contactPictureResponse;
             }
         };
+    }
+
+    private class ContactPictureResponse extends ContactPicture implements InputStreamAwareResponse {
+
+        private InputStream in;
+
+        /**
+         * Initializes a new {@link ContactPictureResponse}.
+         * 
+         * @param eTag The ETag
+         * @param lastModified The last modified
+         */
+        public ContactPictureResponse(String eTag, Date lastModified) {
+            super(eTag, null, lastModified);
+        }
+
+        @Override
+        @Nullable
+        public InputStream getInputStream() {
+            return in;
+        }
+
+        @Override
+        public void setInputStream(@NonNull InputStream stream) {
+            this.in = stream;
+        }
+
+        @Override
+        public IFileHolder getFileHolder() {
+            if (null == in) {
+                return null;
+            }
+            return new FileHolder(in, -1, null, null);
+        }
+
     }
 
 }
