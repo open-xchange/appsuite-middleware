@@ -324,8 +324,15 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
         if (folderAccess instanceof UserCreatedFileStorageFolderAccess) {
-            String rootId = folderAccess.getRootFolder().getId();
-            if (rootId.equals(folderID.getFolderId())) {
+            String rootId = null;
+            try {
+                rootId = folderAccess.getRootFolder().getId();
+            } catch (OXException e) {
+                if (false == FileStorageExceptionCodes.NO_SUCH_FOLDER.equals(e)) {
+                    throw e;
+                }
+            }
+            if (null != rootId && rootId.equals(folderID.getFolderId())) {
                 // rename of root folder -> rename account
                 FileStorageAccountManagerLookupService service = Services.getService(FileStorageAccountManagerLookupService.class);
                 if (service == null) {

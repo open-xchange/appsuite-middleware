@@ -184,7 +184,7 @@ public class XOXAccountAccess implements CapabilityAware {
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        return XOXFolderAccess.getRootFolder(session, account);
+        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
     }
 
     @Override

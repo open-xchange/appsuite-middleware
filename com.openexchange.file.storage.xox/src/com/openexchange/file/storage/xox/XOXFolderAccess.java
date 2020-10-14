@@ -49,23 +49,23 @@
 
 package com.openexchange.file.storage.xox;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
-import com.openexchange.file.storage.FileStorageFolderType;
+import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
+import com.openexchange.java.Strings;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.QuotaType;
-import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
@@ -75,11 +75,12 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess {
+public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess, PermissionAware {
 
-    private final Session session;
+    /** The identifier of the root folder on the remote account */
+    private static final String ROOT_FOLDER_ID = "9"; // SYSTEM_INFOSTORE_FOLDER_ID
+
     private final XOXAccountAccess accountAccess;
-    private final FileStorageAccount account;
     private final ShareClient client;
 
     /**
@@ -91,18 +92,6 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
     public XOXFolderAccess(XOXAccountAccess accountAccess, ShareClient client) {
         this.accountAccess = Objects.requireNonNull(accountAccess, "accountAccess must not be null");
         this.client = Objects.requireNonNull(client, "client must not be null");
-        this.session = accountAccess.getSession();
-        this.account = accountAccess.getAccount();
-    }
-
-    /**
-     * Gets a value indicating whether the supplied folder identifier denotes the root folder of the account or not.
-     *
-     * @param folderId The folder identifier to check
-     * @return <code>true</code> if the folder identifier represents the root folder, <code>false</code>, otherwise
-     */
-    protected static boolean isRoot(String folderId) {
-        return folderId == null || FileStorageFolder.ROOT_FULLNAME.equals(folderId);
     }
 
     /**
@@ -143,29 +132,8 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
         return client.getInfostoreQuota();
     }
 
-    /**
-     * Returns a stub root folder
-     *
-     * @param session The session
-     * @param account The account
-     * @return The stub
-     * @throws OXException
-     */
-    public static FileStorageFolder getRootFolder(Session session, FileStorageAccount account) {
-        XOXFolder rootFolder = new XOXFolder(session.getUserId());
-        rootFolder.setRootFolder(true);
-        rootFolder.setHoldsFiles(true);
-        rootFolder.setHoldsFolders(true);
-        rootFolder.setType(FileStorageFolderType.HOME_DIRECTORY);
-        rootFolder.setName(account.getDisplayName());
-        return rootFolder;
-    }
-
     @Override
     public boolean exists(String folderId) throws OXException {
-        if (isRoot(folderId)) {
-            return true;
-        }
         try {
             client.getFolder(folderId);
             return true;
@@ -209,7 +177,7 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        return getRootFolder(session, account);
+        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
     }
 
     @Override
@@ -219,7 +187,12 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
-        return client.updateFolder(identifier, toUpdate, FileStorageFileAccess.DISTANT_FUTURE, true);
+        return client.updateFolder(identifier, toUpdate, FileStorageFileAccess.DISTANT_FUTURE, Boolean.TRUE, null);
+    }
+
+    @Override
+    public String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
+        return client.updateFolder(identifier, toUpdate, FileStorageFileAccess.DISTANT_FUTURE, null, B(cascadePermissions));
     }
 
     @Override
@@ -262,8 +235,8 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
         List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>();
         FileStorageFolder folder = getFolder(folderId);
         folders.add(folder);
-        while (false == isRoot(folder.getId())) {
-            folder = isRoot(folder.getParentId()) ? getRootFolder() : getFolder(folder.getParentId());
+        while (Strings.isNotEmpty(folder.getParentId()) && false == ROOT_FOLDER_ID.equals(folder.getParentId())) {
+            folder = getFolder(folder.getParentId());
             if (null == folder) {
                 break;
             }
@@ -307,4 +280,5 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
         }
         return ret.toArray(new Quota[ret.size()]);
     }
+
 }

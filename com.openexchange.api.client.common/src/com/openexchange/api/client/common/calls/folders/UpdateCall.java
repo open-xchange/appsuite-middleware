@@ -111,6 +111,20 @@ public class UpdateCall extends AbstractPutCall<String> {
      * @param folderBody The folder data to apply
      * @param allowEnqueue <code>true</code> if the request is allowed for being submitted to job queue, <code>false</code> otherwise
      * @param timestamp Timestamp of the updated folder. If the folder was modified after the specified timestamp, then the update must fail.
+     * @param autoRename Whether to automatically rename the folder in case an folder with the same name already exists.
+     * @param cascadePermissions <code>true</code> to cascade permissions to all sub-folders. The user must have administrative permissions to all sub-folders subject to change. If one permission change fails, the entire operation fails.
+     */
+    public UpdateCall(String id, FolderBody folderBody, Boolean allowEnqueue, long timestamp, Boolean autoRename, Boolean cascadePermissions) {
+        this(id, folderBody, allowEnqueue, timestamp, null, null, cascadePermissions, null, autoRename);
+    }
+
+    /**
+     * Initializes a new {@link UpdateCall}.
+     *
+     * @param id The ID of the folder to update
+     * @param folderBody The folder data to apply
+     * @param allowEnqueue <code>true</code> if the request is allowed for being submitted to job queue, <code>false</code> otherwise
+     * @param timestamp Timestamp of the updated folder. If the folder was modified after the specified timestamp, then the update must fail.
      * @param tree The identifier of the folder tree. If missing "0" (primary folder tree) is assumed.
      * @param allowedModules An array of modules strings (e.g. "tasks,calendar,contacts,mail") supported by requesting client. If missing, all available modules are considered.
      * @param cascadePermissions <code>true</code> to cascade permissions to all sub-folders. The user must have administrative permissions to all sub-folders subject to change. If one permission change fails, the entire operation fails.

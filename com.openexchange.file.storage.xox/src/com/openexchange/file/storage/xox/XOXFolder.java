@@ -49,18 +49,10 @@
 
 package com.openexchange.file.storage.xox;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.api.client.common.calls.folders.RemoteFolder;
 import com.openexchange.file.storage.CacheAware;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
-import com.openexchange.file.storage.DefaultFileStoragePermission;
-import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
-import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Permissions;
 
 /**
  * {@link XOXFolder} - A folder shared from another OX instance
@@ -75,87 +67,9 @@ public class XOXFolder extends DefaultFileStorageFolder implements TypeAware, Ca
 
     /**
      * Initializes a new {@link XOXFolder}.
-     *
-     * @param userId The ID of the owner
      */
-    public XOXFolder(final int userId) {
-        this(userId, null);
-    }
-
-    /**
-     * Initializes a new {@link XOXFolder}.
-     *
-     * @param userId The ID of the owner
-     * @param other The {@link RemoteFolder} to copy the values from
-     */
-    public XOXFolder(final int userId, final RemoteFolder other) {
+    public XOXFolder() {
         super();
-        cacheable = true;
-
-        id = other == null || other.getID() == null ? FileStorageFolder.ROOT_FULLNAME : other.getID();
-        name = other != null ? other.getName() : null;
-        type = FileStorageFolderType.NONE;
-        exists = true;
-
-        holdsFiles = true;
-        b_holdsFiles = true;
-
-        holdsFolders = true;
-        b_holdsFolders = true;
-
-        subscribed = true; //TODO
-        b_subscribed = true; //TODO
-
-        creationDate = other != null ? other.getCreationDate() : null;
-        lastModifiedDate = other != null ? other.getLastModified() : null;
-
-        if (other != null && other.getParentID() != null) {
-            setParentId(other.getParentID());
-        }
-        if (other != null) {
-            setSubfolders(other.hasSubfolders());
-        } else {
-            setSubfolders(true);
-        }
-        setCapabilities(FileStorageFolder.ALL_CAPABILITIES);
-        setSubscribedSubfolders(true);
-
-        //own permissions: Adopt the permissions the user has as guest
-        final DefaultFileStoragePermission ownFolderPermission = DefaultFileStoragePermission.newInstance();
-        ownFolderPermission.setEntity(userId);
-        if (other != null && other.containsOwnRights()) {
-            int[] permissionBits = Permissions.parsePermissionBits(other.getOwnRights());
-            ownFolderPermission.setFolderPermission(permissionBits[0]);
-            ownFolderPermission.setReadPermission(permissionBits[1]);
-            ownFolderPermission.setWritePermission(permissionBits[2]);
-            ownFolderPermission.setDeletePermission(permissionBits[3]);
-            ownFolderPermission.setAdmin(permissionBits[4] > 0 ? true : false);
-        }
-        ownPermission = ownFolderPermission;
-
-        //Set permissions for other entities
-        if (other != null && other.getPermissions() != null && other.getPermissions().length > 0) {
-            List<FileStoragePermission> remotePermissions = new ArrayList<>(other.getPermissions().length);
-            for (Permission p : other.getPermissions()) {
-                DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
-                //TODO MW-1380 MW-1401 Resolve remote entity
-                permission.setEntity(p.getEntity());
-                permission.setFolderPermission(p.getFolderPermission());
-                permission.setGroup(permission.isGroup());
-                remotePermissions.add(permission);
-            }
-            //TODO MW-1380 MW-1401 Set as extended permission
-        }
-
-        //ownPermission might get recalculated by the caller based on the existing permissions so we add the own permissions to the list
-        addPermission(ownPermission);
-
-        createdBy = 0;
-        modifiedBy = 0;
-        if (null != other && (null != other.getCreatedFrom() || null != other.getModifiedFrom())) {
-            createdFrom = other.getCreatedFrom();
-            modifiedFrom = other.getModifiedFrom();
-        }
     }
 
     @Override

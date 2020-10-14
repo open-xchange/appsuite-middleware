@@ -52,6 +52,7 @@ package com.openexchange.file.storage.xox;
 import static com.openexchange.folderstorage.filestorage.FileStorageUtils.getFileStorageFolderType;
 import static com.openexchange.folderstorage.filestorage.FileStorageUtils.getFileStoragePermission;
 import static com.openexchange.folderstorage.filestorage.FileStorageUtils.getFileStoragePermissions;
+import static com.openexchange.folderstorage.filestorage.FileStorageUtils.getPermissions;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -65,9 +66,11 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.groupware.EntityInfo;
-import com.openexchange.groupware.LinkEntityInfo;
 import com.openexchange.groupware.EntityInfo.Type;
+import com.openexchange.groupware.LinkEntityInfo;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Enums;
+import com.openexchange.session.Session;
 import com.openexchange.share.core.subscription.EntityMangler;
 
 /**
@@ -78,21 +81,36 @@ import com.openexchange.share.core.subscription.EntityMangler;
  */
 public class XOXFolderConverter {
 
+    private final Session localSession;
     private final EntityMangler entityMangler;
-    private final int userId;
 
+    /**
+     * Initializes a new {@link XOXFolderConverter}.
+     * 
+     * @param accountAccess The underlying account access
+     */
     public XOXFolderConverter(XOXAccountAccess accountAccess) {
-        super();
-        this.userId = accountAccess.getSession().getUserId();
-        this.entityMangler = new EntityMangler(accountAccess.getService().getId(), accountAccess.getAccountId());
+        this(accountAccess.getAccount(), accountAccess.getSession());
     }
 
-    public XOXFolderConverter(int userId, FileStorageAccount account) {
+    /**
+     * Initializes a new {@link XOXFolderConverter}.
+     * 
+     * @param account The underlying file storage account
+     * @param localSession The user's <i>local</i> session associated with the file storage account
+     */
+    public XOXFolderConverter(FileStorageAccount account, Session localSession) {
         super();
-        this.userId = userId;
+        this.localSession = localSession;
         this.entityMangler = new EntityMangler(account.getFileStorageService().getId(), account.getId());
     }
 
+    /**
+     * Converts a list of remote folders into their file storage folder equivalents.
+     *
+     * @param remoteFolders The remote folders to convert
+     * @return The file storage folders
+     */
     public List<XOXFolder> getStorageFolders(List<RemoteFolder> remoteFolders) {
         if (null == remoteFolders) {
             return null;
@@ -104,11 +122,18 @@ public class XOXFolderConverter {
         return storageFolders;
     }
 
+    /**
+     * Converts a remote folder into its file storage folder equivalent.
+     *
+     * @param remoteFolder The remote folder to convert
+     * @return The file storage folder
+     */
     public XOXFolder getStorageFolder(RemoteFolder remoteFolder) {
-
-        XOXFolder folder = new XOXFolder(userId); //TODO empty default c'tor?
-        folder.setCacheable(false); //for now, maybe make configurable?
-
+        if (null == remoteFolder) {
+            return null;
+        }
+        XOXFolder folder = new XOXFolder();
+        folder.setCacheable(false); //for now, maybe make configurable?        
         folder.setId(remoteFolder.getID());
         folder.setParentId(remoteFolder.getParentID());
         folder.setName(remoteFolder.getName());
@@ -131,7 +156,7 @@ public class XOXFolderConverter {
         if (remoteFolder.containsSubscribedSubfolders()) {
             folder.setSubscribedSubfolders(remoteFolder.hasSubscribedSubfolders());
         }
-        folder.setOwnPermission(getFileStoragePermission(new BasicPermission(userId, false, remoteFolder.getOwnRights())));
+        folder.setOwnPermission(getFileStoragePermission(new BasicPermission(localSession.getUserId(), false, remoteFolder.getOwnRights())));
         List<FileStoragePermission> storagePermissions = addExtendedPermissions(getFileStoragePermissions(remoteFolder.getPermissions()), remoteFolder.getExtendedPermissions());
         folder.setPermissions(entityMangler.mangleRemotePermissions(storagePermissions));
         DefaultFileStoragePermission systemPermission = DefaultFileStoragePermission.newInstance(folder.getOwnPermission());
@@ -139,6 +164,43 @@ public class XOXFolderConverter {
         folder.addPermission(systemPermission);
         folder.setCapabilities(getStorageCapabilities(remoteFolder.getSupportedCapabilities()));
         return folder;
+    }
+
+    /**
+     * Converts a file storage folder to its remote folder equivalent.
+     *
+     * @param storageFolder The file storage folder to convert
+     * @return The remote folder
+     */
+    public RemoteFolder getFolder(FileStorageFolder storageFolder) {
+        if (null == storageFolder) {
+            return null;
+        }
+        RemoteFolder remoteFolder = new RemoteFolder();
+        remoteFolder.setModule(Module.INFOSTORE.getName());
+        remoteFolder.setID(storageFolder.getId());
+        remoteFolder.setParentID(storageFolder.getParentId());
+        EntityInfo remoteCreatedFrom = entityMangler.unmangleLocalEntity(storageFolder.getCreatedFrom());
+        remoteFolder.setCreatedFrom(remoteCreatedFrom);
+        remoteFolder.setCreatedBy(null != remoteCreatedFrom ? remoteCreatedFrom.getEntity() : -1);
+        EntityInfo remoteModifiedFrom = entityMangler.unmangleLocalEntity(storageFolder.getModifiedFrom());
+        remoteFolder.setModifiedFrom(remoteModifiedFrom);
+        remoteFolder.setModifiedBy(null != remoteModifiedFrom ? remoteModifiedFrom.getEntity() : -1);
+        remoteFolder.setName(storageFolder.getName());
+        remoteFolder.setMeta(storageFolder.getMeta());
+        remoteFolder.setPermissions(entityMangler.unmangleLocalPermissions(getPermissions(storageFolder.getPermissions())));
+        return remoteFolder;
+    }
+
+    /**
+     * Initializes a new remote folder.
+     * 
+     * @return The initialized remote folder
+     */
+    public RemoteFolder initFolder() {
+        RemoteFolder remoteFolder = new RemoteFolder();
+        remoteFolder.setModule(Module.INFOSTORE.getName());
+        return remoteFolder;
     }
 
     private static List<FileStoragePermission> addExtendedPermissions(List<FileStoragePermission> permissions, ExtendedPermission[] extendedPermissions) {
