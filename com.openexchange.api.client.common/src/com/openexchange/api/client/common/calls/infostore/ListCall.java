@@ -127,7 +127,7 @@ public class ListCall extends AbstractPutCall<List<DefaultFile>> {
     @Override
     protected void fillParameters(Map<String, String> parameters) {
         parameters.put("columns", ApiClientUtils.toCommaString(columns));
-        putIfPresent(parameters, "columns", String.valueOf(pregeneratePreviews));
+        putIfPresent(parameters, "pregeneratePreviews", pregeneratePreviews);
     }
 
     @Override
