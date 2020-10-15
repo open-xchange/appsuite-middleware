@@ -63,16 +63,18 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolderStatus;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ExamineAction}
  *
  * @author <a href="mailto:joshua.wirtz@open-xchange.com">Joshua Wirtz</a>
  */
+@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
 public class ExamineAction extends AbstractMailAction {
 
     /**
@@ -87,7 +89,6 @@ public class ExamineAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(MailRequest req) throws OXException, JSONException {
         String folder = req.checkParameter("folder");
-        ServerSession session = req.getSession();
         FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folder);
 
         MailServletInterface mailInterface = getMailInterface(req);

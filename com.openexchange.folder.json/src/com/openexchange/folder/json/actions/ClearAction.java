@@ -59,7 +59,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -139,7 +138,7 @@ public final class ClearAction extends AbstractFolderAction {
         try {
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);
-                UserizedFolder folder = folderService.getFolder(treeId, folderId, session, new FolderServiceDecorator());
+                UserizedFolder folder = folderService.getFolder(treeId, folderId, session, getDecorator(request));
                 if (!mayWriteViaOAuthRequest(folder.getContentType(), access)) {
                     return false;
                 }

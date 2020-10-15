@@ -61,7 +61,6 @@ import com.openexchange.folder.json.parser.NotificationData;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -142,7 +141,7 @@ public final class NotifyAction extends AbstractFolderAction {
          * obtain existing folder permissions from folder service
          */
         FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        UserizedFolder folder = folderService.getFolder(treeId, folderId, session, new FolderServiceDecorator());
+        UserizedFolder folder = folderService.getFolder(treeId, folderId, session, getDecorator(request));
         if (isOAuthRequest(request) && !mayWriteViaOAuthRequest(folder.getContentType(), getOAuthAccess(request))) {
             throw new OAuthInsufficientScopeException(OAuthContentTypes.writeScopeForContentType(folder.getContentType()));
         }
@@ -178,7 +177,7 @@ public final class NotifyAction extends AbstractFolderAction {
         }
 
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        ContentType contentType = folderService.getFolder(treeId, id, session, new FolderServiceDecorator()).getContentType();
+        ContentType contentType = folderService.getFolder(treeId, id, session, getDecorator(request)).getContentType();
         return mayWriteViaOAuthRequest(contentType, access);
     }
 

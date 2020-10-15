@@ -655,7 +655,7 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * As the original email %1$s no longer exists in folder %2$s, your email has been sent as a new one.
      */
-    ORIGINAL_MAIL_NOT_FOUND("As the original email %1$s no longer exists in folder %2$s, your email has been sent as a new one.", MailExceptionStrings.ORIGINAL_MAIL_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 122)
+    ORIGINAL_MAIL_NOT_FOUND("As the original email %1$s no longer exists in folder %2$s, your email has been sent as a new one.", MailExceptionStrings.ORIGINAL_MAIL_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 122),
     ;
 
     private static final String PREFIX = "MSG";

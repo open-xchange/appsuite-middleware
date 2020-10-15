@@ -75,11 +75,13 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailThread;
 import com.openexchange.mail.dataobjects.MailThreads;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.utils.ColumnCollection;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -87,6 +89,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:joshua.wirtz@open-xchange.com">Joshua Wirtz</a>
  */
+@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
 public class ThreadReferencesAction extends AbstractMailAction {
 
     /**

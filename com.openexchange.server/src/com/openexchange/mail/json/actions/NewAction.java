@@ -100,6 +100,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.compose.ComposeDraftResult;
 import com.openexchange.mail.json.compose.ComposeHandler;
@@ -121,6 +122,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.MailAccounts;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -134,6 +136,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @DispatcherNotes(preferStream = true, enqueueable = true)
 @RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
+@OAuthAction(MailActionFactory.OAUTH_WRITE_SCOPE)
 public final class NewAction extends AbstractMailAction implements EnqueuableAJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
@@ -147,7 +150,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
 
     /**
      * Initializes a new {@link NewAction}.
-     * 
+     *
      * @param services
      */
     public NewAction(final ServiceLookup services) {

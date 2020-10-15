@@ -100,6 +100,7 @@ import com.openexchange.folderstorage.mail.contentType.SentContentType;
 import com.openexchange.folderstorage.mail.contentType.SpamContentType;
 import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.mail.osgi.Services;
+import com.openexchange.folderstorage.oauth.OAuthFolderErrorCodes;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.container.FolderObject;
@@ -159,6 +160,8 @@ import gnu.trove.procedure.TObjectProcedure;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailFolderStorage implements FolderStorageFolderModifier<MailFolderImpl>, TrashAwareFolderStorage {
+
+    public static final String OAUTH_REQUEST = "oauthRequest";
 
     private static final String HARD_DELETE = "hardDelete";
 
@@ -469,7 +472,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             } else {
                 final List<MailAccount> accountList;
                 final Object property = decorator.getProperty("mailRootFolders");
-                if (property != null && Boolean.parseBoolean(property.toString()) && session.getUserPermissionBits().isMultipleMailAccounts()) {
+                if (property != null && Boolean.parseBoolean(property.toString()) && session.getUserPermissionBits().isMultipleMailAccounts() && isAccessedViaOAuth(storageParameters) == false) {
                     final MailAccountStorageService mass = Services.getService(MailAccountStorageService.class);
                     final MailAccount[] accounts = mass.getUserMailAccounts(storageParameters.getUserId(), storageParameters.getContextId());
                     accountList = new ArrayList<>(accounts.length);
@@ -515,6 +518,16 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
         } finally {
             closeMailAccess(mailAccess);
         }
+    }
+
+    /**
+     * Checks whether the request is an oauth request or not
+     *
+     * @param params The {@link StorageParameters}
+     * @return <code>true</code> in case it is an oauth request, <code>false</code> otherwise
+     */
+    private boolean isAccessedViaOAuth(StorageParameters params) {
+        return params.getDecorator().getBoolProperty(OAUTH_REQUEST);
     }
 
     @Override
@@ -835,8 +848,10 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
         }
         if (cannotConnect(session, accountId)) {
+            checkAccountAccess(true, accountId, storageParameters);
             throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(SESSION_PASSWORD);
         }
+        checkAccountAccess(false, accountId, storageParameters);
         return session;
     }
 
@@ -1036,12 +1051,29 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
 
     private static final Set<String> IGNORABLES = RemoveAfterAccessFolder.IGNORABLES;
 
+    /**
+     * Checks whether the given account is accessible or not
+     *
+     * @param cannotConnect Whether the account is able to connect or not
+     * @param accountId The account id
+     * @param params The {@link StorageParameters}
+     * @throws OXException in case it is not accessible
+     */
+    private void checkAccountAccess(boolean cannotConnect, int accountId, StorageParameters params) throws OXException {
+        if ((MailAccount.DEFAULT_ID != accountId || cannotConnect) && isAccessedViaOAuth(params)) {
+            throw OAuthFolderErrorCodes.NO_ACCOUNT_ACCESS.create();
+        }
+    }
+
     private Folder getFolder(String treeId, FullnameArgument argument, StorageParameters storageParameters, MailAccess<?, ?> mailAccess, ServerSession session, MailAccount mailAccount, boolean translateDefaultFolders) throws OXException {
         final int accountId = argument.getAccountId();
+        boolean cannotConnect = cannotConnect(session, accountId);
+        checkAccountAccess(cannotConnect, accountId, storageParameters);
+
         final String fullName = argument.getFullname();
         final Folder retval;
         final boolean hasSubfolders;
-        if (cannotConnect(session, accountId)) {
+        if (cannotConnect) {
             String accountName = "default" + argument.getAccountId();
             return new DummyFolder(treeId, MailFolderUtility.prepareFullname(accountId, argument.getFullname()), accountName, accountName, argument.getFullname(), session.getUserId());
         }
@@ -1347,7 +1379,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                  * Get all user mail accounts
                  */
                 final List<MailAccount> accounts;
-                if (session.getUserPermissionBits().isMultipleMailAccounts()) {
+                if (session.getUserPermissionBits().isMultipleMailAccounts() && isAccessedViaOAuth(storageParameters) == false) {
                     final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
                     final MailAccount[] accountsArr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
                     final List<MailAccount> tmp = new ArrayList<>(accountsArr.length);

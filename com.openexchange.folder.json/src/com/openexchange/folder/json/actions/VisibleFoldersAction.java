@@ -52,8 +52,6 @@ package com.openexchange.folder.json.actions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -62,13 +60,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
-import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
@@ -126,9 +122,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
             final String parameter = request.getParameter(AJAXServlet.PARAMETER_ALL);
             all = "1".equals(parameter) || Boolean.parseBoolean(parameter);
         }
-        final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         final String mailRootFolders = request.getParameter("mailRootFolders");
-        final java.util.List<ContentType> allowedContentTypes = collectAllowedContentTypes(request);
         /*
          * Get folder service
          */
@@ -136,12 +130,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         /*
          * Get all private folders
          */
-        final TimeZone timeZone = Tools.getTimeZone(timeZoneId);
-        final String sAltNames = "altNames";
-        final String altNames = request.getParameter(sAltNames);
-        final String sSuppressUnifiedMail = "suppressUnifiedMail";
-        final Boolean suppressUnifiedMail = isSuppressUnifiedMail(session);
-        Locale optLocale = optLocale(request);
+        // @formatter:off
         final FolderResponse<UserizedFolder[]> privateResp =
             folderService.getVisibleFolders(
                 rootFolderId,
@@ -150,8 +139,8 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 PrivateType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setLocale(optLocale).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(
-                    "mailRootFolders", mailRootFolders).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
+                getDecorator(request).put("mailRootFolders", mailRootFolders));
+        // @formatter:on
         /*
          * Get all shared folders
          */
@@ -163,7 +152,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 SharedType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setLocale(optLocale).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
+                getDecorator(request));
         /*
          * Get all public folders
          */
@@ -175,7 +164,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 PublicType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setLocale(optLocale).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
+                getDecorator(request));
         /*
          * Determine max. last-modified time stamp
          */

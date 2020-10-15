@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
@@ -85,6 +86,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.OAuthMailErrorCodes;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailActionConstants;
@@ -242,9 +244,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      *
      * @param mailRequest The mail request
      * @return The closeables or <code>null</code> if state is absent
-     * @throws OXException If closebales cannot be returned
      */
-    protected Collection<Closeable> getCloseables(final MailRequest mailRequest) throws OXException {
+    protected Collection<Closeable> getCloseables(final MailRequest mailRequest) {
         final AJAXState state = mailRequest.getRequest().getState();
         if (state == null) {
             return null;
@@ -283,6 +284,12 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             //Bug 42565
             if (MailExceptionCode.NO_ATTACHMENT_FOUND.equals(e)) {
                 throw AjaxExceptionCodes.HTTP_ERROR.create(I(404), e.getMessage());
+            }
+            if (OAuthMailErrorCodes.NO_ACCOUNT_ACCESS.equals(e)) {
+                Optional<Integer> optStatus = OAuthMailErrorCodes.getHttpStatus(e);
+                if (optStatus.isPresent()) {
+                    throw AjaxExceptionCodes.HTTP_ERROR.create(optStatus.get(), e.getMessage());
+                }
             }
             throw e;
         } finally {
@@ -437,16 +444,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         return MimeMessageFiller.resolveFrom2Account(session, from, checkTransportSupport, checkFrom);
     }
 
-    protected static String getDefaultSendAddress(final ServerSession session) throws OXException {
+    protected static String getDefaultSendAddress(final ServerSession session) {
         return session.getUserSettingMail().getSendAddr();
-        /*-
-         *
-        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-            MailAccountStorageService.class,
-            true);
-        return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
-         *
-         */
     }
 
     protected static boolean isEmpty(final String string) {

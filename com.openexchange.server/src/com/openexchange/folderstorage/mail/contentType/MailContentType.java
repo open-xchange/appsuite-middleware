@@ -58,6 +58,11 @@ import com.openexchange.folderstorage.ContentType;
  */
 public class MailContentType implements ContentType {
 
+    /**
+     * The MailContentType.java.
+     */
+    private static final long serialVersionUID = 1L;
+
     private static final MailContentType instance = new MailContentType();
 
     /**

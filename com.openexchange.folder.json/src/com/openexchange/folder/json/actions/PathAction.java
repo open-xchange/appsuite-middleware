@@ -56,13 +56,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
-import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
-import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -102,8 +99,6 @@ public final class PathAction extends AbstractFolderAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
-        final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        final java.util.List<ContentType> allowedContentTypes = collectAllowedContentTypes(request);
         /*
          * Request subfolders from folder service
          */
@@ -113,7 +108,7 @@ public final class PathAction extends AbstractFolderAction {
                 treeId,
                 folderId,
                 session,
-                new FolderServiceDecorator().setLocale(optLocale(request)).setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("suppressUnifiedMail", isSuppressUnifiedMail(session)));
+                getDecorator(request));
         /*
          * Determine last-modified time stamp
          */

@@ -150,7 +150,7 @@ public final class DeleteAction extends AbstractFolderAction implements Enqueuab
          */
         final boolean failOnError = AJAXRequestDataTools.parseBoolParameter(PARAM_FAIL_ON_ERROR, request, false);
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        FolderServiceDecorator decorator = new FolderServiceDecorator().put(PARAM_HARD_DELETE, request.getParameter(PARAM_HARD_DELETE));
+        FolderServiceDecorator decorator = getDecorator(request).put(PARAM_HARD_DELETE, request.getParameter(PARAM_HARD_DELETE));
         final AJAXRequestResult result;
         if (failOnError) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);

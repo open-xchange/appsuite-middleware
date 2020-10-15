@@ -192,14 +192,13 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
          */
         boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request, false);
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        FolderServiceDecorator decorator = new FolderServiceDecorator()
-            .put("permissions", request.getParameter("permissions"))
-            .put("altNames", request.getParameter("altNames"))
-            .put(PARAM_AUTORENAME, request.getParameter(PARAM_AUTORENAME))
-            .put("suppressUnifiedMail", isSuppressUnifiedMail(session))
-            .put("cascadePermissions", Boolean.valueOf(cascadePermissions))
-            .put("ignoreWarnings", Boolean.valueOf(ignoreWarnings))
-            .put(id, folderService);
+        // @formatter:off
+        FolderServiceDecorator decorator = getDecorator(request).put("cascadePermissions", Boolean.valueOf(cascadePermissions))
+                                                                .put("permissions", request.getParameter("permissions"))
+                                                                .put(PARAM_AUTORENAME, request.getParameter(PARAM_AUTORENAME))
+                                                                .put("ignoreWarnings", Boolean.valueOf(ignoreWarnings))
+                                                                .put(id, folderService);
+        // @formatter:on
 
         boolean notify = updateData.notifyPermissionEntities() && folder.getPermissions() != null && folder.getPermissions().length > 0;
         UserizedFolder original = null;
@@ -221,7 +220,8 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
         AJAXRequestResult result = new AJAXRequestResult(newId, lastModified);
 
         result.addWarnings(warnings);
-        if (newId == null && 0 < warnings.size() && false == ignoreWarnings) {
+
+        if (null == newId && 0 < warnings.size() && false == ignoreWarnings) {
             result.setException(FolderExceptionErrorMessage.FOLDER_UPDATE_ABORTED.create(
                 getFolderNameSafe(session, folder, id, treeId, folderService), id));
         }

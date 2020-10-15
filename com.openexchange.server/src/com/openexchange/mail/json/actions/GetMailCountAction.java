@@ -54,18 +54,18 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link GetMailCountAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
 public final class GetMailCountAction extends AbstractMailAction {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetMailCountAction.class);
 
     /**
      * Initializes a new {@link GetMailCountAction}.
@@ -79,7 +79,6 @@ public final class GetMailCountAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            final ServerSession session = req.getSession();
             /*
              * Read in parameters
              */

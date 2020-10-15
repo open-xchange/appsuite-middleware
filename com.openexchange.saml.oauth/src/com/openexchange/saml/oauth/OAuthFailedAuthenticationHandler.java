@@ -85,6 +85,9 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
 
     /**
      * Initializes a new {@link OAuthFailedAuthenticationHandler}.
+     *
+     * @param tokenService
+     * @param services
      */
     public OAuthFailedAuthenticationHandler(OAuthAccessTokenService tokenService, ServiceLookup services) {
         super();

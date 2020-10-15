@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,58 +47,18 @@
  *
  */
 
-package com.openexchange.mail.json.actions;
+package com.openexchange.folderstorage.oauth;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.json.MailActionFactory;
-import com.openexchange.mail.json.MailRequest;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link AllSeenAction}
+ * {@link OAuthFolderErrorMessages}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.5
  */
-@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
-public final class AllSeenAction extends AbstractMailAction {
+public class OAuthFolderErrorMessages implements LocalizableStrings {
 
-    /**
-     * Initializes a new {@link AllSeenAction}.
-     *
-     * @param services
-     */
-    public AllSeenAction(final ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
-        try {
-            /*
-             * Read in parameters
-             */
-            final String folder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            /*
-             * Get mail interface
-             */
-            final MailServletInterface mailInterface = getMailInterface(req);
-            /*
-             * Update system flags which are allowed to be altered by client
-             */
-            mailInterface.updateMessageFlags(folder, null, MailMessage.FLAG_SEEN, true);
-            /*
-             * Return
-             */
-            return new AJAXRequestResult(Boolean.TRUE, "native");
-        } catch (RuntimeException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
+    public final static String NO_ACCOUNT_ACCESS_MSG = "No account access permitted.";
 
 }

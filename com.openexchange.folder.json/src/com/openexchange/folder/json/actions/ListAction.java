@@ -61,13 +61,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
-import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
-import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -115,8 +112,6 @@ public final class ListAction extends AbstractFolderAction {
             final String parameter = request.getParameter(AJAXServlet.PARAMETER_ALL);
             all = "1".equals(parameter) || Boolean.parseBoolean(parameter);
         }
-        final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        final java.util.List<ContentType> allowedContentTypes = collectAllowedContentTypes(request);
         boolean filterDuplicateNames = parseBoolean(request.getParameter("errorOnDuplicateName"), false);
         if (!filterDuplicateNames) {
             filterDuplicateNames = parseBoolean(request.getParameter("errOnDuplName"), false);
@@ -132,6 +127,7 @@ public final class ListAction extends AbstractFolderAction {
                 parentId,
                 all,
                 session,
+<<<<<<< HEAD
                 new FolderServiceDecorator()
                     .setLocale(optLocale(request))
                     .setTimeZone(Tools.getTimeZone(timeZoneId))
@@ -140,6 +136,9 @@ public final class ListAction extends AbstractFolderAction {
                     .put("suppressUnifiedMail", isSuppressUnifiedMail(session))
                     .put("forceRetry",request.getParameter("forceRetry")));
         //@formatter:off
+=======
+                getDecorator(request));
+>>>>>>> a09510fd349 (MW-1431: Enable mail module access via oauth)
         /*
          * Determine max. last-modified time stamp
          */

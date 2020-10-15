@@ -55,12 +55,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
-import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
-import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -86,6 +83,7 @@ public final class GetAction extends AbstractFolderAction {
 
     @Override
     protected AJAXRequestResult doPerform(final AJAXRequestData request, final ServerSession session) throws OXException {
+
         /*
          * Parse parameters
          */
@@ -100,27 +98,20 @@ public final class GetAction extends AbstractFolderAction {
         if (null == folderId) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
-        final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        final java.util.List<ContentType> allowedContentTypes = collectAllowedContentTypes(request);
         /*
          * Request subfolders from folder service
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         // System.out.println("TOPMOST: " + folderId);
-        //@formatter:off
+
+        // @formatter:off
         final UserizedFolder folder =
             folderService.getFolder(
                 treeId,
                 folderId,
                 session,
-                new FolderServiceDecorator()
-                    .setLocale(optLocale(request))
-                    .setTimeZone(Tools.getTimeZone(timeZoneId))
-                    .setAllowedContentTypes(allowedContentTypes)
-                    .put("altNames", request.getParameter("altNames"))
-                    .put("suppressUnifiedMail", isSuppressUnifiedMail(session)));
-        //@formatter:on
-
+                getDecorator(request));
+        // @formatter:on
         if (isOAuthRequest(request) && !mayReadViaOAuthRequest(folder.getContentType(), getOAuthAccess(request))) {
             throw new OAuthInsufficientScopeException(OAuthContentTypes.readScopeForContentType(folder.getContentType()));
         }

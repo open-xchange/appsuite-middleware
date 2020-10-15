@@ -68,8 +68,10 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageEnhancedDeletion;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -77,6 +79,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@OAuthAction(MailActionFactory.OAUTH_WRITE_SCOPE)
 public final class TrashAction extends AbstractMailAction {
 
     private final JSONArray emptyJsonArray;

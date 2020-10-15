@@ -198,6 +198,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
                 startTokenIntrospectionService();
                 break;
         }
+
         RankingAwareNearRegistryServiceTracker<OAuthAuthorizationService> oAuthAuthorizationService = new RankingAwareNearRegistryServiceTracker<OAuthAuthorizationService>(context, OAuthAuthorizationService.class);
 
         rememberTracker(oAuthAuthorizationService);
@@ -205,6 +206,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         openTrackers();
 
         registerService(OAuthResourceService.class, new OAuthResourceServiceImpl(oAuthAuthorizationService, serviceLookup));
+
     }
 
     @Override

@@ -61,10 +61,12 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.utils.ColumnCollection;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
@@ -74,6 +76,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
 public final class GetUpdatesAction extends AbstractMailAction {
 
     /**

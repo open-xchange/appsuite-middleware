@@ -63,7 +63,9 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -73,6 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@OAuthAction(MailActionFactory.OAUTH_WRITE_SCOPE)
 public final class UpdateAction extends AbstractMailAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateAction.class);
@@ -173,39 +176,35 @@ public final class UpdateAction extends AbstractMailAction {
                  */
                 mailInterface.updateMessageFlags(sourceFolder, uid == null ? null : new String[] { uid }, flagBits.intValue(), flagVal);
             }
-            if (setFlags != null || setUserFlags != null) {
-                if (setUserFlags != null) {
-                    if (setFlags == null) {
-                        // no system flags to add
-                        setFlags = new Integer(0);
-                    }
-                    /*
-                     * Add system and user flags
-                     */
-                    mailInterface.updateMessageFlags(sourceFolder, uid == null ? null : new String[] { uid }, setFlags.intValue(), setUserFlags, true);
-                } else {
-                    /*
-                     * Add system flags which are allowed to be altered by client
-                     */
-                    mailInterface.updateMessageFlags(sourceFolder, uid == null ? null : new String[] { uid }, setFlags.intValue(), true);
+            if (setUserFlags != null) {
+                if (setFlags == null) {
+                    // no system flags to add
+                    setFlags = new Integer(0);
                 }
+                /*
+                 * Add system and user flags
+                 */
+                mailInterface.updateMessageFlags(sourceFolder, uid == null ? null : new String[] { uid }, setFlags.intValue(), setUserFlags, true);
+            } else if (setFlags != null) {
+                /*
+                 * Add system flags which are allowed to be altered by client
+                 */
+                mailInterface.updateMessageFlags(sourceFolder, uid == null ? null : new String[] { uid }, setFlags.intValue(), true);
             }
-            if (clearFlags != null || clearUserFlags != null) {
-                if (clearUserFlags != null) {
-                    if (clearFlags == null) {
-                        // no system flags to remove
-                        clearFlags = new Integer(0);
-                    }
-                    /*
-                     * Remove system and user flags
-                     */
-                    mailInterface.updateMessageFlags(sourceFolder, uid == null ? null : new String[] { uid }, clearFlags.intValue(), clearUserFlags, false);
-                } else {
-                    /*
-                     * Remove system flags which are allowed to be altered by client
-                     */
-                    mailInterface.updateMessageFlags(sourceFolder, uid == null ? null : new String[] { uid }, clearFlags.intValue(), false);
+            if (clearUserFlags != null) {
+                if (clearFlags == null) {
+                    // no system flags to remove
+                    clearFlags = new Integer(0);
                 }
+                /*
+                 * Remove system and user flags
+                 */
+                mailInterface.updateMessageFlags(sourceFolder, uid == null ? null : new String[] { uid }, clearFlags.intValue(), clearUserFlags, false);
+            } else if (clearFlags != null) {
+                /*
+                 * Remove system flags which are allowed to be altered by client
+                 */
+                mailInterface.updateMessageFlags(sourceFolder, uid == null ? null : new String[] { uid }, clearFlags.intValue(), false);
             }
             if (destFolder != null) {
                 /*

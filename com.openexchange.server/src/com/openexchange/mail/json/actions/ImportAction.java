@@ -92,6 +92,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
@@ -101,6 +102,7 @@ import com.openexchange.mail.mime.converters.DefaultConverterConfig;
 import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTrackableTask;
@@ -113,6 +115,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@OAuthAction(MailActionFactory.OAUTH_WRITE_SCOPE)
 public final class ImportAction extends AbstractMailAction {
 
     /**

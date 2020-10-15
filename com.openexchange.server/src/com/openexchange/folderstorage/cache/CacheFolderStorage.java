@@ -1655,6 +1655,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                         @Override
                         public java.util.List<SortableId> call() throws Exception {
                             StorageParameters newParameters = newStorageParameters(storageParameters);
+                            newParameters.setDecorator(storageParameters.getDecorator());
                             boolean started = neededStorage.startTransaction(newParameters, false);
                             try {
                                 java.util.List<SortableId> l = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));

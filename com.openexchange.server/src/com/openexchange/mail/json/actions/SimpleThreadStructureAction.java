@@ -74,6 +74,7 @@ import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.converters.MailConverter;
@@ -84,6 +85,7 @@ import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.collections.PropertizedList;
@@ -94,6 +96,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
 public final class SimpleThreadStructureAction extends AbstractMailAction implements MailRequestSha1Calculator {
 
     protected static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SimpleThreadStructureAction.class);

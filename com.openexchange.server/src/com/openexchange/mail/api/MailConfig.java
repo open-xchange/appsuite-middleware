@@ -115,6 +115,8 @@ import gnu.trove.set.hash.TIntHashSet;
  */
 public abstract class MailConfig {
 
+    public static final String MISSING_SESSION_PASSWORD = "MISSING_SESSION_PW";
+
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(MailConfig.class);
@@ -887,7 +889,9 @@ public abstract class MailConfig {
                     String sessionPassword = session.getPassword();
                     if (null == sessionPassword) {
                         if (!Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-                            throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
+                            OXException e = MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
+                            e.setArgument(MISSING_SESSION_PASSWORD, Boolean.TRUE);
+                            throw e;
                         }
                         sessionPassword = "";
                     }
@@ -1332,6 +1336,7 @@ public abstract class MailConfig {
      * @return <code>true</code> if custom parsing has been performed; otherwise <code>false</code>
      * @throws OXException If custom parsing fails
      */
+    @SuppressWarnings("unused")
     protected boolean doCustomParsing(final Account account, final Session session) throws OXException {
         return false;
     }

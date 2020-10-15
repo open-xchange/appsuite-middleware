@@ -47,25 +47,38 @@
  *
  */
 
-package com.openexchange.mail.json;
+package com.openexchange.ajax.mail.oauth;
 
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+import javax.ws.rs.core.GenericType;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.invoker.Pair;
 
 /**
- * {@link MailOAuthConstants}
+ * {@link OAuthApiClient}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.5
  */
-public class MailOAuthConstants {
+public class OAuthApiClient extends ApiClient {
+
+    private final Supplier<String> tokenSupplier;
 
     /**
-     * Initializes a new {@link MailOAuthConstants}.
+     * Initializes a new {@link OAuthApiClient}.
      */
-    private MailOAuthConstants() {
+    public OAuthApiClient(Supplier<String> tokenSupplier) {
         super();
+        this.tokenSupplier = tokenSupplier;
     }
 
-    /** The OAuth scope granting permission to send a RFC822 data block via primary account's transport*/
-    public static final String OAUTH_SEND_DATA = "send_data";
+    @Override
+    public <T> T invokeAPI(String path, String method, List<Pair> queryParams, Object body, Map<String, String> headerParams, Map<String, Object> formParams, String accept, String contentType, String[] authNames, GenericType<T> returnType) throws ApiException {
+        headerParams.put("Authorization", tokenSupplier.get());
+        return super.invokeAPI(path, method, queryParams, body, headerParams, formParams, accept, contentType, authNames, returnType);
+    }
 
 }

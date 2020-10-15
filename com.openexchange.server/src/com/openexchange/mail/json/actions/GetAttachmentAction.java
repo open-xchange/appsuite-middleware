@@ -101,6 +101,7 @@ import com.openexchange.mail.attachment.storage.StoreOperation;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeStructureFixer;
@@ -109,6 +110,7 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.HashUtility;
@@ -122,6 +124,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @DispatcherNotes(allowPublicSession = true)
+@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
 public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAttachmentAction.class);

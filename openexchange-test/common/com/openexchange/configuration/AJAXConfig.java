@@ -138,8 +138,13 @@ public class AJAXConfig extends AbstractConfig {
         TEST_DIR("testMailDir"),
 
         MAIL_PORT("mailPort"),
-        
+
         PATH_PREFIX("pathPrefix"),
+
+        /**
+         * An oauth token previously obtained from a oauth authentication server (e.g. keycloak)
+         */
+        OAUTH_TOKEN("oauthToken")
 
         ;
 

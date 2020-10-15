@@ -124,7 +124,7 @@ public final class CreateAction extends AbstractFolderAction {
         /*
          * Parse parameters
          */
-        FolderServiceDecorator decorator = new FolderServiceDecorator().put(PARAM_AUTORENAME, request.getParameter(PARAM_AUTORENAME));
+        FolderServiceDecorator decorator = getDecorator(request).put(PARAM_AUTORENAME, request.getParameter(PARAM_AUTORENAME));
         final FolderResponse<String> newIdResponse = folderService.createFolder(folder, session, decorator);
         final String newId = newIdResponse.getResponse();
         Collection<OXException> warnings = new ArrayList<>(newIdResponse.getWarnings());

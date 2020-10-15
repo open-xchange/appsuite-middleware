@@ -68,6 +68,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.FromAddressProvider;
 import com.openexchange.mail.compose.old.OldCompositionSpace;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -79,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.WRITE_MAIL)
+@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
 public final class GetReplyAction extends AbstractMailAction {
 
     /**

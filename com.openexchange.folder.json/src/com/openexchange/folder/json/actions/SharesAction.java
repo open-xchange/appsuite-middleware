@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
-import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
 import com.openexchange.folderstorage.ContentType;
@@ -106,14 +105,8 @@ public class SharesAction extends AbstractFolderAction {
         /*
          * prepare folder service decorator based on additional request parameters
          */
-        FolderServiceDecorator decorator = new FolderServiceDecorator()
-            .setLocale(optLocale(request))
-            .setTimeZone(Tools.getTimeZone(request.getParameter(AJAXServlet.PARAMETER_TIMEZONE)))
-            .setAllowedContentTypes(collectAllowedContentTypes(request))
-            .put("mailRootFolders", request.getParameter("mailRootFolders"))
-            .put("altNames", request.getParameter("altNames"))
-            .put("suppressUnifiedMail", isSuppressUnifiedMail(session))
-        ;
+        FolderServiceDecorator decorator = getDecorator(request).put("mailRootFolders", request.getParameter("mailRootFolders"));
+
         /*
          * get shares from folder service
          */

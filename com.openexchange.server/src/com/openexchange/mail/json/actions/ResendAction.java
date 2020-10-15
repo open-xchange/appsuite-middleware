@@ -66,6 +66,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -74,6 +75,7 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -83,9 +85,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
+@OAuthAction(MailActionFactory.OAUTH_WRITE_SCOPE)
 public final class ResendAction extends AbstractMailAction {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResendAction.class);
 
     /**
      * Initializes a new {@link ResendAction}.
@@ -162,7 +163,7 @@ public final class ResendAction extends AbstractMailAction {
                     try {
                         mm.setHeader("X-Ignore", "Ignore");
                         mm.removeHeader("X-Ignore");
-                    } catch (javax.mail.IllegalWriteException e) {
+                    } catch (@SuppressWarnings("unused") javax.mail.IllegalWriteException e) {
                         readOnly = true;
                     } catch (javax.mail.MessagingException e) {
                         throw MimeMailException.handleMessagingException(e);

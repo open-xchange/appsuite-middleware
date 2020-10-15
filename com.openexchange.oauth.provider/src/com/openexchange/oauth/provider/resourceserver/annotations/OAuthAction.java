@@ -86,10 +86,6 @@ public @interface OAuthAction {
      */
     public static final String GRANT_ALL = "*";
 
-    public static final String READ_MAIL = "read_mail";
-
-    public static final String WRITE_MAIL = "write_mail";
-
     /**
      * Indicates that a custom scope check is necessary.
      * See {@link OAuthScopeCheck} for details.
@@ -98,7 +94,7 @@ public @interface OAuthAction {
 
     /**
      * Indicates the required OAuth 2.0 scope to call this action.
-     * 
+     *
      * @return The scope. If all requests are authorized to call this action
      *         {@link OAuthAction#GRANT_ALL} must be returned.
      */
