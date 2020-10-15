@@ -249,6 +249,9 @@ public class XOXAccountAccess implements CapabilityAware {
             errorHandler.assertNoRecentException();
             shareClient.ping();
             return true;
+        } catch (OXException e) {
+            errorHandler.handleException(e);
+            throw e;
         } finally {
             close();
         }
