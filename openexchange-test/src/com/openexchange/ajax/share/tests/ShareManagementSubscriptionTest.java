@@ -147,16 +147,21 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
     }
 
     @Test
-    public void testSomeLink_APIException() throws Exception {
+    public void testSomeLink_Unresovable() throws Exception {
         analyze("https://example.org/no/share/link", StateEnum.UNRESOLVABLE);
+    }
+    
+    @Test
+    public void testBrokenLink_Unresovable() throws Exception {
+        analyze("https://example.org/ajax/share/aaaf78820506e0b2faf7883506ce41388f98fa02a4e314c9/1/8/MTk3Njk0", StateEnum.UNRESOLVABLE);
     }
 
     @Test
-    public void testAnonymousLink_Addable() throws Exception {
+    public void testAnonymousLink_Forbidden() throws Exception {
         String folderId = createFolder();
         ShareLinkData shareLink = getOrCreateShareLink(folderManager, smApi, folderId);
 
-        analyze(shareLink, StateEnum.ADDABLE);
+        analyze(shareLink, StateEnum.FORBIDDEN);
     }
 
     @Test
@@ -169,18 +174,18 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
     }
 
     @Test
-    public void testAnonymousLinkWithPassword_Addable() throws Exception {
+    public void testAnonymousLinkWithPassword_Forbidden() throws Exception {
         String folderId = createFolder();
         ShareLinkData shareLink = getOrCreateShareLink(folderManager, smApi, folderId);
 
-        analyze(shareLink, StateEnum.ADDABLE);
+        analyze(shareLink, StateEnum.FORBIDDEN);
 
         updateLinkWithPassword(folderManager, smApi, folderId);
-        analyze(smApiC2, getOrCreateShareLink(folderManager, smApi, folderId), StateEnum.ADDABLE_WITH_PASSWORD);
+        analyze(smApiC2, getOrCreateShareLink(folderManager, smApi, folderId), StateEnum.FORBIDDEN);
     }
 
     @Test
-    public void testAnonymousLink_Unresovable() throws Exception {
+    public void testDeletedAnonymousLink_Unresolvable() throws Exception {
         String folderId = createFolder();
         ShareLinkData shareLink = getOrCreateShareLink(folderManager, smApi, folderId);
         deleteShareLink(folderManager, smApi, folderId);

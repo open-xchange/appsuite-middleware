@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl.subscription;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.slf4j.Logger;
@@ -57,10 +58,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.Links;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
 import com.openexchange.share.subscription.ShareLinkState;
 import com.openexchange.share.subscription.ShareSubscriptionExceptions;
@@ -74,8 +77,6 @@ import com.openexchange.share.subscription.ShareSubscriptionProvider;
  * @since v7.10.5
  */
 public class ContextInternalSubscriptionProvider implements ShareSubscriptionProvider {
-
-    private static final ShareLinkAnalyzeResult INACCESSIBLE = new ShareLinkAnalyzeResult(ShareLinkState.INACCESSIBLE, null);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ContextInternalSubscriptionProvider.class);
 
@@ -114,7 +115,7 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
         URL url = getUrl(shareLink);
         String ref = url.getRef();
         if (Strings.isEmpty(ref)) {
-            return INACCESSIBLE;
+            return incaccessible(shareLink);
         }
         if (ref.startsWith(Links.FRAGMENT_APP)) {
             ref = ref.substring(Links.FRAGMENT_APP.length());
@@ -129,7 +130,7 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
             }
         }
         if (Strings.isEmpty(folderId)) {
-            return INACCESSIBLE;
+            return incaccessible(shareLink);
         }
 
         /*
@@ -139,11 +140,11 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
         try {
             UserizedFolder folder = folderService.getFolder(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), folderId, session, null);
             int module = folder.getContentType().getModule();
-            return new ShareLinkAnalyzeResult(ShareLinkState.SUBSCRIBED, new ShareSubscriptionInformation(folder.getAccountID(), String.valueOf(module), folderId));
+            return new ShareLinkAnalyzeResult(ShareLinkState.SUBSCRIBED, new ShareSubscriptionInformation(folder.getAccountID(), Module.getForFolderConstant(module).getName(), folderId));
         } catch (OXException e) {
             LOGGER.debug("Unable to access the folder", e);
+            return new ShareLinkAnalyzeResult(ShareLinkState.INACCESSIBLE, ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(I(session.getUserId()), folderId, I(session.getContextId()), e), null);
         }
-        return INACCESSIBLE;
     }
 
     @Override
@@ -177,6 +178,10 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
         } catch (MalformedURLException e) {
             throw ShareSubscriptionExceptions.NOT_USABLE.create(url, e);
         }
+    }
+
+    private static ShareLinkAnalyzeResult incaccessible(String link) {
+        return new ShareLinkAnalyzeResult(ShareLinkState.INACCESSIBLE, ShareExceptionCodes.INVALID_LINK.create(link), null);
     }
 
 }

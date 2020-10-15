@@ -49,6 +49,8 @@
 
 package com.openexchange.share.subscription;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link ShareLinkAnalyzeResult}
  *
@@ -58,18 +60,37 @@ package com.openexchange.share.subscription;
 public final class ShareLinkAnalyzeResult {
 
     private final ShareLinkState state;
+    private final OXException error;
     private final ShareSubscriptionInformation infos;
 
     /**
      * Initializes a new {@link ShareLinkAnalyzeResult}.
      * 
      * @param state The state of the result
-     * @param infos Detailed information abouut the share
+     * @param infos Detailed information about the share
      */
     public ShareLinkAnalyzeResult(ShareLinkState state, ShareSubscriptionInformation infos) {
+        this(state, null, infos);
+    }
+
+    /**
+     * Initializes a new {@link ShareLinkAnalyzeResult}.
+     * 
+     * @param state The state of the result
+     * @param error The details about the state as {@link OXException}
+     * @param infos Detailed information about the share
+     */
+    public ShareLinkAnalyzeResult(ShareLinkState state, OXException error, ShareSubscriptionInformation infos) {
         super();
         this.state = state;
+        this.error = error;
         this.infos = infos;
+    }
+
+    ShareLinkAnalyzeResult(Builder builder) {
+        this.state = builder.state;
+        this.error = builder.error;
+        this.infos = builder.infos;
     }
 
     /**
@@ -79,6 +100,15 @@ public final class ShareLinkAnalyzeResult {
      */
     public ShareLinkState getState() {
         return state;
+    }
+
+    /**
+     * Further details of the state
+     *
+     * @return Details as {@link OXException}, might be <code>null</code>
+     */
+    public OXException getDetails() {
+        return error;
     }
 
     /**
@@ -92,7 +122,82 @@ public final class ShareLinkAnalyzeResult {
 
     @Override
     public String toString() {
-        return "ShareLinkAnalyzeResult [state=" + state + ", infos=" + (null != infos ? infos.toString() : "null") + "]";
+        return "ShareLinkAnalyzeResult [state=" + state + ", error=" + (null == error ? "null" : error.getMessage()) + ", infos=" + (null != infos ? infos.toString() : "null") + "]";
+    }
+
+    /**
+     * {@link Builder}
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v7.10.5
+     */
+    public static class Builder {
+
+        ShareLinkState state;
+        OXException error;
+        ShareSubscriptionInformation infos;
+
+        /**
+         * Initializes a new {@link Builder}.
+         */
+        public Builder() {}
+
+        /**
+         * Initializes a new {@link Builder}.
+         * 
+         * @param state The state of the result
+         * @param error The detailed error about the state as {@link OXException}
+         * @param infos Detailed information about the share
+         */
+        public Builder(ShareLinkState state, OXException error, ShareSubscriptionInformation infos) {
+            this.state = state;
+            this.error = error;
+            this.infos = infos;
+        }
+
+        /**
+         * Add the state
+         *
+         * @param state The state
+         * @return This instance for chaining
+         */
+        public Builder state(ShareLinkState state) {
+            this.state = state;
+            return Builder.this;
+        }
+
+        /**
+         * Add a detailed error message to the state
+         *
+         * @param error The details
+         * @return This instance for chaining
+         */
+        public Builder error(OXException error) {
+            this.error = error;
+            return Builder.this;
+        }
+
+        /**
+         * Add the infos
+         *
+         * @param infos The infos
+         * @return This instance for chaining
+         */
+        public Builder infos(ShareSubscriptionInformation infos) {
+            this.infos = infos;
+            return Builder.this;
+        }
+
+        /**
+         * Builds the result
+         *
+         * @return The analyze result
+         */
+        public ShareLinkAnalyzeResult build() {
+
+            return new ShareLinkAnalyzeResult(this);
+        }
+
     }
 
 }

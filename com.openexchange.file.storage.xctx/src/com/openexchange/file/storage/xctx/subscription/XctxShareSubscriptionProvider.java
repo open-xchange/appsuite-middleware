@@ -49,10 +49,6 @@
 
 package com.openexchange.file.storage.xctx.subscription;
 
-import static com.openexchange.share.AuthenticationMode.ANONYMOUS;
-import static com.openexchange.share.AuthenticationMode.ANONYMOUS_PASSWORD;
-import static com.openexchange.share.AuthenticationMode.GUEST;
-import static com.openexchange.share.AuthenticationMode.GUEST_PASSWORD;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE_WITH_PASSWORD;
 import static com.openexchange.share.subscription.ShareLinkState.FORBIDDEN;
@@ -69,16 +65,16 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.subscription.AbstractFileStorageSubscriptionProvider;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
+import com.openexchange.share.subscription.ShareLinkAnalyzeResult.Builder;
 import com.openexchange.share.subscription.ShareLinkState;
-import com.openexchange.share.subscription.ShareSubscriptionInformation;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.user.User;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -108,18 +104,17 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
             return false;
         }
         ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
-        if (Module.INFOSTORE.getFolderConstant() != targetPath.getModule()) {
+        if (null == targetPath || Module.INFOSTORE.getFolderConstant() != targetPath.getModule()) {
             return false;
         }
         try {
             GuestInfo guestInfo = resolveGuest(shareLink);
-            if (null == guestInfo) {
-                return false;
+            if (null != guestInfo) {
+                /*
+                 * Skip checking if context or user are enabled. This provider is responsible for handling the link
+                 */
+                return hasCapability(session);
             }
-            /*
-             * Skip checking if context or user are enabled. This provider is responsible for handling the link
-             */
-            return hasCapability(session);
         } catch (OXException e) {
             logExcpetionError(e);
         }
@@ -134,35 +129,42 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
     @Override
     public ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException {
         /*
-         * Check that the share can be subscribed 
+         * Check that the share can be subscribed
          */
         requireAccess(session);
         if (isSingleFileShare(shareLink)) {
-            return new ShareLinkAnalyzeResult(FORBIDDEN, new ShareSubscriptionInformation(null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
+            return new ShareLinkAnalyzeResult(FORBIDDEN, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
         }
 
+        /*
+         * Check for existing accounts
+         */
         FileStorageAccountAccess accountAccess = getStorageAccountAccess(session, shareLink);
         if (null != accountAccess) {
-            ShareLinkState state = checkAccessible(accountAccess, shareLink);
-            return new ShareLinkAnalyzeResult(state, generateInfos(accountAccess, shareLink));
+            Builder builder = checkAccessible(accountAccess, shareLink);
+            return builder.infos(generateInfos(accountAccess, shareLink)).build();
         }
+
         /*
-         * Try to resolve the token to a guest and if found announce that it can be added
+         * Try to resolve the token to a guest
          */
         GuestInfo guestInfo = resolveGuest(shareLink);
-        if (false == matchesByMail(ServerSessionAdapter.valueOf(session).getUser(), guestInfo)) {
-            return new ShareLinkAnalyzeResult(FORBIDDEN, new ShareSubscriptionInformation(null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
+        if (null == guestInfo) {
+            return unknownGuest(shareLink);
         }
-        ShareLinkState state = UNRESOLVABLE;
-        if (null != guestInfo && null != guestInfo.getAuthentication()) {
-            AuthenticationMode mode = guestInfo.getAuthentication();
-            if (GUEST_PASSWORD.equals(mode) || ANONYMOUS_PASSWORD.equals(mode)) {
-                state = ADDABLE_WITH_PASSWORD;
-            } else if (GUEST.equals(mode) || ANONYMOUS.equals(mode)) {
-                state = ADDABLE;
-            }
+        if (false == RecipientType.GUEST.equals(guestInfo.getRecipientType()) || Strings.isEmpty(guestInfo.getEmailAddress())) {
+            return forbidden(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
         }
-        return new ShareLinkAnalyzeResult(state, new ShareSubscriptionInformation(null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
+        if (false == UserAliasUtility.isAlias(guestInfo.getEmailAddress(), getAliases(ServerSessionAdapter.valueOf(session).getUser()))) {
+            return forbidden(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(guestInfo.getEmailAddress()));
+        }
+
+        /*
+         * Resolve the guest info to a state
+         */
+        Builder builder = resolveState(shareLink, guestInfo);
+        builder.infos(getModuleInfo());
+        return builder.build();
     }
 
     @Override
@@ -186,25 +188,72 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
     }
 
     /**
-     * Matches if the user is the correct recipient of the share
+     * Resolves a share link to a specific guest of this system
      *
-     * @param user The user to match
-     * @param guestInfo The guest information of the share
-     * @return <code>true</code> if the share is for anonymous users or if an alias of the user matches as recipient, <code>false</code> otherwise
+     * @param shareLink The share link to get the guest info for
+     * @return The guest info or <code>null</code> if no guest can be found for the link
+     * @throws OXException In case {@link ShareService} is missing or token is invalid
      */
-    private static boolean matchesByMail(User user, GuestInfo guestInfo) {
-        if (null == guestInfo || false == RecipientType.GUEST.equals(guestInfo.getRecipientType()) || Strings.isEmpty(guestInfo.getEmailAddress())) {
-            return false;
-        }
-        return UserAliasUtility.isAlias(guestInfo.getEmailAddress(), getAliases(user));
-    }
-
     private GuestInfo resolveGuest(String shareLink) throws OXException {
         String baseToken = ShareTool.getBaseToken(shareLink);
         if (Strings.isEmpty(baseToken)) {
             return null;
         }
         return services.getServiceSafe(ShareService.class).resolveGuest(baseToken);
+    }
+
+    /**
+     * Map the {@link AuthenticationMode} of the guest to a fitting share state
+     *
+     * @param shareLink The share link for logging
+     * @param guestInfo The guest info to map
+     * @return A {@link Builder} holding the information
+     */
+    private Builder resolveState(String shareLink, GuestInfo guestInfo) {
+        Builder builder = new Builder();
+        if (null == guestInfo || null == guestInfo.getAuthentication()) {
+            return builder.state(UNRESOLVABLE).error(ShareExceptionCodes.INVALID_LINK.create(shareLink));
+        }
+        AuthenticationMode mode = guestInfo.getAuthentication();
+        switch (mode) {
+            case ANONYMOUS:
+            case ANONYMOUS_PASSWORD:
+                /*
+                 * Do not support anonymous shares
+                 */
+                return builder.state(ShareLinkState.FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
+            case GUEST_PASSWORD:
+                return builder.state(ADDABLE_WITH_PASSWORD);
+            case GUEST:
+                return builder.state(ADDABLE);
+            default:
+                return builder.state(UNRESOLVABLE).error(ShareExceptionCodes.INVALID_LINK.create(shareLink));
+        }
+    }
+
+    /**
+     * Create response for a unknown guest.
+     * <p>
+     * Please note that the provider did find a guest with the given sharing link when {@link #isSupported(Session, String)}
+     * was executed. However now the guest hasn't access anymore. Therefore behave like this provider was never called
+     * and return the {@link ShareLinkState#UNRESOLVABLE} with no infos about this provider
+     *
+     * @return Appropriated response in case guest can't be resolved.
+     */
+    private ShareLinkAnalyzeResult unknownGuest(String shareLink) {
+        return new Builder() // @formatter:off
+            .state(UNRESOLVABLE)
+            .error(ShareExceptionCodes.INVALID_LINK.create(shareLink))
+            .infos(null)
+            .build(); // @formatter:on
+    }
+
+    private ShareLinkAnalyzeResult forbidden(OXException exception) {
+        return new Builder() // @formatter:off
+            .state(FORBIDDEN)
+            .error(exception)
+            .infos(getModuleInfo())
+            .build(); // @formatter:on
     }
 
 }

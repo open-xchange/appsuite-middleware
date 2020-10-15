@@ -25,6 +25,11 @@ properties:
             - REMOVED
             - UNRESOLVABLE
             - FORBIDDEN
+        error:
+          type: object
+          properties:
+            $ref: ../common/CommonResponseData.yaml
+          description: Further details in case a share isn't `SUBSCRIBED`, `ADDABLE` or `ADDABLE_WITH_PASSWORD`
         account:
           type: string
           description: The account ID of the newly created account

@@ -190,6 +190,8 @@ public abstract class AbstractApiClient implements ApiClient {
              */
             HttpContext httpContext = new BasicHttpContext();
             HttpContextUtils.addCookieStore(httpContext, cookieStore);
+
+            LOGGER.trace("Sending request \"{}\" with cookies \"{}\"", request, cookieStore.toString());
             response = getHttpClient().execute(request, httpContext);
 
             /*
@@ -198,7 +200,7 @@ public abstract class AbstractApiClient implements ApiClient {
             if (canBuffer(response)) {
                 response = ensureRepeatability(response);
             }
-            log(request, response);
+            log(response, cookieStore);
 
             final boolean enquedRequest = response.getStatusLine() != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_ACCEPTED;
 
@@ -518,7 +520,7 @@ public abstract class AbstractApiClient implements ApiClient {
      * @param request The actual request
      * @param response The actual response
      */
-    private static void log(HttpRequestBase request, HttpResponse response) {
+    private static void log(HttpResponse response, CookieStore cookieStore) {
         if (false == LOGGER.isTraceEnabled()) {
             return;
         }
@@ -527,7 +529,7 @@ public abstract class AbstractApiClient implements ApiClient {
             content = ApiClientUtils.getBody(response);
         }
 
-        LOGGER.trace("Request executed: {}. Received the following content:\n\n{}\n", request, content, new OXException());
+        LOGGER.trace("Received response. Cookies \"{}\".\nResponse content:\n\n{}\n", cookieStore, content, new OXException(999, "TRACE stack trace"));
     }
 
     /**

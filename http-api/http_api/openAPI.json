@@ -12690,6 +12690,14 @@
           }
         }, {
           "in" : "query",
+          "name" : "accoutn_id",
+          "description" : "The account identifier of an specific account belonging to the user of the session\n",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
           "name" : "contact_id",
           "description" : "The contact identifier.\n",
           "required" : false,
@@ -18271,9 +18279,13 @@
             "type" : "string",
             "description" : "For mail folders, the rights string as defined in [RFC 2086](http://tools.ietf.org/html/rfc2086)."
           },
+          "identifier" : {
+            "type" : "string",
+            "description" : "The qualified identifier of the entity associated with this permission."
+          },
           "entity" : {
             "type" : "integer",
-            "description" : "User ID of the user or group to which this permission applies (ignored for type \"anonymous\" or \"guest\")."
+            "description" : "Internal identifier of the user or group to which this permission applies (ignored for type \"anonymous\" or \"guest\")."
           },
           "group" : {
             "type" : "boolean",
@@ -18313,9 +18325,13 @@
       "FolderExtendedPermission" : {
         "type" : "object",
         "properties" : {
+          "identifier" : {
+            "type" : "string",
+            "description" : "The qualified identifier of the entity associated with this permission. Should be used to associate the entry  with its 'extended' permission version equivalent."
+          },
           "entity" : {
             "type" : "integer",
-            "description" : "Identifier of the permission entity (i.e. user-, group- or guest-ID)."
+            "description" : "Internal identifier of the permission entity (i.e. user-, group- or guest-ID)."
           },
           "bits" : {
             "type" : "integer",
@@ -37014,6 +37030,55 @@
                 "description" : "State to indicate a possible usage of the link\n  * `SUBSCRIBED` - State to indicate that the link belongs to a known share and is accessible. Nothing to do for the client.\n  * `CREDENTIALS_REFRESH` - State to indicate that the link belongs to a known share but is not accessible at the moment because the remote server indicates that credentials have been updated meanwhile.\n  * `ADDABLE` -State to indicate that the link is valid and belongs to a share that is not yet subscribed an can be added as an account.\n  * `ADDABLE_WITH_PASSWORD` - Equal state to `ADDABLE` but in addition the user needs to enter a password to add the share.\n  * `INACCESSIBLE` - State to indicate that the share link is inaccessible and thus can't be subscribed.\n",
                 "enum" : [ "SUBSCRIBED", "CREDENTIALS_REFRESH", "ADDABLE", "ADDABLE_WITH_PASSWORD", "INACCESSIBLE" ]
               },
+              "error" : {
+                "type" : "object",
+                "properties" : {
+                  "error" : {
+                    "type" : "string",
+                    "description" : "The translated error message. Present in case of errors."
+                  },
+                  "error_params" : {
+                    "type" : "array",
+                    "description" : "Empty JSON array.",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  },
+                  "error_id" : {
+                    "type" : "string",
+                    "description" : "Unique error identifier to help finding this error instance in the server logs."
+                  },
+                  "error_desc" : {
+                    "type" : "string",
+                    "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+                  },
+                  "error_stack" : {
+                    "type" : "array",
+                    "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  },
+                  "code" : {
+                    "type" : "string",
+                    "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+                  },
+                  "categories" : {
+                    "type" : "string",
+                    "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+                  },
+                  "category" : {
+                    "type" : "integer",
+                    "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+                  },
+                  "timestamp" : {
+                    "type" : "integer",
+                    "format" : "int64",
+                    "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+                  }
+                },
+                "description" : "Further details in case a share isn't `SUBSCRIBED`, `ADDABLE` or `ADDABLE_WITH_PASSWORD`"
+              },
               "account" : {
                 "type" : "string",
                 "description" : "The account ID of the newly created account"
@@ -37362,7 +37427,7 @@
           },
           "rootFolder" : {
             "type" : "string",
-            "description" : "The ID of the account's root folder within the folder tree. This is not writeable and is generated by the server.",
+            "description" : "The ID of the account's root folder within the folder tree, if available. This is not writeable and is generated by the server.",
             "readOnly" : true
           },
           "isDefaultAccount" : {
