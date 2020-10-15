@@ -269,10 +269,10 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      */
     protected FileStorageAccount getStorageAccount(Session session, String shareLink) throws OXException {
         URL shareUrl = getUrl(shareLink);
-        if (null == shareUrl) {
+        String baseToken = ShareTool.getBaseToken(shareLink);
+        if (null == shareUrl || Strings.isEmpty(baseToken)) {
             return null;
         }
-        String baseToken = ShareTool.getBaseToken(shareLink);
         for (FileStorageAccount account : fileStorageService.getAccountManager().getAccounts(session)) {
             String url = String.valueOf(account.getConfiguration().get(URL));
             if (Strings.isNotEmpty(url) && baseToken.equals(ShareTool.getBaseToken(url)) && compareHost(shareUrl, url)) {

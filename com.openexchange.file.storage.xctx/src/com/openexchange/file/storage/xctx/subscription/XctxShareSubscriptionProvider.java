@@ -108,7 +108,7 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
             return false;
         }
         ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
-        if (Module.INFOSTORE.getFolderConstant() != targetPath.getModule()) {
+        if (null == targetPath || Module.INFOSTORE.getFolderConstant() != targetPath.getModule()) {
             return false;
         }
         try {
@@ -134,7 +134,7 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
     @Override
     public ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException {
         /*
-         * Check that the share can be subscribed 
+         * Check that the share can be subscribed
          */
         requireAccess(session);
         if (isSingleFileShare(shareLink)) {
@@ -156,9 +156,14 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
         ShareLinkState state = UNRESOLVABLE;
         if (null != guestInfo && null != guestInfo.getAuthentication()) {
             AuthenticationMode mode = guestInfo.getAuthentication();
-            if (GUEST_PASSWORD.equals(mode) || ANONYMOUS_PASSWORD.equals(mode)) {
+            if (ANONYMOUS.equals(mode) || ANONYMOUS_PASSWORD.equals(mode)) {
+                /*
+                 * Do not support anonymous shares
+                 */
+                state = ShareLinkState.FORBIDDEN;
+            } else if (GUEST_PASSWORD.equals(mode)) {
                 state = ADDABLE_WITH_PASSWORD;
-            } else if (GUEST.equals(mode) || ANONYMOUS.equals(mode)) {
+            } else if (GUEST.equals(mode)) {
                 state = ADDABLE;
             }
         }
