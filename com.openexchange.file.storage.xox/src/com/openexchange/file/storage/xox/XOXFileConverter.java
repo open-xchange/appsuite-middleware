@@ -122,14 +122,8 @@ public class XOXFileConverter {
         /*
          * enhance & qualify remote entities in object permissions for usage in local session in storage account's context
          */
-        if (null == fields || fields.contains(Field.OBJECT_PERMISSIONS)) {
-            file.setObjectPermissions(remoteFile.getObjectPermissions());
-
-            //List<FileStorageObjectPermission> objectPermissions = file.getObjectPermissions();
-            //TODO: objectPermissions = entityHelper.addObjectPermissionEntityInfos(guestSession, file.getObjectPermissions());
-
-            // file.setObjectPermissions(entityMangler.mangleRemoteObjectPermissions(objectPermissions));
-        }
+        //TODO: directly get from extended object permission field if possible
+        file.setObjectPermissions(entityHelper.mangleRemoteObjectPermissions(entityHelper.addObjectPermissionEntityInfos(remoteFile.getObjectPermissions())));
         /*
          * assume not shareable by default
          */

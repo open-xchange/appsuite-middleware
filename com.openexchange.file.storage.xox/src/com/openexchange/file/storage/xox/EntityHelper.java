@@ -51,7 +51,9 @@ package com.openexchange.file.storage.xox;
 
 import static com.openexchange.java.Autoboxing.I;
 import static org.slf4j.LoggerFactory.getLogger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -63,7 +65,9 @@ import com.google.common.cache.CacheBuilder;
 import com.openexchange.api.client.ApiClient;
 import com.openexchange.api.client.common.calls.GetJsonObjectDataCall;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.groupware.EntityInfo;
@@ -131,6 +135,46 @@ public class EntityHelper extends EntityMangler {
             return permission;
         }
         BasicPermission enhancedPermission = new BasicPermission(permission);
+        enhancedPermission.setEntityInfo(entityInfo);
+        return enhancedPermission;
+    }
+
+    /**
+     * Resolves and builds additional entity info for the users and groups referenced by the supplied permissions under perspective of
+     * the API client's user, and returns new object permissions enriched by these entity info.
+     * 
+     * @param permissions The permissions to enhance
+     * @return A list with new object permissions, enhanced with additional details of the underlying entity
+     */
+    public List<FileStorageObjectPermission> addObjectPermissionEntityInfos(List<FileStorageObjectPermission> permissions) {
+        if (null == permissions) {
+            return null;
+        }
+        List<FileStorageObjectPermission> enhancedPermissions = new ArrayList<FileStorageObjectPermission>(permissions.size());
+        for (FileStorageObjectPermission permission : permissions) {
+            enhancedPermissions.add(addObjectPermissionEntityInfo(permission));
+        }
+        return enhancedPermissions;
+    }
+
+    /**
+     * Resolves and builds additional entity info for a certain user or group under perspective of the API client's user, and returns
+     * a new object permission enriched by these entity info.
+     * 
+     * @param permission The permission to enhance
+     * @return A new object permission, enhanced with additional details of the underlying entity, or the passed permission as is if no
+     *         info could be resolved
+     */
+    public FileStorageObjectPermission addObjectPermissionEntityInfo(FileStorageObjectPermission permission) {
+        if (null == permission || null != permission.getEntityInfo() || 0 > permission.getEntity() || 0 == permission.getEntity() && false == permission.isGroup()) {
+            return permission;
+        }
+        EntityInfo entityInfo = optEntityInfo(permission.getEntity(), permission.isGroup());
+        if (null == entityInfo) {
+            return permission;
+        }
+        DefaultFileStorageObjectPermission enhancedPermission = new DefaultFileStorageObjectPermission(
+            permission.getIdentifier(), permission.getEntity(), permission.isGroup(), permission.getPermissions());
         enhancedPermission.setEntityInfo(entityInfo);
         return enhancedPermission;
     }
