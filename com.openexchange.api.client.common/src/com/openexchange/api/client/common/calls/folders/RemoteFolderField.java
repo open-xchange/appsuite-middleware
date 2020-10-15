@@ -128,7 +128,18 @@ public enum RemoteFolderField {
     /**
      * Extended folder permissions
      */
-    EXTENDED_PERMISSIONS(3060, "com.openexchange.share.extendedPermissions")
+    EXTENDED_PERMISSIONS(3060, "com.openexchange.share.extendedPermissions"),
+
+    /**
+     * Information about the entity that created the folder
+     */
+    CREATED_FROM(51, "created_from"),
+
+    /**
+     * Information about the entity that modified the folder
+     */
+    MODIFIED_FROM(52, "modified_from"),
+
     ;
 
     private final int column;
