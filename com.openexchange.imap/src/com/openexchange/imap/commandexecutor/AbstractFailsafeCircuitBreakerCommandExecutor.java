@@ -495,16 +495,18 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
         private final String name;
         private final String host;
         private final boolean perHost;
+        private int hash;
 
         private Key(String name, String host, boolean perHost) {
             super();
             this.name = name;
             this.host = host;
             this.perHost = perHost;
+            hash = 0;
         }
 
         /**
-         * Gets the name
+         * Gets the name.
          *
          * @return The name
          */
@@ -513,7 +515,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
         }
 
         /**
-         * Gets the host
+         * Gets the host.
          *
          * @return The host
          */
@@ -522,7 +524,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
         }
 
         /**
-         * Checks if the host information denotes a certain end-point (IP address)-
+         * Checks if the host information denotes a certain end-point (IP address).
          *
          * @return <code>true</code> if a certain end-point is specified; otherwise <code>false</code>
          */
@@ -532,11 +534,15 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
 
         @Override
         public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + (perHost ? 1231 : 1237);
-            result = prime * result + ((host == null) ? 0 : host.hashCode());
-            result = prime * result + ((name == null) ? 0 : name.hashCode());
+            int result = hash;
+            if (result == 0) {
+                int prime = 31;
+                result = 1;
+                result = prime * result + (perHost ? 1231 : 1237);
+                result = prime * result + ((name == null) ? 0 : name.hashCode());
+                result = prime * result + ((host == null) ? 0 : host.hashCode());
+                hash = result;
+            }
             return result;
         }
 
@@ -555,18 +561,18 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
             if (perHost != other.perHost) {
                 return false;
             }
-            if (host == null) {
-                if (other.host != null) {
-                    return false;
-                }
-            } else if (!host.equals(other.host)) {
-                return false;
-            }
             if (name == null) {
                 if (other.name != null) {
                     return false;
                 }
             } else if (!name.equals(other.name)) {
+                return false;
+            }
+            if (host == null) {
+                if (other.host != null) {
+                    return false;
+                }
+            } else if (!host.equals(other.host)) {
                 return false;
             }
             return true;
