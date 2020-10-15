@@ -47,54 +47,76 @@
  *
  */
 
-package com.openexchange.file.storage.xox;
+package com.openexchange.api.client.common.calls;
 
-import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import com.openexchange.api.client.ApiClient;
-import com.openexchange.api.client.common.calls.user.GetEntityInfoCall;
+import java.util.Objects;
+import org.apache.http.protocol.HttpContext;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.api.client.ApiClientExceptions;
+import com.openexchange.api.client.HttpResponseParser;
+import com.openexchange.api.client.common.parser.AbstractHttpResponseParser;
+import com.openexchange.api.client.common.parser.CommonApiResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.EntityInfo;
 
 /**
- * {@link XOXEntityInfoLoader}
+ * {@link GetJsonObjectDataCall}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
-public class XOXEntityInfoLoader {
+public class GetJsonObjectDataCall extends AbstractGetCall<JSONObject> {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(XOXEntityInfoLoader.class);
-
-    private final Map<String, EntityInfo> knownUsers;
-    private final ApiClient apiClient;
-
-    public XOXEntityInfoLoader(ApiClient apiClient) {
-        super();
-        this.apiClient = apiClient;
-        this.knownUsers = new HashMap<String, EntityInfo>();
-    }
+    private final String module;
+    private final String action;
+    private final Map<String, String> parameters;
 
     /**
-     * Enhances a file with entity info for 'created_from' and/or 'modified_from'
-     *
-     * @param files The list of files
+     * Initializes a new {@link GetJsonObjectDataCall}.
+     * 
+     * @param module The module of the HTTP API to call
+     * @param action The action in the module of the HTTP API to call
+     * @param parameters Additional URL parameters to include in the call
      */
-    public EntityInfo load(String folderId, int userId) {
-        String identifier = XOXStorageConstants.ID + "/" + folderId + "/" + userId;
-        if (knownUsers.containsKey(identifier)) {
-            return knownUsers.get(identifier);
+    public GetJsonObjectDataCall(String module, String action, Map<String, String> parameters) {
+        super();
+        this.module = Objects.requireNonNull(module);
+        this.action = action;
+        this.parameters = parameters;
+    }
+
+    @SuppressWarnings("null")
+    @Override
+    public @NonNull String getModule() {
+        return module;
+    }
+
+    @Override
+    protected String getAction() {
+        return action;
+    }
+
+    @Override
+    protected void fillParameters(Map<String, String> parameters) {
+        if (null != this.parameters) {
+            parameters.putAll(this.parameters);
         }
-        GetEntityInfoCall call = new GetEntityInfoCall(identifier, userId);
-        EntityInfo entityInfo = null;
-        try {
-            entityInfo = apiClient.execute(call);
-        } catch (OXException e) {
-            LOG.info("Could not get entity info.", e);
-        }
-        knownUsers.put(identifier, entityInfo);
-        return entityInfo;
+    }
+
+    @Override
+    public HttpResponseParser<JSONObject> getParser() {
+        return new AbstractHttpResponseParser<JSONObject>() {
+
+            @Override
+            public JSONObject parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException, JSONException {
+                if (null == commonResponse || false == commonResponse.isJSONObject()) {
+                    throw ApiClientExceptions.UNEXPECTED_ERROR.create("Unexpected response format");
+                }                
+                return commonResponse.getJSONObject();
+            }
+        };
     }
 
 }

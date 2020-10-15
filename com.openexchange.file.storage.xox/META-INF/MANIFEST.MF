@@ -4,9 +4,10 @@ Bundle-Name: The OX share file storage bundle
 Bundle-SymbolicName: com.openexchange.file.storage.xox
 Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
-Automatic-Module-Name: com.openexchange.file.storage.oxshare
+Automatic-Module-Name: com.openexchange.file.storage.xox
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.annotation,
+Import-Package: com.google.common.cache,
+ com.openexchange.annotation,
  com.openexchange.api.client,
  com.openexchange.api.client.common,
  com.openexchange.api.client.common.calls,

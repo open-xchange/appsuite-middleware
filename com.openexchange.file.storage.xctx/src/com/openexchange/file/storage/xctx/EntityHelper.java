@@ -141,7 +141,7 @@ public class EntityHelper extends EntityMangler {
      * 
      * @param session The session to use to resolve the entities in
      * @param permissions The permissions to enhance
-     * @return A list with new object permissions, enhanced with additional details of the underlying entity
+     * @return A list with new permissions, enhanced with additional details of the underlying entity
      */
     public List<FileStoragePermission> addPermissionEntityInfos(Session session, List<FileStoragePermission> permissions) {
         if (null == permissions) {
