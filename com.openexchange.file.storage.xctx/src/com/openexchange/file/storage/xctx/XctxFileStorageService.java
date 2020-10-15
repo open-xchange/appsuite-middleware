@@ -62,12 +62,10 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
 import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.groupware.modules.Module;
@@ -81,7 +79,7 @@ import com.openexchange.share.ShareExceptionCodes;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public class XctxFileStorageService implements FileStorageService, AccountAware, SharingFileStorageService, LoginAwareFileStorageServiceExtension {
+public class XctxFileStorageService implements SharingFileStorageService, LoginAwareFileStorageServiceExtension {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XctxFileStorageService.class);
 
