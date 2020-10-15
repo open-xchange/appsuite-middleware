@@ -81,6 +81,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -129,7 +130,6 @@ public abstract class AbstractApiClient implements ApiClient {
     protected final int userId;
     protected final URL loginLink;
 
-    protected final BasicHttpContext httpContext;
     protected final CookieStore cookieStore;
 
     private final AtomicBoolean isClosed;
@@ -150,9 +150,7 @@ public abstract class AbstractApiClient implements ApiClient {
         this.contextId = contextId;
         this.userId = userId;
 
-        this.httpContext = new BasicHttpContext();
         this.cookieStore = HttpContextUtils.createCookieStore();
-        HttpContextUtils.addCookieStore(httpContext, cookieStore);
 
         this.isClosed = new AtomicBoolean(false);
     }
@@ -190,6 +188,8 @@ public abstract class AbstractApiClient implements ApiClient {
             /*
              * Execute the request
              */
+            HttpContext httpContext = new BasicHttpContext();
+            HttpContextUtils.addCookieStore(httpContext, cookieStore);
             response = getHttpClient().execute(request, httpContext);
 
             /*
@@ -208,8 +208,8 @@ public abstract class AbstractApiClient implements ApiClient {
             OXException oxException = response.getEntity() != null && response.getEntity().isRepeatable() ? getNestedOXException(response) : null;
             if (null != oxException && !enquedRequest) {
                 if (matches(SessionExceptionCodes.SESSION_EXPIRED, oxException)) {
-                    clean();
                     isClosed.set(true);
+                    cookieStore.clear();
                     //do not throw the original session_expired exception to prevent confusion with the local session
                     throw ApiClientExceptions.SESSION_EXPIRED.create();
                 }
@@ -285,7 +285,7 @@ public abstract class AbstractApiClient implements ApiClient {
             LOGGER.error("Unable to logout client", e);
         } finally {
             HttpClients.close(request, response);
-            clean();
+            cookieStore.clear();
         }
     }
 
@@ -562,17 +562,5 @@ public abstract class AbstractApiClient implements ApiClient {
             }
         }
         throw ApiClientExceptions.UNEXPECTED_ERROR.create("Unexpected JSON response with status code 202.");
-    }
-
-    /**
-     * Cleans up any kind of HTTP related data. Removes
-     * <li>cookies</li>
-     * <li>HTTP context attributes</li>
-     * Afterwards the client is back to an "uninitialized" state
-     */
-    private void clean() {
-        this.cookieStore.clear();
-        this.httpContext.clear();
-        HttpContextUtils.addCookieStore(httpContext, cookieStore);
     }
 }
