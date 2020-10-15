@@ -61,17 +61,15 @@ import com.openexchange.api.client.common.calls.folders.ExtendedPermission;
 import com.openexchange.api.client.common.calls.folders.ExtendedPermission.Contact;
 import com.openexchange.api.client.common.calls.folders.RemoteFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
-import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.folderstorage.BasicPermission;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.EntityInfo.Type;
 import com.openexchange.groupware.LinkEntityInfo;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Enums;
 import com.openexchange.session.Session;
-import com.openexchange.share.core.subscription.EntityMangler;
 
 /**
  * {@link XOXFolderConverter}
@@ -81,28 +79,19 @@ import com.openexchange.share.core.subscription.EntityMangler;
  */
 public class XOXFolderConverter {
 
+    private final EntityHelper entityHelper;
     private final Session localSession;
-    private final EntityMangler entityMangler;
 
     /**
      * Initializes a new {@link XOXFolderConverter}.
      * 
-     * @param accountAccess The underlying account access
-     */
-    public XOXFolderConverter(XOXAccountAccess accountAccess) {
-        this(accountAccess.getAccount(), accountAccess.getSession());
-    }
-
-    /**
-     * Initializes a new {@link XOXFolderConverter}.
-     * 
-     * @param account The underlying file storage account
+     * @param entityHelper The underlying entity helper to resolve & mangle remote entities
      * @param localSession The user's <i>local</i> session associated with the file storage account
      */
-    public XOXFolderConverter(FileStorageAccount account, Session localSession) {
+    public XOXFolderConverter(EntityHelper entityHelper, Session localSession) {
         super();
+        this.entityHelper = entityHelper;
         this.localSession = localSession;
-        this.entityMangler = new EntityMangler(account.getFileStorageService().getId(), account.getId());
     }
 
     /**
@@ -132,17 +121,15 @@ public class XOXFolderConverter {
         if (null == remoteFolder) {
             return null;
         }
+        /*
+         * init storage folder and take over common properties from remote folder
+         */
         XOXFolder folder = new XOXFolder();
         folder.setCacheable(false); //for now, maybe make configurable?        
         folder.setId(remoteFolder.getID());
         folder.setParentId(remoteFolder.getParentID());
         folder.setName(remoteFolder.getName());
         folder.setCreationDate(remoteFolder.getCreationDate());
-        folder.setCreatedFrom(entityMangler.mangleRemoteEntity(remoteFolder.getCreatedFrom()));
-        folder.setCreatedBy(0);
-        folder.setLastModifiedDate(remoteFolder.getLastModified());
-        folder.setModifiedFrom(entityMangler.mangleRemoteEntity(remoteFolder.getModifiedFrom()));
-        folder.setModifiedBy(0);
         folder.setType(getFileStorageFolderType(remoteFolder.getType()));
         folder.setMeta(remoteFolder.getMeta());
         folder.setDefaultFolder(remoteFolder.isDefault());
@@ -156,12 +143,33 @@ public class XOXFolderConverter {
         if (remoteFolder.containsSubscribedSubfolders()) {
             folder.setSubscribedSubfolders(remoteFolder.hasSubscribedSubfolders());
         }
+        /*
+         * qualify remote entities for usage in local session in storage account's context & erase ambiguous numerical identifiers
+         */
+        folder.setCreatedFrom(entityHelper.mangleRemoteEntity(null == remoteFolder.getCreatedFrom() && 0 < remoteFolder.getCreatedBy() ? 
+            entityHelper.optEntityInfo(remoteFolder.getCreatedBy(), false) : remoteFolder.getCreatedFrom()));
+        folder.setCreatedBy(0);        
+        folder.setModifiedFrom(entityHelper.mangleRemoteEntity(null == remoteFolder.getModifiedFrom() && 0 < remoteFolder.getModifiedBy() ? 
+            entityHelper.optEntityInfo(remoteFolder.getModifiedBy(), false) : remoteFolder.getModifiedFrom()));
+        folder.setModifiedBy(0);
+        /*
+         * exchange remote guest user id with local session user's id in own permissions
+         */
         folder.setOwnPermission(getFileStoragePermission(new BasicPermission(localSession.getUserId(), false, remoteFolder.getOwnRights())));
-        List<FileStoragePermission> storagePermissions = addExtendedPermissions(getFileStoragePermissions(remoteFolder.getPermissions()), remoteFolder.getExtendedPermissions());
-        folder.setPermissions(entityMangler.mangleRemotePermissions(storagePermissions));
+        /*
+         * enhance & qualify remote entities in folder permissions for usage in local session in storage account's context
+         */
+        Permission[] permissions = entityHelper.addEntityInfos(enhancePermissions(remoteFolder.getPermissions(), remoteFolder.getExtendedPermissions()));
+        folder.setPermissions(entityHelper.mangleRemotePermissions(getFileStoragePermissions(permissions)));
+        /*
+         * insert user's own permission as system permission to ensure folder is considered as visible for the local session user throughout the stack
+         */
         DefaultFileStoragePermission systemPermission = DefaultFileStoragePermission.newInstance(folder.getOwnPermission());
         systemPermission.setSystem(1);
         folder.addPermission(systemPermission);
+        /*
+         * adjust capabilities from remote folder
+         */
         folder.setCapabilities(getStorageCapabilities(remoteFolder.getSupportedCapabilities()));
         return folder;
     }
@@ -172,23 +180,22 @@ public class XOXFolderConverter {
      * @param storageFolder The file storage folder to convert
      * @return The remote folder
      */
-    public RemoteFolder getFolder(FileStorageFolder storageFolder) {
+    public RemoteFolder getRemoteFolder(FileStorageFolder storageFolder) {
         if (null == storageFolder) {
             return null;
         }
-        RemoteFolder remoteFolder = new RemoteFolder();
-        remoteFolder.setModule(Module.INFOSTORE.getName());
+        RemoteFolder remoteFolder = initRemoteFolder();
         remoteFolder.setID(storageFolder.getId());
         remoteFolder.setParentID(storageFolder.getParentId());
-        EntityInfo remoteCreatedFrom = entityMangler.unmangleLocalEntity(storageFolder.getCreatedFrom());
+        EntityInfo remoteCreatedFrom = entityHelper.unmangleLocalEntity(storageFolder.getCreatedFrom());
         remoteFolder.setCreatedFrom(remoteCreatedFrom);
         remoteFolder.setCreatedBy(null != remoteCreatedFrom ? remoteCreatedFrom.getEntity() : -1);
-        EntityInfo remoteModifiedFrom = entityMangler.unmangleLocalEntity(storageFolder.getModifiedFrom());
+        EntityInfo remoteModifiedFrom = entityHelper.unmangleLocalEntity(storageFolder.getModifiedFrom());
         remoteFolder.setModifiedFrom(remoteModifiedFrom);
         remoteFolder.setModifiedBy(null != remoteModifiedFrom ? remoteModifiedFrom.getEntity() : -1);
         remoteFolder.setName(storageFolder.getName());
         remoteFolder.setMeta(storageFolder.getMeta());
-        remoteFolder.setPermissions(entityMangler.unmangleLocalPermissions(getPermissions(storageFolder.getPermissions())));
+        remoteFolder.setPermissions(entityHelper.unmangleLocalPermissions(getPermissions(storageFolder.getPermissions())));
         return remoteFolder;
     }
 
@@ -197,28 +204,43 @@ public class XOXFolderConverter {
      * 
      * @return The initialized remote folder
      */
-    public RemoteFolder initFolder() {
+    public RemoteFolder initRemoteFolder() {
         RemoteFolder remoteFolder = new RemoteFolder();
         remoteFolder.setModule(Module.INFOSTORE.getName());
         return remoteFolder;
     }
 
-    private static List<FileStoragePermission> addExtendedPermissions(List<FileStoragePermission> permissions, ExtendedPermission[] extendedPermissions) {
+    private static Permission[] enhancePermissions(Permission[] permissions, ExtendedPermission[] extendedPermissions) {
         if (null == permissions) {
             return null;
         }
-        List<FileStoragePermission> enhencedPermissions = new ArrayList<FileStoragePermission>(permissions.size());
-        for (FileStoragePermission permission : permissions) {
-            ExtendedPermission matchingPermission = findMatching(extendedPermissions, permission);
+        Permission[] enhancedPermissions = new Permission[permissions.length];
+        for (int i = 0; i < permissions.length; i++) {
+            ExtendedPermission matchingPermission = findMatching(extendedPermissions, permissions[i]);
             if (null == matchingPermission) {
-                enhencedPermissions.add(permission);
+                enhancedPermissions[i] = permissions[i];
             } else {
-                DefaultFileStoragePermission enhancedPermission = DefaultFileStoragePermission.newInstance(permission);
+                BasicPermission enhancedPermission = new BasicPermission(permissions[i]);
                 enhancedPermission.setEntityInfo(getEntityInfo(matchingPermission));
-                enhencedPermissions.add(enhancedPermission);
+                enhancedPermissions[i] = enhancedPermission;
             }
         }
-        return enhencedPermissions;
+        return enhancedPermissions;
+    }
+
+    private static ExtendedPermission findMatching(ExtendedPermission[] extendedPermissions, Permission permission) {
+        if (null == extendedPermissions) {
+            return null;
+        }
+        for (ExtendedPermission extendedPermission : extendedPermissions) {
+            if (null != permission.getIdentifier() && permission.getIdentifier().equals(extendedPermission.getIdentifier())) {
+                return extendedPermission;
+            }
+            if ((0 < permission.getEntity() || 0 == permission.getEntity() && permission.isGroup()) && permission.getEntity() == extendedPermission.getEntity()) {
+                return extendedPermission;
+            }
+        }
+        return null;
     }
 
     private static EntityInfo getEntityInfo(ExtendedPermission extendedPermission) {
@@ -239,21 +261,6 @@ public class XOXFolderConverter {
             entityInfo = new LinkEntityInfo(entityInfo, extendedPermission.getShareUrl(), extendedPermission.getPassword(), extendedPermission.getExpiryDate(), extendedPermission.isInherited());
         }
         return entityInfo;
-    }
-
-    private static ExtendedPermission findMatching(ExtendedPermission[] extendedPermissions, FileStoragePermission permission) {
-        if (null == extendedPermissions) {
-            return null;
-        }
-        for (ExtendedPermission extendedPermission : extendedPermissions) {
-            if (null != permission.getIdentifier() && permission.getIdentifier().equals(extendedPermission.getIdentifier())) {
-                return extendedPermission;
-            }
-            if ((0 < permission.getEntity() || 0 == permission.getEntity() && permission.isGroup()) && permission.getEntity() == extendedPermission.getEntity()) {
-                return extendedPermission;
-            }
-        }
-        return null;
     }
 
     private static Set<String> getStorageCapabilities(Set<String> capabilities) {

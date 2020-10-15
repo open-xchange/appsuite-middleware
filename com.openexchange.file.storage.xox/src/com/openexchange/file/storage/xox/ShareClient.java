@@ -53,13 +53,13 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.api.client.ApiClient;
@@ -98,26 +98,20 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.Range;
-import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.results.Delta;
+import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.java.Strings;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link ShareClient} a client for accessing remote shares on other OX instances/installations
@@ -127,11 +121,6 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  */
 public class ShareClient {
 
-    private final ApiClient ajaxClient;
-    private final Session session;
-    private final FileStorageAccount account;
-
-    protected static final String SYSTEM_ROOT_FOLDER_ID = "0";
     protected static final String TREE_ID = FolderStorage.REAL_TREE_ID;
     protected static final String MODULE_FILES = "files";
     protected static final String TIMEZONE_UTC = "UTC";
@@ -139,11 +128,13 @@ public class ShareClient {
     protected static final String SEARCH_FACET_ACCOUNT = "account";
     protected static final String INFOSTORE = Module.INFOSTORE.getName();
     protected static final String INFOSTORE_ACCOUNT_ID = "com.openexchange.infostore://infostore";
+    protected static final List<Field> ALL_FIELDS = Collections.unmodifiableList(Arrays.asList(Field.values()));
 
-    protected static final List<Field> ALL_FIELDS;
-    static {
-        ALL_FIELDS = Arrays.asList(Field.values());
-    }
+    private final ApiClient ajaxClient;
+    private final Session session;
+    private final FileStorageAccount account;
+    private final XOXFolderConverter folderConverter;
+    private final XOXFileConverter fileConverter;
 
     /**
      * Initializes a new {@link ShareClient}.
@@ -157,16 +148,9 @@ public class ShareClient {
         this.session = Objects.requireNonNull(session, "session must not be null");
         this.account = account;
         this.ajaxClient = Objects.requireNonNull(client, "client must not be null");
-    }
-
-    /**
-     * Gets the folderId
-     *
-     * @param folderId The given ID
-     * @return The root folder ID if the given ID is null or empty, the given id otherwise
-     */
-    protected String getFolderId(String folderId) {
-        return Strings.isEmpty(folderId) ? SYSTEM_ROOT_FOLDER_ID : folderId;
+        EntityHelper entityHelper = new EntityHelper(account, client);
+        this.folderConverter = new XOXFolderConverter(entityHelper, session);
+        this.fileConverter = new XOXFileConverter(entityHelper);
     }
 
     /**
@@ -211,7 +195,7 @@ public class ShareClient {
      * @param fields The fields
      * @return An array of IDs for the given fields
      */
-    protected int[] toIdList(List<Field> fields) {
+    protected int[] toIdList(Collection<Field> fields) {
         return fields.stream().mapToInt(f -> f.getNumber()).toArray();
     }
 
@@ -240,8 +224,7 @@ public class ShareClient {
      */
     public XOXFolder getFolder(String folderId) throws OXException {
         RemoteFolder remoteFolder = getApiClient().execute(new GetFolderCall(folderId));
-        remoteFolder = addEntityInfos(remoteFolder, new XOXEntityInfoLoader(getApiClient()));
-        return new XOXFolderConverter(account, session).getStorageFolder(remoteFolder);
+        return folderConverter.getStorageFolder(remoteFolder);
     }
 
     /**
@@ -252,9 +235,8 @@ public class ShareClient {
      * @throws OXException If either parent folder does not exist or its subfolders cannot be delivered
      */
     public XOXFolder[] getSubFolders(final String parentId) throws OXException {
-        List<RemoteFolder> remoteFolders = getApiClient().execute(new ListFoldersCall(getFolderId(parentId)));
-        remoteFolders = addEntityInfos(remoteFolders, new XOXEntityInfoLoader(getApiClient()));
-        List<XOXFolder> storageFolders = new XOXFolderConverter(account, session).getStorageFolders(remoteFolders);
+        List<RemoteFolder> remoteFolders = getApiClient().execute(new ListFoldersCall(parentId));
+        List<XOXFolder> storageFolders = folderConverter.getStorageFolders(remoteFolders);
         return storageFolders.toArray(new XOXFolder[storageFolders.size()]);
     }
 
@@ -295,7 +277,7 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public IDTuple saveNewDocument(File file, InputStream data, boolean tryAddVersion) throws OXException {
-        String idTuple = getApiClient().execute(new NewCall(new DefaultFile(file), data, B(tryAddVersion)));
+        String idTuple = getApiClient().execute(new NewCall(fileConverter.getRemoteFile(file), data, B(tryAddVersion)));
         return toIDTuple(idTuple);
     }
 
@@ -310,7 +292,7 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public IDTuple updateDocument(File file, InputStream data, long sequenceNumber, int[] columns) throws OXException {
-        String idTuple = getApiClient().execute(new PostUpdateCall(new DefaultFile(file), data, sequenceNumber, columns));
+        String idTuple = getApiClient().execute(new PostUpdateCall(fileConverter.getRemoteFile(file), data, sequenceNumber, columns));
         return toIDTuple(idTuple);
     }
 
@@ -325,7 +307,7 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public IDTuple updateDocument(String id, File file, long sequenceNumber, int[] columns) throws OXException {
-        String idTuple = getApiClient().execute(new PutUpdateCall(id, new DefaultFile(file), sequenceNumber, columns));
+        String idTuple = getApiClient().execute(new PutUpdateCall(id, fileConverter.getRemoteFile(file), sequenceNumber, columns));
         return toIDTuple(idTuple);
     }
 
@@ -339,7 +321,7 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public IDTuple updateDocument(File file, long sequenceNumber, int[] columns) throws OXException {
-        String idTuple = getApiClient().execute(new PutUpdateCall(new DefaultFile(file), sequenceNumber, columns));
+        String idTuple = getApiClient().execute(new PutUpdateCall(fileConverter.getRemoteFile(file), sequenceNumber, columns));
         return toIDTuple(idTuple);
     }
 
@@ -369,8 +351,8 @@ public class ShareClient {
     public IDTuple copyDocument(String id, File file, int[] columns, @Nullable InputStream data) throws OXException {
         //@formatter:off
         String idTuple = data != null ?
-            getApiClient().execute(new PostCopyCall(id, new DefaultFile(file), data, columns)) :
-            getApiClient().execute(new PutCopyCall(id, new DefaultFile(file), columns));
+            getApiClient().execute(new PostCopyCall(id, fileConverter.getRemoteFile(file), data, columns)) :
+            getApiClient().execute(new PutCopyCall(id, fileConverter.getRemoteFile(file), columns));
         //@formatter:on
         return toIDTuple(idTuple);
     }
@@ -399,8 +381,8 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public XOXFile getMetaData(String folderId, String id, @Nullable String version) throws OXException {
-        DefaultFile file = getApiClient().execute(new GetCall(folderId, id, version));
-        return new XOXFile(file);
+        DefaultFile remoteFile = getApiClient().execute(new GetCall(folderId, id, version));
+        return fileConverter.getStorageFile(remoteFile);
     }
 
     /**
@@ -429,41 +411,16 @@ public class ShareClient {
      * @throws OXException
      */
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order, Range range) throws OXException {
-        final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
-        boolean requestCreatedFrom = fields == null;
-        boolean requestModifiedFrom = fields == null;
-        // TODO: Detect 7.10.5 OX to request those fields directly
-        if (fieldsToQuery.contains(Field.CREATED_FROM)) {
-            fieldsToQuery.remove(Field.CREATED_FROM);
-            requestCreatedFrom = true;
-        }
-        if (fieldsToQuery.contains(Field.MODIFIED_FROM)) {
-            fieldsToQuery.remove(Field.MODIFIED_FROM);
-            requestModifiedFrom = true;
-        }
         //@formatter:off
-        List<? extends File> files = getApiClient().execute(
-            new GetAllCall(getFolderId(folderId),
-                          toIdList(fieldsToQuery),
+        List<DefaultFile> remoteFiles = getApiClient().execute(
+            new GetAllCall(folderId,
+                          toIdList(getFieldsToQuery(fields, Field.SEQUENCE_NUMBER)),
                           sort != null ? I(sort.getNumber()) : null,
                           order,
                           range != null ? I(range.from) : null,
                           range != null ? I(range.to) : null));
         //@formatter:on
-        if (requestCreatedFrom || requestModifiedFrom) {
-            XOXEntityInfoLoader loader = new XOXEntityInfoLoader(getApiClient());
-            for (File file : files) {
-                if (requestCreatedFrom) {
-                    EntityInfo info = loader.load(file.getFolderId(), file.getCreatedBy());
-                    file.setCreatedFrom(info);
-                }
-                if (requestModifiedFrom) {
-                    EntityInfo info = loader.load(file.getFolderId(), file.getModifiedBy());
-                    file.setModifiedFrom(info);
-                }
-            }
-        }
-        return new FileTimedResult((List<File>) files);
+        return fileConverter.getStorageTimedResult(remoteFiles, fields);
     }
 
     /**
@@ -475,14 +432,13 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
-        final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
-        if (ids != null && !ids.isEmpty()) {
-            List<InfostoreTuple> filesToQuery = ids.stream().map(t -> new InfostoreTuple(t.getFolder(), t.getId())).collect(Collectors.toList());
-            List<? extends File> result = getApiClient().execute(new ListCall(filesToQuery, toIdList(fieldsToQuery)));
-            return new FileTimedResult((List<File>) result);
+        if (null == ids || ids.isEmpty()) {
+            return com.openexchange.groupware.results.Results.emptyTimedResult();
         }
-
-        return new FileTimedResult(Collections.emptyList());
+        int[] columns = toIdList(getFieldsToQuery(fields, Field.SEQUENCE_NUMBER));
+        List<InfostoreTuple> filesToQuery = ids.stream().map(t -> new InfostoreTuple(t.getFolder(), t.getId())).collect(Collectors.toList());
+        List<DefaultFile> remoteFiles = getApiClient().execute(new ListCall(filesToQuery, columns));
+        return fileConverter.getStorageTimedResult(remoteFiles, fields);
     }
 
     /**
@@ -496,9 +452,9 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public TimedResult<File> getVersions(String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        final List<Field> fieldsToQuery = fields != null ? fields : ALL_FIELDS;
-        List<? extends File> versions = getApiClient().execute(new VersionsCall(id, toIdList(fieldsToQuery), sort != null ? I(sort.getNumber()) : null, order));
-        return new FileTimedResult((List<File>) versions);
+        int[] columns = toIdList(getFieldsToQuery(fields, Field.SEQUENCE_NUMBER));
+        List<DefaultFile> remoteVersions = getApiClient().execute(new VersionsCall(id, columns, sort != null ? I(sort.getNumber()) : null, order));
+        return fileConverter.getStorageTimedResult(remoteVersions, fields);
     }
 
     /**
@@ -563,7 +519,7 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public String createaFolder(FileStorageFolder folder, boolean autoRename) throws OXException {
-        RemoteFolder newRemoteFolder = new XOXFolderConverter(account, session).getFolder(folder);
+        RemoteFolder newRemoteFolder = folderConverter.getRemoteFolder(folder);
         FolderBody newFolder = new FolderBody(newRemoteFolder);
         return getApiClient().execute(new com.openexchange.api.client.common.calls.folders.NewCall(newRemoteFolder.getParentID(), newFolder, autoRename));
     }
@@ -598,7 +554,7 @@ public class ShareClient {
      * @throws OXException In case of error
      */
     public String updateFolder(String folderId, FileStorageFolder folder, long timestamp, Boolean autoRename, Boolean cascadePermissions) throws OXException {
-        RemoteFolder updatedFolder = new XOXFolderConverter(account, session).getFolder(folder);
+        RemoteFolder updatedFolder = folderConverter.getRemoteFolder(folder);
         return getApiClient().execute(new UpdateCall(folderId, new FolderBody(updatedFolder), null, timestamp, autoRename, cascadePermissions));
     }
 
@@ -644,7 +600,6 @@ public class ShareClient {
      * @return The changes as delta
      * @throws OXException In case of error
      */
-    @SuppressWarnings("unchecked")
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
         UpdatesCall.SortOrder sortOrder = null;
         if (sort != null && order != null) {
@@ -653,7 +608,7 @@ public class ShareClient {
 
         //@formatter:off
         UpdatesResponse response = getApiClient().execute(new UpdatesCall(folderId,
-            toIdList(fields),
+            toIdList(getFieldsToQuery(fields)),
             L(updateSince),
             ignoreDeleted ? new UpdatesCall.UpdateType[] { UpdatesCall.UpdateType.DELETED } : null,
             sort != null ? sort.getName() : null,
@@ -661,10 +616,11 @@ public class ShareClient {
             null));
         //@formatter:on
 
-        List<? extends File> newFiles = response.getNewFiles();
-        List<? extends File> modifiedFiles = response.getModifiedFiles();
-        List<? extends File> deletedFiles = response.getDeletedFiles();
-        return new FileDelta((List<File>) newFiles, (List<File>) modifiedFiles, (List<File>) deletedFiles, response.getSequenceNumber());
+        return new DeltaImpl<File>(
+            fileConverter.getStorageSearchIterator(response.getNewFiles(), fields),
+            fileConverter.getStorageSearchIterator(response.getModifiedFiles(), fields),
+            fileConverter.getStorageSearchIterator(response.getDeletedFiles(), fields),
+            response.getSequenceNumber());
     }
 
     /**
@@ -681,7 +637,6 @@ public class ShareClient {
      * @return The search results
      * @throws OXException If operation fails
      */
-    @SuppressWarnings("unchecked")
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
         //Build the query
         //@formatter:off
@@ -703,63 +658,47 @@ public class ShareClient {
         }
 
         //Search
-        FindResponse<DefaultFile> result = getApiClient().execute(new QueryCall<DefaultFile, File.Field>(MODULE_FILES, toIdList(fields), builder.build(), new DefaultFileMapper()));
-        List<? extends File> resultFiles = result.getResultObjects();
-        return new SearchIteratorAdapter<File>((Iterator<File>) resultFiles.iterator(), resultFiles.size());
+        int[] columns = toIdList(getFieldsToQuery(fields, Field.SEQUENCE_NUMBER));
+        FindResponse<DefaultFile> result = getApiClient().execute(new QueryCall<DefaultFile, File.Field>(MODULE_FILES, columns, builder.build(), new DefaultFileMapper()));
+        return fileConverter.getStorageSearchIterator(result.getResultObjects(), fields);
     }
 
-    //TODO: intergrate "addEntityInfos" methods into loader directly?
-
-    private List<RemoteFolder> addEntityInfos(Collection<RemoteFolder> remoteFolders, XOXEntityInfoLoader loader) {
-        if (null == remoteFolders) {
-            return null;
+    /**
+     * Gets the metadata fields to query from the remote server, based on the fields requested that are actually requested.
+     * <p/>
+     * Fields that are not supported by the remote server are removed automatically.
+     * 
+     * @param requestedFields The requested fields, or <code>null</code> if undefined
+     * @param requiredFields Optional additional fields to include, may contain <code>null</code> elements
+     * @return The fields to use when querying the remote server
+     */
+    private Set<Field> getFieldsToQuery(List<Field> requestedFields, Field... requiredFields) {
+        Set<Field> fields = new HashSet<Field>(null != requestedFields ? requestedFields : Arrays.asList(Field.values()));
+        /*
+         * handle fields not supported by the remote server
+         */
+        Object remoteServerVersion = getRemoteServerVersion();
+        if (null == remoteServerVersion /* || remoteServerVersion < 7.10.5 */) {
+            if (fields.remove(Field.CREATED_FROM)) {
+                fields.add(Field.CREATED_BY);
+            }
+            if (fields.remove(Field.MODIFIED_FROM)) {
+                fields.add(Field.CREATED_BY);
+            }
         }
-        List<RemoteFolder> enhancedFolders = new ArrayList<RemoteFolder>(remoteFolders.size());
-        for (RemoteFolder remoteFolder : remoteFolders) {
-            enhancedFolders.add(addEntityInfos(remoteFolder, loader));
+        /*
+         * add required fields
+         */
+        if (null != requiredFields && 0 < requiredFields.length) {
+            for (Field requiredField : requiredFields) {
+                fields.add(requiredField);
+            }
         }
-        return enhancedFolders;
+        return fields;
     }
 
-    private RemoteFolder addEntityInfos(RemoteFolder remoteFolder, XOXEntityInfoLoader loader) {
-        if (null == remoteFolder) {
-            return null;
-        }
-        if (null == remoteFolder.getCreatedFrom() && 0 < remoteFolder.getCreatedBy()) {
-            remoteFolder.setCreatedFrom(loader.load("", remoteFolder.getCreatedBy())); //TODO: folderId parameter?!
-        }
-        if (null == remoteFolder.getModifiedFrom() && 0 < remoteFolder.getModifiedBy()) {
-            remoteFolder.setModifiedFrom(loader.load("", remoteFolder.getModifiedBy())); //TODO: folderId parameter?!
-        }
-        if (null != remoteFolder.getPermissions() && 0 < remoteFolder.getPermissions().length) {
-            remoteFolder.setPermissions(addEntityInfos(remoteFolder.getPermissions(), loader));
-        }
-        return remoteFolder;
-    }
-
-    private Permission[] addEntityInfos(Permission[] permissions, XOXEntityInfoLoader loader) {
-        if (null == permissions || 0 == permissions.length) {
-            return permissions;
-        }
-        Permission[] enhancedPermissions = new Permission[permissions.length];
-        for (int i = 0; i < permissions.length; i++) {
-            enhancedPermissions[i] = addEntityInfos(permissions[i], loader);
-        }
-        return enhancedPermissions;
-    }
-
-    private Permission addEntityInfos(Permission permission, XOXEntityInfoLoader loader) {
-        if (null == permission || null != permission.getEntityInfo() || 0 > permission.getEntity() || 0 == permission.getEntity() && false == permission.isGroup()) {
-            return permission;
-        }
-        if (permission.isGroup()) {
-            //TODO
-
-            return permission;
-        }
-        BasicPermission enhancedPermission = new BasicPermission(permission);
-        enhancedPermission.setEntityInfo(loader.load("", permission.getEntity()));
-        return enhancedPermission;
+    private Object getRemoteServerVersion() {
+        return null;
     }
 
 }
