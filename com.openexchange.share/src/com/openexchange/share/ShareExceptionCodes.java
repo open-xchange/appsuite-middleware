@@ -84,20 +84,16 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
     INVALID_MAIL_ADDRESS("\"%1$s\" is not a valid email address.", INVALID_MAIL_ADDRESS_MSG, Category.CATEGORY_USER_INPUT, 5),
 
     /** The share has been modified in the meantime. Please refresh or synchronize and try again. || The share \"%1$s\" has been modified in the meantime. */
-    CONCURRENT_MODIFICATION("The share \"%1$s\" has been modified in the meantime.",
-        ShareExceptionMessages.CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 6),
+    CONCURRENT_MODIFICATION("The share \"%1$s\" has been modified in the meantime.", ShareExceptionMessages.CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 6),
 
     /** You don't have sufficient permissions to delete the share. || User %1$d has no delete permissions for share \"%2$s\" in context %3$d. */
-    NO_DELETE_PERMISSIONS("User %1$d has no delete permissions for share \"%2$s\" in context %3$d.",
-        ShareExceptionMessages.NO_DELETE_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 7),
+    NO_DELETE_PERMISSIONS("User %1$d has no delete permissions for share \"%2$s\" in context %3$d.", ShareExceptionMessages.NO_DELETE_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 7),
 
     /** You don't have sufficient permissions to edit the share. || User %1$d has no edit permissions for share \"%2$s\" in context %3$d. */
-    NO_EDIT_PERMISSIONS("User %1$d has no edit permissions for share \"%2$s\" in context %3$d.",
-        ShareExceptionMessages.NO_EDIT_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 8),
+    NO_EDIT_PERMISSIONS("User %1$d has no edit permissions for share \"%2$s\" in context %3$d.", ShareExceptionMessages.NO_EDIT_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 8),
 
     /** You don't have sufficient permissions to share folder or item \"%2$s\". || User %1$d has no share permissions for folder or item \"%2$s\" in context %3$d. */
-    NO_SHARE_PERMISSIONS(" User %1$d has no share permissions for folder or item \"%2$s\" in context %3$d.",
-        ShareExceptionMessages.NO_SHARE_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 9),
+    NO_SHARE_PERMISSIONS(" User %1$d has no share permissions for folder or item \"%2$s\" in context %3$d.", ShareExceptionMessages.NO_SHARE_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 9),
 
     /** An I/O error occurred: %1$s */
     IO_ERROR("An I/O error occurred: %1$s", null, Category.CATEGORY_ERROR, 10),
@@ -154,8 +150,17 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
     /** The set permissions for the link are invalid. */
     INVALID_LINK_PERMISSION(INVALID_LINK_PERMISSIONS_MSG, INVALID_LINK_PERMISSIONS_MSG, Category.CATEGORY_USER_INPUT, 24),
 
-    /** You don't have sufficient permissions to subscribe to a share. **/
+    /** You don't have sufficient permissions to subscribe to a share. */
     NO_SUBSCRIBE_SHARE_PERMISSION(ShareExceptionMessages.NO_SUBSCRIBE_SHARE_PERMISSION_MSG, ShareExceptionMessages.NO_SUBSCRIBE_SHARE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 25),
+
+    /** Subscribing to a single file is not allowed */
+    NO_FILE_SUBSCRIBE(ShareExceptionMessages.NO_FILE_SUBSCRIBE_MSG, ShareExceptionMessages.NO_FILE_SUBSCRIBE_MSG, Category.CATEGORY_ERROR, 26),
+
+    /** You are not allowed to subscribe to a share for %1$s */
+    NO_SUBSCRIBE_PERMISSION(ShareExceptionMessages.NO_SUBSCRIBE_PERMISSION_MSG, ShareExceptionMessages.NO_SUBSCRIBE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 27),
+
+    /** You are not allowed to subscribe to an anonymous share */
+    NO_SUBSCRIBE_SHARE_ANONYMOUS(ShareExceptionMessages.NO_SUBSCRIBE_SHARE_ANONYMOUS_MSG, ShareExceptionMessages.NO_SUBSCRIBE_SHARE_ANONYMOUS_MSG, Category.CATEGORY_ERROR, 28),
 
     ;
 

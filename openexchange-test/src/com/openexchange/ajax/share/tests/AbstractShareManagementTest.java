@@ -60,6 +60,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -138,6 +139,8 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
      * ------------------- HELPERS -------------------
      */
 
+    protected final static EnumSet<StateEnum> SUCCESS = EnumSet.of(StateEnum.ADDABLE, StateEnum.ADDABLE_WITH_PASSWORD, StateEnum.SUBSCRIBED);
+
     protected String createFolder() throws ApiException {
         return folderManager.createFolder(infostoreRoot, sharedFolderName, INFOSTORE);
     }
@@ -213,7 +216,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
     protected static ShareLinkData getOrCreateShareLink(FolderManager folderManager, ShareManagementApi smApi, String folder) throws ApiException {
         return getOrCreateShareLink(folderManager, smApi, folder, null);
     }
-    
+
     /**
      * Creates a new share link for the given folder
      *
@@ -333,7 +336,9 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
             assertThat(state, is(expectedState));
         }
 
-        if (StateEnum.SUBSCRIBED.equals(expectedState)) {
+        if (false == SUCCESS.contains(state)) {
+            assertThat("Expected a detailed error message about the state", response.getError(), notNullValue());
+        } else if (StateEnum.SUBSCRIBED.equals(expectedState)) {
             assertThat(response.getAccount(), notNullValue());
             assertThat(response.getModule(), is(String.valueOf(Module.INFOSTORE.getFolderConstant())));
             assertThat(response.getFolder(), notNullValue());

@@ -53,6 +53,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.conversion.ConversionResult;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.conversion.SimpleData;
+import com.openexchange.conversion.datahandler.DataHandlers;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
@@ -82,12 +88,29 @@ public class AnalyzeAction extends AbstractShareSubscriptionAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, JSONObject json, String shareLink) throws OXException {
         ShareSubscriptionRegistry service = services.getServiceSafe(ShareSubscriptionRegistry.class);
         ShareLinkAnalyzeResult result = service.analyze(session, shareLink);
-        JSONObject jsonObject = new JSONObject(4);
+        JSONObject jsonObject = new JSONObject(5);
         try {
             jsonObject.put("state", result.getState());
+            putDetails(result, jsonObject);
             return createResponse(result.getInfos(), jsonObject);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        }
+    }
+
+    private void putDetails(ShareLinkAnalyzeResult result, JSONObject jsonObject) throws OXException, JSONException {
+        OXException details = result.getDetails();
+        if (null == details) {
+            return;
+        }
+        details.setStackTrace(new StackTraceElement[0]);
+        ConversionService conversionService = services.getServiceSafe(ConversionService.class);
+        DataHandler error2json = conversionService.getDataHandler(DataHandlers.OXEXCEPTION2JSON);
+
+        ConversionResult rs = error2json.processData(new SimpleData<OXException>(details), new DataArguments(), null);
+        Object data = rs.getData();
+        if (data != null && JSONObject.class.isInstance(data)) {
+            jsonObject.put("error", data);
         }
     }
 

@@ -109,10 +109,7 @@ public class ApiShareClient extends AbstractApiClient {
         ShareLoginInformation shareLoginInfos = execute(accessCall);
 
         String loginType = shareLoginInfos.getLoginType();
-        if ("message".equals(loginType)) {
-            throw ApiClientExceptions.NO_ACCESS.create(loginType);
-        }
-        if ("message_continue".equals(loginType)) {
+        if ("message".equals(loginType) || "message_continue".equals(loginType)) {
             throw ApiClientExceptions.ACCESS_REVOKED.create();
         }
 

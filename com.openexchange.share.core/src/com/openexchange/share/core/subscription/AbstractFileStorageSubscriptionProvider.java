@@ -78,6 +78,7 @@ import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.tools.ShareTool;
+import com.openexchange.share.subscription.ShareLinkAnalyzeResult.Builder;
 import com.openexchange.share.subscription.ShareLinkState;
 import com.openexchange.share.subscription.ShareSubscriptionExceptions;
 import com.openexchange.share.subscription.ShareSubscriptionInformation;
@@ -347,9 +348,10 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      * 
      * @param accountAccess The access to the account
      * @param shareLink The share link
-     * @return A state fitting the accessibility of the share
+     * @return A builder holding the state fitting the accessibility of the share
      */
-    protected ShareLinkState checkAccessible(FileStorageAccountAccess accountAccess, String shareLink) {
+    protected Builder checkAccessible(FileStorageAccountAccess accountAccess, String shareLink) {
+        Builder builder = new Builder();
         try {
             /*
              * Connect and access to check accessibility
@@ -360,24 +362,24 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
             ShareTargetPath path = ShareTool.getShareTarget(shareLink);
             if (null != path && Strings.isNotEmpty(path.getFolder())) {
                 FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
-                folderAccess.getFolder(path.getFolder());
-                return SUBSCRIBED;
+                folderAccess.getPath2DefaultFolder(path.getFolder());
+                return builder.state(SUBSCRIBED);
             }
         } catch (OXException e) {
             if (isPasswordMissing(e)) {
                 /*
                  * Client needs new credentials
                  */
-                return CREDENTIALS_REFRESH;
+                return builder.state(CREDENTIALS_REFRESH).error(e);
             }
             if (isFolderRemoved(e)) {
-                return REMOVED;
+                return builder.state(REMOVED).error(e);
             }
             logExcpetionDebug(e);
         } finally {
             accountAccess.close();
         }
-        return INACCESSIBLE;
+        return builder.state(INACCESSIBLE);
     }
 
     /**
@@ -415,7 +417,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         String folderId = ShareTool.getShareTarget(shareLink).getFolder();
         return new ShareSubscriptionInformation( // @formatter:off
             accountAccess.getAccountId(),
-            String.valueOf(Module.INFOSTORE.getFolderConstant()),
+            String.valueOf(Module.INFOSTORE.getName()),
             IDMangler.mangle(fileStorageService.getId(), accountAccess.getAccountId(), folderId)); // @formatter:on
     }
 
@@ -506,6 +508,15 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
             LOGGER.warn("Error extracting host name from share link {}", shareLink);
         }
         return Strings.isNotEmpty(hostname) ? hostname : shareLink;
+    }
+
+    /**
+     * The module info
+     *
+     * @return {@link ShareSubscriptionInformation} with only the module set
+     */
+    protected ShareSubscriptionInformation getModuleInfo() {
+        return new ShareSubscriptionInformation(null, Module.INFOSTORE.getName(), null);
     }
 
 }

@@ -68,11 +68,12 @@ import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.subscription.AbstractFileStorageSubscriptionProvider;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
-import com.openexchange.share.subscription.ShareLinkState;
+import com.openexchange.share.subscription.ShareLinkAnalyzeResult.Builder;
 import com.openexchange.share.subscription.ShareSubscriptionInformation;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.userconf.UserPermissionService;
@@ -133,15 +134,15 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
          */
         requireAccess(session);
         if (isSingleFileShare(shareLink)) {
-            return new ShareLinkAnalyzeResult(FORBIDDEN, new ShareSubscriptionInformation(null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
+            return new ShareLinkAnalyzeResult(FORBIDDEN, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
         }
         /*
          * Check if account exists and still accessible
          */
         FileStorageAccountAccess accountAccess = getStorageAccountAccess(session, shareLink);
         if (null != accountAccess) {
-            ShareLinkState state = checkAccessible(accountAccess, shareLink);
-            return new ShareLinkAnalyzeResult(state, generateInfos(accountAccess, shareLink));
+            Builder builder = checkAccessible(accountAccess, shareLink);
+            return builder.infos(generateInfos(accountAccess, shareLink)).build();
         }
 
         /*
@@ -149,7 +150,7 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
          */
         ApiClientService apiClientService = services.getServiceSafe(ApiClientService.class);
         ApiClient apiClient = null;
-        ShareLinkState state = UNRESOLVABLE;
+        Builder builder = new Builder();
         try {
             /*
              * If creation of the client throws no error, the share has been access successfully
@@ -157,22 +158,30 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
             apiClient = apiClientService.getApiClient(session, shareLink, null);
             LoginInformation loginInformation = apiClient.getLoginInformation();
             if (null != loginInformation) {
-                state = ADDABLE;
-                if (Strings.isNotEmpty(loginInformation.getLoginType()) && loginInformation.getLoginType().startsWith("guest")) {
-                    if (false == UserAliasUtility.isAlias(loginInformation.getRemoteMailAddress(), getAliases(ServerSessionAdapter.valueOf(session).getUser()))) {
+                builder.state(ADDABLE);
+                if (Strings.isNotEmpty(loginInformation.getLoginType())) {
+                    if (false == loginInformation.getLoginType().startsWith("guest")) {
+                        builder.state(FORBIDDEN);
+                        builder.error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
+                    } else if (false == UserAliasUtility.isAlias(loginInformation.getRemoteMailAddress(), getAliases(ServerSessionAdapter.valueOf(session).getUser()))) {
                         /*
                          * Share is not for the current user
                          */
-                        state = ShareLinkState.FORBIDDEN;
+                        builder.state(FORBIDDEN);
+                        builder.error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(loginInformation.getRemoteMailAddress()));
                     }
                 }
+            } else {
+                builder.state(UNRESOLVABLE).error(ShareExceptionCodes.INVALID_LINK.create(shareLink));
             }
         } catch (OXException e) {
             /*
              * Check if credentials are missing
              */
             if (isPasswordMissing(e)) {
-                state = ADDABLE_WITH_PASSWORD;
+                builder.state(ADDABLE_WITH_PASSWORD);
+            } else {
+                builder.state(UNRESOLVABLE).error(ShareExceptionCodes.INVALID_LINK.create(shareLink));
             }
             logExcpetionDebug(e);
         } finally {
@@ -181,7 +190,8 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
              */
             apiClientService.close(apiClient);
         }
-        return new ShareLinkAnalyzeResult(state, new ShareSubscriptionInformation(null, String.valueOf(Module.INFOSTORE.getFolderConstant()), null));
+        builder.infos(getModuleInfo());
+        return builder.build();
     }
 
     @Override
@@ -207,7 +217,7 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
 
     @Override
     protected boolean isFolderRemoved(OXException e) {
-        return matches(e, ApiClientExceptions.NO_ACCESS, ApiClientExceptions.ACCESS_REVOKED, FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE);
+        return matches(e, ApiClientExceptions.ACCESS_REVOKED, FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE);
     }
 
     /**
