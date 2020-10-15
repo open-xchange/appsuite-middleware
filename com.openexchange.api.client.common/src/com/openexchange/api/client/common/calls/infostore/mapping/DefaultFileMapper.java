@@ -49,12 +49,20 @@
 
 package com.openexchange.api.client.common.calls.infostore.mapping;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.b;
+import static com.openexchange.java.Autoboxing.d;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.api.client.common.calls.mapping.EntityInfoMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -66,15 +74,13 @@ import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.json.DateMapping;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
-import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
+import com.openexchange.groupware.tools.mappings.json.DoubleMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.LongMapping;
 import com.openexchange.groupware.tools.mappings.json.MapMapping;
-import com.openexchange.groupware.tools.mappings.json.DoubleMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
 import com.openexchange.java.GeoLocation;
-import static com.openexchange.java.Autoboxing.*;
 
 /**
  * {@link DefaultFileMapper}
@@ -1050,25 +1056,11 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
             }
         });
 
-        mappings.put(File.Field.CREATED_FROM, new DefaultJsonMapping<EntityInfo, DefaultFile>(File.Field.CREATED_FROM.getName(), I(File.Field.CREATED_FROM.getNumber())) {
-
-            @Override
-            public void deserialize(JSONObject from, DefaultFile to) throws JSONException, OXException {
-                if (from.isNull(getAjaxName())) {
-                    to.setCreatedFrom(null);
-                } else {
-                    Object o = from.get(getAjaxName());
-                    if (JSONObject.class.isInstance(o)) {
-                        JSONObject json = (JSONObject)o;
-                        EntityInfo info = EntityInfo.parseJSON(json);
-                        to.setCreatedFrom(info);
-                    }
-                }
-            }
+        mappings.put(File.Field.CREATED_FROM, new EntityInfoMapping<DefaultFile>(File.Field.CREATED_FROM.getName(), I(File.Field.CREATED_FROM.getNumber())) {
 
             @Override
             public boolean isSet(DefaultFile object) {
-                return null != object && null != object.getCreatedFrom();
+                return null != object.getCreatedFrom();
             }
 
             @Override
@@ -1085,28 +1077,13 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
             public void remove(DefaultFile object) {
                 object.setCreatedFrom(null);
             }
-            
         });
 
-        mappings.put(File.Field.MODIFIED_FROM, new DefaultJsonMapping<EntityInfo, DefaultFile>(File.Field.MODIFIED_FROM.getName(), I(File.Field.MODIFIED_FROM.getNumber())) {
-
-            @Override
-            public void deserialize(JSONObject from, DefaultFile to) throws JSONException, OXException {
-                if (from.isNull(getAjaxName())) {
-                    to.setModifiedFrom(null);
-                } else {
-                    Object o = from.get(getAjaxName());
-                    if (JSONObject.class.isInstance(o)) {
-                        JSONObject json = (JSONObject)o;
-                        EntityInfo info = EntityInfo.parseJSON(json);
-                        to.setModifiedFrom(info);
-                    }
-                }
-            }
+        mappings.put(File.Field.MODIFIED_FROM, new EntityInfoMapping<DefaultFile>(File.Field.MODIFIED_FROM.getName(), I(File.Field.MODIFIED_FROM.getNumber())) {
 
             @Override
             public boolean isSet(DefaultFile object) {
-                return null != object && null != object.getModifiedFrom();
+                return null != object.getModifiedFrom();
             }
 
             @Override
@@ -1123,7 +1100,6 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
             public void remove(DefaultFile object) {
                 object.setModifiedFrom(null);
             }
-            
         });
 
         return mappings;

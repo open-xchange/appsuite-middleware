@@ -59,8 +59,10 @@ import java.util.EnumMap;
 import java.util.List;
 import com.openexchange.api.client.common.calls.folders.mapping.ExtendedPermissionMapping;
 import com.openexchange.api.client.common.calls.folders.mapping.PermissionMapping;
+import com.openexchange.api.client.common.calls.mapping.EntityInfoMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.json.DateMapping;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
@@ -435,6 +437,52 @@ public class RemoteFolderMapper extends DefaultJsonMapper<RemoteFolder, RemoteFo
                 object.removeExtendedPermissions();
             }
 
+        });
+
+        mappings.put(RemoteFolderField.CREATED_FROM, new EntityInfoMapping<RemoteFolder>(RemoteFolderField.CREATED_FROM.getName(), I(RemoteFolderField.CREATED_FROM.getColumn())) {
+
+            @Override
+            public boolean isSet(RemoteFolder object) {
+                return null != object.getCreatedFrom();
+            }
+
+            @Override
+            public void set(RemoteFolder object, EntityInfo value) throws OXException {
+                object.setCreatedFrom(value);
+            }
+
+            @Override
+            public EntityInfo get(RemoteFolder object) {
+                return object.getCreatedFrom();
+            }
+
+            @Override
+            public void remove(RemoteFolder object) {
+                object.setCreatedFrom(null);
+            }
+        });
+
+        mappings.put(RemoteFolderField.MODIFIED_FROM, new EntityInfoMapping<RemoteFolder>(RemoteFolderField.MODIFIED_FROM.getName(), I(RemoteFolderField.MODIFIED_FROM.getColumn())) {
+
+            @Override
+            public boolean isSet(RemoteFolder object) {
+                return null != object.getModifiedFrom();
+            }
+
+            @Override
+            public void set(RemoteFolder object, EntityInfo value) throws OXException {
+                object.setModifiedFrom(value);
+            }
+
+            @Override
+            public EntityInfo get(RemoteFolder object) {
+                return object.getModifiedFrom();
+            }
+
+            @Override
+            public void remove(RemoteFolder object) {
+                object.setModifiedFrom(null);
+            }
         });
 
         return mappings;
