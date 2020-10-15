@@ -86,7 +86,10 @@ import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.exception.LogLevel;
 
 /**
+ * {@link OXReseller}
+ * 
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
@@ -236,6 +239,24 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
         } catch (Throwable e) {
             logAndEnhanceException(e, creds);
+            throw e;
+        }
+    }
+
+    @Override
+    public void changeSelf(ResellerAdmin admin, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException {
+        try {
+            doNullCheck(LOGGER, credentials, admin);
+            checkIdOrName(admin);
+            if (admin.getId() != null && !oxresell.existsAdmin(admin)) {
+                throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, admin.getName());
+            }
+
+            resellerauth.doAuthentication(credentials);
+            checkResellerChangeSelfData(admin);
+            oxresell.change(admin);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
             throw e;
         }
     }
@@ -636,6 +657,22 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 }
             });
         }
+    }
+
+    /**
+     * Checks if any contained reseller data besides ID, Capabilities, Properties, Taxonomies is set
+     * for a self-change.
+     *
+     * @param admin The admin that issued the self-change
+     * @throws InvalidDataException If invalid data is set
+     */
+    private void checkResellerChangeSelfData(ResellerAdmin admin) throws InvalidDataException {
+        // @formatter:off
+        if (admin.isNameset() || admin.isDisplaynameset() || admin.isParentIdset() || admin.isParentNameset() || admin.isPasswordMechset() 
+            || admin.isPasswordset() || admin.isRestrictionsset() || admin.isSaltSet()) {
+            throw new InvalidDataException("Invalid data sent by client!");
+        }
+        // @formatter:on
     }
 
     @Override
