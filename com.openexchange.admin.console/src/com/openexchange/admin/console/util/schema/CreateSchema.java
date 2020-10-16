@@ -176,8 +176,8 @@ public class CreateSchema extends BasicCommandlineOptions {
     }
 
     private void setOptions(final AdminParser parser) {
-        this.adminUserOption = setShortLongOpt(parser, OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, "Master admin user", true, AdminParser.NeededQuadState.needed);
-        this.adminPassOption = setShortLongOpt(parser, OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, "Master admin password", true, AdminParser.NeededQuadState.needed);
+        this.adminUserOption = setShortLongOpt(parser, OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, "Master admin user", true, AdminParser.NeededQuadState.possibly);
+        this.adminPassOption = setShortLongOpt(parser, OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, "Master admin password", true, AdminParser.NeededQuadState.possibly);
         this.optDBIdOption = setShortLongOpt(parser, OPT_DB_ID_SHORT, OPT_DB_ID_LONG, OPT_DB_ID_DESCRIPTION, true, AdminParser.NeededQuadState.notneeded);
         setCSVOutputOption(parser);
     }
