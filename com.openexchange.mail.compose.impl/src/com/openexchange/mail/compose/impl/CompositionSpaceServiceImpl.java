@@ -1954,11 +1954,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 // Check if attachment identifiers are about to be changed
                 Set<UUID> oldAttachmentIds = null;
                 if (md.containsAttachments()) {
-
-                    List<Attachment> oldAttachments = compositionSpace.getMessage().getAttachments();
-                    oldAttachmentIds = new HashSet<UUID>(oldAttachments.size());
-                    for (Attachment attachment : oldAttachments) {
-                        oldAttachmentIds.add(attachment.getId());
+                    List<Attachment> attachments = compositionSpace.getMessage().getAttachments();
+                    if (attachments == null || attachments.isEmpty()) {
+                        oldAttachmentIds = Collections.emptySet();
+                    } else {
+                        oldAttachmentIds = attachments.stream().map(a -> a.getId()).collect(Collectors.toSet());
                     }
                 }
 
