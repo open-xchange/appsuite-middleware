@@ -132,13 +132,13 @@ public class XOXFileConverter {
     }
 
     /**
-     * Converts a list of remote files into its file storage equivalent, and returns them as {@link SearchIterator}.
+     * Converts a list of remote files into its file storage equivalents.
      *
-     * @param remoteFile The remote file to convert
+     * @param remoteFiles The remote files to convert
      * @param fields The fields as requested by the client, or <code>null</code> to consider all fields
      * @return The search iterator of file storage files
      */
-    public SearchIterator<File> getStorageSearchIterator(List<DefaultFile> remoteFiles, List<Field> fields) {
+    public List<File> getStorageFiles(List<DefaultFile> remoteFiles, List<Field> fields) {
         if (null == remoteFiles) {
             return null;
         }
@@ -147,13 +147,25 @@ public class XOXFileConverter {
         for (DefaultFile remoteFile : remoteFiles) {
             files.add(getStorageFile(remoteFile, requestedFields));
         }
-        return new SearchIteratorAdapter<File>(files.iterator(), files.size());
+        return files;
+    }
+
+    /**
+     * Converts a list of remote files into its file storage equivalent, and returns them as {@link SearchIterator}.
+     *
+     * @param remoteFiles The remote files to convert
+     * @param fields The fields as requested by the client, or <code>null</code> to consider all fields
+     * @return The search iterator of file storage files
+     */
+    public SearchIterator<File> getStorageSearchIterator(List<DefaultFile> remoteFiles, List<Field> fields) {
+        List<File> files = getStorageFiles(remoteFiles, fields);
+        return null == files ? null : new SearchIteratorAdapter<File>(files.iterator(), files.size());
     }
 
     /**
      * Converts a list of remote files into its file storage equivalent, and returns them as {@link TimedResult}.
      *
-     * @param remoteFile The remote file to convert
+     * @param remoteFiles The remote files to convert
      * @param fields The fields as requested by the client, or <code>null</code> to consider all fields
      * @return The timed result of file storage files
      */

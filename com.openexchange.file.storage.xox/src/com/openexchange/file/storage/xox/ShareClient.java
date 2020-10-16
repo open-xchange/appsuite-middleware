@@ -111,7 +111,6 @@ import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link ShareClient} a client for accessing remote shares on other OX instances/installations
@@ -555,6 +554,13 @@ public class ShareClient {
      */
     public String updateFolder(String folderId, FileStorageFolder folder, long timestamp, Boolean autoRename, Boolean cascadePermissions) throws OXException {
         RemoteFolder updatedFolder = folderConverter.getRemoteFolder(folder);
+        /*
+         * handle changes subscribed flag internally
+         */
+        if (updatedFolder.containsSubscribed()) {
+
+            updatedFolder.removeSubscribed();
+        }
         return getApiClient().execute(new UpdateCall(folderId, new FolderBody(updatedFolder), null, timestamp, autoRename, cascadePermissions));
     }
 
@@ -637,7 +643,7 @@ public class ShareClient {
      * @return The search results
      * @throws OXException If operation fails
      */
-    public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
+    public List<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
         //Build the query
         //@formatter:off
         final QueryBuilder builder = new QueryBuilder()
@@ -660,7 +666,7 @@ public class ShareClient {
         //Search
         int[] columns = toIdList(getFieldsToQuery(fields, Field.SEQUENCE_NUMBER));
         FindResponse<DefaultFile> result = getApiClient().execute(new QueryCall<DefaultFile, File.Field>(MODULE_FILES, columns, builder.build(), new DefaultFileMapper()));
-        return fileConverter.getStorageSearchIterator(result.getResultObjects(), fields);
+        return fileConverter.getStorageFiles(result.getResultObjects(), fields);
     }
 
     /**

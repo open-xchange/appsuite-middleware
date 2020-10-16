@@ -61,6 +61,7 @@ import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.OriginAwareFileStorageFolder;
+import com.openexchange.file.storage.SetterAwareFileStorageFolder;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.EntityInfo;
@@ -70,7 +71,7 @@ import com.openexchange.groupware.EntityInfo;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class IDManglingFolder implements TypeAware, CacheAware, OriginAwareFileStorageFolder {
+public class IDManglingFolder implements TypeAware, CacheAware, OriginAwareFileStorageFolder, SetterAwareFileStorageFolder {
 
     /**
      * Create a new {@link FileStorageFolder} instance delegating all regular calls to the supplied folder, but returning the unique ID
@@ -198,6 +199,14 @@ public class IDManglingFolder implements TypeAware, CacheAware, OriginAwareFileS
     }
 
     @Override
+    public boolean containsSubscribed() {
+        if (SetterAwareFileStorageFolder.class.isInstance(delegate)) {
+            return ((SetterAwareFileStorageFolder) delegate).containsSubscribed();
+        }
+        return true;
+    }
+
+    @Override
     public boolean isSubscribed() {
         return delegate.isSubscribed();
     }
@@ -284,4 +293,5 @@ public class IDManglingFolder implements TypeAware, CacheAware, OriginAwareFileS
     public OXException getAccountError() {
         return delegate.getAccountError();
     }
+
 }

@@ -80,7 +80,9 @@ import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.tools.iterator.RangeAwareSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link XOXFileAccess}
@@ -336,7 +338,18 @@ public class XOXFileAccess implements /*@formatter:off*/
 
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
-        return client.search(pattern, fields, folderId, includeSubfolders, sort, order, start, end);
+        List<Field> queriedFields = fields;
+        if (null != fields && false == fields.contains(Field.FOLDER_ID)) {
+            queriedFields = new ArrayList<File.Field>(fields);
+            queriedFields.add(Field.FOLDER_ID);
+        }
+        List<File> files = client.search(pattern, queriedFields, folderId, includeSubfolders, sort, order, NOT_SET, NOT_SET);
+        if (null == files || files.isEmpty()) {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+        SubscribedHelper subscribedHelper = new SubscribedHelper(accountAccess.getAccount());
+        files = subscribedHelper.filterUnsubscribed(files, (id) -> subscribedHelper.addSubscribed(client.getFolder(id)));
+        return new RangeAwareSearchIterator<File>(new SearchIteratorAdapter<File>(files.iterator(), files.size()), start, end);
     }
 
     @Override
