@@ -675,6 +675,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
             boolean move;
             boolean rename;
             boolean permissions;
+            boolean subscribed;
             {
                 Reference<FileStorageFolder> originalFolder = new Reference<>(null);
                 UpdateOperation updateOperation = UpdateOperation.optUpdateOperation(storageParameters);
@@ -686,6 +687,8 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
                     rename = null != folderToUpdate.getName() && false == getFolder(originalFolder, folder.getID(), folderAccess).getName().equals(folderToUpdate.getName());
                 }
                 permissions = null != folderToUpdate.getPermissions() && !folderToUpdate.getPermissions().isEmpty() && false == folderToUpdate.getPermissions().equals(getFolder(originalFolder, folder.getID(), folderAccess).getPermissions());
+                subscribed = SetterAwareFolder.class.isInstance(folder) && ((SetterAwareFolder) folder).containsSubscribed() && 
+                    folder.isSubscribed() != getFolder(originalFolder, folder.getID(), folderAccess).isSubscribed();
             }
             /*
              * perform move and/or rename operation
@@ -700,9 +703,9 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
                 folderToUpdate.setId(newID);
             }
             /*
-             * update permissions separately if needed
+             * update permissions / subscribed separately if needed
              */
-            if (permissions) {
+            if (permissions || subscribed) {
                 String newID = folderAccess.updateFolder(folderToUpdate.getId(), folderToUpdate);
                 folderToUpdate.setId(newID);
                 if (StorageParametersUtility.isHandDownPermissions(storageParameters)) {
@@ -782,7 +785,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         fileStorageFolder.setId(folder.getID());
         fileStorageFolder.setParentId(folder.getParentID());
         fileStorageFolder.setName(folder.getName());
-        if (!SetterAwareFolder.class.isInstance(fileStorageFolder) || ((SetterAwareFolder) folder).containsSubscribed()) {
+        if (SetterAwareFolder.class.isInstance(folder) && ((SetterAwareFolder) folder).containsSubscribed()) {
             fileStorageFolder.setSubscribed(folder.isSubscribed());
         }
         fileStorageFolder.setPermissions(FileStorageUtils.getFileStoragePermissions(folder.getPermissions()));

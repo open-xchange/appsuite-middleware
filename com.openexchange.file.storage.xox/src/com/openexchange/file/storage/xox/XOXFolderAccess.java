@@ -62,6 +62,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.SetterAwareFileStorageFolder;
 import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.AccountQuota;
@@ -135,7 +136,7 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
     @Override
     public boolean exists(String folderId) throws OXException {
         try {
-            client.getFolder(folderId);
+            getFolder(folderId);
             return true;
         } catch (OXException e) {
             if (e.similarTo(OXFolderExceptionCode.NOT_EXISTS)) {
@@ -147,7 +148,7 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
-        return client.getFolder(folderId);
+        return new SubscribedHelper(accountAccess.getAccount()).addSubscribed(client.getFolder(folderId));
     }
 
     @Override
@@ -167,7 +168,8 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
-        return client.getSubFolders(parentIdentifier);
+        XOXFolder[] subfolders = client.getSubFolders(parentIdentifier);
+        return new SubscribedHelper(accountAccess.getAccount()).addSubscribed(subfolders, false == all);
     }
 
     @Override
@@ -182,17 +184,29 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
-        return ((XOXFileAccess) accountAccess.getFileAccess()).createFolder(toCreate, true);
+        return accountAccess.getFileAccess().createFolder(toCreate, true);
     }
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
-        return client.updateFolder(identifier, toUpdate, FileStorageFileAccess.DISTANT_FUTURE, Boolean.TRUE, null);
+        return updateFolder(identifier, toUpdate, Boolean.TRUE, null);
     }
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
-        return client.updateFolder(identifier, toUpdate, FileStorageFileAccess.DISTANT_FUTURE, null, B(cascadePermissions));
+        return updateFolder(identifier, toUpdate, null, B(cascadePermissions));
+    }
+
+    private String updateFolder(String folderId, FileStorageFolder folderUpdate, Boolean autoRename, Boolean cascadePermissions) throws OXException {
+        /*
+         * pass-through update to remote server & handle changed "subscribed" flag internally
+         */
+        String result = client.updateFolder(folderId, folderUpdate, FileStorageFileAccess.DISTANT_FUTURE, autoRename, cascadePermissions);
+        if (SetterAwareFileStorageFolder.class.isInstance(folderUpdate) && ((SetterAwareFileStorageFolder) folderUpdate).containsSubscribed()) {
+            FileStorageFolder folder = client.getFolder(result);
+            new SubscribedHelper(accountAccess.getAccount()).setSubscribed(accountAccess.getSession(), folder, B(folderUpdate.isSubscribed()));
+        }
+        return result;
     }
 
     @Override
@@ -202,12 +216,12 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
-        return ((XOXFileAccess) accountAccess.getFileAccess()).moveFolder(folderId, newParentId, newName, true);
+        return accountAccess.getFileAccess().moveFolder(folderId, newParentId, newName, true);
     }
 
     @Override
     public String renameFolder(String folderId, String newName) throws OXException {
-        return ((XOXFileAccess) accountAccess.getFileAccess()).moveFolder(folderId, null, newName, true);
+        return accountAccess.getFileAccess().moveFolder(folderId, null, newName, true);
     }
 
     @Override
@@ -227,7 +241,7 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public void clearFolder(String folderId, boolean hardDelete) throws OXException {
-        ((XOXFileAccess) accountAccess.getFileAccess()).removeDocument(folderId, FileStorageFileAccess.DISTANT_FUTURE, hardDelete);
+        accountAccess.getFileAccess().removeDocument(folderId, FileStorageFileAccess.DISTANT_FUTURE, hardDelete);
     }
 
     @Override

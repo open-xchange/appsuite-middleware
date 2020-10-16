@@ -65,7 +65,7 @@ import com.openexchange.groupware.EntityInfo;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DefaultFileStorageFolder implements FileStorageFolder {
+public class DefaultFileStorageFolder implements FileStorageFolder, SetterAwareFileStorageFolder {
 
     protected Set<String> capabilities;
 
@@ -488,6 +488,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
      *
      * @return <code>true</code> if this folder has the subscribed flag set; otherwise <code>false</code>
      */
+    @Override
     public boolean containsSubscribed() {
         return b_subscribed;
     }

@@ -64,7 +64,6 @@ import com.openexchange.file.storage.FileStorageAccountErrorHandler;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
@@ -160,7 +159,7 @@ public class XOXAccountAccess implements CapabilityAware {
     }
 
     @Override
-    public FileStorageFileAccess getFileAccess() throws OXException {
+    public XOXFileAccess getFileAccess() throws OXException {
         assertConnected();
         this.errorHandler.assertNoRecentException();
         return new XOXFileAccess(this, shareClient);
