@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.provider.impl.jwt;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -74,25 +73,15 @@ import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
-import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.authentication.NamePart;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.java.ConfigAwareKeyStore;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.authorizationserver.spi.AuthorizationException;
-import com.openexchange.oauth.provider.authorizationserver.spi.DefaultValidationResponse;
-import com.openexchange.oauth.provider.authorizationserver.spi.OAuthAuthorizationService;
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse;
-import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse.TokenStatus;
-import com.openexchange.oauth.provider.impl.osgi.Services;
-import com.openexchange.user.UserService;
+import com.openexchange.oauth.provider.impl.AbstractAuthorizationService;
 
 /**
  * {@link OAuthJwtAuthorizationService} - Service provider Interface that validates and parses incoming access tokens that are JWT.
@@ -100,12 +89,11 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:sebastian.lutz@open-xchange.com">Sebastian Lutz</a>
  * @since v7.10.5
  */
-public class OAuthJwtAuthorizationService implements OAuthAuthorizationService, ForcedReloadable {
+public class OAuthJwtAuthorizationService extends AbstractAuthorizationService implements ForcedReloadable {
 
     private static final Logger LOG = LoggerFactory.getLogger(OAuthJwtAuthorizationService.class);
 
     private LeanConfigurationService leanConfService;
-    private OAuthJWTScopeService scopeService;
     private ConfigurableJWTProcessor<SecurityContext> jwtProcessor;
     private ConfigAwareKeyStore configAwareKeystore;
 
@@ -114,55 +102,36 @@ public class OAuthJwtAuthorizationService implements OAuthAuthorizationService, 
      * 
      * @param leanConfService
      * @param scopeService
+     * @throws OXException
      */
-    public OAuthJwtAuthorizationService(LeanConfigurationService leanConfService, OAuthJWTScopeService scopeService) {
-        super();
+    public OAuthJwtAuthorizationService(LeanConfigurationService leanConfService, OAuthJWTScopeService scopeService) throws OXException {
+        super(scopeService);
         this.leanConfService = leanConfService;
-        this.scopeService = scopeService;
         this.jwtProcessor = createJWTProcessor();
     }
 
     @Override
     public ValidationResponse validateAccessToken(String accessToken) throws AuthorizationException {
-
-        DefaultValidationResponse response = new DefaultValidationResponse();
         try {
             JWTClaimsSet claimsSet = jwtProcessor.process(accessToken, null);
-
-            response.setClientName(claimsSet.getStringClaim(OAuthJWTClaimVerifier.AUTHORIZED_PARTY_CLAIM_NAME));
-
-            Context ctx = resolveContext(claimsSet);
-            response.setContextId(ctx.getContextId());
-
-            int userId = resolveUser(claimsSet, ctx);
-            response.setUserId(userId);
-
-            List<String> scopes = scopeService.getInternalScopes(claimsSet.getStringClaim(OAuthJWTClaimVerifier.SCOPE_CLAIM_NAME));
-            response.setScope(scopes);
-
-            response.setTokenStatus(TokenStatus.VALID);
+            return createValidationReponse(claimsSet);
         } catch (ParseException | BadJOSEException | JOSEException | OXException e) {
+            LOG.debug(e.getMessage());
             throw new AuthorizationException(e);
         }
-
-        return response;
     }
 
     /**
      * Depending on configuration this method gets a {@link JWKSource} from remote or a locally populated keystore.
      *
      * @return the loaded JWKSource.
+     * @throws OXException
      */
-    JWKSource<SecurityContext> getKeySource() {
-        try {
-            if (!leanConfService.getProperty(OAuthJWTProperty.JWKS_ENDPOINT).isEmpty()) {
-                return getRemoteJWKS();
-            }
-            return getLocalKeystore();
-        } catch (OXException e) {
-            LOG.error("", e);
+    JWKSource<SecurityContext> getKeySource() throws OXException {
+        if (!leanConfService.getProperty(OAuthJWTProperty.JWKS_ENDPOINT).isEmpty()) {
+            return getRemoteJWKS();
         }
-        return null;
+        return getLocalKeystore();
     }
 
     /**
@@ -215,87 +184,13 @@ public class OAuthJwtAuthorizationService implements OAuthAuthorizationService, 
     }
 
     /**
-     * Determines the {@link Context} of a user for which a JWT has been obtained.
-     * The corresponding {@link Context} is resolved from configured claim (default = "sub").
-     * 
-     * @param claimsSet - contains all claims of the obtained JWT.
-     * @return the resolved context.
-     * @throws OXException
-     * @throws ParseException
-     */
-    private Context resolveContext(JWTClaimsSet claimsSet) throws OXException, ParseException {
-        String contextLookupParameter = leanConfService.getProperty(OAuthJWTProperty.CONTEXT_LOOKUP_CLAIM);
-        if (Strings.isEmpty(contextLookupParameter)) {
-            throw LoginExceptionCodes.MISSING_PROPERTY.create(OAuthJWTProperty.CONTEXT_LOOKUP_CLAIM.name());
-        }
-
-        String contextLookup = claimsSet.getStringClaim(contextLookupParameter);
-        if (contextLookup == null) {
-            throw OAuthJWTExceptionCode.UNABLE_TO_PARSE_CLAIM.create(OAuthJWTProperty.CONTEXT_LOOKUP_CLAIM.getDefaultValue());
-        }
-
-        NamePart namePart = NamePart.of(leanConfService.getProperty(OAuthJWTProperty.CONTEXT_LOOKUP_NAME_PART));
-        String contextInfo = namePart.getFrom(contextLookup, Authenticated.DEFAULT_CONTEXT_INFO);
-
-        ContextService contextService = Services.requireService(ContextService.class);
-        int contextId = contextService.getContextId(contextInfo);
-
-        if (contextId < 0) {
-            LOG.debug("Unknown context for login mapping '{}' ('{}')", contextInfo, contextLookup);
-            throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(contextInfo);
-        }
-
-        LOG.debug("Resolved context {} for login mapping '{}' ('{}')", I(contextId), contextInfo, contextLookup);
-
-        return contextService.getContext(contextId);
-    }
-
-    /**
-     * Determines the user ID for which a JWT has been obtained.
-     * The corresponding user is resolved from configured claim (default = "sub").
-     *
-     * @param claimsSet - contains all claims of the obtained JWT.
-     * @param context - context of the user.
-     * @return the resolved user.
-     * @throws OXException
-     * @throws ParseException
-     */
-    private int resolveUser(JWTClaimsSet claimsSet, Context context) throws OXException, ParseException {
-        String userLookupParameter = leanConfService.getProperty(OAuthJWTProperty.USER_LOOKUP_CLAIM);
-        if (Strings.isEmpty(userLookupParameter)) {
-            throw LoginExceptionCodes.MISSING_PROPERTY.create(OAuthJWTProperty.USER_LOOKUP_CLAIM.name());
-        }
-
-        String userLookup = claimsSet.getStringClaim(userLookupParameter);
-        if (userLookup == null) {
-            throw OAuthJWTExceptionCode.UNABLE_TO_PARSE_CLAIM.create(OAuthJWTProperty.USER_LOOKUP_CLAIM.getDefaultValue());
-        }
-
-        NamePart namePart = NamePart.of(leanConfService.getProperty(OAuthJWTProperty.USER_LOOKUP_NAME_PART));
-        String userInfo = namePart.getFrom(userLookup, userLookup);
-
-        UserService userService = Services.requireService(UserService.class);
-        try {
-            int userId = userService.getUserId(userInfo, context);
-            LOG.debug("Resolved user {} in context {} for '{}' ('{}')", I(userId), I(context.getContextId()), userInfo, userLookup);
-            return userId;
-        } catch (OXException e) {
-            if (LdapExceptionCode.USER_NOT_FOUND.equals(e)) {
-                LOG.debug("Unknown user in context {} for '{}' ('{}')", I(context.getContextId()), userInfo, userLookup);
-                throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(userInfo);
-            }
-
-            throw e;
-        }
-    }
-
-    /**
      * 
      * Creates and configures {@link ConfigurableJWTProcessor} with a custom {@link OAuthJWTClaimVerifier} and {@link JWSKeySelector}.
      *
      * @return the configured {@link ConfigurableJWTProcessor}
+     * @throws OXException
      */
-    private ConfigurableJWTProcessor<SecurityContext> createJWTProcessor() {
+    private ConfigurableJWTProcessor<SecurityContext> createJWTProcessor() throws OXException {
         ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<SecurityContext>();
 
         jwtProcessor.setJWTClaimsSetVerifier(createClaimVerifier());
@@ -318,8 +213,9 @@ public class OAuthJwtAuthorizationService implements OAuthAuthorizationService, 
      * Creates new {@link JWSKeySelector}.
      *
      * @return JWSKeySelector
+     * @throws OXException
      */
-    private JWSKeySelector<SecurityContext> createJWSKeySelector() {
+    private JWSKeySelector<SecurityContext> createJWSKeySelector() throws OXException {
         JWSAlgorithm expectedJWSAlg = JWSAlgorithm.RS256;
         JWKSource<SecurityContext> keySource = getKeySource();
         JWSKeySelector<SecurityContext> keySelector = new JWSVerificationKeySelector<>(expectedJWSAlg, keySource);
@@ -328,7 +224,32 @@ public class OAuthJwtAuthorizationService implements OAuthAuthorizationService, 
 
     @Override
     public synchronized void reloadConfiguration(ConfigurationService configService) {
-        JWSKeySelector<SecurityContext> reloadedKeySelector = createJWSKeySelector();
-        jwtProcessor.setJWSKeySelector(reloadedKeySelector);
+        JWSKeySelector<SecurityContext> reloadedKeySelector;
+        try {
+            reloadedKeySelector = createJWSKeySelector();
+            jwtProcessor.setJWSKeySelector(reloadedKeySelector);
+        } catch (OXException e) {
+            LOG.error("Reload of OAuth JWT properties failed: ", e.getMessage());
+        }
+    }
+
+    @Override
+    protected String getContextLookupClaimname() {
+        return leanConfService.getProperty(OAuthJWTProperty.CONTEXT_LOOKUP_CLAIM);
+    }
+
+    @Override
+    protected String getContextLookupNamePart() {
+        return leanConfService.getProperty(OAuthJWTProperty.CONTEXT_LOOKUP_NAME_PART);
+    }
+
+    @Override
+    protected String getUserLookupClaimname() {
+        return leanConfService.getProperty(OAuthJWTProperty.USER_LOOKUP_CLAIM);
+    }
+
+    @Override
+    protected String getUserNameLookupPart() {
+        return leanConfService.getProperty(OAuthJWTProperty.USER_LOOKUP_NAME_PART);
     }
 }

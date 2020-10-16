@@ -55,6 +55,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import com.openexchange.java.Strings;
 
 /**
  * {@link OAuthJWTClaimVerifier}
@@ -97,12 +98,12 @@ public class OAuthJWTClaimVerifier<T extends SecurityContext> extends DefaultJWT
             }
 
             //Verify that the clientname claim is not empty.
-            if (claimsSet.getStringClaim(AUTHORIZED_PARTY_CLAIM_NAME) == null) {
+            if (Strings.isEmpty(claimsSet.getStringClaim(AUTHORIZED_PARTY_CLAIM_NAME))) {
                 throw new BadJWTException("Clientname claim is empty");
             }
 
             //Verify that the scope claim is not empty.
-            if (claimsSet.getStringClaim(OAuthJWTClaimVerifier.SCOPE_CLAIM_NAME) == null || claimsSet.getStringClaim(OAuthJWTClaimVerifier.SCOPE_CLAIM_NAME).isEmpty()) {
+            if (Strings.isEmpty(claimsSet.getStringClaim(OAuthJWTClaimVerifier.SCOPE_CLAIM_NAME))) {
                 throw new BadJWTException("Scope is null or empty");
             }
 

@@ -81,7 +81,7 @@ public enum OAuthJWTProperty implements Property {
     KEYSTORE_TYPE("keystore.type", "JKS"),
 
     /**
-     * A comma sperated list of issuer names (JWT claim "iss") that tokens are accepted from.
+     * A comma separated list of issuer names (JWT claim "iss") that tokens are accepted from.
      * If this property is empty, tokens are accepted from all issuers.
      */
     ALLOWED_ISSUER("allowedIssuer", OAuthJWTProperty.EMPTY),
@@ -93,8 +93,8 @@ public enum OAuthJWTProperty implements Property {
 
     /**
      * Gets the {@link NamePart} used for determining the context
-     * of a user for which a jwt has been obtained. The part
-     * is taken from the value of the according {@link LookupSource}.
+     * of a user for which a JWT has been obtained. The part
+     * is taken from the value of the according {@link OAuthJWTProperty#CONTEXT_LOOKUP_CLAIM}.
      */
     CONTEXT_LOOKUP_NAME_PART("contextLookupNamePart", NamePart.DOMAIN.getConfigName()),
 
@@ -105,8 +105,8 @@ public enum OAuthJWTProperty implements Property {
 
     /**
      * Gets the {@link NamePart} used for determining the user for
-     * which a jwt has been obtained. The part is taken from
-     * the value of the according {@link LookupSource}.
+     * which a JWT has been obtained. The part is taken from
+     * the value of the according {@link OAuthJWTProperty#USER_LOOKUP_CLAIM}.
      */
     USER_LOOKUP_NAME_PART("userLookupNamePart", NamePart.LOCAL_PART.getConfigName());
 
@@ -115,6 +115,12 @@ public enum OAuthJWTProperty implements Property {
     private final String fqn;
     private final Object defaultValue;
 
+    /**
+     * Initializes a new {@link OAuthJWTProperty}.
+     * 
+     * @param suffix the suffix
+     * @param defaultValue the default value
+     */
     private OAuthJWTProperty(String suffix, Object defaultValue) {
         this.fqn = PREFIX + suffix;
         this.defaultValue = defaultValue;

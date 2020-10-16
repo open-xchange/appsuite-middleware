@@ -92,10 +92,25 @@ public enum OAuthJWTExceptionCode implements OXExceptionCode {
     private final int detailNumber;
     private final Category category;
 
+    /**
+     * Initializes a new {@link OAuthJWTExceptionCode}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     */
     private OAuthJWTExceptionCode(final String message, final Category category, final int detailNumber) {
         this(message, null, category, detailNumber);
     }
 
+    /**
+     * Initializes a new {@link OAuthJWTExceptionCode}.
+     * 
+     * @param message
+     * @param displayMessage
+     * @param category
+     * @param detailNumber
+     */
     private OAuthJWTExceptionCode(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.displayMessage = displayMessage;
@@ -120,7 +135,7 @@ public enum OAuthJWTExceptionCode implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "JWT";
+        return "OAUTH_JWT";
     }
 
     @Override

@@ -72,6 +72,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
@@ -173,6 +174,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
         OAuthProviderMode mode = OAuthProviderMode.getProviderMode(configService.getProperty(OAuthProviderProperties.MODE));
         switch (mode) {
+            default:
             case AUTH_SEVER:
                 if ("hz".equalsIgnoreCase(configService.getProperty(OAuthProviderProperties.AUTHCODE_TYPE, "hz").trim())) {
                     final HazelcastConfigurationService hzConfigService = getService(HazelcastConfigurationService.class);
@@ -188,10 +190,13 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
                 } else {
                     startAuthorizationServer(new DbAuthorizationCodeProvider(this));
                 }
+                break;
             case EXPECT_JWT:
                 startJWTService();
+                break;
             case TOKEN_INTROSPECTION:
-                startTokenIntrospectionService(configService);
+                startTokenIntrospectionService();
+                break;
         }
         RankingAwareNearRegistryServiceTracker<OAuthAuthorizationService> oAuthAuthorizationService = new RankingAwareNearRegistryServiceTracker<OAuthAuthorizationService>(context, OAuthAuthorizationService.class);
 
@@ -271,7 +276,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         }
     }
 
-    private void startJWTService() {
+    private void startJWTService() throws OXException {
     	LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
     	OAuthJWTScopeService scopeService = new OAuthJWTScopeService(leanConfigService);
     	registerService(Reloadable.class, scopeService);
@@ -281,9 +286,11 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         registerService(ForcedReloadable.class, jwtAuthorizationService);
     }
 
-    private void startTokenIntrospectionService(ConfigurationService configService) {
+    private void startTokenIntrospectionService() {
         LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
         OAuthJWTScopeService scopeService = new OAuthJWTScopeService(leanConfigService);
+        registerService(Reloadable.class, scopeService);
+
         OAuthIntrospectionAuthorizationService tokenIntrospectionAuthorizationService = new OAuthIntrospectionAuthorizationService(leanConfigService, scopeService);
         registerService(OAuthAuthorizationService.class, tokenIntrospectionAuthorizationService, null);
     }

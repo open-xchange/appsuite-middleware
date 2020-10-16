@@ -59,7 +59,6 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
@@ -89,8 +88,7 @@ public class OAuthJWTScopeService implements Reloadable {
      * Processes incoming scopes that may have to be replaced by internal middleware scopes.
      *
      * @param externalScopes - String representation of the received scopes.
-     * @return resolvedScopes - List of processed and substituted scopes that can be interpreted by the corresponding {@link OAuthAction}
-     * @throws OXException
+     * @return resolvedScopes - List of processed and substituted scopes that can be interpreted by the corresponding OAuthAction
      */
     public List<String> getInternalScopes(String externalScopes) {
         return getInternalScopes(parse(externalScopes));
@@ -99,9 +97,8 @@ public class OAuthJWTScopeService implements Reloadable {
     /**
      * Processes incoming scopes that may have to be replaced by internal middleware scopes.
      *
-     * @param externalScopes - String representation of the received scopes.
-     * @return resolvedScopes - List of processed and substituted scopes that can be interpreted by the corresponding {@link OAuthAction}
-     * @throws OXException
+     * @param externalScopes - String representation of the received scopes
+     * @return resolvedScopes - List of processed and substituted scopes that can be interpreted by the corresponding OAuthAction
      */
     public List<String> getInternalScopes(List<String> externalScopes) {
         if (configuredScopes.isEmpty()) {
@@ -143,7 +140,7 @@ public class OAuthJWTScopeService implements Reloadable {
     }
 
     /**
-     * Splits given scopes string by space or comma
+     * Splits given scopes string by space or comma.
      *
      * @param scopes the string to split
      * @return the split string

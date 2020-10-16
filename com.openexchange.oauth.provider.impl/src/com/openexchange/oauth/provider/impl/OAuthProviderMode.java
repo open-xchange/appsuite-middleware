@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.provider.impl;
 
+import java.util.Arrays;
+import java.util.List;
 import com.openexchange.oauth.provider.impl.introspection.OAuthIntrospectionAuthorizationService;
 import com.openexchange.oauth.provider.impl.jwt.OAuthJwtAuthorizationService;
 
@@ -99,19 +101,11 @@ public enum OAuthProviderMode {
     /**
      * Return the corresponding {@link OAuthProviderMode} or {@link OAuthProviderMode#AUTH_SEVER} in case the given mode string is unknown.
      * 
-     * @param mode String representation of an {@link OAuthProviderMode}.
+     * @param input String representation of an {@link OAuthProviderMode}.
      * @return The corresponding {@link OAuthProviderMode}
      */
-    public static OAuthProviderMode getProviderMode(String mode) {
-        switch (mode) {
-            case "auth_server":
-                return AUTH_SEVER;
-            case "expect_jwt":
-                return EXPECT_JWT;
-            case "token_introspection":
-                return TOKEN_INTROSPECTION;
-            default:
-                return AUTH_SEVER;
-        }
+    public static OAuthProviderMode getProviderMode(String input) {
+        List<OAuthProviderMode> modes = Arrays.asList(OAuthProviderMode.values());
+        return modes.stream().filter(mode -> mode.getProviderModeString().equals(input)).findAny().orElse(AUTH_SEVER);
     }
 }

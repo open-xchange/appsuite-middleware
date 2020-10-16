@@ -24,7 +24,7 @@ properties:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.jwt.keystore.password", "com.openexchange.oauth.provider.jwt.keystore.type"]
+    related: ["com.openexchange.oauth.provider.jwt.jwks.endpoint", "com.openexchange.oauth.provider.jwt.keystore.password", "com.openexchange.oauth.provider.jwt.keystore.type"]
     file: oauth-provider-jwt.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
@@ -35,7 +35,7 @@ properties:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: 
+    related: ["com.openexchange.oauth.provider.jwt.keystore.path", "com.openexchange.oauth.provider.jwt.keystore.type"]
     file: oauth-provider-jwt.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
@@ -46,7 +46,7 @@ properties:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: "com.openexchange.oauth.provider.jwt.keystore.path"
+    related: ["com.openexchange.oauth.provider.jwt.keystore.path", "com.openexchange.oauth.provider.jwt.keystore.password"]
     file: oauth-provider-jwt.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
@@ -75,20 +75,18 @@ properties:
     file: oauth-provider-jwt.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
-
   - key: com.openexchange.oauth.provider.jwt.contextLookupNamePart
     description: |
       Gets the name part of the JWT claim value used for
       determining the context of a user. Possible values are
 
-      <ol>
-      <li><pre>full</pre>
-      The full string as returned by the authorization server. </li>
-      <li><pre>local-part </pre>
-      The local part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.</li>
-      <li><pre>domain </pre>
-      The domain part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.</li>
-      </ol>
+      <ul>
+      <li><code>full</code> - The full string as returned by the authorization server. </li>
+      <li><code>local-part</code> - The local part of an email address (local-part@domain), 
+      if the provided name matches such. In case the name does not match an email address, the full string is taken.</li>
+      <li><code>domain</code> - The domain part of an email address (local-part@domain), 
+      if the provided name matches such. In case the name does not match an email address, the full string is taken.</li>
+      </ul>
     defaultValue: domain
     version: 7.10.5
     reloadable: true
@@ -115,14 +113,13 @@ properties:
       Gets the name part of the JWT claim value used for
       determining a user within a context. Possible values are
 
-      <ol>
-      <li><pre>full</pre>
-      The full string as returned by the authorization server. </li>
-      <li><pre>local-part </pre>
-      The local part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.</li>
-      <li><pre>domain </pre>
-      The domain part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.</li>
-      </ol>
+      <ul>
+      <li><code>full</code> - The full string as returned by the authorization server. </li>
+      <li><code>local-part</code> - The local part of an email address (local-part@domain), 
+      if the provided name matches such. In case the name does not match an email address, the full string is taken.</li>
+      <li><code>domain</code> - The domain part of an email address (local-part@domain), 
+      if the provided name matches such. In case the name does not match an email address, the full string is taken.</li>
+      </ul>
     defaultValue: local-part
     version: 7.10.5
     reloadable: true
@@ -144,6 +141,6 @@ properties:
     reloadable: true
     configcascadeAware: true
     related: 
-    file: oauth-provider-jwt-scopes.properties
+    file: oauth-provider-jwt.propertie
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]

@@ -55,9 +55,10 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link OAuthIntrospectionExceptionCode} - The static service lookup.
+ * {@link OAuthIntrospectionExceptionCode}
  *
  * @author <a href="mailto:sebastian.lutz@open-xchange.com">Sebastian Lutz</a>
+ * @since 7.10.5
  */
 public enum OAuthIntrospectionExceptionCode implements OXExceptionCode {
 
@@ -72,9 +73,9 @@ public enum OAuthIntrospectionExceptionCode implements OXExceptionCode {
     UNABLE_TO_LOAD_USERINFO("Unable to load user information from IDP after valid authentication: '%1$s'", Category.CATEGORY_ERROR, 2),
     
     /**
-     * Unable to load user information from IDP after valid authentication: '%1$s'
+     * Unable to load user information from IDP after valid authentication
      */
-    UNABLE_TO_LOAD_CLIENT_CREDENTIALS("Unable to load credentials for introsprection basic auth: '%1$s'", Category.CATEGORY_ERROR, 3),
+    UNABLE_TO_LOAD_CLIENT_CREDENTIALS("Unable to load credentials for introsprection basic auth", Category.CATEGORY_ERROR, 3),
     
     /**
      * Unable to parse JWT claim: '%1$s'
@@ -86,10 +87,25 @@ public enum OAuthIntrospectionExceptionCode implements OXExceptionCode {
     private final int detailNumber;
     private final Category category;
 
+    /**
+     * Initializes a new {@link OAuthIntrospectionExceptionCode}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     */
     private OAuthIntrospectionExceptionCode(final String message, final Category category, final int detailNumber) {
         this(message, null, category, detailNumber);
     }
 
+    /**
+     * Initializes a new {@link OAuthIntrospectionExceptionCode}.
+     * 
+     * @param message
+     * @param displayMessage
+     * @param category
+     * @param detailNumber
+     */
     private OAuthIntrospectionExceptionCode(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.displayMessage = displayMessage;
@@ -114,7 +130,7 @@ public enum OAuthIntrospectionExceptionCode implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "JWT";
+        return "OAUTH_INTROSPECTION";
     }
 
     @Override

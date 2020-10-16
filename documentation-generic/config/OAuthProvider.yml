@@ -5,8 +5,8 @@ properties:
   - key: com.openexchange.oauth.provider.enabled
     description: |
       Set to 'true' to basically enable the OAuth 2.0 provider. This setting can then be overridden
-      via config cascade to disallow granting access for certain users. If the provider is enabled,
-      an encryption key (see below) must be set!
+      via config cascade to disallow granting access for certain users. If the provider is enabled and should act as
+      authorization server, an [[com.openexchange.oauth.provider.encryptionKey]] must be set!
     defaultValue: false
     version: 7.10.5
     reloadable: true

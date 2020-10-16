@@ -8,6 +8,8 @@ With OX App Suite v7.8.0 a service provider can decide to publish a certain subs
 
 When acting as `authorization server`, every application must be registered at the OX backend. The registration process is up to you, while the backend provides SOAP and RMI interfaces to persist those registrations and generates the client-specific credentials that are needed to gain access for granting users. With OX App Suite v7.8.1 it is possible to use an external authorization server.
 
+With OX App Suite v7.10.5 further features were introduced. The OX HTTP API is now accessible via OAuth 2.0 Bearer Access Tokens, which are JWTs. Furthermore it is possible to validate opaque OAuth access tokens via token introspection.
+
 # Installation and Configuration
 
 The OAuth provider feature is separated into two packages `open-xchange-oauth-provider` and `open-xchange-admin-oauth-provider` which are both contained in the `backend`software repository.
@@ -27,18 +29,23 @@ The internal authorization server needs some configuration, that also takes plac
     # Default: false
     com.openexchange.oauth.provider.enabled=true
 
-    # Defines whether the enabled OAuth 2.0 provider does not only act as resource server but also
-    # as authorization server. If 'true' the following functionality will be provided:
-    #   * An authorization endpoint, token endpoint and revocation endpoint are made available via HTTP
-    #   * API calls for revoking access to external clients are made available, access can be revoked via
-    #     App Suite UI
-    #   * Provisioning interfaces to manage trusted clients are enabled
+
+    # Besides the functionality to act as an OAuth 2.0 provider, there are three different modes to choose from:
     #
-    # If set to 'false' while the provider itself is enabled, a custom bridge to the external authorization
-    # server must be provided.
+    # auth_server
+    #  * Defines whether the enabled OAuth 2.0 provider does not only act as resource server but also as authorization server. The following functionality will be provided:
+    #    ** An authorization endpoint, token endpoint and revocation endpoint are made available via HTTP
+    #    ** API calls for revoking access to external clients are made available, access can be revoked via App Suite
+    #    ** UI Provisioning interfaces to manage trusted clients are enabled
     #
-    # Default: true
-    com.openexchange.oauth.provider.isAuthorizationServer=true
+    # expect_jwt
+    #  * Defines whether the enabled OAuth 2.0 provider is accesible with OAuth 2.0 Bearer Access Tokens that are JWTs, which were issued by an external Identity & Access management System.
+    #
+    # token_introspection
+    #  * Defines whether the enabled OAuth 2.0 provider is able to grant access based on opaque bearer tokens through token introspection.
+    #
+    # Default: auth_server
+    com.openexchange.oauth.provider.mode=auth_server
 
     # Specify how authorization codes shall be stored, to enable OAuth in multi-node environments.
     # Options are Hazelcast ('hz') or database ('db').
@@ -1008,6 +1015,8 @@ Disabled clients can of course be enabled again. If the client was already enabl
 When using an external authorization server, the internal client and grant management are deactivated. The according provisioning interfaces will not be available and the "External Apps" section within the App Suite settings page will not show up. The whole client and grant management will be off-loaded to the external identity management system.
 
 You need to deactivate the internal authorization server, by setting [com.openexchange.oauth.provider.isAuthorizationServer](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.oauth.provider.isAuthorizationServer) in `/opt/open-xchange/etc/oauth-provider.properties` to `false`. Additionally you need to provide an implementation of `com.openexchange.oauth.provider.authorizationserver.spi.OAuthAuthorizationService` as OSGi service. Its purpose is to validate the access tokens of incoming requests and to identify the according OX user. The service provider interface is contained in bundle `com.openexchange.oauth.provider`.
+
+With OX App Suite v7.10.5 `com.openexchange.oauth.provider.isAuthorizationServer` was transferred to `com.openexchange.oauth.provider.mode`. To deactivate the internal authorization server, which is activated using the value `auth_server`, the value must be set to one of the offered implementations of the `com.openexchange.oauth.provider.authorizationserver.spi.OAuthAuthorizationService`. Here `expect_jwt` or `token_introspection` are available.
 
 ## Example
 
