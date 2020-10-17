@@ -49,9 +49,11 @@
 
 package com.openexchange.mail.compose.json.action;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +76,8 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.10.2
  */
 public class AllMailComposeAction extends AbstractMailComposeAction {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllMailComposeAction.class);
 
     /**
      * Initializes a new {@link AllMailComposeAction}.
@@ -103,13 +107,24 @@ public class AllMailComposeAction extends AbstractMailComposeAction {
         columns = null;
 
         List<CompositionSpace> compositionSpaces = compositionSpaceService.getCompositionSpaces(fields, session);
+        boolean debugEnabled = LOG.isDebugEnabled();
         if (null == compositionSpaces) {
+            if (debugEnabled) {
+                LOG.debug("No open composition spaces for user {} in context {}", I(session.getUserId()), I(session.getContextId()));
+            }
             return new AJAXRequestResult(JSONArray.EMPTY_ARRAY, "json");
         }
 
         int size = compositionSpaces.size();
         if (size <= 0) {
+            if (debugEnabled) {
+                LOG.debug("No open composition spaces for user {} in context {}", I(session.getUserId()), I(session.getContextId()));
+            }
             return new AJAXRequestResult(JSONArray.EMPTY_ARRAY, "json");
+        }
+
+        if (debugEnabled) {
+            LOG.debug("Detected {} open composition space(s) for user {} in context {}: {}", I(size), I(session.getUserId()), I(session.getContextId()), compositionSpaces.stream().map(c -> c.getId()).collect(Collectors.toList()).toString());
         }
 
         if (hasColumns) {
