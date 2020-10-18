@@ -124,7 +124,7 @@ public class AllMailComposeAction extends AbstractMailComposeAction {
         }
 
         if (debugEnabled) {
-            LOG.debug("Detected {} open composition space(s) for user {} in context {}: {}", I(size), I(session.getUserId()), I(session.getContextId()), compositionSpaces.stream().map(c -> c.getId()).collect(Collectors.toList()).toString());
+            LOG.debug("Detected {} open composition space(s) for user {} in context {}: {}", I(size), I(session.getUserId()), I(session.getContextId()), compositionSpaces.stream().map(c -> UUIDs.getUnformattedString(c.getId())).collect(Collectors.toList()).toString());
         }
 
         if (hasColumns) {
