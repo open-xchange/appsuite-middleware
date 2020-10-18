@@ -152,7 +152,7 @@ public final class UUIDs {
      */
     public static UUID fromUnformattedString(final String unformattedString) {
         if (null == unformattedString) {
-            throw new IllegalArgumentException("string must nnot be null");
+            throw new IllegalArgumentException("Given string must not be null");
         }
         return toUUID(decodeHex(unformattedString));
     }
@@ -160,7 +160,7 @@ public final class UUIDs {
     private static byte[] decodeHex(final String data) throws IllegalArgumentException {
         final int len = data.length();
         if ((len & 0x01) != 0) {
-            throw new IllegalArgumentException("Odd number of characters.");
+            throw new IllegalArgumentException("Odd number of characters");
         }
         final byte[] out = new byte[len >> 1];
         // two characters form the hex value.
@@ -178,7 +178,7 @@ public final class UUIDs {
     private static int toDigit(final char ch, final int index) throws IllegalArgumentException {
         final int digit = Character.digit(ch, 16);
         if (digit == -1) {
-            throw new IllegalArgumentException("Illegal hexadecimal charcter " + ch + " at index " + index);
+            throw new IllegalArgumentException("Illegal hexadecimal character " + ch + " at index " + index);
         }
         return digit;
     }
@@ -207,10 +207,10 @@ public final class UUIDs {
      */
     public static UUID toUUID(final byte[] bytes) {
         if (null == bytes) {
-            throw new IllegalArgumentException("Byte array is null.");
+            throw new IllegalArgumentException("Byte array is null");
         }
         if (bytes.length != UUID_BYTE_LENGTH) {
-            throw new IllegalArgumentException("UUID must be contructed using a 16 byte array.");
+            throw new IllegalArgumentException("UUID must be contructed using a 16 byte array");
         }
         return toUUID0(bytes);
     }
