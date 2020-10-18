@@ -115,20 +115,20 @@ public final class UUIDs {
     }
 
     /**
-     * Gets the unformatted string representation of specified {@link UUID} instance.<br>
-     * Example:<br>
-     * <code>
-     * &nbsp;&nbsp;067e6162-3b6f-4ae2-a171-2470b63dff00
-     * </code><br>
-     * is converted to<br>
-     * <code>
-     * &nbsp;&nbsp;067e61623b6f4ae2a1712470b63dff00
-     * </code>
+     * Gets the unformatted string representation of specified {@link UUID} instance.
+     * <p>
+     * Example:
+     * <pre>067e6162-3b6f-4ae2-a171-2470b63dff00</pre>
+     * is converted to
+     * <pre>067e61623b6f4ae2a1712470b63dff00</pre>
      *
      * @param uuid The {@link UUID} instance
      * @return The unformatted string representation
      */
     public static String getUnformattedString(final UUID uuid) {
+        if (uuid == null) {
+            return null;
+        }
         return new String(encodeHex(toByteArray(uuid)));
     }
 
