@@ -52,7 +52,6 @@ package com.openexchange.file.storage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -129,7 +128,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder, SetterAwareF
 
     protected EntityInfo modifiedFrom;
 
-    private Map<String, Object> meta = new HashMap<String, Object>();
+    protected Map<String, Object> meta;
 
     /**
      * Initializes a new {@link DefaultFileStorageFolder}.
