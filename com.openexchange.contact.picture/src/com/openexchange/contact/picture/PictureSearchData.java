@@ -77,6 +77,19 @@ public class PictureSearchData {
      * Initializes a new {@link PictureSearchData}.
      *
      * @param userId The user identifier
+     * @param folderId The folder identifier
+     * @param contactId The contact identifier
+     * @param emails The email addresses
+     *
+     */
+    public PictureSearchData(Integer userId, Integer folderId, Integer contactId, Collection<String> emails) {
+        this(userId, null, folderId, contactId, emails);
+    }
+
+    /**
+     * Initializes a new {@link PictureSearchData}.
+     *
+     * @param userId The user identifier
      * @param accountId The account identifier
      * @param folderId The folder identifier
      * @param contactId The contact identifier

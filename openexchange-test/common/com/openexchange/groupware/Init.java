@@ -215,8 +215,8 @@ import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.userconf.internal.UserPermissionServiceImpl;
+import com.openexchange.version.ServerVersion;
 import com.openexchange.version.VersionService;
-import com.openexchange.version.internal.Numbers;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.jdom.impl.JDOMParserImpl;
 import com.openexchange.xml.spring.SpringParser;
@@ -551,7 +551,7 @@ public final class Init {
 
     private static void startVersionBundle() throws Exception {
         // Using some static version because access to c.o.version bundle manifest is not possible currently.
-        com.openexchange.version.internal.VersionServiceImpl versionService = new com.openexchange.version.internal.VersionServiceImpl("01.01.2019", new Numbers("0.0.0", "0"));
+        com.openexchange.version.internal.VersionServiceImpl versionService = new com.openexchange.version.internal.VersionServiceImpl("01.01.2019", new ServerVersion("0.0.0", "0"));
         TestServiceRegistry.getInstance().addService(VersionService.class, versionService);
         services.put(VersionService.class, versionService);
     }
