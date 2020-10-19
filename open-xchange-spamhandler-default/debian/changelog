@@ -1,3 +1,9 @@
+open-xchange-spamhandler-default (7.10.3-26) stable; urgency=medium
+
+  * Build for patch 2020-10-26 (5887)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 19 Oct 2020 16:35:37 +0000
+
 open-xchange-spamhandler-default (7.10.3-25) stable; urgency=medium
 
   * Build for patch 2020-10-12 (5878)
