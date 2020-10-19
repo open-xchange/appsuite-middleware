@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 11
+%define        ox_release 12
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -47,6 +47,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.push.mail.notify/ChangeLog
 
 %changelog
+* Mon Oct 19 2020 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2020-10-26 (5888)
 * Tue Oct 06 2020 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2020-10-12 (5879)
 * Wed Sep 23 2020 Carsten Hoeger <choeger@open-xchange.com>

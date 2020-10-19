@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 11
+%define        ox_release 12
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -218,6 +218,8 @@ ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
+* Mon Oct 19 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-10-26 (5888)
 * Tue Oct 06 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-10-12 (5879)
 * Wed Sep 23 2020 Marcus Klein <marcus.klein@open-xchange.com>
