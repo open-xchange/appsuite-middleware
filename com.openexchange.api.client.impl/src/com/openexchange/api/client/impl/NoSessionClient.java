@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,70 +47,50 @@
  *
  */
 
-package com.openexchange.version.internal;
+package com.openexchange.api.client.impl;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.net.URL;
+import com.openexchange.annotation.Nullable;
+import com.openexchange.api.client.Credentials;
+import com.openexchange.api.client.LoginInformation;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * Data object storing the version and build number from the manifest of this bundle.
+ * {@link NoSessionClient}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public final class Numbers {
+public class NoSessionClient extends AbstractApiClient {
 
-    private static final String EXPRESSION = "([0-9]+)\\.([0-9]+)\\.([0-9]+)";
-    private static final Pattern PATTERN = Pattern.compile(EXPRESSION);
-
-    private final String version;
-    private final String buildNumber;
-    private final int major;
-    private final int minor;
-    private final int patch;
-
-    public Numbers(String version, String buildNumber) throws Exception {
-        super();
-        this.version = version;
-        this.buildNumber = buildNumber;
-        Matcher matcher = PATTERN.matcher(version);
-        if (matcher.find()) {
-            try {
-                major = Integer.parseInt(matcher.group(1));
-            } catch (NumberFormatException e) {
-                throw new Exception("Can not parse major out of version \"" + version + "\".", e);
-            }
-            try {
-                minor = Integer.parseInt(matcher.group(2));
-            } catch (NumberFormatException e) {
-                throw new Exception("Can not parse minor out of version \"" + version + "\".", e);
-            }
-            try {
-                patch = Integer.parseInt(matcher.group(3));
-            } catch (NumberFormatException e) {
-                throw new Exception("Can not parse patch out of version \"" + version + "\".", e);
-            }
-        } else {
-            throw new Exception("Version pattern does not match on version string \"" + version + "\".");
-        }
+    /**
+     * Initializes a new {@link NoSessionClient}.
+     * 
+     * @param services The services
+     * @param contextId The context identifier of this local OX node
+     * @param userId The user identifier of this local OX node
+     * @param loginLink The link to the target to log in into
+     */
+    public NoSessionClient(ServiceLookup services, int contextId, int userId, URL loginLink) {
+        super(services, contextId, userId, loginLink);
     }
 
-    public String getVersion() {
-        return version;
+    @Override
+    @Nullable
+    public Credentials getCredentials() {
+        return null;
     }
 
-    public String getBuildNumber() {
-        return buildNumber;
+    @Override
+    @Nullable
+    public LoginInformation getLoginInformation() {
+        return null;
     }
 
-    public int getMajor() {
-        return major;
+    @Override
+    protected void doLogin() throws OXException {
+        // No-op
     }
 
-    public int getMinor() {
-        return minor;
-    }
-
-    public int getPatch() {
-        return patch;
-    }
 }

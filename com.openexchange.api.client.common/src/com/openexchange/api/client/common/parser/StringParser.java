@@ -60,6 +60,28 @@ import com.openexchange.exception.OXException;
  */
 public class StringParser extends AbstractHttpResponseParser<String> {
 
+    /** Simple class to delay initialization until needed */
+    private static class InstanceHolder {
+
+        static final StringParser INSTANCE = new StringParser();
+    }
+
+    /**
+     * Initializes a new {@link StringParser}.
+     */
+    protected StringParser() {
+        super();
+    }
+
+    /**
+     * Get the instance of a {@link StringParser}
+     *
+     * @return A {@link StringParser}
+     */
+    public static StringParser getInstance() {
+        return InstanceHolder.INSTANCE;
+    }
+
     @Override
     public String parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException {
         return commonResponse.getData(String.class);

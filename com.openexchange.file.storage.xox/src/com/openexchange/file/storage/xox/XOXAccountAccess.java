@@ -69,6 +69,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.folderstorage.FederatedSharingFolders;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -82,8 +83,8 @@ public class XOXAccountAccess implements CapabilityAware {
     private final FileStorageAccount account;
     private final FileStorageService service;
     private final Session session;
-    private final ApiClientService clientFactory;
     private final FileStorageAccountErrorHandler errorHandler;
+    private final ServiceLookup services;
 
     private boolean isConnected;
     private ShareClient shareClient;
@@ -92,26 +93,25 @@ public class XOXAccountAccess implements CapabilityAware {
      * Initializes a new {@link XOXAccountAccess}.
      *
      * @param service The {@link FileStorageService}
-     * @param clientFactory The {@link ApiClientService}
-     * @param conversionService The {@link ConversionService}
+     * @param services The {@link ServiceLookup} to get the {@link ApiClientService} or the {@link ConversionService}
      * @param account The {@link FileStorageAccount}
      * @param session The {@link Session}
      * @param retryAfterError The amount of seconds after which accessing an error afflicted account should be retried.
+     * @throws OXException If services are missing
      */
     public XOXAccountAccess(/* @formatter:off */
                             FileStorageService service,
-                            ApiClientService clientFactory,
-                            ConversionService conversionService,
+                            ServiceLookup services,
                             FileStorageAccount account,
                             Session session,
                             int retryAfterError
-                            /*@formatter:on*/) {
+                            /*@formatter:on*/) throws OXException {
         this.service = Objects.requireNonNull(service, "service must not be null");
-        this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory must not be null");
         this.account = Objects.requireNonNull(account, "account must not be null");
         this.session = Objects.requireNonNull(session, "session must not be null");
+        this.services = Objects.requireNonNull(services, "services must not be null");
 
-        Objects.requireNonNull(conversionService, "conversionService must not be null");
+        ConversionService conversionService = services.getServiceSafe(ConversionService.class);
         DataHandler ox2jsonDataHandler = conversionService.getDataHandler(DataHandlers.OXEXCEPTION2JSON);
         DataHandler json2oxDataHandler = conversionService.getDataHandler(DataHandlers.JSON2OXEXCEPTION);
         this.errorHandler = new FileStorageAccountErrorHandler(ox2jsonDataHandler, json2oxDataHandler, this, session, retryAfterError);
@@ -214,13 +214,14 @@ public class XOXAccountAccess implements CapabilityAware {
             return;
         }
 
+        ApiClientService clientService = services.getServiceSafe(ApiClientService.class);
         try {
-            shareClient = new ShareClient(session, account, clientFactory.getApiClient(session, shareUrl, credentials));
+            shareClient = new ShareClient(session, account, clientService.getApiClient(session, shareUrl, credentials));
             final Credentials cachedCredentials = shareClient.getApiClient().getCredentials();
-            if(!Objects.equals(cachedCredentials, credentials)) {
+            if (!Objects.equals(cachedCredentials, credentials)) {
                 //The credentials changed; we need to close the current client and create a new one
-                clientFactory.close(shareClient.getApiClient());
-                shareClient = new ShareClient(session, account, clientFactory.getApiClient(session, shareUrl, credentials));
+                clientService.close(shareClient.getApiClient());
+                shareClient = new ShareClient(session, account, clientService.getApiClient(session, shareUrl, credentials));
             }
             //the client might just come from a cache so we ensure that we can access the remote by performing a ping
             shareClient.ping();

@@ -161,7 +161,7 @@ public class UpdateCall extends AbstractPutCall<String> {
 
     @Override
     public HttpResponseParser<String> getParser() {
-        return new StringParser();
+        return StringParser.getInstance();
     }
 
     @Override

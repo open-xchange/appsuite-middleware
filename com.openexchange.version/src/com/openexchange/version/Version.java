@@ -49,8 +49,6 @@
 
 package com.openexchange.version;
 
-import com.openexchange.version.internal.Numbers;
-
 /**
  * Stores the version of the Middleware.
  *
@@ -79,9 +77,8 @@ public class Version {
 
     // -----------------------------------------------------------------------------------------------------------------
 
-    private volatile Numbers numbers = null;
+    private volatile ServerVersion serverVersion = null;
     private volatile String buildDate = null;
-    private volatile String versionString = null;
 
     protected Version() {
         super();
@@ -90,11 +87,10 @@ public class Version {
     /**
      * Sets the numbers for this version instance.
      *
-     * @param numbers The number to set
+     * @param serverVersion The number to set
      */
-    public void setNumbers(Numbers numbers) {
-        this.numbers = numbers;
-        versionString = null;
+    public void setNumbers(ServerVersion serverVersion) {
+        this.serverVersion = serverVersion;
     }
 
     /**
@@ -128,12 +124,12 @@ public class Version {
      * @throws IllegalStateException if version instance is not yet initialized
      */
     public int getMajor() {
-        if (null == numbers) {
+        if (null == serverVersion) {
             IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
             LOG.error("", e);
             throw e;
         }
-        return numbers.getMajor();
+        return serverVersion.getMajor();
     }
 
     /**
@@ -143,12 +139,12 @@ public class Version {
      * @throws IllegalStateException if version instance is not yet initialized
      */
     public int getMinor() {
-        if (null == numbers) {
+        if (null == serverVersion) {
             IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
             LOG.error("", e);
             throw e;
         }
-        return numbers.getMinor();
+        return serverVersion.getMinor();
     }
 
     /**
@@ -158,12 +154,12 @@ public class Version {
      * @throws IllegalStateException if version instance is not yet initialized
      */
     public int getPatch() {
-        if (null == numbers) {
+        if (null == serverVersion) {
             IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
             LOG.error("", e);
             throw e;
         }
-        return numbers.getPatch();
+        return serverVersion.getPatch();
     }
 
     /**
@@ -173,25 +169,12 @@ public class Version {
      * @throws IllegalStateException if version instance is not yet initialized
      */
     public String getVersionString() {
-        String tmp = this.versionString;
-        if (null == tmp) {
-            // Acquire lock...
-            synchronized (this) {
-                // ... and try again
-                tmp = this.versionString;
-                if (null == tmp) {
-                    // Initialize version string
-                    if (null == numbers) {
-                        IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
-                        LOG.error("", e);
-                        throw e;
-                    }
-                    tmp = numbers.getVersion() + "-Rev" + numbers.getBuildNumber();
-                    this.versionString = tmp;
-                }
-            }
+        if (null == serverVersion) {
+            IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
+            LOG.error("", e);
+            throw e;
         }
-        return tmp;
+        return serverVersion.getVersionString();
     }
 
     /**
@@ -200,7 +183,7 @@ public class Version {
      * @return The version string, or <code>null</code> if it is not yet initialized
      */
     public String optVersionString() {
-        return versionString;
+        return null == serverVersion ? null : serverVersion.getVersionString();
     }
 
 }

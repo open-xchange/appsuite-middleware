@@ -56,10 +56,8 @@ import java.util.Objects;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.api.client.ApiClientService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.conversion.ConversionService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
@@ -126,26 +124,6 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
             }
         }
         return m;
-    }
-
-    /**
-     * Gets the client {@link ApiClientService} for accessing the remote server
-     *
-     * @return The {@link ApiClientService}
-     * @throws OXException
-     */
-    private ApiClientService getApiClientService() throws OXException {
-        return this.services.getServiceSafe(ApiClientService.class);
-    }
-
-    /**
-     * Gets the {@link ConversionService}
-     *
-     * @return The {@link ConversionService}
-     * @throws OXException
-     */
-    private ConversionService getConversionService() throws OXException {
-        return this.services.getServiceSafe(ConversionService.class);
     }
 
     /**
@@ -227,7 +205,7 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
             throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId(), I(session.getUserId()), I(session.getContextId()));
         }
         FileStorageAccount account = manager.getAccount(accountId, session);
-        return new XOXAccountAccess(this, getApiClientService(), getConversionService(), account, session, getRetryAfterError(session));
+        return new XOXAccountAccess(this, services, account, session, getRetryAfterError(session));
     }
 
     @Override

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.api.client.impl.share;
+package com.openexchange.api.client.impl;
 
 import java.net.URL;
 import com.openexchange.annotation.Nullable;
@@ -59,7 +59,6 @@ import com.openexchange.api.client.common.calls.login.AnonymousLoginCall;
 import com.openexchange.api.client.common.calls.login.GuestLoginCall;
 import com.openexchange.api.client.common.calls.login.RedeemTokenCall;
 import com.openexchange.api.client.common.calls.login.ShareLoginInformation;
-import com.openexchange.api.client.impl.AbstractApiClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
