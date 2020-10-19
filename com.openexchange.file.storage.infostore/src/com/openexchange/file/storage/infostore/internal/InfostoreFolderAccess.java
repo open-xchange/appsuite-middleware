@@ -49,10 +49,20 @@
 
 package com.openexchange.file.storage.infostore.internal;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageRestoringFolderAccess;
 import com.openexchange.file.storage.infostore.folder.AbstractInfostoreFolderAccess;
 import com.openexchange.file.storage.infostore.osgi.Services;
+import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.RestoringFolderService;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.session.ServerSession;
@@ -62,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreFolderAccess extends AbstractInfostoreFolderAccess {
+public class InfostoreFolderAccess extends AbstractInfostoreFolderAccess implements FileStorageRestoringFolderAccess {
 
     private final InfostoreFacade infostore;
 
@@ -75,6 +85,31 @@ public class InfostoreFolderAccess extends AbstractInfostoreFolderAccess {
     public InfostoreFolderAccess(ServerSession session, InfostoreFacade infostore) {
         super(session);
         this.infostore = infostore;
+    }
+
+    @Override
+    public Map<String, FileStorageFolder[]> restoreFolderFromTrash(List<String> folderIds, String defaultDestFolderId) throws OXException {
+        FolderService folderService = getFolderService();
+        if (false == (folderService instanceof RestoringFolderService)) {
+            throw FileStorageExceptionCodes.NO_RESTORE_SUPPORT.create();
+        }
+
+        FolderServiceDecorator decorator = initDecorator();
+        UserizedFolder destFolder = folderService.getFolder(TREE_ID, defaultDestFolderId, session, decorator);
+        FolderResponse<Map<String, List<UserizedFolder>>> result = ((RestoringFolderService) folderService).restoreFolderFromTrash(TREE_ID, folderIds, destFolder, session, decorator);
+        Map<String, List<UserizedFolder>> map = result.getResponse();
+
+        Map<String, FileStorageFolder[]> retval = new LinkedHashMap<String, FileStorageFolder[]>(map.size());
+        for (Map.Entry<String, List<UserizedFolder>> entry : map.entrySet()) {
+            List<UserizedFolder> path = entry.getValue();
+            FileStorageFolder[] folders = new FileStorageFolder[path.size()];
+            int i = 0;
+            for (UserizedFolder userizedFolder : path) {
+                folders[i++] = getConverter().getStorageFolder(userizedFolder);
+            }
+            retval.put(entry.getKey(), folders);
+        }
+        return retval;
     }
 
     @Override
