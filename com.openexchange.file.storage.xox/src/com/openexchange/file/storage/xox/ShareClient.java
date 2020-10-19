@@ -52,6 +52,7 @@ package com.openexchange.file.storage.xox;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.l;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,6 +61,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.api.client.ApiClient;
@@ -93,6 +95,7 @@ import com.openexchange.api.client.common.calls.infostore.UpdatesCall;
 import com.openexchange.api.client.common.calls.infostore.UpdatesResponse;
 import com.openexchange.api.client.common.calls.infostore.VersionsCall;
 import com.openexchange.api.client.common.calls.infostore.mapping.DefaultFileMapper;
+import com.openexchange.api.client.common.calls.system.ServerVersionCall;
 import com.openexchange.api.client.common.calls.system.WhoamiCall;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -111,6 +114,7 @@ import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.session.Session;
+import com.openexchange.version.ServerVersion;
 
 /**
  * {@link ShareClient} a client for accessing remote shares on other OX instances/installations
@@ -119,6 +123,9 @@ import com.openexchange.session.Session;
  * @since v7.10.5
  */
 public class ShareClient {
+
+    private static final String SERVER_VERSION = "server_version";
+    private static final String SERVER_VERSION_TIMESTAMP = "server_version_TIMESTAMP";
 
     protected static final String TREE_ID = FolderStorage.REAL_TREE_ID;
     protected static final String MODULE_FILES = "files";
@@ -137,7 +144,7 @@ public class ShareClient {
 
     /**
      * Initializes a new {@link ShareClient}.
-     *
+     * 
      * @param session A session
      * @param account The underlying file storage account
      * @param client The underlying {@link ApiClient} to use
@@ -180,15 +187,6 @@ public class ShareClient {
     }
 
     /**
-     * Pings the remote OX
-     *
-     * @throws OXException if the ping failed
-     */
-    public void ping() throws OXException {
-        getApiClient().execute(new WhoamiCall());
-    }
-
-    /**
      * Internal method to return an array of IDs for the given fields
      *
      * @param fields The fields
@@ -213,6 +211,42 @@ public class ShareClient {
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Pings the remote OX
+     *
+     * @throws OXException if the ping failed
+     */
+    public void ping() throws OXException {
+        getApiClient().execute(new WhoamiCall());
+    }
+
+    /**
+     * Get the server version
+     *
+     * @return The server version or <code>null</code>
+     * @throws OXException If the version can't be get
+     */
+    public ServerVersion getServerVersion() throws OXException {
+        ServerVersion version = (ServerVersion) account.getConfiguration().get(SERVER_VERSION);
+        if (null != version) {
+            Long timestamp = (Long) account.getConfiguration().get(SERVER_VERSION_TIMESTAMP);
+            if (null != timestamp && System.currentTimeMillis() - l(timestamp) < TimeUnit.DAYS.toMillis(1)) {
+                return version;
+            }
+        }
+
+        /*
+         * Save into account with timestamp
+         */
+        version = getApiClient().execute(new ServerVersionCall());
+        if (null != version) {
+            account.getConfiguration().put(SERVER_VERSION, version);
+            account.getConfiguration().put(SERVER_VERSION_TIMESTAMP, L(System.currentTimeMillis()));
+        }
+
+        return version;
+    }
 
     /**
      * Gets the folder identified through given identifier
@@ -622,11 +656,7 @@ public class ShareClient {
             null));
         //@formatter:on
 
-        return new DeltaImpl<File>(
-            fileConverter.getStorageSearchIterator(response.getNewFiles(), fields),
-            fileConverter.getStorageSearchIterator(response.getModifiedFiles(), fields),
-            fileConverter.getStorageSearchIterator(response.getDeletedFiles(), fields),
-            response.getSequenceNumber());
+        return new DeltaImpl<File>(fileConverter.getStorageSearchIterator(response.getNewFiles(), fields), fileConverter.getStorageSearchIterator(response.getModifiedFiles(), fields), fileConverter.getStorageSearchIterator(response.getDeletedFiles(), fields), response.getSequenceNumber());
     }
 
     /**
@@ -669,6 +699,9 @@ public class ShareClient {
         return fileConverter.getStorageFiles(result.getResultObjects(), fields);
     }
 
+    /** A static reference since when the federated sharing feature was introduced and thus certain API functionality like the {@link Field#CREATED_FROM} field is available */
+    private final static ServerVersion API_LEVEL = new ServerVersion(7, 10, 5, "0");
+
     /**
      * Gets the metadata fields to query from the remote server, based on the fields requested that are actually requested.
      * <p/>
@@ -678,13 +711,13 @@ public class ShareClient {
      * @param requiredFields Optional additional fields to include, may contain <code>null</code> elements
      * @return The fields to use when querying the remote server
      */
-    private Set<Field> getFieldsToQuery(List<Field> requestedFields, Field... requiredFields) {
+    private Set<Field> getFieldsToQuery(List<Field> requestedFields, Field... requiredFields) throws OXException {
         Set<Field> fields = new HashSet<Field>(null != requestedFields ? requestedFields : Arrays.asList(Field.values()));
         /*
          * handle fields not supported by the remote server
          */
-        Object remoteServerVersion = getRemoteServerVersion();
-        if (null == remoteServerVersion /* || remoteServerVersion < 7.10.5 */) {
+        ServerVersion serverVersion = getServerVersion();
+        if (null == serverVersion || API_LEVEL.compareTo(serverVersion) > 0) {
             if (fields.remove(Field.CREATED_FROM)) {
                 fields.add(Field.CREATED_BY);
             }
@@ -701,10 +734,6 @@ public class ShareClient {
             }
         }
         return fields;
-    }
-
-    private Object getRemoteServerVersion() {
-        return null;
     }
 
 }

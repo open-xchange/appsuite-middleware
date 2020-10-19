@@ -51,9 +51,9 @@ package com.openexchange.version.osgi;
 
 import java.util.Dictionary;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.version.ServerVersion;
 import com.openexchange.version.Version;
 import com.openexchange.version.VersionService;
-import com.openexchange.version.internal.Numbers;
 import com.openexchange.version.internal.VersionServiceImpl;
 
 /**
@@ -91,9 +91,9 @@ public class VersionActivator extends HousekeepingActivator {
             throw new Exception("Can not read build date from bundle manifest.");
         }
         Version instance = Version.getInstance();
-        instance.setNumbers(new Numbers(version, buildNumber));
+        instance.setNumbers(new ServerVersion(version, buildNumber));
         instance.setBuildDate(date);
-        VersionService versionService = new VersionServiceImpl(date, new Numbers(version, buildNumber));
+        VersionService versionService = new VersionServiceImpl(date, new ServerVersion(version, buildNumber));
         registerService(VersionService.class, versionService);
         LOG.info(VersionServiceImpl.NAME + ' ' + versionService.getVersionString());
         LOG.info("(c) OX Software GmbH , Open-Xchange GmbH");

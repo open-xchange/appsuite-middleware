@@ -59,6 +59,7 @@ Import-Package: com.google.common.cache,
  com.openexchange.tools.session,
  com.openexchange.tx,
  com.openexchange.userconf,
+ com.openexchange.version,
  org.json,
  org.osgi.framework,
  org.slf4j

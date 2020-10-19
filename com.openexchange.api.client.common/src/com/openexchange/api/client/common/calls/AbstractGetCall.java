@@ -58,7 +58,7 @@ import com.openexchange.api.client.HttpMethods;
  * {@link AbstractGetCall} - Common abstract class for methods build on {@link HttpMethods#GET}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @param <T> The calss of the response
+ * @param <T> The class of the response
  * @since v7.10.5
  */
 public abstract class AbstractGetCall<T> extends AbstractApiCall<T> {

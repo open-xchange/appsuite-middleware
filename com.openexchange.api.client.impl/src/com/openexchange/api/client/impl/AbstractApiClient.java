@@ -425,9 +425,8 @@ public abstract class AbstractApiClient implements ApiClient {
      *
      * @param call The call to get the information from
      * @return the full qualified path
-     * @throws OXException In case path prefix can't be added
      */
-    private <T> String buildPath(ApiCall<T> call) throws OXException {
+    private <T> String buildPath(ApiCall<T> call) {
         if (false == call.appendDispatcherPrefix()) {
             String module = call.getModule();
             return '/' == module.charAt(0) ? module : '/' + module;

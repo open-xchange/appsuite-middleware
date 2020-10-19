@@ -68,7 +68,6 @@ import com.openexchange.api.client.ApiClient;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.api.client.Credentials;
-import com.openexchange.api.client.impl.share.ApiShareClient;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -227,6 +226,9 @@ public class ApiClientServiceImpl implements ApiClientService {
      */
     private static String generateCacheKey(int contextId, int userId, URL host) {
         String baseToken = ShareTool.getBaseToken(host.getPath());
+        if (Strings.isEmpty(baseToken)) {
+            return Strings.concat("-", I(contextId), I(userId), host.getHost());
+        }
         return Strings.concat("-", I(contextId), I(userId), host.getHost(), Strings.isEmpty(baseToken) ? host.getPath() : baseToken);
     }
 
@@ -238,17 +240,15 @@ public class ApiClientServiceImpl implements ApiClientService {
      * @param url The login link to choose the client from
      * @param credentials The optional credentials to pass to the client
      * @return The client
-     * @throws OXException If no fitting client can be chosen
      */
-    protected ApiClient chooseClient(int contextId, int userId, URL url, Credentials credentials) throws OXException {
-        LOGGER.debug("Creating share access for remote system {} in context {} for user {}.", url.getHost(), I(contextId), I(userId));
+    protected ApiClient chooseClient(int contextId, int userId, URL url, Credentials credentials) {
+        LOGGER.debug("Creating API client for remote system {} in context {} for user {}.", url.getHost(), I(contextId), I(userId));
 
         ApiClient client = null;
         if (ShareTool.isShare(url.getPath())) {
             client = new ApiShareClient(services, contextId, userId, url, credentials);
-        }
-        if (null == client) {
-            throw ApiClientExceptions.UNKOWN_API.create();
+        } else {
+            client = new NoSessionClient(services, contextId, userId, url);
         }
         return client;
     }

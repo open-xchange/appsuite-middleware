@@ -139,14 +139,14 @@ public class PutUpdateCall extends AbstractPutCall<String> {
 
     @Override
     public HttpResponseParser<String> getParser() {
-        return new StringParser();
+        return StringParser.getInstance();
     }
 
     @Override
     protected void fillParameters(Map<String, String> parameters) {
         parameters.put("id", id);
         parameters.put("timestamp", String.valueOf(timestamp));
-        putIfNotEmpty(parameters,"pushToken", pushToken);
+        putIfNotEmpty(parameters, "pushToken", pushToken);
     }
 
     @Override

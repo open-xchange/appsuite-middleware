@@ -77,8 +77,6 @@ import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
-import com.openexchange.api.client.ApiClientExceptions;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAppender;
 import com.openexchange.java.Strings;
@@ -151,12 +149,14 @@ public final class ApiClientUtils {
      *
      * @param loginLinkPath The login link to access
      * @return The prefix
-     * @throws OXException In case exceptions of the path aren't met
      */
-    public static String parseDispatcherPrefix(String loginLinkPath) throws OXException {
+    public static String parseDispatcherPrefix(String loginLinkPath) {
         String sharePrefix = SHARE_SERVLET;
         if (false == loginLinkPath.contains(sharePrefix)) {
-            throw ApiClientExceptions.INVALID_TARGET.create(loginLinkPath);
+            /*
+             * Return as-is
+             */
+            return loginLinkPath;
         }
 
         String prefix = loginLinkPath; // "/ajax/share/0..."
