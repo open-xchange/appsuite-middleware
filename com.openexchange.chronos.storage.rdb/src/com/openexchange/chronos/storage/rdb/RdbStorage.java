@@ -111,23 +111,64 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
      * @param connection The write connection to release
      * @param updated The number of actually updated rows to
      */
-    protected void release(Connection connection, int updated) throws OXException {
-        if (null != connection) {
-            try {
-                if (false == connection.getAutoCommit()) {
-                    txPolicy.rollback(connection);
-                }
-                txPolicy.setAutoCommit(connection, true);
-            } catch (SQLException e) {
-                throw asOXException(e);
-            } finally {
-                if (0 < updated) {
-                    dbProvider.releaseWriteConnection(context, connection);
-                } else {
-                    dbProvider.releaseWriteConnectionAfterReading(context, connection);
-                }
+    protected void release(Connection connection, int updated) {
+        if (null == connection) {
+            return;
+        }
+
+        try {
+            if (false == isAutoCommitSafe(connection)) {
+                rollback(connection);
+            }
+            enableAutoCommit(connection);
+        } finally {
+            if (0 < updated) {
+                dbProvider.releaseWriteConnection(context, connection);
+            } else {
+                dbProvider.releaseWriteConnectionAfterReading(context, connection);
             }
         }
+    }
+
+    /**
+     * Tries to enable auto-commit mode.
+     *
+     * @param connection The connection of which the auto-commit mode shall be enabled
+     */
+    private void enableAutoCommit(Connection connection) {
+        try {
+            txPolicy.setAutoCommit(connection, true);
+        } catch (Exception e) {
+            LOG.warn("Failed to enable auto-commit mode.", e);
+        }
+    }
+
+    /**
+     * Tries to undo all changes made in the current transaction and releases any database locks currently held by given connection.
+     *
+     * @param connection The connection to roll-back
+     */
+    private void rollback(Connection connection) {
+        try {
+            txPolicy.rollback(connection);
+        } catch (Exception e) {
+            LOG.warn("Failed to perform a roll-back.", e);
+        }
+    }
+
+    /**
+     * Tries to retrieve the current auto-commit mode for given connection.
+     *
+     * @param connection The connection to determine auto-commit mode from
+     * @return <code>true</code> if auto-commit mode is enabled; otherwise <code>false</code>
+     */
+    private static boolean isAutoCommitSafe(Connection connection) {
+        try {
+            return connection.getAutoCommit();
+        } catch (Exception e) {
+            LOG.warn("Failed to retrieve the current auto-commit mode.", e);
+        }
+        return true;
     }
 
     /**
@@ -135,8 +176,8 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
      *
      * @param accountId The account identifier
      * @param sequenceTable The sequence table name
-     * @return The next sequential identifier
-     * @throws OXException if the next seq id cannot be generated
+     * @return The next sequence identifier
+     * @throws OXException If next sequence identifier cannot be generated
      */
     protected String nextId(String sequenceTable) throws OXException {
         String value = null;
@@ -165,7 +206,7 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
      */
     //TODO: consolidate somehow with the duplicate method....
     protected int nextId(Connection connection, String sequenceTable) throws SQLException {
-        if (connection.getAutoCommit()) {
+        if (isAutoCommitSafe(connection)) {
             throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
         }
         try (PreparedStatement stmt = connection.prepareStatement("UPDATE " + sequenceTable + " SET id=LAST_INSERT_ID(id+1) WHERE cid=?;")) {
@@ -199,7 +240,7 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
      * @return The next sequential identifier
      */
     protected int nextId(Connection connection, int account, String sequenceTable) throws SQLException {
-        if (connection.getAutoCommit()) {
+        if (isAutoCommitSafe(connection)) {
             throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
         }
         try (PreparedStatement stmt = connection.prepareStatement("UPDATE " + sequenceTable + " SET id=LAST_INSERT_ID(id+1) WHERE cid=? AND account=?;")) {
