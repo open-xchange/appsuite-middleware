@@ -56,7 +56,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,14 +63,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.DefaultInterests;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.userconfiguration.PermissionConfigurationChecker;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.PermissionCheckerCodes;
+import com.openexchange.groupware.userconfiguration.PermissionConfigurationChecker;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -82,7 +77,7 @@ import com.openexchange.osgi.annotation.SingletonService;
  * @since v7.10.4
  */
 @SingletonService
-public class PermissionConfigurationCheckerImpl implements Reloadable, PermissionConfigurationChecker {
+public class PermissionConfigurationCheckerImpl implements PermissionConfigurationChecker {
 
     private static final Logger LOG = LoggerFactory.getLogger(PermissionConfigurationCheckerImpl.class);
 
@@ -116,50 +111,7 @@ public class PermissionConfigurationCheckerImpl implements Reloadable, Permissio
         ILLEGAL_CAPABILITIES = illegalCaps.build();
     }
 
-    private static final String ALLOW_ILLEGAL_PROV_PROP = PermissionConfigurationChecker.PROP_ALLOW_ILLEGAL_PROV;
-    private static final String APPLY_ILLEGAL_PERMISSIONS_PROP = PermissionConfigurationChecker.PROP_APPLY_ILLEGAL_PERMISSIONS;
-
-    /**
-     * {@link Options} wrapper for the {@link PermissionConfigurationCheckerImpl} configuration.
-     *
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
-     * @since v7.10.4
-     */
-    private static class Options {
-
-        final boolean allowIllegalProvisioning;
-        final boolean applyIllegalPermissions;
-
-        /**
-         * Initializes a new {@link Options}.
-         *
-         * @param allowIllegalProvisioning Whether to allow illegal provisioning or not
-         * @param applyIllegalPermissions Whether to apply illegal permissions or not
-         */
-        Options(boolean allowIllegalProvisioning, boolean applyIllegalPermissions) {
-            super();
-            this.allowIllegalProvisioning = allowIllegalProvisioning;
-            this.applyIllegalPermissions = applyIllegalPermissions;
-        }
-    }
-
     // -------------------------------------------------------------------------------------------------------------------------------------
-
-    private final AtomicReference<Options> options;
-
-    /**
-     * Initializes a new {@link PermissionConfigurationCheckerImpl} and
-     *
-     * @param factory The {@link ConfigViewFactory}
-     * @param configService The {@link ConfigurationService}
-     */
-    public PermissionConfigurationCheckerImpl(ConfigurationService configService) {
-        super();
-        boolean allowIllegalProvisioning = configService.getBoolProperty(ALLOW_ILLEGAL_PROV_PROP, false);
-        boolean applyIllegalPermissions = configService.getBoolProperty(APPLY_ILLEGAL_PERMISSIONS_PROP, false);
-        this.options = new AtomicReference<Options>(new Options(allowIllegalProvisioning, applyIllegalPermissions));
-    }
 
     @Override
     public void checkConfig(ConfigurationService configService) {
@@ -205,12 +157,8 @@ public class PermissionConfigurationCheckerImpl implements Reloadable, Permissio
                              .collect(Collectors.joining(","));
 
         if (Strings.isNotEmpty(illegal)) {
-            Options options = this.options.get();
-            if (options.allowIllegalProvisioning == false) {
-                LOG.error("Setting the permission(s) '{}' via user attributes is not allowed!!", illegal);
-                throw PermissionCheckerCodes.ILLEGAL_USER_ATTRIBUTE.create(illegal);
-            }
-            LOG.error("The permission(s) '{}' should not be set via user attributes.", illegal);
+            LOG.error("Setting the permission(s) '{}' via user attributes is not allowed!!", illegal);
+            throw PermissionCheckerCodes.ILLEGAL_USER_ATTRIBUTE.create(illegal);
         }
     }
 
@@ -220,23 +168,15 @@ public class PermissionConfigurationCheckerImpl implements Reloadable, Permissio
             return true;
         }
 
-        // Contained in set of illegal capabilities. Check setting whether illegal capabilities may be applied or not
-        Options options = this.options.get();
+        // Contained in set of illegal capabilities.
         String key = getKey(contextId, userId, capability);
         if (userId <= 0 || contextId <= 0) {
-            if (options.applyIllegalPermissions == false) {
-                logCapabilityWarning(key, "Ignoring capability '{}' because it's in conflict with a permission (see {}).", capability, APPLY_ILLEGAL_PERMISSIONS_PROP);
-                return false;
-            }
-            logCapabilityWarning(key, "The capability '{}' is in conflict with a permission, but it's going to be used anyway (see {}). Be aware that this can lead to an unexpected behavior.", capability, APPLY_ILLEGAL_PERMISSIONS_PROP);
+            logCapabilityWarning(key, "Ignoring capability '{}' because it's in conflict with a permission.", capability);
+            return false;
         } else {
-            if (options.applyIllegalPermissions == false) {
-                logCapabilityWarning(key, "Ignoring capability '{}' for user {} in context {} because it's in conflict with a permission (see {}).", capability, I(userId), I(contextId), APPLY_ILLEGAL_PERMISSIONS_PROP);
-                return false;
-            }
-            logCapabilityWarning(key, "The capability '{}' of user {} in context {} is in conflict with a permission, but it's going to be used anyway (see {}). Be aware that this can lead to an unexpected behavior.", capability, I(userId), I(contextId), APPLY_ILLEGAL_PERMISSIONS_PROP);
+            logCapabilityWarning(key, "Ignoring capability '{}' for user {} in context {} because it's in conflict with a permission.", capability, I(userId), I(contextId));
+            return false;
         }
-        return true;
     }
 
     /**
@@ -284,12 +224,8 @@ public class PermissionConfigurationCheckerImpl implements Reloadable, Permissio
         }
         String capString = caps.stream().filter((cap) -> ILLEGAL_CAPABILITIES.contains(cap)).collect(Collectors.joining(","));
         if (Strings.isNotEmpty(capString)) {
-            Options options = this.options.get();
-            if (options.allowIllegalProvisioning == false) {
-                LOG.error("The capabilities '{}' are in conflict with permissions! Permissions must not be defined as capabilities (see {}).", capString, ALLOW_ILLEGAL_PROV_PROP);
-                throw PermissionCheckerCodes.ILLEGAL_CAPABILITY.create(capString);
-            }
-            LOG.error("The capabilities '{}' are in conflict with permissions and will not be applied (see {})! Permissions shouldn't be defined as capabilities (see {}).", capString, APPLY_ILLEGAL_PERMISSIONS_PROP, ALLOW_ILLEGAL_PROV_PROP);
+            LOG.error("The capabilities '{}' are in conflict with permissions! Permissions must not be defined as capabilities.", capString);
+            throw PermissionCheckerCodes.ILLEGAL_CAPABILITY.create(capString);
         }
     }
 
@@ -301,21 +237,6 @@ public class PermissionConfigurationCheckerImpl implements Reloadable, Permissio
      */
     private Optional<String> containsPermissions(String text) {
         return ILLEGAL_PROPERTIES.stream().filter((invalid) -> text.contains(invalid)).findAny();
-    }
-
-    // ---------------------------------------------------- Reloadable stuff ---------------------------------------------------------------
-
-    @Override
-    public Interests getInterests() {
-        return DefaultInterests.builder().propertiesOfInterest(ALLOW_ILLEGAL_PROV_PROP, APPLY_ILLEGAL_PERMISSIONS_PROP).build();
-    }
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        checkConfig(configService);
-        boolean allowIllegalProvisioning = configService.getBoolProperty(ALLOW_ILLEGAL_PROV_PROP, false);
-        boolean applyIllegalPermissions = configService.getBoolProperty(APPLY_ILLEGAL_PERMISSIONS_PROP, false);
-        this.options.set(new Options(allowIllegalProvisioning, applyIllegalPermissions));
     }
 
 }

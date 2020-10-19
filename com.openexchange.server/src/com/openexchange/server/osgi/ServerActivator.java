@@ -707,10 +707,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Permission checker
         {
-            PermissionConfigurationCheckerImpl checker = new PermissionConfigurationCheckerImpl(configService);
+            PermissionConfigurationCheckerImpl checker = new PermissionConfigurationCheckerImpl();
             checker.checkConfig(configService);
             registerService(PermissionConfigurationChecker.class, checker);
-            registerService(Reloadable.class, checker);
         }
 
         // Start up server the usual way
