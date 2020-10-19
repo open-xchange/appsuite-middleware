@@ -58,6 +58,7 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.infostore.AbstractInfostoreFileAccess;
 import com.openexchange.file.storage.infostore.FileConverter;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -89,10 +90,15 @@ public class XctxFileAccess extends AbstractInfostoreFileAccess {
         this.accountAccess = accountAccess;
         this.fileConverter = new XctxFileConverter(accountAccess, guestSession);
     }
-    
+
+    @Override
+    protected FileConverter getConverter() {
+        return fileConverter;
+    }
+
     @Override
     protected InfostoreFacade getInfostore(String folderId) throws OXException {
-        if (XctxFolderAccess.UNSUPPORTED_FOLDER_IDS.contains(folderId)) {
+        if (XctxFolderAccess.UNHANDLED_FOLDER_IDS.contains(folderId)) {
             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId, accountAccess.getAccountId(), accountAccess.getService().getId(), I(localSession.getUserId()), I(localSession.getContextId()));
         }
@@ -110,8 +116,22 @@ public class XctxFileAccess extends AbstractInfostoreFileAccess {
     }
 
     @Override
-    protected FileConverter getConverter() {
-        return fileConverter;
+    public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
+        return filterUnsubscribed(super.search(pattern, fields, folderId, includeSubfolders, sort, order, start, end));
+    }
+
+    @Override
+    public SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
+        return filterUnsubscribed(super.search(folderIds, searchTerm, fields, sort, order, start, end));
+    }
+
+    @Override
+    public SearchIterator<File> search(String folderId, boolean includeSubfolders, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
+        return filterUnsubscribed(super.search(folderId, includeSubfolders, searchTerm, fields, sort, order, start, end));
+    }
+
+    private SearchIterator<File> filterUnsubscribed(SearchIterator<File> searchIterator) {
+        return accountAccess.getSubscribedHelper().filterUnsubscribed(searchIterator, (id) -> accountAccess.getFolderAccess().getFolder(id));
     }
 
     @Override

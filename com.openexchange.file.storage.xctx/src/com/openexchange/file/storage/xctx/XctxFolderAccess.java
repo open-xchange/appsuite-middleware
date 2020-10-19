@@ -49,11 +49,14 @@
 
 package com.openexchange.file.storage.xctx;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.SetterAwareFileStorageFolder;
 import com.openexchange.file.storage.infostore.folder.AbstractInfostoreFolderAccess;
 import com.openexchange.file.storage.infostore.folder.FolderConverter;
 import com.openexchange.folderstorage.FolderService;
@@ -69,8 +72,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class XctxFolderAccess extends AbstractInfostoreFolderAccess {
     
-    static final Set<String> UNSUPPORTED_FOLDER_IDS = Collections.unmodifiableSet(
-        AbstractInfostoreFolderAccess.INFOSTORE_FOLDER_ID, AbstractInfostoreFolderAccess.PUBLIC_INFOSTORE_FOLDER_ID);
+    /** Identifiers of those system folders that are shared with the default infostore, hence served by the cross-context file storage provider */
+    static final Set<String> UNHANDLED_FOLDER_IDS = Collections.unmodifiableSet(INFOSTORE_FOLDER_ID, PUBLIC_INFOSTORE_FOLDER_ID);
 
     private final XctxAccountAccess accountAccess;
     private final XctxFolderConverter folderConverter;
@@ -106,21 +109,44 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess {
     }
 
     @Override
-    public FileStorageFolder getFolder(String folderId) throws OXException {
-        if (UNSUPPORTED_FOLDER_IDS.contains(folderId)) {
+    public DefaultFileStorageFolder getFolder(String folderId) throws OXException {
+        if (UNHANDLED_FOLDER_IDS.contains(folderId)) {
             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId, accountAccess.getAccountId(), accountAccess.getService().getId(), I(localSession.getUserId()), I(localSession.getContextId()));
         }
-        return super.getFolder(folderId);
+        DefaultFileStorageFolder folder = super.getFolder(folderId);
+        return accountAccess.getSubscribedHelper().addSubscribed(folder);
     }
 
     @Override
-    protected FileStorageFolder getDefaultFolder(com.openexchange.folderstorage.Type type) throws OXException {
+    public DefaultFileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
+        DefaultFileStorageFolder[] subfolders = super.getSubfolders(parentIdentifier, all);
+        return accountAccess.getSubscribedHelper().addSubscribed(subfolders, true);
+    }
+
+    @Override
+    public DefaultFileStorageFolder[] getPublicFolders() throws OXException {
+        DefaultFileStorageFolder[] publicFolders = super.getPublicFolders();
+        return accountAccess.getSubscribedHelper().addSubscribed(publicFolders, true);
+    }
+
+    @Override
+    public String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
+        String result = super.updateFolder(identifier, toUpdate, cascadePermissions);
+        if (SetterAwareFileStorageFolder.class.isInstance(toUpdate) && ((SetterAwareFileStorageFolder) toUpdate).containsSubscribed()) {
+            DefaultFileStorageFolder folder = super.getFolder(result);
+            accountAccess.getSubscribedHelper().setSubscribed(localSession, folder, B(toUpdate.isSubscribed()));
+        }
+        return result;
+    }
+
+    @Override
+    protected DefaultFileStorageFolder getDefaultFolder(com.openexchange.folderstorage.Type type) throws OXException {
         throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
     }
 
     @Override
-    public FileStorageFolder getRootFolder() throws OXException {
+    public DefaultFileStorageFolder getRootFolder() throws OXException {
         throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
     }
 

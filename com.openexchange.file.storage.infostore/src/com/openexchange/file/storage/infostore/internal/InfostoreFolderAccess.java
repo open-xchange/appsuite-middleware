@@ -53,9 +53,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageRestoringFolderAccess;
+import com.openexchange.file.storage.MediaFolderAwareFolderAccess;
 import com.openexchange.file.storage.infostore.folder.AbstractInfostoreFolderAccess;
 import com.openexchange.file.storage.infostore.osgi.Services;
 import com.openexchange.folderstorage.FolderResponse;
@@ -63,6 +65,11 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.RestoringFolderService;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.DocumentsType;
+import com.openexchange.folderstorage.type.MusicType;
+import com.openexchange.folderstorage.type.PicturesType;
+import com.openexchange.folderstorage.type.TemplatesType;
+import com.openexchange.folderstorage.type.VideosType;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.session.ServerSession;
@@ -72,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreFolderAccess extends AbstractInfostoreFolderAccess implements FileStorageRestoringFolderAccess {
+public class InfostoreFolderAccess extends AbstractInfostoreFolderAccess implements FileStorageRestoringFolderAccess, MediaFolderAwareFolderAccess {
 
     private final InfostoreFacade infostore;
 
@@ -110,6 +117,31 @@ public class InfostoreFolderAccess extends AbstractInfostoreFolderAccess impleme
             retval.put(entry.getKey(), folders);
         }
         return retval;
+    }
+
+    @Override
+    public DefaultFileStorageFolder getPicturesFolder() throws OXException {
+        return getDefaultFolder(PicturesType.getInstance());
+    }
+
+    @Override
+    public DefaultFileStorageFolder getDocumentsFolder() throws OXException {
+        return getDefaultFolder(DocumentsType.getInstance());
+    }
+
+    @Override
+    public DefaultFileStorageFolder getTemplatesFolder() throws OXException {
+        return getDefaultFolder(TemplatesType.getInstance());
+    }
+
+    @Override
+    public DefaultFileStorageFolder getMusicFolder() throws OXException {
+        return getDefaultFolder(MusicType.getInstance());
+    }
+
+    @Override
+    public DefaultFileStorageFolder getVideosFolder() throws OXException {
+        return getDefaultFolder(VideosType.getInstance());
     }
 
     @Override

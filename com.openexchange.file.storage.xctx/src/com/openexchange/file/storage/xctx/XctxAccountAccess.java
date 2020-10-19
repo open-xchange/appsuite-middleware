@@ -49,8 +49,11 @@
 
 package com.openexchange.file.storage.xctx;
 
+import static com.openexchange.file.storage.infostore.folder.AbstractInfostoreFolderAccess.PUBLIC_INFOSTORE_FOLDER_ID;
+import static com.openexchange.file.storage.infostore.folder.AbstractInfostoreFolderAccess.USER_INFOSTORE_FOLDER_ID;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Set;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.datahandler.DataHandlers;
@@ -75,9 +78,11 @@ import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.core.subscription.SubscribedHelper;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.subscription.XctxHostData;
 import com.openexchange.share.subscription.XctxSessionManager;
+import com.openexchange.tools.arrays.Collections;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -88,6 +93,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @since 7.10.5
  */
 public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAware {
+
+    /** The identifiers of the parent folders where adjusting the subscribed flag is supported, which mark the entry points for shared and public files */
+    private static final Set<String> SUBSCRIBE_PARENT_IDS = Collections.unmodifiableSet(USER_INFOSTORE_FOLDER_ID, PUBLIC_INFOSTORE_FOLDER_ID);
 
     private final FileStorageAccount account;
     private final ServerSession session;
@@ -116,6 +124,25 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
         DataHandler json2oxDataHandler = conversionService.getDataHandler(DataHandlers.JSON2OXEXCEPTION);
         this.errorHandler = new FileStorageAccountErrorHandler(ox2jsonDataHandler, json2oxDataHandler, this, session, retryAfterError);
     }
+
+    /**
+     * Gets the underlying filestorage account.
+     * 
+     * @return The file storage account
+     */
+    public FileStorageAccount getAccount() {
+        return account;
+    }
+
+    /**
+     * Gets a {@link SubscribedHelper} suitable for the connected file storage account.
+     * 
+     * @return The subscribed helper
+     */
+    public SubscribedHelper getSubscribedHelper() {
+        return new SubscribedHelper(account, SUBSCRIBE_PARENT_IDS);
+    }
+
     /**
      * Gets the service of specified type. Throws error if service is absent.
      *
