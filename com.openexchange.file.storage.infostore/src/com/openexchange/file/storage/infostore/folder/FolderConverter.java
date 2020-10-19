@@ -109,7 +109,7 @@ public class FolderConverter {
      * @param folders The userized folders to convert
      * @return The file storage folders
      */
-    public FileStorageFolder[] getStorageFolders(UserizedFolder[] folders) throws OXException {
+    public UserizedFileStorageFolder[] getStorageFolders(UserizedFolder[] folders) throws OXException {
         return getStorageFolders(folders, true);
     }
 
@@ -120,17 +120,17 @@ public class FolderConverter {
      * @param infostoreOnly <code>true</code> to exclude folders from other modules, <code>false</code>, otherwise
      * @return The file storage folders
      */
-    public FileStorageFolder[] getStorageFolders(UserizedFolder[] folders, boolean infostoreOnly) throws OXException {
+    public UserizedFileStorageFolder[] getStorageFolders(UserizedFolder[] folders, boolean infostoreOnly) throws OXException {
         if (null == folders) {
             return null;
         }
-        List<FileStorageFolder> fileStorageFolders = new ArrayList<FileStorageFolder>(folders.length);
+        List<UserizedFileStorageFolder> fileStorageFolders = new ArrayList<UserizedFileStorageFolder>(folders.length);
         for (UserizedFolder folder : folders) {
             if (false == infostoreOnly || false == isNotInfostore(folder)) {
                 fileStorageFolders.add(getStorageFolder(folder));
             }
         }
-        return fileStorageFolders.toArray(new FileStorageFolder[fileStorageFolders.size()]);
+        return fileStorageFolders.toArray(new UserizedFileStorageFolder[fileStorageFolders.size()]);
     }
 
     /**

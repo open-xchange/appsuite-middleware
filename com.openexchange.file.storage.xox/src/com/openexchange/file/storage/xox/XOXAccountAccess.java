@@ -51,6 +51,7 @@ package com.openexchange.file.storage.xox;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.conversion.ConversionService;
@@ -71,6 +72,8 @@ import com.openexchange.folderstorage.FederatedSharingFolders;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.core.subscription.SubscribedHelper;
+import com.openexchange.tools.arrays.Collections;
 
 /**
  * {@link XOXAccountAccess}
@@ -79,6 +82,9 @@ import com.openexchange.session.Session;
  * @since v7.10.5
  */
 public class XOXAccountAccess implements CapabilityAware {
+
+    /** The identifiers of the parent folders where adjusting the subscribed flag is supported, which mark the entry points for shared and public files */
+    private static final Set<String> SUBSCRIBE_PARENT_IDS = Collections.unmodifiableSet("10", "15");
 
     private final FileStorageAccount account;
     private final FileStorageService service;
@@ -133,6 +139,15 @@ public class XOXAccountAccess implements CapabilityAware {
      */
     public FileStorageAccount getAccount() {
         return this.account;
+    }
+
+    /**
+     * Gets a {@link SubscribedHelper} suitable for the connected file storage account.
+     * 
+     * @return The subscribed helper
+     */
+    public SubscribedHelper getSubscribedHelper() {
+        return new SubscribedHelper(account, SUBSCRIBE_PARENT_IDS);
     }
 
     /**

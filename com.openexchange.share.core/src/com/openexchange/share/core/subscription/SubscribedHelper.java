@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.xox;
+package com.openexchange.share.core.subscription;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.b;
@@ -68,9 +68,11 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
-import com.openexchange.tools.arrays.Collections;
 import com.openexchange.tools.functions.ErrorAwareFunction;
+import com.openexchange.tools.iterator.FilteringSearchIterator;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link SubscribedHelper}
@@ -85,18 +87,21 @@ public class SubscribedHelper {
      * sharing ("15" / "Public Files" / FolderObject#SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, and "10" / "Shared Files" / 
      * FolderObject#SYSTEM_USER_INFOSTORE_FOLDER_ID).
      */
-    static final Set<String> SUPPORTED_PARENT_IDS = Collections.unmodifiableSet("10", "15");
+    //    static final Set<String> SUPPORTED_PARENT_IDS = Collections.unmodifiableSet("10", "15");
     
     private final FileStorageAccount account;
+    private final Set<String> possibleParentIds;
     
     /**
      * Initializes a new {@link SubscribedHelper}.
      * 
      * @param account The underlying file storage account
+     * @param possibleParentIds The identifiers of those parent folders where subscribe/unsubscribe operations of subfolders are possible
      */
-    public SubscribedHelper(FileStorageAccount account) {
+    public SubscribedHelper(FileStorageAccount account, Set<String> possibleParentIds) {
         super();
         this.account = account;
+        this.possibleParentIds = possibleParentIds;
     }
     
     /**
@@ -165,14 +170,13 @@ public class SubscribedHelper {
         if (false == setSubscribed(accountMetadata, folder.getId(), subscribed)) {
             return false;
         }
-        FileStorageAccount storageAccount = account;
         FileStorageService fileStorageService = account.getFileStorageService();
         DefaultFileStorageAccount accountUpdate = new DefaultFileStorageAccount();
         accountUpdate.setServiceId(fileStorageService.getId());
         accountUpdate.setFileStorageService(fileStorageService);
-        accountUpdate.setId(storageAccount.getId());
-        accountUpdate.setDisplayName(storageAccount.getDisplayName());
-        accountUpdate.setConfiguration(storageAccount.getConfiguration());
+        accountUpdate.setId(account.getId());
+        accountUpdate.setDisplayName(account.getDisplayName());
+        accountUpdate.setConfiguration(account.getConfiguration());
         accountUpdate.setMetaData(accountMetadata);
         fileStorageService.getAccountManager().updateAccount(accountUpdate, session);
         return true;
@@ -209,6 +213,56 @@ public class SubscribedHelper {
         }
     }
 
+    /**
+     * Checks the parent folder of each file in the passed search iterator, and skips those files that are located in an folder subtree
+     * that is currently not subscribed from the resulting iterator.
+     * 
+     * @param searchIterator The search iterator to filter
+     * @param getFolderFunction A function to retrieve a folder for the check by its identifier
+     * @return A search iterator that skips filtered files
+     */
+    public SearchIterator<File> filterUnsubscribed(SearchIterator<File> searchIterator, ErrorAwareFunction<String, FileStorageFolder> getFolderFunction) {
+        if (null == searchIterator || 0 == searchIterator.size()) {
+            return searchIterator;
+        }
+        Set<String> unsubscribedIds = getUnsubscribedIds(getAccountMetadata());
+        if (null == unsubscribedIds || unsubscribedIds.isEmpty()) {
+            return searchIterator;
+        }
+        try {
+            Map<String, FileStorageFolder> knownFolders = new HashMap<String, FileStorageFolder>();
+            return new FilteringSearchIterator<File>(searchIterator) {
+
+                @Override
+                public boolean accept(File file) throws OXException {
+                    return isSubscribed(file.getFolderId(), knownFolders, getFolderFunction);
+                }
+            };
+        } catch (OXException e) {
+            getLogger(SubscribedHelper.class).warn("Unexpetced error filtering files in unsubscribed folders", e);
+            return searchIterator;
+        }
+    }
+
+    private boolean isSupported(FileStorageFolder folder) {
+        return null != folder && null != folder.getId() && null != folder.getParentId() && possibleParentIds.contains(folder.getParentId());
+    }
+
+    boolean isSubscribed(String folderId, Map<String, FileStorageFolder> knownFolders, ErrorAwareFunction<String, FileStorageFolder> getFolderFunction) throws OXException {
+        if (Strings.isEmpty(folderId) || possibleParentIds.contains(folderId)) {
+            return true;
+        }
+        FileStorageFolder folder = knownFolders.get(folderId);
+        if (null == folder) {
+            folder = getFolderFunction.apply(folderId);
+            knownFolders.put(folderId, folder);
+        }
+        if (false == folder.isSubscribed()) {
+            return false;
+        }
+        return isSubscribed(folder.getParentId(), knownFolders, getFolderFunction);
+    }
+
     private JSONObject getAccountMetadata() {
         JSONObject metadata = account.getMetadata();
         return null == metadata ? new JSONObject() : metadata;
@@ -242,25 +296,6 @@ public class SubscribedHelper {
         }
         subscribedObject.putSafe(folderId, Boolean.TRUE.equals(subscribed) ? null : subscribed);
         return true;
-    }
-
-    private static boolean isSupported(FileStorageFolder folder) {
-        return null != folder && null != folder.getId() && null != folder.getParentId() && SUPPORTED_PARENT_IDS.contains(folder.getParentId());
-    }
-
-    private static boolean isSubscribed(String folderId, Map<String, FileStorageFolder> knownFolders, ErrorAwareFunction<String, FileStorageFolder> getFolderFunction) throws OXException {
-        if (SUPPORTED_PARENT_IDS.contains(folderId)) {
-            return true;
-        }
-        FileStorageFolder folder = knownFolders.get(folderId);
-        if (null == folder) {
-            folder = getFolderFunction.apply(folderId);
-            knownFolders.put(folderId, folder);
-        }
-        if (false == folder.isSubscribed()) {
-            return false;
-        }
-        return isSubscribed(folder.getParentId(), knownFolders, getFolderFunction);
     }
 
 }

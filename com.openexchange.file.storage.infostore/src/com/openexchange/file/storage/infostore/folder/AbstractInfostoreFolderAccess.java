@@ -51,12 +51,12 @@ package com.openexchange.file.storage.infostore.folder;
 
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FolderStatsAware;
-import com.openexchange.file.storage.MediaFolderAwareFolderAccess;
 import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
@@ -67,13 +67,8 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
-import com.openexchange.folderstorage.type.DocumentsType;
-import com.openexchange.folderstorage.type.MusicType;
-import com.openexchange.folderstorage.type.PicturesType;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
-import com.openexchange.folderstorage.type.VideosType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.tools.session.ServerSession;
@@ -84,10 +79,16 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public abstract class AbstractInfostoreFolderAccess implements FileStorageFolderAccess, MediaFolderAwareFolderAccess, PermissionAware, FolderStatsAware, FileStorageCaseInsensitiveAccess {
+public abstract class AbstractInfostoreFolderAccess implements FileStorageFolderAccess, PermissionAware, FolderStatsAware, FileStorageCaseInsensitiveAccess {
 
-    protected static final String INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
-    protected static final String PUBLIC_INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+    /** The static identifier <code>9</code> of the <i>Infostore</i> root folder ("infostore / <code>FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID</code>) */
+    public static final String INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+
+    /** The static identifier <code>15</code> of the <i>Public Files</i> root folder ("public_infostore" / <code>FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID</code>) */
+    public static final String PUBLIC_INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+
+    /** The static identifier <code>10</code> of the <i>Shared Files</i> root folder ("userstore" / <code>FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID</code>) */
+    public static final String USER_INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
 
     /** The tree identifier used when getting folders from the underlying folder service (<code>FolderStorage#REAL_TREE_ID</code>) */
     protected static final String TREE_ID = "0";
@@ -164,53 +165,28 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
     }
 
     @Override
-    public FileStorageFolder getFolder(final String folderId) throws OXException {
+    public DefaultFileStorageFolder getFolder(final String folderId) throws OXException {
         return getConverter().getStorageFolder(getFolderService().getFolder(TREE_ID, folderId, session, initDecorator()));
     }
 
     @Override
-    public FileStorageFolder getPersonalFolder() throws OXException {
+    public DefaultFileStorageFolder getPersonalFolder() throws OXException {
         return getDefaultFolder(PublicType.getInstance());
     }
 
     @Override
-    public FileStorageFolder getTrashFolder() throws OXException {
+    public DefaultFileStorageFolder getTrashFolder() throws OXException {
         return getDefaultFolder(TrashType.getInstance());
     }
 
     @Override
-    public FileStorageFolder getPicturesFolder() throws OXException {
-        return getDefaultFolder(PicturesType.getInstance());
-    }
-
-    @Override
-    public FileStorageFolder getDocumentsFolder() throws OXException {
-        return getDefaultFolder(DocumentsType.getInstance());
-    }
-
-    @Override
-    public FileStorageFolder getTemplatesFolder() throws OXException {
-        return getDefaultFolder(TemplatesType.getInstance());
-    }
-
-    @Override
-    public FileStorageFolder getMusicFolder() throws OXException {
-        return getDefaultFolder(MusicType.getInstance());
-    }
-
-    @Override
-    public FileStorageFolder getVideosFolder() throws OXException {
-        return getDefaultFolder(VideosType.getInstance());
-    }
-
-    @Override
-    public FileStorageFolder[] getPublicFolders() throws OXException {
+    public DefaultFileStorageFolder[] getPublicFolders() throws OXException {
         UserizedFolder[] subfolders = getFolderService().getSubfolders(TREE_ID, PUBLIC_INFOSTORE_FOLDER_ID, true, session, initDecorator()).getResponse();
         return getConverter().getStorageFolders(subfolders);
     }
 
     @Override
-    public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
+    public DefaultFileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
         UserizedFolder[] folders = getFolderService().getPath(TREE_ID, folderId, session, initDecorator()).getResponse();
         return getConverter().getStorageFolders(folders);
     }
@@ -247,7 +223,7 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
     }
 
     @Override
-    public FileStorageFolder getRootFolder() throws OXException {
+    public DefaultFileStorageFolder getRootFolder() throws OXException {
         try {
             return getFolder(INFOSTORE_FOLDER_ID);
         } catch (OXException e) {
@@ -259,13 +235,13 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
     }
 
     @Override
-    public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
+    public DefaultFileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
         UserizedFolder[] subfolders = getFolderService().getSubfolders(TREE_ID, parentIdentifier, all, session, initDecorator()).getResponse();
         return getConverter().getStorageFolders(subfolders);
     }
 
     @Override
-    public FileStorageFolder[] getUserSharedFolders() throws OXException {
+    public DefaultFileStorageFolder[] getUserSharedFolders() throws OXException {
         UserizedFolder[] folders = getFolderService().getUserSharedFolders(TREE_ID, InfostoreContentType.getInstance(), session, initDecorator()).getResponse();
         return getConverter().getStorageFolders(folders);
     }
@@ -342,7 +318,7 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
      * @param type The type to get the default folder for
      * @return The default folder
      */
-    protected FileStorageFolder getDefaultFolder(com.openexchange.folderstorage.Type type) throws OXException {
+    protected DefaultFileStorageFolder getDefaultFolder(com.openexchange.folderstorage.Type type) throws OXException {
         try {
             return getConverter().getStorageFolder(getFolderService().getDefaultFolder(
                 session.getUser(), TREE_ID, InfostoreContentType.getInstance(), type, session, initDecorator()));

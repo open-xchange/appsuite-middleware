@@ -148,7 +148,7 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
-        return new SubscribedHelper(accountAccess.getAccount()).addSubscribed(client.getFolder(folderId));
+        return accountAccess.getSubscribedHelper().addSubscribed(client.getFolder(folderId));
     }
 
     @Override
@@ -169,7 +169,7 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
         XOXFolder[] subfolders = client.getSubFolders(parentIdentifier);
-        return new SubscribedHelper(accountAccess.getAccount()).addSubscribed(subfolders, false == all);
+        return accountAccess.getSubscribedHelper().addSubscribed(subfolders, false == all);
     }
 
     @Override
@@ -204,7 +204,7 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
         String result = client.updateFolder(folderId, folderUpdate, FileStorageFileAccess.DISTANT_FUTURE, autoRename, cascadePermissions);
         if (SetterAwareFileStorageFolder.class.isInstance(folderUpdate) && ((SetterAwareFileStorageFolder) folderUpdate).containsSubscribed()) {
             FileStorageFolder folder = client.getFolder(result);
-            new SubscribedHelper(accountAccess.getAccount()).setSubscribed(accountAccess.getSession(), folder, B(folderUpdate.isSubscribed()));
+            accountAccess.getSubscribedHelper().setSubscribed(accountAccess.getSession(), folder, B(folderUpdate.isSubscribed()));
         }
         return result;
     }

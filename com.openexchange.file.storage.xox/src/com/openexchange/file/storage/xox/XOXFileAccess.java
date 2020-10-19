@@ -80,6 +80,7 @@ import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.share.core.subscription.SubscribedHelper;
 import com.openexchange.tools.iterator.RangeAwareSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -347,7 +348,7 @@ public class XOXFileAccess implements /*@formatter:off*/
         if (null == files || files.isEmpty()) {
             return SearchIteratorAdapter.emptyIterator();
         }
-        SubscribedHelper subscribedHelper = new SubscribedHelper(accountAccess.getAccount());
+        SubscribedHelper subscribedHelper = accountAccess.getSubscribedHelper();
         files = subscribedHelper.filterUnsubscribed(files, (id) -> subscribedHelper.addSubscribed(client.getFolder(id)));
         return new RangeAwareSearchIterator<File>(new SearchIteratorAdapter<File>(files.iterator(), files.size()), start, end);
     }
