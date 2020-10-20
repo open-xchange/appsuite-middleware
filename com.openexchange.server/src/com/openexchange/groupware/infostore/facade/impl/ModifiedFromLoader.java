@@ -51,12 +51,12 @@ package com.openexchange.groupware.infostore.facade.impl;
 
 import java.util.Collection;
 import java.util.Map;
-import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EntityInfoLoader;
+import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.session.Session;
 
 
@@ -68,8 +68,8 @@ import com.openexchange.session.Session;
  */
 public class ModifiedFromLoader extends InfostoreEntityInfoLoader {
 
-    public ModifiedFromLoader(DBProvider provider, EntityInfoLoader loader, Session session) {
-        super(provider, loader, session);
+    public ModifiedFromLoader(Map<Integer, DocumentMetadata> documents, EntityInfoLoader loader, Session session) {
+        super(documents, loader, session);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ModifiedFromLoader extends InfostoreEntityInfoLoader {
 
     @Override
     public Map<Integer, EntityInfo> load(Collection<Integer> ids, Context context) throws OXException {
-        return super.load(ids, context, "changed_by");
+        return super.load(ids, Metadata.MODIFIED_FROM);
     }
 
 }

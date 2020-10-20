@@ -50,21 +50,16 @@
 package com.openexchange.groupware.infostore.facade.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import com.openexchange.database.provider.DBProvider;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EntityInfo;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EntityInfoLoader;
-import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
+import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.session.Session;
 
 /**
@@ -73,51 +68,43 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.5
  */
-public abstract class InfostoreEntityInfoLoader extends DbMetadataLoader<EntityInfo> {
+public abstract class InfostoreEntityInfoLoader extends MetadataLoader<EntityInfo> {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreEntityInfoLoader.class);
 
     protected final Session session;
     protected final EntityInfoLoader loader;
+    protected final Map<Integer, DocumentMetadata> documents;
 
-    public InfostoreEntityInfoLoader(DBProvider provider, EntityInfoLoader loader, Session session) {
-        super(provider);
+    public InfostoreEntityInfoLoader(Map<Integer, DocumentMetadata> documents, EntityInfoLoader loader, Session session) {
+        super();
+        this.documents = documents;
         this.session = session;
         this.loader = loader;
     }
 
-    public Map<Integer, EntityInfo> load(Collection<Integer> ids, Context context, String field) throws OXException {
-        if (null == ids || ids.size() == 0) {
+    public Map<Integer, EntityInfo> load(Collection<Integer> ids, int field) throws OXException {
+        if (null == ids || ids.size() == 0 || null == documents || documents.isEmpty() || ids.size() != documents.size()) {
             return Collections.emptyMap();
         }
-        List<Object> parameters = new ArrayList<Object>(ids.size() + 1);
-        parameters.add(I(context.getContextId()));
-        parameters.addAll(ids);
         Map<Integer, EntityInfo> map = new HashMap<Integer, EntityInfo>(ids.size());
-        String query = InfostoreQueryCatalog.getInstance().getCreatedModifiedBy(field, ids.size());
-        try {
-            performQuery(context, query, new ResultProcessor<Void>() {
-
-                @Override
-                public Void process(ResultSet results) throws SQLException {
-                    while (results.next()) {
-                        int documentId = results.getInt(1);
-                        int createdBy = results.getInt(2);
-                        EntityInfo info;
-                        try {
-                            info = loader.load(createdBy, session);
-                            map.put(I(documentId), info);
-                        } catch (OXException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                    }
-                    return null;
-                }
-                
-            }, parameters.toArray(new Object[parameters.size()]));
-        } catch (SQLException e) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        for (Integer id : ids) {
+            DocumentMetadata document = documents.get(id);
+            if (null == document) {
+                LOG.debug("\"ids\" size and \"documents\" size mismatch: {}, {}", I(ids.size()), I(documents.size()));
+                return Collections.emptyMap();
+            }
+            EntityInfo info = null;
+            if (Metadata.CREATED_FROM == field) {
+                info = loader.load(document.getCreatedBy(), session);
+            } else if (Metadata.MODIFIED_FROM == field) {
+                info = loader.load(document.getModifiedBy(), session);
+            } else {
+                LOG.debug("Invalid column to load: {}.", Metadata.get(field));
+                return Collections.emptyMap();
+            }
+            map.put(id, info);
         }
         return map;
     }
-
 }
