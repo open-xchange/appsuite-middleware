@@ -1,9 +1,3 @@
-open-xchange-userfeedback (7.10.4-12) stable; urgency=medium
-
-  * Build for patch 2020-10-26 (5888)
-
- -- Martin Schneider <martin.schneider@open-xchange.com>  Mon, 19 Oct 2020 12:23:30 +0000
-
 open-xchange-userfeedback (7.10.4-11) stable; urgency=medium
 
   * Build for patch 2020-10-12 (5879)

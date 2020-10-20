@@ -4,7 +4,7 @@ BuildArch:        noarch
 BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
 Version:          @OXVERSION@
-%define           ox_release 12
+%define           ox_release 11
 Release:          %{ox_release}_<CI_CNT>.<B_CNT>
 Group:            Applications/Productivity
 License:          GPL-2.0
@@ -85,8 +85,6 @@ systemctl daemon-reload &> /dev/null || :
 %doc docs/%{dropin_example}
 
 %changelog
-* Mon Oct 19 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-10-26 (5888)
 * Tue Oct 06 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-10-12 (5879)
 * Wed Sep 23 2020 Marcus Klein <marcus.klein@open-xchange.com>

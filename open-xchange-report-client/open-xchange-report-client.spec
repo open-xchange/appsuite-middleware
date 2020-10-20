@@ -9,7 +9,7 @@ BuildRequires: open-xchange-admin
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 12
+%define        ox_release 11
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -57,8 +57,6 @@ ox_update_permissions /opt/open-xchange/etc/reportclient.properties root:open-xc
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Mon Oct 19 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-10-26 (5888)
 * Tue Oct 06 2020 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2020-10-12 (5879)
 * Wed Sep 23 2020 Carsten Hoeger <choeger@open-xchange.com>
