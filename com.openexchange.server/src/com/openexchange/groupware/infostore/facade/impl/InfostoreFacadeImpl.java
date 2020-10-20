@@ -359,6 +359,40 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
     }
 
+    private static class LoadEntityInfoCustomizer implements DocumentCustomizer {
+
+        private final ServerSession session;
+        private final boolean addCreatedFrom;
+        private final boolean addModifiedFrom;
+        private final EntityInfoLoader loader;
+        private final DocumentCustomizer optSuccessor;
+
+        public LoadEntityInfoCustomizer(EntityInfoLoader loader, boolean addCreatedFrom, boolean addModifiedFrom, ServerSession session, DocumentCustomizer optSuccessor) {
+            super();
+            this.loader = loader;
+            this.addCreatedFrom = addCreatedFrom;
+            this.addModifiedFrom = addModifiedFrom;
+            this.session = session;
+            this.optSuccessor = optSuccessor;
+        }
+
+        @Override
+        public DocumentMetadata handle(DocumentMetadata document) throws OXException {
+            if (null != loader) {
+                if (addCreatedFrom) {
+                    CreatedFromLoader createdFromLoader = new CreatedFromLoader(Collections.singletonMap(I(document.getId()), document), loader, session);
+                    document = createdFromLoader.add(document, session.getContext(), null);
+                }
+                if (addModifiedFrom) {
+                    ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(Collections.singletonMap(I(document.getId()), document), loader, session);
+                    document = modifiedFromLoader.add(document, session.getContext(), null);
+                }
+            }
+            return null == optSuccessor ? document : optSuccessor.handle(document);
+        }
+        
+    }
+
     /** The document customizer caring about triggering media metadata extraction dependent on the media status */
     private static class TriggerMediaMetaDataExtractionDocumentCustomizer extends AbstractFolderOwnerProvider implements DocumentCustomizer {
 
@@ -688,8 +722,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * Load created/modifiedFrom data
          */
         
-        CreatedFromLoader createdFromLoader = new CreatedFromLoader(this, entityInfoLoader, session);
-        ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(this, entityInfoLoader, session);
+        CreatedFromLoader createdFromLoader = new CreatedFromLoader(Collections.singletonMap(I(document.getId()), document), entityInfoLoader, session);
+        ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(Collections.singletonMap(I(document.getId()), document), entityInfoLoader, session);
         /*
          * add further metadata and return
          */
@@ -719,8 +753,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             /*
              * Load created/modifiedFrom data
              */
-            CreatedFromLoader createdFromLoader = new CreatedFromLoader(this, entityInfoLoader, session);
-            ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(this, entityInfoLoader, session);
+            CreatedFromLoader createdFromLoader = new CreatedFromLoader(Collections.singletonMap(I(document.getId()), document), entityInfoLoader, session);
+            ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(Collections.singletonMap(I(document.getId()), document), entityInfoLoader, session);
             return modifiedFromLoader.add(createdFromLoader.add(numberOfVersionsLoader.add(lockedUntilLoader.add(document, context, null), context, null), context, null), context, null);
         }
 
@@ -812,9 +846,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * Load created/modifiedFrom data
          */
-        CreatedFromLoader createdFromLoader = new CreatedFromLoader(this, entityInfoLoader, session);
+        CreatedFromLoader createdFromLoader = new CreatedFromLoader(Collections.singletonMap(I(metadata.getId()), metadata), entityInfoLoader, session);
         metadata = createdFromLoader.add(metadata, context, null);
-        ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(this, entityInfoLoader, session);
+        ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(Collections.singletonMap(I(metadata.getId()), metadata), entityInfoLoader, session);
         metadata = modifiedFromLoader.add(metadata, context, null);
         /*
          * check client E-Tag if supplied
@@ -3210,11 +3244,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             documents = objectPermissionLoader.add(documents, context, (Map<Integer, List<ObjectPermission>>) null);
         }
         if (contains(columns, Metadata.CREATED_FROM_LITERAL)) {
-            CreatedFromLoader createdFromLoader = new CreatedFromLoader(this, entityInfoLoader, session);
+            CreatedFromLoader createdFromLoader = new CreatedFromLoader(documents.stream().collect(Collectors.toMap(DocumentMetadata::getId, document -> document)), entityInfoLoader, session);
             documents = createdFromLoader.add(documents, context, (Map<Integer, EntityInfo>) null);
         }
         if (contains(columns, Metadata.MODIFIED_FROM_LITERAL)) {
-            ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(this, entityInfoLoader, session);
+            ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(documents.stream().collect(Collectors.toMap(DocumentMetadata::getId, document -> document)), entityInfoLoader, session);
             documents = modifiedFromLoader.add(documents, context, (Map<Integer, EntityInfo>) null);
         }
         return new InfostoreTimedResult(new SearchIteratorAdapter<>(documents.iterator(), documents.size()));
@@ -3238,6 +3272,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
+        boolean addCreatedFrom = contains(columns, Metadata.CREATED_FROM_LITERAL);
+        boolean addModifiedFrom = contains(columns, Metadata.MODIFIED_FROM_LITERAL);
         Metadata[] cols = addSequenceNumberIfNeeded(columns);
         cols = addDateFieldsIfNeeded(cols, sort);
         if(folderId != -1) {
@@ -3262,22 +3298,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     } else {
                         document.setShareable(infoPerm.canShareObject());
                     }
-                    
-                    try {
-                        if (contains(columns, Metadata.CREATED_FROM_LITERAL)) {
-                            document.setCreatedFrom(entityInfoLoader.load(document.getCreatedBy(), session));
-                        }
-                        if (contains(columns, Metadata.MODIFIED_FROM_LITERAL)) {
-                            document.setModifiedFrom(entityInfoLoader.load(document.getModifiedBy(), session));
-                        }
-                    } catch (OXException e) {
-                        LoggerHolder.LOG.warn("Could not load entity info for document {} in context {}: {}.", I(document.getId()), I(context.getContextId()), e.getMessage());
-                    }
                     return document;
                 }
             };
             if (shouldTriggerMediaDataExtraction) {
                 customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, null, session, customizer);
+            }
+            if (addCreatedFrom || addModifiedFrom) {
+                customizer = new LoadEntityInfoCustomizer(entityInfoLoader, addCreatedFrom, addModifiedFrom, session, customizer);
             }
             iter.setCustomizer(customizer);
             TimedResult<DocumentMetadata> timedResult = new InfostoreTimedResult(iter);
@@ -3316,6 +3344,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          */
         final Map<Long, EffectiveInfostoreFolderPermission> knownFolderPermissions = new HashMap<>();
         InfostoreIterator iterator = InfostoreIterator.list(Autoboxing.I2i(objectIDs), cols, this, session.getContext());
+        boolean addCreatedFrom = contains(columns, Metadata.CREATED_FROM_LITERAL);
+        boolean addModifiedFrom = contains(columns, Metadata.MODIFIED_FROM_LITERAL);
         DocumentCustomizer customizer = new DocumentCustomizer() {
 
             @Override
@@ -3388,6 +3418,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (shouldTriggerMediaDataExtraction) {
             customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, null, session, customizer);
         }
+        if (addCreatedFrom || addModifiedFrom) {
+            customizer = new LoadEntityInfoCustomizer(entityInfoLoader, addCreatedFrom, addModifiedFrom, session, customizer);
+        }
         iterator.setCustomizer(customizer);
         /*
          * wrap iterator into timed result, adding additional metadata as needed
@@ -3401,14 +3434,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
         if (contains(cols, Metadata.NUMBER_OF_VERSIONS_LITERAL)) {
             timedResult = numberOfVersionsLoader.add(timedResult, context, objectIDs);
-        }
-        if (contains(cols, Metadata.CREATED_FROM_LITERAL)) {
-            CreatedFromLoader createdFromLoader = new CreatedFromLoader(this, entityInfoLoader, session);
-            timedResult = createdFromLoader.add(timedResult, context, objectIDs);
-        }
-        if (contains(cols, Metadata.MODIFIED_FROM_LITERAL)) {
-            ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(this, entityInfoLoader, session);
-            timedResult = modifiedFromLoader.add(timedResult, context, objectIDs);
         }
         return timedResult;
     }
@@ -3428,6 +3453,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         InfostoreIterator modIter = null;
         InfostoreIterator delIter = null;
         boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
+        boolean addCreatedFrom = contains(columns, Metadata.CREATED_FROM_LITERAL);
+        boolean addModifiedFrom = contains(columns, Metadata.MODIFIED_FROM_LITERAL);
         Metadata[] cols = addSequenceNumberIfNeeded(columns);
         cols = addDateFieldsIfNeeded(cols, sort);
         cols = removeOriginFromColumns(cols, (int)folderId, session);
@@ -3447,6 +3474,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             };
             if (shouldTriggerMediaDataExtraction) {
                 customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, null, session, customizer);
+            }
+            if (addCreatedFrom || addModifiedFrom) {
+                customizer = new LoadEntityInfoCustomizer(entityInfoLoader, addCreatedFrom, addModifiedFrom, session, customizer);
             }
             newIter = InfostoreIterator.newSharedDocumentsForUser(context, user, columns, sort, order, updateSince, this);
             newIter.setCustomizer(customizer);
@@ -3470,6 +3500,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 QuotaFileStorage fileStorage = getFileStorage(isperm.getFolderOwner(), context.getContextId());
                 customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, session);
             }
+            if (addCreatedFrom || addModifiedFrom) {
+                customizer = new LoadEntityInfoCustomizer(entityInfoLoader, addCreatedFrom, addModifiedFrom, session, customizer);
+            }
 
             if (onlyOwn) {
                 newIter = InfostoreIterator.newDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, this, context);
@@ -3492,8 +3525,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         boolean addLocked = false;
         boolean addNumberOfVersions = false;
-        boolean addCreatedFrom = false;
-        boolean addModifiedFrom = false;
         for (final Metadata m : columns) {
             if (m == Metadata.LOCKED_UNTIL_LITERAL) {
                 addLocked = true;
@@ -3501,14 +3532,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
             if (m == Metadata.NUMBER_OF_VERSIONS_LITERAL) {
                 addNumberOfVersions = true;
-                break;
-            }
-            if (m == Metadata.CREATED_FROM_LITERAL) {
-                addCreatedFrom = true;
-                break;
-            }
-            if (m == Metadata.MODIFIED_FROM_LITERAL) {
-                addModifiedFrom = true;
                 break;
             }
         }
@@ -3520,14 +3543,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
         if (addNumberOfVersions) {
             delta = numberOfVersionsLoader.add(delta, context, (Map<Integer, Integer>) null);
-        }
-        if (addCreatedFrom) {
-            CreatedFromLoader createdFromLoader = new CreatedFromLoader(this, entityInfoLoader, session);
-            delta = createdFromLoader.add(delta, context, (Map<Integer, EntityInfo>) null);
-        }
-        if (addModifiedFrom) {
-            ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(this, entityInfoLoader, session);
-            delta = modifiedFromLoader.add(delta, context, (Map<Integer, EntityInfo>) null);
         }
         return delta;
     }
@@ -3832,11 +3847,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             documents = numberOfVersionsLoader.add(documents, session.getContext(), objectIDs);
         }
         if (addCreatedFrom) {
-            CreatedFromLoader createdFromLoader = new CreatedFromLoader(this, entityInfoLoader, session);
+            CreatedFromLoader createdFromLoader = new CreatedFromLoader(documents.stream().collect(Collectors.toMap(DocumentMetadata::getId, document -> document)), entityInfoLoader, session);
             documents = createdFromLoader.add(documents, session.getContext(), objectIDs);
         }
         if (addModifiedFrom) {
-            ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(this, entityInfoLoader, session);
+            ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(documents.stream().collect(Collectors.toMap(DocumentMetadata::getId, document -> document)), entityInfoLoader, session);
             documents = modifiedFromLoader.add(documents, session.getContext(), objectIDs);
         }
         if (addShareable || containsSharedFilesResults) {
@@ -4242,7 +4257,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
         if (addModifiedFrom) {
             cols = Metadata.addIfAbsent(columns, Metadata.MODIFIED_BY_LITERAL);
-        }        
+        }
         /*
          * get appropriate infostore iterator
          */
@@ -4342,11 +4357,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 timedResult = numberOfVersionsLoader.add(timedResult, context, objectIDs);
             }
             if (addCreatedFrom && null != optSession) {
-                CreatedFromLoader createdFromLoader = new CreatedFromLoader(this, entityInfoLoader, optSession);
+                CreatedFromLoader createdFromLoader = new CreatedFromLoader(documents.stream().collect(Collectors.toMap(DocumentMetadata::getId, document -> document)), entityInfoLoader, optSession);
                 timedResult = createdFromLoader.add(timedResult, context, objectIDs);
             }
             if (addModifiedFrom && null != optSession) {
-                ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(this, entityInfoLoader, optSession);
+                ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(documents.stream().collect(Collectors.toMap(DocumentMetadata::getId, document -> document)), entityInfoLoader, optSession);
                 timedResult = modifiedFromLoader.add(timedResult, context, objectIDs);
             }
             if (addShareable) {
