@@ -59,8 +59,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -91,19 +89,28 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * {@link OAuthDispatcherServlet}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
 public class OAuthDispatcherServlet extends DispatcherServlet {
 
     private static final long serialVersionUID = 2930109046898745937L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(OAuthDispatcherServlet.class);
-
     private final ServiceLookup services;
 
-    public OAuthDispatcherServlet(ServiceLookup services, String prefix) {
+    private final boolean useOAuthPrefix;
+
+    /**
+     * Initializes a new {@link OAuthDispatcherServlet}.
+     *
+     * @param services The service lookup
+     * @param prefix The servlet prefix
+     * @param useOAuthPrefix Whether to use the additional "oauth/modules" prefix or not
+     */
+    public OAuthDispatcherServlet(ServiceLookup services, String prefix, boolean useOAuthPrefix) {
         super(prefix);
         this.services = services;
+        this.useOAuthPrefix = useOAuthPrefix;
     }
 
     @Override
@@ -111,6 +118,10 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
         Session session = SessionUtility.getSessionObject(httpRequest, false);
         if (session != null) {
             return new SessionResult<ServerSession>(Reply.CONTINUE, ServerSessionAdapter.valueOf(session));
+        }
+
+        if (isSessionBasedRequest(httpRequest)) {
+            return super.initializeSession(httpRequest, httpResponse);
         }
 
         String authHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
@@ -131,11 +142,26 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
         return new SessionResult<ServerSession>(Reply.CONTINUE, ServerSessionAdapter.valueOf(session));
     }
 
+    /**
+     * Checks if the request is a normal session request
+     *
+     * @param httpRequest The {@link HttpServletRequest} to check
+     * @return <code>true</code> if it is a session based request, <code>false</code> otherwise
+     */
+    private boolean isSessionBasedRequest(HttpServletRequest httpRequest) {
+        String sessionId = httpRequest.getParameter(PARAMETER_SESSION);
+        return (sessionId != null && sessionId.length() > 0) || httpRequest.getParameter(HttpHeaders.AUTHORIZATION) == null;
+    }
+
     @Override
     protected AJAXRequestData initializeRequestData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, boolean preferStream) throws OXException, IOException {
+        if (isSessionBasedRequest(httpRequest)) {
+            return super.initializeRequestData(httpRequest, httpResponse, preferStream);
+        }
+
         Dispatcher dispatcher = getDispatcher();
         AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-        String module = requestDataTools.getModule(prefix + "oauth/modules/", httpRequest);
+        String module = requestDataTools.getModule(useOAuthPrefix ? prefix + "oauth/modules/" : prefix, httpRequest);
         String action = requestDataTools.getAction(httpRequest);
         ServerSession session = SessionUtility.getSessionObject(httpRequest, false);
         if (session == null) {
@@ -172,6 +198,10 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
 
     @Override
     protected void handleOXException(OXException e, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+        if (isSessionBasedRequest(httpRequest)) {
+            super.handleOXException(e, httpRequest, httpResponse);
+            return;
+        }
         if (e instanceof OAuthInvalidTokenException) {
             OAuthInvalidTokenException ex = (OAuthInvalidTokenException) e;
             if (ex.getReason() == Reason.TOKEN_MISSING) {

@@ -158,11 +158,13 @@ If the token has expired, has been tampered with, or the permissions revoked, th
 
 With OAuth you can access a subset of the existing [HTTP API](http://oxpedia.org/wiki/index.php?title=HTTP_API). There are a few differences to the existing API documentation you have to keep in mind:
 
--   The available modules and actions must be accessed via a special servlet path `/appsuite/api/oauth/modules`.
+-   The available modules and actions can be accessed via a special servlet path `/appsuite/api/oauth/modules` in addition to the normal path. But this subpath is deprecated an will be removed in the future.
 
-        GET /appsuite/api/oauth/modules/contacts?action=all&folder=123
+		GET /appsuite/api/contacts?action=all&folder=123
+		or
+        GET /appsuite/api/oauth/modules/contacts?action=all&folder=123 (deprecated)
 
--   The session parameter can be omitted for every request. Instead the access token must be provided as authorization header:
+-   The session parameter must be omitted for every request. Instead the access token must be provided as authorization header:
 
         Authorization: Bearer 0062a74e65a74cefb364dcd17648eb04
 
@@ -295,6 +297,63 @@ Find the OAuth-enabled modules and actions below. Every action is bound to a spe
 | all                 | read_calendar  |
 | confirm             | write_calendar |
 
+### mail
+
+| Name                      | Scope       |
+|---------------------------|-------------|
+| all 						| read_mails  |
+| threadedAll 				| read_mails  |
+| get 						| read_mails  |
+| get_structure 			| read_mails  |
+| count 					| read_mails  |
+| copy 						| write_mails |
+| move_all 					| write_mails |
+| archive 					| write_mails |
+| archive_folder 			| write_mails |
+| reply 					| read_mails  |
+| replyall 					| read_mails  |
+| updates 					| read_mails  |
+| forward 					| read_mails  |
+| bounce 					| write_mails |
+| resend 					| write_mails |
+| attachment 				| read_mails  |
+| attachmentToken 			| read_mails  |
+| zip_attachments 			| read_mails  |
+| zip_messages 				| read_mails  |
+| saveVersit 				| write_mails |
+| list 						| read_mails  |
+| search 					| read_mails  |
+| update 					| write_mails |
+| delete 					| write_mails |
+| transport 				| write_mails |
+| receipt_ack 				| write_mails |
+| clear 					| write_mails |
+| expunge 					| write_mails |
+| new 						| write_mails |
+| send_data 				| write_mails |
+| import 					| write_mails |
+| edit 						| write_mails |
+| autosave 					| write_mails |
+| all_seen 					| write_mails |
+| resolve_share_reference 	| read_mails  |
+| examine 					| read_mails  |
+| thread_references 		| read_mails  |
+| trash 					| write_mails |
+
+### snippet
+
+| Name                      | Scope            |
+|---------------------------|------------------|
+| all 						| <any>            |
+| getattachment  			| <any>            |
+| list 						| <any>            |
+| get 						| <any>            |
+| update					| write_userconfig |
+| detach					| write_userconfig |
+| attach					| write_userconfig |
+| import					| write_userconfig |
+| new   					| write_userconfig |
+| delete   					| write_userconfig |
 
 ## Card- and CalDAV
 
