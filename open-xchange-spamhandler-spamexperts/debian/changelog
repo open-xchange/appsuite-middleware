@@ -1,3 +1,9 @@
+open-xchange-spamhandler-spamexperts (7.10.4-12) stable; urgency=medium
+
+  * Build for patch 2020-10-26 (5888)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 20 Oct 2020 10:51:14 +0000
+
 open-xchange-spamhandler-spamexperts (7.10.4-11) stable; urgency=medium
 
   * Build for patch 2020-10-12 (5879)

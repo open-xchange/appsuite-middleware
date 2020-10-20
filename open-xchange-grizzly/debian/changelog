@@ -1,3 +1,9 @@
+open-xchange-grizzly (7.10.4-12) stable; urgency=medium
+
+  * Build for patch 2020-10-26 (5888)
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 20 Oct 2020 10:50:03 +0000
+
 open-xchange-grizzly (7.10.4-11) stable; urgency=medium
 
   * Build for patch 2020-10-12 (5879)
