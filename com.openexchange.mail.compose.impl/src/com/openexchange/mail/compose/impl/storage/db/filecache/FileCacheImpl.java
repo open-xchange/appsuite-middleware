@@ -104,8 +104,7 @@ public class FileCacheImpl implements FileCache {
                 }
             }
         };
-        //timerTask = services.getServiceSafe(TimerService.class).scheduleWithFixedDelay(task, 300000, 3600000);
-        timerTask = services.getServiceSafe(TimerService.class).scheduleWithFixedDelay(task, 3000, 36000);
+        timerTask = services.getServiceSafe(TimerService.class).scheduleWithFixedDelay(task, 300000, 3600000);
     }
 
     @Override
