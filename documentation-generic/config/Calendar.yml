@@ -517,6 +517,17 @@ properties:
       packageName: open-xchange-core
       related: com.openexchange.noreply.address
       tags: ["Calendar", "Notification", "No-Reply"]
+    - key: com.openexchange.calendar.preferNoReplyForIMip
+      description: |
+        If set to 'true' then external imip mails are sent via the no-reply mail account.
+      defaultValue: false
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      file: calendar.properties
+      packageName: open-xchange-core
+      related: com.openexchange.noreply.address
+      tags: ["Calendar", "No-Reply"]
     - key: com.openexchange.calendar.allowOrganizerPartStatChanges
       description: |
         Configures whether organizer changes of the participation status property of other attendees are allowed beyond the recommended 

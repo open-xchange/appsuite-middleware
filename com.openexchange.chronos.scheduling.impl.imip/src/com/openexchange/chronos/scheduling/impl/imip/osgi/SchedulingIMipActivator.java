@@ -55,6 +55,7 @@ import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.scheduling.TransportProvider;
 import com.openexchange.chronos.scheduling.impl.imip.IMipTransportProvider;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -78,7 +79,7 @@ public class SchedulingIMipActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class[] { ContactService.class, HtmlService.class, UserService.class, VersionService.class };
+        return new Class[] { ContactService.class, HtmlService.class, UserService.class, VersionService.class, LeanConfigurationService.class };
     }
 
     @Override
