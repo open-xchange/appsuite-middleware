@@ -129,6 +129,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.uploaddir.UploadDirService;
 import com.openexchange.user.UserService;
 
 /**
@@ -225,6 +226,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         rememberTracker(attachmentStorageService);
 
         trackService(UnifiedInboxManagement.class);
+        trackService(UploadDirService.class);
 
         openTrackers();
 

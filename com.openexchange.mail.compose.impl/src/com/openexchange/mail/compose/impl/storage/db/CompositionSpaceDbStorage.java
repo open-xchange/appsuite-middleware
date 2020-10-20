@@ -117,6 +117,18 @@ public class CompositionSpaceDbStorage {
         this.context = getContext(contextId);
     }
 
+    public long getMaxAllowedPacketSize() throws OXException {
+        Connection connection = dbProvider.getReadConnection(context);
+        try {
+            return Databases.getMaxAllowedPacketSize(connection);
+        } catch (SQLException e) {
+            LoggerHolder.LOG.error("Failed to retrieve the value for 'max_allowed_packet' setting. Assuming \"-1\" instead.", e);
+            return -1L;
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
     public int countAll() throws OXException {
         Connection connection = dbProvider.getReadConnection(context);
         try {
