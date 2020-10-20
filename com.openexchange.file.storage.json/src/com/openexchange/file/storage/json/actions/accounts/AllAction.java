@@ -51,28 +51,29 @@ package com.openexchange.file.storage.json.actions.accounts;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
-import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
 import com.openexchange.file.storage.json.FileStorageAccountConstants;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -131,9 +132,7 @@ public class AllAction extends AbstractFileStorageAccountAction {
                         ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
                     }
 
-                    // Check file storage capabilities
-                    Set<String> caps = determineCapabilities(access);
-                    result.put(writer.write(account, rootFolder, caps));
+                    result.put(writer.write(account, rootFolder, determineCapabilities(access), optMetadata(session, account)));
 
                 } catch (OXException e) {
                     LOG.debug(e.getMessage(), e);
@@ -146,9 +145,11 @@ public class AllAction extends AbstractFileStorageAccountAction {
                         }
                     } else {
                         // Add account with error
-                        Set<String> caps = determineCapabilities(access);
                         boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter(AJAXServlet.PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, request);
-                        result.put(writer.write(account, null, caps, e, session, includeStackTraceOnError));
+                        JSONObject accountJSON = writer.write(account, null, determineCapabilities(access), null);
+                        accountJSON.put("hasError", true);
+                        ResponseWriter.addException(accountJSON, e, localeFrom(session), includeStackTraceOnError);
+                        result.put(accountJSON);
                     }
                 }
             }
@@ -157,75 +158,18 @@ public class AllAction extends AbstractFileStorageAccountAction {
         return requestResult;
     }
 
-    private Set<String> determineCapabilities(FileStorageAccountAccess access) {
-        if (!(access instanceof CapabilityAware)) {
-            return null;
+    private static Locale localeFrom(final Session session) {
+        if (null == session) {
+            return Locale.US;
         }
-
-        CapabilityAware capabilityAware = (CapabilityAware) access;
-        Set<String> caps = new HashSet<String>();
-
-        Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.FILE_VERSIONS.name());
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
         }
-
-        supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+        try {
+            return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
+        } catch (OXException e) {
+            return Locale.US;
         }
-
-        supported = capabilityAware.supports(FileStorageCapability.RANDOM_FILE_ACCESS);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.LOCKS);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.LOCKS.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.READ_ONLY);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.READ_ONLY.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.MAIL_ATTACHMENTS);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.MAIL_ATTACHMENTS.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.AUTO_NEW_VERSION);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.AUTO_NEW_VERSION.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.ZIPPABLE_FOLDER);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.ZIPPABLE_FOLDER.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.COUNT_TOTAL);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.COUNT_TOTAL.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.CASE_INSENSITIVE);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.CASE_INSENSITIVE.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.AUTO_RENAME_FOLDERS);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.AUTO_RENAME_FOLDERS.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.RESTORE);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.RESTORE.name());
-        }
-
-        return caps;
     }
 
 }

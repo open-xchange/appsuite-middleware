@@ -52,6 +52,7 @@ package com.openexchange.file.storage.xctx;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.NonNull;
@@ -63,10 +64,10 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
+import com.openexchange.file.storage.MetadataAware;
 import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
@@ -79,7 +80,7 @@ import com.openexchange.share.ShareExceptionCodes;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public class XctxFileStorageService implements SharingFileStorageService, LoginAwareFileStorageServiceExtension {
+public class XctxFileStorageService implements SharingFileStorageService, LoginAwareFileStorageServiceExtension, MetadataAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XctxFileStorageService.class);
 
@@ -125,6 +126,17 @@ public class XctxFileStorageService implements SharingFileStorageService, LoginA
     }
 
     @Override
+    public JSONObject getMetadata(Session session, FileStorageAccount account) throws OXException {
+        XctxAccountAccess accountAccess = getAccountAccess(account.getId(), session);
+        try {
+            accountAccess.connect();
+            return accountAccess.getMetadata();
+        } finally {
+            accountAccess.close();
+        }
+    }
+
+    @Override
     public boolean hasCapability(Session session) {
         try {
             CapabilitySet capabilities = services.getServiceSafe(CapabilityService.class).getCapabilities(session);
@@ -141,7 +153,7 @@ public class XctxFileStorageService implements SharingFileStorageService, LoginA
     }
 
     @Override
-    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
+    public XctxAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
         assertCapability(session);
         FileStorageAccount account = getAccountManager().getAccount(accountId, session);
         return new XctxAccountAccess(services, account, session, getRetryAfterError(session));
@@ -181,7 +193,7 @@ public class XctxFileStorageService implements SharingFileStorageService, LoginA
 
     @Override
     public void resetRecentError(String accountId, Session session) throws OXException {
-        XctxAccountAccess accountAccess = (XctxAccountAccess) getAccountAccess(accountId, session);
+        XctxAccountAccess accountAccess = getAccountAccess(accountId, session);
         accountAccess.resetRecentError();
     }
 

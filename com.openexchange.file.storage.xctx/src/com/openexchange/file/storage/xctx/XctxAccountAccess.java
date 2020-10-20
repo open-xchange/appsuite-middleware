@@ -54,6 +54,10 @@ import static com.openexchange.file.storage.infostore.folder.AbstractInfostoreFo
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Set;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.datahandler.DataHandlers;
@@ -80,6 +84,7 @@ import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.core.subscription.SubscribedHelper;
 import com.openexchange.share.core.tools.ShareLinks;
+import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.subscription.XctxHostData;
 import com.openexchange.share.subscription.XctxSessionManager;
 import com.openexchange.tools.arrays.Collections;
@@ -183,6 +188,33 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
     }
 
     /**
+     * Gets a {@link JSONObject} providing additional metadata of the account for clients.
+     * 
+     * @return The metadata
+     */
+    public JSONObject getMetadata() throws OXException {
+        try {
+            JSONObject metadata = new JSONObject();
+            /*
+             * add identifiers of guest user/context based on share token
+             */
+            ShareToken shareToken = new ShareToken(getBaseToken(account));
+            metadata.put("guestContextId", shareToken.getContextID());
+            metadata.put("guestUserId", shareToken.getUserID());
+            metadata.put("guestUserIdentifier", new EntityHelper(this).mangleRemoteEntity(shareToken.getUserID()));
+            /*
+             * add capabilities of guest user
+             */
+            CapabilityService capabilityService = getServiceSafe(CapabilityService.class);
+            CapabilitySet capabilities = capabilityService.getCapabilities(shareToken.getUserID(), shareToken.getContextID());
+            metadata.put("guestCapabilities", capabilities.asSet());
+            return metadata;
+        } catch (JSONException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
      * Resets the last known, recent, error for this account
      *
      * @throws OXException
@@ -201,15 +233,8 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
 
     @Override
     public void connect() throws OXException {
-        String shareUrl = (String) account.getConfiguration().get("url");
-        if (Strings.isEmpty(shareUrl)) {
-            throw FileStorageExceptionCodes.MISSING_CONFIG.create("url", account.getId());
-        }
+        String baseToken = getBaseToken(account);
         String password = (String) account.getConfiguration().get("password");
-        String baseToken = ShareLinks.extractBaseToken(shareUrl);
-        if (null == baseToken) {
-            throw ShareExceptionCodes.INVALID_LINK.create(shareUrl);
-        }
 
         boolean hasKnownError = errorHandler.hasRecentException();
         if (hasKnownError) {
@@ -289,4 +314,17 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
     public FileStorageService getService() {
         return account.getFileStorageService();
     }
+
+    private static String getBaseToken(FileStorageAccount account) throws OXException {
+        String shareUrl = (String) account.getConfiguration().get("url");
+        if (Strings.isEmpty(shareUrl)) {
+            throw FileStorageExceptionCodes.MISSING_CONFIG.create("url", account.getId());
+        }
+        String baseToken = ShareLinks.extractBaseToken(shareUrl);
+        if (null == baseToken) {
+            throw ShareExceptionCodes.INVALID_LINK.create(shareUrl);
+        }
+        return baseToken;
+    }
+
 }

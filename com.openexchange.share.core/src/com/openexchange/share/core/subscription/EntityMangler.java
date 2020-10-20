@@ -70,10 +70,10 @@ import com.openexchange.tools.id.IDMangler;
  */
 public class EntityMangler {
 
-    private static final int NOT_SET = -1;
+    protected static final int NOT_SET = -1;
     
-    private final String serviceId;
-    private final String accountId;
+    protected final String serviceId;
+    protected final String accountId;
 
     /**
      * Initializes a new {@link XctxFolderConverter}.
@@ -332,7 +332,14 @@ public class EntityMangler {
         return unmangledPermissions;
     }
 
-    protected String mangleRemoteEntity(int entity) {
+    /**
+     * <i>Mangles</i> a numerical entity identifier from the <i>remote</i> context, so that it can be used within the local session of
+     * the storage account's context.
+     * 
+     * @param entity The numerical identifier to mangle
+     * @return The mangled identifier
+     */
+    public String mangleRemoteEntity(int entity) {
         if (0 > entity) {
             return null;
         }
@@ -351,7 +358,7 @@ public class EntityMangler {
     }
 
     protected boolean matchesAccount(List<String> unmangledComponents) {
-        return null != unmangledComponents && 3 == unmangledComponents.size() && 
+        return null != unmangledComponents && 3 <= unmangledComponents.size() && 
             Objects.equals(unmangledComponents.get(0), serviceId) && Objects.equals(unmangledComponents.get(1), accountId);
     }
 
