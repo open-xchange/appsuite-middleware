@@ -2015,7 +2015,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         int[] flaggedSeqNums = null;
         int[] seqNumsToFetch = null;
 
-        if (OrderDirection.ASC.equals(order)) {
+        if (OrderDirection.DESC.equals(order)) {
             SearchTerm<?> flagSearchTerm = createFlagsSearchTermFor(sortField, false);
             unflaggedSeqNums = IMAPSort.sortMessages(imapFolder, flagSearchTerm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig, session).msgIds;
 
