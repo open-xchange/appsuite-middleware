@@ -1,3 +1,9 @@
+open-xchange-configjump-generic (7.10.3-26) stable; urgency=medium
+
+  * Build for patch 2020-10-26 (5887)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 20 Oct 2020 10:24:34 +0000
+
 open-xchange-configjump-generic (7.10.3-25) stable; urgency=medium
 
   * Build for patch 2020-10-12 (5878)
