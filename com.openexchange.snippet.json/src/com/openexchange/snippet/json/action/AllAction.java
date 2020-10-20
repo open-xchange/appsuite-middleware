@@ -54,6 +54,7 @@ import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Snippet;
@@ -65,6 +66,7 @@ import com.openexchange.snippet.json.SnippetRequest;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@OAuthAction(OAuthAction.GRANT_ALL)
 public final class AllAction extends SnippetAction {
 
     /**

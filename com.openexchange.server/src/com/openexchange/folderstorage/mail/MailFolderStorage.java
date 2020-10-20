@@ -527,7 +527,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
      * @return <code>true</code> in case it is an oauth request, <code>false</code> otherwise
      */
     private boolean isAccessedViaOAuth(StorageParameters params) {
-        return params.getDecorator().getBoolProperty(OAUTH_REQUEST);
+        return params.getDecorator() != null && params.getDecorator().getBoolProperty(OAUTH_REQUEST);
     }
 
     @Override

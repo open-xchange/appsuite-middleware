@@ -63,6 +63,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.json.ConfigActionFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
@@ -72,6 +73,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Attachment;
@@ -92,6 +94,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@OAuthAction(ConfigActionFactory.OAUTH_WRITE_SCOPE)
 public final class AttachAction extends SnippetAction {
 
     private static final class InputStreamProviderImpl implements InputStreamProvider {
@@ -212,39 +215,6 @@ public final class AttachAction extends SnippetAction {
             return 0;
         }
         return Long.parseLong(sizeS);
-    }
-
-    private static final String FILE_TYPE_ALL = "file";
-
-    private static final String FILE_TYPE_TEXT = "text";
-
-    private static final String FILE_TYPE_MEDIA = "media";
-
-    private static final String FILE_TYPE_IMAGE = "image";
-
-    private static final String FILE_TYPE_AUDIO = "audio";
-
-    private static final String FILE_TYPE_VIDEO = "video";
-
-    private static final String FILE_TYPE_APPLICATION = "application";
-
-    private static boolean checkFileType(final String filter, final ContentType fileContentType) {
-        if (FILE_TYPE_ALL.equalsIgnoreCase(filter)) {
-            return true;
-        } else if (FILE_TYPE_TEXT.equalsIgnoreCase(filter)) {
-            return fileContentType.startsWith("text/");
-        } else if (FILE_TYPE_MEDIA.equalsIgnoreCase(filter)) {
-            return fileContentType.startsWith("image/") || fileContentType.startsWith("audio/") || fileContentType.startsWith("video/");
-        } else if (FILE_TYPE_IMAGE.equalsIgnoreCase(filter)) {
-            return fileContentType.startsWith("image/");
-        } else if (FILE_TYPE_AUDIO.equalsIgnoreCase(filter)) {
-            return fileContentType.startsWith("audio/");
-        } else if (FILE_TYPE_VIDEO.equalsIgnoreCase(filter)) {
-            return fileContentType.startsWith("video/");
-        } else if (FILE_TYPE_APPLICATION.equalsIgnoreCase(filter)) {
-            return fileContentType.startsWith("application/");
-        }
-        return false;
     }
 
     @Override
