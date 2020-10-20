@@ -69,13 +69,6 @@ public class DefaultFileCache implements FileCache {
     /** The logger constant */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultFileCache.class);
 
-    public static interface Filter {
-
-        String resolve(String path);
-
-        byte[] filter(ByteArrayOutputStream baos);
-    }
-
     private static class CacheEntry {
 
         private final File path;
@@ -170,7 +163,7 @@ public class DefaultFileCache implements FileCache {
         LOG.debug(sb.toString());
         return null;
     }
-    
+
     @Override
     public void clear() {
         cache.clear();

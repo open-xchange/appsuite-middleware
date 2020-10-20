@@ -49,16 +49,25 @@
 
 package com.openexchange.appsuite;
 
-import com.openexchange.appsuite.DefaultFileCache.Filter;
+import java.io.ByteArrayOutputStream;
 
 /**
- * 
+ *
  * {@link FileCache}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.4
  */
 public interface FileCache {
+
+    public static interface Filter {
+
+        String resolve(String path);
+
+        byte[] filter(ByteArrayOutputStream baos);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Returns the file contents as a byte array.
