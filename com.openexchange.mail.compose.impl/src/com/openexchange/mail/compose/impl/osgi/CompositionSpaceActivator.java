@@ -146,6 +146,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
     }
 
     private InMemoryCompositionSpaceStorageService inmemoryStorage;
+    private RdbCompositionSpaceStorageService rdbStorage;
 
     /**
      * Initializes a new {@link CompositionSpaceActivator}.
@@ -259,6 +260,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         {
             DatabaseServiceDBProvider dbProvider = new DatabaseServiceDBProvider(getService(DatabaseService.class));
             RdbCompositionSpaceStorageService rdbStorage = new RdbCompositionSpaceStorageService(dbProvider, attachmentStorageService, this);
+            this.rdbStorage = rdbStorage;
             boolean useInMemoryStorage = configurationService.getBoolProperty("com.openexchange.mail.compose.useInMemoryStorage", false);
             if (useInMemoryStorage) {
                 long delayDuration = configurationService.getIntProperty("com.openexchange.mail.compose.delayDuration", 60000);
@@ -359,6 +361,15 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         if (null != inmemoryStorage) {
             this.inmemoryStorage = null;
             inmemoryStorage.close();
+        }
+        RdbCompositionSpaceStorageService rdbStorage = this.rdbStorage;
+        if (null != rdbStorage) {
+            this.rdbStorage = null;
+            try {
+                rdbStorage.signalStop();
+            } catch (Exception e) {
+                LoggerHolder.LOG.error("Failed to stop database-backed composition space storage", e);
+            }
         }
         FileStorageCompositionSpaceKeyStorage.unsetInstance();
         CompositionSpaceCleanUpRegistry.releaseInstance();

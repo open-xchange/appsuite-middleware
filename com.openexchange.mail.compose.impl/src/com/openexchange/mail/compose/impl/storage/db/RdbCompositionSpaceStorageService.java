@@ -98,12 +98,13 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
      * @param dbProvider The provider for connections to database
      * @param attachmentStorageService The attachment storage service to use
      * @param services The service look-up
+     * @throws OXException If initialization fails
      */
-    public RdbCompositionSpaceStorageService(DBProvider dbProvider, AttachmentStorageService attachmentStorageService, ServiceLookup services) {
+    public RdbCompositionSpaceStorageService(DBProvider dbProvider, AttachmentStorageService attachmentStorageService, ServiceLookup services) throws OXException {
         super(services);
         this.dbProvider = dbProvider;
         this.attachmentStorageService = attachmentStorageService;
-        fileCache = new FileCacheImpl(services);
+        fileCache = new FileCacheImpl(this, services);
     }
 
     private CompositionSpaceDbStorage newDbStorageFor(Session session) {
@@ -116,6 +117,15 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         } catch (@SuppressWarnings("unused") Exception e) {
             // Ignore...
         }
+    }
+
+    /**
+     * Signals that application is going to be stopped.
+     *
+     * @throws OXException If operation fails fatally
+     */
+    public void signalStop() throws OXException {
+        fileCache.signalStop();
     }
 
     /**

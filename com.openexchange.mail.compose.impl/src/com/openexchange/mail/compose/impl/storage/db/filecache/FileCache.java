@@ -61,6 +61,9 @@ import com.openexchange.exception.OXException;
  */
 public interface FileCache {
 
+    /** The file name prefix */
+    public static final String FILE_NAME_PREFIX = "open-xchange-tmpcscontent-";
+
     /**
      * Gets the optional cached content for given arguments.
      *
@@ -93,5 +96,12 @@ public interface FileCache {
      * @throws OXException If deletion fails
      */
     void deleteCachedContent(UUID compositionSpaceId, int userId, int contextId) throws OXException;
+
+    /**
+     * Signals that application is going to be stopped.
+     *
+     * @throws OXException If operation fails fatally
+     */
+    void signalStop() throws OXException;
 
 }
