@@ -60,7 +60,10 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.mail.compose.impl.storage.db.RdbCompositionSpaceStorageService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.uploaddir.UploadDirService;
 
 
@@ -78,19 +81,48 @@ public class FileCacheImpl implements FileCache {
     }
 
     private final ServiceLookup services;
+    private volatile ScheduledTimerTask timerTask;
 
     /**
      * Initializes a new {@link FileCacheImpl}.
      *
+     * @param storageService The storage service
      * @param services The service look-up
+     * @throws OXException If needed service is absent
      */
-    public FileCacheImpl(ServiceLookup services) {
+    public FileCacheImpl(RdbCompositionSpaceStorageService storageService, ServiceLookup services) throws OXException {
         super();
         this.services = services;
+        Runnable task = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    new FileCacheCleanUp(storageService, services).doCleanUp();
+                } catch (Exception e) {
+                    LoggerHolder.LOG.error("Failed file cache clean-up run", e);
+                }
+            }
+        };
+        //timerTask = services.getServiceSafe(TimerService.class).scheduleWithFixedDelay(task, 300000, 3600000);
+        timerTask = services.getServiceSafe(TimerService.class).scheduleWithFixedDelay(task, 3000, 36000);
+    }
+
+    @Override
+    public void signalStop() throws OXException {
+        ScheduledTimerTask timerTask = this.timerTask;
+        if (timerTask != null) {
+            this.timerTask = null;
+            timerTask.cancel();
+            TimerService timerService = services.getOptionalService(TimerService.class);
+            if (timerService != null) {
+                timerService.purge();
+            }
+        }
     }
 
     private static String buildFileName(UUID compositionSpaceId, int userId, int contextId) {
-        return new StringBuilder("open-xchange-tmpcscontent-").append(UUIDs.getUnformattedString(compositionSpaceId)).append('-').append(userId).append('-').append(contextId).append(".tmp").toString();
+        return new StringBuilder(FILE_NAME_PREFIX).append(UUIDs.getUnformattedString(compositionSpaceId)).append('-').append(userId).append('-').append(contextId).append(".tmp").toString();
     }
 
     @Override
