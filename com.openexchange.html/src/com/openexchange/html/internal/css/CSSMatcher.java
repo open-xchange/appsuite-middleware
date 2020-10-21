@@ -1175,6 +1175,19 @@ public final class CSSMatcher {
                 }
             }
             break;
+            case '!':
+            {
+                if (open) {
+                    token.append(c);
+                } else {
+                    if (token.length() > 0) {
+                        l.add(token.toString());
+                        token.setLength(0);
+                    }
+                    token.append(c);
+                }
+            }
+            break;
             case '(':
                 token.append(c);
                 open = true;
