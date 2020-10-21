@@ -16,15 +16,15 @@ There are two kinds of search operators, comparison operators and logic operator
 Comparison operators compare two operands with one another. The exception is the "isNull" operator which has only one operand which must be a field name.
 The following operators are available: 
 
-| Operator | Description |
-|:---------|:------------|
-| ">"      | greater |
-| "<" | smaller |
-| "=" | equal |
-| "<=" | smaller or equal | 
-| ">=" | greater or equal |
-| "<>" | unequal |
-| "isNull" | is NULL |
+| Operator | Description      |
+|:---------|:-----------------|
+| ">"      | greater          |
+| "<"      | smaller          |
+| "="      | equal            |
+| "<="     | smaller or equal | 
+| ">="     | greater or equal |
+| "<>"     | unequal          |
+| "isNull" | is NULL          |
 
 
 ### Logic operators
@@ -68,30 +68,100 @@ A header operand is a JSON object with the member `header` specifying the header
 
 ## Examples
 
+Represents the expression `field_name1 = value1 AND NOT field_name2 > value2`.
+
 ```json
 {
-  "filter":[
+  "filter" : [
     "and",
-    [
-      "=",
-      {
-        "field":"field_name1"
-      },
-      "value1"
-    ],
-    [
-      "not",
-      [
-        ">",
-        {
-          "field":"field_name2"
-        },
-        "value2"
+      [ "=" , { "field" : "field_name1" }, "value1" ],
+      ["not",
+        [ ">", { "field" : "field_name2" }, "value2"]
       ]
     ]
-  ]
 }
 ```
 
-Represents the expression `field_name1 = value1 AND NOT field_name2 > value2`.
+## Infostore Advanced Search
 
+### Operators
+
+The following operators are allowed in search terms.
+
+| Operators |
+|:----------|
+| "="       |
+| ">"       |
+| "<"       |
+
+### Operands
+
+The following operands and operators are allowed in search terms.
+
+| Operands               | Valid operator |
+|------------------------|:--------------:|
+| "camera_aperture"      | ALL            |
+| "camera_exposure_time" | ALL            |
+| "camera_focal_length"  | AL             |
+| "camera_iso_speed"     | ALL            |
+| "camera_make"          | "="            |
+| "camera_model"         | "="            |
+| "capture_date"         | ALL            |
+| "categories"           | "="            |
+| "color_label"          | ALL            |
+| "content"              | "="            |
+| "creation_date"        | ALL            |
+| "created_by"           | ALL            |
+| "current_version"      | ALL            |
+| "description"          | "="            |
+| "filename"             | "="            |
+| "file_md5sum"          | "="            |
+| "file_mimetype"        | "="            |
+| "file_size"            | ALL            |
+| "height"               | ALL            |
+| "last_modified"        | ALL            |
+| "last_modified_utc"    | ALL            |
+| "locked_until"         | ALL            |
+| "media_date"           | ALL            |
+| "meta"                 | "="            |
+| "modified_by"          | ALL            |
+| "number_of_versions"   | ALL            |
+| "sequence_number"      | ALL            |
+| "title"                | "="            |
+| "url"                  | "="            |
+| "version"              | "="            |
+| "version_comment"      | "="            |
+| "width"                | ALL            |
+
+### Examples
+
+Represents `Find files having a file_size < 1024`.
+
+```json
+{
+  "filter" : [ "<" , { "field" : "file_size" }, "1024" ]
+}
+```
+
+Represents `Find files with filename = "stuff"`.
+
+```json
+{
+  "filter" : [ "=" ,  { "field" : "filename" }, "stuff" ]
+}
+```
+
+Represents `Find files with filename "stuff" and file_size < 100 OR having filename = "changelog"`.
+
+```json
+{
+  "filter" : 
+    [ "or",
+      [ "and",  
+        [ "=" , { "field" : "filename" }, "stuff" ],
+        [ "<" , { "field" : "file_size" }, "100" ]
+      ],
+      [ "=" , { "field" : "filename" }, "changelog" ]
+    ]
+}
+```

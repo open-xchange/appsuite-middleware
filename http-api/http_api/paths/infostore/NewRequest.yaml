@@ -47,9 +47,7 @@
       content:
         application/json:
           schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/InfoItemBody'
+            $ref: '#/components/schemas/InfoItemBody'
       description: >-
         A JSON object containing a field `file` with the modified fields of the
         infoitem's data. It is possible to let added object permission entities
