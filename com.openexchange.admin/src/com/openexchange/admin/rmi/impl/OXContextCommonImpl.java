@@ -52,6 +52,7 @@ package com.openexchange.admin.rmi.impl;
 import com.openexchange.admin.plugins.ContextDbLookupPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
+import com.openexchange.admin.properties.PropertyScope;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -119,6 +120,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         }
 
         GenericChecks.checkValidMailAddress(admin_user.getPrimaryEmail());
+        GenericChecks.checkValidMailAddressRegex(admin_user.getPrimaryEmail(), PropertyScope.propertyScopeForServer());
 
         checkUserAttributes(admin_user);
     }

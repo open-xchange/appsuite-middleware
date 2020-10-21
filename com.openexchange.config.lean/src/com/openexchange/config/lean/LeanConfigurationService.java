@@ -49,6 +49,7 @@
 
 package com.openexchange.config.lean;
 
+import java.util.List;
 import java.util.Map;
 import com.openexchange.config.PropertyFilter;
 import com.openexchange.osgi.annotation.SingletonService;
@@ -235,6 +236,8 @@ public interface LeanConfigurationService {
      */
     long getLongProperty(Property property, Map<String, String> optionals);
 
+    /////////////////////////////////////// CONFIG VIEW AWARE /////////////////////////////////
+
     /**
      * Fetches the {@link String} value of specified {@link Property} for
      * the specified user in the specified context via ConfigCascade
@@ -308,6 +311,92 @@ public interface LeanConfigurationService {
      * @throws IllegalArgumentException If value cannot be converted to <code>Long</code>
      */
     long getLongProperty(int userId, int contextId, Property property, Map<String, String> optionals);
+
+    //////////////////////////////////////// CONFIG VIEW SCOPE AWARE ///////////////////////////////
+
+    /**
+     * Fetches the {@link String} value of specified {@link Property} for
+     * the specified user in the specified context via ConfigCascade
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param property The {@link Property} name to fetch
+     * @param scopes The list of scopes that should be considered,
+     *            with first element being the most specific and last element being the least specific scope
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
+     * @return The {@link String} value of the property
+     */
+    String getProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals);
+
+    /**
+     * Fetches the {@link Integer} value of specified {@link Property} for
+     * the specified user in the specified context via ConfigCascade
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param property The {@link Property} name to fetch
+     * @param scopes The list of scopes that should be considered,
+     *            with first element being the most specific and last element being the least specific scope
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
+     * @return The {@link Integer} value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Integer</code>
+     */
+    int getIntProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals);
+
+    /**
+     * Fetches the {@link Boolean} value of specified {@link Property} for
+     * the specified user in the specified context via ConfigCascade
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param property The {@link Property} name to fetch
+     * @param scopes The list of scopes that should be considered,
+     *            with first element being the most specific and last element being the least specific scope
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
+     * @return The {@link Boolean} value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Boolean</code>
+     */
+    boolean getBooleanProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals);
+
+    /**
+     * Fetches the {@link Float} value of specified {@link Property} for
+     * the specified user in the specified context via ConfigCascade
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param property The {@link Property} name to fetch
+     * @param scopes The list of scopes that should be considered,
+     *            with first element being the most specific and last element being the least specific scope
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
+     * @return The {@link Float} value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Float</code>
+     */
+    float getFloatProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals);
+
+    /**
+     * Fetches the {@link Long} value of specified {@link Property} for
+     * the specified user in the specified context via ConfigCascade
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param property The {@link Property} name to fetch
+     * @param scopes The list of scopes that should be considered,
+     *            with first element being the most specific and last element being the least specific scope
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
+     * @return The {@link Long} value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Long</code>
+     */
+    long getLongProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals);
 
     /**
      * Returns all properties that fulfill the given filter's acceptance criteria.

@@ -65,11 +65,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.mail.internet.idn.IDNA;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterfaceExtended;
@@ -104,7 +102,6 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.filestore.FilestoreDataMover;
 import com.openexchange.admin.tools.filestore.PostProcessTask;
@@ -113,7 +110,6 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.ConfigurationProperty;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -124,7 +120,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
@@ -186,10 +181,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
             logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId, userId);
         }
-    }
-
-    private boolean usernameIsChangeable() {
-        return this.cache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false);
     }
 
     @Override
@@ -1059,7 +1050,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             checkUserAttributes(usrdata);
             final User[] dbuser = oxu.getData(ctx, new User[] { usrdata });
-            checkChangeUserData(ctx, usrdata, dbuser[0], this.prop);
+            tool.checkChangeUserData(ctx, usrdata, dbuser[0], this.prop);
 
             // Check if he wants to change the filestore id
             {
@@ -2212,190 +2203,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log(LogLevel.ERROR, LOGGER, auth, ctx.getIdAsString(), getObjectIds(retusers), e, "Error while calling delete for plugin: {}", bundlename);
             return e;
         }
-    }
-
-    /**
-     * checking for some requirements when changing existing user data
-     *
-     * @param ctx The {@link Context}
-     * @param newuser The {@link User}
-     * @param dbuser The database {@link User}
-     * @param prop Additional {@link PropertyHandler}
-     * @throws StorageException If user can't be found
-     * @throws InvalidDataException If data already exists or is flawed
-     */
-    private void checkChangeUserData(final Context ctx, final User newuser, final User dbuser, final PropertyHandler prop) throws StorageException, InvalidDataException {
-        if (newuser.getName() != null) {
-            if (usernameIsChangeable()) {
-                if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
-                    tool.validateUserName(newuser.getName());
-                }
-                if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-                    newuser.setName(newuser.getName().toLowerCase());
-                }
-            }
-            // must be loaded additionally because the user loading method gets the new user name passed and therefore does not load the
-            // current one.
-            final String currentName = tool.getUsernameByUserID(ctx, newuser.getId().intValue());
-            if (!newuser.getName().equals(currentName)) {
-                if (usernameIsChangeable()) {
-                    if (tool.existsUserName(ctx, newuser.getName())) {
-                        throw new InvalidDataException("User " + newuser.getName() + " already exists in this context");
-                    }
-                } else {
-                    throw new InvalidDataException("Changing username is disabled!");
-                }
-            }
-        }
-
-        {
-            String lang = newuser.getLanguage();
-            if (lang != null && lang.indexOf('_') < 0) {
-                throw new InvalidDataException("Language must contain an underscore, e.g. en_US.");
-            }
-        }
-
-        String newDefaultSenderAddress = newuser.getDefaultSenderAddress();
-        String newPrimaryEmail = newuser.getPrimaryEmail();
-        String newEmail1 = newuser.getEmail1();
-        boolean mailCheckNeeded = (null != newDefaultSenderAddress) || (null != newPrimaryEmail) || (null != newEmail1) || (null != newuser.getAliases());
-
-        if (prop.getUserProp(AdminProperties.User.PRIMARY_MAIL_UNCHANGEABLE, true)) {
-            if (newPrimaryEmail != null && !newPrimaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
-                throw new InvalidDataException("primary mail must not be changed");
-            }
-        }
-
-        GenericChecks.checkChangeValidPasswordMech(newuser);
-
-        // if no password mech supplied, use the old one as set in db
-        if (newuser.getPasswordMech() == null) {
-            newuser.setPasswordMech(dbuser.getPasswordMech());
-        }
-
-        if (mailCheckNeeded) {
-            // Check if E-Mail addresses should be checked for context administrator, too (default is false)
-            boolean enableAdminMailChecks = false;
-            {
-                ConfigurationService configService = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
-                if (null != configService) {
-                    enableAdminMailChecks = configService.getBoolProperty(AdminProperties.User.ENABLE_ADMIN_MAIL_CHECKS, enableAdminMailChecks);
-                }
-            }
-
-            // Validate E-Mail addresses for either all users (com.openexchange.admin.enableAdminMailChecks=true) or only non-admin users
-            if (enableAdminMailChecks || !tool.isContextAdmin(ctx, newuser.getId().intValue())) {
-                // checks below throw InvalidDataException
-                tool.checkValidEmailsInUserObject(newuser);
-                Set<String> useraliases = newuser.getAliases();
-                if (useraliases == null) {
-                    useraliases = dbuser.getAliases();
-                }
-                if (null != useraliases) {
-                    Set<String> tmp = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-                    for (String email : useraliases) {
-                        tmp.add(IDNA.toIDN(email));
-                    }
-                    useraliases = tmp;
-                }
-
-                if (newPrimaryEmail != null && newEmail1 != null && !newPrimaryEmail.equalsIgnoreCase(newEmail1)) {
-                    // primary mail value must be same with email1
-                    throw new InvalidDataException("email1 not equal with primarymail!");
-                }
-
-                if (useraliases == null) {
-                    useraliases = Collections.emptySet();
-                } else {
-                    Set<String> useraliasesAddresses = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-                    for (String sAddr : useraliases) {
-                        try {
-                            QuotedInternetAddress addr = new QuotedInternetAddress(sAddr, false);
-                            useraliasesAddresses.add(addr.getIDNAddress());
-                            useraliasesAddresses.add(QuotedInternetAddress.toACE(addr.getAddress()));
-                        } catch (Exception e) {
-                            // Failed to parse as E-Mail address
-                            useraliasesAddresses.add(IDNA.toIDN(extractRealMailAddressFrom(sAddr)));
-                        }
-                    }
-                    useraliases = useraliasesAddresses;
-                }
-
-                String check_primary_mail;
-                String check_email1;
-                String check_default_sender_address;
-                if (newPrimaryEmail != null) {
-                    check_primary_mail = IDNA.toIDN(newPrimaryEmail);
-                    if (!newPrimaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
-                        tool.primaryMailExists(ctx, newPrimaryEmail);
-                    }
-                } else {
-                    final String email = dbuser.getPrimaryEmail();
-                    check_primary_mail = email == null ? email : IDNA.toIDN(email);
-                }
-                check_primary_mail = parseRealMailAddressFrom(check_primary_mail, true);
-
-                if (newEmail1 != null) {
-                    check_email1 = IDNA.toIDN(newEmail1);
-                } else {
-                    final String s = dbuser.getEmail1();
-                    check_email1 = s == null ? s : IDNA.toIDN(s);
-                }
-                check_email1 = parseRealMailAddressFrom(check_email1, true);
-
-                if (newDefaultSenderAddress != null) {
-                    check_default_sender_address = IDNA.toIDN(newDefaultSenderAddress);
-                } else {
-                    final String s = dbuser.getDefaultSenderAddress();
-                    check_default_sender_address = s == null ? s : IDNA.toIDN(s);
-                }
-                check_default_sender_address = parseRealMailAddressFrom(check_default_sender_address, true);
-
-                final boolean found_primary_mail = useraliases.contains(check_primary_mail);
-                final boolean found_email1 = useraliases.contains(check_email1);
-                final boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
-
-                if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
-                    throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
-                }
-                // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
-                // which is not very good when just changing the displayname for example
-                if (newPrimaryEmail != null && newEmail1 == null) {
-                    throw new InvalidDataException("email1 not sent but required!");
-
-                }
-            }
-        }
-
-        // TODO mail checks
-    }
-
-    private static String parseRealMailAddressFrom(String sAddress, boolean idn) {
-        if (sAddress == null) {
-            return null;
-        }
-
-        try {
-            QuotedInternetAddress addr = new QuotedInternetAddress(sAddress, false);
-            return idn ? addr.getIDNAddress() : QuotedInternetAddress.toACE(addr.getAddress());
-        } catch (Exception e) {
-            // Failed to parse as E-Mail address
-            String s = extractRealMailAddressFrom(sAddress);
-            return idn ? IDNA.toIDN(s) : s;
-        }
-    }
-
-    private static String extractRealMailAddressFrom(String sAddress) {
-        if (sAddress == null) {
-            return null;
-        }
-
-        int indexOf = sAddress.indexOf('<');
-        if (indexOf < 0) {
-            return sAddress;
-        }
-
-        return sAddress.substring(indexOf + 1, sAddress.indexOf('>'));
     }
 
     private static void checkContext(final Context ctx) throws InvalidDataException {

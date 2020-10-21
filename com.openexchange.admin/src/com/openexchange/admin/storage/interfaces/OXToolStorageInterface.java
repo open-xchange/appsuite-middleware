@@ -52,6 +52,7 @@ package com.openexchange.admin.storage.interfaces;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -575,10 +576,24 @@ public abstract class OXToolStorageInterface {
     public abstract void unsetUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
 
     public abstract void checkCreateUserData(Context ctx, User usr) throws InvalidDataException, EnforceableDataObjectException, StorageException;
+    
+    /**
+     * checking for some requirements when changing existing user data
+     *
+     * @param ctx The {@link Context}
+     * @param newuser The {@link User}
+     * @param dbuser The database {@link User}
+     * @param prop Additional {@link PropertyHandler}
+     * @throws StorageException If user can't be found
+     * @throws InvalidDataException If data already exists or is flawed
+     */
+    public abstract void checkChangeUserData(Context ctx, User usr, User dbUser, PropertyHandler prop) throws InvalidDataException, StorageException;
 
     public abstract void validateUserName(String name) throws InvalidDataException;
 
     public abstract void checkValidEmailsInUserObject(User user) throws InvalidDataException;
+
+    public abstract void checkValidEmailsInUserObject(User user, Pattern pattern) throws InvalidDataException;
 
     /**
      * Changes access rights for all users in the Database.

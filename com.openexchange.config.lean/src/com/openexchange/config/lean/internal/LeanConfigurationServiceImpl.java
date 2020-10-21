@@ -51,6 +51,7 @@ package com.openexchange.config.lean.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +59,7 @@ import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -202,6 +204,31 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
     }
 
     @Override
+    public String getProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+        return getProperty(property, userId, contextId, scopes, String.class, optionals);
+    }
+
+    @Override
+    public int getIntProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+        return getProperty(property, userId, contextId, scopes, Integer.class, optionals).intValue();
+    }
+
+    @Override
+    public boolean getBooleanProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+        return getProperty(property, userId, contextId, scopes, Boolean.class, optionals).booleanValue();
+    }
+
+    @Override
+    public float getFloatProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+        return getProperty(property, userId, contextId, scopes, Float.class, optionals).floatValue();
+    }
+
+    @Override
+    public long getLongProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+        return getProperty(property, userId, contextId, scopes, Long.class, optionals).longValue();
+    }
+
+    @Override
     public Map<String, String> getProperties(PropertyFilter propertyFilter) {
         try {
             ConfigurationService configService = this.configService;
@@ -285,4 +312,34 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
         }
     }
 
+    /**
+     * Get the value T of specified property for the specified user in the specified context and coerce it to the specified type T
+     *
+     * @param property The {@link Property}
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param scopes The list of scopes that should be considered,
+     *            with first element being the most specific and last element being the least specific scope
+     * @param coerceTo The type T to coerce the value of the property
+     * @return The value T of the property from the config cascade or the default value
+     */
+    private <T> T getProperty(Property property, int userId, int contextId, List<String> scopes, Class<T> coerceTo, Map<String, String> optionals) {
+        try {
+            ConfigViewFactory viewFactory = this.viewFactory;
+            ConfigView view = viewFactory.getView(userId, contextId);
+
+            for (String scope : scopes) {
+                ConfigProperty<T> p = view.property(scope, property.getFQPropertyName(optionals), coerceTo);
+                if (false == p.isDefined()) {
+                    continue;
+                }
+                return p.get();
+            }
+            return property.getDefaultValue(coerceTo);
+        } catch (Exception e) {
+            T defaultValue = property.getDefaultValue(coerceTo);
+            LOGGER.error("Error getting '{}' property for user '{}' in context '{}'  for scope(s) '{}'. Returning the default value of '{}'", property.getFQPropertyName(), I(userId), I(contextId), scopes, defaultValue, e);
+            return defaultValue;
+        }
+    }
 }

@@ -68,9 +68,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+import javax.mail.internet.idn.IDNA;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.properties.AdminProperties;
+import com.openexchange.admin.properties.PropertyScope;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -94,8 +100,10 @@ import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.storage.utils.PoolAndSchema;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
+import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -106,6 +114,7 @@ import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.BitAND;
 import com.openexchange.sql.grammar.BitOR;
@@ -117,8 +126,11 @@ import com.openexchange.sql.grammar.UPDATE;
 import com.openexchange.tools.oxfolder.OXFolderDefaultMode;
 
 /**
+ * {@link OXToolMySQLStorage}
+ *
  * @author d7
  * @author cutmasta
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefaultValues {
 
@@ -126,7 +138,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXToolMySQLStorage.class);
 
     private static final String FALLBACK_LANGUAGE_CREATE = "en";
-
     private static final String FALLBACK_COUNTRY_CREATE = "US";
 
     @Override
@@ -1568,83 +1579,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    //    /**
-    //     * This function is used for all sql queries which insert an integer
-    //     * followed by a string followed by an integer as option
-    //     *
-    //     * @param sql_select_string
-    //     * @param firstnumber
-    //     *            the first integer
-    //     * @param string
-    //     *            the string value
-    //     * @param secondnumber
-    //     *            the second integer (left out if int is -1)
-    //     * @return
-    //     * @throws StorageException
-    //     */
-    //    private boolean selectwithintstringint(final int context_id, final String sql_select_string, final int firstnumber, final String string, final int secondnumber) throws StorageException {
-    //        boolean retBool = false;
-    //        final AdminCache cache = ClientAdminThread.cache;
-    //        Connection con = null;
-    //        PreparedStatement prep_check = null;
-    //        ResultSet rs = null;
-    //        try {
-    //            if (context_id != -1) {
-    //                con = cache.getWRITEConnectionForContext(context_id);
-    //            } else {
-    //                con = cache.getWRITEConnectionForCONFIGDB();
-    //            }
-    //            prep_check = con.prepareStatement(sql_select_string);
-    //            prep_check.setInt(1, firstnumber);
-    //            prep_check.setString(2, string);
-    //            if (-1 != secondnumber) {
-    //                prep_check.setInt(3, secondnumber);
-    ////            } else {
-    ////                prep_check.setInt(3, java.sql.Types.INTEGER);
-    //            }
-    //            // SELECT id FROM resource WHERE cid = ? AND identifier = ? OR id =
-    //            // ?
-    //            rs = prep_check.executeQuery();
-    //            if (rs.next()) {
-    //                retBool = true;
-    //            }
-    //        } catch (PoolException e) {
-    //            log.error("Pool Error",e);
-    //            throw new StorageException(e);
-    //        } catch (SQLException e) {
-    //            log.error("SQL Error",e);
-    //            throw new StorageException(e);
-    //        } finally {
-    //            if (null != rs) {
-    //                try {
-    //                    rs.close();
-    //                } catch (SQLException e) {
-    //                    log.error("Error closing resultset", e);
-    //                }
-    //            }
-    //            try {
-    //                if (null != prep_check) {
-    //                    prep_check.close();
-    //                }
-    //            } catch (SQLException e) {
-    //                log.error("Error closing prepared statement!", e);
-    //            }
-    //
-    //            try {
-    //                if (context_id != -1) {
-    //                    cache.pushOXDBWrite(context_id, con);
-    //                } else {
-    //                    cache.pushConfigDBWrite(con);
-    //                }
-    //            } catch (PoolException e) {
-    //                log.error("Error pushing configdb write connection to pool!", e);
-    //            }
-    //
-    //        }
-    //
-    //        return retBool;
-    //    }
-
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isContextAdmin(int,
      *      int)
@@ -2260,7 +2194,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    @SuppressWarnings("unused")
     private Group[] getDomainUsedbyGroup(final Context ctx, final String domain, final Connection oxcon) throws SQLException {
         // groups are currently not used with mail addresses in the core
         return null;
@@ -2828,7 +2761,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString());
         } catch (RuntimeException e) {
             log.error("Runtime Error", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
@@ -2961,8 +2894,15 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
             usr.setName(usr.getName().toLowerCase());
         }
-        // checks below throw InvalidDataException
+
+        // Checks below throw InvalidDataException
         checkValidEmailsInUserObject(usr);
+        if (existsContext(ctx)) {
+            checkValidEmailsInUserObjectRegex(usr, PropertyScope.propertyScopeForContext(ctx.getId().intValue()));
+        } else {
+            checkValidEmailsInUserObjectRegex(usr, PropertyScope.propertyScopeForServer());
+        }
+
         // ### Do some mail attribute checks cause of bug 5444
         // check if primary email address is also set in Email1,
         if (!usr.getPrimaryEmail().equals(usr.getEmail1())) {
@@ -3002,6 +2942,206 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             throw new InvalidDataException("An invalid folder mode was selected. Only the following modes are allowed: " + modes);
         }
+    }
+
+    @Override
+    public void checkChangeUserData(Context ctx, User newuser, User dbuser, PropertyHandler prop) throws InvalidDataException, StorageException {
+        if (newuser.getName() != null) {
+            if (usernameIsChangeable()) {
+                if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
+                    validateUserName(newuser.getName());
+                }
+                if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                    newuser.setName(newuser.getName().toLowerCase());
+                }
+            }
+            // must be loaded additionally because the user loading method gets the new user name passed and therefore does not load the
+            // current one.
+            final String currentName = getUsernameByUserID(ctx, newuser.getId().intValue());
+            if (!newuser.getName().equals(currentName)) {
+                if (usernameIsChangeable()) {
+                    if (existsUserName(ctx, newuser.getName())) {
+                        throw new InvalidDataException("User " + newuser.getName() + " already exists in this context");
+                    }
+                } else {
+                    throw new InvalidDataException("Changing username is disabled!");
+                }
+            }
+        }
+
+        {
+            String lang = newuser.getLanguage();
+            if (lang != null && lang.indexOf('_') < 0) {
+                throw new InvalidDataException("Language must contain an underscore, e.g. en_US.");
+            }
+        }
+
+        String newDefaultSenderAddress = newuser.getDefaultSenderAddress();
+        String newPrimaryEmail = newuser.getPrimaryEmail();
+        String newEmail1 = newuser.getEmail1();
+        boolean mailCheckNeeded = (null != newDefaultSenderAddress) || (null != newPrimaryEmail) || (null != newEmail1) || (null != newuser.getAliases());
+
+        if (prop.getUserProp(AdminProperties.User.PRIMARY_MAIL_UNCHANGEABLE, true)) {
+            if (newPrimaryEmail != null && !newPrimaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
+                throw new InvalidDataException("primary mail must not be changed");
+            }
+        }
+
+        GenericChecks.checkChangeValidPasswordMech(newuser);
+
+        // if no password mech supplied, use the old one as set in db
+        if (newuser.getPasswordMech() == null) {
+            newuser.setPasswordMech(dbuser.getPasswordMech());
+        }
+
+        if (mailCheckNeeded) {
+            // Check if E-Mail addresses should be checked for context administrator, too (default is false)
+            boolean enableAdminMailChecks = false;
+            {
+                ConfigurationService configService = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null != configService) {
+                    enableAdminMailChecks = configService.getBoolProperty(AdminProperties.User.ENABLE_ADMIN_MAIL_CHECKS, enableAdminMailChecks);
+                }
+            }
+
+            // Validate E-Mail addresses for either all users (com.openexchange.admin.enableAdminMailChecks=true) or only non-admin users
+            if (enableAdminMailChecks || !isContextAdmin(ctx, newuser.getId().intValue())) {
+                // checks below throw InvalidDataException
+                checkValidEmailsInUserObject(newuser);
+                checkValidEmailsInUserObjectRegex(newuser, PropertyScope.propertyScopeForUser(newuser.getId().intValue(), ctx.getId().intValue()));
+                Set<String> useraliases = newuser.getAliases();
+                if (useraliases == null) {
+                    useraliases = dbuser.getAliases();
+                }
+                if (null != useraliases) {
+                    Set<String> tmp = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+                    for (String email : useraliases) {
+                        tmp.add(IDNA.toIDN(email));
+                    }
+                    useraliases = tmp;
+                }
+
+                if (newPrimaryEmail != null && newEmail1 != null && !newPrimaryEmail.equalsIgnoreCase(newEmail1)) {
+                    // primary mail value must be same with email1
+                    throw new InvalidDataException("email1 not equal with primarymail!");
+                }
+
+                if (useraliases == null) {
+                    useraliases = Collections.emptySet();
+                } else {
+                    Set<String> useraliasesAddresses = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+                    for (String sAddr : useraliases) {
+                        try {
+                            QuotedInternetAddress addr = new QuotedInternetAddress(sAddr, false);
+                            useraliasesAddresses.add(addr.getIDNAddress());
+                            useraliasesAddresses.add(QuotedInternetAddress.toACE(addr.getAddress()));
+                        } catch (Exception e) {
+                            // Failed to parse as E-Mail address
+                            useraliasesAddresses.add(IDNA.toIDN(extractRealMailAddressFrom(sAddr)));
+                        }
+                    }
+                    useraliases = useraliasesAddresses;
+                }
+
+                String check_primary_mail;
+                String check_email1;
+                String check_default_sender_address;
+                if (newPrimaryEmail != null) {
+                    check_primary_mail = IDNA.toIDN(newPrimaryEmail);
+                    if (!newPrimaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
+                        primaryMailExists(ctx, newPrimaryEmail);
+                    }
+                } else {
+                    final String email = dbuser.getPrimaryEmail();
+                    check_primary_mail = email == null ? email : IDNA.toIDN(email);
+                }
+                check_primary_mail = parseRealMailAddressFrom(check_primary_mail, true);
+
+                if (newEmail1 != null) {
+                    check_email1 = IDNA.toIDN(newEmail1);
+                } else {
+                    final String s = dbuser.getEmail1();
+                    check_email1 = s == null ? s : IDNA.toIDN(s);
+                }
+                check_email1 = parseRealMailAddressFrom(check_email1, true);
+
+                if (newDefaultSenderAddress != null) {
+                    check_default_sender_address = IDNA.toIDN(newDefaultSenderAddress);
+                } else {
+                    final String s = dbuser.getDefaultSenderAddress();
+                    check_default_sender_address = s == null ? s : IDNA.toIDN(s);
+                }
+                check_default_sender_address = parseRealMailAddressFrom(check_default_sender_address, true);
+
+                final boolean found_primary_mail = useraliases.contains(check_primary_mail);
+                final boolean found_email1 = useraliases.contains(check_email1);
+                final boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
+
+                if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
+                    throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
+                }
+                // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
+                // which is not very good when just changing the displayname for example
+                if (newPrimaryEmail != null && newEmail1 == null) {
+                    throw new InvalidDataException("email1 not sent but required!");
+
+                }
+            }
+        }
+
+        // Other mail checks?
+    }
+
+    /**
+     * Checks whether the E-Mail addresses specified in the user object are valid according to the configured regular expression.
+     *
+     * @param user The user to check
+     * @param propertyScope The scope to apply
+     * @throws InvalidDataException If one of the user's E-Mail address is invalid
+     */
+    private void checkValidEmailsInUserObjectRegex(User user, PropertyScope propertyScope) throws InvalidDataException {
+        String propertyName = AdminProperties.User.ADDITIONAL_EMAIL_CHECK_REGEX;
+        String regex = AdminProperties.optScopedProperty(propertyName, propertyScope, String.class);
+        if (Strings.isEmpty(regex)) {
+            return;
+        }
+        try {
+            checkValidEmailsInUserObject(user, Pattern.compile(regex));
+        } catch (PatternSyntaxException e) {
+            log.warn("Unable to compile the value of the '{}' property to a regular expression. User E-Mail addresses cannot be further checked for validity.", propertyName, e);
+        }
+    }
+
+    private boolean usernameIsChangeable() {
+        return cache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false);
+    }
+
+    private static String parseRealMailAddressFrom(String sAddress, boolean idn) {
+        if (sAddress == null) {
+            return null;
+        }
+
+        try {
+            QuotedInternetAddress addr = new QuotedInternetAddress(sAddress, false);
+            return idn ? addr.getIDNAddress() : QuotedInternetAddress.toACE(addr.getAddress());
+        } catch (Exception e) {
+            // Failed to parse as E-Mail address
+            String s = extractRealMailAddressFrom(sAddress);
+            return idn ? IDNA.toIDN(s) : s;
+        }
+    }
+
+    private static String extractRealMailAddressFrom(String sAddress) {
+        if (sAddress == null) {
+            return null;
+        }
+
+        int indexOf = sAddress.indexOf('<');
+        if (indexOf < 0) {
+            return sAddress;
+        }
+
+        return sAddress.substring(indexOf + 1, sAddress.indexOf('>'));
     }
 
     private void checkAndSetLanguage(final Context ctx, final User user) throws InvalidDataException {
@@ -3076,10 +3216,27 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         GenericChecks.checkValidMailAddress(usr.getEmail3());
         GenericChecks.checkValidMailAddress(usr.getDefaultSenderAddress());
         HashSet<String> aliases = usr.getAliases();
-        if (aliases != null) {
-            for (final String addr : aliases) {
-                GenericChecks.checkValidMailAddress(addr);
-            }
+        if (aliases == null) {
+            return;
+        }
+        for (String addr : aliases) {
+            GenericChecks.checkValidMailAddress(addr);
+        }
+    }
+
+    @Override
+    public void checkValidEmailsInUserObject(User user, Pattern pattern) throws InvalidDataException {
+        GenericChecks.checkValidMailAddressRegex(user.getPrimaryEmail(), pattern);
+        GenericChecks.checkValidMailAddressRegex(user.getEmail1(), pattern);
+        GenericChecks.checkValidMailAddressRegex(user.getEmail2(), pattern);
+        GenericChecks.checkValidMailAddressRegex(user.getEmail3(), pattern);
+        GenericChecks.checkValidMailAddressRegex(user.getDefaultSenderAddress(), pattern);
+        HashSet<String> aliases = user.getAliases();
+        if (aliases == null) {
+            return;
+        }
+        for (String addr : aliases) {
+            GenericChecks.checkValidMailAddressRegex(addr, pattern);
         }
     }
 

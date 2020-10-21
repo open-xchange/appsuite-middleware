@@ -49,6 +49,9 @@
 
 package com.openexchange.config.lean;
 
+import static com.openexchange.java.Autoboxing.b;
+import static com.openexchange.java.Autoboxing.i;
+import java.util.List;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.PropertyFilter;
@@ -79,12 +82,12 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
 
     @Override
     public int getIntProperty(Property property) {
-        return delegateConfigurationService.getIntProperty(property.getFQPropertyName(), property.getDefaultValue(Integer.class));
+        return delegateConfigurationService.getIntProperty(property.getFQPropertyName(), i(property.getDefaultValue(Integer.class)));
     }
 
     @Override
     public boolean getBooleanProperty(Property property) {
-        return delegateConfigurationService.getBoolProperty(property.getFQPropertyName(), property.getDefaultValue(Boolean.class));
+        return delegateConfigurationService.getBoolProperty(property.getFQPropertyName(), b(property.getDefaultValue(Boolean.class)));
     }
 
     @Override
@@ -104,12 +107,12 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
 
     @Override
     public int getIntProperty(int userId, int contextId, Property property) {
-        return delegateConfigurationService.getIntProperty(property.getFQPropertyName(), property.getDefaultValue(Integer.class));
+        return delegateConfigurationService.getIntProperty(property.getFQPropertyName(), i(property.getDefaultValue(Integer.class)));
     }
 
     @Override
     public boolean getBooleanProperty(int userId, int contextId, Property property) {
-        return delegateConfigurationService.getBoolProperty(property.getFQPropertyName(), property.getDefaultValue(Boolean.class));
+        return delegateConfigurationService.getBoolProperty(property.getFQPropertyName(), b(property.getDefaultValue(Boolean.class)));
     }
 
     @Override
@@ -173,6 +176,31 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
     }
 
     @Override
+    public String getProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+        return delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class));
+    }
+
+    @Override
+    public int getIntProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+        return delegateConfigurationService.getIntProperty(property.getFQPropertyName(), property.getDefaultValue(Integer.class).intValue());
+    }
+
+    @Override
+    public boolean getBooleanProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+        return delegateConfigurationService.getBoolProperty(property.getFQPropertyName(), property.getDefaultValue(Boolean.class).booleanValue());
+    }
+
+    @Override
+    public float getFloatProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+        return Float.parseFloat(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
+    }
+
+    @Override
+    public long getLongProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+        return Long.parseLong(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
+    }
+
+    @Override
     public Map<String, String> getProperties(PropertyFilter propertyFilter) {
         try {
             return delegateConfigurationService.getProperties(propertyFilter);
@@ -180,4 +208,5 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
             return ImmutableMap.of();
         }
     }
+
 }

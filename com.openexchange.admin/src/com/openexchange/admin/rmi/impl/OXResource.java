@@ -53,10 +53,13 @@ import static com.openexchange.java.Autoboxing.I;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
+import com.openexchange.admin.properties.PropertyScope;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -83,6 +86,9 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXResource.class);
 
     // ---------------------------------------------------------------------------------------------------------- //
+
+    /** A listing of scopes: <code>context</code> -&gt; <code>server</code> */
+    private static final List<String> SCOPES_FROM_CONTEXT = ImmutableList.of("context", "server");
 
     private final BasicAuthenticator basicauth;
     private final OXResourceStorageInterface oxRes;
@@ -179,7 +185,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             }
 
             final String resmail = res.getEmail();
-            if (resmail != null && resmail.trim().length() > 0 && !GenericChecks.isValidMailAddress(resmail)) {
+            if (resmail != null && resmail.trim().length() > 0 && (!GenericChecks.isValidMailAddress(resmail) || !GenericChecks.isValidMailAddress(resmail, PropertyScope.propertyScopeForContext(ctx.getId().intValue())))) {
                 throw new InvalidDataException("Invalid email address");
             }
             oxRes.change(ctx, res);
@@ -253,7 +259,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             }
 
             final String resmail = res.getEmail();
-            if (resmail != null && !GenericChecks.isValidMailAddress(resmail)) {
+            if (resmail != null && (!GenericChecks.isValidMailAddress(resmail)) || !GenericChecks.isValidMailAddress(resmail, PropertyScope.propertyScopeForContext(ctx.getId().intValue()))) {
                 throw new InvalidDataException("Invalid email address");
             }
             final int retval = oxRes.create(ctx, res);

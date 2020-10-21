@@ -49,6 +49,9 @@
 
 package com.openexchange.admin.properties;
 
+import org.slf4j.Logger;
+import com.openexchange.admin.services.AdminServiceRegistry;
+
 /**
  * This class will hold the properties setting from now on
  *
@@ -56,6 +59,11 @@ package com.openexchange.admin.properties;
  *
  */
 public class AdminProperties {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AdminProperties.class);
+    }
 
     /**
      * The properties for group
@@ -128,5 +136,37 @@ public class AdminProperties {
         public static final String DEFAULT_PASSWORD_MECHANISM = "DEFAULT_PASSWORD_MECHANISM";
         public static final String DEFAULT_TIMEZONE = "DEFAULT_TIMEZONE";
         public static final String ENABLE_ADMIN_MAIL_CHECKS = "com.openexchange.admin.enableAdminMailChecks";
+        public static final String ADDITIONAL_EMAIL_CHECK_REGEX = "com.openexchange.admin.additionalEmailCheckRegex";
     }
+
+    /**
+     * Optionally gets the specified property in the specified scope.
+     *
+     * @param <T> The type to coerce the property to
+     * @param propertyName The property name
+     * @param propertyScope The property scope to apply
+     * @param coerceTo The type to coerce the property to
+     * @return The value of the property or <code>null</code> in any other case
+     */
+    public static <T> T optScopedProperty(String propertyName, PropertyScope propertyScope, Class<T> coerceTo) {
+        com.openexchange.config.cascade.ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(com.openexchange.config.cascade.ConfigViewFactory.class);
+        if (null == viewFactory) {
+            return null;
+        }
+
+        try {
+            com.openexchange.config.cascade.ConfigView view = viewFactory.getView(propertyScope.getUserId(), propertyScope.getContextId());
+            for (String scope : propertyScope.getScopes()) {
+                com.openexchange.config.cascade.ConfigProperty<T> configProperty = view.property(scope, propertyName, coerceTo);
+                if (false == configProperty.isDefined()) {
+                    continue;
+                }
+                return configProperty.get();
+            }
+        } catch (Exception e) {
+            LoggerHolder.LOG.warn("Unable to get the value of the '{}' property for the '{}' scope(s)!", propertyName, propertyScope.getScopes(), e);
+        }
+        return null;
+    }
+
 }

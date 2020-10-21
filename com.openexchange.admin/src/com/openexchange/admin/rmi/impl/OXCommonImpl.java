@@ -83,9 +83,10 @@ import com.openexchange.groupware.userconfiguration.PermissionConfigurationCheck
 import com.openexchange.log.LogProperties;
 
 /**
- * General abstraction class used by all impl classes
+ * {@link OXCommonImpl} - General abstraction class used by all impl classes
  *
  * @author d7
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public abstract class OXCommonImpl {
 
