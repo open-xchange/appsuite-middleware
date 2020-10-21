@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link RemountShareAction} - Updates an existing share that is associated with a specific share link from a remote server
  * <p>
- * Currently only refreshing of the password is supported.
+ * Currently only refreshing of the password or renaming is supported.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5

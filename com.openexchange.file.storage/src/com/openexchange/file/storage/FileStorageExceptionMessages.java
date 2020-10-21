@@ -191,6 +191,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // The account name is too long. Please limit the account name to a maximum of %1$s characters.
     public static final String ACCOUNT_NAME_TO_LONG_MSG = "The account name is too long. Please limit the account name to a maximum of %1$s characters.";
+    
+    // The account update was denied: %1s$
+    public static final String NOT_ALLOWED_ACCOUNT_UPDATE_MSG = "The account update was denied: %1s$";
 
     /**
      * Initializes a new {@link OXExceptionMessages}.

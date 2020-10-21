@@ -118,7 +118,7 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
                 m = accountManger;
                 if (null == m) {
                     FileStorageAccountManagerLookupService lookupService = services.getService(FileStorageAccountManagerLookupService.class);
-                    m = lookupService.getAccountManagerFor(getId());
+                    m = new XOXFileStorageAccountManager(services, lookupService.getAccountManagerFor(getId()));
                     accountManger = m;
                 }
             }

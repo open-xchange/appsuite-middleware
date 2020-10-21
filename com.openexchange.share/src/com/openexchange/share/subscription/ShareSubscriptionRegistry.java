@@ -67,22 +67,23 @@ public interface ShareSubscriptionRegistry {
      *
      * @param session The session representing the acting user
      * @param shareLink The link to a share or rather subscription
-     * @return A result indicating the action that can be performed for the link, or <code>null</code> if not applicable
+     * @return A result indicating the action that can be performed for the link
      * @throws OXException In case of an error
      */
     ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException;
 
     /**
-     * Mounts a share represented by the link efficiently subscribing the share
+     * Subscribes to a share represented by the link. If the share is unknown a new
+     * account for the share will be mounted, too.
      *
-     * @param session The user session to bind the share to
-     * @param shareLink The share link to mount
-     * @param shareName The name to set for the share to mount, or <code>null</code> to use 
-     * @param password The optional password for the share
+     * @param session The user session
+     * @param shareLink The share link to subscribe
+     * @param shareName The name to set for the share, or <code>null</code> to use a default value
+     * @param password The optional password for the share, can be <code>null</code>
      * @return The information about the mount
-     * @throws OXException In case of error
+     * @throws OXException In case the share can't be subscribed
      */
-    ShareSubscriptionInformation mount(Session session, String shareLink, String shareName, String password) throws OXException;
+    ShareSubscriptionInformation subscribe(Session session, String shareLink, String shareName, String password) throws OXException;
 
     /**
      * Updates a mounted object
@@ -92,16 +93,18 @@ public interface ShareSubscriptionRegistry {
      * @param shareName The optional name to set for the share, or <code>null</code> to keep the existing one
      * @param password The password to set for the object
      * @return The information about the mount
-     * @throws OXException In case of error
+     * @throws OXException In case the underlying account can't be updated or rather remounted
      */
     ShareSubscriptionInformation remount(Session session, String shareLink, String shareName, String password) throws OXException;
 
     /**
-     * Unmouts a share or rather deactivates the subscription
+     * Unsubscribes a share. This however will not delete the underlying account.
+     * <p>
+     * To delete the underlying account use the account API.
      *
      * @param session The user session
-     * @param shareLink The share link to identify the mounted object
-     * @throws OXException In case of error
+     * @param shareLink The share link to identify the subscription
+     * @throws OXException In case the unsubscribe fails
      */
-    void unmount(Session session, String shareLink) throws OXException;
+    void unsubscribe(Session session, String shareLink) throws OXException;
 }

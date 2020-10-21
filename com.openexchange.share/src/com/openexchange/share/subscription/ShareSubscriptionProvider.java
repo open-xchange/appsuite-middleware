@@ -91,7 +91,7 @@ public interface ShareSubscriptionProvider extends Ranked {
      * @return The information about the mount
      * @throws OXException In case of error
      */
-    ShareSubscriptionInformation mount(Session session, String shareLink, String shareName, String password) throws OXException;
+    ShareSubscriptionInformation subscribe(Session session, String shareLink, String shareName, String password) throws OXException;
 
     /**
      * Updates a mounted object
@@ -116,6 +116,6 @@ public interface ShareSubscriptionProvider extends Ranked {
      * @return <code>true</code> if the resource identified by the link was unmount, <code>false</code> otherwise
      * @throws OXException In case of missing service.
      */
-    boolean unmount(Session session, String shareLink) throws OXException;
+    boolean unsubscribe(Session session, String shareLink) throws OXException;
 
 }

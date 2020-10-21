@@ -13,6 +13,3 @@ properties:
         folder:
           type: string
           description: The folder ID of the subscrition
-        service:
-          type: string
-          description: The ID of the service that created the result.

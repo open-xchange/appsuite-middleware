@@ -53,6 +53,7 @@ import static com.openexchange.api.client.common.OXExceptionParser.matches;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE_WITH_PASSWORD;
 import static com.openexchange.share.subscription.ShareLinkState.FORBIDDEN;
+import static com.openexchange.share.subscription.ShareLinkState.REMOVED;
 import static com.openexchange.share.subscription.ShareLinkState.UNRESOLVABLE;
 import com.openexchange.api.client.ApiClient;
 import com.openexchange.api.client.ApiClientExceptions;
@@ -180,7 +181,9 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
              */
             if (isPasswordMissing(e)) {
                 builder.state(ADDABLE_WITH_PASSWORD);
-            } else {
+            } else if(isFolderRemoved(e)) {
+                builder.state(REMOVED);
+            }else {
                 builder.state(UNRESOLVABLE).error(ShareExceptionCodes.INVALID_LINK.create(shareLink));
             }
             logExcpetionDebug(e);
@@ -202,8 +205,8 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
     }
 
     @Override
-    public boolean unmount(Session session, String shareLink) throws OXException {
-        if (super.unmount(session, shareLink)) {
+    public boolean unsubscribe(Session session, String shareLink) throws OXException {
+        if (super.unsubscribe(session, shareLink)) {
             clearRemoteSessions(session, shareLink);
             return true;
         }

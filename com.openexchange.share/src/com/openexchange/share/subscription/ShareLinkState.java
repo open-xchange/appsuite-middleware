@@ -96,6 +96,11 @@ public enum ShareLinkState {
     /**
      * State to indicate that the subscription of the link is not allowed.
      */
-    FORBIDDEN;
+    FORBIDDEN,
+
+    /**
+     * State to indicate that the link belongs to a known share but is not subscribed at the moment.
+     */
+    UNSUBSCRIBED;
 
 }

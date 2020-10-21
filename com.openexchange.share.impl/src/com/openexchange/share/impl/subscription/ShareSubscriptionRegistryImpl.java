@@ -95,11 +95,11 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
     }
 
     @Override
-    public ShareSubscriptionInformation mount(Session session, String shareLink, String shareName, String password) throws OXException {
+    public ShareSubscriptionInformation subscribe(Session session, String shareLink, String shareName, String password) throws OXException {
         checkLinkIsUsable(shareLink);
         ShareSubscriptionProvider provider = getProvider(session, shareLink);
         if (null != provider) {
-            return provider.mount(session, shareLink, shareName, password);
+            return provider.subscribe(session, shareLink, shareName, password);
         }
         throw ShareSubscriptionExceptions.NOT_USABLE.create(shareLink);
     }
@@ -115,13 +115,13 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
     }
 
     @Override
-    public void unmount(Session session, String shareLink) throws OXException {
+    public void unsubscribe(Session session, String shareLink) throws OXException {
         checkLinkIsUsable(shareLink);
         /*
          * Try all providers because the link might not be marked supported by the actual provider anymore
          */
         for (Iterator<ShareSubscriptionProvider> iterator = iterator(); iterator.hasNext();) {
-            if (iterator.next().unmount(session, shareLink)) {
+            if (iterator.next().unsubscribe(session, shareLink)) {
                 return;
             }
         }

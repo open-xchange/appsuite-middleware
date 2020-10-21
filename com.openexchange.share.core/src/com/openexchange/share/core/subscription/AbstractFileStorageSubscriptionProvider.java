@@ -54,6 +54,7 @@ import static com.openexchange.share.subscription.ShareLinkState.CREDENTIALS_REF
 import static com.openexchange.share.subscription.ShareLinkState.INACCESSIBLE;
 import static com.openexchange.share.subscription.ShareLinkState.REMOVED;
 import static com.openexchange.share.subscription.ShareLinkState.SUBSCRIBED;
+import static com.openexchange.share.subscription.ShareLinkState.UNSUBSCRIBED;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -66,11 +67,15 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
@@ -96,6 +101,9 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public abstract class AbstractFileStorageSubscriptionProvider implements ShareSubscriptionProvider {
 
+    private static final String SYSTEM_USER_INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+    private static final String SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileStorageSubscriptionProvider.class);
 
     private static final String URL = "url";
@@ -118,12 +126,19 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
     }
 
     @Override
-    public ShareSubscriptionInformation mount(Session session, String shareLink, String shareName, String password) throws OXException {
+    public ShareSubscriptionInformation subscribe(Session session, String shareLink, String shareName, String password) throws OXException {
         requireAccess(session);
         FileStorageAccount existingAccount = getStorageAccount(session, shareLink);
         if (null != existingAccount) {
             LOGGER.debug("Found existing account with ID {}", existingAccount.getId());
-            return generateInfos(session, existingAccount.getId(), shareLink);
+            FileStorageAccountAccess accountAccess = fileStorageService.getAccountAccess(existingAccount.getId(), session);
+            try {
+                accountAccess.connect();
+                setSubscribed(accountAccess, shareLink, true);
+                return testAndGenerateInfos(accountAccess, shareLink);
+            } finally {
+                accountAccess.close();
+            }
         }
         /*
          * Setup new account
@@ -150,35 +165,48 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         /*
          * Create new account and access it
          */
-        String accountId = fileStorageService.getAccountManager().addAccount(storageAccount, session);
+        FileStorageAccountAccess accountAccess = null;
         try {
-            return generateInfos(session, accountId, shareLink);
+            String accountId = fileStorageService.getAccountManager().addAccount(storageAccount, session);
+            accountAccess = fileStorageService.getAccountAccess(accountId, session);
+            accountAccess.connect();
+            setSubscribed(accountAccess, shareLink, true);
+            return testAndGenerateInfos(accountAccess, shareLink);
         } catch (OXException e) {
             /**
-             * Account can't connect, remove it
+             * Account can't connect or be subscribed, remove it
              */
             fileStorageService.getAccountManager().deleteAccount(getStorageAccount(session, shareLink), session);
             throw e;
+        } finally {
+            if (null != accountAccess) {
+                accountAccess.close();
+            }
         }
     }
 
     @Override
-    public boolean unmount(Session session, String shareLink) throws OXException {
+    public boolean unsubscribe(Session session, String shareLink) throws OXException {
         FileStorageAccount storageAccount = getStorageAccount(session, shareLink);
-        if (null != storageAccount) {
-            if (false == hasAccess(session)) {
-                LOGGER.info("User {} in context {} tried to unmount share without appropriated permissions.", I(session.getUserId()), I(session.getContextId()));
-                return false;
-            }
-            /*
-             * Close access and remove account, announce successful closing
-             */
-            fileStorageService.getAccountAccess(storageAccount.getId(), session).close();
-            fileStorageService.getAccountManager().deleteAccount(storageAccount, session);
-            return true;
+        if (null == storageAccount) {
+            LOGGER.trace("No account found for {} in filestorage {}.", shareLink, fileStorageService.getClass().getSimpleName());
+            return false;
         }
-        LOGGER.trace("No account found for {} in filestorage {}.", shareLink, fileStorageService.getClass().getSimpleName());
-        return false;
+        if (false == hasAccess(session)) {
+            LOGGER.info("User {} in context {} tried to unmount share without appropriated permissions.", I(session.getUserId()), I(session.getContextId()));
+            return false;
+        }
+        FileStorageAccountAccess accountAccess = null;
+        try {
+            accountAccess = fileStorageService.getAccountAccess(storageAccount.getId(), session);
+            accountAccess.connect();
+            setSubscribed(accountAccess, shareLink, false);
+        } finally {
+            if (null != accountAccess) {
+                accountAccess.close();
+            }
+        }
+        return true;
     }
 
     @Override
@@ -214,7 +242,15 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         fileStorageService.getAccountAccess(storageAccount.getId(), session).close();
         fileStorageService.getAccountManager().updateAccount(updated, session);
 
-        return generateInfos(session, storageAccount.getId(), shareLink);
+        FileStorageAccountAccess accountAccess = null;
+        try {
+            accountAccess = fileStorageService.getAccountAccess(storageAccount.getId(), session);
+            return testAndGenerateInfos(accountAccess, shareLink);
+        } finally {
+            if (null != accountAccess) {
+                accountAccess.close();
+            }
+        }
     }
 
     /**
@@ -358,12 +394,14 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
              */
             accountAccess.connect();
 
-            // Folder ID is also always set for single item share
-            ShareTargetPath path = ShareTool.getShareTarget(shareLink);
-            if (null != path && Strings.isNotEmpty(path.getFolder())) {
+            String folderId = getFolderFrom(shareLink);
+            if (Strings.isNotEmpty(folderId)) {
                 FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
-                folderAccess.getPath2DefaultFolder(path.getFolder());
-                return builder.state(SUBSCRIBED);
+                folderAccess.getPath2DefaultFolder(folderId);
+                if (isSubscribed(accountAccess, shareLink)) {
+                    return builder.state(SUBSCRIBED);
+                }
+                return builder.state(UNSUBSCRIBED).error(ShareSubscriptionExceptions.UNSUBSCRIEBED_FOLDER.create(folderId));
             }
         } catch (OXException e) {
             if (isPasswordMissing(e)) {
@@ -383,7 +421,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
     }
 
     /**
-     * Generates the information about the account
+     * Generates the information about the account, test connection before
      *
      * @param session The session
      * @param accountId The account ID
@@ -391,20 +429,10 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      * @return The {@link ShareSubscriptionInformation}
      * @throws OXException In case of error
      */
-    protected ShareSubscriptionInformation generateInfos(Session session, String accountId, String shareLink) throws OXException {
-        if (Strings.isEmpty(accountId)) {
-            throw ShareSubscriptionExceptions.MISSING_SUBSCRIPTION.create(shareLink);
-        }
-
-        FileStorageAccountAccess accountAccess = fileStorageService.getAccountAccess(accountId, session);
-        try {
-            accountAccess.connect();
-            String folderId = ShareTool.getShareTarget(shareLink).getFolder();
-            accountAccess.getFolderAccess().getFolder(folderId);
-            return generateInfos(accountAccess, shareLink);
-        } finally {
-            accountAccess.close();
-        }
+    protected ShareSubscriptionInformation testAndGenerateInfos(FileStorageAccountAccess accountAccess, String shareLink) throws OXException {
+        String folderId = getFolderFrom(shareLink);
+        accountAccess.getFolderAccess().getFolder(folderId);
+        return generateInfos(accountAccess, shareLink);
     }
 
     /**
@@ -517,6 +545,81 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      */
     protected ShareSubscriptionInformation getModuleInfo() {
         return new ShareSubscriptionInformation(null, Module.INFOSTORE.getName(), null);
+    }
+
+    /**
+     * Extracts the folder ID from a share link
+     *
+     * @param shareLink The share link
+     * @return The folder ID or <code>null</code>
+     */
+    private String getFolderFrom(String shareLink) {
+        ShareTargetPath path = ShareTool.getShareTarget(shareLink);
+        if (null != path) {
+            return path.getFolder();
+        }
+        return null;
+    }
+
+    /**
+     * Set the subscribed flag to the root folder of the given folder
+     *
+     * @param session The session to use
+     * @param shareLink The share link to set the subscribed flag for
+     * @param accountId The file storage account ID
+     * @param subscribed <code>true</code> to subscribe, <code>false</code> to unsubscribe
+     * @throws OXException In case it can't be (un-)subscribed
+     */
+    private void setSubscribed(FileStorageAccountAccess accountAccess, String shareLink, boolean subscribed) throws OXException {
+        String folderId = getFolderFrom(shareLink);
+
+        /*
+         * Search for share or public root folder
+         */
+        FileStorageFolder rootFolder = getShareRootFolder(accountAccess, folderId);
+        if (null == rootFolder) {
+            throw FolderExceptionErrorMessage.NOT_FOUND.create(folderId, "");
+        }
+
+        /*
+         * Subscribe folder, root folder only at the moment
+         */
+        DefaultFileStorageFolder update = new DefaultFileStorageFolder();
+        update.setId(rootFolder.getId());
+        update.setSubscribed(subscribed);
+        accountAccess.getFolderAccess().updateFolder(rootFolder.getId(), update);
+    }
+
+    /**
+     * Set the subscribed flag to the root folder of the given folder
+     *
+     * @param session The session to use
+     * @param shareLink The share link to set the subscribed flag for
+     * @param accountId The file storage account ID
+     * @throws OXException In case parent folder can't be get
+     */
+    private boolean isSubscribed(FileStorageAccountAccess accountAccess, String shareLink) throws OXException {
+        String folderId = getFolderFrom(shareLink);
+        FileStorageFolder rootFolder = getShareRootFolder(accountAccess, folderId);
+        return null != rootFolder && rootFolder.isSubscribed();
+    }
+
+    /**
+     * Get the shares root folder. The parent of this folder might be the user or the public infostore folder
+     *
+     * @param accountAccess The access to use
+     * @param folderId The folder to resolve the path to
+     * @return The root folder or <code>null</code>
+     * @throws OXException If path can't be resolved
+     */
+    private FileStorageFolder getShareRootFolder(FileStorageAccountAccess accountAccess, String folderId) throws OXException {
+        for (FileStorageFolder folder : accountAccess.getFolderAccess().getPath2DefaultFolder(folderId)) {
+            String id = folder.getParentId();
+            if (Strings.isNotEmpty(id) && SYSTEM_USER_INFOSTORE_FOLDER_ID.equals(id) || SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID.equals(id)) {
+                return folder;
+            }
+        }
+        return null;
     }
 
 }

@@ -1,10 +1,10 @@
-/share/management?action=mount:
+/share/management?action=subscribe:
   put:
-    operationId: mount
+    operationId: subscribeShare
     tags:
       - Share/Management
       - FederatedSharing
-    summary: Mounts a share that is associated with a specific share link from a remote server.
+    summary: Subscribes to a share that is associated with a specific share link from a remote server.
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
@@ -17,12 +17,12 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MountShareResponse'
+              $ref: '#/components/schemas/SubscribeShareResponse'
     requestBody:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ExtendedMountShareBody'
+            $ref: '#/components/schemas/ExtendedSubscribeShareBody'
       description: >-
         A JSON object containing the data for the update
       required: true

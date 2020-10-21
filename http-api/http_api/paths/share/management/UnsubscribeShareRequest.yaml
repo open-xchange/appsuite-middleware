@@ -1,10 +1,12 @@
-/share/management?action=unmount:
+/share/management?action=unsubscribe:
   put:
-    operationId: unmount
+    operationId: unsubscribeShare
     tags:
       - Share/Management
       - FederatedSharing
-    summary: Delets a federated share.
+    summary: |
+             Unsubscribes from a certain share. However undelying accounts will not be deleted.
+             To delete the underlying account use the account API.
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
@@ -22,7 +24,7 @@
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/MountShareBody'
+            $ref: '#/components/schemas/SubscribeShareBody'
       description: >-
         A JSON object containing the data for the update
       required: true

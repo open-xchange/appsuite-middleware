@@ -53,11 +53,11 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import org.junit.Test;
-import com.openexchange.testing.httpclient.models.ExtendedMountShareBody;
+import com.openexchange.testing.httpclient.models.ExtendedSubscribeShareBody;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
-import com.openexchange.testing.httpclient.models.MountShareResponse;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponseData.StateEnum;
+import com.openexchange.testing.httpclient.models.SubscribeShareResponse;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 
 /**
@@ -108,8 +108,8 @@ public class ShareManagementInternalSubscriptionTest extends AbstractShareManage
         folderId = setFolderPermission(folderId, originalPermissions);
         analyze(smApi2, shareLink, StateEnum.INACCESSIBLE);
 
-        ExtendedMountShareBody body = getExtendedBody(shareLink, null, "Share from " + testUser.getLogin());
-        MountShareResponse mountShareResponse = smApi2.mount(smApi2.getApiClient().getSession(), body);
+        ExtendedSubscribeShareBody body = getExtendedBody(shareLink, null, "Share from " + testUser.getLogin());
+        SubscribeShareResponse mountShareResponse = smApi2.subscribeShare(smApi2.getApiClient().getSession(), body);
         assertThat(mountShareResponse.getErrorDesc(), is("You don't have enough permissions to perform the operation."));
     }
 

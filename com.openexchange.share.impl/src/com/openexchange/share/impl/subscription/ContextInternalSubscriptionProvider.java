@@ -50,6 +50,9 @@
 package com.openexchange.share.impl.subscription;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.share.subscription.ShareLinkState.INACCESSIBLE;
+import static com.openexchange.share.subscription.ShareLinkState.SUBSCRIBED;
+import static com.openexchange.share.subscription.ShareLinkState.UNSUBSCRIBED;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.slf4j.Logger;
@@ -65,7 +68,7 @@ import com.openexchange.session.Session;
 import com.openexchange.share.Links;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
-import com.openexchange.share.subscription.ShareLinkState;
+import com.openexchange.share.subscription.ShareLinkAnalyzeResult.Builder;
 import com.openexchange.share.subscription.ShareSubscriptionExceptions;
 import com.openexchange.share.subscription.ShareSubscriptionInformation;
 import com.openexchange.share.subscription.ShareSubscriptionProvider;
@@ -140,15 +143,23 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
         try {
             UserizedFolder folder = folderService.getFolder(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), folderId, session, null);
             int module = folder.getContentType().getModule();
-            return new ShareLinkAnalyzeResult(ShareLinkState.SUBSCRIBED, new ShareSubscriptionInformation(folder.getAccountID(), Module.getForFolderConstant(module).getName(), folderId));
+
+            Builder builder = new Builder();
+            builder.infos(new ShareSubscriptionInformation(folder.getAccountID(), Module.getForFolderConstant(module).getName(), folderId));
+            if (folder.isSubscribed()) {
+                builder.state(SUBSCRIBED);
+            } else {
+                builder.state(UNSUBSCRIBED).error(ShareSubscriptionExceptions.UNSUBSCRIEBED_FOLDER.create(folder.getID()));
+            }
+            return builder.build();
         } catch (OXException e) {
             LOGGER.debug("Unable to access the folder", e);
-            return new ShareLinkAnalyzeResult(ShareLinkState.INACCESSIBLE, ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(I(session.getUserId()), folderId, I(session.getContextId()), e), null);
+            return new ShareLinkAnalyzeResult(INACCESSIBLE, ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(I(session.getUserId()), folderId, I(session.getContextId()), e), null);
         }
     }
 
     @Override
-    public ShareSubscriptionInformation mount(Session session, String shareLink, String shareName, String password) throws OXException {
+    public ShareSubscriptionInformation subscribe(Session session, String shareLink, String shareName, String password) throws OXException {
         throw ShareSubscriptionExceptions.MISSING_PERMISSIONS.create();
     }
 
@@ -158,7 +169,7 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
     }
 
     @Override
-    public boolean unmount(Session session, String shareLink) throws OXException {
+    public boolean unsubscribe(Session session, String shareLink) throws OXException {
         return false;
     }
 
@@ -181,7 +192,7 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
     }
 
     private static ShareLinkAnalyzeResult incaccessible(String link) {
-        return new ShareLinkAnalyzeResult(ShareLinkState.INACCESSIBLE, ShareExceptionCodes.INVALID_LINK.create(link), null);
+        return new ShareLinkAnalyzeResult(INACCESSIBLE, ShareExceptionCodes.INVALID_LINK.create(link), null);
     }
 
 }

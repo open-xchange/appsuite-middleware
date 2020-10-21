@@ -87,11 +87,16 @@ public enum ShareSubscriptionExceptions implements DisplayableOXExceptionCode {
      * Unable to interpret the link \"%1$s\".
      */
     NOT_USABLE("Unable to interpret the link \"%1$s\".", Category.CATEGORY_ERROR, 5),
-    
+
     /**
      * You don't have enough permissions to perform the operation.
      */
     MISSING_PERMISSIONS("You don't have enough permissions to perform the operation.", Category.CATEGORY_ERROR, 6),
+    
+    /**
+     * The folder %1$s belongs to a folder tree that is unsubscribed.
+     */
+    UNSUBSCRIEBED_FOLDER("The folder %1$s belongs to a folder tree that is unsubscribed.", Category.CATEGORY_WARNING, 7),
 
     ;
 
