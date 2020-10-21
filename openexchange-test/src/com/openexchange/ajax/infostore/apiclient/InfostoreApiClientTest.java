@@ -159,8 +159,39 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
     }
 
     protected String uploadInfoItem(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, String filename) throws ApiException {
-        String name = filename==null ? file.getName() : filename;
+        String name = filename == null ? file.getName() : filename;
         InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, name, bytes, timestamp, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, Boolean.FALSE, Boolean.FALSE, offset, null);
+        Assert.assertNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
+        Assert.assertNotNull(uploadInfoItem.getData());
+        timestamp = uploadInfoItem.getTimestamp();
+        return uploadInfoItem.getData();
+    }
+
+    protected String uploadInfoItem(String id, InfoItemData file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, String filename) throws ApiException {
+        String name = filename == null ? file.getFilename() : filename;
+        // @formatter:off
+        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(
+            getApiClient().getSession(), 
+            folderId, 
+            name, 
+            bytes, 
+            timestamp, 
+            id, 
+            name, 
+            mimeType, 
+            null, 
+            null, 
+            null, 
+            null, 
+            versionComment, 
+            null, 
+            null, 
+            filesize == null ? Long.valueOf(bytes.length) : filesize, 
+            Boolean.FALSE, 
+            Boolean.FALSE, 
+            offset, 
+            null);
+        // @formatter:on
         Assert.assertNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
         Assert.assertNotNull(uploadInfoItem.getData());
         timestamp = uploadInfoItem.getTimestamp();
@@ -193,7 +224,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
     }
 
     protected void rememberFolder(String folder) {
-       folders.add(folder);
+        folders.add(folder);
     }
 
     protected InfoItemData getItem(String id) throws ApiException {
@@ -289,6 +320,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
     }
 
     protected void assertFileExistsInFolder(String folderId, String itemId) throws Exception {
+        // @formatter:off
         InfoItemsResponse allInfoItems = infostoreApi.getAllInfoItems(getApiClient().getSession(),
             folderId,
             Integer.toString(Metadata.ID),
@@ -298,6 +330,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
             null,
             null,
             null);
+        // @formatter:off
         List<List<String>> ret = (List<List<String>>)checkResponse(allInfoItems.getError(), allInfoItems.getErrorDesc(), allInfoItems.getData());
         Assert.assertTrue("The item is not present in the given folder", ret.stream().filter( l -> l.contains(itemId)).count() == 1);
     }
@@ -309,7 +342,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
      * @param perms The new permissions
      * @throws ApiException
      */
-    protected void updatePermissions(String id, List<InfoItemPermission> perms) throws ApiException{
+    protected void updatePermissions(String id, List<InfoItemPermission> perms) throws ApiException {
         updatePermissions(id, perms, Optional.empty());
     }
 
@@ -322,13 +355,13 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
      * @param errorCode The expected error code
      * @throws ApiException
      */
-    protected void updatePermissions(String id, List<InfoItemPermission> perms, Optional<String> errorCode) throws ApiException{
+    protected void updatePermissions(String id, List<InfoItemPermission> perms, Optional<String> errorCode) throws ApiException {
         InfoItemData file = new InfoItemData();
         file.setObjectPermissions(perms);
         InfoItemBody body = new InfoItemBody();
         body.file(file);
         InfoItemUpdateResponse resp = infostoreApi.updateInfoItem(getSessionId(), id, timestamp, body, null);
-        if(errorCode.isPresent()) {
+        if (errorCode.isPresent()) {
             assertNotNull("Expected an error but the response didn't contain one.", resp.getError());
             assertEquals("Request returned with an unexpected error: " + resp.getErrorDesc(), errorCode.get(), resp.getCode());
             return;

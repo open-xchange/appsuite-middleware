@@ -70,6 +70,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.customizer.file.AdditionalFileField;
+import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
@@ -87,9 +88,11 @@ import com.openexchange.file.storage.composition.crypto.CryptographicAwareIDBase
 import com.openexchange.file.storage.composition.crypto.CryptographyMode;
 import com.openexchange.file.storage.json.FileFieldCollector;
 import com.openexchange.file.storage.json.FileMetadataParser;
+import com.openexchange.file.storage.json.FileSearchTermParser;
 import com.openexchange.file.storage.json.ParameterBasedFileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.file.storage.json.services.Services;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.infostore.utils.UploadSizeValidation;
@@ -108,6 +111,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -438,6 +442,29 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         } catch (JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
         }
+    }
+
+    @Override
+    public SearchTerm<?> getSearchTerm() throws OXException {
+        JSONArray jsonArray = this.getJSONData().optJSONArray("filter");
+        if (null == jsonArray) {
+            throw OXJSONExceptionCodes.MISSING_FIELD.create("filter");
+        }
+
+        com.openexchange.search.SearchTerm<?> term = SearchTermParser.parse(jsonArray);
+
+        return FileSearchTermParser.parseSearchTerm(term);
+    }
+
+    @Override
+    public JSONObject getJSONData() throws OXException {
+        Object data = this.data.getData();
+        if (null == data) {
+            throw OXJSONExceptionCodes.MISSING_FIELD.create("data");
+        } else if (false == JSONObject.class.isInstance(data)) {
+            throw OXJSONExceptionCodes.INVALID_VALUE.create("data", data.toString());
+        }
+        return (JSONObject) data;
     }
 
     @Override
@@ -951,7 +978,6 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                     fields.add(File.Field.FILE_MIMETYPE);
                 }
 
-
                 long size = streamedUploadFile.getSize();
                 if (size >= 0) {
                     file.setFileSize(size);
@@ -1112,9 +1138,9 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                     fieldsToLoad.add(field);
                     requestedColumns[i] = field.getNumber();
                 } else {
-                /*
-                 * check additionally registered file fields
-                 */
+                    /*
+                     * check additionally registered file fields
+                     */
                     FileFieldCollector fieldCollector;
                     if (null == fieldCollectorRef) {
                         fieldCollector = Services.getFieldCollector();
@@ -1130,11 +1156,11 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                         }
                         requestedColumns[i] = additionalField.getColumnID();
                     } else {
-                /*
-                 * unknown column
-                 */
-                unknownColumns.add(columns[i]);
-            }
+                        /*
+                         * unknown column
+                         */
+                        unknownColumns.add(columns[i]);
+                    }
                 }
             }
             if (0 < unknownColumns.size()) {
