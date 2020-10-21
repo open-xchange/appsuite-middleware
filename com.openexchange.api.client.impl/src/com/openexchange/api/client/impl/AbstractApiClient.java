@@ -64,7 +64,9 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.LockSupport;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -117,6 +119,12 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 public abstract class AbstractApiClient implements ApiClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractApiClient.class);
+
+    /** The default maximum number of retry attempts */
+    private static final int DEFAULT_RETRIES = 5;
+
+    /** The base number of milliseconds to wait until retrying */
+    private static final int RETRY_BASE_DELAY = 500;
 
     /** The content type for "text/javascript" */
     public static final ContentType TEXT_JAVA_SCRIPT = ContentType.create("text/javascript");
@@ -210,10 +218,8 @@ public abstract class AbstractApiClient implements ApiClient {
             OXException oxException = response.getEntity() != null && response.getEntity().isRepeatable() ? getNestedOXException(response) : null;
             if (null != oxException && !enquedRequest) {
                 if (matches(SessionExceptionCodes.SESSION_EXPIRED, oxException)) {
-                    isClosed.set(true);
-                    cookieStore.clear();
-                    //do not throw the original session_expired exception to prevent confusion with the local session
-                    throw ApiClientExceptions.SESSION_EXPIRED.create();
+                    reLogin();
+                    return execute(request, parser);
                 }
                 throw oxException;
             }
@@ -529,6 +535,45 @@ public abstract class AbstractApiClient implements ApiClient {
         }
 
         LOGGER.trace("Received response. Cookies \"{}\".\nResponse content:\n\n{}\n", cookieStore, content, new OXException(999, "TRACE stack trace"));
+    }
+
+    /**
+     * Tries to login the client again. Will wait a certain time after
+     * a login request failed.
+     * <p>
+     * If the login constantly fails, the client will be closed as per
+     * {@link #isClosed}
+     *
+     * @throws OXException In case a valid session can't be obtained, or the login fails because of another reason then {@link SessionExceptionCodes#SESSION_EXPIRED}
+     */
+    private synchronized void reLogin() throws OXException {
+        for (int retryCount = 0; retryCount <= DEFAULT_RETRIES; retryCount++) {
+            try {
+                cookieStore.clear();
+                doLogin();
+                return;
+            } catch (OXException e) {
+                if (false == matches(ApiClientExceptions.NO_ACCESS, e)) {
+                    throw e;
+                }
+
+                if (retryCount == DEFAULT_RETRIES) {
+                    /*
+                     * Login attempts failed. Throw error and close client. Logout doen't need to be performed, as no valid session is available
+                     */
+                    LOGGER.info("Can't obtain a valid session at host {} for user {} in context {}", I(contextId), I(userId), loginLink.getHost(), e);
+                    isClosed.set(true);
+                    cookieStore.clear();
+                    throw ApiClientExceptions.SESSION_EXPIRED.create(e);
+                }
+                /*
+                 * Try login after a certain amount of time again
+                 */
+                int delay = RETRY_BASE_DELAY * retryCount;
+                LOGGER.debug("Error during automatic login (\"{}\"), trying again in {}ms ({}/{})...", e.getMessage(), I(delay), I(retryCount), I(DEFAULT_RETRIES));
+                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(delay));
+            }
+        }
     }
 
     /**
