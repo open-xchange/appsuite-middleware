@@ -56,6 +56,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.serverconfig.ServerConfigService;
 
 /**
  * {@link OnboardingEASActivator}
@@ -74,7 +75,7 @@ public class OnboardingEASActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, ServerConfigService.class };
     }
 
     @Override

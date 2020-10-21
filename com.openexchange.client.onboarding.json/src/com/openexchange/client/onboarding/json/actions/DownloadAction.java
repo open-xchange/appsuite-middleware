@@ -49,24 +49,31 @@
 
 package com.openexchange.client.onboarding.json.actions;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.json.JSONException;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.client.onboarding.BuiltInProvider;
+import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
+import com.openexchange.client.onboarding.plist.PListSigner;
 import com.openexchange.client.onboarding.plist.PlistScenario;
 import com.openexchange.client.onboarding.plist.PlistScenarioType;
 import com.openexchange.client.onboarding.plist.PlistUtility;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.plist.PListDict;
+import com.openexchange.plist.PListWriter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -162,12 +169,36 @@ public class DownloadAction extends AbstractOnboardingAction {
             }
         }
 
-        // Generate synthetic scenario
+        // Generate synthetic scenario and sign result
         PListDict dict = null;
         for (Map.Entry<String, OnboardingPlistProvider> providerEntry : onboardingProviders.entrySet()) {
             OnboardingPlistProvider provider = providerEntry.getValue();
             PlistScenario scenario = PlistScenario.newInstance(providerEntry.getKey(), Collections.singletonList(provider));
             dict = provider.getPlist(dict, scenario, requestData.getHostData().getHost(), session.getUserId(), session.getContextId());
+        }
+        PListSigner signer = services.getOptionalService(PListSigner.class);
+        if (null != signer) {
+            boolean error = true;
+            ThresholdFileHolder fileHolder = null;
+            try {
+                fileHolder = new ThresholdFileHolder();
+                fileHolder.setDisposition("attachment");
+                fileHolder.setName("profile.mobileconfig");
+                fileHolder.setContentType("application/x-apple-aspen-config");
+                fileHolder.setDelivery("download");
+                new PListWriter().write(dict, fileHolder.asOutputStream());
+                IFileHolder signed = signer.signPList(fileHolder, session);
+                fileHolder = new ThresholdFileHolder(signed);
+                signed.close();
+                error = false;
+                return new AJAXRequestResult(fileHolder, "signed_plist_download");
+            } catch (IOException e) {
+                throw OnboardingExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } finally {
+                if (error) {
+                    Streams.close(fileHolder);
+                }
+            }
         }
         return new AJAXRequestResult(dict, "plist_download");
     }

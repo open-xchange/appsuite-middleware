@@ -58,6 +58,7 @@ import com.openexchange.client.onboarding.json.OnboardingActionFactory;
 import com.openexchange.client.onboarding.json.converter.OnboardingViewConverter;
 import com.openexchange.client.onboarding.json.converter.PListDownloadConverter;
 import com.openexchange.client.onboarding.json.converter.ScenarioConverter;
+import com.openexchange.client.onboarding.json.converter.SignedPListDownloadConverter;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 
@@ -88,6 +89,7 @@ public class OnboardingJsonActivator extends AJAXModuleActivator {
         registerService(ResultConverter.class, new OnboardingViewConverter(this));
         registerService(ResultConverter.class, new ScenarioConverter(this));
         registerService(ResultConverter.class, new PListDownloadConverter());
+        registerService(ResultConverter.class, new SignedPListDownloadConverter());
         registerModule(new OnboardingActionFactory(this), "onboarding");
     }
 

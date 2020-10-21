@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,45 +47,51 @@
  *
  */
 
-package com.openexchange.client.onboarding.carddav.osgi;
+package com.openexchange.client.onboarding.json.converter;
 
-import com.openexchange.client.onboarding.OnboardingProvider;
-import com.openexchange.client.onboarding.carddav.CardDAVOnboardingProvider;
-import com.openexchange.client.onboarding.carddav.custom.CustomLoginSource;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link CardDAVOnboardingActivator}
+ * {@link SignedPListDownloadConverter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.5
  */
-public class CardDAVOnboardingActivator extends HousekeepingActivator {
+public class SignedPListDownloadConverter implements ResultConverter {
 
-    /**
-     * Initializes a new {@link CardDAVOnboardingActivator}.
-     */
-    public CardDAVOnboardingActivator() {
-        super();
+    @Override
+    public String getInputFormat() {
+        return "signed_plist_download";
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, ServerConfigService.class };
+    public String getOutputFormat() {
+        return "apiResponse";
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        RankingAwareNearRegistryServiceTracker<CustomLoginSource> loginSources = new RankingAwareNearRegistryServiceTracker<>(context, CustomLoginSource.class);
-        rememberTracker(loginSources);
-        openTrackers();
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
 
-        registerService(OnboardingProvider.class, new CardDAVOnboardingProvider(loginSources, this));
+    @Override
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        ThresholdFileHolder fileHolder = (ThresholdFileHolder) result.getResultObject();
+        try {
+            result.setResultObject(fileHolder, "file");
+        } catch (RuntimeException e) {
+            Streams.close(fileHolder);
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
 }
