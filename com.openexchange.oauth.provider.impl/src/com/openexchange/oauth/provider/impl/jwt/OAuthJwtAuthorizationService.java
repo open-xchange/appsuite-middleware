@@ -93,13 +93,13 @@ public class OAuthJwtAuthorizationService extends AbstractAuthorizationService i
 
     private static final Logger LOG = LoggerFactory.getLogger(OAuthJwtAuthorizationService.class);
 
-    private LeanConfigurationService leanConfService;
-    private ConfigurableJWTProcessor<SecurityContext> jwtProcessor;
+    private final LeanConfigurationService leanConfService;
+    private final ConfigurableJWTProcessor<SecurityContext> jwtProcessor;
     private ConfigAwareKeyStore configAwareKeystore;
 
     /**
      * Initializes a new {@link OAuthJwtAuthorizationService}.
-     * 
+     *
      * @param leanConfService
      * @param scopeService
      * @throws OXException
@@ -128,7 +128,7 @@ public class OAuthJwtAuthorizationService extends AbstractAuthorizationService i
      * @throws OXException
      */
     JWKSource<SecurityContext> getKeySource() throws OXException {
-        if (!leanConfService.getProperty(OAuthJWTProperty.JWKS_ENDPOINT).isEmpty()) {
+        if (Strings.isNotEmpty(leanConfService.getProperty(OAuthJWTProperty.JWKS_ENDPOINT))) {
             return getRemoteJWKS();
         }
         return getLocalKeystore();
@@ -145,7 +145,7 @@ public class OAuthJwtAuthorizationService extends AbstractAuthorizationService i
             String endpoint = leanConfService.getProperty(OAuthJWTProperty.JWKS_ENDPOINT);
             return new RemoteJWKSet<>(new URL(endpoint));
         } catch (MalformedURLException e) {
-            throw OAuthJWTExceptionCode.JWT_VALIDATON_FAILED.create(e, "Unable to parse JWKSet URL");
+            throw OAuthJWTExceptionCode.SERVICE_CONFIGURATION_FAILED.create(e, "Unable to parse JWKSet URL");
         }
     }
 
@@ -163,7 +163,11 @@ public class OAuthJwtAuthorizationService extends AbstractAuthorizationService i
 
             String keystorePath = leanConfService.getProperty(OAuthJWTProperty.KEYSTORE_PATH);
             String keyStorePassword = leanConfService.getProperty(OAuthJWTProperty.KEYSTORE_PASSWORD);
-
+            
+            if(Strings.isEmpty(keystorePath)) {
+                throw OAuthJWTExceptionCode.SERVICE_CONFIGURATION_FAILED.create("Missing required property: " + OAuthJWTProperty.KEYSTORE_PATH.getFQPropertyName());
+            }
+            
             Properties properties = new Properties();
             properties.put(OAuthJWTProperty.KEYSTORE_PATH.getFQPropertyName(), keystorePath);
             properties.put(OAuthJWTProperty.KEYSTORE_PASSWORD.getFQPropertyName(), keyStorePassword);
@@ -179,12 +183,12 @@ public class OAuthJwtAuthorizationService extends AbstractAuthorizationService i
             });
             return new ImmutableJWKSet<>(jwkSet);
         } catch (KeyStoreException | FileNotFoundException e) {
-            throw OAuthJWTExceptionCode.JWT_VALIDATON_FAILED.create(e, "Unable to load local keystore");
+            throw OAuthJWTExceptionCode.SERVICE_CONFIGURATION_FAILED.create(e, "Unable to load local keystore");
         }
     }
 
     /**
-     * 
+     *
      * Creates and configures {@link ConfigurableJWTProcessor} with a custom {@link OAuthJWTClaimVerifier} and {@link JWSKeySelector}.
      *
      * @return the configured {@link ConfigurableJWTProcessor}

@@ -83,11 +83,11 @@ public abstract class AbstractAuthorizationService implements OAuthAuthorization
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractAuthorizationService.class);
 
-    private OAuthJWTScopeService scopeService;
+    private final OAuthJWTScopeService scopeService;
 
     /**
      * Initializes a new {@link AbstractAuthorizationService}.
-     * 
+     *
      * @param scopeService
      */
     protected AbstractAuthorizationService(OAuthJWTScopeService scopeService) {
@@ -126,7 +126,7 @@ public abstract class AbstractAuthorizationService implements OAuthAuthorization
     /**
      * Determines the {@link Context} of a user for which a {@link JWTClaimsSet} has been obtained.
      * The corresponding {@link Context} is resolved from configured claim (default = "sub").
-     * 
+     *
      * @param claimsSet contains all claims
      * @return the resolved {@link Context}.
      * @throws OXException

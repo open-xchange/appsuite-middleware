@@ -50,6 +50,7 @@
 package com.openexchange.oauth.provider.impl.jwt;
 
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.List;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -65,14 +66,16 @@ import com.openexchange.java.Strings;
  */
 public class OAuthJWTClaimVerifier<T extends SecurityContext> extends DefaultJWTClaimsVerifier<T> {
 
+    public static final OAuthJWTClaimVerifier<SecurityContext> DEFAULT_VERIFIER = new OAuthJWTClaimVerifier<SecurityContext>(Collections.emptyList());
+
     public static final String SCOPE_CLAIM_NAME = "scope";
     public static final String AUTHORIZED_PARTY_CLAIM_NAME = "azp";
 
-    private List<String> issuer;
+    private final List<String> issuer;
 
     /**
      * Initializes a new {@link OAuthJWTClaimVerifier}.
-     * 
+     *
      * @param issuer Allowed JWT issuer
      */
     public OAuthJWTClaimVerifier(List<String> issuer) {
@@ -80,20 +83,18 @@ public class OAuthJWTClaimVerifier<T extends SecurityContext> extends DefaultJWT
         this.issuer = issuer;
     }
 
-    
-    
     @Override
     public void verify(JWTClaimsSet claimsSet, T context) throws BadJWTException {
         super.verify(claimsSet, context);
         verify(claimsSet);
     }
 
-
     @Override
     public void verify(JWTClaimsSet claimsSet) throws BadJWTException {
         try {
             //Verify that the JWT issuer matches the configured issuer and therefore is allowed.
-            if (!issuer.get(0).isEmpty() && !issuer.contains(claimsSet.getIssuer())) {
+
+            if (issuer.isEmpty() == false && (issuer.size() > 1 || Strings.isNotEmpty(issuer.get(0))) && !issuer.contains(claimsSet.getIssuer())) {
                 throw new BadJWTException("JWT validation failed because of invalid issuer: " + claimsSet.getIssuer());
             }
 
@@ -108,7 +109,7 @@ public class OAuthJWTClaimVerifier<T extends SecurityContext> extends DefaultJWT
             }
 
         } catch (ParseException e) {
-            e.printStackTrace();
+            throw new BadJWTException("Unable to parse claim", e);
         }
     }
 

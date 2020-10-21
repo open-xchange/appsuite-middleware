@@ -52,14 +52,12 @@ package com.openexchange.oauth.provider.impl.introspection;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -98,7 +96,7 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
 
     /**
      * Initializes a new {@link OAuthIntrospectionAuthorizationService}.
-     * 
+     *
      * @param leanConfService the {@link LeanConfigurationService}
      * @param scopeService the {@link OAuthJWTScopeService}
      */
@@ -113,15 +111,15 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
                 if (resp.indicatesSuccess()) {
                     long expiration = ((TokenIntrospectionSuccessResponse) resp).getExpirationTime().getTime();
                     long current = System.currentTimeMillis();
-                    
+
                     //The response contains the "exp" parameter (expiration), the response
-                    //MUST NOT be cached beyond the time indicated therein - RFC 7662   
+                    //MUST NOT be cached beyond the time indicated therein - RFC 7662
                     TTL = expiration - current;
-                } else {
-                    TTL = TimeUnit.MILLISECONDS.convert(30L, TimeUnit.SECONDS);
+                    return TimeUnit.MILLISECONDS.toNanos(TTL);
                 }
 
-                return TimeUnit.MILLISECONDS.toNanos(TTL);
+                // Store unsuccessful responses for 30 seconds
+                return TimeUnit.SECONDS.toNanos(30);
             }
 
             @Override
@@ -166,9 +164,8 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
      * @throws BadJWTException
      */
     private JWTClaimsSet parseResponseToClaimSet(TokenIntrospectionSuccessResponse introspectionSuccessResponse) throws java.text.ParseException, BadJWTException {
-        OAuthJWTClaimVerifier<SecurityContext> claimVerifier = new OAuthJWTClaimVerifier<SecurityContext>(Arrays.asList(""));
         JWTClaimsSet claimsSet = JWTClaimsSet.parse(introspectionSuccessResponse.toJSONObject());
-        claimVerifier.verify(claimsSet);
+        OAuthJWTClaimVerifier.DEFAULT_VERIFIER.verify(claimsSet);
         return claimsSet;
     }
 
@@ -176,7 +173,7 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
      * Introspect and verify that the provided token is active.
      *
      * @param accessToken the token to introspect
-     * @return {@link TokenIntrospectionSuccessResponse} containing the token's attributes
+     * @return {@link TokenIntrospectionResponse} containing the token's attributes
      * @throws AuthorizationException
      */
     public TokenIntrospectionResponse introspect(String accessToken) throws AuthorizationException {
@@ -190,8 +187,8 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
     /**
      * Send the introspection request and retrieve the response.
      *
-     * @param httpRequest the {@link HTTPRequest}
-     * @return the {@link HTTPResponse}
+     * @param accessToken the access token to inspect
+     * @return the {@link TokenIntrospectionResponse}
      * @throws OXException
      */
     private TokenIntrospectionResponse makeRequest(String accessToken) throws OXException {
@@ -209,7 +206,7 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
      *
      * @param response the {@link HTTPResponse} from introspection request.
      * @return Either {@link TokenIntrospectionSuccessResponse} or {@link TokenIntrospectionErrorResponse}.
-     * @throws OXException
+     * @throws OXException in case of a parsing error
      */
     private TokenIntrospectionResponse parseResponse(HTTPResponse response) throws OXException {
         try {
@@ -228,7 +225,7 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
      */
     private HTTPRequest buildRequest(String accessToken) throws OXException {
         Token token = new BearerAccessToken(accessToken);
-        
+
         ClientSecretBasic clientSecretBasic = null;
         boolean basicAuthEnabled = leanConfService.getBooleanProperty(OAuthIntrospectionProperty.BASIC_AUTH_ENABLED);
         if (basicAuthEnabled) {
@@ -243,7 +240,7 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
         }else {
             request = new TokenIntrospectionRequest(introspectionEndpoint, token);
         }
-        
+
         return request.toHTTPRequest();
     }
 
@@ -255,7 +252,7 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
      */
     private URI getIntrospectionEndpoint() throws OXException {
         String introspectionEndpoint = leanConfService.getProperty(OAuthIntrospectionProperty.ENDPOINT);
-        if (!Strings.isEmpty(introspectionEndpoint)) {
+        if (Strings.isNotEmpty(introspectionEndpoint)) {
             try {
                 return new URI(leanConfService.getProperty(OAuthIntrospectionProperty.ENDPOINT));
             } catch (URISyntaxException e) {
@@ -274,7 +271,7 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
     private ClientSecretBasic createClientSecretBasic() throws OXException {
         String clientID = leanConfService.getProperty(OAuthIntrospectionProperty.CLIENT_ID);
         String secret = leanConfService.getProperty(OAuthIntrospectionProperty.CLIENT_SECRET);
-        if (clientID.isEmpty() || secret.isEmpty()) {
+        if (Strings.isEmpty(clientID) || Strings.isEmpty(secret)) {
             throw OAuthIntrospectionExceptionCode.UNABLE_TO_LOAD_CLIENT_CREDENTIALS.create();
         }
         return new ClientSecretBasic(new ClientID(clientID), new Secret(secret));

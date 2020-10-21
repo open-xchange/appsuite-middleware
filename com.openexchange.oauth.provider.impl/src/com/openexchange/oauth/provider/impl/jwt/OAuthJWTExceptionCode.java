@@ -78,9 +78,9 @@ public enum OAuthJWTExceptionCode implements OXExceptionCode {
     UNABLE_TO_LOAD_VALID_SCOPE("Unable to load valid scope from claim: '%1$s'", Category.CATEGORY_ERROR, 3),
 
     /**
-     * JWT validation failed because of internal errors: '%1$s'
+     * Service configuration failed because of internal errors: '%1$s'
      */
-    JWT_VALIDATON_FAILED("JWT validation failed because of internal errors: '%1$s'", Category.CATEGORY_ERROR, 4),
+    SERVICE_CONFIGURATION_FAILED("Oauth JWT service configuration failed because of internal errors: '%1$s'", Category.CATEGORY_ERROR, 4),
 
     /**
      * Unable to parse JWT claim: '%1$s'
