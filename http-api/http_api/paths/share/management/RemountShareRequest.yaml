@@ -17,12 +17,12 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MountShareResponse'
+              $ref: '#/components/schemas/SubscribeShareResponse'
     requestBody:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ExtendedMountShareBody'
+            $ref: '#/components/schemas/ExtendedSubscribeShareBody'
       description: >-
         A JSON object containing the data for the update
       required: true

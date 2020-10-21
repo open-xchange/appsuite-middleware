@@ -49,41 +49,37 @@
 
 package com.openexchange.share.json.actions;
 
-import org.json.JSONException;
+import java.util.Date;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.subscription.ShareSubscriptionInformation;
 import com.openexchange.share.subscription.ShareSubscriptionRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MountShareAction} - Mounts a share that is associated with a specific share link from a remote server.
+ * {@link UnsubscribeShareAction} - Unsubscribes a share that is associated with a specific share link from a remote server
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class MountShareAction extends AbstractShareSubscriptionAction {
+public class UnsubscribeShareAction extends AbstractShareSubscriptionAction {
 
     /**
-     * Initializes a new {@link MountShareAction}.
+     * Initializes a new {@link UnsubscribeShareAction}.
      * 
      * @param services The service lookup
      */
-    public MountShareAction(ServiceLookup services) {
+    public UnsubscribeShareAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, JSONObject json, String shareLink) throws OXException, JSONException {
+    AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, JSONObject json, String shareLink) throws OXException {
         ShareSubscriptionRegistry service = services.getServiceSafe(ShareSubscriptionRegistry.class);
-        String password = json.optString(PASSWORD);
-        String shareName = json.optString(DISPLAY_NAME);
-        ShareSubscriptionInformation infos = service.mount(session, shareLink, shareName, password);
-
-        return createResponse(infos);
+        service.unsubscribe(session, shareLink);
+        return new AJAXRequestResult(null, new Date(System.currentTimeMillis()));
     }
 
 }

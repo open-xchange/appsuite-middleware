@@ -603,39 +603,6 @@
         }
       }
     },
-    "/share/management?action=unmount" : {
-      "put" : {
-        "operationId" : "unmount",
-        "tags" : [ "Share/Management", "FederatedSharing" ],
-        "summary" : "Delets a federated share.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An empty json object in case of success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CommonResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/MountShareBody"
-              }
-            }
-          },
-          "description" : "A JSON object containing the data for the update",
-          "required" : true
-        }
-      }
-    },
     "/mail/compose/{id}/attachments" : {
       "post" : {
         "operationId" : "postAttachments",
@@ -1847,39 +1814,6 @@
         },
         "requestBody" : {
           "$ref" : "#/components/requestBodies/ConversionDataSource"
-        }
-      }
-    },
-    "/share/management?action=mount" : {
-      "put" : {
-        "operationId" : "mount",
-        "tags" : [ "Share/Management", "FederatedSharing" ],
-        "summary" : "Mounts a share that is associated with a specific share link from a remote server.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An empty json object in case of success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MountShareResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/ExtendedMountShareBody"
-              }
-            }
-          },
-          "description" : "A JSON object containing the data for the update",
-          "required" : true
         }
       }
     },
@@ -9806,7 +9740,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/MountShareBody"
+                "$ref" : "#/components/schemas/SubscribeShareBody"
               }
             }
           },
@@ -12633,7 +12567,7 @@
         }, {
           "in" : "query",
           "name" : "accoutn_id",
-          "description" : "The account identifier of an specific account belonging to the user of the session\n",
+          "description" : "The account identifier of an specific account belonging to the user of the session.\nIf the account ID is set, the search will be delegated to the matching account, if found.\n",
           "required" : false,
           "schema" : {
             "type" : "string"
@@ -13028,6 +12962,39 @@
         },
         "requestBody" : {
           "$ref" : "#/components/requestBodies/deleteFoldersBody"
+        }
+      }
+    },
+    "/share/management?action=subscribe" : {
+      "put" : {
+        "operationId" : "subscribeShare",
+        "tags" : [ "Share/Management", "FederatedSharing" ],
+        "summary" : "Subscribes to a share that is associated with a specific share link from a remote server.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An empty json object in case of success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SubscribeShareResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExtendedSubscribeShareBody"
+              }
+            }
+          },
+          "description" : "A JSON object containing the data for the update",
+          "required" : true
         }
       }
     },
@@ -15978,7 +15945,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/MountShareResponse"
+                  "$ref" : "#/components/schemas/SubscribeShareResponse"
                 }
               }
             }
@@ -15988,7 +15955,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/ExtendedMountShareBody"
+                "$ref" : "#/components/schemas/ExtendedSubscribeShareBody"
               }
             }
           },
@@ -16231,6 +16198,39 @@
             }
           },
           "description" : "A JSON array with the identifiers of the attachments, which shall be put into ZIP archive",
+          "required" : true
+        }
+      }
+    },
+    "/share/management?action=unsubscribe" : {
+      "put" : {
+        "operationId" : "unsubscribeShare",
+        "tags" : [ "Share/Management", "FederatedSharing" ],
+        "summary" : "Unsubscribes from a certain share. However undelying accounts will not be deleted.\nTo delete the underlying account use the account API.\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An empty json object in case of success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SubscribeShareBody"
+              }
+            }
+          },
+          "description" : "A JSON object containing the data for the update",
           "required" : true
         }
       }
@@ -36770,8 +36770,8 @@
             "properties" : {
               "state" : {
                 "type" : "string",
-                "description" : "State to indicate a possible usage of the link\n  * `SUBSCRIBED` - State to indicate that the link belongs to a known share and is accessible.\n  * `CREDENTIALS_REFRESH` - State to indicate that the link belongs to a known share but is not accessible at the moment because the remote server indicates that credentials have been updated meanwhile.\n  * `ADDABLE` - State to indicate that the link is valid and belongs to a share that is not yet subscribed an can be added.\n  * `ADDABLE_WITH_PASSWORD` - Similar to `ADDABLE` but in addition the user needs to enter a password to add the share.\n  * `INACCESSIBLE` - State to indicate that the link belongs to a known share but is inaccessible at the moment.\n  * `REMOVED` - State to indicate that the link belongs to a known share but can no longer be accessed.\n  * `UNRESOLVABLE` - State to indicate that the share link can't be resolved at all and thus can't be subscribed.\n  * `FORBIDDEN` - State to indicate that the subscription of the link is not allowed.\n",
-                "enum" : [ "SUBSCRIBED", "CREDENTIALS_REFRESH", "ADDABLE", "ADDABLE_WITH_PASSWORD", "INACCESSIBLE", "REMOVED", "UNRESOLVABLE", "FORBIDDEN" ]
+                "description" : "State to indicate a possible usage of the link\n  * `SUBSCRIBED` - State to indicate that the link belongs to a known share and is accessible.\n  * `CREDENTIALS_REFRESH` - State to indicate that the link belongs to a known share but is not accessible at the moment because the remote server indicates that credentials have been updated meanwhile.\n  * `ADDABLE` - State to indicate that the link is valid and belongs to a share that is not yet subscribed an can be added.\n  * `ADDABLE_WITH_PASSWORD` - Similar to `ADDABLE` but in addition the user needs to enter a password to add the share.\n  * `INACCESSIBLE` - State to indicate that the link belongs to a known share but is inaccessible at the moment.\n  * `REMOVED` - State to indicate that the link belongs to a known share but can no longer be accessed.\n  * `UNRESOLVABLE` - State to indicate that the share link can't be resolved at all and thus can't be subscribed.\n  * `FORBIDDEN` - State to indicate that the subscription of the link is not allowed.\n  * `UNSUBSCRIBED` - State to indicate that the link belongs to a known share but is not subscribed at the moment.\n",
+                "enum" : [ "SUBSCRIBED", "CREDENTIALS_REFRESH", "ADDABLE", "ADDABLE_WITH_PASSWORD", "INACCESSIBLE", "REMOVED", "UNRESOLVABLE", "FORBIDDEN", "UNSUBSCRIBED" ]
               },
               "error" : {
                 "type" : "object",
@@ -36881,7 +36881,7 @@
           }
         }
       },
-      "MountShareResponse" : {
+      "SubscribeShareResponse" : {
         "type" : "object",
         "properties" : {
           "data" : {
@@ -36950,7 +36950,7 @@
           }
         }
       },
-      "MountShareBody" : {
+      "SubscribeShareBody" : {
         "type" : "object",
         "properties" : {
           "link" : {
@@ -36959,7 +36959,7 @@
           }
         }
       },
-      "ExtendedMountShareBody" : {
+      "ExtendedSubscribeShareBody" : {
         "type" : "object",
         "properties" : {
           "link" : {

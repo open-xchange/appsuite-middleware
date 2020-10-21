@@ -58,10 +58,10 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.json.actions.AnalyzeAction;
 import com.openexchange.share.json.actions.DeleteLinkAction;
 import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.MountShareAction;
 import com.openexchange.share.json.actions.RemountShareAction;
 import com.openexchange.share.json.actions.SendLinkAction;
-import com.openexchange.share.json.actions.UnmountShareAction;
+import com.openexchange.share.json.actions.SubscribeShareAction;
+import com.openexchange.share.json.actions.UnsubscribeShareAction;
 import com.openexchange.share.json.actions.UpdateLinkAction;
 
 /**
@@ -89,8 +89,8 @@ public class ShareActionFactory implements AJAXActionServiceFactory {
 
         // Federated Sharing
         actions.put("analyze", new AnalyzeAction(services));
-        actions.put("mount", new MountShareAction(services));
-        actions.put("unmount", new UnmountShareAction(services));
+        actions.put("subscribe", new SubscribeShareAction(services));
+        actions.put("unsubscribe", new UnsubscribeShareAction(services));
         actions.put("remount", new RemountShareAction(services));
     }
 

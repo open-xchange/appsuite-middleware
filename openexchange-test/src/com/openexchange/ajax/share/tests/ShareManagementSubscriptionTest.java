@@ -71,12 +71,14 @@ import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.InfoItemUpdateResponse;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponse;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponseData.StateEnum;
 import com.openexchange.testing.httpclient.models.ShareLinkData;
+import com.openexchange.testing.httpclient.models.SubscribeShareBody;
 import com.openexchange.testing.httpclient.modules.InfostoreApi;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 
@@ -150,7 +152,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
     public void testSomeLink_Unresovable() throws Exception {
         analyze("https://example.org/no/share/link", StateEnum.UNRESOLVABLE);
     }
-    
+
     @Test
     public void testBrokenLink_Unresovable() throws Exception {
         analyze("https://example.org/ajax/share/aaaf78820506e0b2faf7883506ce41388f98fa02a4e314c9/1/8/MTk3Njk0", StateEnum.UNRESOLVABLE);
@@ -222,7 +224,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         /*
          * Add share and verify analyze changed
          */
-        addOXShareAccount(smApiC2, shareLink, null);
+        String fqFolderId = addOXShareAccount(smApiC2, shareLink, null);
 
         /*
          * Remove guest from folder permission
@@ -237,9 +239,15 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         analyze(shareLink, StateEnum.SUBSCRIBED);
 
         /*
+         * Unsubscribe from share and check response
+         */
+        unsubscribe(shareLink);
+        analyze(shareLink, StateEnum.UNSUBSCRIBED);
+
+        /*
          * Delete account and check again
          */
-        deleteOXShareAccount(smApiC2, shareLink);
+        deleteOXShareAccount(smApiC2.getApiClient(), fqFolderId);
         analyze(shareLink, StateEnum.ADDABLE);
     }
 
@@ -272,7 +280,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         /*
          * Add share and verify analyze changed
          */
-        addOXShareAccount(smApiC2, shareLink, null);
+        String fqFolderId = addOXShareAccount(smApiC2, shareLink, null);
 
         /*
          * Change password of guest and verify response.
@@ -306,9 +314,15 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         analyze(shareLink, StateEnum.SUBSCRIBED);
 
         /*
+         * Unsubscribe from share and check response
+         */
+        unsubscribe(shareLink);
+        analyze(shareLink, StateEnum.UNSUBSCRIBED);
+
+        /*
          * Delete account and check again
          */
-        deleteOXShareAccount(smApiC2, shareLink);
+        deleteOXShareAccount(smApiC2.getApiClient(), fqFolderId);
         analyze(shareLink, StateEnum.ADDABLE_WITH_PASSWORD);
     }
 
@@ -334,5 +348,18 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         assertNotNull(uploadResponse);
         assertNull(uploadResponse.getErrorDesc(), uploadResponse.getError());
         return uploadResponse.getData();
+    }
+
+    /**
+     * Unsubscribes a share
+     *
+     * @param shareLink The share to unsubscribe
+     * @throws ApiException In case unsubscribe fails
+     */
+    private void unsubscribe(String shareLink) throws ApiException {
+        SubscribeShareBody body = new SubscribeShareBody();
+        body.setLink(shareLink);
+        CommonResponse response = smApiC2.unsubscribeShare(smApiC2.getApiClient().getSession(), body);
+        checkResponse(response);
     }
 }

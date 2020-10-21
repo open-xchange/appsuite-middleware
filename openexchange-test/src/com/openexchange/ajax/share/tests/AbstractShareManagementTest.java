@@ -68,6 +68,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import org.junit.Assert;
 import com.openexchange.ajax.chronos.AbstractEnhancedApiClientSession;
 import com.openexchange.ajax.folder.manager.FolderApi;
 import com.openexchange.ajax.folder.manager.FolderManager;
@@ -77,16 +78,14 @@ import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
-import com.openexchange.testing.httpclient.models.ExtendedMountShareBody;
+import com.openexchange.testing.httpclient.models.ExtendedSubscribeShareBody;
+import com.openexchange.testing.httpclient.models.FileAccountUpdateResponse;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.MailData;
 import com.openexchange.testing.httpclient.models.MailListElement;
 import com.openexchange.testing.httpclient.models.MailResponse;
 import com.openexchange.testing.httpclient.models.MailsResponse;
-import com.openexchange.testing.httpclient.models.MountShareBody;
-import com.openexchange.testing.httpclient.models.MountShareResponse;
-import com.openexchange.testing.httpclient.models.MountShareResponseData;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponse;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponseData;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponseData.StateEnum;
@@ -94,8 +93,13 @@ import com.openexchange.testing.httpclient.models.ShareLinkData;
 import com.openexchange.testing.httpclient.models.ShareLinkResponse;
 import com.openexchange.testing.httpclient.models.ShareLinkUpdateBody;
 import com.openexchange.testing.httpclient.models.ShareTargetData;
+import com.openexchange.testing.httpclient.models.SubscribeShareBody;
+import com.openexchange.testing.httpclient.models.SubscribeShareResponse;
+import com.openexchange.testing.httpclient.models.SubscribeShareResponseData;
+import com.openexchange.testing.httpclient.modules.FilestorageApi;
 import com.openexchange.testing.httpclient.modules.MailApi;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link AbstractShareManagementTest} - Test for the <code>analyze</code> action of the share management module.
@@ -190,14 +194,14 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         return folderManager.updateFolder(folderId, deltaFolder, null);
     }
 
-    protected static MountShareBody getBody(String link) {
-        MountShareBody body = new MountShareBody();
+    protected static SubscribeShareBody getBody(String link) {
+        SubscribeShareBody body = new SubscribeShareBody();
         body.setLink(link);
         return body;
     }
 
-    protected static ExtendedMountShareBody getExtendedBody(String shareLink, String password, String displayName) {
-        ExtendedMountShareBody body = new ExtendedMountShareBody();
+    protected static ExtendedSubscribeShareBody getExtendedBody(String shareLink, String password, String displayName) {
+        ExtendedSubscribeShareBody body = new ExtendedSubscribeShareBody();
         body.setLink(shareLink);
         body.setPassword(password);
         body.setName(displayName);
@@ -279,28 +283,40 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
      * @param smApi The API to use
      * @param shareLink The share link to add ass storage
      * @param password The optional password to set
-     * @return The account ID
+     * @return The folder ID
      * @throws ApiException
      */
     protected String addOXShareAccount(ShareManagementApi smApi, String shareLink, String password) throws ApiException {
-        ExtendedMountShareBody body = getExtendedBody(shareLink, password, "Share from " + testUser.getLogin());
-        MountShareResponse mountResponse = smApi.mount(smApi.getApiClient().getSession(), body);
+        ExtendedSubscribeShareBody body = getExtendedBody(shareLink, password, "Share from " + testUser.getLogin());
+        SubscribeShareResponse mountResponse = smApi.subscribeShare(smApi.getApiClient().getSession(), body);
 
-        MountShareResponseData data = checkResponse(mountResponse.getError(), mountResponse.getErrorDesc(), mountResponse.getData());
+        SubscribeShareResponseData data = checkResponse(mountResponse.getError(), mountResponse.getErrorDesc(), mountResponse.getData());
 
         String accountId = data.getAccount();
         assertThat(accountId, notNullValue());
+        addTearDownOperation(() -> deleteOXShareAccount(smApi.getApiClient(), accountId));
         assertThat(data.getFolder(), notNullValue());
-        assertThat(data.getModule(), is(String.valueOf(Module.INFOSTORE.getFolderConstant())));
-        addTearDownOperation(() -> deleteOXShareAccount(smApi, shareLink));
+        assertThat(data.getModule(), is(Module.INFOSTORE.getName()));
 
         analyze(smApi, shareLink, StateEnum.SUBSCRIBED);
-        return accountId;
+        return data.getFolder();
     }
 
-    protected void deleteOXShareAccount(ShareManagementApi smApi, String shareLink) throws Exception {
-        CommonResponse response = smApi.unmount(smApi.getApiClient().getSession(), getBody(shareLink));
-        checkResponse(response);
+    /**
+     * Deletes the account.
+     * <p>
+     * Note: The account is deleted not unsubscribed!
+     *
+     * @param client The client to use
+     * @param accountId The account ID
+     * @throws Exception
+     */
+    protected void deleteOXShareAccount(ApiClient client, String fqFolderId) throws Exception {
+        FilestorageApi filestorageApi = new FilestorageApi(client);
+        List<String> unmangle = IDMangler.unmangle(fqFolderId);
+        Assert.assertTrue(fqFolderId + "isn't the correct full qualified folder ID with embeded account ID", unmangle.size() > 1);
+        FileAccountUpdateResponse response = filestorageApi.deleteFileAccount(client.getSession(), unmangle.get(0), unmangle.get(1));
+        checkResponse(response.getError(), response.getErrorDesc());
     }
 
     /**
@@ -340,7 +356,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
             assertThat("Expected a detailed error message about the state", response.getError(), notNullValue());
         } else if (StateEnum.SUBSCRIBED.equals(expectedState)) {
             assertThat(response.getAccount(), notNullValue());
-            assertThat(response.getModule(), is(String.valueOf(Module.INFOSTORE.getFolderConstant())));
+            assertThat(response.getModule(), is(String.valueOf(Module.INFOSTORE.getName())));
             assertThat(response.getFolder(), notNullValue());
         }
 

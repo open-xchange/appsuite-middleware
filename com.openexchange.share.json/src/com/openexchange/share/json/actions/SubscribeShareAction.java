@@ -49,37 +49,42 @@
 
 package com.openexchange.share.json.actions;
 
-import java.util.Date;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.subscription.ShareSubscriptionInformation;
 import com.openexchange.share.subscription.ShareSubscriptionRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link UnmountShareAction} - Unmounts a share that is associated with a specific share link from a remote server
+ * {@link SubscribeShareAction} - Subscribes a share that is associated with a specific share link from a remote server.
+ * May mount a account if not existing
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class UnmountShareAction extends AbstractShareSubscriptionAction {
+public class SubscribeShareAction extends AbstractShareSubscriptionAction {
 
     /**
-     * Initializes a new {@link UnmountShareAction}.
+     * Initializes a new {@link SubscribeShareAction}.
      * 
      * @param services The service lookup
      */
-    public UnmountShareAction(ServiceLookup services) {
+    public SubscribeShareAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, JSONObject json, String shareLink) throws OXException {
+    AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session, JSONObject json, String shareLink) throws OXException, JSONException {
         ShareSubscriptionRegistry service = services.getServiceSafe(ShareSubscriptionRegistry.class);
-        service.unmount(session, shareLink);
-        return new AJAXRequestResult(null, new Date(System.currentTimeMillis()));
+        String password = json.optString(PASSWORD, null);
+        String shareName = json.optString(DISPLAY_NAME, null);
+        ShareSubscriptionInformation infos = service.subscribe(session, shareLink, shareName, password);
+
+        return createResponse(infos);
     }
 
 }
