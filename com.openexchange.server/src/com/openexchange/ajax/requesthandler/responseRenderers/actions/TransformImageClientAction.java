@@ -218,7 +218,7 @@ public class TransformImageClientAction extends TransformImageAction {
                             }
                         }
                     } catch (ImageConverterException e) {
-                        throw OXException.general("Communication with Image Converter failed", e);
+                        throw OXException.general("Communication with ImageConverter failed", e);
                     } finally {
                         Streams.close(resultImageStm);
                     }
