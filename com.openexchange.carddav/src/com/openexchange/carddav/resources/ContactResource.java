@@ -456,6 +456,24 @@ public class ContactResource extends CommonResource<Contact> {
                     } else if (providedMailAddress.equals(dbContact.getEmail3())) {
                         entry.setEmailfield(DistributionListEntryObject.EMAILFIELD3);
                     }
+                } else {
+                    /*
+                     * insert reference to first non-empty email address of contact as fallback
+                     */
+                    try {
+                        if (Strings.isNotEmpty(dbContact.getEmail1())) {
+                            entry.setEmailfield(DistributionListEntryObject.EMAILFIELD1);
+                            entry.setEmailaddress(dbContact.getEmail1(), false);
+                        } else if (Strings.isNotEmpty(dbContact.getEmail2())) {
+                            entry.setEmailfield(DistributionListEntryObject.EMAILFIELD2);
+                            entry.setEmailaddress(dbContact.getEmail2(), false);
+                        } else if (Strings.isNotEmpty(dbContact.getEmail3())) {
+                            entry.setEmailfield(DistributionListEntryObject.EMAILFIELD3);
+                            entry.setEmailaddress(dbContact.getEmail3(), false);
+                        }
+                    } catch (OXException e) {
+                        LOG.warn("Unexpected error assigning default mail address from reference contact", e);
+                    }
                 }
                 if (!entry.containsEntryID() || entry.getEntryID() < 1) {
                     entry.setEntryID(dbContact.getObjectID());
