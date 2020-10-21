@@ -92,6 +92,8 @@ public final class UserAgents {
 
     public static final String EM_CLIENT_FOR_APP_SUITE = "eM Client for OX App Suite/6.0.28376.0";
 
+    public static final String CALDAV_SYNCHRONIZER = "CalDavSynchronizer/3.6";
+
     public static final String[] MACOS_ALL = { MACOS_10_6_7, MACOS_10_6_8, MACOS_10_6_8_DE, MACOS_10_6_8_NL, MACOS_10_7_2, MACOS_10_7_3, MACOS_10_8_1, MACOS_10_8_2
     };
 
