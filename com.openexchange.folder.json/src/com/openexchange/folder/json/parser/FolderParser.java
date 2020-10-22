@@ -251,7 +251,7 @@ public final class FolderParser {
             /*
              * ensure the targeted entity can be identified properly
              */
-            if ((0 > parsedPermission.getEntity() || 0 == parsedPermission.getEntity() && parsedPermission.isGroup()) && Strings.isEmpty(parsedPermission.getIdentifier())) {
+            if ((0 > parsedPermission.getEntity() || 0 == parsedPermission.getEntity() && false == parsedPermission.isGroup()) && Strings.isEmpty(parsedPermission.getIdentifier())) {
                 throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.ENTITY.getName());
             }
             permission = parsedPermission;
