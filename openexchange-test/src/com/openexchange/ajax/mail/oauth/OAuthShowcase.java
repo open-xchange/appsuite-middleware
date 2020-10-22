@@ -59,46 +59,44 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
-import org.junit.Assert;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractAPIClientSession;
-import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.apiclient.oauth.AbstractOAuthAPIClient;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.exception.OXException;
-import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.MailResponse;
 import com.openexchange.testing.httpclient.models.MailsResponse;
+import com.openexchange.testing.httpclient.models.SnippetData;
+import com.openexchange.testing.httpclient.models.SnippetResponse;
+import com.openexchange.testing.httpclient.models.SnippetUpdateResponse;
+import com.openexchange.testing.httpclient.models.SnippetsResponse;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.MailApi;
+import com.openexchange.testing.httpclient.modules.SnippetApi;
 
 /**
- * {@link OAuthShowcase} - is not a test but rather a showcase for the oauth mail functionality. You need to configure the {@link AJAXConfig.Property#OAUTH_TOKEN} for this to work. This token should contain the read_mails and write-mails scopes only.
+ * {@link OAuthShowcase} - is not a test but rather a showcase for the oauth mail and snippet functionality.
+ * You need to configure the {@link AJAXConfig.Property#OAUTH_TOKEN} for this to work. This token should contain the <code>read_mails</code>, <code>write_mails</code> and <code>write_userconfig</code> scopes only.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.5
  */
-public class OAuthShowcase extends AbstractAPIClientSession {
+public class OAuthShowcase extends AbstractOAuthAPIClient {
 
     private static final String TREE = "0";
-    private static final String FAKE_SESSION_ID = "SOME_FAKE_ID";
+    private static final String FAKE_SESSION_ID = USE_PREFIX ? "SOME_FAKE_ID" : null;
 
-    private OAuthApiClient oauthclient;
     private FoldersApi fApi;
     private MailApi mApi;
+    private SnippetApi sApi;
 
     @Override
     public void setUp() throws Exception {
-        ProvisioningSetup.init();
-        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
-        Assert.assertNotNull("Unable to retrieve a context!", testContext);
-        testUser = testContext.acquireUser();
-        testUser2 = testContext.acquireUser();
-        oauthclient = generateOAuthClient();
+        super.setUp();
         fApi = new FoldersApi(oauthclient);
         mApi = new MailApi(oauthclient);
+        sApi = new SnippetApi(oauthclient);
     }
 
     @SuppressWarnings("unchecked")
@@ -134,6 +132,34 @@ public class OAuthShowcase extends AbstractAPIClientSession {
         String sendMail = mApi.sendMail(FAKE_SESSION_ID, createMail(), null);
 
         print("Mail send:" + Jsoup.parse(sendMail).html());
+    }
+
+    @Test
+    public void showcaseSnippetViaOAuth() throws ApiException, JSONException {
+        SnippetsResponse allSnippetsResp = sApi.getAllSnippets(FAKE_SESSION_ID, null);
+        assertNull(allSnippetsResp.getErrorDesc(), allSnippetsResp.getError());
+        printList("All snippets", allSnippetsResp.getData());
+
+        if (allSnippetsResp.getData().size() > 0) {
+            SnippetResponse snippetResponse = sApi.getSnippet(FAKE_SESSION_ID, allSnippetsResp.getData().get(0).getId());
+            assertNull(snippetResponse.getError());
+            print("Snippet 1: " + new JSONObject(snippetResponse.getData().toJson()).toString(4));
+        }
+        SnippetData snippetData = new SnippetData();
+        // @formatter:off
+        snippetData.type("signature")
+                   .module("io.ox./mail")
+                   .displayname("showcase")
+                   .content("<p>test</p>");
+        // @formatter:on
+        SnippetUpdateResponse createSnippetResp = sApi.createSnippet(FAKE_SESSION_ID, snippetData);
+        assertNull(createSnippetResp.getError());
+        print("New snippet: " + createSnippetResp.getData());
+
+        SnippetResponse snippetResponse2 = sApi.getSnippet(FAKE_SESSION_ID, createSnippetResp.getData());
+        assertNull(snippetResponse2.getError());
+
+        print("Snippet new: " + new JSONObject(snippetResponse2.getData().toJson()).toString(4));
     }
 
 
@@ -187,23 +213,5 @@ public class OAuthShowcase extends AbstractAPIClientSession {
         return mail.toString();
     }
 
-    /**
-     * Generates an oauth client, which uses an provided oauth token to authenticate instead of login/password
-     *
-     * @return The {@link OAuthApiClient}
-     * @throws OXException in case something went wrong
-     */
-    protected final OAuthApiClient generateOAuthClient() throws OXException {
-        OAuthApiClient newClient;
-        try {
-            newClient = new OAuthApiClient(() -> "Bearer " + AJAXConfig.getProperty(AJAXConfig.Property.OAUTH_TOKEN));
-            setBasePath(newClient);
-            newClient.setBasePath(newClient.getBasePath() + "/oauth/modules");
-            newClient.setUserAgent("HTTP API Testing Agent");
-        } catch (Exception e) {
-            throw new OXException(e);
-        }
-        return newClient;
-    }
 
 }

@@ -142,9 +142,17 @@ public class AJAXConfig extends AbstractConfig {
         PATH_PREFIX("pathPrefix"),
 
         /**
-         * An oauth token previously obtained from a oauth authentication server (e.g. keycloak)
+         * The token endpoint of an oauth authentication server (e.g. keycloak)
          */
-        OAUTH_TOKEN("oauthToken")
+        OAUTH_TOKEN_ENDPOINT("oauthTokenEndpoint"),
+        /**
+         * The client id configured in the oauth authentication server
+         */
+        OAUTH_CLIENT_ID("oauthClientID"),
+        /**
+         * The client secret configured in the oauth authentication server
+         */
+        OAUTH_CLIENT_PASSWORD("oauthClientPassword")
 
         ;
 

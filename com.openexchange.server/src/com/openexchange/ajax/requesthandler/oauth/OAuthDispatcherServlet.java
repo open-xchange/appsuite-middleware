@@ -150,7 +150,7 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
      */
     private boolean isSessionBasedRequest(HttpServletRequest httpRequest) {
         String sessionId = httpRequest.getParameter(PARAMETER_SESSION);
-        return (sessionId != null && sessionId.length() > 0) || httpRequest.getParameter(HttpHeaders.AUTHORIZATION) == null;
+        return useOAuthPrefix == false && ((sessionId != null && sessionId.length() > 0) || httpRequest.getHeader(HttpHeaders.AUTHORIZATION) == null);
     }
 
     @Override

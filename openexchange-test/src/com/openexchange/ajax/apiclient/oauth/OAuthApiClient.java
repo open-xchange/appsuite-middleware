@@ -47,11 +47,10 @@
  *
  */
 
-package com.openexchange.ajax.mail.oauth;
+package com.openexchange.ajax.apiclient.oauth;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import javax.ws.rs.core.GenericType;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -65,20 +64,30 @@ import com.openexchange.testing.httpclient.invoker.Pair;
  */
 public class OAuthApiClient extends ApiClient {
 
-    private final Supplier<String> tokenSupplier;
+    private final ErrorAwareSupplier<String> tokenSupplier;
 
     /**
      * Initializes a new {@link OAuthApiClient}.
      */
-    public OAuthApiClient(Supplier<String> tokenSupplier) {
+    public OAuthApiClient(ErrorAwareSupplier<String> tokenSupplier) {
         super();
         this.tokenSupplier = tokenSupplier;
     }
 
     @Override
     public <T> T invokeAPI(String path, String method, List<Pair> queryParams, Object body, Map<String, String> headerParams, Map<String, Object> formParams, String accept, String contentType, String[] authNames, GenericType<T> returnType) throws ApiException {
-        headerParams.put("Authorization", tokenSupplier.get());
+        try {
+            headerParams.put("Authorization", tokenSupplier.get());
+        } catch (Exception e) {
+            throw new ApiException(e);
+        }
         return super.invokeAPI(path, method, queryParams, body, headerParams, formParams, accept, contentType, authNames, returnType);
+    }
+
+    static interface ErrorAwareSupplier<T> {
+
+        T get() throws Exception;
+
     }
 
 }
