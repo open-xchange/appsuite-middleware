@@ -370,6 +370,11 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * Invalid account name
      */
     ACCOUNT_NAME_TOO_LONG("Invalid account name.", Category.CATEGORY_ERROR, 73, FileStorageExceptionMessages.ACCOUNT_NAME_TO_LONG_MSG),
+    
+    /**
+     * The account update was denied: %1s$
+     */
+    NOT_ALLOWED_ACCOUNT_UPDATE("The account update was denied: %1s$", Category.CATEGORY_ERROR, 74, FileStorageExceptionMessages.ACCOUNT_NAME_TO_LONG_MSG)
 
     ;
 
