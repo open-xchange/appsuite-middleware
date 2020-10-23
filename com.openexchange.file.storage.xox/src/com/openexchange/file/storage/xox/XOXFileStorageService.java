@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.capabilities.CapabilityService;
@@ -64,11 +65,11 @@ import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
+import com.openexchange.file.storage.MetadataAware;
 import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -79,7 +80,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class XOXFileStorageService implements AccountAware, SharingFileStorageService, LoginAwareFileStorageServiceExtension {
+public class XOXFileStorageService implements AccountAware, SharingFileStorageService, LoginAwareFileStorageServiceExtension, MetadataAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XOXFileStorageService.class);
 
@@ -198,7 +199,7 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
     }
 
     @Override
-    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
+    public XOXAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
         assertCapability(session);
         FileStorageAccountManager manager = getAccountManager();
         if (null == manager) {
@@ -226,7 +227,19 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
 
     @Override
     public void resetRecentError(String accountId, Session session) throws OXException {
-        XOXAccountAccess accountAccess = (XOXAccountAccess) getAccountAccess(accountId, session);
+        XOXAccountAccess accountAccess = getAccountAccess(accountId, session);
         accountAccess.resetRecentError();
     }
+
+    @Override
+    public JSONObject getMetadata(Session session, FileStorageAccount account) throws OXException {
+        XOXAccountAccess accountAccess = getAccountAccess(account.getId(), session);
+        try {
+            accountAccess.connect();
+            return accountAccess.getMetadata();
+        } finally {
+            accountAccess.close();
+        }
+    }
+
 }

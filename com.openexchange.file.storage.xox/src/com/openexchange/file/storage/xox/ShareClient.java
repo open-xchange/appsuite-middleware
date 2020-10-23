@@ -52,7 +52,6 @@ package com.openexchange.file.storage.xox;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.l;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
@@ -114,6 +113,7 @@ import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.session.Session;
+import com.openexchange.share.core.subscription.AccountMetadataHelper;
 import com.openexchange.version.ServerVersion;
 
 /**
@@ -123,9 +123,6 @@ import com.openexchange.version.ServerVersion;
  * @since v7.10.5
  */
 public class ShareClient {
-
-    private static final String SERVER_VERSION = "server_version";
-    private static final String SERVER_VERSION_TIMESTAMP = "server_version_TIMESTAMP";
 
     protected static final String TREE_ID = FolderStorage.REAL_TREE_ID;
     protected static final String MODULE_FILES = "files";
@@ -228,24 +225,7 @@ public class ShareClient {
      * @throws OXException If the version can't be get
      */
     public ServerVersion getServerVersion() throws OXException {
-        ServerVersion version = (ServerVersion) account.getConfiguration().get(SERVER_VERSION);
-        if (null != version) {
-            Long timestamp = (Long) account.getConfiguration().get(SERVER_VERSION_TIMESTAMP);
-            if (null != timestamp && System.currentTimeMillis() - l(timestamp) < TimeUnit.DAYS.toMillis(1)) {
-                return version;
-            }
-        }
-
-        /*
-         * Save into account with timestamp
-         */
-        version = getApiClient().execute(new ServerVersionCall());
-        if (null != version) {
-            account.getConfiguration().put(SERVER_VERSION, version);
-            account.getConfiguration().put(SERVER_VERSION_TIMESTAMP, L(System.currentTimeMillis()));
-        }
-
-        return version;
+        return getApiClient().execute(new ServerVersionCall());
     }
 
     /**
@@ -716,8 +696,11 @@ public class ShareClient {
         /*
          * handle fields not supported by the remote server
          */
-        ServerVersion serverVersion = getServerVersion();
-        if (null == serverVersion || API_LEVEL.compareTo(serverVersion) > 0) {
+        String versionString = new AccountMetadataHelper(account, session).getCachedValue("serverVersion", TimeUnit.DAYS.toMillis(1L), String.class, () -> {
+            ServerVersion serverVersion = getApiClient().execute(new ServerVersionCall());
+            return null != serverVersion ? serverVersion.getVersionString() : null;
+        });
+        if (null == versionString || API_LEVEL.compareTo(ServerVersion.parse(versionString)) > 0) {
             if (fields.remove(Field.CREATED_FROM)) {
                 fields.add(Field.CREATED_BY);
             }

@@ -52,6 +52,10 @@ package com.openexchange.file.storage.xox;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.conversion.ConversionService;
@@ -72,7 +76,11 @@ import com.openexchange.folderstorage.FederatedSharingFolders;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.core.subscription.AccountMetadataHelper;
+import com.openexchange.share.core.subscription.EntityMangler;
 import com.openexchange.share.core.subscription.SubscribedHelper;
+import com.openexchange.share.core.tools.ShareLinks;
+import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.tools.arrays.Collections;
 
 /**
@@ -151,6 +159,38 @@ public class XOXAccountAccess implements CapabilityAware {
     }
 
     /**
+     * Gets a {@link JSONObject} providing additional arbitrary metadata of the account for clients.
+     * 
+     * @return The metadata
+     */
+    public JSONObject getMetadata() throws OXException {
+        assertConnected();
+        this.errorHandler.assertNoRecentException();
+        try {
+            JSONObject metadata = new JSONObject();
+            /*
+             * add identifiers of guest user/context based on share token
+             */
+            ShareToken shareToken = new ShareToken(ShareLinks.extractBaseToken(getShareUrl()));
+            metadata.put("guestContextId", shareToken.getContextID());
+            metadata.put("guestUserId", shareToken.getUserID());
+            metadata.put("guestUserIdentifier", new EntityMangler(getService().getId(), getAccountId()).mangleRemoteEntity(shareToken.getUserID()));
+            /*
+             * load & add capabilities of guest user
+             */
+            metadata.put("guestCapabilities", new AccountMetadataHelper(account, session).getCachedValue("capabilities", TimeUnit.DAYS.toMillis(1L), JSONArray.class, () -> {
+                if (null == shareClient) {
+                    throw new IllegalStateException("missing share client reference");
+                }
+                return new JSONArray(shareClient.getApiClient().execute(new com.openexchange.api.client.common.calls.capabilities.AllCall()));
+            }));
+            return metadata;
+        } catch (JSONException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
      * Internal method to ensure that the account access is connected
      *
      * @throws OXException If the account access is not connected
@@ -212,15 +252,6 @@ public class XOXAccountAccess implements CapabilityAware {
             return;
         }
 
-        Map<String, Object> configuration = account.getConfiguration();
-        String shareUrl = (String) configuration.get(XOXStorageConstants.SHARE_URL);
-        if (Strings.isEmpty(shareUrl)) {
-            throw FileStorageExceptionCodes.INVALID_URL.create("not provided", "empty");
-        }
-
-        String password = (String) configuration.get(XOXStorageConstants.PASSWORD);
-        Credentials credentials = new Credentials("", password);
-
         boolean hasKnownError = errorHandler.hasRecentException();
         if (hasKnownError) {
             //We do not really connect because we have known errors,
@@ -228,6 +259,9 @@ public class XOXAccountAccess implements CapabilityAware {
             isConnected = true;
             return;
         }
+
+        String shareUrl = getShareUrl();
+        Credentials credentials = new Credentials("", (String) account.getConfiguration().get(XOXStorageConstants.PASSWORD));
 
         ApiClientService clientService = services.getServiceSafe(ApiClientService.class);
         try {
@@ -281,4 +315,14 @@ public class XOXAccountAccess implements CapabilityAware {
     public Boolean supports(FileStorageCapability capability) {
         return FileStorageCapabilityTools.supportsByClass(XOXFileAccess.class, capability);
     }
+
+    private String getShareUrl() throws OXException {
+        Map<String, Object> configuration = account.getConfiguration();
+        String shareUrl = (String) configuration.get(XOXStorageConstants.SHARE_URL);
+        if (Strings.isEmpty(shareUrl)) {
+            throw FileStorageExceptionCodes.INVALID_URL.create("not provided", "empty");
+        }
+        return shareUrl;
+    }
+
 }

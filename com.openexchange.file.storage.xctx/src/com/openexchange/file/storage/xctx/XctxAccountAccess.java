@@ -188,7 +188,7 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
     }
 
     /**
-     * Gets a {@link JSONObject} providing additional metadata of the account for clients.
+     * Gets a {@link JSONObject} providing additional arbitrary metadata of the account for clients.
      * 
      * @return The metadata
      */
