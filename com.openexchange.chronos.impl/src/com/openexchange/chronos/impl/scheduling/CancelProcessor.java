@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos.impl.scheduling;
 
+import static com.openexchange.java.Autoboxing.I;
 import static java.util.Collections.singletonList;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
@@ -131,11 +131,11 @@ public class CancelProcessor extends AbstractUpdatePerformer {
         /*
          * Check if CANCEL is relevant for current user
          */
-        if (originalEvent.getAttendees().size() != deletee.getAttendees().size() && null == CalendarUtils.find(deletee.getAttendees(), calendarUserId)) {
+        if (originalEvent.getAttendees().size() != deletee.getAttendees().size() && null == CalendarUtils.find(deletee.getAttendees(), calendarUser)) {
             /*
              * Neither for all attendees nor for the target user, skip as recommended by the RFC
              */
-            return Collections.emptyList();
+            throw CalendarExceptionCodes.WRONG_CANCELLATION.create(eventID.getObjectID(), I(calendarUserId));
         }
         /*
          * Check if originator is allowed to cancel, either by perfect match comparing to the organizer or by comparing to the sent-by field of the organizer

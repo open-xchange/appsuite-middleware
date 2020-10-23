@@ -170,6 +170,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
     public static final String TOO_MANY_CONFERENCES_MSG = "The appointment contains too many conferences.";
 
     public static final String UNSUPPORTED_METHOD_MSG = "The method \"%1$s\" is not supported.";
+    
+    public static final String WRONG_CANCELATION_MSG = "The event %1$s was not canceled for the user %2$s and won't be deleted.";
 
     /**
      * Initializes a new {@link CalendarExceptionMessages}.
