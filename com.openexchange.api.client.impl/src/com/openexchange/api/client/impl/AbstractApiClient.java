@@ -66,6 +66,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -121,7 +123,7 @@ public abstract class AbstractApiClient implements ApiClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractApiClient.class);
 
     /** The default maximum number of retry attempts */
-    private static final int DEFAULT_RETRIES = 5;
+    private static final int DEFAULT_RETRIES = 3;
 
     /** The base number of milliseconds to wait until retrying */
     private static final int RETRY_BASE_DELAY = 500;
@@ -141,6 +143,8 @@ public abstract class AbstractApiClient implements ApiClient {
     protected final CookieStore cookieStore;
 
     private final AtomicBoolean isClosed;
+    private final AtomicInteger counter;
+    private final AtomicLong lastRelogin;
 
     /**
      * Initializes a new {@link AbstractApiClient}.
@@ -161,6 +165,8 @@ public abstract class AbstractApiClient implements ApiClient {
         this.cookieStore = HttpContextUtils.createCookieStore();
 
         this.isClosed = new AtomicBoolean(false);
+        this.counter = new AtomicInteger();
+        this.lastRelogin = new AtomicLong(System.currentTimeMillis());
     }
 
     @Override
@@ -180,12 +186,22 @@ public abstract class AbstractApiClient implements ApiClient {
 
     @Override
     public <T> T execute(ApiCall<T> call) throws OXException {
-        return execute(buildRequest(call), call.getParser());
+        try {
+            return execute(buildRequest(call), call.getParser());
+        } catch (OXException e) {
+            if (matches(SessionExceptionCodes.SESSION_EXPIRED, e)) {
+                /*
+                 * Try relogin if session expired. Wrap error if no session can be established again
+                 */
+                reLogin();
+                return execute(buildRequest(call), call.getParser());
+            }
+            throw e;
+        }
     }
 
     @SuppressWarnings({ "resource", "unchecked" })
-    @Override
-    public <T> T execute(HttpRequestBase request, HttpResponseParser<T> parser) throws OXException {
+    private <T> T execute(HttpRequestBase request, HttpResponseParser<T> parser) throws OXException {
         if (isClosed.get()) {
             throw ApiClientExceptions.SESSION_EXPIRED.create();
         }
@@ -213,15 +229,17 @@ public abstract class AbstractApiClient implements ApiClient {
             final boolean enquedRequest = response.getStatusLine() != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_ACCEPTED;
 
             /*
-             * Check response for exceptions, try to re-login if session expired
+             * Check response for exceptions
              */
             OXException oxException = response.getEntity() != null && response.getEntity().isRepeatable() ? getNestedOXException(response) : null;
             if (null != oxException && !enquedRequest) {
-                if (matches(SessionExceptionCodes.SESSION_EXPIRED, oxException)) {
-                    reLogin();
-                    return execute(request, parser);
-                }
                 throw oxException;
+            }
+            /*
+             * Decrement counter after successful request
+             */
+            if (counter.get() > 0) {
+                counter.decrementAndGet();
             }
 
             /**
@@ -547,7 +565,18 @@ public abstract class AbstractApiClient implements ApiClient {
      * @throws OXException In case a valid session can't be obtained, or the login fails because of another reason then {@link SessionExceptionCodes#SESSION_EXPIRED}
      */
     private synchronized void reLogin() throws OXException {
-        for (int retryCount = 0; retryCount <= DEFAULT_RETRIES; retryCount++) {
+        if (System.currentTimeMillis() - lastRelogin.get() < TimeUnit.MINUTES.toMillis(1)) {
+            LOGGER.trace("Already tried relogin in the last minute. Using local data to determine state");
+            LoginInformation loginInformation = getLoginInformation();
+            if (null == loginInformation || Strings.isEmpty(loginInformation.getRemoteSessionId())) {
+                throw ApiClientExceptions.SESSION_EXPIRED.create();
+            }
+            return;
+        }
+
+        lastRelogin.set(System.currentTimeMillis());
+        LOGGER.debug("The session on the remote system {} expired for user {} in context {}. Trying to re-login", loginLink.getHost(), I(userId), I(contextId));
+        for (; counter.get() <= DEFAULT_RETRIES; counter.incrementAndGet()) {
             try {
                 cookieStore.clear();
                 doLogin();
@@ -557,11 +586,11 @@ public abstract class AbstractApiClient implements ApiClient {
                     throw e;
                 }
 
-                if (retryCount == DEFAULT_RETRIES) {
+                if (counter.get() == DEFAULT_RETRIES) {
                     /*
                      * Login attempts failed. Throw error and close client. Logout doen't need to be performed, as no valid session is available
                      */
-                    LOGGER.info("Can't obtain a valid session at host {} for user {} in context {}", I(contextId), I(userId), loginLink.getHost(), e);
+                    LOGGER.info("Unable to re-login at host {} for user {} in context {}", loginLink.getHost(), I(userId), I(contextId), e);
                     isClosed.set(true);
                     cookieStore.clear();
                     throw ApiClientExceptions.SESSION_EXPIRED.create(e);
@@ -569,8 +598,8 @@ public abstract class AbstractApiClient implements ApiClient {
                 /*
                  * Try login after a certain amount of time again
                  */
-                int delay = RETRY_BASE_DELAY * retryCount;
-                LOGGER.debug("Error during automatic login (\"{}\"), trying again in {}ms ({}/{})...", e.getMessage(), I(delay), I(retryCount), I(DEFAULT_RETRIES));
+                int delay = RETRY_BASE_DELAY * counter.get();
+                LOGGER.debug("Error during automatic login (\"{}\"), trying again in {}ms ({}/{})...", e.getMessage(), I(delay), I(counter.get()), I(DEFAULT_RETRIES));
                 LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(delay));
             }
         }
@@ -599,8 +628,7 @@ public abstract class AbstractApiClient implements ApiClient {
                         String jobId = data.getString("job");
 
                         //Try to get the result again by using the parsed job ID
-                        HttpRequestBase getRequest = buildRequest(new com.openexchange.api.client.common.calls.jobs.GetCall<T>(jobId, parser));
-                        return execute(getRequest, parser);
+                        return execute(new com.openexchange.api.client.common.calls.jobs.GetCall<T>(jobId, parser));
                     }
                 } catch (JSONException e) {
                     throw ApiClientExceptions.JSON_ERROR.create(e, e.getMessage());

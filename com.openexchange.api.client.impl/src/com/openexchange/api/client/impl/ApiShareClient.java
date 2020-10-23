@@ -104,9 +104,20 @@ public class ApiShareClient extends AbstractApiClient {
 
     @Override
     protected synchronized void doLogin() throws OXException {
+        /*
+         * Clean up data from former logins
+         */
+        this.information = null;
+
+        /*
+         * Access the share
+         */
         AccessShareCall accessCall = new AccessShareCall(loginLink);
         ShareLoginInformation shareLoginInfos = execute(accessCall);
 
+        /*
+         * Validate result and perform further calls if needed
+         */
         String loginType = shareLoginInfos.getLoginType();
         if ("message".equals(loginType) || "message_continue".equals(loginType)) {
             throw ApiClientExceptions.ACCESS_REVOKED.create();
