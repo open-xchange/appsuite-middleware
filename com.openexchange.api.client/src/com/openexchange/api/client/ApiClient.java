@@ -50,7 +50,6 @@
 package com.openexchange.api.client;
 
 import java.net.URL;
-import org.apache.http.client.methods.HttpRequestBase;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
 
@@ -116,7 +115,7 @@ public interface ApiClient {
     /**
      * Gets a value indicating whether this client is closed, meaning if it can serve requests or not.
      * <p>
-     * If the client is closed, any call of {@link #execute(HttpRequestBase, HttpResponseParser)} will fail
+     * If the client is closed, any call of {@link #execute(ApiCall)} will fail
      * with an exception.
      *
      * @return <code>true</code> if the client has been closed, <code>false</code> otherwise
@@ -132,15 +131,4 @@ public interface ApiClient {
      * @throws OXException In case request can't be executed, parsing fails or client is closed
      */
     <T> T execute(ApiCall<T> call) throws OXException;
-
-    /**
-     * Executes the given request and parses it to the desired object
-     *
-     * @param <T> The type of the return value
-     * @param request The request to execute. <b>Note:</b> The request will be <i>closed</i> by this method.
-     * @param parser The parser for the response or <code>null</code> if no parsing should be done
-     * @return The parsed object or <code>null</code> in case the parser was not set
-     * @throws OXException In case request can't be executed, parsing fails or client is closed
-     */
-    <T> T execute(HttpRequestBase request, HttpResponseParser<T> parser) throws OXException;
 }
