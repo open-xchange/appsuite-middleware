@@ -65,6 +65,10 @@ properties:
   category:
     type: integer
     description: "Maintained for legacy reasons: The numeric representation of the first category."
+  metadata:
+    type: object
+    description: A JSON object providing additional arbitrary metadata of the account. 
+    readOnly: true
   capabilities:
     type: array
     description: >-

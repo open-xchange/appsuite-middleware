@@ -145,7 +145,7 @@ public class FileStorageAccountWriter {
             accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
         }
 
-        accountJSON.putOpt("capabilities", capabilities);
+        accountJSON.putOpt("capabilities", null != capabilities ? new JSONArray(capabilities) : null);
         accountJSON.putOpt("metadata", metadata);
 
         return accountJSON;
