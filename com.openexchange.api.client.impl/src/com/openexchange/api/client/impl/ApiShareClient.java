@@ -120,6 +120,9 @@ public class ApiShareClient extends AbstractApiClient {
          */
         String loginType = shareLoginInfos.getLoginType();
         if ("message".equals(loginType) || "message_continue".equals(loginType)) {
+            if ("ERROR".equals(shareLoginInfos.getMessageType()) || "internal_error".equals(shareLoginInfos.getStatus())) {
+                throw ApiClientExceptions.REMOTE_SERVER_ERROR.create(shareLoginInfos.getMessage());
+            }
             throw ApiClientExceptions.ACCESS_REVOKED.create();
         }
 
