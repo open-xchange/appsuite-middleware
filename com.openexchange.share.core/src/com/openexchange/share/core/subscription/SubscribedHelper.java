@@ -66,8 +66,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.functions.ErrorAwareFunction;
@@ -81,13 +79,6 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @since v7.10.5
  */
 public class SubscribedHelper {
-    
-    /** 
-     * The identifiers of the parent folders where adjusting the subscribed flag is supported, which mark the entry points for federated 
-     * sharing ("15" / "Public Files" / FolderObject#SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, and "10" / "Shared Files" / 
-     * FolderObject#SYSTEM_USER_INFOSTORE_FOLDER_ID).
-     */
-    //    static final Set<String> SUPPORTED_PARENT_IDS = Collections.unmodifiableSet("10", "15");
     
     private final FileStorageAccount account;
     private final Set<String> possibleParentIds;
@@ -170,15 +161,7 @@ public class SubscribedHelper {
         if (false == setSubscribed(accountMetadata, folder.getId(), subscribed)) {
             return false;
         }
-        FileStorageService fileStorageService = account.getFileStorageService();
-        DefaultFileStorageAccount accountUpdate = new DefaultFileStorageAccount();
-        accountUpdate.setServiceId(fileStorageService.getId());
-        accountUpdate.setFileStorageService(fileStorageService);
-        accountUpdate.setId(account.getId());
-        accountUpdate.setDisplayName(account.getDisplayName());
-        accountUpdate.setConfiguration(account.getConfiguration());
-        accountUpdate.setMetaData(accountMetadata);
-        fileStorageService.getAccountManager().updateAccount(accountUpdate, session);
+        new AccountMetadataHelper(account, session).saveAccountMetadata(accountMetadata);
         return true;
     }
 

@@ -52,6 +52,7 @@ package com.openexchange.version;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ServerVersion} - Data object storing the version and build number from the manifest of this bundle.
@@ -61,10 +62,33 @@ import org.slf4j.Logger;
  */
 public class ServerVersion implements Comparable<ServerVersion> {
 
+    /**
+     * Parses the supplied server version string.
+     * 
+     * @param versionString The version string to parse, e.g. <code>7.10.5-Rev1</code>
+     * @return The parsed server version
+     * @throws IllegalArgumentException If string cannot be parsed
+     */
+    public static ServerVersion parse(String versionString) throws IllegalArgumentException {
+        if (Strings.isEmpty(versionString)) {
+            throw new IllegalArgumentException(versionString);
+        }
+        String[] splitBy = Strings.splitBy(versionString, '-', true);
+        if (null == splitBy || 2 != splitBy.length) {
+            return null;
+        }
+        String buildNumber = splitBy[1];
+        if (Strings.isNotEmpty(buildNumber) && buildNumber.startsWith(REVISION_ID) && buildNumber.length() > REVISION_ID.length()) {
+            buildNumber = buildNumber.substring(REVISION_ID.length());
+        }
+        return new ServerVersion(splitBy[0], buildNumber);
+    }
+
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ServerVersion.class);
 
     private static final String EXPRESSION = "([0-9]+)\\.([0-9]+)\\.([0-9]+)";
     private static final Pattern PATTERN = Pattern.compile(EXPRESSION);
+    private static final String REVISION_ID = "Rev";
 
     private final String versionString;
     private final String version;
@@ -88,7 +112,7 @@ public class ServerVersion implements Comparable<ServerVersion> {
         this.minor = minor;
         this.patch = patch;
         this.version = String.valueOf(major) + "." + String.valueOf(minor) + "." + String.valueOf(patch);
-        this.versionString = version + "-Rev" + buildNumber;
+        this.versionString = version + '-' + REVISION_ID + buildNumber;
     }
 
     /**
@@ -98,7 +122,7 @@ public class ServerVersion implements Comparable<ServerVersion> {
      * @param buildNumber The build number
      * @throws Exception In case version string can't be parsed
      */
-    public ServerVersion(String version, String buildNumber) throws Exception {
+    public ServerVersion(String version, String buildNumber) throws IllegalArgumentException {
         super();
         this.version = version;
         this.buildNumber = buildNumber;
@@ -107,22 +131,22 @@ public class ServerVersion implements Comparable<ServerVersion> {
             try {
                 major = Integer.parseInt(matcher.group(1));
             } catch (NumberFormatException e) {
-                throw new Exception("Can not parse major out of version \"" + version + "\".", e);
+                throw new IllegalArgumentException("Can not parse major out of version \"" + version + "\".", e);
             }
             try {
                 minor = Integer.parseInt(matcher.group(2));
             } catch (NumberFormatException e) {
-                throw new Exception("Can not parse minor out of version \"" + version + "\".", e);
+                throw new IllegalArgumentException("Can not parse minor out of version \"" + version + "\".", e);
             }
             try {
                 patch = Integer.parseInt(matcher.group(3));
             } catch (NumberFormatException e) {
-                throw new Exception("Can not parse patch out of version \"" + version + "\".", e);
+                throw new IllegalArgumentException("Can not parse patch out of version \"" + version + "\".", e);
             }
         } else {
-            throw new Exception("Version pattern does not match on version string \"" + version + "\".");
+            throw new IllegalArgumentException("Version pattern does not match on version string \"" + version + "\".");
         }
-        this.versionString = version + "-Rev" + buildNumber;
+        this.versionString = version + '-' + REVISION_ID + buildNumber;
     }
 
     /**

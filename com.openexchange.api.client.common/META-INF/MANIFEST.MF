@@ -1,7 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: The share API bundle
+Bundle-Name: The common API client bundle
 Bundle-SymbolicName: com.openexchange.api.client.common
+Automatic-Module-Name: com.openexchange.api.client.common
 Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -52,6 +53,7 @@ Import-Package: com.openexchange.ajax,
  org.slf4j
 Export-Package: com.openexchange.api.client.common,
  com.openexchange.api.client.common.calls,
+ com.openexchange.api.client.common.calls.capabilities,
  com.openexchange.api.client.common.calls.contact.picture,
  com.openexchange.api.client.common.calls.find,
  com.openexchange.api.client.common.calls.folders,

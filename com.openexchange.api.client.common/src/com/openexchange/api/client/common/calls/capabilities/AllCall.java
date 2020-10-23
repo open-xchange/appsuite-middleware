@@ -47,91 +47,59 @@
  *
  */
 
-package com.openexchange.api.client.common.calls.system;
+package com.openexchange.api.client.common.calls.capabilities;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.apache.http.protocol.HttpContext;
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
 import com.openexchange.api.client.common.parser.AbstractHttpResponseParser;
 import com.openexchange.api.client.common.parser.CommonApiResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.version.ServerVersion;
 
 /**
- * {@link ServerVersionCall}
+ * {@link AllCall}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.5
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.5
  */
-public class ServerVersionCall extends AbstractGetCall<ServerVersion> {
-
-    @Override
-    public boolean appendSessionToPath() {
-        return false;
-    }
+public class AllCall extends AbstractGetCall<Set<String>> {
 
     @Override
     @NonNull
     public String getModule() {
-        return "version";
+        return "capabilities";
     }
 
     @Override
     protected String getAction() {
-        return "version";
+        return "all";
     }
 
     @Override
-    public HttpResponseParser<ServerVersion> getParser() {
-        return new ServerVersionParser();
+    public HttpResponseParser<Set<String>> getParser() {
+        return new AbstractHttpResponseParser<Set<String>>() {
+
+            @Override
+            public Set<String> parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException, JSONException {
+                JSONArray jsonArray = commonResponse.getJSONArray();
+                Set<String> capabilities = new HashSet<String>(jsonArray.length());
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    capabilities.add(jsonArray.getJSONObject(i).getString("id"));
+                }
+                return capabilities;
+            }
+        };
     }
 
     @Override
-    protected void fillParameters(Map<String, String> parameters) {}
-
-    /**
-     * {@link ServerVersionParser}
-     *
-     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
-     * @since v7.10.5
-     */
-    private final static class ServerVersionParser extends AbstractHttpResponseParser<ServerVersion> {
-
-        /** Simple class to delay initialization until needed */
-        private static class LoggerHolder {
-
-            static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerVersionCall.class);
-        }
-
-        /**
-         * Initializes a new {@link ServerVersionParser}.
-         */
-        public ServerVersionParser() {
-            super();
-        }
-
-        @Override
-        public ServerVersion parse(CommonApiResponse commonResponse, HttpContext httpContext) throws OXException, JSONException {
-            JSONObject json = commonResponse.getJSONObject();
-            String serverVersion = json.getString("version");
-            if (Strings.isEmpty(serverVersion)) {
-                return null;
-            }
-            /*
-             * Something like "7.10.5-Rev1"
-             */
-            try {
-                return ServerVersion.parse(serverVersion);
-            } catch (Exception e) {
-                LoggerHolder.LOG.info("Unable to parse version string from {}", serverVersion, e);
-            }
-            return null;
-        }
+    protected void fillParameters(Map<String, String> parameters) {
+        // no
     }
+
 }
