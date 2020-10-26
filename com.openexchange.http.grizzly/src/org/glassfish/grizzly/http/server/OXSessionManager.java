@@ -135,7 +135,7 @@ public class OXSessionManager implements SessionManager {
         Session session;
         for (Iterator<Session> it = sessions.values().iterator(); it.hasNext();) {
             session = it.next();
-            if (isInvalid(session) || isNotAuthenticated(session) || isRateLimited(session) || isTimedOut(currentTime, session) || isUnusedSession(currentTime, session)) {
+            if (isInvalid(session) || isNotAuthenticatedAndUnusedAttributes(session) || isRateLimited(session) || isTimedOut(currentTime, session) || isUnusedSession(currentTime, session)) {
                 session.setValid(false);
                 it.remove();
                 sessionsCount--;
@@ -163,11 +163,12 @@ public class OXSessionManager implements SessionManager {
      * @param session The session to check
      * @return <code>true</code> if "authenticated" marker is absent; otherwise <code>false</code>
      */
-    private boolean isNotAuthenticated(Session session) {
+    private boolean isNotAuthenticatedAndUnusedAttributes(Session session) {
         if (!grizzlyConfig.isRemoveNonAuthenticatedSessions()) {
             return false;
         }
-        return !Boolean.TRUE.equals(session.getAttribute(HTTP_SESSION_ATTR_AUTHENTICATED));
+        ConcurrentMap<String, Object> attributes = session.attributes();
+        return !Boolean.TRUE.equals(attributes.get(HTTP_SESSION_ATTR_AUTHENTICATED)) && attributes.isEmpty();
     }
 
     /**
