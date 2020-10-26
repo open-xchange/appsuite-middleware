@@ -137,7 +137,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             accountDescription.setTransportOAuthId(-1);
         }
 
-        checkNeededFields(accountDescription);
+        checkNeededFields(accountDescription, true);
 
         if (isEmpty(accountDescription.getSpamHandler())) {
             accountDescription.setSpamHandler(SpamHandler.SPAM_HANDLER_FALLBACK);
