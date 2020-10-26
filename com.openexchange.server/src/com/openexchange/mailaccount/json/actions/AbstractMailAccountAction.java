@@ -324,8 +324,8 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         return UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailProtocol);
     }
 
-    protected static void checkNeededFields(final MailAccountDescription accountDescription) throws OXException {
-        MailAccountJsonUtility.checkNeededFields(accountDescription);
+    protected static void checkNeededFields(final MailAccountDescription accountDescription, boolean checkForPrimaryAddress) throws OXException {
+        MailAccountJsonUtility.checkNeededFields(accountDescription, checkForPrimaryAddress);
     }
 
     /**
