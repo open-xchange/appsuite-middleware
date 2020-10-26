@@ -124,7 +124,7 @@ public interface OXResellerInterface extends Remote {
     void change(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException;
 
     /**
-     * Allows a reseller admin to change his own id, capabilities, properties and taxonomies
+     * Allows a reseller admin to change his own capabilities, properties and taxonomies
      *
      * @param admin The {@link ResellerAdmin} object
      * @param credentials {@link Credentials} of the reseller admin
