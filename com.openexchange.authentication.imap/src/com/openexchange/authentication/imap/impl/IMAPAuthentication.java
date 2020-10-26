@@ -52,7 +52,6 @@ package com.openexchange.authentication.imap.impl;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
 import static com.openexchange.authentication.LoginExceptionCodes.UNKNOWN;
-import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.mail.AuthenticationFailedException;
@@ -148,16 +147,6 @@ public class IMAPAuthentication implements AuthenticationService {
             String password = loginInfo.getPassword();
             if ("".equals(localPart.trim()) || "".equals(password.trim())) {
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-            }
-
-            if (props.get(PropertyNames.IMAPAUTHENC.name) != null) {
-                String authenc = (String) props.get(PropertyNames.IMAPAUTHENC.name);
-                try {
-                    password = new String(password.getBytes(authenc), CHARENC_ISO8859);
-                } catch (UnsupportedEncodingException e) {
-                    LOG.error("", e);
-                    throw LoginExceptionCodes.COMMUNICATION.create(e);
-                }
             }
 
             String imaptimeout = "4000";
@@ -345,6 +334,16 @@ public class IMAPAuthentication implements AuthenticationService {
                  * Needed for JavaMail >= 1.4
                  */
                 // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+            }
+
+            {
+                Object value = props.get(PropertyNames.IMAPAUTHENC.name);
+                if (value != null) {
+                    String authenc = (String) value;
+                    if (Strings.isNotEmpty(authenc)) {
+                        imapprops.put("mail.imap.login.encoding", authenc.trim());
+                    }
+                }
             }
 
             Store imapconnection = null;

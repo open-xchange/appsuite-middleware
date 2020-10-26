@@ -394,6 +394,16 @@ public final class SessionUtility {
     }
 
     /**
+     * Checks whether passed exception indicates an IP check error.
+     *
+     * @param e The exception to check
+     * @return <code>true</code> if passed exception indicates an IP check error; otherwise <code>false</code>
+     */
+    public static boolean isIpCheckError(final OXException e) {
+        return (isSessionExpiredError(e) && "true".equals(e.getProperty(com.openexchange.ajax.ipcheck.IPCheckers.OXEXCEPTION_PROPERTY_IP_CHECK)));
+    }
+
+    /**
      * Checks if the client IP address of the current request matches the one associated with given session.
      *
      * @param session The session to check for

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.parser.handlers;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
@@ -67,8 +68,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.TreeSet;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.idn.IDNA;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,6 +83,7 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -119,6 +123,7 @@ import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.ContentProvider;
 import com.openexchange.mail.parser.MailMessageHandler;
@@ -1669,12 +1674,60 @@ public final class JsonMessageHandler implements MailMessageHandler {
     public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean acknowledged) throws OXException {
         try {
             if (!acknowledged) {
-                jsonObject.put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(), dispositionNotificationTo.toUnicodeString());
+                // Check if given address is covered by user's aliases
+                UserAliasStorage aliasStorage = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
+                if (aliasStorage == null || false == determineUserAliases(aliasStorage).contains(dispositionNotificationTo.getAddress())) {
+                    // Given address is not covered by user's aliases. Therefore, advertise "disp_notification_to" field in JSON representation
+                    jsonObject.put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(), dispositionNotificationTo.toUnicodeString());
+                }
             }
             return true;
         } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private Set<String> determineUserAliases(UserAliasStorage aliasStorage) {
+        try {
+            Set<String> aliases = aliasStorage.getAliases(session.getContextId(), session.getUserId());
+            Set<String> preparedAliases = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+            for (String address : aliases) {
+                String sAddr = IDNA.toIDN(address);
+                if (containsControlWhitespaceOrNonAscii(sAddr)) {
+                    try {
+                        QuotedInternetAddress addr = new QuotedInternetAddress(sAddr, false);
+                        preparedAliases.add(addr.getIDNAddress());
+                        preparedAliases.add(QuotedInternetAddress.toACE(addr.getAddress()));
+                    } catch (Exception e) {
+                        // Failed to parse as E-Mail address
+                        preparedAliases.add(IDNA.toIDN(extractRealMailAddressFrom(sAddr)));
+                    }
+                } else {
+                    preparedAliases.add(IDNA.toIDN(extractRealMailAddressFrom(sAddr)));
+                }
+            }
+            return preparedAliases;
+        } catch (Exception e) {
+            LOG.warn("Failed to determine aliases for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
+            return Collections.emptySet();
+        }
+    }
+
+    private static boolean containsControlWhitespaceOrNonAscii(String address) {
+        int len = address.length();
+        for (int i = len; i-- > 0;) {
+            char c = address.charAt(i);
+            if (c <= 32 || c >= 127) {
+                // Address contains control/whitespace or non-ascii character
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String extractRealMailAddressFrom(String sAddress) {
+        int index = sAddress.indexOf('<');
+        return index < 0 ? sAddress : sAddress.substring(index + 1, sAddress.indexOf('>'));
     }
 
     @Override
