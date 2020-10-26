@@ -54,6 +54,7 @@ import java.util.Map;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link IDManglingAccountAwareGroupwareFolder}
@@ -91,13 +92,13 @@ public class IDManglingAccountAwareGroupwareFolder extends IDManglingAccountAwar
     }
 
     @Override
-    public int getModifiedBy() {
-        return delegate.getModifiedBy();
+    public EntityInfo getModifiedFrom() {
+        return delegate.getModifiedFrom();
     }
 
     @Override
-    public int getCreatedBy() {
-        return delegate.getCreatedBy();
+    public EntityInfo getCreatedFrom() {
+        return delegate.getCreatedFrom();
     }
 
     @Override

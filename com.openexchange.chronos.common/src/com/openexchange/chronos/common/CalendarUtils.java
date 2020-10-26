@@ -1495,7 +1495,7 @@ public class CalendarUtils {
          */
         RecurrenceIterator<RecurrenceId> iterator;
         try {
-            iterator = recurrenceService.iterateRecurrenceIds(recurrenceData);
+            iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, asDate(recurrenceIds.first().getValue()), null);
         } catch (OXException e) {
             getLogger(CalendarUtils.class).info("Error getting iterator for \"{}\", assuming all recurrence ids as invalid.", recurrenceData, e);
             return validRecurrenceIds;

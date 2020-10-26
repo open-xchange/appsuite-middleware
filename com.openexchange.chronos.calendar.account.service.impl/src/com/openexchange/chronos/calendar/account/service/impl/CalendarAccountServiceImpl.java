@@ -202,6 +202,27 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     @Override
+    public CalendarAccount createAccount(Session session, String providerId, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        /*
+         * get associated calendar provider, check permissions & initialize account config
+         */
+        CalendarProvider calendarProvider = requireCapability(getProvider(providerId), session);
+        if (isGuest(session) || false == FolderCalendarProvider.class.isInstance(calendarProvider)) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(calendarProvider.getId());
+        }
+        JSONObject internalConfig = ((FolderCalendarProvider) calendarProvider).configureAccount(session, userConfig, parameters);
+        /*
+         * insert calendar account in storage within transaction
+         */
+        CalendarAccount account = insertAccount(session.getContextId(), calendarProvider, session.getUserId(), internalConfig, userConfig, parameters);
+        /*
+         * let provider perform any additional initialization
+         */
+        calendarProvider.onAccountCreated(session, account, parameters);
+        return account;
+    }
+
+    @Override
     public CalendarAccount updateAccount(Session session, int id, JSONObject userConfig, long clientTimestamp, CalendarParameters parameters) throws OXException {
         /*
          * get & check stored calendar account

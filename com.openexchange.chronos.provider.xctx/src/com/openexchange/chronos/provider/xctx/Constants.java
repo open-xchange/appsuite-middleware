@@ -47,76 +47,41 @@
  *
  */
 
-package com.openexchange.chronos.provider.composition.impl.idmangling;
+package com.openexchange.chronos.provider.xctx;
 
-import java.util.Date;
-import java.util.Map;
-import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
-import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
-import com.openexchange.groupware.EntityInfo;
+import com.openexchange.folderstorage.ContentType;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.modules.Module;
 
 /**
- * {@link IDManglingGroupwareFolder}
+ * {@link Constants}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @since v7.10.5
  */
-public class IDManglingGroupwareFolder extends IDManglingFolder implements GroupwareCalendarFolder {
+public enum Constants {
+    ;
 
-    protected final String newParentId;
-    protected final GroupwareCalendarFolder delegate;
+    /** The static identifier of the internal calendar provider */
+    //    public static final String PROVIDER_ID = CalendarProviders.ID_CHRONOS;
+    public static final String PROVIDER_ID = "xctx" + Module.CALENDAR.getFolderConstant();
 
-    /**
-     * Initializes a new {@link IDManglingGroupwareFolder}.
-     *
-     * @param delegate The event delegate
-     * @param newId The new identifier to hide the delegate's one
-     * @param newParentId The new parent identifier to hide the delegate's one
-     */
-    public IDManglingGroupwareFolder(GroupwareCalendarFolder delegate, String newId, String newParentId) {
-        super(delegate, newId);
-        this.delegate = delegate;
-        this.newParentId = newParentId;
-    }
+    /** The identifier of the folder tree the calendar provider is using */
+    public static final String TREE_ID = com.openexchange.folderstorage.FolderStorage.REAL_TREE_ID;
 
-    @Override
-    public String getParentId() {
-        return newParentId;
-    }
+    /** The used folder storage content type */
+    public static final ContentType CONTENT_TYPE = com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance();
 
-    @Override
-    public boolean isDefaultFolder() {
-        return delegate.isDefaultFolder();
-    }
+    /** The identifier of the "private" root folder */
+    static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 
-    @Override
-    public EntityInfo getModifiedFrom() {
-        return delegate.getModifiedFrom();
-    }
+    /** The identifier of the "public" root folder */
+    static final String PUBLIC_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
 
-    @Override
-    public EntityInfo getCreatedFrom() {
-        return delegate.getCreatedFrom();
-    }
+    /** The identifier of the "shared" root folder */
+    static final String SHARED_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID);
 
-    @Override
-    public Date getCreationDate() {
-        return delegate.getCreationDate();
-    }
-
-    @Override
-    public GroupwareFolderType getType() {
-        return delegate.getType();
-    }
-
-    @Override
-    public Map<String, Object> getMeta() {
-        return delegate.getMeta();
-    }
-
-    @Override
-    public String toString() {
-        return "IDManglingGroupwareFolder [newId=" + newId + ", newParentId=" + newParentId + ", delegate=" + delegate + "]";
-    }
+    /** The prefix used for stored user properties of folders */
+    static final String USER_PROPERTY_PREFIX = "cal/";
 
 }
