@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -281,19 +280,7 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
                     result = sender.send(getMessage(client, notification), registrationIDs, 3, Endpoint.FCM);
 
                     // Log it
-                    Object ostr = new Object() {
-
-                        @Override
-                        public String toString() {
-                            StringBuilder sb = new StringBuilder(registrationIDs.size() * 16);
-                            Iterator<String> it = registrationIDs.iterator();
-                            sb.append(it.next());
-                            while (it.hasNext()) {
-                                sb.append(", ").append(it.next());
-                            }
-                            return sb.toString();
-                        }
-                    };
+                    Object ostr = registrationIDs.size() == 1 ? registrationIDs.get(0) : createStringObj(registrationIDs);
                     if (null != result) {
                         LOG.info("Sent notification \"{}\" via transport '{}' for user {} in context {} to registration ID(s): {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), ostr);
                         LOG.debug("{}", result);
@@ -613,6 +600,22 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
         }
         LOG.warn("Registration ID {} not removed.", registrationID);
         return false;
+    }
+
+    private Object createStringObj(List<String> registrationIDs) {
+        return new Object() {
+
+            @Override
+            public String toString() {
+                int size = registrationIDs.size();
+                StringBuilder sb = new StringBuilder(size << 8);
+                sb.append(registrationIDs.get(0));
+                for (int i = 1; i < size; i++) {
+                    sb.append(", ").append(registrationIDs.get(i));
+                }
+                return sb.toString();
+            }
+        };
     }
 
 }
