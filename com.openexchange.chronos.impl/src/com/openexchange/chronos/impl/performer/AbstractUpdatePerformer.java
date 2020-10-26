@@ -697,6 +697,23 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
+     * Optionally loads all non user-specific data for a specific event, including attendees and attachments.
+     * <p/>
+     * No <i>userization</i> of the event is performed and no alarm data is fetched for a specific attendee, i.e. only the plain/vanilla
+     * event data is loaded from the storage.
+     *
+     * @param id The identifier of the event to load
+     * @return The event data, or <code>null</code> if not found
+     */
+    protected Event optEventData(String id) throws OXException {
+        Event event = storage.getEventStorage().loadEvent(id, null);
+        if (null == event) {
+            return null;
+        }
+        return new UnmodifiableEvent(storage.getUtilities().loadAdditionalEventData(-1, event, null));
+    }
+
+    /**
      * Loads all non user-specific data for a specific event, including attendees and attachments.
      * <p/>
      * No <i>userization</i> of the event is performed and no alarm data is fetched for a specific attendee, i.e. only the plain/vanilla
@@ -1150,7 +1167,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * Deletes an existing change exception. Besides the removal of the change exception data via {@link #delete(Event)}, this also
      * includes adjusting the master event's change- and delete exception date arrays.
      *
-     * @param originalSeriesMaster The original series master event
+     * @param originalSeriesMaster The original series master event, or <code>null</code> if not available
      * @param originalExceptionEvent The original exception event
      * @return A list holding the deleted exception event
      */
@@ -1160,10 +1177,12 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         RecurrenceId recurrenceId = originalExceptionEvent.getRecurrenceId();
         List<Event> deletedEvents = delete(originalExceptionEvent);
-        /*
-         * update the series master accordingly
-         */
-        addDeleteExceptionDate(originalSeriesMaster, recurrenceId);
+        if (null != originalSeriesMaster) {
+            /*
+             * update the series master accordingly
+             */
+            addDeleteExceptionDate(originalSeriesMaster, recurrenceId);
+        }
         return deletedEvents;
     }
 

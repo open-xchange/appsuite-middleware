@@ -1355,7 +1355,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } else if (Strings.isNotEmpty(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", null))) {
             isAllowed = Boolean.valueOf(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", "true").trim());
         } else {
-            isAllowed = getConfigViewValue(0, contextId, "com.openexchange.mail.remoteContentPerDefault", null);
+            isAllowed = getConfigViewValue(contextId, "com.openexchange.mail.remoteContentPerDefault", null);
         }
 
         int flegs = flags;
@@ -1368,25 +1368,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     /**
      * Gets a user-specific {@link Boolean} for the specified property name
      *
-     * @param userId The ID of the user to be created
      * @param contextId The ID of the context, the user gets created in
      * @param propertyName The name of the boolean property to get
      * @param defaultValue The default value for the <code>Boolean</code> to use
      * @return A {@link Boolean} or the default value
      */
-    private Boolean getConfigViewValue(int userId, int contextId, String propertyName, Boolean defaultValue) {
+    private Boolean getConfigViewValue(int contextId, String propertyName, Boolean defaultValue) {
         ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
         if (viewFactory != null) {
             try {
-                ConfigView view = viewFactory.getView(userId, contextId);
+                ConfigView view = viewFactory.getView(-1, contextId);
                 Boolean value = view.get(propertyName, Boolean.class);
                 return null == value ? defaultValue : value;
             } catch (OXException e) {
                 if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
-                    LOG.debug("Context {} is being created. Therefore can't load context sensitive properties. Try to load \"{}\" on global view.", I(contextId), propertyName, e);
+                    LOG.info("Context {} is being created. Therefore can't load context sensitive properties. Trying to load \"{}\" on global view.", I(contextId), propertyName, e);
                     return getConfigViewValue(propertyName, defaultValue, viewFactory);
                 }
-                LOG.debug("Unable to load {}.", propertyName, e);
+                LOG.warn("Unable to load {}.", propertyName, e);
             }
         }
         return defaultValue;
@@ -1406,7 +1405,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             Boolean value = view.get(propertyName, Boolean.class);
             return null == value ? defaultValue : value;
         } catch (OXException e) {
-            LOG.debug("Unable to load {}.", propertyName, e);
+            LOG.warn("Unable to load {}.", propertyName, e);
         }
         return defaultValue;
     }
@@ -1471,7 +1470,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         account.setLogin(null == user.getImapLogin() ? "" : user.getImapLogin());
         account.setPrimaryAddress(user.getPrimaryEmail());
         {
-            Boolean check = getConfigViewValue(userId, ctx.getId().intValue(), "com.openexchange.mail.useStaticDefaultFolders", Boolean.FALSE);
+            Boolean check = getConfigViewValue(ctx.getId().intValue(), "com.openexchange.mail.useStaticDefaultFolders", Boolean.FALSE);
 
             if (check != null && check.booleanValue()) {
                 String lang = user.getLanguage().toUpperCase();
@@ -2819,7 +2818,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     private void checkForIllegalCombination(int contextId, int userId, final UserModuleAccess access) throws StorageException {
-        if (access.isGlobalAddressBookDisabled() && false == b(getConfigViewValue(userId, contextId, "com.openexchange.admin.bypassAccessCombinationChecks", Boolean.FALSE))) {
+        if (access.isGlobalAddressBookDisabled() && false == b(getConfigViewValue(contextId, "com.openexchange.admin.bypassAccessCombinationChecks", Boolean.FALSE))) {
 
             // At least Outlook does not work if global address book is not available. All other groupware functionality gets useless.
             if (access.getEditPublicFolders()) {

@@ -131,7 +131,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              */
             requireDeletePermissions(originalEvent);
             if (isSeriesException(originalEvent)) {
-                Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
+                Event originalSeriesMaster = optEventData(originalEvent.getSeriesId());
                 List<Event> deletedEvents = deleteException(originalSeriesMaster, originalEvent);
                 schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedEvents), originalSeriesMaster, null);
             } else {
@@ -199,7 +199,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                 /*
                  * delete existing change exception & prepare cancel or reply scheduling message representing the delete operation
                  */
-                Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
+                Event originalSeriesMaster = optEventData(originalEvent.getSeriesId());
                 List<Event> deletedEvents = deleteException(originalSeriesMaster, originalEvent);
                 schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedEvents), originalSeriesMaster, null);
             } else {
@@ -241,7 +241,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                 /*
                  * deletion of existing change exception
                  */
-                Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
+                Event originalSeriesMaster = optEventData(originalEvent.getSeriesId());
                 List<EventUpdate> attendeeEventUpdates = deleteException(originalSeriesMaster, originalEvent, userAttendee);
                 schedulingHelper.trackReply(userAttendee, getUpdatedResource(attendeeEventUpdates), originalSeriesMaster, attendeeEventUpdates);
             } else {
@@ -257,7 +257,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * Deletes a specific internal user attendee from an existing change exception. Besides the removal of the attendee via
      * {@link #delete(Event, Attendee)}, this also includes 'touching' the master event's last-modification timestamp.
      *
-     * @param originalSeriesMaster The original series master event
+     * @param originalSeriesMaster The original series master event, or <code>null</code> if not available
      * @param originalExceptionEvent The original exception event
      * @param originalAttendee The original attendee to delete
      * @return A list containing the performed event update as {@link AttendeeEventUpdate}
@@ -270,8 +270,10 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         /*
          * 'touch' the series master accordingly & track result
          */
-        touch(originalSeriesMaster.getId());
-        resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
+        if (null != originalSeriesMaster) {
+            touch(originalSeriesMaster.getId());
+            resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
+        }
         return attendeeEventUpdates;
     }
 

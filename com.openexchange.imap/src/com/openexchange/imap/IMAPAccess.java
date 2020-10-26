@@ -1392,6 +1392,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapProps.put("mail.imap.auth.mechanisms", "PLAIN LOGIN NTLM");
         }
         /*
+         * Charset for "LOGIN" command. Default is UTF-8
+         */
+        {
+            IIMAPProperties imapConfProps = (IIMAPProperties) config.getMailProperties();
+            String imapAuthEnc = imapConfProps.getImapAuthEnc();
+            if (Strings.isNotEmpty(imapAuthEnc)) {
+                imapProps.put("mail.imap.login.encoding", imapAuthEnc.trim());
+            }
+        }
+        /*
          * Check if a secure IMAP connection should be established
          */
         String sPort = String.valueOf(config.getPort());

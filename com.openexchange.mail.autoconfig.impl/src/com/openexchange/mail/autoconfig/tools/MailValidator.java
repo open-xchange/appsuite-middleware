@@ -98,6 +98,7 @@ public class MailValidator {
     public static boolean validateImap(String host, int port, ConnectMode connectMode, String user, String pwd, Map<String, Object> optProperties) {
         Store store = null;
         try {
+            ConfigurationService configuration = Services.getService(ConfigurationService.class);
             SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
             String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
             Properties props = new Properties();
@@ -112,13 +113,13 @@ public class MailValidator {
                 props.put("mail.imap.starttls.enable", Boolean.TRUE);
                 props.put("mail.imap.ssl.trust", "*");
                 {
-                    final ConfigurationService configuration = Services.getService(ConfigurationService.class);
-                    final String sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
+                    String defaultValue = "SSLv3 TLSv1";
+                    String sslProtocols = configuration == null ? defaultValue : configuration.getProperty("com.openexchange.imap.ssl.protocols", defaultValue).trim();
                     props.put("mail.imap.ssl.protocols", sslProtocols);
                 }
                 {
-                    final ConfigurationService configuration = Services.getService(ConfigurationService.class);
-                    final String cipherSuites = configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", "").trim();
+                    String defaultValue = "";
+                    String cipherSuites = configuration == null ? defaultValue : configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", defaultValue).trim();
                     if (Strings.isNotEmpty(cipherSuites)) {
                         props.put("mail.imap.ssl.ciphersuites", cipherSuites);
                     }
@@ -128,6 +129,12 @@ public class MailValidator {
             props.put("mail.imap.connectiontimeout", I(DEFAULT_CONNECT_TIMEOUT));
             props.put("mail.imap.timeout", I(DEFAULT_TIMEOUT));
             props.put("mail.imap.socketFactory.port", I(port));
+            if (configuration != null) {
+                String authenc = configuration.getProperty("com.openexchange.imap.imapAuthEnc", "UTF-8").trim();
+                if (Strings.isNotEmpty(authenc)) {
+                    props.put("mail.imap.login.encoding", authenc);
+                }
+            }
 
             if (optProperties != null) {
                 Integer contextId = (Integer) optProperties.get(PROP_GENERAL_CONTEXT_ID);

@@ -681,6 +681,7 @@ properties:
       description: |
         Defines whether standard folder names should be initialized with the default values or not. 
         The default values can be configured within the Adminuser.properties file.
+        Can be specified through the config-cascade, up to scope 'context' after the context has been created.
       defaultValue: false
       version: 7.8.3
       reloadable: true

@@ -381,7 +381,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          */
         boolean assumeExternalOrganizerUpdate = assumeExternalOrganizerUpdate(originalEvent, eventData);
         List<Event> originalChangeExceptions = isSeriesMaster(originalEvent) ? loadExceptionData(originalEvent) : null;
-        Event originalSeriesMasterEvent = isSeriesException(originalEvent) ? loadEventData(originalEvent.getSeriesId()) : null;
+        Event originalSeriesMasterEvent = isSeriesException(originalEvent) ? optEventData(originalEvent.getSeriesId()) : null;
         InternalEventUpdate eventUpdate = new InternalEventUpdate(
             session, folder, originalEvent, originalChangeExceptions, originalSeriesMasterEvent, eventData, timestamp, Arrays.add(SKIPPED_FIELDS, ignoredFields));
         if (needsConflictCheck(eventUpdate)) {
@@ -882,9 +882,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (null == updatedResource) {
                 updatedResource = new DefaultCalendarObjectResource(updatedEvent, updatedChangeExceptions);
                 if (isSeriesException(updatedResource.getFirstEvent())) {
-                    Event seriesMaster = performer.loadEventData(updatedResource.getFirstEvent().getSeriesId());
-                    List<Event> changeExceptions = performer.loadExceptionData(seriesMaster);
-                    updatedResource = new DefaultCalendarObjectResource(seriesMaster, changeExceptions);
+                    Event seriesMaster = performer.optEventData(updatedResource.getFirstEvent().getSeriesId());
+                    if (null != seriesMaster) {
+                        List<Event> changeExceptions = performer.loadExceptionData(seriesMaster);
+                        updatedResource = new DefaultCalendarObjectResource(seriesMaster, changeExceptions);
+                    }
                 }
             }
             return updatedResource;
