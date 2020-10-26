@@ -117,7 +117,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * <code>fileinto &lt;mailbox: string&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-4.1">RFC-5228: Action fileinto</p>
          */
-        FILEINTO("fileinto", 1, fileintoTags(), "move", Collections.singletonList("fileinto")),
+        FILEINTO("fileinto", 1, fileintoTags(), "move", Arrays.asList("fileinto", "copy")),
         /**
          * <p>The "reject" action cancels the implicit keep and refuses delivery of a message.</p>
          * <code>reject &lt;reason: string&gt;</code>
