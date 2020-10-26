@@ -134,9 +134,11 @@ public class CalendarFolderConverter {
         folder.setSupportedCapabilities(getCapabilityNames(calendarFolder.getSupportedCapabilites()));
         if (GroupwareCalendarFolder.class.isInstance(calendarFolder)) {
             GroupwareCalendarFolder groupwareCalendarFolder = (GroupwareCalendarFolder) calendarFolder;
-            folder.setCreatedBy(groupwareCalendarFolder.getCreatedBy());
+            folder.setCreatedFrom(groupwareCalendarFolder.getCreatedFrom());
+            folder.setCreatedBy(null != folder.getCreatedFrom() ? folder.getCreatedFrom().getEntity() : 0);
             folder.setCreationDate(groupwareCalendarFolder.getCreationDate());
-            folder.setModifiedBy(groupwareCalendarFolder.getModifiedBy());
+            folder.setModifiedFrom(groupwareCalendarFolder.getModifiedFrom());
+            folder.setModifiedBy(null != folder.getModifiedFrom() ? folder.getModifiedFrom().getEntity() : 0);
             folder.setParentID(groupwareCalendarFolder.getParentId());
             folder.setType(getStorageType(groupwareCalendarFolder.getType()));
             folder.setDefault(groupwareCalendarFolder.isDefaultFolder());
@@ -271,13 +273,13 @@ public class CalendarFolderConverter {
      */
     public static DefaultGroupwareCalendarFolder getCalendarFolder(Folder folder) {
         DefaultGroupwareCalendarFolder calendarFolder = new DefaultGroupwareCalendarFolder();
-        calendarFolder.setCreatedBy(folder.getCreatedBy());
+        calendarFolder.setCreatedFrom(folder.getCreatedFrom());
         calendarFolder.setCreationDate(folder.getCreationDate());
         calendarFolder.setDefaultFolder(folder.isDefault());
         calendarFolder.setFolderType(getCalendarType(folder.getType()));
         calendarFolder.setId(folder.getID());
         calendarFolder.setLastModified(folder.getLastModified());
-        calendarFolder.setModifiedBy(folder.getModifiedBy());
+        calendarFolder.setModifiedFrom(folder.getModifiedFrom());
         calendarFolder.setName(folder.getName());
         calendarFolder.setParentId(folder.getParentID());
         calendarFolder.setPermissions(getCalendarPermissions(folder.getPermissions()));

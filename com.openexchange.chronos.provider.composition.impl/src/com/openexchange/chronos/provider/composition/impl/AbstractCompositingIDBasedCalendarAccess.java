@@ -90,6 +90,7 @@ import com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
+import com.openexchange.chronos.provider.groupware.InternalCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.ErrorAwareCalendarResult;
 import com.openexchange.chronos.service.EventID;
@@ -304,6 +305,16 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      */
     protected GroupwareCalendarAccess getGroupwareAccess(CalendarAccount account) throws OXException {
         return getAccess(account, GroupwareCalendarAccess.class);
+    }
+
+    /**
+     * Gets the internal groupware calendar access for the default calendar account {@link CalendarAccount#DEFAULT_ACCOUNT}. The account
+     * is connected implicitly and remembered to be closed during {@link #finish()} implicitly, if not already done.
+     *
+     * @return The internal groupware calendar access for the default account
+     */
+    protected InternalCalendarAccess getInternalAccess() throws OXException {
+        return getAccess(CalendarAccount.DEFAULT_ACCOUNT, InternalCalendarAccess.class);
     }
 
     /**
@@ -679,6 +690,16 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     protected boolean isFolderCalendarProvider(int accountId) throws OXException {
         CalendarProvider provider = providerRegistry.getCalendarProvider(getAccount(accountId).getProviderId());
         return FolderCalendarProvider.class.isInstance(provider);
+    }
+
+    /**
+     * Optionally gets the calendar provider responsible from the provider registry.
+     * 
+     * @param providerId The identifier of the provider to get
+     * @return The calendar provider, or <code>null</code> if not available
+     */
+    protected CalendarProvider optCalendarProvider(String providerId) {
+        return providerRegistry.getCalendarProvider(providerId);
     }
 
     @Override

@@ -104,6 +104,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
+import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
@@ -127,6 +128,7 @@ import com.openexchange.chronos.provider.extensions.FolderSyncAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.SyncAware;
 import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
+import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
@@ -280,7 +282,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     @Override
     public List<Event> getEventsOfUser() throws OXException {
         try {
-            return withUniqueIDs(getGroupwareAccess(DEFAULT_ACCOUNT).getEventsOfUser(), DEFAULT_ACCOUNT.getAccountId());
+            return withUniqueIDs(getInternalAccess().getEventsOfUser(), DEFAULT_ACCOUNT.getAccountId());
         } catch (OXException e) {
             throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
         }
@@ -289,7 +291,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     @Override
     public List<Event> getEventsOfUser(Boolean rsvp, ParticipationStatus[] partStats) throws OXException {
         try {
-            return withUniqueIDs(getGroupwareAccess(DEFAULT_ACCOUNT).getEventsOfUser(rsvp, partStats), DEFAULT_ACCOUNT.getAccountId());
+            return withUniqueIDs(getInternalAccess().getEventsOfUser(rsvp, partStats), DEFAULT_ACCOUNT.getAccountId());
         } catch (OXException e) {
             throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
         }
@@ -298,7 +300,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     @Override
     public List<Event> getEventsNeedingAction() throws OXException {
         try {
-            return withUniqueIDs(getGroupwareAccess(DEFAULT_ACCOUNT).getEventsNeedingAction(), DEFAULT_ACCOUNT.getAccountId());
+            return withUniqueIDs(getInternalAccess().getEventsNeedingAction(), DEFAULT_ACCOUNT.getAccountId());
         } catch (OXException e) {
             throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
         }
@@ -307,7 +309,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     @Override
     public Event resolveEvent(String eventId, Integer sequence) throws OXException {
         try {
-            Event event = getGroupwareAccess(DEFAULT_ACCOUNT).resolveEvent(eventId, sequence);
+            Event event = getInternalAccess().resolveEvent(eventId, sequence);
             return null == event ? null : withUniqueID(event, DEFAULT_ACCOUNT.getAccountId());
         } catch (OXException e) {
             throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
@@ -380,7 +382,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     @Override
     public UpdatesResult getUpdatedEventsOfUser(long updatedSince) throws OXException {
         try {
-            UpdatesResult updatesResult = getGroupwareAccess(DEFAULT_ACCOUNT).getUpdatedEventsOfUser(updatedSince);
+            UpdatesResult updatesResult = getInternalAccess().getUpdatedEventsOfUser(updatedSince);
             return new IDManglingUpdatesResult(updatesResult, DEFAULT_ACCOUNT.getAccountId());
         } catch (OXException e) {
             throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
@@ -470,7 +472,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     @Override
     public CalendarFolder getDefaultFolder() throws OXException {
         try {
-            GroupwareCalendarFolder defaultFolder = getGroupwareAccess(DEFAULT_ACCOUNT).getDefaultFolder();
+            GroupwareCalendarFolder defaultFolder = getInternalAccess().getDefaultFolder();
             return withUniqueID(defaultFolder, DEFAULT_ACCOUNT);
         } catch (OXException e) {
             throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
@@ -546,6 +548,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
 
     @Override
     public CalendarResult moveEvent(EventID eventID, String targetFolderId, long clientTimestamp) throws OXException {
+
+        //TODO: Move between groupware accesses?
+
         int accountId = getAccountId(eventID.getFolderID());
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
@@ -807,10 +812,13 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
      */
     private List<? extends CalendarFolder> getVisibleFolders(CalendarAccount account, GroupwareFolderType type) throws OXException {
         /*
-         * non-private folders are handled by groupware calendar access exclusively
+         * non-private folders are handled by folder calendar providers exclusively
          */
-        if (false == GroupwareFolderType.PRIVATE.equals(type) && DEFAULT_ACCOUNT.getAccountId() != account.getAccountId()) {
-            return Collections.emptyList();
+        if (false == GroupwareFolderType.PRIVATE.equals(type)) {
+            CalendarProvider provider = optCalendarProvider(account.getProviderId());
+            if (null == provider || false == FolderCalendarProvider.class.isInstance(provider)) {
+                return Collections.emptyList();
+            }
         }
         /*
          * init calendar access for account, falling back to a placeholder folder in case access cannot be established (provider not available or similar)

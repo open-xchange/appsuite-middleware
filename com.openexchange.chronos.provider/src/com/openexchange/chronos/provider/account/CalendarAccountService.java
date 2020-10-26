@@ -94,7 +94,7 @@ public interface CalendarAccountService {
     CalendarSettings probeAccountSettings(Session session, String providerId, CalendarSettings settings, CalendarParameters parameters) throws OXException;
 
     /**
-     * Creates a new calendar account for the current session' user.
+     * Creates a new calendar account for the current session's user in a <i>basic</i> calendar provider.
      *
      * @param session The current session
      * @param providerId The identifier of the corresponding calendar provider
@@ -103,6 +103,17 @@ public interface CalendarAccountService {
      * @return The created calendar account
      */
     CalendarAccount createAccount(Session session, String providerId, CalendarSettings settings, CalendarParameters parameters) throws OXException;
+
+    /**
+     * Creates a new calendar account for the current session's user in a <i>folder</i> calendar provider.
+     *
+     * @param session The current session
+     * @param providerId The identifier of the corresponding calendar provider
+     * @param userConfig Provider-specific <i>user</i> configuration data for the calendar account
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @return The created calendar account
+     */
+    CalendarAccount createAccount(Session session, String providerId, JSONObject userConfig, CalendarParameters parameters) throws OXException;
 
     /**
      * Updates an existing calendar account in a <i>basic</i> calendar provider.
