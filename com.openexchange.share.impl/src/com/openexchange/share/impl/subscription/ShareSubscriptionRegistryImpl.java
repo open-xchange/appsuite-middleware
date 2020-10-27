@@ -105,11 +105,11 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
     }
 
     @Override
-    public ShareSubscriptionInformation remount(Session session, String shareLink, String shareName, String password) throws OXException {
+    public ShareSubscriptionInformation resubscribe(Session session, String shareLink, String shareName, String password) throws OXException {
         checkLinkIsUsable(shareLink);
         ShareSubscriptionProvider provider = getProvider(session, shareLink);
         if (null != provider) {
-            return provider.remount(session, shareLink, shareName, password);
+            return provider.resubscribe(session, shareLink, shareName, password);
         }
         throw ShareSubscriptionExceptions.MISSING_SUBSCRIPTION.create(shareLink);
     }

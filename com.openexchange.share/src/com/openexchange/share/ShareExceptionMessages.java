@@ -105,6 +105,8 @@ public final class ShareExceptionMessages implements LocalizableStrings {
     
     public static final String NO_SUBSCRIBE_SHARE_ANONYMOUS_MSG = "You are not allowed to subscribe to an anonymous share";
 
+    public static final String NO_UNSUBSCRIBE_FOLDER_MSG = "You are not allowed to unsubscribe folder %1$s";
+
     /**
      * Prevent instantiation.
      */

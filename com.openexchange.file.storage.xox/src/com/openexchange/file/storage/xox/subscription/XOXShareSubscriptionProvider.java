@@ -198,8 +198,8 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
     }
 
     @Override
-    public ShareSubscriptionInformation remount(Session session, String shareLink, String shareName, String password) throws OXException {
-        ShareSubscriptionInformation information = super.remount(session, shareLink, shareName, password);
+    public ShareSubscriptionInformation resubscribe(Session session, String shareLink, String shareName, String password) throws OXException {
+        ShareSubscriptionInformation information = super.resubscribe(session, shareLink, shareName, password);
         clearRemoteSessions(session, shareLink);
         return information;
     }

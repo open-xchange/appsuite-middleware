@@ -1,6 +1,6 @@
 /share/management?action=remount:
   put:
-    operationId: remount
+    operationId: resubscribeShare
     tags:
       - Share/Management
       - FederatedSharing

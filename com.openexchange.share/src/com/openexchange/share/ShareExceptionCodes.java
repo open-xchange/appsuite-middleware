@@ -161,6 +161,9 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
 
     /** You are not allowed to subscribe to an anonymous share */
     NO_SUBSCRIBE_SHARE_ANONYMOUS(ShareExceptionMessages.NO_SUBSCRIBE_SHARE_ANONYMOUS_MSG, ShareExceptionMessages.NO_SUBSCRIBE_SHARE_ANONYMOUS_MSG, Category.CATEGORY_ERROR, 28),
+    
+    /** You are not allowed to unsubscribe folder %1$s */
+    NO_UNSUBSCRIBE_FOLDER(ShareExceptionMessages.NO_UNSUBSCRIBE_FOLDER_MSG, ShareExceptionMessages.NO_UNSUBSCRIBE_FOLDER_MSG, Category.CATEGORY_ERROR, 29),
 
     ;
 

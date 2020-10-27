@@ -201,6 +201,10 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
             accountAccess = fileStorageService.getAccountAccess(storageAccount.getId(), session);
             accountAccess.connect();
             setSubscribed(accountAccess, shareLink, false);
+            FileStorageFolder rootFolder = getShareRootFolder(accountAccess, getFolderFrom(shareLink));
+            if (rootFolder.isSubscribed()) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unsubscribe was not successful");
+            }
         } finally {
             if (null != accountAccess) {
                 accountAccess.close();
@@ -210,7 +214,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
     }
 
     @Override
-    public ShareSubscriptionInformation remount(Session session, String shareLink, String shareName, String password) throws OXException {
+    public ShareSubscriptionInformation resubscribe(Session session, String shareLink, String shareName, String password) throws OXException {
         requireAccess(session);
         /*
          * Check preconditions before update
