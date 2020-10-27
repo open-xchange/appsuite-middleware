@@ -50,7 +50,10 @@
 package com.openexchange.file.storage;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,6 +81,11 @@ public class FileStorageAccountErrorHandler {
     private final Session session;
     private final DataHandler json2error;
     private final DataHandler error2json;
+
+    /* a a static list of error prefix which should be ignored */
+    private static final List<String> IGNORED_ERROR_PREFIX = new ArrayList<>(Arrays.asList(
+        "SES" /* do not store session related exceptions */
+    ));
 
     /**
      * {@link ErrorHandledOperation} - represents an operation for which error handling is applied
@@ -156,7 +164,7 @@ public class FileStorageAccountErrorHandler {
      * @return <code>True</code> if the exception should be stored to the DB, <code>false</code> otherwise
      */
     private boolean shouldSaveException(OXException exception) {
-        if (exception != null) {
+        if (exception != null && !IGNORED_ERROR_PREFIX.contains(exception.getPrefix())) {
             return true;
         }
         return false;
