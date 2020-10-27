@@ -52,7 +52,6 @@ package com.openexchange.chronos.scheduling.common;
 import static com.openexchange.chronos.scheduling.common.MailUtils.saveChangesSafe;
 import java.util.Locale;
 import java.util.Map;
-import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.authentication.application.AppPasswordUtils;
@@ -74,7 +73,6 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.sun.mail.smtp.SMTPMessage;
 
 /**
  * {@link AbstractMailTransportProvider}
@@ -107,10 +105,7 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
         }
 
         try {
-            transport.sendMailMessage(new ContentAwareComposedMailMessage(new SMTPMessage(mime), session, null), ComposeType.NEW);
-        } catch (MessagingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            transport.sendMailMessage(new ContentAwareComposedMailMessage(mime, session, null), ComposeType.NEW);
         } finally {
             transport.close();
         }

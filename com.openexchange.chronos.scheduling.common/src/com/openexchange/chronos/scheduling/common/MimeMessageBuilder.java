@@ -92,6 +92,7 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 import com.openexchange.version.VersionService;
+import com.sun.mail.smtp.SMTPMessage;
 
 /**
  * {@link MimeMessageBuilder} - builds the actual mail based on the given data
@@ -110,7 +111,7 @@ public class MimeMessageBuilder {
      */
     public MimeMessageBuilder() {
         super();
-        this.mime = new MimeMessage(MimeDefaultSession.getDefaultSession());
+        this.mime = new SMTPMessage(MimeDefaultSession.getDefaultSession());
     }
 
     /**
