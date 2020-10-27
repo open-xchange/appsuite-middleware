@@ -151,7 +151,7 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
         /*
          * ENVELOPE-FROM
          */
-        if (smtpProperties.isSmtpEnvelopeFrom() && (mimeMessage instanceof SMTPMessage)) {
+        if (true && (mimeMessage instanceof SMTPMessage)) {
             /*
              * Set ENVELOPE-FROM in SMTP message to user's primary email address
              */
