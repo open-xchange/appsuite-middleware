@@ -153,7 +153,8 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         if (null != existingAccount) {
             FolderCalendarAccess calendarAccess = provider.connect(session, existingAccount, null);
             ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
-            CalendarFolder folder = calendarAccess.getFolder(targetPath.getFolder());
+            String foreignRelativeFolderId = getRelativeFolderId(targetPath.getFolder());
+            CalendarFolder folder = calendarAccess.getFolder(foreignRelativeFolderId);
             ShareLinkState state = Boolean.FALSE.equals(folder.isSubscribed()) ? ShareLinkState.UNSUBSCRIBED : ShareLinkState.SUBSCRIBED;
             return new ShareLinkAnalyzeResult.Builder().state(state).infos(getSubscriptionInfo(existingAccount, targetPath)).build();
         }
@@ -205,7 +206,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         userConfig.putSafe("name", shareName);
         
         CalendarAccountService accountService = services.getServiceSafe(CalendarAccountService.class);
-        CalendarAccount account = accountService.createAccount(session, Constants.PROVIDER_ID, userConfig, null);
+        CalendarAccount account = accountService.createAccount(session, provider.getId(), userConfig, null);
         
         // TODO: ensure folder is subscribed / all others are unsubscribed?
 
@@ -316,13 +317,21 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         return null;
     }
 
-    private static ShareSubscriptionInformation getSubscriptionInfo(CalendarAccount account, ShareTargetPath targetPath) {
-        String uniqueFolderId = null != targetPath ? getUniqueFolderId(account, targetPath.getFolder()) : null;
-        return new ShareSubscriptionInformation(String.valueOf(account.getAccountId()), Module.CALENDAR.getName(), uniqueFolderId);
+    private static ShareSubscriptionInformation getSubscriptionInfo(CalendarAccount account, ShareTargetPath targetPath) throws OXException {
+        if (null == targetPath || null == targetPath.getFolder()) {
+            return new ShareSubscriptionInformation(String.valueOf(account.getAccountId()), Module.CALENDAR.getName(), null);
+        }
+        String foreignRelativeFolderId = getRelativeFolderId(targetPath.getFolder());
+        String localUniqueFolderId = getUniqueFolderId(account, foreignRelativeFolderId);
+        return new ShareSubscriptionInformation(String.valueOf(account.getAccountId()), Module.CALENDAR.getName(), localUniqueFolderId);
     }
 
     private static String getUniqueFolderId(CalendarAccount account, String relativeFolderId) {
-        return com.openexchange.chronos.provider.composition.IDMangling.getUniqueFolderId(account.getAccountId(), relativeFolderId);
+        return com.openexchange.chronos.provider.composition.IDMangling.getUniqueFolderId(account.getAccountId(), relativeFolderId, true);
+    }
+
+    private static String getRelativeFolderId(String uniqueFolderId) throws OXException {
+        return com.openexchange.chronos.provider.composition.IDMangling.getRelativeFolderId(uniqueFolderId);
     }
 
 }

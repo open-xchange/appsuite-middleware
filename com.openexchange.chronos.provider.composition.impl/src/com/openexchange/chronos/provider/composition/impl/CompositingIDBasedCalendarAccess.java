@@ -721,8 +721,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             CalendarAccount existingAccount = optAccount(accountId);
             if (null != existingAccount && (null == providerId || providerId.equals(existingAccount.getProviderId()))) {
                 try {
-                    String folderId = getAccess(accountId, FolderCalendarAccess.class).createFolder(withRelativeID(folder));
-                    return getUniqueFolderId(existingAccount.getAccountId(), folderId);
+                    FolderCalendarAccess calendarAccess = getAccess(accountId, FolderCalendarAccess.class);
+                    String folderId = calendarAccess.createFolder(withRelativeID(folder));
+                    return getUniqueFolderId(existingAccount.getAccountId(), folderId, GroupwareCalendarAccess.class.isInstance(calendarAccess));
                 } catch (OXException e) {
                     throw withUniqueIDs(e, existingAccount.getAccountId());
                 }
@@ -749,7 +750,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                  * update folder directly within folder-aware account
                  */
                 String updatedId = ((FolderCalendarAccess) calendarAccess).updateFolder(getRelativeFolderId(folderId), withRelativeID(folder), clientTimestamp);
-                return getUniqueFolderId(accountId, updatedId);
+                return getUniqueFolderId(accountId, updatedId, GroupwareCalendarAccess.class.isInstance(calendarAccess));
             }
             /*
              * update account settings
@@ -792,9 +793,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             CalendarAccess access = getAccess(account.getAccountId(), CTagAware.class);
             if (BasicCTagAware.class.isInstance(access)) {
                 return ((BasicCTagAware) access).getCTag();
-            } else {
-                throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
             }
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
         } catch (OXException e) {
             throw withUniqueIDs(e, account.getAccountId());
         }

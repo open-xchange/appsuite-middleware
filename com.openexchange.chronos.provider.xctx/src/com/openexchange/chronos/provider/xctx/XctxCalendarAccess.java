@@ -49,12 +49,16 @@
 
 package com.openexchange.chronos.provider.xctx;
 
+import static com.openexchange.chronos.provider.CalendarAccount.DEFAULT_ACCOUNT;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.xctx.Constants.CONTENT_TYPE;
 import static com.openexchange.chronos.provider.xctx.Constants.PUBLIC_FOLDER_ID;
 import static com.openexchange.chronos.provider.xctx.Constants.SHARED_FOLDER_ID;
 import static com.openexchange.chronos.provider.xctx.Constants.TREE_ID;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -63,13 +67,17 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.dmfs.rfc5545.DateTime;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -78,6 +86,8 @@ import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
+import com.openexchange.chronos.provider.UsedForSync;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.extensions.FolderSearchAware;
 import com.openexchange.chronos.provider.extensions.FolderSyncAware;
 import com.openexchange.chronos.provider.extensions.QuotaAware;
@@ -98,21 +108,16 @@ import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.CalendarFolderConverter;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.EntityInfo;
-import com.openexchange.groupware.EntityInfo.Type;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.quota.Quota;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.user.User;
 
 /**
  * {@link XctxCalendarAccess}
@@ -162,17 +167,8 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
             case PUBLIC:
                 return getCalendarFolders(getSubfoldersRecursively(getFolderService(), initDecorator(), PUBLIC_FOLDER_ID));
             default:
-                throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(Constants.PROVIDER_ID);
+                throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
         }
-    }
-
-    @Override
-    public List<CalendarFolder> getVisibleFolders() throws OXException {
-        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
-        for (GroupwareFolderType type : GroupwareFolderType.values()) {
-            folders.addAll(getVisibleFolders(type));
-        }
-        return folders;
     }
 
     @Override
@@ -189,43 +185,37 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         /*
-         * update extended properties as needed; 'hide' the change in folder update afterwards
+         * update folder's configuration in underlying account's internal config
          */
-        GroupwareCalendarFolder originalFolder = getFolder(folderId);
+        JSONObject originalConfig = getFolderConfig(folderId);
+        JSONObject updatedConfig = new JSONObject(originalConfig);
+        if (null != folder.isSubscribed()) {
+            updatedConfig.putSafe("subscribed", Boolean.FALSE.equals(folder.isSubscribed()) ? Boolean.FALSE : null);
+        }
         if (null != folder.getExtendedProperties()) {
-            //updateProperties(originalFolder, folder.getExtendedProperties());
-            DefaultGroupwareCalendarFolder folderUpdate = new DefaultGroupwareCalendarFolder(folder);
-            folderUpdate.setExtendedProperties(null);
-            folder = folderUpdate;
+            ExtendedProperty colorProperty = folder.getExtendedProperties().get(COLOR_LITERAL);
+            updatedConfig.putSafe("color", null == colorProperty ? null : colorProperty.getValue());
+        }
+        if (false == Objects.equals(originalConfig, updatedConfig)) {
+            JSONObject userConfig = null != account.getUserConfiguration() ? account.getUserConfiguration() : new JSONObject();
+            userConfig.putSafe("internalConfig", setFolderConfig(folderId, updatedConfig));
+            services.getService(CalendarAccountService.class).updateAccount(localSession, account.getAccountId(), userConfig, clientTimestamp, null);
         }
         /*
-         * perform common folder update
+         * forward common folder update to remote context
          */
-        ParameterizedFolder storageFolder = getStorageFolder(TREE_ID, CONTENT_TYPE, folder, null, 0, null); //TODO account id?
+        DefaultGroupwareCalendarFolder folderUpdate = new DefaultGroupwareCalendarFolder(folder);
+        folderUpdate.setExtendedProperties(null);
+        folderUpdate.setSubscribed(null);
+        folderUpdate.setUsedForSync(null);
+        ParameterizedFolder storageFolder = getStorageFolder(TREE_ID, CONTENT_TYPE, folderUpdate, DEFAULT_ACCOUNT.getProviderId(), DEFAULT_ACCOUNT.getAccountId(), null);
         getFolderService().updateFolder(storageFolder, new Date(clientTimestamp), guestSession.getSession(), initDecorator());
         return storageFolder.getID();
     }
 
     @Override
     public String createFolder(CalendarFolder folder) throws OXException {
-        /*
-         * perform common folder create (excluding extended properties)
-         */
-        String folderId;
-        {
-            DefaultGroupwareCalendarFolder plainFolder = new DefaultGroupwareCalendarFolder(folder);
-            plainFolder.setExtendedProperties(null);
-            ParameterizedFolder folderToCreate = getStorageFolder(TREE_ID, CONTENT_TYPE, plainFolder, null, 0, null); //TODO account id? 
-            FolderResponse<String> response = getFolderService().createFolder(folderToCreate, guestSession.getSession(), initDecorator());
-            folderId = response.getResponse();
-        }
-        /*
-         * insert extended properties if needed
-         */
-        if (null != folder.getExtendedProperties()) {
-            //updateProperties(getFolder(folderId), folder.getExtendedProperties());
-        }
-        return folderId;
+        throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
     }
 
     @Override
@@ -425,7 +415,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
      * @param folders The folders as retrieved from the folder service
      * @return The groupware calendar folders
      */
-    public List<GroupwareCalendarFolder> getCalendarFolders(List<UserizedFolder> folders) throws OXException {
+    public List<GroupwareCalendarFolder> getCalendarFolders(List<UserizedFolder> folders) {
         if (null == folders || 0 == folders.size()) {
             return Collections.emptyList();
         }
@@ -442,25 +432,19 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
      * @param folder The folder as retrieved from the folder service
      * @return The groupware calendar folder
      */
-    public DefaultGroupwareCalendarFolder getCalendarFolder(UserizedFolder folder) throws OXException {
+    public DefaultGroupwareCalendarFolder getCalendarFolder(UserizedFolder folder) {
         /*
          * get calendar folder with entities under perspective of remote guest session in foreign context
          */
         DefaultGroupwareCalendarFolder calendarFolder = CalendarFolderConverter.getCalendarFolder(folder);
         calendarFolder.setDefaultFolder(false);
-        calendarFolder.setParentId("3"); // shared root // TODO
+        calendarFolder.setParentId(GroupwareFolderType.PUBLIC.equals(calendarFolder.getType()) ? PUBLIC_FOLDER_ID : SHARED_FOLDER_ID);
         calendarFolder.setName(calendarFolder.getName() + " (" + folder.getCreatedFrom().getDisplayName() + ")");
         /*
          * qualify remote entities for usage in local session in storage account's context
          */
         calendarFolder.setCreatedFrom(entityHelper.mangleRemoteEntity(calendarFolder.getCreatedFrom()));
         calendarFolder.setModifiedFrom(entityHelper.mangleRemoteEntity(calendarFolder.getModifiedFrom()));
-        {
-            //TODO: client looks at created by / from to include owner in folder name, so use faked createdFrom 
-            User user = ServerSessionAdapter.valueOf(localSession).getUser();
-            EntityInfo entityInfo = new EntityInfo(String.valueOf(user.getId()), user.getDisplayName(), null, null, null, user.getMail(), user.getId(), null, Type.USER);
-            //            calendarFolder.setCreatedFrom(entityInfo);
-        }
         /*
          * enhance & qualify remote entities in folder permissions for usage in local session in storage account's context
          */
@@ -480,19 +464,54 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         EnumSet<CalendarCapability> capabilities = CalendarCapability.getCapabilities(getClass());
         capabilities.remove(CalendarCapability.PERMISSIONS);
         calendarFolder.setSupportedCapabilites(capabilities);
-
         /*
-         * apply further extended properties & capabilities
+         * derive extended properties, and 'subscribed' state from account config
          */
-        //        Map<String, String> userProperties = loadUserProperties(session.getContextId(), userizedFolder.getID(), session.getUserId());
-        //        calendarFolder.setExtendedProperties(getExtendedProperties(userProperties, userizedFolder));
-        //        calendarFolder.setSupportedCapabilites(CalendarCapability.getCapabilities(getClass()));
-
-        //        if (userizedFolder.isDefault() && PrivateType.getInstance().equals(userizedFolder.getType())) {
-        //            calendarFolder.setUsedForSync(UsedForSync.FORCED_ACTIVE);
-        //        }
-
+        JSONObject folderConfig = getFolderConfig(folder.getID());
+        ExtendedProperties extendedProperties = new ExtendedProperties();
+        extendedProperties.add(COLOR(folderConfig.optString("color", null), false));
+        calendarFolder.setExtendedProperties(extendedProperties);
+        calendarFolder.setSubscribed(folderConfig.hasAndNotNull("subscribed") ? B(folderConfig.optBoolean("subscribed")) : null);
+        calendarFolder.setUsedForSync(UsedForSync.DEACTIVATED);
         return calendarFolder;
+    }
+
+    /**
+     * Sets the configuration for a specific folder identified by its identifier in the internal configuration blob of the underlying account.
+     * 
+     * @param folderId The identifier of the folder to get the configuration for
+     * @param folderConfig The folder's config, or <code>null</code> to remove the config
+     * @return The updated (or newly prepared) internal configuration blob of the underlying account.
+     */
+    private JSONObject setFolderConfig(String folderId, JSONObject folderConfig) {
+        JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
+        JSONObject foldersObject = internalConfig.optJSONObject("folders");
+        if (null == foldersObject) {
+            foldersObject = new JSONObject();
+            internalConfig.putSafe("folders", foldersObject);
+        }
+        foldersObject.putSafe(folderId, folderConfig);
+        return internalConfig;
+    }
+
+    /**
+     * Gets the configuration for a specific folder by its identifier from the internal configuration blob of the underlying account.
+     * 
+     * @param folderId The identifier of the folder to get the configuration for
+     * @return The folder's config, or an empty JSON object if none is stored at the moment
+     */
+    private JSONObject getFolderConfig(String folderId) {
+        JSONObject internalConfig = account.getInternalConfiguration();
+        if (null != internalConfig) {
+            JSONObject foldersObject = internalConfig.optJSONObject("folders");
+            if (null != foldersObject) {
+                JSONObject folderObject = foldersObject.optJSONObject(folderId);
+                if (null != folderObject) {
+                    return folderObject;
+                }
+            }
+        }
+        return new JSONObject();
     }
 
 }

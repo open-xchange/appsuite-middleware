@@ -136,13 +136,13 @@ public class IDMangling extends com.openexchange.chronos.provider.composition.ID
      * @return The calendar folder representation with unique identifiers
      */
     public static AccountAwareCalendarFolder withUniqueID(CalendarFolder folder, CalendarAccount account) {
-        String newId = getUniqueFolderId(account.getAccountId(), folder.getId());
         if (GroupwareCalendarFolder.class.isInstance(folder)) {
             GroupwareCalendarFolder groupwareFolder = (GroupwareCalendarFolder) folder;
-            String newParentId = getUniqueFolderId(account.getAccountId(), groupwareFolder.getParentId());
+            String newId = getUniqueFolderId(account.getAccountId(), folder.getId(), true);
+            String newParentId = getUniqueFolderId(account.getAccountId(), groupwareFolder.getParentId(), true);
             return new IDManglingAccountAwareGroupwareFolder(groupwareFolder, account, newId, newParentId);
         }
-        return new IDManglingAccountAwareFolder(folder, account, newId);
+        return new IDManglingAccountAwareFolder(folder, account, getUniqueFolderId(account.getAccountId(), folder.getId()));
     }
 
     /**

@@ -108,14 +108,30 @@ public class IDMangling {
     /**
      * Gets the fully qualified composite representation of a specific relative folder identifier.
      * <p/>
-     * {@link IDMangling#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangling#SHARED_PREFIX} are passed as-is implicitly.
+     * {@link IDMangling#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangling#SHARED_PREFIX} are passed as-is implicitly,
+     * in case the account is the default groupware calendar account.
      *
      * @param accountId The identifier of the account the folder originates in
      * @param relativeFolderId The relative folder identifier
      * @return The unique folder identifier
      */
     public static String getUniqueFolderId(int accountId, String relativeFolderId) {
-        if (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == accountId) {
+        return getUniqueFolderId(accountId, relativeFolderId, CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == accountId);
+    }
+
+    /**
+     * Gets the fully qualified composite representation of a specific relative folder identifier.
+     * <p/>
+     * {@link IDMangling#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangling#SHARED_PREFIX} are passed as-is implicitly,
+     * in case a <i>groupware</i> calendar access is indicated.
+     *
+     * @param accountId The identifier of the account the folder originates in
+     * @param relativeFolderId The relative folder identifier
+     * @param groupwareAccess <code>true</code> if the identifier originates from a <i>groupware</i> calendar access, <code>false</code>, otherwise
+     * @return The unique folder identifier
+     */
+    public static String getUniqueFolderId(int accountId, String relativeFolderId, boolean groupwareAccess) {
+        if (groupwareAccess || CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == accountId) {
             if (ROOT_FOLDER_IDS.contains(relativeFolderId) || relativeFolderId.startsWith(SHARED_PREFIX)) {
                 return relativeFolderId;
             }
@@ -128,19 +144,35 @@ public class IDMangling {
     /**
      * Gets the fully qualified composite representations of a list of specific relative folder identifiers.
      * <p/>
-     * {@link IDMangling#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangling#SHARED_PREFIX} are passed as-is implicitly.
+     * {@link IDMangling#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangling#SHARED_PREFIX} are passed as-is implicitly,
+     * in case the account is the default groupware calendar account.
      *
      * @param accountId The identifier of the account the folders originate in
      * @param relativeFolderIds The relative folder identifiers
      * @return The unique folder identifiers
      */
     public static List<String> getUniqueFolderIds(int accountId, List<String> relativeFolderIds) {
+        return getUniqueFolderIds(accountId, relativeFolderIds, CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == accountId);
+    }
+
+    /**
+     * Gets the fully qualified composite representations of a list of specific relative folder identifiers.
+     * <p/>
+     * {@link IDMangling#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangling#SHARED_PREFIX} are passed as-is implicitly,
+     * in case a <i>groupware</i> calendar access is indicated.
+     *
+     * @param accountId The identifier of the account the folders originate in
+     * @param relativeFolderIds The relative folder identifiers
+     * @param groupwareAccess <code>true</code> if the identifier originates from a <i>groupware</i> calendar access, <code>false</code>, otherwise
+     * @return The unique folder identifiers
+     */
+    public static List<String> getUniqueFolderIds(int accountId, List<String> relativeFolderIds, boolean groupwareAccess) {
         if (null == relativeFolderIds) {
             return null;
         }
         List<String> uniqueFolderIds = new ArrayList<String>(relativeFolderIds.size());
         for (String relativeFolderId : relativeFolderIds) {
-            uniqueFolderIds.add(getUniqueFolderId(accountId, relativeFolderId));
+            uniqueFolderIds.add(getUniqueFolderId(accountId, relativeFolderId, groupwareAccess));
         }
         return uniqueFolderIds;
     }
