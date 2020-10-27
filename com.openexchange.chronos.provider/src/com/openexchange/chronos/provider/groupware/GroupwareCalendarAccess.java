@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.groupware;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -58,6 +59,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.SchedulingControl;
+import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.extensions.PermissionAware;
 import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -75,6 +77,18 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public interface GroupwareCalendarAccess extends FolderCalendarAccess, PermissionAware {
+
+    /**
+     * Default implementation delegating to {@link #getVisibleFolders(GroupwareFolderType)} for all types. Override if applicable.
+     */
+    @Override
+    default List<CalendarFolder> getVisibleFolders() throws OXException {
+        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
+        for (GroupwareFolderType type : GroupwareFolderType.values()) {
+            folders.addAll(getVisibleFolders(type));
+        }
+        return folders;
+    }
 
     /**
      * Gets a list of all visible calendar folders.

@@ -126,16 +126,17 @@ public class XctxCalendarProvider implements FolderCalendarProvider {
     @Override
     public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         /*
-         * implicitly check configuration by initialing guest session
+         * implicitly check configuration by initializing guest session
          */
         CalendarSession calendarSession = initGuestSession(session, userConfig, parameters);
         /*
-         * remember visible calendars in internal config
+         * extract slipstreamed internal config
          */
-        JSONObject internalConfig = new JSONObject();
-        //        XctxCalendarAccess calendarAccess = new XctxCalendarAccess(services, null, session, calendarSession);
-        //        internalConfig.putSafe("knownCalendars", rememberVisibleCalendars(calendarAccess));
-        return internalConfig;
+        Object internalConfig = userConfig.remove("internalConfig");
+        if (null != internalConfig && JSONObject.class.isInstance(internalConfig)) {
+            return (JSONObject) internalConfig;
+        }
+        return new JSONObject();
     }
 
     @Override

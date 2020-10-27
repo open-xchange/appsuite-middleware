@@ -176,15 +176,6 @@ public class InternalCalendarAccess implements com.openexchange.chronos.provider
     }
 
     @Override
-    public List<CalendarFolder> getVisibleFolders() throws OXException {
-        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
-        for (GroupwareFolderType type : GroupwareFolderType.values()) {
-            folders.addAll(getVisibleFolders(type));
-        }
-        return folders;
-    }
-
-    @Override
     public GroupwareCalendarFolder getFolder(String folderId) throws OXException {
         UserizedFolder folder = getFolderService().getFolder(TREE_ID, folderId, session.getSession(), initDecorator());
         return getCalendarFolder(folder);
