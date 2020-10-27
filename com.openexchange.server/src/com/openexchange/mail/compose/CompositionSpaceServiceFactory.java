@@ -63,17 +63,26 @@ import com.openexchange.session.Session;
 public interface CompositionSpaceServiceFactory {
 
     /**
-     * The default identifier of the composition space service.
+     * The default identifier of the composition space service factory.
      */
     public static final String DEFAULT_SERVICE_ID = "rdb";
 
     /**
-     * Gets the identifier for this composition space service.
+     * Gets the identifier for this composition space service factory.
      *
      * @return The service identifier
      */
     default String getServiceId() {
         return DEFAULT_SERVICE_ID;
+    }
+
+    /**
+     * Gets the ranking for this composition space service factory.
+     *
+     * @return The ranking
+     */
+    default int getRanking() {
+        return 0;
     }
 
     /**

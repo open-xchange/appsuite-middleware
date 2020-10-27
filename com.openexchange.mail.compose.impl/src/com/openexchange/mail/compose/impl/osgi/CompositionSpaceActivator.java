@@ -87,12 +87,9 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageService;
-import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
 import com.openexchange.mail.compose.CompositionSpaceStorageService;
 import com.openexchange.mail.compose.impl.CompositionSpaceServiceFactoryImpl;
-import com.openexchange.mail.compose.impl.CompositionSpaceServiceImpl;
-import com.openexchange.mail.compose.impl.CryptoCompositionSpaceService;
 import com.openexchange.mail.compose.impl.attachment.AttachmentImageDataSource;
 import com.openexchange.mail.compose.impl.attachment.AttachmentStorageServiceImpl;
 import com.openexchange.mail.compose.impl.attachment.filestore.ContextAssociatedFileStorageAttachmentStorage;
@@ -127,6 +124,7 @@ import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.Tools;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -285,7 +283,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         registerService(CompositionSpaceStorageService.class, storageService);
 
         CompositionSpaceServiceFactoryImpl serviceFactoryImpl = new CompositionSpaceServiceFactoryImpl(storageService, attachmentStorageService, keyStorageService, this);
-        registerService(CompositionSpaceServiceFactory.class, serviceFactoryImpl);
+        registerService(CompositionSpaceServiceFactory.class, serviceFactoryImpl, Tools.withRanking(serviceFactoryImpl.getRanking()));
 
         {
             Optional<CompositionSpaceCleanUpRegistry> optionalCleanUpRegistry = CompositionSpaceCleanUpRegistry.initInstance(serviceFactoryImpl, this);

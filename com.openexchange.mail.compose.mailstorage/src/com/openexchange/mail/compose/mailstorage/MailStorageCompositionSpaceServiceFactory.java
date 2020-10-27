@@ -100,6 +100,11 @@ public class MailStorageCompositionSpaceServiceFactory implements CompositionSpa
     }
 
     @Override
+    public int getRanking() {
+        return 10;
+    }
+
+    @Override
     public boolean isEnabled(Session session) throws OXException {
         return MailStorageCompositionSpaceConfig.getInstance().isEnabled(session.getUserId(), session.getContextId());
     }

@@ -152,7 +152,7 @@ public class MailStorageCompositionSpaceActivator extends HousekeepingActivator 
             ImageActionFactory.addMapping(mailStorageCompositionSpaceImageDataSource.getRegistrationName(), mailStorageCompositionSpaceImageDataSource.getAlias());
         }
 
-        registerService(CompositionSpaceServiceFactory.class, compositionSpaceServiceFactory, Tools.withRanking(10));
+        registerService(CompositionSpaceServiceFactory.class, compositionSpaceServiceFactory, Tools.withRanking(compositionSpaceServiceFactory.getRanking()));
 
         {
             Optional<CompositionSpaceCleanUpRegistry> optionalCleanUpRegistry = CompositionSpaceCleanUpRegistry.initInstance(compositionSpaceServiceFactory, this);
