@@ -120,8 +120,8 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess {
 
     @Override
     public DefaultFileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
-        DefaultFileStorageFolder[] subfolders = super.getSubfolders(parentIdentifier, all);
-        return accountAccess.getSubscribedHelper().addSubscribed(subfolders, true);
+        DefaultFileStorageFolder[] subfolders = super.getSubfolders(parentIdentifier, true);
+        return accountAccess.getSubscribedHelper().addSubscribed(subfolders, false == all);
     }
 
     @Override
