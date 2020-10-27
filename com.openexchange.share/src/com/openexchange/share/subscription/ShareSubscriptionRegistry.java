@@ -95,7 +95,7 @@ public interface ShareSubscriptionRegistry {
      * @return The information about the mount
      * @throws OXException In case the underlying account can't be updated or rather remounted
      */
-    ShareSubscriptionInformation remount(Session session, String shareLink, String shareName, String password) throws OXException;
+    ShareSubscriptionInformation resubscribe(Session session, String shareLink, String shareName, String password) throws OXException;
 
     /**
      * Unsubscribes a share. This however will not delete the underlying account.

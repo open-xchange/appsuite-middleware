@@ -298,7 +298,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         /*
          * Update password in local instance and check response
          */
-        smApiC2.remount(apiClientC2.getSession(), getExtendedBody(shareLink, password, null));
+        smApiC2.resubscribeShare(apiClientC2.getSession(), getExtendedBody(shareLink, password, null));
         analyze(shareLink, StateEnum.SUBSCRIBED);
 
         /*

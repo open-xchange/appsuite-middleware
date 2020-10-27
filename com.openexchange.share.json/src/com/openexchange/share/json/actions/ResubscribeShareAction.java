@@ -60,21 +60,21 @@ import com.openexchange.share.subscription.ShareSubscriptionRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link RemountShareAction} - Updates an existing share that is associated with a specific share link from a remote server
+ * {@link ResubscribeShareAction} - Updates an existing share that is associated with a specific share link from a remote server
  * <p>
  * Currently only refreshing of the password or renaming is supported.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class RemountShareAction extends AbstractShareSubscriptionAction {
+public class ResubscribeShareAction extends AbstractShareSubscriptionAction {
 
     /**
-     * Initializes a new {@link RemountShareAction}.
+     * Initializes a new {@link ResubscribeShareAction}.
      * 
      * @param services The service lookup
      */
-    public RemountShareAction(ServiceLookup services) {
+    public ResubscribeShareAction(ServiceLookup services) {
         super(services);
     }
 
@@ -83,7 +83,7 @@ public class RemountShareAction extends AbstractShareSubscriptionAction {
         ShareSubscriptionRegistry service = services.getServiceSafe(ShareSubscriptionRegistry.class);
         String password = json.optString(PASSWORD);
         String dislpayName = json.optString(DISPLAY_NAME);
-        ShareSubscriptionInformation infos = service.remount(session, shareLink, dislpayName, password);
+        ShareSubscriptionInformation infos = service.resubscribe(session, shareLink, dislpayName, password);
         return createResponse(infos);
     }
 

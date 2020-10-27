@@ -214,7 +214,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
 
 
     @Override
-    public ShareSubscriptionInformation remount(Session session, String shareLink, String shareName, String password) throws OXException {
+    public ShareSubscriptionInformation resubscribe(Session session, String shareLink, String shareName, String password) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

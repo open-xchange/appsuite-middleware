@@ -210,7 +210,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
     }
 
     @Override
-    public ShareSubscriptionInformation remount(Session session, String shareLink, String shareName, String password) throws OXException {
+    public ShareSubscriptionInformation resubscribe(Session session, String shareLink, String shareName, String password) throws OXException {
         requireAccess(session);
         /*
          * Check preconditions before update

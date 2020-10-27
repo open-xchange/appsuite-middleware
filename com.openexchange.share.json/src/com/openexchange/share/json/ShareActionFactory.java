@@ -58,7 +58,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.json.actions.AnalyzeAction;
 import com.openexchange.share.json.actions.DeleteLinkAction;
 import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.RemountShareAction;
+import com.openexchange.share.json.actions.ResubscribeShareAction;
 import com.openexchange.share.json.actions.SendLinkAction;
 import com.openexchange.share.json.actions.SubscribeShareAction;
 import com.openexchange.share.json.actions.UnsubscribeShareAction;
@@ -91,7 +91,7 @@ public class ShareActionFactory implements AJAXActionServiceFactory {
         actions.put("analyze", new AnalyzeAction(services));
         actions.put("subscribe", new SubscribeShareAction(services));
         actions.put("unsubscribe", new UnsubscribeShareAction(services));
-        actions.put("remount", new RemountShareAction(services));
+        actions.put("resubscribe", new ResubscribeShareAction(services));
     }
 
     @Override

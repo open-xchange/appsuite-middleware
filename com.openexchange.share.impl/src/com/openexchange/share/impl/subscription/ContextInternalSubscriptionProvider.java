@@ -164,7 +164,7 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
     }
 
     @Override
-    public ShareSubscriptionInformation remount(Session session, String shareLink, String shareName, String password) throws OXException {
+    public ShareSubscriptionInformation resubscribe(Session session, String shareLink, String shareName, String password) throws OXException {
         throw ShareSubscriptionExceptions.MISSING_PERMISSIONS.create();
     }
 

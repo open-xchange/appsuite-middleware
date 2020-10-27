@@ -5,5 +5,5 @@ requests:
   - UpdateLinkRequest.yaml
   - AnalyzeLinkRequest.yaml
   - SubscribeShareRequest.yaml
-  - RemountShareRequest.yaml
+  - ResubscribeShareRequest.yaml
   - UnsubscribeShareRequest.yaml

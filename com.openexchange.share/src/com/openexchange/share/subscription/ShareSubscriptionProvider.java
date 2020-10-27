@@ -103,7 +103,7 @@ public interface ShareSubscriptionProvider extends Ranked {
      * @return The information about the mount
      * @throws OXException In case of error
      */
-    ShareSubscriptionInformation remount(Session session, String shareLink, String shareName, String password) throws OXException;
+    ShareSubscriptionInformation resubscribe(Session session, String shareLink, String shareName, String password) throws OXException;
 
     /**
      * Unmouts a share or rather deactivates the subscription
