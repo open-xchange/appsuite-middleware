@@ -355,6 +355,7 @@ public interface Cache {
      * @param key The key
      * @param value Object to store
      * @throws OXException If put operation on cache fails
+     * @throws IllegalArgumentException If either one of passed arguments is <code>null</code>
      * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
     void localPut(Serializable key, Serializable value) throws OXException;
