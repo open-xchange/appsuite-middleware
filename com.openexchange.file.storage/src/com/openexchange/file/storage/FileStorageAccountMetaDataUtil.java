@@ -142,7 +142,7 @@ public class FileStorageAccountMetaDataUtil {
      *
      * @param from The account to get the meta data from
      * @param to The account to apply the meta data on
-     * @throws OXException
+     * @throws OXException In case a JSON exception occurs
      */
     public static void copy(FileStorageAccount from, FileStorageAccount to) throws OXException {
         try {
