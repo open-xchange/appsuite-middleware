@@ -322,13 +322,8 @@ public class MailStorage implements IMailStorage {
             }
 
             MailPath draftPath = optMailPath.get();
-            Optional<MailMessage> optDraftMail = getMail(optMailPath.get(), messageStorage);
-            if (!optDraftMail.isPresent()) {
-                throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(getUUIDForLogging(compositionSpaceId));
-            }
-
-            MailMessage draftMail = optDraftMail.get();
-            processor = MailMessageProcessor.initReadEnvelope(compositionSpaceId, optDraftMail.get(), session, services);
+            MailMessage draftMail = requireDraftMail(new DefaultMailStorageId(draftPath, compositionSpaceId, Optional.empty()), mailAccess);
+            processor = MailMessageProcessor.initReadEnvelope(compositionSpaceId, draftMail, session, services);
             boolean changed = processor.validate();
             MessageDescription currentDraft = processor.getCurrentDraft();
             SecuritySettings securitySettings = getSecuritySettings(currentDraft.getSecurity());
@@ -348,6 +343,8 @@ public class MailStorage implements IMailStorage {
             MessageInfo messageInfo = new MessageInfo(currentDraft, draftMail.getSize(), draftMail.getSentDate());
             MailStorageId newId = new DefaultMailStorageId(draftMail.getMailPath(), compositionSpaceId, processor.getFileCacheReference());
             return MailStorageResult.resultFor(newId, messageInfo, true, mailAccess);
+        } catch (MissingDraftException e) {
+            throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(getUUIDForLogging(e.getFirstMailStorageId().getCompositionSpaceId()));
         } finally {
             if (mailAccess != null) {
                 mailAccess.close(true);
@@ -586,7 +583,7 @@ public class MailStorage implements IMailStorage {
 
             tryCleanUpFileCacheReference(mailStorageId);
 
-            MailMessage draftMail = requireDraftMail(mailStorageId, mailAccess);
+            MailMessage draftMail = requireDraftMail(mailStorageId, mailAccess,false);
 
             if (deleteSharedAttachmentsFolderIfPresent) {
                 String headerValue = HeaderUtility.decodeHeaderValue(draftMail.getFirstHeader(HeaderUtility.HEADER_X_OX_SHARED_ATTACHMENTS));
@@ -1417,11 +1414,17 @@ public class MailStorage implements IMailStorage {
     private MailMessage getOriginalMail(Session session, MailPath mailPath, MailService mailService, List<MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> mailAccesses, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess) throws OXException {
         Optional<MailMessage> optionalMail;
         if (mailPath.getAccountId() == MailAccount.DEFAULT_ID) {
+            if (mayDecrypt(session)) {
+                defaultMailAccess = createCryptographicAwareAccess(defaultMailAccess, null);
+            }
             optionalMail = getMail(mailPath.getMailID(), mailPath.getFolder(), defaultMailAccess.getMessageStorage());
         } else {
             MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> otherAccess = mailService.getMailAccess(session, mailPath.getAccountId());
             mailAccesses.add(otherAccess);
             otherAccess.connect(false);
+            if (mayDecrypt(session)) {
+                otherAccess = createCryptographicAwareAccess(otherAccess, null);
+            }
             optionalMail = getMail(mailPath.getMailID(), mailPath.getFolder(), otherAccess.getMessageStorage());
         }
 
@@ -1644,7 +1647,7 @@ public class MailStorage implements IMailStorage {
             try {
                 HeadersAndStream parsedHeaders = parseHeaders(mimeStream);
                 security = convertSecurity(parsedHeaders.headers);
-                if (security.isDisabled()) {
+                if (!security.isEncrypt()) {
                     mimeStream = null; // Avoid premature closing
                     return parsedHeaders.mimeStream;
                 }
@@ -1672,11 +1675,11 @@ public class MailStorage implements IMailStorage {
         throw new MissingDraftException(mailStorageId);
     }
 
-    private Optional<InputStream> getMimeStream(MailPath mailPath, IMailMessageStorage messageStorage) {
+    private Optional<InputStream> getMimeStream(MailPath mailPath, IMailMessageStorage messageStorage) throws OXException {
         return getMimeStream(mailPath.getMailID(), mailPath.getFolder(), messageStorage);
     }
 
-    private Optional<InputStream> getMimeStream(String mailId, String fullName, IMailMessageStorage messageStorage) {
+    private Optional<InputStream> getMimeStream(String mailId, String fullName, IMailMessageStorage messageStorage) throws OXException {
         try {
             InputStream in = null;
             IMailMessageStorageMimeSupport mimeSupport = messageStorage.supports(IMailMessageStorageMimeSupport.class);
@@ -1697,11 +1700,34 @@ public class MailStorage implements IMailStorage {
             return Optional.ofNullable(in);
         } catch (OXException e) {
             LOG.debug("Failed to fetch full MIME stream of draft {}/{}", fullName, mailId, e);
-            return Optional.empty();
+            throw e;
         }
     }
 
+    /**
+     * Gets a {@link MailMessage}. Tries to decrypt if required.
+     *
+     * @param mailStorageId The mail storage id
+     * @param mailAccess The {@link MailAccess} to use
+     * @return The {@link MailMessage}
+     * @throws OXException
+     * @throws MissingDraftException
+     */
     private MailMessage requireDraftMail(MailStorageId mailStorageId, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, MissingDraftException {
+        return requireDraftMail(mailStorageId, mailAccess, true);
+    }
+
+    /**
+     * Gets a {@link MailMessage}
+     *
+     * @param mailStorageId The mail storage id
+     * @param mailAccess The {@link MailAccess} to use
+     * @param decryptIfRequired <code>True</code> in order to decrypt the message if required, <code>False</code> to return the raw PGP message in case it is encrypted.
+     * @return The {@link MailMessage}
+     * @throws OXException
+     * @throws MissingDraftException
+     */
+    private MailMessage requireDraftMail(MailStorageId mailStorageId, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, boolean decryptIfRequired) throws OXException, MissingDraftException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccezz = mailAccess;
         IMailMessageStorage messageStorage = mailAccezz.getMessageStorage();
 
@@ -1713,7 +1739,7 @@ public class MailStorage implements IMailStorage {
             MailMessage mailMessage = optionalDraftMail.get();
 
             security = convertSecurity(mailMessage);
-            if (security.isDisabled()) {
+            if (!decryptIfRequired || !security.isEncrypt()) {
                 return mailMessage;
             }
 
@@ -1729,11 +1755,11 @@ public class MailStorage implements IMailStorage {
         throw new MissingDraftException(mailStorageId);
     }
 
-    private Optional<MailMessage> getMail(MailPath mailPath, IMailMessageStorage messageStorage) {
+    private Optional<MailMessage> getMail(MailPath mailPath, IMailMessageStorage messageStorage) throws OXException {
         return getMail(mailPath.getMailID(), mailPath.getFolder(), messageStorage);
     }
 
-    private Optional<MailMessage> getMail(String mailId, String fullName, IMailMessageStorage messageStorage) {
+    private Optional<MailMessage> getMail(String mailId, String fullName, IMailMessageStorage messageStorage) throws OXException {
         try {
             MailMessage mail = messageStorage.getMessage(fullName, mailId, false);
             if (mail == null) {
@@ -1744,7 +1770,7 @@ public class MailStorage implements IMailStorage {
             return Optional.ofNullable(mail);
         } catch (OXException e) {
             LOG.debug("Failed to fetch full draft {}/{}", fullName, mailId, e);
-            return Optional.empty();
+            throw e;
         }
     }
 
@@ -1792,7 +1818,7 @@ public class MailStorage implements IMailStorage {
             return mailMessage;
         }
 
-        if (false == mayEncrypt(session)) {
+        if (false == mayDecrypt(session)) {
             throw OXException.noPermissionForModule(CAPABILITY_GUARD);
         }
 
@@ -1843,13 +1869,13 @@ public class MailStorage implements IMailStorage {
     }
 
     /**
-     * Checks if session-associated user is allowed to encrypt mails.
+     * Checks if session-associated user is allowed to decrypt guard mails.
      *
      * @param session The session
      * @return <code>true</code> if allowed; otherwise <code>false</code>
      * @throws OXException If check fails
      */
-    private boolean mayEncrypt(Session session) throws OXException {
+    private boolean mayDecrypt(Session session) throws OXException {
         CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
         return null == capabilityService ? false : capabilityService.getCapabilities(session).contains(CAPABILITY_GUARD);
     }
