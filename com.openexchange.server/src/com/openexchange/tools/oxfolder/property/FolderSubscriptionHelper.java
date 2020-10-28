@@ -125,4 +125,26 @@ public interface FolderSubscriptionHelper {
      */
     boolean isSubscribableModule(final int module) throws OXException;
 
+    /**
+     * Removes the <i>subscribed</i> user property for a specific folder.
+     * 
+     * @param optCon The optional database connection to use
+     * @param contextId The context identifier
+     * @param userIds The identifiers of the users to clear the <i>subscribed</i> flag for
+     * @param folderId The folder identifier
+     * @param module The module identifier
+     */
+    void clearSubscribed(Optional<Connection> optCon, int contextId, int[] userIds, int folderId, int module) throws OXException;
+
+    /**
+     * Removes the <i>usedForSync</i> user property for a specific folder.
+     * 
+     * @param optCon The optional database connection to use
+     * @param contextId The context identifier
+     * @param userIds The identifiers of the users to clear the <i>usedForSync</i> flag for
+     * @param folderId The folder identifier
+     * @param module The module identifier
+     */
+    void clearUsedForSync(Optional<Connection> optCon, int contextId, int[] userIds, int folderId, int module) throws OXException;
+
 }

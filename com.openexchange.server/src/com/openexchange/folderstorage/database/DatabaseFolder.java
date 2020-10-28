@@ -446,9 +446,25 @@ public class DatabaseFolder extends AbstractFolder {
         return true;
     }
 
-
     @Override
     public void setSubscribed(boolean subscribed) {
         // ignore
     }
+
+    @Override
+    public boolean hasSubscribedSubfolders() {
+        /*
+         * only pass parent subscribed subfolders flag if subscribed to mimic recursive character of subscribed flag in database folders
+         */
+        return isSubscribed() && super.hasSubscribedSubfolders();
+    }
+
+    @Override
+    public String[] getSubfolderIDs() {
+        /*
+         * indicate empty subfolders array to mimic recursive character of subscribed flag in database folders
+         */
+        return isSubscribed() ? super.getSubfolderIDs() : new String[0];
+    }
+
 }
