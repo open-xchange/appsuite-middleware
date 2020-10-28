@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.provider.xctx;
 
+import static com.openexchange.chronos.common.CalendarUtils.DISTANT_FUTURE;
+import static com.openexchange.chronos.common.CalendarUtils.optExtendedPropertyValue;
 import static com.openexchange.chronos.provider.CalendarAccount.DEFAULT_ACCOUNT;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
@@ -132,14 +134,15 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
     private final Session localSession;
     private final ServiceLookup services;
     private final EntityHelper entityHelper;
-    private final CalendarAccount account;
 
-    private CalendarSession guestSession;
+    private final CalendarSession guestSession;
+    private final CalendarAccount account;
 
     /**
      * Initializes a new {@link XctxCalendarAccess}.
      *
      * @param services A service lookup reference
+     * @param account The underlying calendar account
      * @param localSession The user's <i>local</i> session associated with the file storage account
      * @param guestSession The <i>remote</i> session of the guest user used to access the contents of the foreign context
      */
@@ -154,27 +157,32 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
 
     @Override
     public void close() {
-        this.guestSession = null; // guest session still kept in cache
+        // nothing to close
     }
 
     @Override
     public List<GroupwareCalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException {
+        List<UserizedFolder> folders;
         switch (type) {
             case PRIVATE:
-                return Collections.emptyList();
+                folders = Collections.emptyList();
+                break;
             case SHARED:
-                return getCalendarFolders(getSubfoldersRecursively(getFolderService(), initDecorator(), SHARED_FOLDER_ID));
+                folders = getSubfoldersRecursively(getFolderService(), initDecorator(), SHARED_FOLDER_ID);
+                break;
             case PUBLIC:
-                return getCalendarFolders(getSubfoldersRecursively(getFolderService(), initDecorator(), PUBLIC_FOLDER_ID));
+                folders = getSubfoldersRecursively(getFolderService(), initDecorator(), PUBLIC_FOLDER_ID);
+                break;
             default:
                 throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
         }
+        return rememberFolders(getCalendarFolders(folders));
     }
 
     @Override
     public GroupwareCalendarFolder getFolder(String folderId) throws OXException {
         UserizedFolder folder = getFolderService().getFolder(TREE_ID, folderId, guestSession.getSession(), initDecorator());
-        return getCalendarFolder(folder);
+        return rememberFolder(getCalendarFolder(folder));
     }
 
     @Override
@@ -415,7 +423,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
      * @param folders The folders as retrieved from the folder service
      * @return The groupware calendar folders
      */
-    public List<GroupwareCalendarFolder> getCalendarFolders(List<UserizedFolder> folders) {
+    private List<GroupwareCalendarFolder> getCalendarFolders(List<UserizedFolder> folders) {
         if (null == folders || 0 == folders.size()) {
             return Collections.emptyList();
         }
@@ -432,7 +440,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
      * @param folder The folder as retrieved from the folder service
      * @return The groupware calendar folder
      */
-    public DefaultGroupwareCalendarFolder getCalendarFolder(UserizedFolder folder) {
+    private DefaultGroupwareCalendarFolder getCalendarFolder(UserizedFolder folder) {
         /*
          * get calendar folder with entities under perspective of remote guest session in foreign context
          */
@@ -474,6 +482,71 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         calendarFolder.setSubscribed(folderConfig.hasAndNotNull("subscribed") ? B(folderConfig.optBoolean("subscribed")) : null);
         calendarFolder.setUsedForSync(UsedForSync.DEACTIVATED);
         return calendarFolder;
+    }
+
+    private void updateInternalConfig(JSONObject internalConfig) throws OXException {
+        JSONObject userConfig = null != account.getUserConfiguration() ? account.getUserConfiguration() : new JSONObject();
+        userConfig.putSafe("internalConfig", internalConfig);
+        services.getService(CalendarAccountService.class).updateAccount(localSession, account.getAccountId(), userConfig, DISTANT_FUTURE, null);
+    }
+
+    private GroupwareCalendarFolder rememberFolder(GroupwareCalendarFolder calendarFolder) {
+        return null != calendarFolder ? rememberFolders(Collections.singletonList(calendarFolder)).get(0) : null;
+    }
+
+    private List<GroupwareCalendarFolder> rememberFolders(List<GroupwareCalendarFolder> calendarFolders) {
+        if (null == calendarFolders || calendarFolders.isEmpty()) {
+            return calendarFolders;
+        }
+        /*
+         * get or prepare "folders" configuration section
+         */
+        JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
+        JSONObject foldersConfig = internalConfig.optJSONObject("folders");
+        if (null == foldersConfig) {
+            foldersConfig = new JSONObject();
+            internalConfig.putSafe("folders", foldersConfig);
+        }
+        /*
+         * update each folder in config as needed
+         */
+        boolean needsUpdate = false;
+        for (GroupwareCalendarFolder calendarFolder : calendarFolders) {
+            if (null == calendarFolder.getId()) {
+                LOG.warn("Unable to remember calendar folder {} without id.", calendarFolder);
+                continue;
+            }
+            JSONObject folderConfig = serializeFolder(calendarFolder);
+            if (false == Objects.equals(foldersConfig.optJSONObject(calendarFolder.getId()), folderConfig)) {
+                foldersConfig.putSafe(calendarFolder.getId(), folderConfig);
+                needsUpdate = true;
+            }
+        }
+        /*
+         * update account config if changed
+         */
+        if (needsUpdate) {
+            try {
+                updateInternalConfig(internalConfig);
+            } catch (OXException e) {
+                LOG.warn("Error remembering calendar folders in account config", e);
+            }
+        }
+        return calendarFolders;
+    }
+
+    private static JSONObject serializeFolder(GroupwareCalendarFolder calendarFolder) {
+        if (null == calendarFolder) {
+            return null;
+        }
+        return new JSONObject(8)
+            .putSafe("id", calendarFolder.getId())
+            .putSafe("parentId", calendarFolder.getParentId())
+            .putSafe("name", calendarFolder.getName())
+            .putSafe("type", null != calendarFolder.getType() ? calendarFolder.getType().name() : null)
+            .putSafe("subscribed", calendarFolder.isSubscribed())
+            .putSafe("color", optExtendedPropertyValue(calendarFolder.getExtendedProperties(), COLOR_LITERAL, String.class))
+        ;
     }
 
     /**

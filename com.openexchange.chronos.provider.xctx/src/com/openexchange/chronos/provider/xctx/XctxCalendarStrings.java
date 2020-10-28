@@ -62,7 +62,7 @@ public class XctxCalendarStrings implements LocalizableStrings {
     /**
      * The name of the internal calendar provider.
      */
-    public static final String PROVIDER_NAME = "Subscribed Calendar";
+    public static final String PROVIDER_NAME = "Federated Calendar Shares";
 
     /**
      * Prevent instantiation.

@@ -47,34 +47,51 @@
  *
  */
 
-package com.openexchange.chronos.provider.xctx;
+package com.openexchange.chronos.provider.caching.basic;
 
-import com.openexchange.folderstorage.ContentType;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
+import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.basic.FallbackBasicCalendarAccess;
+import com.openexchange.chronos.provider.caching.AccountConfigHelper;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link Constants}
+ * {@link FallbackBasicCachingCalendarAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
-public enum Constants {
-    ;
+public class FallbackBasicCachingCalendarAccess extends FallbackBasicCalendarAccess {
 
-    /** The static identifier of the internal calendar provider */
-    static final String PROVIDER_ID = "xctx" + Module.CALENDAR.getFolderConstant();
+    private final Session session;
+    private final OXException error;
 
-    /** The identifier of the folder tree the calendar provider is using */
-    static final String TREE_ID = com.openexchange.folderstorage.FolderStorage.REAL_TREE_ID;
+    /**
+     * Initializes a new {@link FallbackBasicCachingCalendarAccess}.
+     *
+     * @param session The session
+     * @param account The underlying calendar account
+     * @param error The error to to include in the accesses' calendar settings, or <code>null</code> if not defined
+     */
+    public FallbackBasicCachingCalendarAccess(Session session, CalendarAccount account, OXException error) {
+        super(account);
+        this.session = session;
+        this.error = error;
+    }
 
-    /** The used folder storage content type */
-    static final ContentType CONTENT_TYPE = com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance();
+    @Override
+    public CalendarSettings getSettings() {
+        CalendarSettings settings = new AccountConfigHelper(account, session).getCalendarSettings();
+        if (null != error) {
+            settings.setError(error);
+        }
+        return settings;
+    }
 
-    /** The identifier of the "public" root folder */
-    static final String PUBLIC_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-
-    /** The identifier of the "shared" root folder */
-    static final String SHARED_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+    @Override
+    public String toString() {
+        return "FallbackBasicCachingCalendarAccess [account=" + account + "]";
+    }
 
 }

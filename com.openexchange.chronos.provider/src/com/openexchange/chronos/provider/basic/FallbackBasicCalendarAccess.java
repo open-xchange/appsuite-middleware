@@ -47,34 +47,59 @@
  *
  */
 
-package com.openexchange.chronos.provider.xctx;
+package com.openexchange.chronos.provider.basic;
 
-import com.openexchange.folderstorage.ContentType;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Constants}
+ * {@link FallbackBasicCalendarAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
-public enum Constants {
-    ;
+public abstract class FallbackBasicCalendarAccess implements BasicCalendarAccess {
 
-    /** The static identifier of the internal calendar provider */
-    static final String PROVIDER_ID = "xctx" + Module.CALENDAR.getFolderConstant();
+    protected final CalendarAccount account;
 
-    /** The identifier of the folder tree the calendar provider is using */
-    static final String TREE_ID = com.openexchange.folderstorage.FolderStorage.REAL_TREE_ID;
+    /**
+     * Initializes a new {@link FallbackBasicCalendarAccess}.
+     * 
+     * @param account The underlying account
+     */
+    protected FallbackBasicCalendarAccess(CalendarAccount account) {
+        super();
+        this.account = account;
+    }
 
-    /** The used folder storage content type */
-    static final ContentType CONTENT_TYPE = com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance();
+    @Override
+    public void close() {
+        // nothing to do
+    }
 
-    /** The identifier of the "public" root folder */
-    static final String PUBLIC_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+    @Override
+    public Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
+        throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(eventId, BasicCalendarAccess.FOLDER_ID);
+    }
 
-    /** The identifier of the "shared" root folder */
-    static final String SHARED_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+    @Override
+    public List<Event> getEvents() throws OXException {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<Event> getChangeExceptions(String seriesId) throws OXException {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public String toString() {
+        return "FallbackBasicCalendarAccess [account=" + account + "]";
+    }
 
 }

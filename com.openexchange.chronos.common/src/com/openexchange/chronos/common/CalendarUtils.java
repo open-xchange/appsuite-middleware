@@ -2342,6 +2342,23 @@ public class CalendarUtils {
         return removed;
     }
 
+    /**
+     * Optionally gets the value of (the first) extended property with a specific name.
+     * 
+     * @param <T> The value's type
+     * @param extendedProperties The extended properties to get the matching one from, or <code>null</code> if not set
+     * @param name The name of the extended property to get
+     * @param clazz The class to cast the value to
+     * @return
+     */
+    public static <T> T optExtendedPropertyValue(ExtendedProperties extendedProperties, String name, Class<T> clazz) {
+        ExtendedProperty extendedProperty = optExtendedProperty(extendedProperties, name);
+        if (null != extendedProperty) {
+            return clazz.cast(extendedProperty.getValue());
+        }
+        return null;
+    }
+
     protected static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {
         return null != extendedProperties ? extendedProperties.get(name) : null;
     }

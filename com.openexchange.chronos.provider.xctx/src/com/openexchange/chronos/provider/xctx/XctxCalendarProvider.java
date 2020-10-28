@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider.xctx;
 
 import java.util.EnumSet;
 import java.util.Locale;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,8 +59,6 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
-import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
-import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -73,6 +70,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.subscription.XctxSessionManager;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link XctxCalendarProvider}
@@ -103,7 +102,18 @@ public class XctxCalendarProvider implements FolderCalendarProvider {
 
     @Override
     public int getDefaultMaxAccounts() {
-        return 20; //TODO: config
+        return 20; // will use com.openexchange.calendar.xctx2.maxAccounts automatically during checks if set 
+    }
+
+    @Override
+    public boolean isAvailable(Session session) {
+        try {
+            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+            return false == serverSession.getUser().isGuest() && serverSession.getUserPermissionBits().hasGroupware();
+        } catch (OXException e) {
+            LOG.warn("Unexpected error while checking xctx2 calendar availability", e);
+            return false;
+        }
     }
 
     @Override
@@ -125,23 +135,38 @@ public class XctxCalendarProvider implements FolderCalendarProvider {
 
     @Override
     public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        return reconfigureAccount(session, null, userConfig, parameters);
+    }
+
+    @Override
+    public JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         /*
-         * implicitly check configuration by initializing guest session
+         * get & check necessary configuration properties
          */
-        CalendarSession calendarSession = initGuestSession(session, userConfig, parameters);
+        if (null == userConfig || false == userConfig.hasAndNotNull("url")) {
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create("url");
+        }
+        String url = userConfig.optString("url", null);
+        if (null != calendarAccount && null != calendarAccount.getUserConfiguration() && false == url.equals(calendarAccount.getUserConfiguration().optString("url"))) {
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create("url");
+        }
+        String password = userConfig.optString("password", null);
+        if (Strings.isNotEmpty(password)) {
+            //TODO: implement secret handling
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(getId());
+        }
         /*
-         * extract slipstreamed internal config
+         * implicitly check access by logging in as guest user
+         */
+        doGuestLogin(session, url, password);
+        /*
+         * extract & return slipstreamed internal config if set, otherwise use empty default
          */
         Object internalConfig = userConfig.remove("internalConfig");
         if (null != internalConfig && JSONObject.class.isInstance(internalConfig)) {
             return (JSONObject) internalConfig;
         }
         return new JSONObject();
-    }
-
-    @Override
-    public JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        return configureAccount(session, userConfig, parameters);
     }
 
     @Override
@@ -162,40 +187,6 @@ public class XctxCalendarProvider implements FolderCalendarProvider {
     @Override
     public void onAccountDeleted(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // no
-    }
-
-    private JSONArray rememberVisibleCalendars(XctxCalendarAccess calendarAccess) throws OXException {
-        JSONArray jsonArray = new JSONArray();
-        for (GroupwareFolderType type : new GroupwareFolderType[] { GroupwareFolderType.SHARED, GroupwareFolderType.PUBLIC }) {
-            for (GroupwareCalendarFolder visibleFolder : calendarAccess.getVisibleFolders(type)) {
-                jsonArray.put(rememberCalendar(visibleFolder));
-            }
-        }
-
-        return jsonArray;
-    }
-
-    private JSONObject rememberCalendar(GroupwareCalendarFolder calendarFolder) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.putSafe("id", calendarFolder.getId());
-        jsonObject.putSafe("name", calendarFolder.getName());
-        jsonObject.putSafe("type", String.valueOf(calendarFolder.getType()));
-        jsonObject.putSafe("parentId", calendarFolder.getParentId());
-        jsonObject.putSafe("subscribed", calendarFolder.isSubscribed());
-        return jsonObject;
-    }
-
-    private CalendarSession initGuestSession(Session localSession, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        /*
-         * do guest login based on configured share url and optional password & initialize calendar session
-         */
-        String shareUrl = userConfig.optString("url", null);
-        if (Strings.isEmpty(shareUrl)) {
-            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create("url");
-        }
-        String password = userConfig.optString("password", null);
-        Session guestSession = doGuestLogin(localSession, shareUrl, password);
-        return services.getServiceSafe(CalendarService.class).init(guestSession, parameters);
     }
 
     private Session doGuestLogin(Session localSession, JSONObject userConfig) throws OXException {
