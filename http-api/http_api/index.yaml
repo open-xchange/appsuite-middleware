@@ -127,7 +127,6 @@ tags:
       condition is true.
 
       The test condition consists of a test command and some arguments for this
-      command depending on the command itself. Because the available tests depend
       on the mail filter server, these tests must be determined at runtime. So
       that no test field is transferred to the server which it isn't able to
       handle. Examples for tests are `address`, `allof` and `anyof`.
@@ -232,6 +231,10 @@ tags:
       `/folders?action=shares` of module "folders" or `/infostore?action=shares`
 
       of module "infostore".
+  - name: Share/Redeem
+    description: >
+      The share/redeem module is used to redeem previously reserved tokens during 
+      the share login workflow.
   - name: Passwordchange
     description: Via the passwordchange module the users can change their password.
   - name: Filestorage
