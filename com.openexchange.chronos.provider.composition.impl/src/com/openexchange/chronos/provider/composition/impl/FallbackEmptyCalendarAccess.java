@@ -47,34 +47,52 @@
  *
  */
 
-package com.openexchange.chronos.provider.xctx;
+package com.openexchange.chronos.provider.composition.impl;
 
-import com.openexchange.folderstorage.ContentType;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.extensions.WarningsAware;
+import com.openexchange.chronos.provider.folder.FallbackFolderCalendarAccess;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Constants}
+ * {@link FallbackEmptyCalendarAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
-public enum Constants {
-    ;
+public class FallbackEmptyCalendarAccess extends FallbackFolderCalendarAccess implements WarningsAware {
 
-    /** The static identifier of the internal calendar provider */
-    static final String PROVIDER_ID = "xctx" + Module.CALENDAR.getFolderConstant();
+    private final OXException error;
 
-    /** The identifier of the folder tree the calendar provider is using */
-    static final String TREE_ID = com.openexchange.folderstorage.FolderStorage.REAL_TREE_ID;
+    /**
+     * Initializes a new {@link FallbackEmptyCalendarAccess}.
+     *
+     * @param account The underlying calendar account
+     * @param error The error to include in the accesses' warnings, or <code>null</code> if not defined
+     */
+    public FallbackEmptyCalendarAccess(CalendarAccount account, OXException error) {
+        super(account);
+        this.error = error;
+    }
 
-    /** The used folder storage content type */
-    static final ContentType CONTENT_TYPE = com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance();
+    @Override
+    public List<OXException> getWarnings() {
+        return null == error ? Collections.emptyList() : Collections.singletonList(error);
+    }
 
-    /** The identifier of the "public" root folder */
-    static final String PUBLIC_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+    @Override
+    public CalendarFolder getFolder(String folderId) throws OXException {
+        throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create(folderId, error);
+    }
 
-    /** The identifier of the "shared" root folder */
-    static final String SHARED_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+    @Override
+    public List<CalendarFolder> getVisibleFolders() throws OXException {
+        return Collections.emptyList();
+    }
 
 }
+

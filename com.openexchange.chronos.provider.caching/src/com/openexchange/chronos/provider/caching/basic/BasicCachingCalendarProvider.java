@@ -57,7 +57,9 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.UserConfigWrapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.FallbackAwareCalendarProvider;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
@@ -76,7 +78,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public abstract class BasicCachingCalendarProvider implements BasicCalendarProvider {
+public abstract class BasicCachingCalendarProvider implements BasicCalendarProvider, FallbackAwareCalendarProvider {
 
     @Override
     public final JSONObject configureAccount(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
@@ -253,4 +255,10 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
             }
         }.executeUpdate();
     }
+
+    @Override
+    public CalendarAccess connectFallback(Session session, CalendarAccount account, CalendarParameters parameters, OXException error) {
+        return new FallbackBasicCachingCalendarAccess(session, account, error);
+    }
+
 }

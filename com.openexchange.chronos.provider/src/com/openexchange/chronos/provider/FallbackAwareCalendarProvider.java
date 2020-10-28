@@ -47,34 +47,30 @@
  *
  */
 
-package com.openexchange.chronos.provider.xctx;
+package com.openexchange.chronos.provider;
 
-import com.openexchange.folderstorage.ContentType;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link Constants}
+ * {@link FallbackAwareCalendarProvider}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
-public enum Constants {
-    ;
+public interface FallbackAwareCalendarProvider extends CalendarProvider {
 
-    /** The static identifier of the internal calendar provider */
-    static final String PROVIDER_ID = "xctx" + Module.CALENDAR.getFolderConstant();
-
-    /** The identifier of the folder tree the calendar provider is using */
-    static final String TREE_ID = com.openexchange.folderstorage.FolderStorage.REAL_TREE_ID;
-
-    /** The used folder storage content type */
-    static final ContentType CONTENT_TYPE = com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance();
-
-    /** The identifier of the "public" root folder */
-    static final String PUBLIC_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-
-    /** The identifier of the "shared" root folder */
-    static final String SHARED_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+    /**
+     * Initializes a <i>fallback</i> {@link CalendarAccess} for a specific calendar account to be used as placeholder after the regular
+     * access could not be established due to an error.
+     * 
+     * @param session The user's session
+     * @param account The calendar account to connect to
+     * @param parameters Additional calendar parameters
+     * @param error The error to include in the accesses' calendar settings or folders, or <code>null</code> if not defined
+     * @return A fallback calendar access for the calendar account
+     */
+    CalendarAccess connectFallback(Session session, CalendarAccount account, CalendarParameters parameters, OXException error);
 
 }
