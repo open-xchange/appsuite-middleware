@@ -50,16 +50,15 @@
 package com.openexchange.oauth.provider.impl.jwt;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.java.Strings;
 
 /**
  * {@link OAuthJWTScopeService} - Provides scope-mapping from external Authorization Server scopes to internal MW scopes
@@ -76,7 +75,7 @@ public class OAuthJWTScopeService implements Reloadable {
 
     /**
      * Initializes a new {@link OAuthJWTScopeService}.
-     * 
+     *
      * @param leanConfigurationService
      */
     public OAuthJWTScopeService(LeanConfigurationService leanConfigurationService) {
@@ -146,7 +145,24 @@ public class OAuthJWTScopeService implements Reloadable {
      * @return the split string
      */
     private static List<String> parse(final String scopes) {
-        return Arrays.asList(Strings.splitByComma(scopes));
+        if (scopes == null) {
+            return null;
+        }
+
+        if (scopes.trim().isEmpty()) {
+            return null;
+        }
+
+        List<String> scope = new ArrayList<>();
+
+        // OAuth specifies space as delimiter, also support comma (old draft)
+        StringTokenizer st = new StringTokenizer(scopes, " ,");
+
+        while (st.hasMoreTokens()) {
+            scope.add(st.nextToken());
+        }
+
+        return scope;
     }
 
     @Override
