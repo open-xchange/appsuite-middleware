@@ -24,3 +24,14 @@ properties:
       file: filestorage.properties
       packageName: open-xchange-subscribe
       tags: ["Federated Sharing", "XCTX"]
+    - key: com.openexchange.file.storage.xctx.maxAccounts
+      description: |
+        Defines the maximum number of allowed accounts for a user within the xctx provider. A value of 0 disables the limit. 
+      defaultValue:  20
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage.properties
+      packageName: open-xchange-subscribe
+      tags: ["Federated Sharing", "XCTX"]

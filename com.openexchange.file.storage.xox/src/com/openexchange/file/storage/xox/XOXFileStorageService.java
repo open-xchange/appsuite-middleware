@@ -71,6 +71,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
 import com.openexchange.file.storage.MetadataAware;
 import com.openexchange.file.storage.SharingFileStorageService;
+import com.openexchange.file.storage.SizeLimitedFileStorageAccountManager;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -119,7 +120,7 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
                 m = accountManger;
                 if (null == m) {
                     FileStorageAccountManagerLookupService lookupService = services.getService(FileStorageAccountManagerLookupService.class);
-                    m = new XOXFileStorageAccountManager(services, lookupService.getAccountManagerFor(getId()));
+                    m = new SizeLimitedFileStorageAccountManager("xox8", this::getMaxAccounts, new XOXFileStorageAccountManager(services, lookupService.getAccountManagerFor(getId())));
                     accountManger = m;
                 }
             }
@@ -160,6 +161,18 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
     private int getRetryAfterError(Session session) throws OXException {
         LeanConfigurationService configuration = this.services.getServiceSafe(LeanConfigurationService.class);
         return configuration.getIntProperty(session.getUserId(), session.getContextId(), XOXFileStorageProperties.RETRY_AFTER_ERROR_INTERVAL);
+    }
+
+    /**
+     * Returns the configured maxAccount value which indicates the amount of allowed XOX accounts
+     *
+     * @param session The session
+     * @return The configured amount of allowed xox accounts
+     * @throws OXException
+     */
+    private int getMaxAccounts(Session session) throws OXException {
+        LeanConfigurationService configuration = this.services.getServiceSafe(LeanConfigurationService.class);
+        return configuration.getIntProperty(session.getUserId(), session.getContextId(), XOXFileStorageProperties.MAX_ACCOUNTS);
     }
 
     @Override
@@ -241,5 +254,4 @@ public class XOXFileStorageService implements AccountAware, SharingFileStorageSe
             accountAccess.close();
         }
     }
-
 }

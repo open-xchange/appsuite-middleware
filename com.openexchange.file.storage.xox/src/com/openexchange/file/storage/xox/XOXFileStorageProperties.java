@@ -65,4 +65,9 @@ public class XOXFileStorageProperties {
      * The time interval, in seconds, after which the access to an an error afflicted XOX (cross ox) sharing account should be retried.
      */
     public static final Property RETRY_AFTER_ERROR_INTERVAL = DefaultProperty.valueOf("com.openexchange.file.storage.xox.retryAfterErrorInterval", I(3600 /* seconds = 1h */));
+
+    /**
+     * Defines the maximum number of allowed accounts within the xox file storage provider. A value of 0 disables the limit.
+     */
+    public static final Property MAX_ACCOUNTS = DefaultProperty.valueOf("com.openexchange.file.storage.xox.maxAccounts", I(20));
 }
