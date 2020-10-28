@@ -66,4 +66,9 @@ public class XctxFileStorageProperties {
      * The time interval, in seconds, after which the access to an error afflicted account should be retried.
      */
     public static Property RETRY_AFTER_ERROR_INTERVAL = DefaultProperty.valueOf("com.openexchange.file.storage.xctx.retryAfterErrorInterval", I(3600 /* seconds = 1h */));
+
+    /**
+     * Defines the maximum number of allowed accounts within the xctx file storage provider. A value of 0 disables the limit.
+     */
+    public static final Property MAX_ACCOUNTS = DefaultProperty.valueOf("com.openexchange.file.storage.xctx.maxAccounts", I(20));
 }

@@ -69,6 +69,7 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
 import com.openexchange.file.storage.MetadataAware;
 import com.openexchange.file.storage.SharingFileStorageService;
+import com.openexchange.file.storage.SizeLimitedFileStorageAccountManager;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -149,7 +150,7 @@ public class XctxFileStorageService implements SharingFileStorageService, LoginA
 
     @Override
     public FileStorageAccountManager getAccountManager() throws OXException {
-        return services.getServiceSafe(FileStorageAccountManagerLookupService.class).getAccountManagerFor(getId());
+        return new SizeLimitedFileStorageAccountManager(getId(), this::getMaxAccounts, services.getServiceSafe(FileStorageAccountManagerLookupService.class).getAccountManagerFor(getId()));
     }
 
     @Override
@@ -189,6 +190,18 @@ public class XctxFileStorageService implements SharingFileStorageService, LoginA
     private int getRetryAfterError(Session session) throws OXException {
         LeanConfigurationService configuration = this.services.getServiceSafe(LeanConfigurationService.class);
         return configuration.getIntProperty(session.getUserId(), session.getContextId(), XctxFileStorageProperties.RETRY_AFTER_ERROR_INTERVAL);
+    }
+
+    /**
+     * Returns the configured maxAccount value which indicates the amount of allowed xctx accounts
+     *
+     * @param session The session
+     * @return The configured amount of allowed xctx accounts
+     * @throws OXException
+     */
+    private int getMaxAccounts(Session session) throws OXException {
+        LeanConfigurationService configuration = this.services.getServiceSafe(LeanConfigurationService.class);
+        return configuration.getIntProperty(session.getUserId(), session.getContextId(), XctxFileStorageProperties.MAX_ACCOUNTS);
     }
 
     @Override
