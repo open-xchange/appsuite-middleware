@@ -49,9 +49,12 @@
 
 package com.openexchange.tools.oxfolder.property.impl;
 
+import java.io.Serializable;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.ImmutableMap;
@@ -107,55 +110,15 @@ public class CachingFolderUserPropertyStorage implements FolderUserPropertyStora
     }
 
     @Override
-    public void deleteFolderProperties(int contextId, int folderId, int userId, Set<String> propertyKeys) throws OXException {
-        deleteFolderProperties(contextId, folderId, userId, propertyKeys, null);
+    public void deleteFolderProperties(int contextId, int folderId, int[] userIds, Set<String> propertyKeys) throws OXException {
+        delegate.deleteFolderProperties(contextId, folderId, userIds, propertyKeys);
+        invalidateCache(contextId, folderId, userIds);
     }
 
     @Override
-    public void deleteFolderProperties(int contextId, int folderId, int userId, Set<String> propertyKeys, Connection connection) throws OXException {
-        delegate.deleteFolderProperties(contextId, folderId, userId, propertyKeys, connection);
-
-        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (null != cacheService) {
-            Cache cache = cacheService.getCache(REGION_NAME);
-            CacheKey key = newCacheKey(cacheService, folderId, userId, contextId);
-            Object object = cache.get(key);
-            if (object instanceof Map) {
-                if (null == propertyKeys || propertyKeys.isEmpty()) {
-                    cache.put(key, EMPTY_IMMUTABLE_MAP, true);
-                } else {
-                    Map<String, String> newProperties = new LinkedHashMap<>((Map<String, String>) object);
-                    for (String propertyKey : propertyKeys) {
-                        newProperties.remove(propertyKey);
-                    }
-                    cache.put(key, newProperties.isEmpty() ? EMPTY_IMMUTABLE_MAP : ImmutableMap.copyOf(newProperties), true);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void deleteFolderProperty(int contextId, int folderId, int userId, String key) throws OXException {
-        deleteFolderProperty(contextId, folderId, userId, key, null);
-    }
-
-    @Override
-    public void deleteFolderProperty(int contextId, int folderId, int userId, String propertyKey, Connection connection) throws OXException {
-        delegate.deleteFolderProperty(contextId, folderId, userId, propertyKey, connection);
-
-        if (null != propertyKey) {
-            CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-            if (null != cacheService) {
-                Cache cache = cacheService.getCache(REGION_NAME);
-                CacheKey key = newCacheKey(cacheService, folderId, userId, contextId);
-                Object object = cache.get(key);
-                if (object instanceof Map) {
-                    Map<String, String> newProperties = new LinkedHashMap<>((Map<String, String>) object);
-                    newProperties.remove(propertyKey);
-                    cache.put(key, newProperties.isEmpty() ? EMPTY_IMMUTABLE_MAP : ImmutableMap.copyOf(newProperties), true);
-                }
-            }
-        }
+    public void deleteFolderProperties(int contextId, int folderId, int[] userIds, Set<String> propertyKeys, Connection connection) throws OXException {
+        delegate.deleteFolderProperties(contextId, folderId, userIds, propertyKeys, connection);
+        invalidateCache(contextId, folderId, userIds);
     }
 
     @Override
@@ -449,6 +412,24 @@ public class CachingFolderUserPropertyStorage implements FolderUserPropertyStora
                         cache.put(key, newProperties.isEmpty() ? EMPTY_IMMUTABLE_MAP : ImmutableMap.copyOf(newProperties), true);
                     }
                 }
+            }
+        }
+    }
+
+    private static void invalidateCache(int contextId, int folderId, int[] userIds) {
+        if (null == userIds || 0 == userIds.length) {
+            return;
+        }
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null != cacheService) {
+            List<Serializable> keys = new ArrayList<Serializable>(userIds.length);
+            for (int userId : userIds) {
+                keys.add(newCacheKey(cacheService, folderId, userId, contextId));
+            }
+            try {
+                cacheService.getCache(REGION_NAME).remove(keys);
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(CachingFolderUserPropertyStorage.class).warn("Unexpected error invalidating cache", e);
             }
         }
     }
