@@ -131,6 +131,12 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess {
     }
 
     @Override
+    public DefaultFileStorageFolder[] getUserSharedFolders() throws OXException {
+        DefaultFileStorageFolder[] userSharedFolders = super.getUserSharedFolders();
+        return accountAccess.getSubscribedHelper().addSubscribed(userSharedFolders, false);
+    }
+
+    @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
         String result = super.updateFolder(identifier, toUpdate, cascadePermissions);
         if (SetterAwareFileStorageFolder.class.isInstance(toUpdate) && ((SetterAwareFileStorageFolder) toUpdate).containsSubscribed()) {
@@ -138,6 +144,12 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess {
             accountAccess.getSubscribedHelper().setSubscribed(localSession, folder, B(toUpdate.isSubscribed()));
         }
         return result;
+    }
+
+    @Override
+    public DefaultFileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
+        DefaultFileStorageFolder[] path2DefaultFolder = super.getPath2DefaultFolder(folderId);
+        return accountAccess.getSubscribedHelper().addSubscribed(path2DefaultFolder, false);
     }
 
     @Override
