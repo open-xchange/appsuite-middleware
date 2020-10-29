@@ -344,7 +344,7 @@ public class MailStorage implements IMailStorage {
             MailStorageId newId = new DefaultMailStorageId(draftMail.getMailPath(), compositionSpaceId, processor.getFileCacheReference());
             return MailStorageResult.resultFor(newId, messageInfo, true, mailAccess);
         } catch (MissingDraftException e) {
-            throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(getUUIDForLogging(e.getFirstMailStorageId().getCompositionSpaceId()));
+            throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(e, getUUIDForLogging(e.getFirstMailStorageId().getCompositionSpaceId()));
         } finally {
             if (mailAccess != null) {
                 mailAccess.close(true);

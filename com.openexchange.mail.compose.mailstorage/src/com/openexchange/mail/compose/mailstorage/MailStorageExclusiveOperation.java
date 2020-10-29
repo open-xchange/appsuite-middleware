@@ -176,7 +176,7 @@ public class MailStorageExclusiveOperation {
                         lookUpResult = compositionSpaceService.getCompositionSpaceToDraftAssociation(compositionSpaceId);
                         association = lookUpResult.getAssociation();
                     } else {
-                        throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+                        throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create(e);
                     }
                 } finally {
                     lock.unlock();

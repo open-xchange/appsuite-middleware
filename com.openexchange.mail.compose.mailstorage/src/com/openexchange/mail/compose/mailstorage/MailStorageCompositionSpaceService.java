@@ -453,7 +453,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         } catch (MissingDraftException e) {
             LOG.debug("Unable to load draft for transport due to invalid draft path: {}", association);
             associationStorage.delete(compositionSpaceId, session, false);
-            throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+            throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create(e);
         } finally {
             if (transportResult != null) {
                 transportResult.rollback();
@@ -984,7 +984,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             return newAssociation;
         } catch (MissingDraftException e) {
             if (isRetry) {
-                throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+                throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create(e);
             }
 
             // retry once as cache result might be outdated
