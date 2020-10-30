@@ -49,6 +49,7 @@
 
 package com.openexchange.pop3.config;
 
+import java.util.Map;
 import java.util.Properties;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MimeDefaultSession;
@@ -164,6 +165,13 @@ public final class POP3SessionProperties {
          * Deny NTLM authentication
          */
         properties.put("mail.pop3.auth.ntlm.disable", "true");
+        final Properties systemProperties = System.getProperties();
+        for (Map.Entry<Object, Object> systemProperty : systemProperties.entrySet()) {
+            String propName = systemProperty.getKey().toString();
+            if (propName.startsWith("mail.")) {
+                properties.put(propName, systemProperty.getValue());
+            }
+        }
         if (MailProperties.getInstance().getJavaMailProperties() != null) {
             /*
              * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties

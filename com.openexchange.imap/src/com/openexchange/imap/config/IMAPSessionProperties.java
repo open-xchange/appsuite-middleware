@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.config;
 
+import java.util.Map;
 import java.util.Properties;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MimeDefaultSession;
@@ -169,6 +170,16 @@ public final class IMAPSessionProperties {
          * Deny NTLM authentication
          */
         properties.put("mail.imap.auth.ntlm.disable", "true");
+        /*
+         * Take over system properties related to "mail."
+         */
+        final Properties systemProperties = System.getProperties();
+        for (Map.Entry<Object, Object> systemProperty : systemProperties.entrySet()) {
+            String propName = systemProperty.getKey().toString();
+            if (propName.startsWith("mail.")) {
+                properties.put(propName, systemProperty.getValue());
+            }
+        }
         /*
          * Apply configured JavaMail properties from file
          */
