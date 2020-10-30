@@ -50,8 +50,10 @@
 package com.openexchange.reseller.osgi;
 
 import com.openexchange.database.DatabaseService;
+import com.openexchange.lock.LockService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.reseller.ResellerService;
+import com.openexchange.reseller.impl.CachingResellerService;
 import com.openexchange.reseller.impl.ResellerServiceImpl;
 
 /**
@@ -75,12 +77,17 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { LockService.class };
+    }
+
+    @Override
     protected boolean stopOnServiceUnavailability() {
         return true;
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(ResellerService.class, new ResellerServiceImpl(getService(DatabaseService.class)));
+        registerService(ResellerService.class, new CachingResellerService(this, new ResellerServiceImpl(getService(DatabaseService.class))));
     }
 }

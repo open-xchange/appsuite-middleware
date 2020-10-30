@@ -3017,7 +3017,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     final ConfigView view = viewFactory.getView(-1, ctxId);
                     final String userAttribute = ctx.getUserAttribute("config", "com.openexchange.admin.user.defaultLanguage");
                     if (userAttribute != null) {
-                        final ComposedConfigProperty<String> property = view.property("com.openexchange.admin.user.defaultLanguage", String.class).precedence("server, contextSets");
+                        final ComposedConfigProperty<String> property = view.property("com.openexchange.admin.user.defaultLanguage", String.class).precedence("server, contextSets, reseller");
                         if (property.isDefined()) {
                             lang = property.get();
                         } else {

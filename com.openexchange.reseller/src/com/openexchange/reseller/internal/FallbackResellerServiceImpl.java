@@ -49,11 +49,18 @@
 
 package com.openexchange.reseller.internal;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
+import com.openexchange.reseller.data.ResellerCapability;
+import com.openexchange.reseller.data.ResellerConfigProperty;
+import com.openexchange.reseller.data.ResellerTaxonomy;
 
 /**
  * {@link FallbackResellerServiceImpl}
@@ -61,7 +68,6 @@ import com.openexchange.reseller.data.ResellerAdmin;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-@SuppressWarnings("unused")
 public class FallbackResellerServiceImpl implements ResellerService {
 
     private static ResellerAdmin DEFAULT;
@@ -69,8 +75,15 @@ public class FallbackResellerServiceImpl implements ResellerService {
         DEFAULT = ResellerAdmin.builder().name("default").build();
     }
 
+    /**
+     * Initialises a new {@link FallbackResellerServiceImpl}.
+     */
+    public FallbackResellerServiceImpl() {
+        super();
+    }
+
     @Override
-    public ResellerAdmin getReseller(int cid) {
+    public ResellerAdmin getReseller(int cid) throws OXException {
         return DEFAULT;
     }
 
@@ -96,7 +109,61 @@ public class FallbackResellerServiceImpl implements ResellerService {
 
     @Override
     public List<ResellerAdmin> getAll() {
-        return Collections.singletonList(DEFAULT);
+        return ImmutableList.of(DEFAULT);
     }
 
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
+
+    @Override
+    public Set<ResellerCapability> getCapabilities(int resellerId) throws OXException {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public ResellerConfigProperty getConfigProperty(int resellerId, String key) {
+        return null;
+    }
+
+    @Override
+    public Map<String, ResellerConfigProperty> getAllConfigProperties(int resellerId) {
+        return ImmutableMap.of();
+    }
+
+    @Override
+    public Map<String, ResellerConfigProperty> getConfigProperties(int resellerId, Set<String> keys) {
+        return ImmutableMap.of();
+    }
+
+    @Override
+    public Set<ResellerTaxonomy> getTaxonomies(int resellerId) throws OXException {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public Set<ResellerCapability> getCapabilitiesByContext(int contextId) throws OXException {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public ResellerConfigProperty getConfigPropertyByContext(int contextId, String key) throws OXException {
+        return null;
+    }
+
+    @Override
+    public Map<String, ResellerConfigProperty> getAllConfigPropertiesByContext(int contextId) throws OXException {
+        return ImmutableMap.of();
+    }
+
+    @Override
+    public Map<String, ResellerConfigProperty> getConfigPropertiesByContext(int contextId, Set<String> keys) throws OXException {
+        return ImmutableMap.of();
+    }
+
+    @Override
+    public Set<ResellerTaxonomy> getTaxonomiesByContext(int contextId) throws OXException {
+        return ImmutableSet.of();
+    }
 }

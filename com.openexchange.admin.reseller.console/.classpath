@@ -5,5 +5,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console.common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.reseller.rmi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rmi"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

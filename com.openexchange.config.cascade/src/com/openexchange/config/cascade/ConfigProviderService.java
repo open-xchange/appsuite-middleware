@@ -131,6 +131,7 @@ public interface ConfigProviderService {
 	 * Currently known scopes:
 	 * <ul>
 	 * <li><code>"server"</code></li>
+	 * <li><code>"reseller"</code></li>
 	 * <li><code>"contextSets"</code></li>
 	 * <li><code>"context"</code></li>
 	 * <li><code>"user"</code></li>
