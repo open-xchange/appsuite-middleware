@@ -97,7 +97,7 @@ public class Bug58814Test extends AbstractChronosTest {
     /**
      * Create a non-full day series with no time and no timezone information on the 'until' property
      * of the recurrence frequency and change it to a full day series.
-     * 
+     *
      * @throws ApiException
      * @throws ParseException
      * @throws ChronosApiException
@@ -133,7 +133,7 @@ public class Bug58814Test extends AbstractChronosTest {
 
     /**
      * Create a full day series and change it to a non-full day series.
-     * 
+     *
      * @throws ApiException
      * @throws ChronosApiException
      */
@@ -177,8 +177,8 @@ public class Bug58814Test extends AbstractChronosTest {
         ICalImportExportManager importExportManager = new ICalImportExportManager(exportApi, importApi);
 
         Asset asset = assetManager.getAsset(AssetType.ics, "bug58814.ics");
-        String response = importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), Boolean.TRUE, Boolean.FALSE);
-        
+        String response = importExportManager.importICalFile(defaultFolderId, new File(asset.getAbsolutePath()), Boolean.TRUE, Boolean.FALSE);
+
         List<EventId> eventIds = importExportManager.parseImportJSONResponseToEventIds(response);
         eventManager.rememberEventIds(eventIds);
         List<EventData> eventDataList = eventManager.listEvents(eventIds);

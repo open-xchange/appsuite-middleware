@@ -4,8 +4,9 @@
     tags:
       - Calendar
     summary: Updates an appointment.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Object ID of the requested appointment.

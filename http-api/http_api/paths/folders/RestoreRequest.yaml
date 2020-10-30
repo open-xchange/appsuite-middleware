@@ -22,6 +22,16 @@
         required: false
         schema:
           type: string
+    requestBody:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: array
+            items:
+              type: string
+              description: The folder id
+      description: A JSON array of folder ids that shall be restored.
+      required: true          
     responses:
       '200':
         description: >
@@ -34,13 +44,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/FolderRestoreResponse'
-    requestBody:
-      content:
-        application/x-www-form-urlencoded:
-          schema:
-            type: array
-            items:
-              type: string
-              description: The folder id
-      description: A JSON array of folder ids that shall be restored.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

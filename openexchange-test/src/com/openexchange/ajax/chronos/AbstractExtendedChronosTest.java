@@ -139,7 +139,7 @@ public class AbstractExtendedChronosTest extends AbstractChronosTest {
      */
     protected UserData getUserInformation(Integer userId) throws ApiException {
         com.openexchange.testing.httpclient.modules.UserApi api = new com.openexchange.testing.httpclient.modules.UserApi(getApiClient());
-        UserResponse userResponse = api.getUser(getApiClient().getSession(), String.valueOf(userId));
+        UserResponse userResponse = api.getUser(String.valueOf(userId));
         return userResponse.getData();
     }
 

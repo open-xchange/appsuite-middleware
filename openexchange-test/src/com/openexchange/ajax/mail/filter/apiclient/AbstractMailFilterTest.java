@@ -114,7 +114,7 @@ public abstract class AbstractMailFilterTest extends AbstractConfigAwareAPIClien
             for (int ruleId : sieveRuleToDelete) {
                 MailFilterDeletionBody body = new MailFilterDeletionBody();
                 body.setId(I(ruleId));
-                mailfilterapi.deleteRuleV2(getSessionId(), body, null);
+                mailfilterapi.deleteRuleV2(body, null);
             }
         } catch (ApiException e) {
             ex = e;

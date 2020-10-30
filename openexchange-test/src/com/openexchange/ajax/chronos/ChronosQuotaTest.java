@@ -113,7 +113,7 @@ public class ChronosQuotaTest extends AbstractChronosTest {
     @Test
     public void testExeededQuota() throws Exception {
         QuotaApi api = new QuotaApi(getApiClient());
-        QuotasResponse response = api.getQuotaInformation(getApiClient().getSession(), MODULE, "0", defaultFolderId);
+        QuotasResponse response = api.getQuotaInformation(MODULE, "0", defaultFolderId);
         Object data = response.getData();
 
         // Check for the right type

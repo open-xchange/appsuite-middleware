@@ -4,6 +4,8 @@
     tags:
       - Filestorage
     summary: Creates a file storage account.
+    security: 
+        - session: []    
     description: >
       #### Example for creating a new OAuth-based file storage account
 
@@ -75,8 +77,6 @@
 
       The response provides the relative identifier of the newly created
       account.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >-

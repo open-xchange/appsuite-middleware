@@ -86,7 +86,7 @@ public class PermissionLimitTest extends InfostoreApiClientTest {
         super.setUpConfiguration();
 
         UserApi userApi = new UserApi(apiClient);
-        UsersResponse resp = userApi.getAllUsers(getSessionId(), "1", null, null);
+        UsersResponse resp = userApi.getAllUsers("1", null, null);
         assertNull(resp.getError());
         assertNotNull(resp.getData());
         @SuppressWarnings("unchecked") ArrayList<ArrayList<Object>> allUsers = (ArrayList<ArrayList<Object>>) resp.getData();

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.oauth;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
@@ -106,6 +107,7 @@ public class OAuthShowcase extends AbstractOAuthAPIClient {
         FoldersVisibilityResponse visibleFolderResp = fApi.getVisibleFolders("mail", "1,300,314,308,316", TREE, null, Boolean.TRUE);
         assertTrue(visibleFolderResp.getErrorDesc(), visibleFolderResp.getError() == null);
         ArrayList<ArrayList<Object>> priv = (ArrayList<ArrayList<Object>>) visibleFolderResp.getData().getPrivate();
+        assertNotNull(priv);
         printList("Visible folders: ", priv);
         // Find the inbox (standard folder type == 7)
         Optional<ArrayList<Object>> inbox = priv.stream().filter(folder -> folder.get(4).equals(I(7))).findFirst();

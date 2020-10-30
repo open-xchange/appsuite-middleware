@@ -102,7 +102,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
         GroupData groupData = new GroupData();
         groupData.setDisplayName("Test1");
         groupData.setName("Test1");
-        GroupUpdateResponse response = groupsApi.createGroup(getSessionId(), groupData);
+        GroupUpdateResponse response = groupsApi.createGroup(groupData);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         groupIds = new Integer[2];
         groupIds[0] = response.getData().getId();
@@ -113,7 +113,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
         members.add(I(3));
         members.add(I(4));
         groupData.setMembers(members);
-        response = groupsApi.createGroup(getSessionId(), groupData);
+        response = groupsApi.createGroup(groupData);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         groupIds[1] = response.getData().getId();
         timestamp = response.getTimestamp();
@@ -136,7 +136,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
         if (groupIds != null) {
             for (Integer id : groupIds) {
                 body.setId(id);
-                groupsApi.deleteGroup(getSessionId(), timestamp, body);
+                groupsApi.deleteGroup(timestamp, body);
             }
         }
         if (tasksToDelete != null && !tasksToDelete.isEmpty()) {
@@ -149,7 +149,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
     public void testUseCount() throws ApiException {
         GroupSearchBody body = new GroupSearchBody();
         body.setPattern("Test");
-        GroupsResponse response = groupsApi.searchGroups(getSessionId(), body);
+        GroupsResponse response = groupsApi.searchGroups(body);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         List<GroupData> groups = response.getData();
         Assert.assertEquals(2, groups.size());
@@ -170,7 +170,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
         // Check order again
         body = new GroupSearchBody();
         body.setPattern("Test");
-        response = groupsApi.searchGroups(getSessionId(), body);
+        response = groupsApi.searchGroups(body);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         groups = response.getData();
         Assert.assertEquals(2, groups.size());
@@ -185,7 +185,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
     public void testUseCountWithTask() throws Exception {
         GroupSearchBody body = new GroupSearchBody();
         body.setPattern("Test");
-        GroupsResponse response = groupsApi.searchGroups(getSessionId(), body);
+        GroupsResponse response = groupsApi.searchGroups(body);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         List<GroupData> groups = response.getData();
         Assert.assertEquals(2, groups.size());
@@ -210,7 +210,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
         // Check order again
         body = new GroupSearchBody();
         body.setPattern("Test");
-        response = groupsApi.searchGroups(getSessionId(), body);
+        response = groupsApi.searchGroups(body);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         groups = response.getData();
         Assert.assertEquals(2, groups.size());

@@ -190,7 +190,7 @@ public class Bug65533Test extends AbstractITipTest {
         assertTrue(null != attachment.getSize());
         assertTrue(attachment.getSize().longValue() >= 177103);
         assertTrue(attachment.getSize().longValue() <= 177115);
-        byte[] attachmentData = chronosApi.getEventAttachment(apiClient.getSession(), eventData.getId(), eventData.getFolder(), attachment.getManagedId());
+        byte[] attachmentData = chronosApi.getEventAttachment(eventData.getId(), eventData.getFolder(), attachment.getManagedId());
         assertNotNull(attachmentData);
         /*
          * receive & analyze iMIP reply as user b, too

@@ -43,18 +43,6 @@
       - $ref: '#/components/parameters/QueryParamChronosFields'
       - $ref: '#/components/parameters/QueryParamChronosPushToken'
       - $ref: '#/components/parameters/QueryParamChronosScheduling'
-    responses:
-      '200':
-        description: >
-          An json object containing the deleted event if the deletion was
-          successful. In case of errors the responsible fields in the response
-          are
-
-          filled (see [Error handling](#error-handling)).
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChronosMultipleCalendarResultResponse'
     requestBody:
       content:
         application/json:
@@ -76,4 +64,21 @@
       description: >-
         A JSON array of JSON objects with the id and optionally the recurrence
         position of the event.
-      required: true
+      required: true      
+    responses:
+      '200':
+        description: >
+          An json object containing the deleted event if the deletion was
+          successful. In case of errors the responsible fields in the response
+          are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChronosMultipleCalendarResultResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              
+

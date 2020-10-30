@@ -16,6 +16,13 @@
         schema:
           type: string
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MailDestinationBody'
+      description: A JSON object containing the id of the destination folder.
+      required: true      
     responses:
       '200':
         description: >
@@ -27,10 +34,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailDestinationResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/MailDestinationBody'
-      description: A JSON object containing the id of the destination folder.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

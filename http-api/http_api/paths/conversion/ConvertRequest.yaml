@@ -4,6 +4,8 @@
     tags:
       - Conversion
     summary: Converts data from source using a specific data handler.
+    security: 
+        - session: []    
     description: >
       #### Saving an iCal email attachment
 
@@ -148,8 +150,6 @@
       of the [getMail](#mail/getMail) request.
 
       `[{"folder_id":2567,"id":7689}, ...]`.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >

@@ -3,9 +3,11 @@
     operationId: deleteDataExportTask
     tags:
       - DataExport
-    summary: Deletes the result files and all resourcess of data export task for session-associated user
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    summary: Deletes the result files 
+    security: 
+        - session: []    
+    description: >-
+      Deletes the result files and all resourcess of data export task for session-associated user
     responses:
       '200':
         description: A JSON object containing the success status.

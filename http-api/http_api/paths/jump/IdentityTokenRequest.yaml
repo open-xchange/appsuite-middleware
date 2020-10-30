@@ -4,8 +4,9 @@
     tags:
       - Jump
     summary: Acquires an identity token.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: system
         description: >-

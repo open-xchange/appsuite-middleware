@@ -249,7 +249,7 @@ public class BasicCommentTest extends AbstractChronosTest {
 
     private UserData getUserInformation(Integer userId) throws ApiException {
         UserApi api = new UserApi(getApiClient());
-        UserResponse userResponse = api.getUser(getApiClient().getSession(), String.valueOf(userId));
+        UserResponse userResponse = api.getUser(String.valueOf(userId));
         return userResponse.getData();
     }
 

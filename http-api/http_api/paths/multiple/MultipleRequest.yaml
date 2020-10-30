@@ -3,7 +3,9 @@
     operationId: process
     tags:
       - Multiple
-    summary: Processes multiple requests to other modules in a single request.
+    summary: Processes multiple requests to other modules in a single request
+    security: 
+        - session: []    
     description: >
       #### Not supported requests are:
        * the ones from modules login and multiple
@@ -33,7 +35,6 @@
 
       ```
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: continue
         description: >-

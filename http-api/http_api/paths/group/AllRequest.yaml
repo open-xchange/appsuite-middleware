@@ -4,8 +4,9 @@
     tags:
       - Groups
     summary: Gets all groups.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: columns
         description: >-

@@ -119,7 +119,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         rememberClient(apiClientC1_2);
 
         UserApi anotherUserApi = new UserApi(apiClientC1_2);
-        UserResponse userResponseC1_2 = anotherUserApi.getUser(apiClientC1_2.getSession(), String.valueOf(apiClientC1_2.getUserId()));
+        UserResponse userResponseC1_2 = anotherUserApi.getUser(String.valueOf(apiClientC1_2.getUserId()));
         assertNull(userResponseC1_2.getError());
 
         /*

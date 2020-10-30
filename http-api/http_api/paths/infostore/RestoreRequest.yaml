@@ -4,8 +4,9 @@
     tags:
       - Infostore
     summary: Restores info items from trash.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: pushToken
         description: The client's push token to restrict the generated drive event

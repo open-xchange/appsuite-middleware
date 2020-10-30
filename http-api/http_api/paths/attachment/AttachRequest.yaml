@@ -4,6 +4,8 @@
     tags:
       - Attachments
     summary: Creates an attachment.
+    security: 
+        - session: []    
     description: >
       #### Note
 
@@ -12,8 +14,6 @@
 
       and `file_[index]` with the appropriate index, like `json_1`, `file_1`.
       The index always starts with 0 (mandatory attachment object).
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >

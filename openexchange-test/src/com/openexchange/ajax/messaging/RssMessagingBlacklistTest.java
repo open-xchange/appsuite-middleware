@@ -86,13 +86,13 @@ public class RssMessagingBlacklistTest extends AbstractAPIClientSession {
         data.setDisplayName(RssMessagingBlacklistTest.class.getSimpleName() + "_" + System.currentTimeMillis());
 
         data.setConfiguration(config);
-        MessagingAccountUpdateResponse resp = messagingApi.createMessagingAccount(getSessionId(), data);
+        MessagingAccountUpdateResponse resp = messagingApi.createMessagingAccount(data);
         try {
             assertNotNull(resp.getError());
             assertEquals("Wrong exception: " + resp.getErrorDesc(), MessagingExceptionCodes.INVALID_ACCOUNT_CONFIGURATION.create().getErrorCode(), resp.getCode());
         } catch (AssertionError e) {
             if (resp.getData() != null) {
-                messagingApi.deleteMessagingAccount(getSessionId(), "com.openexchange.messaging.rss", resp.getData());
+                messagingApi.deleteMessagingAccount("com.openexchange.messaging.rss", resp.getData());
             }
             throw e;
         }

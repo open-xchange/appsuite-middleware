@@ -3,9 +3,9 @@
     operationId: searchResources
     tags:
       - Resources
-    summary: Searches for resources.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    summary: Searches for resources
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

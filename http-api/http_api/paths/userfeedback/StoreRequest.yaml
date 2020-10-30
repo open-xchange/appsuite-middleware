@@ -4,8 +4,9 @@
     tags:
       - userfeedback
     summary: Store user feedback
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: type
         description: The feedback type

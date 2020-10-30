@@ -28,6 +28,8 @@
             schema:
               type: string
               format: binary
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
       '500':
         description: A HTML page in case of errors.
         content:

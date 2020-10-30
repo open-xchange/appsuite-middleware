@@ -4,8 +4,9 @@
     tags:
       - Messaging
     summary: Gets a messaging service.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The ID of the messaging service to load.

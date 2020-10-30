@@ -141,14 +141,14 @@ public class SMSProviderTests extends AbstractMultifactorProviderTest {
     protected CommonResponse doAuthentication(MultifactorStartRegistrationResponseData startRegistrationData, MultifactorStartAuthenticationResponseData startAuthenticationData) throws ApiException {
         MultifactorFinishAuthenticationData data = new MultifactorFinishAuthenticationData();
         data.setSecretCode(DEMO_TOKEN);
-        return MultifactorApi().multifactorDeviceActionfinishAuthentication(getSessionId(), SMS_PROVIDER_NAME, startRegistrationData.getDeviceId(), data);
+        return MultifactorApi().multifactorDeviceActionfinishAuthentication(SMS_PROVIDER_NAME, startRegistrationData.getDeviceId(), data);
     }
 
     @Override
     protected CommonResponse doWrongAuthentication(MultifactorStartRegistrationResponseData startRegistrationData, MultifactorStartAuthenticationResponseData startAuthenticationData) throws Exception {
         MultifactorFinishAuthenticationData data = new MultifactorFinishAuthenticationData();
         data.setSecretCode("THIS IS A WRONG CODE");
-        return MultifactorApi().multifactorDeviceActionfinishAuthentication(getSessionId(), SMS_PROVIDER_NAME, startRegistrationData.getDeviceId(), data);
+        return MultifactorApi().multifactorDeviceActionfinishAuthentication(SMS_PROVIDER_NAME, startRegistrationData.getDeviceId(), data);
     }
 
     @Override

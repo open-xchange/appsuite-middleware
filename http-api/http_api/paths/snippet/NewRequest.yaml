@@ -7,7 +7,16 @@
     security: 
         - session: []
         - oauth: 
-          - write_userconfig    
+          - write_userconfig 
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SnippetData'
+      description: >-
+        A JSON object describing the snippet excluding its attachment(s). For
+        adding attachments see `/snippet?action=attach` request.
+      required: true             
     responses:
       '200':
         description: >
@@ -19,12 +28,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/SnippetUpdateResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SnippetData'
-      description: >-
-        A JSON object describing the snippet excluding its attachment(s). For
-        adding attachments see `/snippet?action=attach` request.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

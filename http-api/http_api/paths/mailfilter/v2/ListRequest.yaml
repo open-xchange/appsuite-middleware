@@ -4,8 +4,9 @@
     tags:
       - Mailfilter
     summary: Gets all mail filter rules.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: flag
         description: 'If given, only rules with this flag are returned.'

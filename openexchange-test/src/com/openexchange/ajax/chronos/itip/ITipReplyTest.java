@@ -177,7 +177,11 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
         ComposeBody composeBody = new ComposeBody();
         composeBody.setId(receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST).getId());
         composeBody.setFolderId(ITipUtil.FOLDER_HUMAN_READABLE);
+<<<<<<< Upstream, based on c41b0d0e1e7823d9bbe9f3c2d63516c97e5a84df
         MailComposeResponse mailCompose = mailComposeApi.postMailCompose(apiClientC2.getSession(), "forward", Boolean.FALSE, null, Collections.singletonList(composeBody));
+=======
+        MailComposeResponse mailCompose = mailComposeApi.postMailCompose("forward", Boolean.FALSE, Collections.singletonList(composeBody));
+>>>>>>> 3c14e72 MW-1431: changed other apis to session security scheme as well
         assertNull(mailCompose.getError());
 
         /*
@@ -192,7 +196,11 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
         fromList.add(userResponseC2.getData().getEmail1());
         data.setTo(Collections.singletonList(toList));
         data.setFrom(fromList);
+<<<<<<< Upstream, based on c41b0d0e1e7823d9bbe9f3c2d63516c97e5a84df
         MailComposeSendResponse forwardedMail = mailComposeApi.postMailComposeSend(apiClientC2.getSession(), data.getId(), data.toJson(), null, null);
+=======
+        MailComposeSendResponse forwardedMail = mailComposeApi.postMailComposeSend(data.getId(), data.toJson(), null);
+>>>>>>> 3c14e72 MW-1431: changed other apis to session security scheme as well
         assertNull(forwardedMail.getErrorDesc());
 
         /*

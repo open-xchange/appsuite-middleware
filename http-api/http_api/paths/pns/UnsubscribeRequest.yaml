@@ -4,8 +4,8 @@
     tags:
       - Pns
     summary: Removes a subscription associated with a token for certain topics
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

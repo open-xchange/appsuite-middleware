@@ -3,7 +3,9 @@
     operationId: setUserAttribute
     tags:
       - User
-    summary: Sets a user attribute.
+    summary: Sets a user attribute
+    security: 
+        - session: []    
     description: >
       Sets a custom user attribute consisting of a name and a value. The
       attribute can later be
@@ -12,7 +14,6 @@
       [/user?action=getAttribute](#operation--user-action-getAttribute-get)
       request.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The ID of the user.

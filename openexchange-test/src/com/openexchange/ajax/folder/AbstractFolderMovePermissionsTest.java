@@ -155,7 +155,7 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
 
     protected String getPrivateInfostoreFolder(ApiClient apiClient) throws ApiException {
         ConfigApi configApi = new ConfigApi(apiClient);
-        ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath(), apiClient.getSession());
+        ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath());
         Object data = checkResponse(configNode);
         if (data != null && !data.toString().equalsIgnoreCase("null")) {
             return String.valueOf(data);

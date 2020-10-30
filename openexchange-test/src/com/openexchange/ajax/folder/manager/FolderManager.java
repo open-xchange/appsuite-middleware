@@ -105,10 +105,6 @@ public class FolderManager {
         this.lastTimestamp = Long.valueOf(0l);
     }
 
-    public String getSession() {
-        return session;
-    }
-
     public void setLastTimestamp(Long timestamp) {
         lastTimestamp = timestamp;
     }

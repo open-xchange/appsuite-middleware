@@ -203,7 +203,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
     }
 
     private TimeZone getUserTimeZone() throws ApiException {
-        UserResponse userResponse = userApi.getUser(getSessionId(), null);
+        UserResponse userResponse = userApi.getUser(null);
         Assert.assertNull(userResponse.getErrorDesc(), userResponse.getError());
         Assert.assertNotNull(userResponse.getData());
         UserData data = userResponse.getData();

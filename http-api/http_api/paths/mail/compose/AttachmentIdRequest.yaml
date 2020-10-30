@@ -1,6 +1,5 @@
 '/mail/compose/{id}/attachments/{attachmentId}':
   parameters:
-    - $ref: '#/components/parameters/gblQueryParamSession'
     - in: path
       name: id
       description: The ID of the composition space
@@ -17,7 +16,10 @@
     operationId: postAttachmentsById
     tags:
       - MailCompose
-    summary: >-
+    summary: Replaces an existing attachment
+    security: 
+      - session: []       
+    description: >-
       Uploads an attachment again and removes the old attachment from the
       server. Used for image resize.
     parameters:
@@ -50,7 +52,10 @@
     operationId: getAttachmentsById
     tags:
       - MailCompose
-    summary: Get binary attachment. This URL pattern can be used for inline images.
+    summary: Get binary attachment
+    security: 
+      - session: []       
+    description: This URL pattern can be used for inline images.
     responses:
       '200':
         description: The attachment as file.

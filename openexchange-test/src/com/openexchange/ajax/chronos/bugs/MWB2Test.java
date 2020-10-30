@@ -92,7 +92,7 @@ public class MWB2Test extends AbstractImportExportTest {
         END:VEVENT
         END:VCALENDAR
          */
-        
+
         List<EventData> eventData = parseEventData(getImportResponse(ICalImportExportManager.FLOATING_ICS));
         assertEquals(1, eventData.size());
 
@@ -103,7 +103,7 @@ public class MWB2Test extends AbstractImportExportTest {
         List<InfoItemExport> itemList = new ArrayList<>();
         addInfoItemExport(itemList, eventData.get(0).getFolder(), eventData.get(0).getId());
 
-        String iCalExport = importExportManager.exportICalBatchFile(defaultUserApi.getSession(), itemList);
+        String iCalExport = importExportManager.exportICalBatchFile(itemList);
         assertNotNull(iCalExport);
         assertEventData(eventData, iCalExport);
 

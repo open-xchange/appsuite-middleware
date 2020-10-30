@@ -22,3 +22,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailCountResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

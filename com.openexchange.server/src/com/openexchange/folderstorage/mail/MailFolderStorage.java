@@ -161,8 +161,6 @@ import gnu.trove.procedure.TObjectProcedure;
  */
 public final class MailFolderStorage implements FolderStorageFolderModifier<MailFolderImpl>, TrashAwareFolderStorage {
 
-    public static final String OAUTH_REQUEST = "oauthRequest";
-
     private static final String HARD_DELETE = "hardDelete";
 
     private static final String SESSION_PASSWORD = "session.password";
@@ -527,7 +525,17 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
      * @return <code>true</code> in case it is an oauth request, <code>false</code> otherwise
      */
     private boolean isAccessedViaOAuth(StorageParameters params) {
-        return params.getDecorator() != null && params.getDecorator().getBoolProperty(OAUTH_REQUEST);
+        return isAccessedViaOAuth(params.getSession());
+    }
+
+    /**
+     * Checks whether the session is oauth based or not
+     *
+     * @param session The session to check
+     * @return <code>true</code> in case the session is oauth based, <code>false</code> otherwise
+     */
+    private boolean isAccessedViaOAuth(Session session) {
+        return session != null && session.containsParameter(Session.PARAM_IS_OAUTH);
     }
 
     @Override
@@ -2338,7 +2346,9 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
     }
 
     private boolean canConnect(Session session, int accountId) throws OXException {
-        if (accountId != MailAccount.DEFAULT_ID || Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+        if (isAccessedViaOAuth(session) && accountId != MailAccount.DEFAULT_ID) {
+            return false;
+        } else if (accountId != MailAccount.DEFAULT_ID || Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
             return true;
         }
 

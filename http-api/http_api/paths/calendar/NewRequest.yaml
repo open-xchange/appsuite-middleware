@@ -4,8 +4,8 @@
     tags:
       - Calendar
     summary: Creates an appointment.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

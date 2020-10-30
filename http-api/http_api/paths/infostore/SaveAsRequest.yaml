@@ -4,8 +4,9 @@
     tags:
       - Infostore
     summary: Saves an attachment in the infostore.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamAttached'
       - $ref: '#/components/parameters/gblQueryParamAttachmentsFolder'
       - $ref: '#/components/parameters/gblQueryParamAttachmentsModule'

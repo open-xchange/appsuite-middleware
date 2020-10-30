@@ -11,6 +11,15 @@
     description: |
       Creates a new contact. This request cannot add contact images. Therefor it
       is necessary to use the `POST` method.
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ContactData'
+      description: >-
+        A JSON object containing the contact's data. The field id is not
+        included.
+      required: true      
     responses:
       '200':
         description: >
@@ -22,15 +31,10 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ContactUpdateResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ContactData'
-      description: >-
-        A JSON object containing the contact's data. The field id is not
-        included.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              
   post:
     operationId: createContactAdvanced
     tags:
@@ -49,15 +53,6 @@
 
       must be placed in a file field named `file` (see also [File
       uploads](#file-uploads)).
-    responses:
-      '200':
-        description: >
-          A HTML page as described in [File uploads](#file-uploads) containing
-          the object ID of the contact or errors if some occurred.
-        content:
-          text/html:
-            schema:
-              type: string
     requestBody:
       content:
         multipart/form-data:
@@ -77,4 +72,17 @@
                 format: binary
             required:
               - json
-              - file
+              - file      
+    responses:
+      '200':
+        description: >
+          A HTML page as described in [File uploads](#file-uploads) containing
+          the object ID of the contact or errors if some occurred.
+        content:
+          text/html:
+            schema:
+              type: string
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'               

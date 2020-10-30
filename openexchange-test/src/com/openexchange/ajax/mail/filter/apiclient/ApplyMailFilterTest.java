@@ -123,7 +123,7 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
         Assert.assertEquals(1, data.size());
         String matchingMailId = data.get(0).getId();
         // Add a new sieve rule and remember its id
-        MailFilterCreationResponse response = mailfilterapi.createRuleV2(getSessionId(), getRule(), null);
+        MailFilterCreationResponse response = mailfilterapi.createRuleV2(getRule(), null);
         Assert.assertNull(response.getErrorDesc(), response.getError());
         Integer ruleId = rememberSieveRule(response.getData());
 
@@ -134,7 +134,7 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
         Assert.assertEquals("Unexpected amount of mails returned.", 2, allMails.getData().size());
 
         // apply the rule to the new folder
-        MailFilterApplyResponse applyPredefinedRule = mailfilterapi.applyPredefinedRule(getSessionId(), ruleId, null, folderId);
+        MailFilterApplyResponse applyPredefinedRule = mailfilterapi.applyPredefinedRule(ruleId, null, folderId);
         // Check result is ok
         Assert.assertNull(applyPredefinedRule.getErrorDesc(), applyPredefinedRule.getError());
         Assert.assertNotNull(applyPredefinedRule.getData());

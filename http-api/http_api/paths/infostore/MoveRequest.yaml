@@ -4,8 +4,9 @@
     tags:
       - Infostore
     summary: Moves one infoitem to another folder.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
         description: Timestamp of the last update of the infoitem to move.
@@ -50,9 +51,10 @@
     operationId: moveInfoItems
     tags:
       - Infostore
-    summary: Moves one or more infoitems to another folder.
+    summary: Moves one or more infoitems to another folder
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: folder
         description: ID of the destination folder.

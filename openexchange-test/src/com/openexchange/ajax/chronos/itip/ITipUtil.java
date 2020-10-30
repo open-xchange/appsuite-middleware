@@ -453,7 +453,7 @@ public class ITipUtil {
         jsonObject.put(NOTIFY_ACCEPTED_DECLINED_AS_PARTICIPANT, Boolean.toString(notifyAcceptedDeclinedAsParticipant));
         jsonObject.put(NOTIFY_NEW_MODIFIED_DELETED, Boolean.toString(notifyNewModifiedDeleted));
         jsonObject.put(DELETE_INVITATION_MAIL_AFTER_ACTION, Boolean.toString(deleteInvitationMailAfterAction));
-        CommonResponse response = jslobApi.setJSlob(jslobApi.getApiClient().getSession(), jsonObject, "io.ox/calendar", null);
+        CommonResponse response = jslobApi.setJSlob(jsonObject, "io.ox/calendar", null);
         assertNotNull("Response missing!", response);
         assertNull(response.getError());
     }
@@ -472,7 +472,7 @@ public class ITipUtil {
         jsonObject.put(NOTIFY_ACCEPTED_DECLINED_AS_PARTICIPANT, values.get(NOTIFY_ACCEPTED_DECLINED_AS_PARTICIPANT).toString());
         jsonObject.put(NOTIFY_NEW_MODIFIED_DELETED, values.get(NOTIFY_NEW_MODIFIED_DELETED).toString());
         jsonObject.put(DELETE_INVITATION_MAIL_AFTER_ACTION, values.get(DELETE_INVITATION_MAIL_AFTER_ACTION));
-        CommonResponse response = jslobApi.setJSlob(jslobApi.getApiClient().getSession(), jsonObject, "io.ox/calendar", null);
+        CommonResponse response = jslobApi.setJSlob(jsonObject, "io.ox/calendar", null);
         assertNotNull("Response missing!", response);
         assertNull(response.getError());
     }
@@ -486,7 +486,7 @@ public class ITipUtil {
      */
     @SuppressWarnings("unchecked")
     public static Map<Object, Object> getJSLoabForCalendar(JSlobApi jSlobApi) throws ApiException {
-        JSlobsResponse jSlobsResponse = jSlobApi.getJSlobList(jSlobApi.getApiClient().getSession(), Collections.singletonList("io.ox/calendar"), null);
+        JSlobsResponse jSlobsResponse = jSlobApi.getJSlobList(Collections.singletonList("io.ox/calendar"), null);
         assertNotNull(jSlobsResponse);
         assertThat("No error expected!", jSlobsResponse.getError(), nullValue());
         JSlobData data = jSlobsResponse.getData().get(0);

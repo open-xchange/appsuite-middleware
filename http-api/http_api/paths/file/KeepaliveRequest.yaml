@@ -4,13 +4,14 @@
     tags:
       - File
     summary: Updates a file's last access timestamp and keeps it alive.
+    security: 
+        - session: []    
     description: >
       By updating the last access timestamp the file is prevented from being
       deleted from both session and disk
 
       storage.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The ID of the uploaded file whose timestamp should be updated.

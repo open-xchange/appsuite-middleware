@@ -284,7 +284,7 @@ components:
       type: apiKey
       in: query
       name: session
-      description: The default session based security scheme. Used in combination with a session cookie.
+      description: The default security scheme which uses a session ID previously obtained from the login module. Used in combination with a session cookie.
     oauth: 
       type: oauth2
       description: The security scheme for oauth enabled modules of the middleware
@@ -306,12 +306,14 @@ components:
             write_tasks: allows to create, update and delete tasks
             read_reminders: allows read reminders
             write_reminders: allows to update and delete reminders
-
+  responses:
+    $ref: ./components/responses/index.yaml
+    
   schemas: 
-   $ref: ./components/schemas/index.yaml 
+    $ref: ./components/schemas/index.yaml 
 
   parameters: 
-   $ref: ./components/parameters/index.yaml 
+    $ref: ./components/parameters/index.yaml 
 
   requestBodies: 
-   $ref: ./components/requestBodies/index.yaml
+    $ref: ./components/requestBodies/index.yaml

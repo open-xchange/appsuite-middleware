@@ -47,6 +47,13 @@
           the usecount of those groups will be increased.
         schema:
           type: string
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EventData'
+      description: A JSON object containing the event's data.
+      required: true          
     responses:
       '200':
         description: >
@@ -64,13 +71,10 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ChronosCalendarResultResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/EventData'
-      description: A JSON object containing the event's data.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              
   post:
     operationId: createEventWithAttachments
     tags:
@@ -106,22 +110,6 @@
           the usecount of those groups will be increased.
         schema:
           type: string
-    responses:
-      '200':
-        description: >
-          A HTML page containing the newly created event or in case of errors an
-          error object (see [File
-          uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads)
-          as an example).
-
-          If the event could not be created due to conflicts, the HTML Page
-          contains an object with the
-
-          field `conflicts`, which holds informations about the conflict.
-        content:
-          text/html:
-            schema:
-              type: string
     requestBody:
       content:
         multipart/form-data:
@@ -140,4 +128,24 @@
                 format: binary
             required:
               - json_0
-              - file_0
+              - file_0          
+    responses:
+      '200':
+        description: >
+          A HTML page containing the newly created event or in case of errors an
+          error object (see [File
+          uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads)
+          as an example).
+
+          If the event could not be created due to conflicts, the HTML Page
+          contains an object with the
+
+          field `conflicts`, which holds informations about the conflict.
+        content:
+          text/html:
+            schema:
+              type: string
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'

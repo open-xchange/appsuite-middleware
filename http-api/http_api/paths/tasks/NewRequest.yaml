@@ -7,7 +7,14 @@
     security: 
         - session: []      
         - oauth:
-          - write_tasks    
+          - write_tasks 
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TaskData'
+      description: A JSON object containing the task's data.
+      required: true             
     responses:
       '200':
         description: >
@@ -19,10 +26,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/TaskUpdateResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/TaskData'
-      description: A JSON object containing the task's data.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'               

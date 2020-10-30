@@ -76,6 +76,8 @@
         schema:
           type: string
       - $ref: '#/components/parameters/glbQueryParamsAllowEnqueue'
+    requestBody:
+      $ref: '#/components/requestBodies/deleteFoldersBody'      
     responses:
       '200':
         description: >
@@ -96,5 +98,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/FoldersCleanUpResponse'
-    requestBody:
-      $ref: '#/components/requestBodies/deleteFoldersBody'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

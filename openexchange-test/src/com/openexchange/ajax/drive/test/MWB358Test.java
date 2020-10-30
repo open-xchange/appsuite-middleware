@@ -200,7 +200,7 @@ public class MWB358Test extends InfostoreApiClientTest {
      * @throws ApiException
      */
     private String createFile(Integer sharedToUserId, String fileName) throws ApiException {
-        InfoItemUpdateResponse uploadResponse = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, fileName, new byte[] { 34, 45, 35, 23 }, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        InfoItemUpdateResponse uploadResponse = infostoreApi.uploadInfoItem(folderId, fileName, new byte[] { 34, 45, 35, 23 }, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         assertNotNull(uploadResponse);
         assertNull(uploadResponse.getErrorDesc(), uploadResponse.getError());
         String id = uploadResponse.getData();

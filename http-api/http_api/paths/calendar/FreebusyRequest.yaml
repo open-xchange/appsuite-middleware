@@ -2,10 +2,11 @@
   get:
     operationId: getFreeAndBusy
     summary: Gets appointments between a specified time range.
+    security: 
+        - session: []    
     tags:
       - Calendar
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Internal user id. Must be obtained from the contact module.

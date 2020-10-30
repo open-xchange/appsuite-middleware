@@ -127,18 +127,7 @@ public final class ListAction extends AbstractFolderAction {
                 parentId,
                 all,
                 session,
-<<<<<<< HEAD
-                new FolderServiceDecorator()
-                    .setLocale(optLocale(request))
-                    .setTimeZone(Tools.getTimeZone(timeZoneId))
-                    .setAllowedContentTypes(allowedContentTypes)
-                    .put("altNames", request.getParameter("altNames"))
-                    .put("suppressUnifiedMail", isSuppressUnifiedMail(session))
-                    .put("forceRetry",request.getParameter("forceRetry")));
-        //@formatter:off
-=======
-                getDecorator(request));
->>>>>>> a09510fd349 (MW-1431: Enable mail module access via oauth)
+                getDecorator(request).put("forceRetry",request.getParameter("forceRetry")));
         /*
          * Determine max. last-modified time stamp
          */

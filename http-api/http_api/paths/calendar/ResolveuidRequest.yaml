@@ -4,8 +4,9 @@
     tags:
       - Calendar
     summary: Resolves the UID to an OX object ID.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: uid
         description: The UID that shall be resolved.

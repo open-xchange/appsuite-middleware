@@ -275,7 +275,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
     private String getPrivateInfostoreFolder() throws ApiException {
         if (null == privateInfostoreFolder) {
             ConfigApi configApi = new ConfigApi(getApiClient());
-            ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath(), getApiClient().getSession());
+            ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath());
             Object data = checkResponse(configNode);
             if (data != null && !data.toString().equalsIgnoreCase("null")) {
                 privateInfostoreFolder = String.valueOf(data);

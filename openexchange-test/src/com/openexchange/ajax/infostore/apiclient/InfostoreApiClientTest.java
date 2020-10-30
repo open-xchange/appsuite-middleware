@@ -138,7 +138,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
     @After
     public void tearDown() throws Exception {
         if (!fileIds.isEmpty()) {
-            infostoreApi.deleteInfoItems(getApiClient().getSession(), L(new Date().getTime()), fileIds, Boolean.TRUE, null);
+            infostoreApi.deleteInfoItems(L(new Date().getTime()), fileIds, Boolean.TRUE, null);
         }
         if (!folders.isEmpty()) {
             FoldersApi folderApi = new FoldersApi(getApiClient());
@@ -163,7 +163,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
 
     protected String uploadInfoItem(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, String filename) throws ApiException {
         String name = filename == null ? file.getName() : filename;
-        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, name, bytes, timestamp, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, Boolean.FALSE, Boolean.FALSE, offset, null);
+        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(folderId, name, bytes, timestamp, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, Boolean.FALSE, Boolean.FALSE, offset, null);
         Assert.assertNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
         Assert.assertNotNull(uploadInfoItem.getData());
         timestamp = uploadInfoItem.getTimestamp();
@@ -174,25 +174,24 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
         String name = filename == null ? file.getFilename() : filename;
         // @formatter:off
         InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(
-            getApiClient().getSession(), 
-            folderId, 
-            name, 
-            bytes, 
-            timestamp, 
-            id, 
-            name, 
-            mimeType, 
-            null, 
-            null, 
-            null, 
-            null, 
-            versionComment, 
-            null, 
-            null, 
-            filesize == null ? Long.valueOf(bytes.length) : filesize, 
-            Boolean.FALSE, 
-            Boolean.FALSE, 
-            offset, 
+            folderId,
+            name,
+            bytes,
+            timestamp,
+            id,
+            name,
+            mimeType,
+            null,
+            null,
+            null,
+            null,
+            versionComment,
+            null,
+            null,
+            filesize == null ? Long.valueOf(bytes.length) : filesize,
+            Boolean.FALSE,
+            Boolean.FALSE,
+            offset,
             null);
         // @formatter:on
         Assert.assertNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
@@ -246,7 +245,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
     }
 
     protected InfoItemData getItem(String id) throws ApiException {
-        InfoItemResponse infoItem = infostoreApi.getInfoItem(getApiClient().getSession(), id, folderId);
+        InfoItemResponse infoItem = infostoreApi.getInfoItem(id, folderId);
         Assert.assertNull(infoItem.getError());
         Assert.assertNotNull(infoItem.getData());
         return infoItem.getData();
@@ -281,13 +280,11 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
             privateInfostoreFolder = getPrivateInfostoreFolder(getApiClient());
         }
         return privateInfostoreFolder;
-
     }
 
     public String getPrivateInfostoreFolder(ApiClient apiClient) throws ApiException {
-
         ConfigApi configApi = new ConfigApi(apiClient);
-        ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath(), apiClient.getSession());
+        ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath());
         Object data = checkResponse(configNode);
         if (data != null && !data.toString().equalsIgnoreCase("null")) {
             return String.valueOf(data);
@@ -310,7 +307,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
     }
 
     protected void deleteInfoItems(List<InfoItemListElement> toDelete, Boolean hardDelete) throws ApiException {
-        InfoItemsResponse deleteInfoItems = infostoreApi.deleteInfoItems(getApiClient().getSession(), timestamp == null ? L(System.currentTimeMillis()) : timestamp, toDelete, hardDelete, null);
+        InfoItemsResponse deleteInfoItems = infostoreApi.deleteInfoItems(timestamp == null ? L(System.currentTimeMillis()) : timestamp, toDelete, hardDelete, null);
         Assert.assertNull(deleteInfoItems.getError());
         Assert.assertNotNull(deleteInfoItems.getData());
         timestamp = deleteInfoItems.getTimestamp();
@@ -321,7 +318,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
     }
 
     protected String copyInfoItem(String id, InfoItemData modifiedData) throws ApiException {
-        InfoItemUpdateResponse response = infostoreApi.copyInfoItem(getApiClient().getSession(), id, modifiedData, null);
+        InfoItemUpdateResponse response = infostoreApi.copyInfoItem(id, modifiedData, null);
         Assert.assertNull(response.getError());
         Assert.assertNotNull(response.getData());
         timestamp = response.getTimestamp();
@@ -329,7 +326,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
     }
 
     protected List<InfoItemListElement> moveInfoItems(String id, List<InfoItemListElement> toMove) throws ApiException {
-        InfoItemsMovedResponse response = infostoreApi.moveInfoItems(getApiClient().getSession(), id, toMove, null, null);
+        InfoItemsMovedResponse response = infostoreApi.moveInfoItems(id, toMove, null, null);
         Assert.assertNull(response.getError());
         Assert.assertNotNull(response.getData());
         timestamp = response.getTimestamp();
@@ -374,7 +371,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
     }
 
     protected List<InfoItemsRestoreResponseData> restoreInfoItems(List<InfoItemListElement> toRestore) throws ApiException {
-        InfoItemsRestoreResponse restoredItems = infostoreApi.restoreInfoItemsFromTrash(getApiClient().getSession(), toRestore, null);
+        InfoItemsRestoreResponse restoredItems = infostoreApi.restoreInfoItemsFromTrash(toRestore, null);
         Assert.assertNull(restoredItems.getError());
         Assert.assertNotNull(restoredItems.getData());
         timestamp = restoredItems.getTimestamp();
@@ -383,7 +380,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
 
     protected void assertFileExistsInFolder(String folderId, String itemId) throws Exception {
         // @formatter:off
-        InfoItemsResponse allInfoItems = infostoreApi.getAllInfoItems(getApiClient().getSession(),
+        InfoItemsResponse allInfoItems = infostoreApi.getAllInfoItems(
             folderId,
             Integer.toString(Metadata.ID),
             null,
@@ -422,7 +419,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
         file.setObjectPermissions(perms);
         InfoItemBody body = new InfoItemBody();
         body.file(file);
-        InfoItemUpdateResponse resp = infostoreApi.updateInfoItem(getSessionId(), id, timestamp, body, null);
+        InfoItemUpdateResponse resp = infostoreApi.updateInfoItem(id, timestamp, body, null);
         if (errorCode.isPresent()) {
             assertNotNull("Expected an error but the response didn't contain one.", resp.getError());
             assertEquals("Request returned with an unexpected error: " + resp.getErrorDesc(), errorCode.get(), resp.getCode());
@@ -432,10 +429,10 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
         assertNotNull(resp.getData());
         timestamp = resp.getTimestamp();
     }
-    
+
     protected boolean fileExistsInFolder(String fileId, String folderId) throws ApiException {
         InfoItemResponse infoItem = infostoreApi.getInfoItem(getSessionId(), fileId, folderId);
         return infoItem.getError() == null;
     }
-   
+
 }

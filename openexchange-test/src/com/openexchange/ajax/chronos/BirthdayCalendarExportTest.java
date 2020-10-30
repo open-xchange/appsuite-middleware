@@ -63,11 +63,10 @@ public class BirthdayCalendarExportTest extends AbstractImportExportTest {
 
     @Test
     public void testBirthdayCalendarExport() throws Exception {
-        String session = defaultUserApi.getSession();
-        createContactWithBirthdayEvent(session);
+        createContactWithBirthdayEvent();
         String folderId = getBirthdayCalendarFolder();
         //export
-        String ical = importExportManager.exportICalFile(session, folderId);
+        String ical = importExportManager.exportICalFile(folderId);
         assertNotNull(ical);
         assertTrue(ical.contains("Peter Paul Rubens"));
     }

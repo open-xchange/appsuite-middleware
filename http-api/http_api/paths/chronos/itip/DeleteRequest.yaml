@@ -4,8 +4,9 @@
     tags:
       - Chronos
     summary: Deletes an event that has been cancled via iTIP
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: message
         description: The comment the attendee wants to transmit

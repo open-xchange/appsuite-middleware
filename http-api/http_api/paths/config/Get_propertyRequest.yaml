@@ -4,8 +4,9 @@
     tags:
       - Config
     summary: Gets a property of the configuration.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: name
         description: The name of the property to return.

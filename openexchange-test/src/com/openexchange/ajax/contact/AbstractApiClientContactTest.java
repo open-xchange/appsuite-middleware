@@ -119,7 +119,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         contactFolderId = getDefaultFolder(apiClient.getSession(), new FoldersApi(apiClient));
         userId = getUserId();
 
-        UserResponse resp = new UserApi(apiClient).getUser(apiClient.getSession(), String.valueOf(userId));
+        UserResponse resp = new UserApi(apiClient).getUser(String.valueOf(userId));
         assertNull(resp.getErrorDesc(), resp.getError());
         assertNotNull(resp.getData());
         tz = TimeZone.getTimeZone(resp.getData().getTimezone());

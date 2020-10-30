@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appPassword;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static java.lang.Boolean.FALSE;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
@@ -82,6 +83,7 @@ public class MultifactorBypassTest extends AbstractAppPasswordTest {
 
     private MultifactorApi multifactorApi;
     private String deviceId;
+    @SuppressWarnings("hiding")
     private LoginApi loginApi;
 
     @Override
@@ -114,21 +116,20 @@ public class MultifactorBypassTest extends AbstractAppPasswordTest {
         final MultifactorDevice deviceData = new MultifactorDevice();
         deviceData.setProviderName(SMS_PROVIDER_NAME);
         deviceData.setName(SMS_TEST_NAME);
-        deviceData.backup(false);
+        deviceData.backup(FALSE);
         MultifactorDeviceParameters paramters = new MultifactorDeviceParameters();
         paramters.setPhoneNumber(SMS_PHONE_NUMBER);
         deviceData.setParameters(paramters);
 
         // Start registration
-        MultifactorStartRegistrationResponse resp = multifactorApi.multifactorDeviceActionStartRegistration(multifactorApi.getApiClient().getSession(), deviceData);
+        MultifactorStartRegistrationResponse resp = multifactorApi.multifactorDeviceActionStartRegistration(deviceData);
         checkResponse(resp.getError(), resp.getErrorDesc(), resp.getData());
         MultifactorStartRegistrationResponseData respData = resp.getData();
         MultifactorFinishRegistrationData data = new MultifactorFinishRegistrationData();
         data.setSecretCode(SMS_CODE);
         // Finalize
         MultifactorFinishRegistrationResponse finalresp =
-            multifactorApi.multifactorDeviceActionfinishRegistration(
-                multifactorApi.getApiClient().getSession(), SMS_PROVIDER_NAME, respData.getDeviceId(), data);
+            multifactorApi.multifactorDeviceActionfinishRegistration(SMS_PROVIDER_NAME, respData.getDeviceId(), data);
         checkResponse(finalresp.getError(), finalresp.getErrorDesc(), finalresp.getData());
         deviceId = respData.getDeviceId();
     }
@@ -137,7 +138,7 @@ public class MultifactorBypassTest extends AbstractAppPasswordTest {
         if (deviceId != null) {
             try {
                 getApiClient().logout();
-            } catch (ApiException ex) {
+            } catch (@SuppressWarnings("unused") ApiException ex) {
                 // May need to log out if hadn't completed test
             }
             // We need to log in the main testuser for cleanup
@@ -146,10 +147,10 @@ public class MultifactorBypassTest extends AbstractAppPasswordTest {
             // Authenticated against sms so we can cleanup
             MultifactorFinishAuthenticationData data = new MultifactorFinishAuthenticationData();
             data.setSecretCode(SMS_CODE);
-            multifactorApi.multifactorDeviceActionStartAuthentication(getSessionId(), SMS_PROVIDER_NAME, deviceId);
-            multifactorApi.multifactorDeviceActionfinishAuthentication(getSessionId(), SMS_PROVIDER_NAME, deviceId, data);
+            multifactorApi.multifactorDeviceActionStartAuthentication(SMS_PROVIDER_NAME, deviceId);
+            multifactorApi.multifactorDeviceActionfinishAuthentication(SMS_PROVIDER_NAME, deviceId, data);
             // Delete the device
-            multifactorApi.multifactorDeviceActionDelete(getSessionId(), SMS_PROVIDER_NAME, deviceId);
+            multifactorApi.multifactorDeviceActionDelete(SMS_PROVIDER_NAME, deviceId);
         }
     }
 
@@ -166,12 +167,12 @@ public class MultifactorBypassTest extends AbstractAppPasswordTest {
 
         // Check that the normal login requires multifactor
 
-        LoginResponse login = loginApi.doLogin(testUser.getLogin(), testUser.getPassword(), null, null, null, null, null, null, null, false);
-        assertThat("Requires multifactor", login.getRequiresMultifactor());
+        LoginResponse login = loginApi.doLogin(testUser.getLogin(), testUser.getPassword(), null, null, null, null, null, null, null, FALSE);
+        assertThat("Requires multifactor", login.getRequiresMultifactor().booleanValue());
         loginApi.doLogout(login.getSession());
 
         // Now, check that our new app specific password does not
-        login = loginApi.doLogin(loginData.getLogin(), loginData.getPassword(), null, null, null, "mobile-something", null, null, null, false);
+        login = loginApi.doLogin(loginData.getLogin(), loginData.getPassword(), null, null, null, "mobile-something", null, null, null, FALSE);
         checkResponse(login.getError(), login.getErrorDesc(), login);
         assertThat("Doesn't require multifactor", login.getRequiresMultifactor() == null);
         loginApi.doLogout(login.getSession());

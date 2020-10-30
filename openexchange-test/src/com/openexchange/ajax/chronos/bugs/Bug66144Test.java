@@ -103,7 +103,7 @@ public class Bug66144Test extends AbstractChronosTest {
         /*
          * retrieve free/busy period for working hours on next monday morning
          */
-        UserData userData = new UserApi(getApiClient()).getUser(getSessionId(), null).getData();
+        UserData userData = new UserApi(getApiClient()).getUser(null).getData();
         String from = formatAsUTC(TimeTools.D("next monday at 09:00", TimeZone.getTimeZone(userData.getTimezone())));
         String until = formatAsUTC(TimeTools.D("next monday at 17:00", TimeZone.getTimeZone(userData.getTimezone())));
         Attendee attendee = new Attendee().entity(getApiClient().getUserId()).cuType(CuTypeEnum.INDIVIDUAL);

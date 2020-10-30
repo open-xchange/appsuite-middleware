@@ -8,6 +8,15 @@
         - session: [] 
         - oauth:
           - write_mailaccounts     
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MailAccountData'
+      description: >-
+        A JSON object identifying (by field `id`) and describing the account to
+        update. Only modified fields are present.
+      required: true
     responses:
       '200':
         description: >
@@ -19,12 +28,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailAccountUpdateResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/MailAccountData'
-      description: >-
-        A JSON object identifying (by field `id`) and describing the account to
-        update. Only modified fields are present.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'        

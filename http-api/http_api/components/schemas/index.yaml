@@ -641,6 +641,8 @@ OAuthClientData:
   $ref: ./oauth/grants/OAuthClientData.yaml
 OAuthGrantsResponse:
   $ref: ./oauth/grants/OAuthGrantsResponse.yaml
+OAuthErrorResponse:
+  $ref: ./oauth/errors/OAuthErrorResponse.yaml
 # Module: JSlob
 JSlobData:
   $ref: ./jslob/JSlobData.yaml

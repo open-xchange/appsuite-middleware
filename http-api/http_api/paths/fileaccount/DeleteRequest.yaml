@@ -4,8 +4,9 @@
     tags:
       - Filestorage
     summary: Deletes a file storage account.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: filestorageService
         description: The identifier of the file storage service the account belongs to.

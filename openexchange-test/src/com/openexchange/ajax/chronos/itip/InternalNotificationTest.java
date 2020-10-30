@@ -129,7 +129,7 @@ public class InternalNotificationTest extends AbstractITipAnalyzeTest {
         apiClient2C1 = generateApiClient(testUser2);
         rememberClient(apiClient2C1);
         UserApi userApi = new UserApi(apiClient2C1);
-        userResponse2C1 = userApi.getUser(apiClient2C1.getSession(), String.valueOf(apiClient2C1.getUserId()));
+        userResponse2C1 = userApi.getUser(String.valueOf(apiClient2C1.getUserId()));
         if (null == userResponse2C1) {
             throw new IllegalDataException("Need user info for test!");
         }

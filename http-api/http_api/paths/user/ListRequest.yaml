@@ -3,9 +3,10 @@
     operationId: getUserList
     tags:
       - User
-    summary: Gets a list of users.
+    summary: Gets a list of users
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamUserColumns'
     responses:
       '200':

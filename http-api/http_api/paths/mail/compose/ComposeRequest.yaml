@@ -1,11 +1,11 @@
 /mail/compose:
-  parameters:
-    - $ref: '#/components/parameters/gblQueryParamSession'
   post:
     operationId: postMailCompose
     tags:
       - MailCompose
     summary: Create a new composition space
+    security: 
+      - session: []    
     description: >-
       For any types but "new", the response provides ready-to-use values, e.g.
       to, cc, bcc, subject with prefix, attachments. Internally all mime headers
@@ -65,6 +65,8 @@
     tags:
       - MailCompose
     summary: Get all open spaces
+    security: 
+      - session: []       
     description: Returns a JSON array of compositions spaces
     parameters:
       - name: columns

@@ -92,7 +92,6 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
-import com.openexchange.folderstorage.mail.MailFolderStorage;
 import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.mail.contentType.SentContentType;
@@ -205,8 +204,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                                            .setTimeZone(timeZone)
                                            .setAllowedContentTypes(allowedContentTypes)
                                            .put(sAltNames, altNames)
-                                           .put(sSuppressUnifiedMail, suppressUnifiedMail)
-                                           .put(MailFolderStorage.OAUTH_REQUEST, Boolean.valueOf(isOAuthRequest(request)));
+                                           .put(sSuppressUnifiedMail, suppressUnifiedMail);
         // @formatter:on
     }
 

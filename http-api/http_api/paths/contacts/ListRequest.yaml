@@ -10,6 +10,8 @@
           - read_contacts    
     parameters:
       - $ref: '#/components/parameters/gblQueryParamContactColumns'
+    requestBody:
+      $ref: '#/components/requestBodies/ContactListElementArray'      
     responses:
       '200':
         description: >
@@ -27,5 +29,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ContactsResponse'
-    requestBody:
-      $ref: '#/components/requestBodies/ContactListElementArray'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

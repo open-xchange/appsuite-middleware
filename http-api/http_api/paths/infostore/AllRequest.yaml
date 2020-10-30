@@ -4,8 +4,9 @@
     tags:
       - Infostore
     summary: Gets all infoitems.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamInfostoreFolder'
       - $ref: '#/components/parameters/gblQueryParamInfostoreColumns'
       - in: query

@@ -4,8 +4,8 @@
     tags:
       - Autoconfig
     summary: Gets the auto configuration for a mail account.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

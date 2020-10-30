@@ -47,18 +47,6 @@
         schema:
           type: string
       - $ref: '#/components/parameters/QueryParamChronosExpand'
-    responses:
-      '200':
-        description: >
-          A JSON object containing containing the result of the update. In case
-          of errors the
-
-          responsible fields in the response are filled (see [Error
-          handling](#error-handling)).
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChronosCalendarResultResponse'
     requestBody:
       content:
         application/json:
@@ -74,4 +62,21 @@
                 items:
                   $ref: '#/components/schemas/Alarm'
       description: A JSON object with the field `attendee` and `alarms`.
-      required: true
+      required: true      
+    responses:
+      '200':
+        description: >
+          A JSON object containing containing the result of the update. In case
+          of errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChronosCalendarResultResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              
+

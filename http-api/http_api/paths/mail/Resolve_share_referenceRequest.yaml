@@ -7,7 +7,14 @@
     security: 
         - session: []      
         - oauth:
-          - read_mails    
+          - read_mails 
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResolveShareReferenceElement'
+      description: A JSON object providing the share reference to resolve
+      required: true             
     responses:
       '200':
         description: >
@@ -19,10 +26,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ResolveShareReferenceResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ResolveShareReferenceElement'
-      description: A JSON object providing the share reference to resolve
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

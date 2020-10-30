@@ -4,8 +4,9 @@
     tags:
       - Mail_categories
     summary: Moves mails to the given category
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: category_id
         description: The identifier of a category.

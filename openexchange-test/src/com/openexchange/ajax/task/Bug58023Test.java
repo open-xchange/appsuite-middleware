@@ -98,7 +98,7 @@ public class Bug58023Test extends AbstractAPIClientSession {
 
     public String getPrivateTaskFolder() throws ApiException {
         ConfigApi configApi = new ConfigApi(apiClient);
-        ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateTaskFolder.getPath(), apiClient.getSession());
+        ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateTaskFolder.getPath());
         Object data = checkResponse(configNode);
         return String.valueOf(data);
     }

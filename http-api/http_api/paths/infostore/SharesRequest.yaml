@@ -4,8 +4,9 @@
     tags:
       - Infostore
     summary: Gets shared infoitems.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamInfostoreColumns'
       - in: query
         name: sort

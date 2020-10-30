@@ -39,17 +39,6 @@
             - audio
             - video
             - application
-    responses:
-      '200':
-        description: >
-          A HTML page as described in [File uploads](#file-uploads) containing a
-          JSON object with the ID of
-
-          the updated snippet or errors if some occurred.
-        content:
-          text/html:
-            schema:
-              type: string
     requestBody:
       content:
         multipart/form-data:
@@ -62,4 +51,19 @@
                 type: string
                 format: binary
             required:
-              - file
+              - file            
+    responses:
+      '200':
+        description: >
+          A HTML page as described in [File uploads](#file-uploads) containing a
+          JSON object with the ID of
+
+          the updated snippet or errors if some occurred.
+        content:
+          text/html:
+            schema:
+              type: string
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

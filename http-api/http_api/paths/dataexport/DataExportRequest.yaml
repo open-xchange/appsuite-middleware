@@ -3,9 +3,12 @@
     operationId: getDataExport
     tags:
       - DataExport
-    summary: Downloads the available result file package from user-associated data export task
+    summary: Downloads the available result 
+    description: >-
+      Downloads the available result file package from user-associated data export task.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: path
         name: id
         description: The ID of the composition space

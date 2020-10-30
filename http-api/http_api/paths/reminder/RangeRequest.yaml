@@ -39,3 +39,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/RemindersResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

@@ -4,8 +4,9 @@
     tags:
       - Mailfilter
     summary: Applies a predefined rule to the given mail folder
+    security: 
+      - session: []
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: username
         description: Must contain the user name for **admin mode**. So the normal credentials are taken for authentication but the mail filter of the user with this username is being changed.
@@ -38,8 +39,9 @@
     tags:
       - Mailfilter
     summary: Applies a given rule to the given mail folder
+    security: 
+      - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: username
         description: Must contain the user name for **admin mode**. So the normal credentials are taken for authentication but the mail filter of the user with this username is being changed.

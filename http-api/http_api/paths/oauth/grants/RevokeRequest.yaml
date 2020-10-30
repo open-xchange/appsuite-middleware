@@ -4,8 +4,9 @@
     tags:
       - OAuth
     summary: Revokes access for an OAuth client.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: client
         description: The ID of the client whose access shall be revoked.

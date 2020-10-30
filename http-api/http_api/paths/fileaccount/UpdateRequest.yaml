@@ -4,8 +4,8 @@
     tags:
       - Filestorage
     summary: Updates a file storage account.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >-

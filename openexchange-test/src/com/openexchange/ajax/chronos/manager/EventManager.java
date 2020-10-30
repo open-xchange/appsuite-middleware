@@ -411,7 +411,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public byte[] getAttachment(String eventId, int attachmentId, String folderId) throws ApiException {
-        byte[] eventAttachment = userApi.getChronosApi().getEventAttachment(userApi.getSession(), eventId, folderId, I(attachmentId));
+        byte[] eventAttachment = userApi.getChronosApi().getEventAttachment(eventId, folderId, I(attachmentId));
         assertNotNull(eventAttachment);
         return eventAttachment;
     }
@@ -433,7 +433,7 @@ public class EventManager extends AbstractManager {
         for (int attachmentId : attachmentIds) {
             attachIds.add(Integer.toString(attachmentId));
         }
-        byte[] zippedAttachments = userApi.getChronosApi().getZippedEventAttachments(userApi.getSession(), eventId, folderId, attachIds);
+        byte[] zippedAttachments = userApi.getChronosApi().getZippedEventAttachments(eventId, folderId, attachIds);
         assertNotNull(zippedAttachments);
         return zippedAttachments;
     }
@@ -784,7 +784,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public EventData acknowledgeAlarm(String eventId, int alarmId, String folderId) throws ApiException {
-        ChronosCalendarResultResponse acknowledgeAlarm = userApi.getChronosApi().acknowledgeAlarm(userApi.getSession(), eventId, folderId != null ? folderId : defaultFolder, I(alarmId), Boolean.FALSE, null, null);
+        ChronosCalendarResultResponse acknowledgeAlarm = userApi.getChronosApi().acknowledgeAlarm(eventId, folderId != null ? folderId : defaultFolder, I(alarmId), Boolean.FALSE, null, null);
         CalendarResult checkResponse = checkResponse(acknowledgeAlarm.getError(), acknowledgeAlarm.getErrorDesc(), acknowledgeAlarm.getCategories(), acknowledgeAlarm.getData());
         assertEquals(1, checkResponse.getUpdated().size());
         EventData updated = checkResponse.getUpdated().get(0);
@@ -805,7 +805,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public EventData snoozeAlarm(String eventId, int alarmId, long snoozeTime, String folderId) throws ApiException {
-        ChronosCalendarResultResponse snoozeResponse = userApi.getChronosApi().snoozeAlarm(userApi.getSession(), eventId, folderId != null ? folderId : defaultFolder, I(alarmId), L(snoozeTime), Boolean.FALSE, null, null);
+        ChronosCalendarResultResponse snoozeResponse = userApi.getChronosApi().snoozeAlarm(eventId, folderId != null ? folderId : defaultFolder, I(alarmId), L(snoozeTime), Boolean.FALSE, null, null);
         CalendarResult snoozeResult = checkResponse(snoozeResponse.getError(), snoozeResponse.getErrorDesc(), snoozeResponse.getCategories(), snoozeResponse.getData());
         assertEquals(1, snoozeResult.getUpdated().size());
         EventData updatedEvent = snoozeResult.getUpdated().get(0);
@@ -836,7 +836,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public List<AlarmTrigger> getAlarmTrigger(long until, String actions) throws ApiException {
-        AlarmTriggerResponse triggerResponse = userApi.getChronosApi().getAlarmTrigger(userApi.getSession(), DateTimeUtil.getZuluDateTime(until).getValue(), DateTimeUtil.getZuluDateTime(0).getValue(), actions);
+        AlarmTriggerResponse triggerResponse = userApi.getChronosApi().getAlarmTrigger(DateTimeUtil.getZuluDateTime(until).getValue(), DateTimeUtil.getZuluDateTime(0).getValue(), actions);
         return checkResponse(triggerResponse.getError(), triggerResponse.getErrorDesc(), triggerResponse.getCategories(), triggerResponse.getData());
     }
 

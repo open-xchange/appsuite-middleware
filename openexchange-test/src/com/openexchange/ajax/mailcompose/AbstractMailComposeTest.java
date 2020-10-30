@@ -126,9 +126,9 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         attachment = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         attachment2 = new File(TestInit.getTestProperty("provisioningFile"));
 
-        MailComposeGetResponse allSpaces = api.getMailCompose(getSessionId(), null);
-        for (MailComposeResponseMessageModel model : allSpaces.getData()) {
-            api.deleteMailComposeById(getSessionId(), model.getId(), null);
+        MailComposeGetResponse allSpaces = api.getMailCompose(null);
+        for (MailComposeMessageModel model : allSpaces.getData()) {
+            api.deleteMailComposeById(model.getId());
         }
     }
 
@@ -137,7 +137,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         if (null != compositionSpaceIds && compositionSpaceIds.size() > 0) {
             for (String id : compositionSpaceIds) {
                 try {
-                    api.deleteMailComposeById(getSessionId(), id, null);
+                    api.deleteMailComposeById(id, null);
                 } catch (ApiException e) {
                     // Space was already deleted, ignore...
                 }
@@ -192,7 +192,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
     }
 
     protected MailComposeResponseMessageModel createNewCompositionSpace() throws Exception {
-        MailComposeResponse response = api.postMailCompose(getSessionId(), null, null, null, null);
+        MailComposeResponse response = api.postMailCompose(null, null, null, null);
         assertTrue(response.getErrorDesc(), Strings.isEmpty(response.getError()));
         MailComposeResponseMessageModel data = response.getData();
         compositionSpaceIds.add(data.getId());

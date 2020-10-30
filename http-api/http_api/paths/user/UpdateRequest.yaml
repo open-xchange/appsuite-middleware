@@ -3,9 +3,10 @@
     operationId: updateUser
     tags:
       - User
-    summary: Updates a user.
+    summary: Updates a user
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Object ID of the requested user.

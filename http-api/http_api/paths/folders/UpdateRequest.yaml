@@ -53,6 +53,22 @@
           type: string
       - $ref: '#/components/parameters/QueryParamFolderAutoRename'
       - $ref: '#/components/parameters/glbQueryParamsIgnoreWarnings'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FolderBody'
+      description: >
+        JSON object with "folder" object containing the modified fields and
+        optional "notification"
+
+        object to let added permission entities be notified about newly shared
+        folders for all modules
+
+        except mail. (Example: {"folder":{"title":"test123"}} or
+        {"folder":{"permissions":[{"bits":403710016,"entity":84,"group":false}]},"notification":{"transport":"mail","message":"The
+        message"}})
+      required: true      
     responses:
       '200':
         description: >-
@@ -74,19 +90,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/GetJobResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/FolderBody'
-      description: >
-        JSON object with "folder" object containing the modified fields and
-        optional "notification"
-
-        object to let added permission entities be notified about newly shared
-        folders for all modules
-
-        except mail. (Example: {"folder":{"title":"test123"}} or
-        {"folder":{"permissions":[{"bits":403710016,"entity":84,"group":false}]},"notification":{"transport":"mail","message":"The
-        message"}})
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

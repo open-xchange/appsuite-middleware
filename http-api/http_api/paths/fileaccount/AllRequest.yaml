@@ -4,8 +4,9 @@
     tags:
       - Filestorage
     summary: Gets all file storage accounts.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: filestorageService
         description: >-

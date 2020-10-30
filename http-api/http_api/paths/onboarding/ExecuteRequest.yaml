@@ -3,11 +3,13 @@
     operationId: executeClientOnboarding
     tags:
       - Clientonboarding
-    summary: >-
+    summary: Performs a on-boarding action
+    security: 
+        - session: []    
+    description: >-
       Performs a certain client on-boarding action for a given device and
       scenario; e.g. download a profile or send an E-Mail/SMS
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: >-

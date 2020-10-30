@@ -4,8 +4,9 @@
     tags:
       - Infostore
     summary: Deletes infoitems.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
         description: Timestamp of the last update of the infoitems to delete.

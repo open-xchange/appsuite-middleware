@@ -129,7 +129,7 @@ public class AbstractAppPasswordTest extends AbstractConfigAwareAPIClientSession
      * @throws ApiException
      */
     protected List<AppPassword> getList() throws ApiException {
-        AppPasswordListResponse response = appSpecApi.listApplicationPassword(getSessionId());
+        AppPasswordListResponse response = appSpecApi.listApplicationPassword();
         return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
     }
 
@@ -137,12 +137,11 @@ public class AbstractAppPasswordTest extends AbstractConfigAwareAPIClientSession
      * Get list of applications
      * AppPasswordGetAppsResponsegetApps
      *
-     * @param session
      * @return
      * @throws ApiException
      */
-    protected List<AppPasswordApplication> getApps(String session) throws ApiException {
-        AppPasswordGetAppsResponse response = appSpecApi.getApplications(session);
+    protected List<AppPasswordApplication> getApps() throws ApiException {
+        AppPasswordGetAppsResponse response = appSpecApi.getApplications();
         return response.getData();
     }
 
@@ -154,7 +153,7 @@ public class AbstractAppPasswordTest extends AbstractConfigAwareAPIClientSession
      * @throws ApiException
      */
     protected AppPasswordRegistrationResponseData addPassword(String appType) throws ApiException {
-        AppPasswordRegistrationResponse resp = appSpecApi.addApplicationPassword(getSessionId(), appType, "Test");
+        AppPasswordRegistrationResponse resp = appSpecApi.addApplicationPassword(appType, "Test");
         return checkResponse(resp.getError(), resp.getErrorDesc(), resp.getData());
     }
 
@@ -165,7 +164,7 @@ public class AbstractAppPasswordTest extends AbstractConfigAwareAPIClientSession
      * @throws ApiException
      */
     protected void removePassword(String uuid) throws ApiException {
-        appSpecApi.removeApplicationPassword(getSessionId(), uuid);
+        appSpecApi.removeApplicationPassword(uuid);
     }
 
     /**
@@ -174,7 +173,7 @@ public class AbstractAppPasswordTest extends AbstractConfigAwareAPIClientSession
      * @throws ApiException
      */
     protected void removeAll() throws ApiException {
-        List<AppPassword> passwords = appSpecApi.listApplicationPassword(getSessionId()).getData();
+        List<AppPassword> passwords = appSpecApi.listApplicationPassword().getData();
         for (AppPassword password : passwords) {
             removePassword(password.getUUID());
         }

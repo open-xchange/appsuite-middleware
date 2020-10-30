@@ -3,12 +3,13 @@
     operationId: getUserAttribute
     tags:
       - User
-    summary: Gets a user attribute.
+    summary: Gets a user attribute
+    security: 
+        - session: []    
     description: >-
       Gets a custom user attribute that was previously set with the
       `/user?action=setAttribute` request.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The ID of the user.

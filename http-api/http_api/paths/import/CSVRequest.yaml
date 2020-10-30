@@ -4,6 +4,8 @@
     tags:
       - Import
     summary: Imports contact data from CSV file.
+    security: 
+        - session: []    
     description: >
       #### Example CSV
 
@@ -26,7 +28,6 @@
 
       for a mapping of fields to CSV column titles.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/glbQueryParamsAllowEnqueue'
       - in: query
         name: folder

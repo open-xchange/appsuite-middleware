@@ -4,6 +4,8 @@
     tags:
       - Find
     summary: Performs the actual search and returns the found items.
+    security: 
+        - session: []    
     description: >
       Before querying the search you should fetch the search filters (facets) by
       calling the
@@ -22,7 +24,6 @@
       We call those "active facets". Their representation is independent from
       their style.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: module
         description: >

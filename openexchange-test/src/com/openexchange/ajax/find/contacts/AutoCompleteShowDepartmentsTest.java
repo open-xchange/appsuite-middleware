@@ -168,7 +168,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
     private void prepareUser(TestUser testUser, String department) throws ApiException {
         ApiClient client = clients.get(testUser.getUser());
         UserApi userApi = new UserApi(client);
-        CommonResponse response = userApi.updateUser(client.getSession(), client.getUserId().toString(), L(System.currentTimeMillis()), createUpdateBody(department));
+        CommonResponse response = userApi.updateUser(client.getUserId().toString(), L(System.currentTimeMillis()), createUpdateBody(department));
         assertNull(response.getErrorDesc(), response.getError());
     }
 
@@ -181,7 +181,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
         for (String key : randomUsers) {
             ApiClient client = clients.get(key);
             UserApi userApi = new UserApi(client);
-            userApi.updateUser(client.getSession(), client.getUserId().toString(), L(System.currentTimeMillis()), createUpdateBody(""));
+            userApi.updateUser(client.getUserId().toString(), L(System.currentTimeMillis()), createUpdateBody(""));
         }
         super.tearDown();
     }
@@ -203,7 +203,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
         body.setPrefix("*"); // Check all users
         body.setOptions(options);
 
-        FindAutoCompleteResponse response = findApi.doAutoComplete(apiClient.getSession(), CONTACTS_MODULE, body, RESULTS_LIMIT);
+        FindAutoCompleteResponse response = findApi.doAutoComplete(CONTACTS_MODULE, body, RESULTS_LIMIT);
         FindAutoCompleteData data = response.getData();
         List<FindFacetValue> values = null;
         for (FindFacetData findFacetData : data.getFacets()) {
@@ -231,7 +231,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
     public void testJslob() throws ApiException, JSONException {
         JSlobApi slobApi = new JSlobApi(apiClient);
 
-        JSlobsResponse response = slobApi.getJSlobList(apiClient.getSession(), Collections.singletonList(CONTACTS_JSLOB), null);
+        JSlobsResponse response = slobApi.getJSlobList(Collections.singletonList(CONTACTS_JSLOB), null);
         List<JSlobData> data = response.getData();
         assertEquals("Expected 1 jslob data object for '" + CONTACTS_JSLOB + "'", 1, data.size());
 

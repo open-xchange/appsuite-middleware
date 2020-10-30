@@ -23,6 +23,13 @@
         schema:
           type: integer
           format: int64
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TaskConfirmationBody'
+      description: A JSON object with the fields `confirmation` and `confirmmessage`.
+      required: true          
     responses:
       '200':
         description: >
@@ -37,10 +44,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/CommonResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/TaskConfirmationBody'
-      description: A JSON object with the fields `confirmation` and `confirmmessage`.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'                

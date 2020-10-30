@@ -11,17 +11,6 @@
     parameters:
       - $ref: '#/components/parameters/QueryParamChronosFields'
       - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
-    responses:
-      '200':
-        description: >
-          A JSON object containing an array with events. In case of errors the
-          responsible fields in the
-
-          response are filled (see [Error handling](#error-handling)).
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EventsResponse'
     requestBody:
       content:
         application/json:
@@ -33,3 +22,18 @@
         A JSON array of JSON objects with the id and optionally the recurrence
         position of the event.
       required: true
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array with events. In case of errors the
+          responsible fields in the
+
+          response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventsResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'        

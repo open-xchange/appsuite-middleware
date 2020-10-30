@@ -3,9 +3,11 @@
     operationId: postMailComposeSend
     tags:
       - MailCompose
-    summary: Send message. Space gets deleted. Optionally deletes draft if referenced.
+    summary: Send message
+    description: Space gets deleted. Optionally deletes draft if referenced.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: path
         name: id
         description: The ID of the composition space

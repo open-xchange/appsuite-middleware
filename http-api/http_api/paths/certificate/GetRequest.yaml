@@ -4,9 +4,10 @@
     tags:
       - Certificate
     summary: Gets a specific or all SSL certificates
+    security: 
+        - session: []    
     description: Gets a specific or all SSL certificates
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: fingerprint
         description: The fingerprint of the SSL certificate

@@ -123,7 +123,7 @@ public class PermissionTest extends AbstractAppPasswordTest {
         try {
             InfostoreApi driveApi = new InfostoreApi(client);
             int folder = getClient().getValues().getPrivateInfostoreFolder();
-            InfoItemsResponse resp = driveApi.getAllInfoItems(getSessionId(), Integer.toString(folder), "1,2,3", "702", "asc", I(-9), I(201), I(10), Boolean.FALSE);
+            InfoItemsResponse resp = driveApi.getAllInfoItems(Integer.toString(folder), "1,2,3", "702", "asc", I(-9), I(201), I(10), Boolean.FALSE);
             return resp.getError() == null;
         } catch (OXException | IOException | JSONException e) {
             throw new ApiException(e.getMessage());
@@ -182,7 +182,7 @@ public class PermissionTest extends AbstractAppPasswordTest {
     @Test
     public void testPermissions() throws ApiException {
 
-        List<AppPasswordApplication> apps = getApps(this.getSessionId());
+        List<AppPasswordApplication> apps = getApps();
         assertThat(I(apps.size()), greaterThan(I(1)));
         String origLogin = testUser.getLogin();
         String origPassword = testUser.getPassword();

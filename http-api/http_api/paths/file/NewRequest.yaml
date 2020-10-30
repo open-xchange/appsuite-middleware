@@ -4,13 +4,14 @@
     tags:
       - File
     summary: Uploads a file.
+    security: 
+        - session: []    
     description: >
       It can be uploaded multiple files at once. Each file must be specified in
       an own form field
 
       (the form field name is arbitrary).
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: module
         description: >-

@@ -15,6 +15,17 @@
         required: true
         schema:
           type: string
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/SnippetAttachmentListElement'
+      description: >-
+        A JSON array with JSON objects each containing a field `id` with the
+        identifier of an attachment that shall be removed.
+      required: true          
     responses:
       '200':
         description: >
@@ -26,14 +37,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/SnippetUpdateResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/SnippetAttachmentListElement'
-      description: >-
-        A JSON array with JSON objects each containing a field `id` with the
-        identifier of an attachment that shall be removed.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

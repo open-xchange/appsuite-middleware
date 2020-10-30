@@ -7,7 +7,18 @@
     security:
       - session: []     
       - oauth:
-        - write_reminders     
+        - write_reminders
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ReminderListElement'
+      description: >-
+        A JSON array with JSON objects containing the field `id` of the
+        reminders to delete.
+      required: true             
     responses:
       '200':
         description: >
@@ -20,14 +31,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/RemindersResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/ReminderListElement'
-      description: >-
-        A JSON array with JSON objects containing the field `id` of the
-        reminders to delete.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

@@ -3,9 +3,9 @@
     operationId: createResource
     tags:
       - Resources
-    summary: Creates a resource.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    summary: Creates a resource
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

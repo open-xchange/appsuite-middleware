@@ -67,7 +67,7 @@ public class GetSessionsTest extends AbstractSessionManagementTest {
 
     @Test
     public void testGetSessions() throws Exception {
-        AllSessionsResponse response = getApi().all(apiClient.getSession());
+        AllSessionsResponse response = getApi().all();
         Collection<SessionManagementData> sessions = response.getData();
         assertEquals(2, sessions.size());
         for (SessionManagementData session : sessions) {

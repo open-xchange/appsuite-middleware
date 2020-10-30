@@ -4,13 +4,14 @@
     tags:
       - Infostore
     summary: Deletes versions of an infoitem.
+    security: 
+        - session: []    
     description: >
       #### Note
 
       When the current version of a document is deleted the new current version
       will be the latest version.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The ID of the base object.

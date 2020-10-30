@@ -17,6 +17,14 @@
         required: false
         schema:
           type: string
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: string
+      description: A JSON array containing the identifiers of the snippets to delete.          
     responses:
       '200':
         description: >-
@@ -26,11 +34,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/CommonResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              type: string
-      description: A JSON array containing the identifiers of the snippets to delete.
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

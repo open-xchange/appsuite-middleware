@@ -113,7 +113,7 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
 
     private String getPrivateInfostoreFolder() throws Exception {
         ConfigApi configApi = new ConfigApi(quotaApiClient);
-        ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath(), quotaApiClient.getSession());
+        ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath());
         return ((Integer) configNode.getData()).toString();
     }
 

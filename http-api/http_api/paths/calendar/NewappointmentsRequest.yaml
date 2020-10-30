@@ -4,8 +4,9 @@
     tags:
       - Calendar
     summary: Gets new appointments.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamCalendarColumns'
       - in: query
         name: start

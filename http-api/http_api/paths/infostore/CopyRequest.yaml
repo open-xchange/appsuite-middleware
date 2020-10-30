@@ -4,11 +4,12 @@
     tags:
       - Infostore
     summary: Copies an infoitem.
+    security: 
+        - session: []    
     description: >
       This request cannot change or add files. Therefore it is necessary to use
       the `POST` method.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Object ID of the infoitem that shall be copied.
@@ -46,6 +47,8 @@
     tags:
       - Infostore
     summary: Copies an infoitem.
+    security: 
+        - session: []    
     description: >
       Copies an infoitem's data with the possibility to change the file. The
       normal request body must be placed as form-data using the
@@ -56,7 +59,6 @@
       must be placed in a file field named `file` (see also [File
       uploads](#file-uploads)).
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Object ID of the infoitem that shall be copies.

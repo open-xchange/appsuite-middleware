@@ -16,6 +16,15 @@
         schema:
           type: integer
           format: int64
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ReminderUpdateBody'
+      description: >-
+        A JSON object containing the field `alarm` which provides the new
+        reminder date.
+      required: true          
     responses:
       '200':
         description: >
@@ -27,12 +36,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ReminderResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ReminderUpdateBody'
-      description: >-
-        A JSON object containing the field `alarm` which provides the new
-        reminder date.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

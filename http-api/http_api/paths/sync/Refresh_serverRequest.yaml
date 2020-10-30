@@ -3,7 +3,9 @@
     operationId: clearFoldersSynced
     tags:
       - Sync
-    summary: Clears a folder's content.
+    summary: Clears a folder's content
+    security: 
+        - session: []    
     description: >
       #### Note
 
@@ -12,8 +14,6 @@
 
       request since if any exception occurs (e.g. missing permissions) the
       complete request is going to be aborted.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >

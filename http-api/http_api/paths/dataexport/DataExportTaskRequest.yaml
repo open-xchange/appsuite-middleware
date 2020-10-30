@@ -4,8 +4,8 @@
     tags:
       - DataExport
     summary: Loads the available data export task for session-associated user
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: A JSON object containing the requested data export task.
@@ -22,8 +22,8 @@
     tags:
       - DataExport
     summary: Cancels the data export for session-associated user
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: A JSON object containing the success status.
@@ -47,8 +47,9 @@
     tags:
       - DataExport
     summary: Submits a data export task for execution
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: deleteOldDataExport
         description: A flag indicating whether previously completed data export is supposed to be deleted prior to submitting a new one.

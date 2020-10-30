@@ -163,7 +163,7 @@ public class RestoreTest extends InfostoreApiClientTest {
         String folderId = restoredItem.getPath().get(0).getId();
 
         //Get all items in the restored folder
-        InfoItemsResponse getRestoredResponse = infostoreApi.getAllInfoItems(apiClient.getSession(),
+        InfoItemsResponse getRestoredResponse = infostoreApi.getAllInfoItems(
             folderId,
             Integer.toString(Metadata.FILENAME),
             null, null, null, null, null, null);
@@ -208,7 +208,7 @@ public class RestoreTest extends InfostoreApiClientTest {
         String folderId = restoredItem.getPath().get(0).getId();
 
         //Get all items in the restored folder
-        InfoItemsResponse getRestoredResponse = infostoreApi.getAllInfoItems(apiClient.getSession(),
+        InfoItemsResponse getRestoredResponse = infostoreApi.getAllInfoItems(
             folderId,
             Integer.toString(Metadata.FILENAME),
             null, null, null, null, null, null);

@@ -4,13 +4,14 @@
     tags:
       - Import
     summary: Imports data from vCard file.
+    security: 
+        - session: []    
     description: |
       #### Supported vCard formats
        * vCard 2.1
        * vCard 3.0
        * vCalendar 1.0
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/glbQueryParamsAllowEnqueue'
       - in: query
         name: folder

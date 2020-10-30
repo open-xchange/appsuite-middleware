@@ -100,7 +100,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         Asset asset = assetManager.getAsset(AssetType.json, "schedjoulesLanguagesResponse.json");
         mock("http://example.com/languages?", assetManager.readAssetString(asset), HttpStatus.SC_OK, RESPONSE_HEADERS);
 
-        LanguagesResponse response = chronosApi.languages(defaultUserApi.getSession());
+        LanguagesResponse response = chronosApi.languages();
         List<LanguageData> languages = response.getData();
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
@@ -116,7 +116,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         Asset asset = assetManager.getAsset(AssetType.json, "schedjoulesCountriesResponse.json");
         mock("http://example.com/countries?", assetManager.readAssetString(asset), HttpStatus.SC_OK, RESPONSE_HEADERS);
 
-        CountriesResponse response = chronosApi.countries(defaultUserApi.getSession(), null);
+        CountriesResponse response = chronosApi.countries(null);
         List<CountryData> countries = response.getData();
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
@@ -134,7 +134,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         Asset countriesAsset = assetManager.getAsset(AssetType.json, "schedjoulesCountriesResponse.json");
         mock("http://example.com/countries?locale=" + randomLanguage, assetManager.readAssetString(countriesAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
 
-        CountriesResponse response = chronosApi.countries(defaultUserApi.getSession(), randomLanguage);
+        CountriesResponse response = chronosApi.countries(randomLanguage);
         List<CountryData> countries = response.getData();
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
@@ -217,7 +217,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         Asset pageAsset = assetManager.getAsset(AssetType.json, "schedjoulesSearchResponse.json");
         mock("http://example.com/pages/search?q=" + URLEncoder.encode(query, "UTF-8") + "&nr_results=" + numberOfResults + "&locale=" + language, assetManager.readAssetString(pageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
 
-        SearchResponse response = chronosApi.search(defaultUserApi.getSession(), query, language, I(numberOfResults));
+        SearchResponse response = chronosApi.search(query, language, I(numberOfResults));
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
 
@@ -238,7 +238,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         Asset asset = assetManager.getAsset(AssetType.json, "schedjoulesLanguagesResponse.json");
         mock("http://example.com/languages?", assetManager.readAssetString(asset), HttpStatus.SC_OK, RESPONSE_HEADERS);
 
-        LanguagesResponse response = chronosApi.languages(defaultUserApi.getSession());
+        LanguagesResponse response = chronosApi.languages();
         List<LanguageData> languages = response.getData();
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
@@ -260,7 +260,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         Asset countriesAsset = assetManager.getAsset(AssetType.json, "schedjoulesCountriesResponse.json");
         mock("http://example.com/countries?", assetManager.readAssetString(countriesAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
 
-        CountriesResponse response = chronosApi.countries(defaultUserApi.getSession(), null);
+        CountriesResponse response = chronosApi.countries(null);
         List<CountryData> countries = response.getData();
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());

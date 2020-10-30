@@ -4,8 +4,9 @@
     tags:
       - Halo
     summary: Investigates a contact.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: provider
         description: >-
@@ -118,8 +119,9 @@
     tags:
       - Halo
     summary: Investigates a contact.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: provider
         description: >-
