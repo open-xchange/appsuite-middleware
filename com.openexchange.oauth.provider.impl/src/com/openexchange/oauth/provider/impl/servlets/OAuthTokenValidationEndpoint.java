@@ -97,7 +97,7 @@ public abstract class OAuthTokenValidationEndpoint extends OAuthEndpoint {
     protected void doGet(HttpServletRequest request, HttpServletResponse resp) throws IOException {
         try {
             Tools.disableCaching(resp);
-            if (!Tools.considerSecure(request)) {
+            if (isInsecureButMustNot(request)) {
                 resp.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
                 resp.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
                 return;

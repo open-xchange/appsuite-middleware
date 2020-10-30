@@ -64,6 +64,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.impl.OAuthProviderConstants;
 import com.openexchange.oauth.provider.impl.osgi.Services;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link URLHelper}
@@ -100,11 +101,34 @@ public class URLHelper {
         return requestURL.toString();
     }
 
+    /**
+     * Takes a {@link HttpServletRequest} and constructs the value for a 'Location' header
+     * based on its given scheme, host and path.
+     *
+     * @param request The servlet request
+     * @return The absolute location
+     */
+    public static String getRequestLocation(HttpServletRequest request) {
+        String hostname = getHostname(request);
+        StringBuilder requestURL = new StringBuilder(request.getScheme()).append("://").append(hostname).append(request.getServletPath());
+        String pathInfo = request.getPathInfo();
+        if (pathInfo != null) {
+            requestURL.append(pathInfo);
+        }
+
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            requestURL.append('?');
+            requestURL.append(queryString);
+        }
+        return requestURL.toString();
+    }
+
     public static String getBaseLocation(HttpServletRequest request) throws OXException {
+        String scheme = Tools.getProtocol(request);
         String hostname = getHostname(request);
         String prefix = Services.requireService(DispatcherPrefixService.class).getPrefix();
-        return "https://" + hostname + prefix;
-
+        return scheme + hostname + prefix;
     }
 
     public static String getRedirectLocation(String redirectURI, String... additionalParams) throws OXException {

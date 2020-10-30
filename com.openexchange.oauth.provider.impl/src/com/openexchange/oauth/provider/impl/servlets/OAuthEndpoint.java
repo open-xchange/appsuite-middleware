@@ -58,6 +58,7 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,6 +66,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableSet;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.Translator;
@@ -73,6 +76,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
 import com.openexchange.oauth.provider.authorizationserver.grant.GrantManagement;
 import com.openexchange.oauth.provider.impl.OAuthProviderConstants;
+import com.openexchange.oauth.provider.impl.tools.URLHelper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplateExceptionHandler;
@@ -91,6 +95,8 @@ public abstract class OAuthEndpoint extends HttpServlet {
 
     private static final long serialVersionUID = 6538319126816587520L;
 
+    private static final Set<String> URI_LOCALHOSTS = ImmutableSet.of("localhost", "127.0.0.1", "[::1]");
+
     protected static final String ATTR_OAUTH_CSRF_TOKEN = "oauth-csrf-token";
 
     protected final ClientManagement clientManagement;
@@ -107,6 +113,46 @@ public abstract class OAuthEndpoint extends HttpServlet {
         this.clientManagement = clientManagement;
         this.grantManagement = grantManagement;
         this.services = services;
+    }
+
+    /**
+     * Checks whether given request was made using HTTPS or if plain HTTP is allowed for this request.
+     *
+     * @param request The HTTP request
+     * @return <code>true</code> if an insecure request was made and this is not allowed
+     */
+    protected boolean isInsecureButMustNot(HttpServletRequest request) {
+        if (Tools.considerSecure(request)) {
+            return false;
+        }
+
+        if (allowInsecureLocalhost()) {
+            String hostname = URLHelper.getHostname(request);
+            int portIndex = hostname.indexOf(':');
+            if (portIndex > 0) {
+                hostname = hostname.substring(0, portIndex);
+            }
+
+            if (URI_LOCALHOSTS.contains(hostname)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Gets whether insecure requests (using plain HTTP) are allowed on localhost.
+     *
+     * @return <code>true</code> if so
+     */
+    protected boolean allowInsecureLocalhost() {
+        ConfigurationService configService = services.getService(ConfigurationService.class);
+        if (configService != null) {
+            return configService.getBoolProperty("com.openexchange.oauth.provider.allowInsecureLocalhost", false);
+        }
+
+        return false;
     }
 
     /**

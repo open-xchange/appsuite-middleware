@@ -148,7 +148,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Tools.disableCaching(response);
         applyFrameOptions(response);
-        if (!Tools.considerSecure(request)) {
+        if (isInsecureButMustNot(request)) {
             response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
             response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
             return;
@@ -205,7 +205,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Tools.disableCaching(response);
         applyFrameOptions(response);
-        if (!Tools.considerSecure(request)) {
+        if (isInsecureButMustNot(request)) {
             response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
             response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
             return;
@@ -324,7 +324,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         LoginServlet.addHeadersAndCookies(loginResult, response);
 
         // Add secret and public cookie
-        LoginServlet.writeSecretCookie(request, response, session, hash, true, serverName, loginConfig);
+        LoginServlet.writeSecretCookie(request, response, session, hash, Tools.considerSecure(request), serverName, loginConfig);
 
         return session;
     }
@@ -657,7 +657,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         }
 
         try {
-            URI expectedReferer = new URI(URLHelper.getSecureLocation(request));
+            URI expectedReferer = new URI(URLHelper.getRequestLocation(request));
             URI actualReferer = new URI(referer);
             if (!stringsEqual(expectedReferer.getScheme(), actualReferer.getScheme())) {
                 return true;
