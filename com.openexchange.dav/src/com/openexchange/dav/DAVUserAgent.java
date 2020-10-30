@@ -118,7 +118,7 @@ public enum DAVUserAgent {
             if (userAgent.contains("DAVdroid")) {
                 return DAVUserAgent.DAVDROID;
             }
-            if (userAgent.contains("Lightning") && userAgent.contains("Thunderbird") && userAgent.contains("Mozilla")) {
+            if (userAgent.contains("Thunderbird") && userAgent.contains("Mozilla")) {
                 return THUNDERBIRD_LIGHTNING;
             }
             if (userAgent.contains("iOS") && userAgent.contains("dataaccessd") && false == userAgent.contains("Android")) {
