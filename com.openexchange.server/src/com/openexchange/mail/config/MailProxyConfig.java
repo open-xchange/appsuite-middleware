@@ -74,11 +74,19 @@ public class MailProxyConfig {
 
     private static final String IMAP_NON_PROXY_HOST = "mail.imap.proxy.nonProxyHosts";
     private static final String SMTP_NON_PROXY_HOST = "mail.smtp.proxy.nonProxyHosts";
+    private static final String POP3_NON_PROXY_HOST = "mail.pop3.proxy.nonProxyHosts";
 
     // -------------------------------------------------------------------------------------------------------------------------------------
+    
+    private static enum Protocol {
+        IMAP, SMTP, POP3;
+    }
+    
+   // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final AtomicReference<HostList> imapHostList;
     private final AtomicReference<HostList> smtpHostList;
+    private final AtomicReference<HostList> pop3HostList;
 
     /**
      * Initializes a new {@link MailProxyConfig}.
@@ -87,24 +95,57 @@ public class MailProxyConfig {
         super();
         imapHostList = new AtomicReference<HostList>();
         smtpHostList = new AtomicReference<HostList>();
+        pop3HostList = new AtomicReference<HostList>();
     }
 
     public HostList getImapNonProxyHostList() {
-        return getHostListFrom(true);
+        return getHostListFrom(Protocol.IMAP);
     }
 
     public HostList getSmtpNonProxyHostList() {
-        return getHostListFrom(false);
+        return getHostListFrom(Protocol.SMTP);
+    }
+    
+    public HostList getPop3NonProxyHostList() {
+        return getHostListFrom(Protocol.POP3);
     }
 
-    private HostList getHostListFrom(boolean imap) {
-        AtomicReference<HostList> hostListReference = imap ? imapHostList : smtpHostList;
+    private HostList getHostListFrom(Protocol proto) {
+        AtomicReference<HostList> hostListReference;
+        switch (proto) {
+            case IMAP:
+                hostListReference = imapHostList;
+                break;
+            case POP3:
+                hostListReference = smtpHostList;
+                break;
+            case SMTP:
+                hostListReference = pop3HostList;
+                break;
+            default:
+                throw new IllegalStateException("Unknown protocol: " + proto);
+        }
+
         HostList hostList = hostListReference.get();
         if (hostList == null) {
             synchronized (hostListReference) {
                 hostList = hostListReference.get();
                 if (hostList == null) {
-                    String property = System.getProperty(imap ? IMAP_NON_PROXY_HOST : SMTP_NON_PROXY_HOST);
+                    String propertyName;
+                    switch (proto) {
+                        case IMAP:
+                            propertyName = IMAP_NON_PROXY_HOST;
+                            break;
+                        case POP3:
+                            propertyName = POP3_NON_PROXY_HOST;
+                            break;
+                        case SMTP:
+                            propertyName = SMTP_NON_PROXY_HOST;
+                            break;
+                        default:
+                            throw new IllegalStateException("Unknown protocol: " + proto);
+                    }
+                    String property = System.getProperty(propertyName);
                     hostList = Strings.isEmpty(property) ? HostList.EMPTY : HostList.valueOf(property.replace('|', ','));
                     hostListReference.set(hostList);
                 }

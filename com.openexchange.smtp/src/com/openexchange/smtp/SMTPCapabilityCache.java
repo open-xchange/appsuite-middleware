@@ -69,6 +69,8 @@ import java.util.concurrent.FutureTask;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.config.MailProxyConfig;
+import com.openexchange.net.HostList;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.smtp.services.Services;
@@ -302,10 +304,19 @@ public final class SMTPCapabilityCache {
                             proxyHost = proxyHost.substring(0, i);
                         }
                         proxyPort = PropUtil.getIntProperty(System.getProperties(), "mail.smtp.proxy.port", proxyPort);
-                        if (connectionTimeout > 0) {
-                            s.connect(new InetSocketAddress(proxyHost, proxyPort), connectionTimeout);
+                        HostList nonProxyHosts = MailProxyConfig.getInstance().getSmtpNonProxyHostList();
+                        if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(key.getAddress())) {
+                            if (connectionTimeout > 0) {
+                                s.connect(key, connectionTimeout);
+                            } else {
+                                s.connect(key);
+                            }
                         } else {
-                            s.connect(new InetSocketAddress(proxyHost, proxyPort));
+                            if (connectionTimeout > 0) {
+                                s.connect(new InetSocketAddress(proxyHost, proxyPort), connectionTimeout);
+                            } else {
+                                s.connect(new InetSocketAddress(proxyHost, proxyPort));
+                            }
                         }
                     }
                 } catch (IOException e) {

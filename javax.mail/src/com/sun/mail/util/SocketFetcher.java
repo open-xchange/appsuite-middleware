@@ -73,6 +73,8 @@ import javax.net.SocketFactory;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import com.openexchange.java.Strings;
+import com.openexchange.net.HostList;
 
 /**
  * This class is used to get Sockets. Depending on the arguments passed
@@ -372,9 +374,14 @@ public class SocketFetcher {
 	    }
 	    proxyPort = PropUtil.getIntProperty(props,
 					prefix + ".proxy.port", proxyPort);
-	    err = "Using web proxy host, port: " + proxyHost + ", " + proxyPort;
-	    if (logger.isLoggable(Level.FINER)) {
-            logger.finer("web proxy host " + proxyHost + ", port " + proxyPort);
+	    String nonProxyList = props.getProperty(prefix + ".proxy.nonProxyHosts", "");
+	    if (Strings.isNotEmpty(nonProxyList) && HostList.valueOf(nonProxyList.trim().replace('|', ',')).contains(address)) {
+	        proxyHost = null;
+        } else {            
+            err = "Using web proxy host, port: " + proxyHost + ", " + proxyPort;
+            if (logger.isLoggable(Level.FINER)) {
+                logger.finer("web proxy host " + proxyHost + ", port " + proxyPort);
+            }
         }
 	} else if ((socksHost =
 		    props.getProperty(prefix + ".socks.host", null)) != null) {
