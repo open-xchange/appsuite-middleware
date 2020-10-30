@@ -99,7 +99,7 @@ public class SubscribedHelper {
      * Looks up the account configuration whether folders are currently unsubscribed and sets the <i>subscribed</i> accordingly in the
      * passed folder references.
      * <p/>
-     * The "subscibed subfolders" flag is implicitly set, too, so that the whole subfolder tree will effectively not appear in clients.
+     * The "subscribed subfolders" flag is implicitly set, too, so that the whole subfolder tree will effectively not appear in clients.
      * 
      * @param folders The folders to set the subscribed information in
      * @param filterUnsubscribed <code>true</code> to exclude currently unsubscribed folders, <code>false</code>, otherwise
