@@ -72,8 +72,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
-import com.openexchange.reseller.ResellerService;
-import com.openexchange.reseller.data.ResellerTaxonomy;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -130,14 +128,6 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     protected Set<String> getSpecification(Context context, UserPermissionBits perms) throws OXException {
         // Gather available tags
         final Set<String> tags = new HashSet<String>(64);
-
-        // Tags from the reseller stack
-        ResellerService resellerService = services.getOptionalService(ResellerService.class);
-        if (resellerService != null) {
-            for (ResellerTaxonomy resellerTaxonomy : resellerService.getTaxonomiesByContext(context.getContextId())) {
-                tags.add(resellerTaxonomy.getTaxonomy());
-            }
-        }
 
         // Special tag that applies to the context
         tags.add(context.getName());

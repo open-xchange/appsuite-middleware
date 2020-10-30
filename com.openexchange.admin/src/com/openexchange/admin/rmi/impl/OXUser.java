@@ -2680,7 +2680,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             for (ConfigurationProperty property : capabilitiesSource) {
                 Matcher m = PROPERTY_BLACK_LIST.matcher(property.getName());
                 String value = m.find() ? "<OBFUSCATED>" : property.getValue();
-                userProperties.add(new UserProperty(property.getScope(), property.getName(), value, property.getMetadata()));
+                userProperties.add(new UserProperty(property.getScope(), property.getName(), value));
             }
 
             Collections.sort(userProperties, new OXUserPropertySorter());

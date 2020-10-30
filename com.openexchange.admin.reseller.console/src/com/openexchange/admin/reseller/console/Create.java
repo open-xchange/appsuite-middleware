@@ -54,67 +54,51 @@ import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
+
 /**
  * @author choeger
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ *
  */
 public class Create extends ResellerAbstraction {
 
-    /**
-     * Initializes a new {@link Create}.
-     */
-    public Create() {
-        super();
+    protected final void setOptions(final AdminParser parser) {
+        setCreateOptions(parser);
     }
 
     /**
-     * Entry point
-     * 
-     * @param args command line arguments
+     *
+     */
+    public Create() {
+    }
+
+    /**
+     * @param args
      */
     public static void main(String[] args) {
-        new Create().start(args);
+        final Create create = new Create();
+        create.start(args);
     }
 
     public void start(final String[] args) {
-        AdminParser parser = new AdminParser("createadmin");
+        final AdminParser parser = new AdminParser("createadmin");
 
         setOptions(parser);
+
 
         // parse the command line
         try {
             parser.ownparse(args);
 
-            Credentials auth = credentialsparsing(parser);
-            ResellerAdmin adm = parseCreateOptions(parser);
+            final Credentials auth = credentialsparsing(parser);
+            final ResellerAdmin adm = parseCreateOptions(parser);
+            final OXResellerInterface rsi = getResellerInterface();
 
-            // Capabilities
-            adm.setCapabilitiesToAdd(parseAndSetCapabilitiesToAdd(parser));
-            adm.setCapabilitiesToRemove(parseAndSetCapabilitiesToRemove(parser));
-            adm.setCapabilitiesToDrop(parseAndSetCapabilitiesToDrop(parser));
-
-            // Configuration & Taxonomies
-            applyDynamicOptionsToReseller(parser, adm);
-
-            OXResellerInterface rsi = getResellerInterface();
-
-            ResellerAdmin create = rsi.create(adm, auth);
+            final ResellerAdmin create = rsi.create(adm, auth);
             displayCreatedMessage(String.valueOf(create.getId()), null, parser);
             sysexit(0);
         } catch (Exception e) {
             printErrors(null, null, e, parser);
             sysexit(1);
         }
-    }
-
-    /**
-     * Sets the extra options for the clt
-     *
-     * @param parser The {@link AdminParser}
-     */
-    private void setOptions(final AdminParser parser) {
-        setCreateOptions(parser);
-        parser.allowDynamicOptions();
-        parser.allowFlexibleDynamicOptions();
     }
 }

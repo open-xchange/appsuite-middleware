@@ -56,17 +56,6 @@ public class OXResellerServicePortTypeImpl1 implements OXResellerServicePortType
         //throw new OXResellerException_Exception("OXResellerException...");
         //throw new InvalidDataException_Exception("InvalidDataException...");
     }
-    
-    @Override
-    public void changeSelf(Change parameters) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception , InvalidDataException_Exception    {
-        LOG.info("Executing operation changeSelf");
-        System.out.println(parameters);
-        try {
-        } catch (java.lang.Exception ex) {
-            ex.printStackTrace();
-            throw new RuntimeException(ex);
-        }
-    }
 
     @Override
     public java.util.List<com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.Restriction> getAvailableRestrictions(com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception    {

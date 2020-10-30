@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
@@ -36,9 +35,12 @@ import com.openexchange.admin.soap.reseller.service.soap.dataobjects.SOAPStringM
  *
  */
 
-@javax.jws.WebService(serviceName = "OXResellerService", portName = "OXResellerServiceHttpSoap12Endpoint", targetNamespace = "http://soap.reseller.admin.openexchange.com",
+@javax.jws.WebService(
+                      serviceName = "OXResellerService",
+                      portName = "OXResellerServiceHttpSoap12Endpoint",
+                      targetNamespace = "http://soap.reseller.admin.openexchange.com",
 
-    endpointInterface = "com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType")
+                      endpointInterface = "com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerServicePortType")
 
 public class OXResellerServicePortTypeImpl implements OXResellerServicePortType {
 
@@ -47,13 +49,13 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
     private static OXResellerInterface getResellerInterface() throws RemoteException_Exception {
         final OXResellerInterface resellerInterface = RMI_REFERENCE.get();
         if (null == resellerInterface) {
-            throw new RemoteException_Exception("Missing " + OXResellerInterface.class.getName() + " instance.");
+            throw new RemoteException_Exception("Missing "+OXResellerInterface.class.getName() + " instance.");
         }
         return resellerInterface;
     }
 
     @Override
-    public void updateDatabaseRestrictions(final Credentials creds) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception {
+    public void updateDatabaseRestrictions(final Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception    {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
             resellerInterface.updateDatabaseRestrictions(soap2Credentials(creds));
@@ -82,7 +84,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
     }
 
     @Override
-    public void change(final Change parameters) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception, InvalidDataException_Exception {
+    public void change(final Change parameters) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception , InvalidDataException_Exception    {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
             resellerInterface.change(soap2ResellerAdmin(parameters.adm), soap2Credentials(parameters.creds));
@@ -114,43 +116,9 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         }
     }
-    
-    @Override
-    public void changeSelf(final Change parameters) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception, InvalidDataException_Exception {
-        final OXResellerInterface resellerInterface = getResellerInterface();
-        try {
-            resellerInterface.changeSelf(soap2ResellerAdmin(parameters.adm), soap2Credentials(parameters.creds));
-        } catch (RemoteException e) {
-            com.openexchange.admin.soap.reseller.service.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.service.reseller.soap.RemoteException();
-            com.openexchange.admin.soap.reseller.service.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.service.rmi.RemoteException();
-            value.setMessage(e.getMessage());
-            faultDetail.setRemoteException(value);
-            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (StorageException e) {
-            com.openexchange.admin.soap.reseller.service.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.service.reseller.soap.StorageException();
-            com.openexchange.admin.soap.reseller.service.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.service.rmi.exceptions.StorageException();
-            faultDetail.setStorageException(value);
-            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (InvalidCredentialsException e) {
-            com.openexchange.admin.soap.reseller.service.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.service.reseller.soap.InvalidCredentialsException();
-            com.openexchange.admin.soap.reseller.service.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.service.rmi.exceptions.InvalidCredentialsException();
-            faultDetail.setInvalidCredentialsException(value);
-            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (OXResellerException e) {
-            com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerException faultDetail = new com.openexchange.admin.soap.reseller.service.reseller.soap.OXResellerException();
-            com.openexchange.admin.soap.reseller.service.reseller.rmi.exceptions.OXResellerException value = new com.openexchange.admin.soap.reseller.service.reseller.rmi.exceptions.OXResellerException();
-            faultDetail.setOXResellerException(value);
-            throw new OXResellerException_Exception(e.getMessage(), faultDetail, e);
-        } catch (InvalidDataException e) {
-            com.openexchange.admin.soap.reseller.service.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.service.reseller.soap.InvalidDataException();
-            com.openexchange.admin.soap.reseller.service.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.service.rmi.exceptions.InvalidDataException();
-            faultDetail.setInvalidDataException(value);
-            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        }
-    }
 
     @Override
-    public List<Restriction> getAvailableRestrictions(final Credentials creds) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception {
+    public List<Restriction> getAvailableRestrictions(final Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception    {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
             final com.openexchange.admin.reseller.rmi.dataobjects.Restriction[] restrictions = resellerInterface.getAvailableRestrictions(soap2Credentials(creds));
@@ -188,7 +156,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
     }
 
     @Override
-    public void removeDatabaseRestrictions(final RemoveDatabaseRestrictions parameters) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception {
+    public void removeDatabaseRestrictions(final RemoveDatabaseRestrictions parameters) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception    {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
             resellerInterface.removeDatabaseRestrictions(soap2Credentials(parameters.creds));
@@ -217,7 +185,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
     }
 
     @Override
-    public void delete(final Delete parameters) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception {
+    public void delete(final Delete parameters) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception    {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
             resellerInterface.delete(soap2ResellerAdmin(parameters.adm), soap2Credentials(parameters.creds));
@@ -251,7 +219,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
     }
 
     @Override
-    public List<ResellerAdmin> list(final java.lang.String searchPattern, final Credentials creds) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
+    public List<ResellerAdmin> list(final java.lang.String searchPattern,final Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
             final com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin[] resellerAdmins = resellerInterface.list(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(creds));
@@ -289,7 +257,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
     }
 
     @Override
-    public List<Restriction> getRestrictionsFromContext(final com.openexchange.admin.soap.reseller.service.reseller.soap.dataobjects.ResellerContext ctx, final Credentials creds) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception, InvalidDataException_Exception {
+    public List<Restriction> getRestrictionsFromContext(final com.openexchange.admin.soap.reseller.service.reseller.soap.dataobjects.ResellerContext ctx,final Credentials creds) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception , InvalidDataException_Exception    {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
             final com.openexchange.admin.reseller.rmi.dataobjects.Restriction[] restrictions = resellerInterface.getRestrictionsFromContext(soap2Context(ctx), soap2Credentials(creds));
@@ -332,7 +300,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
     }
 
     @Override
-    public ResellerAdmin create(final ResellerAdmin adm, final Credentials creds) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception, InvalidDataException_Exception {
+    public ResellerAdmin create(final ResellerAdmin adm,final Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception , InvalidDataException_Exception    {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
             return resellerAdmin2Soap(resellerInterface.create(soap2ResellerAdmin(adm), soap2Credentials(creds)));
@@ -366,7 +334,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
     }
 
     @Override
-    public List<ResellerAdmin> getMultipleData(final List<ResellerAdmin> admins, final Credentials creds) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception, InvalidDataException_Exception {
+    public List<ResellerAdmin> getMultipleData(final List<ResellerAdmin> admins,final Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception , InvalidDataException_Exception    {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
             final com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin[] resellerAdmins = new com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin[admins.size()];
@@ -409,7 +377,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
     }
 
     @Override
-    public ResellerAdmin getData(final ResellerAdmin adm, final Credentials creds) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception, InvalidDataException_Exception {
+    public ResellerAdmin getData(final ResellerAdmin adm, final Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception , InvalidDataException_Exception    {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
             return resellerAdmin2Soap(resellerInterface.getData(soap2ResellerAdmin(adm), soap2Credentials(creds)));
@@ -443,7 +411,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
     }
 
     @Override
-    public void updateDatabaseModuleAccessRestrictions(final UpdateDatabaseModuleAccessRestrictions parameters) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception {
+    public void updateDatabaseModuleAccessRestrictions(final UpdateDatabaseModuleAccessRestrictions parameters) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception    {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
             resellerInterface.updateDatabaseModuleAccessRestrictions(soap2Credentials(parameters.creds));
@@ -472,7 +440,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
     }
 
     @Override
-    public void initDatabaseRestrictions(final InitDatabaseRestrictions parameters) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception {
+    public void initDatabaseRestrictions(final InitDatabaseRestrictions parameters) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , OXResellerException_Exception    {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
             resellerInterface.initDatabaseRestrictions(soap2Credentials(parameters.creds));
@@ -540,52 +508,6 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
         if (null != restrictions) {
             resellerAdmin.setRestrictions(soap2Restrictions(restrictions));
         }
-
-        // Capabilities
-        Set<String> tmpSet = soapResellerAdmin.getCapabilities();
-        if (tmpSet != null) {
-            resellerAdmin.setCapabilities(tmpSet);
-        }
-        tmpSet = soapResellerAdmin.getCapabilitiesToAdd();
-        if (tmpSet != null) {
-            resellerAdmin.setCapabilitiesToAdd(tmpSet);
-        }
-        tmpSet = soapResellerAdmin.getCapabilitiesToRemove();
-        if (tmpSet != null) {
-            resellerAdmin.setCapabilitiesToRemove(tmpSet);
-        }
-        tmpSet = soapResellerAdmin.getCapabilitiesToDrop();
-        if (tmpSet != null) {
-            resellerAdmin.setCapabilitiesToRemove(tmpSet);
-        }
-
-        // Configuration
-        Map<String, String> tmpMap = soapResellerAdmin.getConfiguration();
-        if (tmpMap != null) {
-            resellerAdmin.setConfiguration(tmpMap);
-        }
-        tmpMap = soapResellerAdmin.getConfigurationToAdd();
-        if (tmpMap != null) {
-            resellerAdmin.setConfigurationToAdd(tmpMap);
-        }
-        tmpSet = soapResellerAdmin.getConfigurationToRemove();
-        if (tmpSet != null) {
-            resellerAdmin.setConfigurationToRemove(tmpSet);
-        }
-
-        // Taxonomies
-        tmpSet = soapResellerAdmin.getTaxonomies();
-        if (tmpSet != null) {
-            resellerAdmin.setTaxonomies(tmpSet);
-        }
-        tmpSet = soapResellerAdmin.getTaxonomiesToAdd();
-        if (tmpSet != null) {
-            resellerAdmin.setTaxonomiesToAdd(tmpSet);
-        }
-        tmpSet = soapResellerAdmin.getTaxonomiesToRemove();
-        if (tmpSet != null) {
-            resellerAdmin.setTaxonomiesToRemove(tmpSet);
-        }
         return resellerAdmin;
     }
 
@@ -601,16 +523,6 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
         soapResellerAdmin.setPassword(resellerAdmin.getPassword());
         soapResellerAdmin.setPasswordMech(resellerAdmin.getPasswordMech());
         soapResellerAdmin.setRestrictions(restrictions2Soap(resellerAdmin.getRestrictions()));
-        soapResellerAdmin.setCapabilities(resellerAdmin.getCapabilities());
-        soapResellerAdmin.setCapabilitiesToAdd(resellerAdmin.getCapabilitiesToAdd());
-        soapResellerAdmin.setCapabilitiesToRemove(resellerAdmin.getCapabilitiesToRemove());
-        soapResellerAdmin.setCapabilitiesToDrop(resellerAdmin.getCapabilitiesToDrop());
-        soapResellerAdmin.setConfiguration(resellerAdmin.getConfiguration());
-        soapResellerAdmin.setConfigurationToAdd(resellerAdmin.getConfigurationToAdd());
-        soapResellerAdmin.setConfigurationToRemove(resellerAdmin.getConfigurationToRemove());
-        soapResellerAdmin.setTaxonomies(resellerAdmin.getTaxonomies());
-        soapResellerAdmin.setTaxonomiesToAdd(resellerAdmin.getTaxonomiesToAdd());
-        soapResellerAdmin.setTaxonomiesToRemove(resellerAdmin.getTaxonomiesToRemove());
         return soapResellerAdmin;
     }
 
@@ -844,7 +756,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
             return null;
         }
         final java.util.List<SOAPMapEntry> entries = soapStringMapMap.getEntries();
-        final Map<String, Map<String, String>> map = new java.util.LinkedHashMap<String, Map<String, String>>(entries.size());
+        final Map<String, Map<String, String>> map = new java.util.LinkedHashMap<String, Map<String,String>>(entries.size());
         for (final SOAPMapEntry soapMapEntry : entries) {
             if (null != soapMapEntry) {
                 map.put(soapMapEntry.getKey(), soap2Map(soapMapEntry.getValue()));
@@ -919,7 +831,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
         }
         final SOAPStringMapMap soapMapMap = new SOAPStringMapMap();
         final java.util.List<SOAPMapEntry> entries = new ArrayList<SOAPMapEntry>(mapmap.size());
-        for (final Map.Entry<String, Map<String, String>> mapmapEntry : mapmap.entrySet()) {
+        for (final Map.Entry<String,Map<String,String>> mapmapEntry : mapmap.entrySet()) {
             final SOAPMapEntry mapEntry = new SOAPMapEntry();
             mapEntry.setKey(mapmapEntry.getKey());
             mapEntry.setValue(map2Soap(mapmapEntry.getValue()));
@@ -935,7 +847,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
         }
         final SOAPStringMap soapMap = new SOAPStringMap();
         final java.util.List<Entry> entries = new ArrayList<Entry>(map.size());
-        for (final Map.Entry<String, String> mapEntry : map.entrySet()) {
+        for (final Map.Entry<String,String> mapEntry : map.entrySet()) {
             final Entry entry = new Entry();
             entry.setKey(mapEntry.getKey());
             entry.setValue(mapEntry.getValue());

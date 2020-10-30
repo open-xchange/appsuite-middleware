@@ -50,8 +50,6 @@
 package com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -70,17 +68,7 @@ import javax.xml.bind.annotation.XmlType;
     "parentId",
     "restrictions",
     "displayName",
-    "id",
-    "capabilities",
-    "capabilitiesToAdd",
-    "capabilitiesToRemove",
-    "capabilitiesToDrop",
-    "taxonomies",
-    "taxonomiesToAdd",
-    "taxonomiesToRemove",
-    "configuration",
-    "configurationToAdd",
-    "configurationToRemove"
+    "id"
 })
 public class ResellerAdmin {
 
@@ -99,41 +87,11 @@ public class ResellerAdmin {
     @XmlElement(nillable = true)
     protected String passwordMech;
 
-    @XmlElement(name = "displayname", nillable = true)
+    @XmlElement(name="displayname", nillable = true)
     protected String displayName;
 
     @XmlElement(nillable = true)
     protected List<Restriction> restrictions;
-
-    @XmlElement(nillable = true)
-    protected Set<String> capabilities;
-
-    @XmlElement(nillable = true)
-    protected Set<String> capabilitiesToAdd;
-
-    @XmlElement(nillable = true)
-    protected Set<String> capabilitiesToRemove;
-
-    @XmlElement(nillable = true)
-    protected Set<String> capabilitiesToDrop;
-
-    @XmlElement(nillable = true)
-    protected Set<String> taxonomies;
-
-    @XmlElement(nillable = true)
-    protected Set<String> taxonomiesToAdd;
-
-    @XmlElement(nillable = true)
-    protected Set<String> taxonomiesToRemove;
-
-    @XmlElement(nillable = true)
-    protected Map<String, String> configuration;
-
-    @XmlElement(nillable = true)
-    protected Map<String, String> configurationToAdd;
-
-    @XmlElement(nillable = true)
-    protected Set<String> configurationToRemove;
 
     public Integer getId() {
         return id;
@@ -189,185 +147,5 @@ public class ResellerAdmin {
 
     public void setRestrictions(List<Restriction> restrictions) {
         this.restrictions = restrictions;
-    }
-
-    /**
-     * Gets the capabilities
-     *
-     * @return The capabilities
-     */
-    public Set<String> getCapabilities() {
-        return capabilities;
-    }
-
-    /**
-     * Sets the capabilities
-     *
-     * @param capabilities The capabilities to set
-     */
-    public void setCapabilities(Set<String> capabilities) {
-        this.capabilities = capabilities;
-    }
-
-    /**
-     * Gets the capabilitiesToAdd
-     *
-     * @return The capabilitiesToAdd
-     */
-    public Set<String> getCapabilitiesToAdd() {
-        return capabilitiesToAdd;
-    }
-
-    /**
-     * Sets the capabilitiesToAdd
-     *
-     * @param capabilitiesToAdd The capabilitiesToAdd to set
-     */
-    public void setCapabilitiesToAdd(Set<String> capabilitiesToAdd) {
-        this.capabilitiesToAdd = capabilitiesToAdd;
-    }
-
-    /**
-     * Gets the capabilitiesToRemove
-     *
-     * @return The capabilitiesToRemove
-     */
-    public Set<String> getCapabilitiesToRemove() {
-        return capabilitiesToRemove;
-    }
-
-    /**
-     * Sets the capabilitiesToRemove
-     *
-     * @param capabilitiesToRemove The capabilitiesToRemove to set
-     */
-    public void setCapabilitiesToRemove(Set<String> capabilitiesToRemove) {
-        this.capabilitiesToRemove = capabilitiesToRemove;
-    }
-
-    /**
-     * Gets the capabilitiesToDrop
-     *
-     * @return The capabilitiesToDrop
-     */
-    public Set<String> getCapabilitiesToDrop() {
-        return capabilitiesToDrop;
-    }
-
-    /**
-     * Sets the capabilitiesToDrop
-     *
-     * @param capabilitiesToDrop The capabilitiesToDrop to set
-     */
-    public void setCapabilitiesToDrop(Set<String> capabilitiesToDrop) {
-        this.capabilitiesToDrop = capabilitiesToDrop;
-    }
-
-    /**
-     * Gets the taxonomies
-     *
-     * @return The taxonomies
-     */
-    public Set<String> getTaxonomies() {
-        return taxonomies;
-    }
-
-    /**
-     * Sets the taxonomies
-     *
-     * @param taxonomies The taxonomies to set
-     */
-    public void setTaxonomies(Set<String> taxonomies) {
-        this.taxonomies = taxonomies;
-    }
-
-    /**
-     * Gets the taxonomiesToAdd
-     *
-     * @return The taxonomiesToAdd
-     */
-    public Set<String> getTaxonomiesToAdd() {
-        return taxonomiesToAdd;
-    }
-
-    /**
-     * Sets the taxonomiesToAdd
-     *
-     * @param taxonomiesToAdd The taxonomiesToAdd to set
-     */
-    public void setTaxonomiesToAdd(Set<String> taxonomiesToAdd) {
-        this.taxonomiesToAdd = taxonomiesToAdd;
-    }
-
-    /**
-     * Gets the taxonomiesToRemove
-     *
-     * @return The taxonomiesToRemove
-     */
-    public Set<String> getTaxonomiesToRemove() {
-        return taxonomiesToRemove;
-    }
-
-    /**
-     * Sets the taxonomiesToRemove
-     *
-     * @param taxonomiesToRemove The taxonomiesToRemove to set
-     */
-    public void setTaxonomiesToRemove(Set<String> taxonomiesToRemove) {
-        this.taxonomiesToRemove = taxonomiesToRemove;
-    }
-
-    /**
-     * Gets the configuration
-     *
-     * @return The configuration
-     */
-    public Map<String, String> getConfiguration() {
-        return configuration;
-    }
-
-    /**
-     * Sets the configuration
-     *
-     * @param configuration The configuration to set
-     */
-    public void setConfiguration(Map<String, String> configuration) {
-        this.configuration = configuration;
-    }
-
-    /**
-     * Gets the configurationToAdd
-     *
-     * @return The configurationToAdd
-     */
-    public Map<String, String> getConfigurationToAdd() {
-        return configurationToAdd;
-    }
-
-    /**
-     * Sets the configurationToAdd
-     *
-     * @param configurationToAdd The configurationToAdd to set
-     */
-    public void setConfigurationToAdd(Map<String, String> configurationToAdd) {
-        this.configurationToAdd = configurationToAdd;
-    }
-
-    /**
-     * Gets the configurationToRemove
-     *
-     * @return The configurationToRemove
-     */
-    public Set<String> getConfigurationToRemove() {
-        return configurationToRemove;
-    }
-
-    /**
-     * Sets the configurationToRemove
-     *
-     * @param configurationToRemove The configurationToRemove to set
-     */
-    public void setConfigurationToRemove(Set<String> configurationToRemove) {
-        this.configurationToRemove = configurationToRemove;
     }
 }

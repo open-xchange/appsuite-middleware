@@ -67,10 +67,6 @@ public enum CapabilitySource {
      */
     CONFIGURATION,
     /**
-     * Capabilities applied to a certain reseller (as <code>subadmin_capabilities</code> DB entries) through reseller provisioning API
-     */
-    RESELLER,
-    /**
      * Capabilities applied to a certain context (as <code>context_capabilities</code> DB entries) through provisioning API
      */
     CONTEXT,
