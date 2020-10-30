@@ -58,17 +58,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -76,9 +72,6 @@ import com.openexchange.reseller.ResellerExceptionCodes;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
 import com.openexchange.reseller.data.ResellerAdmin.ResellerAdminBuilder;
-import com.openexchange.reseller.data.ResellerCapability;
-import com.openexchange.reseller.data.ResellerConfigProperty;
-import com.openexchange.reseller.data.ResellerTaxonomy;
 import com.openexchange.reseller.data.Restriction;
 
 /**
@@ -96,18 +89,13 @@ public class ResellerServiceImpl implements ResellerService {
     private static final String DATABASE_COLUMN_NAME = "name";
     private static final String DATABASE_COLUMN_ID = "rid";
 
-    private static final String GET_RESELLER_FOR_CTX = "SELECT sid FROM context2subadmin WHERE cid=?;";
-    private static final String GET_RESELLER = "SELECT sid FROM subadmin WHERE sid=?;";
-    private static final String GET_RESELLER_ID = "SELECT sid FROM subadmin WHERE name=?;";
-    private static final String GET_PARENT_RESELLER = "SELECT sid FROM subadmin WHERE pid=?;";
-    private static final String GET_RESELLER_DATA = "SELECT sid, pid, name, displayName, password, passwordMech, salt FROM subadmin WHERE sid=?;";
-    private static final String GET_ALL_RESELLER_DATA = "SELECT sid, pid, name, displayName, password, passwordMech, salt FROM subadmin;";
-    private static final String GET_RESELLER_RESTRICTIONS = "SELECT subadmin_restrictions.rid,sid,name,value FROM subadmin_restrictions INNER JOIN restrictions ON subadmin_restrictions.rid=restrictions.rid WHERE sid=?;";
-    private static final String GET_RESELLER_PROPERTY = "SELECT propertyValue FROM subadmin_config_properties WHERE sid = ? AND propertyKey = ?;";
-    private static final String GET_RESELLER_CAPABILITIES = "SELECT capability FROM subadmin_capabilities WHERE sid=?";
-    private static final String GET_RESELLER_TAXONOMIES = "SELECT taxonomy FROM subadmin_taxonomies WHERE sid=?;";
-    private static final String GET_RESELLER_PROPERTIES = "SELECT propertyKey, propertyValue FROM subadmin_config_properties WHERE sid = ?;";
-    private static final String GET_RESELLER_SELECTED_PROPERTIES = "SELECT propertyKey, propertyValue FROM subadmin_config_properties WHERE sid = ? AND propertyKey IN (";
+    private static final String GET_RESELLER_FOR_CTX = "SELECT sid FROM context2subadmin WHERE cid=?";
+    private static final String GET_RESELLER = "SELECT sid FROM subadmin WHERE sid=?";
+    private static final String GET_RESELLER_ID = "SELECT sid FROM subadmin WHERE name=?";
+    private static final String GET_PARENT_RESELLER = "SELECT sid FROM subadmin WHERE pid=?";
+    private static final String GET_RESELLER_DATA = "SELECT sid, pid, name, displayName, password, passwordMech, salt FROM subadmin WHERE sid=?";
+    private static final String GET_ALL_RESELLER_DATA = "SELECT sid, pid, name, displayName, password, passwordMech, salt FROM subadmin";
+    private static final String GET_RESELLER_RESTRICTIONS = "SELECT subadmin_restrictions.rid,sid,name,value FROM subadmin_restrictions INNER JOIN restrictions ON subadmin_restrictions.rid=restrictions.rid WHERE sid=?";
 
     // -------------------------------------------------------------------------------------------------
 
@@ -125,7 +113,24 @@ public class ResellerServiceImpl implements ResellerService {
 
     @Override
     public ResellerAdmin getReseller(int cid) throws OXException {
-        return getResellerAdmin(cid, null);
+        Connection con = dbService.getReadOnly();
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            prep = con.prepareStatement(GET_RESELLER_FOR_CTX);
+            prep.setInt(1, cid);
+            rs = prep.executeQuery();
+            if (!rs.next()) {
+                throw ResellerExceptionCodes.NO_RESELLER_FOUND_FOR_CTX.create(Integer.valueOf(cid));
+            }
+            return getData(ResellerAdmin.builder().id(I(rs.getInt(1))).build(), con);
+        } catch (SQLException e) {
+            LOG.error("", e);
+            throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(rs, prep);
+            dbService.backReadOnly(con);
+        }
     }
 
     @Override
@@ -152,12 +157,56 @@ public class ResellerServiceImpl implements ResellerService {
 
     @Override
     public ResellerAdmin getResellerById(int resellerId) throws OXException {
-        return getResellerById(resellerId, null);
+        Connection con = dbService.getReadOnly();
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            prep = con.prepareStatement(GET_RESELLER);
+            prep.setInt(1, resellerId);
+            rs = prep.executeQuery();
+            if (!rs.next()) {
+                throw ResellerExceptionCodes.NO_RESELLER_FOUND.create(Integer.valueOf(resellerId));
+            }
+            return getData(ResellerAdmin.builder().id(I(rs.getInt(1))).build(), con);
+        } catch (SQLException e) {
+            LOG.error("", e);
+            throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(rs, prep);
+            dbService.backReadOnly(con);
+        }
     }
 
     @Override
     public List<ResellerAdmin> getResellerAdminPath(int cid) throws OXException {
-        return getResellerAdminPath(cid, null);
+        Connection con = dbService.getReadOnly();
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            prep = con.prepareStatement(GET_RESELLER_FOR_CTX);
+            prep.setInt(1, cid);
+            rs = prep.executeQuery();
+            if (!rs.next()) {
+                throw ResellerExceptionCodes.NO_RESELLER_FOUND_FOR_CTX.create(Integer.valueOf(cid));
+            }
+
+            List<ResellerAdmin> path = new ArrayList<>();
+            ResellerAdmin admin = getData(ResellerAdmin.builder().id(I(rs.getInt(1))).build(), con);
+            path.add(admin);
+            while (admin.getParentId() != null && admin.getParentId().intValue() != 0) {
+                admin = getData(ResellerAdmin.builder().id(admin.getParentId()).build(), con);
+                path.add(admin);
+            }
+            Collections.reverse(path);
+            return path;
+        } catch (SQLException e) {
+            LOG.error("", e);
+            throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(rs, prep);
+            dbService.backReadOnly(con);
+        }
+
     }
 
     @Override
@@ -210,246 +259,7 @@ public class ResellerServiceImpl implements ResellerService {
         }
     }
 
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
-    public Set<ResellerCapability> getCapabilities(int resellerId) throws OXException {
-        return getCapabilitiesByReseller(resellerId, null);
-    }
-
-    @Override
-    public Set<ResellerCapability> getCapabilitiesByContext(int contextId) throws OXException {
-        return getCapabilitiesByContext(contextId, null);
-    }
-
-    @Override
-    public ResellerConfigProperty getConfigProperty(int resellerId, String key) throws OXException {
-        return getConfigPropertyByReseller(resellerId, key, null);
-    }
-
-    @Override
-    public ResellerConfigProperty getConfigPropertyByContext(int contextId, String key) throws OXException {
-        return getConfigPropertyByContext(contextId, key, null);
-    }
-
-    @Override
-    public Map<String, ResellerConfigProperty> getAllConfigProperties(int resellerId) throws OXException {
-        return getAllConfigPropertiesByReseller(resellerId, null);
-    }
-
-    @Override
-    public Map<String, ResellerConfigProperty> getAllConfigPropertiesByContext(int contextId) throws OXException {
-        return getAllConfigPropertiesByContext(contextId, null);
-    }
-
-    @Override
-    public Map<String, ResellerConfigProperty> getConfigProperties(int resellerId, Set<String> keys) throws OXException {
-        return getConfigPropertiesByReseller(resellerId, keys, null);
-    }
-
-    @Override
-    public Map<String, ResellerConfigProperty> getConfigPropertiesByContext(int contextId, Set<String> keys) throws OXException {
-        return getConfigPropertiesByContext(contextId, keys, null);
-    }
-
-    @Override
-    public Set<ResellerTaxonomy> getTaxonomies(int resellerId) throws OXException {
-        return getTaxonomiesByReseller(resellerId, null);
-    }
-
-    @Override
-    public Set<ResellerTaxonomy> getTaxonomiesByContext(int contextId) throws OXException {
-        return getTaxonomiesByContext(contextId, null);
-    }
-
-    ///////////////////////////////////////// HELPERS /////////////////////////////////
-
-    /**
-     * Optionally gets the reseller admin path. If no reseller exists for the specified
-     * context, then an empty list will be returned.
-     *
-     * @param cid the context identifier
-     * @param connection The connection
-     * @return A List with the path
-     * @throws OXException if an error is occurred
-     */
-    private List<ResellerAdmin> optResellerAdminPath(int cid, Connection connection) throws OXException {
-        return getResellerAdminPath(cid, connection, false);
-    }
-
-    /**
-     * Gets the reseller admin path. If no reseller exists for the specified
-     * context an exception will be thrown
-     *
-     * @param cid the context identifier
-     * @param connection The connection
-     * @return A List with the path
-     * @throws OXException if an error is occurred
-     */
-    private List<ResellerAdmin> getResellerAdminPath(int cid, Connection connection) throws OXException {
-        return getResellerAdminPath(cid, connection, true);
-    }
-
-    /**
-     * Retrieves the reseller admin path
-     *
-     * @param cid The context identifier
-     * @param connection The connection
-     * @param throwEx Whether to throw an exception if the the specified context has no reseller
-     * @return A List with the path
-     * @throws OXException if an error is occurred
-     */
-    private List<ResellerAdmin> getResellerAdminPath(int cid, Connection connection, boolean throwEx) throws OXException {
-        boolean connectionInit = false;
-        if (connection == null) {
-            connection = dbService.getReadOnly();
-            connectionInit = true;
-        }
-        PreparedStatement prep = null;
-        ResultSet rs = null;
-        try {
-            prep = connection.prepareStatement(GET_RESELLER_FOR_CTX);
-            prep.setInt(1, cid);
-            rs = prep.executeQuery();
-            if (rs.next()) {
-                return renderPath(connection, rs);
-            }
-            if (throwEx) {
-                throw ResellerExceptionCodes.NO_RESELLER_FOUND_FOR_CTX.create(Integer.valueOf(cid));
-            }
-            return ImmutableList.of();
-        } catch (SQLException e) {
-            LOG.error("", e);
-            throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
-        } finally {
-            Databases.closeSQLStuff(rs, prep);
-            if (connectionInit) {
-                dbService.backReadOnly(connection);
-            }
-        }
-    }
-
-    /**
-     * Renders the reseller admin path by creating a list with resellers. The first
-     * element of the list is the root reseller while the last element is the leaf.
-     *
-     * @param connection The connection
-     * @param rs The result set
-     * @return A List with the path
-     * @throws SQLException if an SQL error is occurred
-     * @throws OXException if an error is occurred
-     */
-    private List<ResellerAdmin> renderPath(Connection connection, ResultSet rs) throws SQLException, OXException {
-        List<ResellerAdmin> path = new ArrayList<>();
-        ResellerAdmin admin = getData(ResellerAdmin.builder().id(I(rs.getInt(1))).build(), connection);
-        path.add(admin);
-        while (admin.getParentId() != null && admin.getParentId().intValue() != 0) {
-            admin = getData(ResellerAdmin.builder().id(admin.getParentId()).build(), connection);
-            path.add(admin);
-        }
-        Collections.reverse(path);
-        return path;
-    }
-
-    /**
-     * 
-     * Retrieves the reseller admin for the specified context identifier
-     *
-     * @param contextId The context identifier
-     * @param connection The optional connection
-     * @return The reseller admin
-     * @throws OXException if an error is occurred
-     */
-    private ResellerAdmin getResellerAdmin(int contextId, Connection connection) throws OXException {
-        return getResellerAdmin(contextId, connection, true);
-    }
-
-    /**
-     * Retrieves the reseller admin
-     *
-     * @param contextId The context identifier
-     * @param connection The optional connection
-     * @param throwEx Whether to throw an exception if the reseller admin does not exist
-     * @return The reseller admin or <code>null</code> (dictated by the throwEx parameter
-     * @throws OXException if an error is occurred
-     */
-    private ResellerAdmin getResellerAdmin(int contextId, Connection connection, boolean throwEx) throws OXException {
-        boolean connectionInit = false;
-        if (connection == null) {
-            connection = dbService.getReadOnly();
-            connectionInit = true;
-        }
-        PreparedStatement prep = null;
-        ResultSet rs = null;
-        try {
-            prep = connection.prepareStatement(GET_RESELLER_FOR_CTX);
-            prep.setInt(1, contextId);
-            rs = prep.executeQuery();
-            if (rs.next()) {
-                return getData(ResellerAdmin.builder().id(I(rs.getInt(1))).build(), connection);
-            }
-            if (throwEx) {
-                throw ResellerExceptionCodes.NO_RESELLER_FOUND_FOR_CTX.create(Integer.valueOf(contextId));
-            }
-            return null;
-        } catch (SQLException e) {
-            LOG.error("", e);
-            throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
-        } finally {
-            Databases.closeSQLStuff(rs, prep);
-            if (connectionInit) {
-                dbService.backReadOnly(connection);
-            }
-        }
-    }
-
-    /**
-     * Gets the reseller admin by id.
-     *
-     * @param resellerId The reseller identifier
-     * @param connection The connection
-     * @return The reseller admin
-     * @throws OXException if an error is occurred
-     */
-    private ResellerAdmin getResellerById(int resellerId, Connection connection) throws OXException {
-        return getResellerById(resellerId, connection, true);
-    }
-
-    /**
-     * Gets the reseller admin by id.
-     *
-     * @param resellerId The reseller identifier
-     * @param connection The connection
-     * @param throwEx Whether to throw an exception if no reseller exists.
-     * @return The reseller admin or <code>null</code> (controlled by throwEx)
-     * @throws OXException if an error is occurred
-     */
-    private ResellerAdmin getResellerById(int resellerId, Connection connection, boolean throwEx) throws OXException {
-        Connection con = dbService.getReadOnly();
-        PreparedStatement prep = null;
-        ResultSet rs = null;
-        try {
-            prep = con.prepareStatement(GET_RESELLER);
-            prep.setInt(1, resellerId);
-            rs = prep.executeQuery();
-            if (rs.next()) {
-                return getData(ResellerAdmin.builder().id(I(rs.getInt(1))).build(), con);
-            }
-            if (throwEx) {
-                throw ResellerExceptionCodes.NO_RESELLER_FOUND.create(Integer.valueOf(resellerId));
-            }
-            return null;
-        } catch (SQLException e) {
-            LOG.error("", e);
-            throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
-        } finally {
-            Databases.closeSQLStuff(rs, prep);
-            dbService.backReadOnly(con);
-        }
-    }
+    ////////////////////////////////////////////// HELPERS ///////////////////////////////////////
 
     /**
      * Retrieves the metadata for the specified {@link ResellerAdmin}
@@ -499,18 +309,6 @@ public class ResellerServiceImpl implements ResellerService {
                 List<Restriction> restrictions = getRestrictionDataForAdmin(id, parentId, con);
                 if (false == restrictions.isEmpty()) {
                     builder.restrictions(restrictions);
-                }
-                Set<ResellerCapability> capabilities = getCapabilitiesByReseller(i(id), con);
-                if (false == capabilities.isEmpty()) {
-                    builder.capabilities(capabilities);
-                }
-                Set<ResellerTaxonomy> taxonomies = getTaxonomiesByReseller(i(id), con);
-                if (false == taxonomies.isEmpty()) {
-                    builder.taxonomies(taxonomies);
-                }
-                Map<String, ResellerConfigProperty> configuration = getAllConfigPropertiesByReseller(i(id), con);
-                if (false == configuration.isEmpty()) {
-                    builder.configuration(configuration);
                 }
                 ret.add(builder.build());
             }
@@ -584,368 +382,5 @@ public class ResellerServiceImpl implements ResellerService {
         builder.passwordMech(resultSet.getString("passwordMech"));
         builder.salt(resultSet.getString("salt"));
         return builder;
-    }
-
-    /**
-     * Retrieves the capabilities for the specified context. Traverses the admin path upwards
-     * to locate and merge all stored capabilities.
-     *
-     * @param contextId the context identifier
-     * @param connection The optional connection
-     * @return The capabilities
-     * @throws OXException if an error is occurred
-     */
-    private Set<ResellerCapability> getCapabilitiesByContext(int contextId, Connection connection) throws OXException {
-        boolean connectionInitialised = false;
-        if (connection == null) {
-            connection = dbService.getReadOnly();
-            connectionInitialised = true;
-        }
-        try {
-            List<ResellerAdmin> path = optResellerAdminPath(contextId, connection);
-            if (path.isEmpty()) {
-                return ImmutableSet.of();
-            }
-            Set<ResellerCapability> capabilities = new HashSet<ResellerCapability>();
-            for (ResellerAdmin admin : path) {
-                capabilities.addAll(getCapabilitiesByReseller(admin.getId().intValue(), connection));
-            }
-            return capabilities;
-        } finally {
-            if (connectionInitialised) {
-                dbService.backReadOnly(connection);
-            }
-        }
-    }
-
-    /**
-     * Returns all capabilities for the specified reseller
-     *
-     * @param resellerId The reseller identifier
-     * @param connection The optional database connection
-     * @return A Set with all capabilities for the specified reseller
-     * @throws OXException if an error is occurred
-     */
-    private Set<ResellerCapability> getCapabilitiesByReseller(int resellerId, Connection connection) throws OXException {
-        boolean connectionInitialised = false;
-        if (connection == null) {
-            connection = dbService.getReadOnly();
-            connectionInitialised = true;
-        }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = connection.prepareStatement(GET_RESELLER_CAPABILITIES);
-            stmt.setLong(1, resellerId);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return ImmutableSet.of();
-            }
-            Set<ResellerCapability> capas = new HashSet<ResellerCapability>();
-            do {
-                capas.add(new ResellerCapability(rs.getString(1), resellerId));
-            } while (rs.next());
-            return capas;
-        } catch (SQLException e) {
-            LOG.error("", e);
-            throw new OXException(e);
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-            if (connectionInitialised) {
-                dbService.backReadOnly(connection);
-            }
-        }
-    }
-
-    /**
-     * Retrieves the value of the specified property
-     *
-     * @param resellerId The reseller identifier
-     * @param key The key of the property
-     * @param connection the optional database connection
-     * @return The value of the property if it exists; <code>null</code> otherwise
-     * @throws OXException if an error is occurred
-     */
-    private ResellerConfigProperty getConfigPropertyByReseller(int resellerId, String key, Connection connection) throws OXException {
-        boolean connectionInitialised = false;
-        if (connection == null) {
-            connection = dbService.getReadOnly();
-            connectionInitialised = true;
-        }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = connection.prepareStatement(GET_RESELLER_PROPERTY);
-            stmt.setInt(1, resellerId);
-            stmt.setString(2, key);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                return new ResellerConfigProperty(key, rs.getString(1), resellerId);
-            }
-            return null;
-        } catch (SQLException e) {
-            LOG.error("", e);
-            throw new OXException(e);
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-            if (connectionInitialised) {
-                dbService.backReadOnly(connection);
-            }
-        }
-    }
-
-    /**
-     * Retrieves the value of the specified property
-     *
-     * @param contextId The reseller identifier
-     * @param key The key of the property
-     * @param connection the optional database connection
-     * @return The value of the property if it exists; <code>null</code> otherwise
-     * @throws OXException if an error is occurred
-     */
-    private ResellerConfigProperty getConfigPropertyByContext(int contextId, String key, Connection connection) throws OXException {
-        boolean connectionInitialised = false;
-        if (connection == null) {
-            connection = dbService.getReadOnly();
-            connectionInitialised = true;
-        }
-        try {
-            List<ResellerAdmin> path = optResellerAdminPath(contextId, connection);
-            if (path.isEmpty()) {
-                return null;
-            }
-            ResellerConfigProperty propertyValue = null;
-            for (ResellerAdmin admin : path) {
-                ResellerConfigProperty candidate = getConfigPropertyByReseller(admin.getId().intValue(), key, connection);
-                if (candidate == null) {
-                    continue;
-                }
-                propertyValue = candidate;
-            }
-            return propertyValue;
-        } finally {
-            if (connectionInitialised) {
-                dbService.backReadOnly(connection);
-            }
-        }
-    }
-
-    /**
-     * Retrieves all configuration properties for the specified reseller only, i.e. no up traversal.
-     *
-     * @param resellerId The reseller identifier
-     * @param connection The connection
-     * @return A Map with all configured properties
-     * @throws OXException if an error is occurred
-     */
-    private Map<String, ResellerConfigProperty> getAllConfigPropertiesByReseller(int resellerId, Connection connection) throws OXException {
-        boolean connectionInitialised = false;
-        if (connection == null) {
-            connection = dbService.getReadOnly();
-            connectionInitialised = true;
-        }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = connection.prepareStatement(GET_RESELLER_PROPERTIES);
-            int pIndex = 1;
-            stmt.setInt(pIndex++, resellerId);
-            rs = stmt.executeQuery();
-
-            Map<String, ResellerConfigProperty> props = new HashMap<>(4);
-            while (rs.next()) {
-                props.put(rs.getString(1), new ResellerConfigProperty(rs.getString(1), rs.getString(2), resellerId));
-            }
-            return props;
-        } catch (SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new OXException(e);
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-            if (connectionInitialised) {
-                dbService.backReadOnly(connection);
-            }
-        }
-    }
-
-    /**
-     * Retrieves all configuration properties for the specified context by traversing up
-     * the admin path and fetching all configuration properties from all resellers in the
-     * path.
-     *
-     * @param contextId The context identifier
-     * @param connection The connection
-     * @return A Map with all configured properties
-     * @throws OXException if an error is occurred
-     */
-    private Map<String, ResellerConfigProperty> getAllConfigPropertiesByContext(int contextId, Connection connection) throws OXException {
-        boolean connectionInitialised = false;
-        if (connection == null) {
-            connection = dbService.getReadOnly();
-            connectionInitialised = true;
-        }
-        try {
-            List<ResellerAdmin> path = optResellerAdminPath(contextId, connection);
-            if (path.isEmpty()) {
-                return ImmutableMap.of();
-            }
-            Map<String, ResellerConfigProperty> props = new HashMap<>();
-            for (ResellerAdmin admin : path) {
-                props.putAll(getAllConfigPropertiesByReseller(admin.getId().intValue(), connection));
-            }
-            return props;
-        } finally {
-            if (connectionInitialised) {
-                dbService.backReadOnly(connection);
-            }
-        }
-    }
-
-    /**
-     * Retrieves the specified configuration properties for the specified reseller only, i.e. no up traversal.
-     *
-     * @param resellerId The reseller identifier
-     * @param keys The properties to get
-     * @param connection The connection
-     * @return A Map with the specified configured properties
-     * @throws OXException if an error is occurred
-     */
-    private Map<String, ResellerConfigProperty> getConfigPropertiesByReseller(int resellerId, Set<String> keys, Connection connection) throws OXException {
-        boolean connectionInitialised = false;
-        if (connection == null) {
-            connection = dbService.getReadOnly();
-            connectionInitialised = true;
-        }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = connection.prepareStatement(Databases.getIN(GET_RESELLER_SELECTED_PROPERTIES, keys.size()));
-            int pIndex = 1;
-            stmt.setInt(pIndex++, resellerId);
-            for (String key : keys) {
-                stmt.setString(pIndex++, key);
-            }
-            rs = stmt.executeQuery();
-
-            Map<String, ResellerConfigProperty> props = new HashMap<>(4);
-            while (rs.next()) {
-                props.put(rs.getString(1), new ResellerConfigProperty(rs.getString(1), rs.getString(2), resellerId));
-            }
-            return props;
-        } catch (SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new OXException(e);
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-            if (connectionInitialised) {
-                dbService.backReadOnly(connection);
-            }
-        }
-    }
-
-    /**
-     * Retrieves the specified configuration properties for the specified context by traversing up
-     * the admin path and fetching the specified configuration properties from all resellers in the
-     * path.
-     *
-     * @param resellerId The reseller identifier
-     * @param keys The properties to get
-     * @param connection The connection
-     * @return A Map with the specified configured properties
-     * @throws OXException if an error is occurred
-     */
-    private Map<String, ResellerConfigProperty> getConfigPropertiesByContext(int contextId, Set<String> keys, Connection connection) throws OXException {
-        boolean connectionInitialised = false;
-        if (connection == null) {
-            connection = dbService.getReadOnly();
-            connectionInitialised = true;
-        }
-        try {
-            List<ResellerAdmin> path = optResellerAdminPath(contextId, connection);
-            if (path.isEmpty()) {
-                return ImmutableMap.of();
-            }
-            Map<String, ResellerConfigProperty> props = new HashMap<>();
-            for (ResellerAdmin admin : path) {
-                props.putAll(getConfigPropertiesByReseller(admin.getId().intValue(), keys, connection));
-            }
-            return props;
-        } finally {
-            if (connectionInitialised) {
-                dbService.backReadOnly(connection);
-            }
-        }
-    }
-
-    /**
-     * Retrieves all taxonomies for the specified reseller only, i.e. no up traversal.
-     *
-     * @param resellerId The reseller identifier
-     * @param connection The connection
-     * @return A Set with all taxonomies for the reseller
-     * @throws OXException if an error is occurred
-     */
-    private Set<ResellerTaxonomy> getTaxonomiesByReseller(int resellerId, Connection connection) throws OXException {
-        boolean connectionInitialised = false;
-        if (connection == null) {
-            connection = dbService.getReadOnly();
-            connectionInitialised = true;
-        }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = connection.prepareStatement(GET_RESELLER_TAXONOMIES);
-            stmt.setLong(1, resellerId);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return ImmutableSet.of();
-            }
-            Set<ResellerTaxonomy> taxonomies = new HashSet<>();
-            do {
-                taxonomies.add(new ResellerTaxonomy(rs.getString(1), resellerId));
-            } while (rs.next());
-            return taxonomies;
-        } catch (SQLException e) {
-            LOG.error("", e);
-            throw new OXException(e);
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-            if (connectionInitialised) {
-                dbService.backReadOnly(connection);
-            }
-        }
-    }
-
-    /**
-     * Retrieves all taxonomies for the specified context by traversing up
-     * the admin path and fetching all taxonomies from all resellers in the
-     * path.
-     *
-     * @param resellerId The reseller identifier
-     * @param connection The connection
-     * @return A Set with all taxonomies for the reseller
-     * @throws OXException if an error is occurred
-     */
-    private Set<ResellerTaxonomy> getTaxonomiesByContext(int contextId, Connection connection) throws OXException {
-        boolean connectionInitialised = false;
-        if (connection == null) {
-            connection = dbService.getReadOnly();
-            connectionInitialised = true;
-        }
-        try {
-            List<ResellerAdmin> path = optResellerAdminPath(contextId, connection);
-            if (path.isEmpty()) {
-                return ImmutableSet.of();
-            }
-            Set<ResellerTaxonomy> taxonomies = new HashSet<>();
-            for (ResellerAdmin admin : path) {
-                taxonomies.addAll(getTaxonomiesByReseller(admin.getId().intValue(), connection));
-            }
-            return taxonomies;
-        } finally {
-            if (connectionInitialised) {
-                dbService.backReadOnly(connection);
-            }
-        }
     }
 }

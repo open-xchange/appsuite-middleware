@@ -242,7 +242,7 @@ public class ConfigCascade implements ConfigViewFactory {
                 }
 
                 private String getFinalScope() throws OXException {
-                    return property(property, String.class).precedence("server", "reseller", "context", "user").get("final");
+                    return property(property, String.class).precedence("server", "context", "user").get("final");
                 }
 
                 @Override
@@ -258,7 +258,7 @@ public class ConfigCascade implements ConfigViewFactory {
 
                 @Override
                 public String getScope() throws OXException {
-                    final String finalScope = getFinalScope();
+                	final String finalScope = getFinalScope();
                     for (final ConfigProviderService provider : getConfigProviders(finalScope)) {
                         final String value = provider.get(property, context, user).get();
                         if (value != null) {
@@ -295,6 +295,7 @@ public class ConfigCascade implements ConfigViewFactory {
                     return new ArrayList<String>(metadataNames);
                 }
 
+
                 @Override
                 public <M> ComposedConfigProperty<String> set(final String metadataName, final M value) throws OXException {
                     throw new UnsupportedOperationException("Unscoped set is not supported");
@@ -321,10 +322,7 @@ public class ConfigCascade implements ConfigViewFactory {
                         collect = collect || finalScope == null || finalScope.equals(scope);
 
                         if (collect) {
-                            ConfigProviderService providerService = providers.get(scope);
-                            if (providerService != null) {
-                                p.add(providerService);
-                            }
+                            p.add(providers.get(scope));
                         }
                     }
                     return p;
@@ -346,6 +344,7 @@ public class ConfigCascade implements ConfigViewFactory {
                 public <M> ComposedConfigProperty<M> to(final Class<M> otherType) throws OXException {
                     return new CoercingComposedConfigProperty<M>(otherType, this, stringParser);
                 }
+
 
             }, stringParser);
         }

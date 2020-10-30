@@ -393,31 +393,48 @@ public abstract class BasicCommandlineOptions {
     }
 
     protected final CLIOption setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required) {
-        return admp.addOption(longopt, longopt, description, required, hasarg);
+
+        final CLIOption retval = admp.addOption(longopt, longopt, description, required, hasarg);
+        //        //OptionBuilder.withLongOpt( longopt ).withDescription( description ).withValueSeparator( '=' ).create();
+        //        if (hasarg) {
+        //            retval.hasArg();
+        //        }
+        //        retval.setRequired(required);
+        return retval;
     }
 
     protected final CLIOption setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required, final boolean extended) {
-        return admp.addOption(longopt, longopt, description, required, hasarg, extended);
+
+        final CLIOption retval = admp.addOption(longopt, longopt, description, required, hasarg, extended);
+        return retval;
     }
 
     protected final CLIOption setLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
-        return admp.addOption(longopt, argdescription, description, required, hasarg, extended);
+
+        final CLIOption retval = admp.addOption(longopt, argdescription, description, required, hasarg, extended);
+        return retval;
     }
 
     protected final CLIOption setIntegerLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
-        return admp.addIntegerOption(longopt, argdescription, description, required, hasarg, extended);
+
+        final CLIOption retval = admp.addIntegerOption(longopt, argdescription, description, required, hasarg, extended);
+        return retval;
     }
 
     protected final CLIOption setSettableBooleanLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
-        return admp.addSettableBooleanOption(longopt, argdescription, description, required, hasarg, extended);
+
+        final CLIOption retval = admp.addSettableBooleanOption(longopt, argdescription, description, required, hasarg, extended);
+        return retval;
     }
 
     protected final CLIOption setShortLongOpt(final AdminParser admp, final char shortopt, final String longopt, final String argdescription, final String description, final boolean required) {
-        return admp.addOption(shortopt, longopt, argdescription, description, required);
+        final CLIOption retval = admp.addOption(shortopt, longopt, argdescription, description, required);
+        return retval;
     }
 
     protected final CLIOption setShortLongOpt(final AdminParser admp, final char shortopt, final String longopt, final String description, final boolean hasarg, final NeededQuadState required) {
-        return admp.addOption(shortopt, longopt, longopt, description, required, hasarg);
+        final CLIOption retval = admp.addOption(shortopt, longopt, longopt, description, required, hasarg);
+        return retval;
     }
 
     protected final CLIOption setShortLongOptWithDefault(final AdminParser admp, final char shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final NeededQuadState required) {

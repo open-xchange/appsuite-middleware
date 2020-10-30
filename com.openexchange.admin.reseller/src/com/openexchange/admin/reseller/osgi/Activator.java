@@ -67,7 +67,6 @@ import com.openexchange.admin.reseller.services.PluginInterfaces;
 import com.openexchange.admin.reseller.tools.AdminCacheExtended;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExecutorService;
@@ -86,10 +85,6 @@ public class Activator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         try {
             AdminCache.compareAndSetBundleContext(null, context);
-
-            CacheService cacheService = getService(CacheService.class);
-            AdminCache.compareAndSetCacheService(null, cacheService);
-
             ConfigurationService configurationService = getService(ConfigurationService.class);
             AdminCache.compareAndSetConfigurationService(null, configurationService);
             initCache(configurationService);
@@ -157,6 +152,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class, DatabaseService.class, DBMigrationExecutorService.class, CacheService.class };
+        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class, DatabaseService.class, DBMigrationExecutorService.class };
     }
 }

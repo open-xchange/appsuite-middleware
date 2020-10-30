@@ -51,59 +51,54 @@ package com.openexchange.admin.reseller.rmi.dataobjects;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.EnforceableDataObject;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 
 /**
- * {@link ResellerAdmin}
- * 
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ResellerAdmin extends EnforceableDataObject implements PasswordMechObject, Cloneable {
 
+    /**
+     *
+     */
     private static final long serialVersionUID = 7212339205350666355L;
 
     private Integer id;
+
     private boolean idset = false;
+
     private Integer parentId;
+
     private boolean parentIdset = false;
+
     private String name;
+
     private boolean nameset = false;
+
     private String password;
+
     private boolean passwordset = false;
+
     private String passwordMech;
+
     private boolean passwordMechset = false;
+
     private byte[] salt;
+
     private boolean saltSet = false;
+
     private String displayname;
+
     private boolean displaynameset = false;
+
     private Restriction[] restrictions;
+
     private boolean restrictionsset = false;
+
     private String parentName;
+
     private boolean parentNameset = false;
-
-    private Set<String> capabilities;
-    private Set<String> capabilitiesToAdd;
-    private boolean capasToAddSet = false;
-    private Set<String> capabilitiesToRemove;
-    private boolean capasToRemoveSet = false;
-    private Set<String> capabilitiesToDrop;
-    private boolean capasToDropSet = false;
-
-    private Set<String> taxonomies;
-    private Set<String> taxonomiesToAdd;
-    private boolean taxonomiesToAddSet = false;
-    private Set<String> taxonomiesToRemove;
-    private boolean taxonomiesToRemoveSet = false;
-
-    private Map<String, String> configuration;
-    private Map<String, String> configurationToAdd;
-    private boolean configurationToAddSet = false;
-    private Set<String> configurationToRemove;
-    private boolean configurationToRemoveSet = false;
 
     public ResellerAdmin() {
         super();
@@ -195,14 +190,14 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     }
 
     private void init() {
-        id = null;
-        parentId = null;
-        name = null;
-        password = null;
-        displayname = null;
-        passwordMech = null;
-        salt = null;
-        restrictions = null;
+        this.id = null;
+        this.parentId = null;
+        this.name = null;
+        this.password = null;
+        this.displayname = null;
+        this.passwordMech = null;
+        this.salt = null;
+        this.restrictions = null;
     }
 
     /**
@@ -258,7 +253,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
      * @param display_name the display_name to set
      */
     public void setDisplayname(final String displayname) {
-        displaynameset = true;
+        this.displaynameset = true;
         this.displayname = displayname;
     }
 
@@ -266,7 +261,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
      * @param id the id to set
      */
     public void setId(final Integer id) {
-        idset = true;
+        this.idset = true;
         this.id = id;
     }
 
@@ -274,7 +269,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
      * @param name the name to set
      */
     public void setName(final String name) {
-        nameset = true;
+        this.nameset = true;
         this.name = name;
     }
 
@@ -282,13 +277,13 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
      * @param password the password to set
      */
     public void setPassword(final String password) {
-        passwordset = true;
+        this.passwordset = true;
         this.password = password;
     }
 
     @Override
     public void setPasswordMech(final String passwordMech) {
-        passwordMechset = true;
+        this.passwordMechset = true;
         this.passwordMech = passwordMech;
     }
 
@@ -296,7 +291,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
      * @param salt the salt to set
      */
     public void setSalt(final byte[] salt) {
-        saltSet = true;
+        this.saltSet = true;
         this.salt = salt;
     }
 
@@ -306,258 +301,8 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
      * @param pid the pid to set
      */
     public void setParentId(final Integer pid) {
-        parentIdset = true;
-        parentId = pid;
-    }
-
-    /**
-     * Gets the capabilitiesToAdd
-     *
-     * @return The capabilitiesToAdd
-     */
-    public Set<String> getCapabilitiesToAdd() {
-        return capabilitiesToAdd;
-    }
-
-    /**
-     * Sets the capabilitiesToAdd
-     *
-     * @param capabilitiesToAdd The capabilitiesToAdd to set
-     */
-    public void setCapabilitiesToAdd(Set<String> capabilitiesToAdd) {
-        capasToAddSet = true;
-        this.capabilitiesToAdd = capabilitiesToAdd;
-    }
-
-    /**
-     * Gets the capabilitiesToRemove
-     *
-     * @return The capabilitiesToRemove
-     */
-    public Set<String> getCapabilitiesToRemove() {
-        return capabilitiesToRemove;
-    }
-
-    /**
-     * Sets the capabilitiesToRemove
-     *
-     * @param capabilitiesToRemove The capabilitiesToRemove to set
-     */
-    public void setCapabilitiesToRemove(Set<String> capabilitiesToRemove) {
-        capasToRemoveSet = true;
-        this.capabilitiesToRemove = capabilitiesToRemove;
-    }
-
-    /**
-     * Gets the capabilitiesToDrop
-     *
-     * @return The capabilitiesToDrop
-     */
-    public Set<String> getCapabilitiesToDrop() {
-        return capabilitiesToDrop;
-    }
-
-    /**
-     * Sets the capabilitiesToDrop
-     *
-     * @param capabilitiesToDrop The capabilitiesToDrop to set
-     */
-    public void setCapabilitiesToDrop(Set<String> capabilitiesToDrop) {
-        capasToDropSet = true;
-        this.capabilitiesToDrop = capabilitiesToDrop;
-    }
-
-    /**
-     * Gets the capasToAddSet
-     *
-     * @return The capasToAddSet
-     */
-    public boolean isCapabilitiesToAddSet() {
-        return capasToAddSet;
-    }
-
-    /**
-     * Gets the capasToRemoveSet
-     *
-     * @return The capasToRemoveSet
-     */
-    public boolean isCapabilitiesToRemoveSet() {
-        return capasToRemoveSet;
-    }
-
-    /**
-     * Gets the capasToDropSet
-     *
-     * @return The capasToDropSet
-     */
-    public boolean isCapabilitiesToDropSet() {
-        return capasToDropSet;
-    }
-
-    /**
-     * Gets the taxonomies to add
-     *
-     * @return The taxonomies to add
-     */
-    public Set<String> getTaxonomiesToAdd() {
-        return taxonomiesToAdd;
-    }
-
-    /**
-     * Sets the taxonomies
-     *
-     * @param taxonomies The taxonomies to set
-     */
-    public void setTaxonomiesToAdd(Set<String> taxonomies) {
-        taxonomiesToAddSet = true;
-        taxonomiesToAdd = taxonomies;
-    }
-
-    /**
-     * Gets the taxonomiesSet
-     *
-     * @return The taxonomiesSet
-     */
-    public boolean isTaxonomiesToAddSet() {
-        return taxonomiesToAddSet;
-    }
-
-    /**
-     * Gets the taxonomiesToRemove
-     *
-     * @return The taxonomiesToRemove
-     */
-    public Set<String> getTaxonomiesToRemove() {
-        return taxonomiesToRemove;
-    }
-
-    /**
-     * Sets the taxonomiesToRemove
-     *
-     * @param taxonomiesToRemove The taxonomiesToRemove to set
-     */
-    public void setTaxonomiesToRemove(Set<String> taxonomiesToRemove) {
-        taxonomiesToRemoveSet = true;
-        this.taxonomiesToRemove = taxonomiesToRemove;
-    }
-
-    /**
-     * Gets the taxonomiesToRemoveSet
-     *
-     * @return The taxonomiesToRemoveSet
-     */
-    public boolean isTaxonomiesToRemoveSet() {
-        return taxonomiesToRemoveSet;
-    }
-
-    /**
-     * Gets the configurationToAdd
-     *
-     * @return The configurationToAdd
-     */
-    public Map<String, String> getConfigurationToAdd() {
-        return configurationToAdd;
-    }
-
-    /**
-     * Sets the configurationToAdd
-     *
-     * @param configurationToAdd The configurationToAdd to set
-     */
-    public void setConfigurationToAdd(Map<String, String> configurationToAdd) {
-        configurationToAddSet = true;
-        this.configurationToAdd = configurationToAdd;
-    }
-
-    /**
-     * Gets the configurationToRemove
-     *
-     * @return The configurationToRemove
-     */
-    public Set<String> getConfigurationToRemove() {
-        return configurationToRemove;
-    }
-
-    /**
-     * Sets the configurationToRemove
-     *
-     * @param configurationToRemove The configurationToRemove to set
-     */
-    public void setConfigurationToRemove(Set<String> configurationToRemove) {
-        configurationToRemoveSet = true;
-        this.configurationToRemove = configurationToRemove;
-    }
-
-    /**
-     * Gets the configurationToAddSet
-     *
-     * @return The configurationToAddSet
-     */
-    public boolean isConfigurationToAddSet() {
-        return configurationToAddSet;
-    }
-
-    /**
-     * Gets the configurationToRemoveSet
-     *
-     * @return The configurationToRemoveSet
-     */
-    public boolean isConfigurationToRemoveSet() {
-        return configurationToRemoveSet;
-    }
-
-    /**
-     * Gets the capabilities
-     *
-     * @return The capabilities
-     */
-    public Set<String> getCapabilities() {
-        return capabilities;
-    }
-
-    /**
-     * Sets the capabilities
-     *
-     * @param capabilities The capabilities to set
-     */
-    public void setCapabilities(Set<String> capabilities) {
-        this.capabilities = capabilities;
-    }
-
-    /**
-     * Gets the taxonomies
-     *
-     * @return The taxonomies
-     */
-    public Set<String> getTaxonomies() {
-        return taxonomies;
-    }
-
-    /**
-     * Sets the taxonomies
-     *
-     * @param taxonomies The taxonomies to set
-     */
-    public void setTaxonomies(Set<String> taxonomies) {
-        this.taxonomies = taxonomies;
-    }
-
-    /**
-     * Gets the configuration
-     *
-     * @return The configuration
-     */
-    public Map<String, String> getConfiguration() {
-        return configuration;
-    }
-
-    /**
-     * Sets the configuration
-     *
-     * @param configuration The configuration to set
-     */
-    public void setConfiguration(Map<String, String> configuration) {
-        this.configuration = configuration;
+        this.parentIdset = true;
+        this.parentId = pid;
     }
 
     /**
@@ -571,7 +316,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
      * @param restrictions the restrictions to set
      */
     public final void setRestrictions(final Restriction[] restrictions) {
-        restrictionsset = true;
+        this.restrictionsset = true;
         this.restrictions = restrictions;
     }
 
@@ -580,16 +325,16 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     }
 
     public final String getParentName() {
-        return parentName;
+        return this.parentName;
     }
 
     public void setParentName(final String parentName) {
-        parentNameset = true;
+        this.parentNameset = true;
         this.parentName = parentName;
     }
 
     public final boolean isParentNameset() {
-        return parentNameset;
+        return this.parentNameset;
     }
 
     @Override
@@ -641,18 +386,6 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((capabilities == null) ? 0 : capabilities.hashCode());
-        result = prime * result + ((capabilitiesToAdd == null) ? 0 : capabilitiesToAdd.hashCode());
-        result = prime * result + ((capabilitiesToDrop == null) ? 0 : capabilitiesToDrop.hashCode());
-        result = prime * result + ((capabilitiesToRemove == null) ? 0 : capabilitiesToRemove.hashCode());
-        result = prime * result + (capasToAddSet ? 1231 : 1237);
-        result = prime * result + (capasToDropSet ? 1231 : 1237);
-        result = prime * result + (capasToRemoveSet ? 1231 : 1237);
-        result = prime * result + ((configuration == null) ? 0 : configuration.hashCode());
-        result = prime * result + ((configurationToAdd == null) ? 0 : configurationToAdd.hashCode());
-        result = prime * result + (configurationToAddSet ? 1231 : 1237);
-        result = prime * result + ((configurationToRemove == null) ? 0 : configurationToRemove.hashCode());
-        result = prime * result + (configurationToRemoveSet ? 1231 : 1237);
         result = prime * result + ((displayname == null) ? 0 : displayname.hashCode());
         result = prime * result + (displaynameset ? 1231 : 1237);
         result = prime * result + ((id == null) ? 0 : id.hashCode());
@@ -671,11 +404,6 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         result = prime * result + (restrictionsset ? 1231 : 1237);
         result = prime * result + Arrays.hashCode(salt);
         result = prime * result + (saltSet ? 1231 : 1237);
-        result = prime * result + ((taxonomies == null) ? 0 : taxonomies.hashCode());
-        result = prime * result + ((taxonomiesToAdd == null) ? 0 : taxonomiesToAdd.hashCode());
-        result = prime * result + (taxonomiesToAddSet ? 1231 : 1237);
-        result = prime * result + ((taxonomiesToRemove == null) ? 0 : taxonomiesToRemove.hashCode());
-        result = prime * result + (taxonomiesToRemoveSet ? 1231 : 1237);
         return result;
     }
 
@@ -691,70 +419,6 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
             return false;
         }
         ResellerAdmin other = (ResellerAdmin) obj;
-        if (capabilities == null) {
-            if (other.capabilities != null) {
-                return false;
-            }
-        } else if (!capabilities.equals(other.capabilities)) {
-            return false;
-        }
-        if (capabilitiesToAdd == null) {
-            if (other.capabilitiesToAdd != null) {
-                return false;
-            }
-        } else if (!capabilitiesToAdd.equals(other.capabilitiesToAdd)) {
-            return false;
-        }
-        if (capabilitiesToDrop == null) {
-            if (other.capabilitiesToDrop != null) {
-                return false;
-            }
-        } else if (!capabilitiesToDrop.equals(other.capabilitiesToDrop)) {
-            return false;
-        }
-        if (capabilitiesToRemove == null) {
-            if (other.capabilitiesToRemove != null) {
-                return false;
-            }
-        } else if (!capabilitiesToRemove.equals(other.capabilitiesToRemove)) {
-            return false;
-        }
-        if (capasToAddSet != other.capasToAddSet) {
-            return false;
-        }
-        if (capasToDropSet != other.capasToDropSet) {
-            return false;
-        }
-        if (capasToRemoveSet != other.capasToRemoveSet) {
-            return false;
-        }
-        if (configuration == null) {
-            if (other.configuration != null) {
-                return false;
-            }
-        } else if (!configuration.equals(other.configuration)) {
-            return false;
-        }
-        if (configurationToAdd == null) {
-            if (other.configurationToAdd != null) {
-                return false;
-            }
-        } else if (!configurationToAdd.equals(other.configurationToAdd)) {
-            return false;
-        }
-        if (configurationToAddSet != other.configurationToAddSet) {
-            return false;
-        }
-        if (configurationToRemove == null) {
-            if (other.configurationToRemove != null) {
-                return false;
-            }
-        } else if (!configurationToRemove.equals(other.configurationToRemove)) {
-            return false;
-        }
-        if (configurationToRemoveSet != other.configurationToRemoveSet) {
-            return false;
-        }
         if (displayname == null) {
             if (other.displayname != null) {
                 return false;
@@ -837,33 +501,6 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         if (saltSet != other.saltSet) {
             return false;
         }
-        if (taxonomies == null) {
-            if (other.taxonomies != null) {
-                return false;
-            }
-        } else if (!taxonomies.equals(other.taxonomies)) {
-            return false;
-        }
-        if (taxonomiesToAdd == null) {
-            if (other.taxonomiesToAdd != null) {
-                return false;
-            }
-        } else if (!taxonomiesToAdd.equals(other.taxonomiesToAdd)) {
-            return false;
-        }
-        if (taxonomiesToAddSet != other.taxonomiesToAddSet) {
-            return false;
-        }
-        if (taxonomiesToRemove == null) {
-            if (other.taxonomiesToRemove != null) {
-                return false;
-            }
-        } else if (!taxonomiesToRemove.equals(other.taxonomiesToRemove)) {
-            return false;
-        }
-        if (taxonomiesToRemoveSet != other.taxonomiesToRemoveSet) {
-            return false;
-        }
         return true;
     }
 
@@ -871,4 +508,5 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
+
 }

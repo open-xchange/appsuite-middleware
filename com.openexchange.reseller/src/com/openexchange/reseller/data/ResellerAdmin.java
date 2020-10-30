@@ -50,11 +50,7 @@
 package com.openexchange.reseller.data;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 /**
  *
@@ -92,9 +88,6 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
         private String salt;
         private String displayname;
         private List<Restriction> restrictions;
-        private Set<ResellerCapability> capabilities;
-        private Set<ResellerTaxonomy> taxonomies;
-        private Map<String, ResellerConfigProperty> configuration;
 
         ResellerAdminBuilder() {
             super();
@@ -106,7 +99,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
         }
 
         public ResellerAdminBuilder parentId(Integer id) {
-            parentId = id;
+            this.parentId = id;
             return this;
         }
 
@@ -147,28 +140,13 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
             return this;
         }
 
-        public ResellerAdminBuilder capabilities(Set<ResellerCapability> capabilities) {
-            this.capabilities = capabilities;
-            return this;
-        }
-
-        public ResellerAdminBuilder taxonomies(Set<ResellerTaxonomy> taxonomies) {
-            this.taxonomies = taxonomies;
-            return this;
-        }
-
-        public ResellerAdminBuilder configuration(Map<String, ResellerConfigProperty> configuration) {
-            this.configuration = configuration;
-            return this;
-        }
-
         /**
          * Creates the {@code ResellerAdmin} instance from this builder's attributes.
          *
          * @return The {@code ResellerAdmin} instance
          */
         public ResellerAdmin build() {
-            return new ResellerAdmin(id, parentId, name, password, passwordMech, salt, displayname, restrictions, capabilities, configuration, taxonomies);
+            return new ResellerAdmin(id, parentId, name, password, passwordMech, salt, displayname, restrictions);
         }
     }
 
@@ -198,25 +176,12 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
     private final List<Restriction> restrictions;
     private final boolean restrictionsset;
 
-    private final Set<ResellerCapability> capabilities;
-    private final boolean capabilitiesSet;
-
-    private final Set<ResellerTaxonomy> taxonomies;
-    private final boolean taxonomiesSet;
-
-    private final Map<String, ResellerConfigProperty> configuration;
-    private final boolean configurationSet;
-
     private volatile Integer hash; // For lazy hash-code computation
 
     /**
      * Initializes a new {@link ResellerAdmin}.
-     * 
-     * @param taxonomies
-     * @param configuration
-     * @param capabilities
      */
-    ResellerAdmin(Integer id, Integer parentId, String name, String password, String passwordMech, String salt, String displayname, List<Restriction> restrictions, Set<ResellerCapability> capabilities, Map<String, ResellerConfigProperty> configuration, Set<ResellerTaxonomy> taxonomies) {
+    ResellerAdmin(Integer id, Integer parentId, String name, String password, String passwordMech, String salt, String displayname, List<Restriction> restrictions) {
         super();
 
         if (id != null) {
@@ -281,30 +246,6 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
         } else {
             this.restrictions = null;
             restrictionsset = false;
-        }
-
-        if (capabilities != null) {
-            this.capabilities = ImmutableSet.copyOf(capabilities);
-            capabilitiesSet = true;
-        } else {
-            this.capabilities = null;
-            capabilitiesSet = false;
-        }
-
-        if (configuration != null) {
-            this.configuration = ImmutableMap.copyOf(configuration);
-            configurationSet = true;
-        } else {
-            this.configuration = null;
-            configurationSet = false;
-        }
-
-        if (taxonomies != null) {
-            this.taxonomies = ImmutableSet.copyOf(taxonomies);
-            taxonomiesSet = true;
-        } else {
-            this.taxonomies = null;
-            taxonomiesSet = false;
         }
     }
 
@@ -411,60 +352,6 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
         return restrictionsset;
     }
 
-    /**
-     * Gets the capabilities
-     *
-     * @return The capabilities
-     */
-    public Set<ResellerCapability> getCapabilities() {
-        return capabilities;
-    }
-
-    /**
-     * Gets the capabilitiesSet
-     *
-     * @return The capabilitiesSet
-     */
-    public boolean isCapabilitiesSet() {
-        return capabilitiesSet;
-    }
-
-    /**
-     * Gets the taxonomies
-     *
-     * @return The taxonomies
-     */
-    public Set<ResellerTaxonomy> getTaxonomies() {
-        return taxonomies;
-    }
-
-    /**
-     * Gets the taxonomiesSet
-     *
-     * @return The taxonomiesSet
-     */
-    public boolean isTaxonomiesSet() {
-        return taxonomiesSet;
-    }
-
-    /**
-     * Gets the configuration
-     *
-     * @return The configuration
-     */
-    public Map<String, ResellerConfigProperty> getConfiguration() {
-        return configuration;
-    }
-
-    /**
-     * Gets the configurationSet
-     *
-     * @return The configurationSet
-     */
-    public boolean isConfigurationSet() {
-        return configurationSet;
-    }
-
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(64);
@@ -490,47 +377,36 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
         if (restrictions != null) {
             builder.append("restrictions=").append(restrictions);
         }
-        if (capabilities != null) {
-            builder.append("capabilities=").append(capabilities);
-        }
-        if (configuration != null) {
-            builder.append("configuration=").append(configuration);
-        }
-        if (taxonomies != null) {
-            builder.append("taxonomies=").append(taxonomies);
-        }
         builder.append("}");
         return builder.toString();
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((capabilities == null) ? 0 : capabilities.hashCode());
-        result = prime * result + (capabilitiesSet ? 1231 : 1237);
-        result = prime * result + ((configuration == null) ? 0 : configuration.hashCode());
-        result = prime * result + (configurationSet ? 1231 : 1237);
-        result = prime * result + ((displayname == null) ? 0 : displayname.hashCode());
-        result = prime * result + (displaynameset ? 1231 : 1237);
-        result = prime * result + ((hash == null) ? 0 : hash.hashCode());
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + (idset ? 1231 : 1237);
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + (nameset ? 1231 : 1237);
-        result = prime * result + ((parentId == null) ? 0 : parentId.hashCode());
-        result = prime * result + (parentIdset ? 1231 : 1237);
-        result = prime * result + ((password == null) ? 0 : password.hashCode());
-        result = prime * result + ((passwordMech == null) ? 0 : passwordMech.hashCode());
-        result = prime * result + (passwordMechset ? 1231 : 1237);
-        result = prime * result + (passwordset ? 1231 : 1237);
-        result = prime * result + ((restrictions == null) ? 0 : restrictions.hashCode());
-        result = prime * result + (restrictionsset ? 1231 : 1237);
-        result = prime * result + ((salt == null) ? 0 : salt.hashCode());
-        result = prime * result + (saltSet ? 1231 : 1237);
-        result = prime * result + ((taxonomies == null) ? 0 : taxonomies.hashCode());
-        result = prime * result + (taxonomiesSet ? 1231 : 1237);
-        return result;
+        Integer tmp = hash;
+        if (null == tmp) {
+            // No problem if concurrent hash-code calculation takes pace...
+            int prime = 31;
+            int result = 1;
+            result = prime * result + ((displayname == null) ? 0 : displayname.hashCode());
+            result = prime * result + (displaynameset ? 1231 : 1237);
+            result = prime * result + ((id == null) ? 0 : id.hashCode());
+            result = prime * result + (idset ? 1231 : 1237);
+            result = prime * result + ((name == null) ? 0 : name.hashCode());
+            result = prime * result + (nameset ? 1231 : 1237);
+            result = prime * result + ((parentId == null) ? 0 : parentId.hashCode());
+            result = prime * result + (parentIdset ? 1231 : 1237);
+            result = prime * result + ((password == null) ? 0 : password.hashCode());
+            result = prime * result + ((passwordMech == null) ? 0 : passwordMech.hashCode());
+            result = prime * result + (passwordMechset ? 1231 : 1237);
+            result = prime * result + (passwordset ? 1231 : 1237);
+            result = prime * result + (saltSet ? 1231 : 1237);
+            result = prime * result + ((restrictions == null) ? 0 : restrictions.hashCode());
+            result = prime * result + (restrictionsset ? 1231 : 1237);
+            tmp = Integer.valueOf(result);
+            hash = tmp;
+        }
+        return tmp.intValue();
     }
 
     @Override
@@ -538,68 +414,43 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof ResellerAdmin)) {
             return false;
         }
         ResellerAdmin other = (ResellerAdmin) obj;
-        if (capabilities == null) {
-            if (other.capabilities != null) {
-                return false;
-            }
-        } else if (!capabilities.equals(other.capabilities)) {
-            return false;
-        }
-        if (capabilitiesSet != other.capabilitiesSet) {
-            return false;
-        }
-        if (configuration == null) {
-            if (other.configuration != null) {
-                return false;
-            }
-        } else if (!configuration.equals(other.configuration)) {
-            return false;
-        }
-        if (configurationSet != other.configurationSet) {
-            return false;
-        }
-        if (displayname == null) {
-            if (other.displayname != null) {
-                return false;
-            }
-        } else if (!displayname.equals(other.displayname)) {
-            return false;
-        }
-        if (displaynameset != other.displaynameset) {
-            return false;
-        }
-        if (hash == null) {
-            if (other.hash != null) {
-                return false;
-            }
-        } else if (!hash.equals(other.hash)) {
-            return false;
-        }
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
+
+        // Easy ones first
+        if (nameset != other.nameset) {
             return false;
         }
         if (idset != other.idset) {
             return false;
         }
-        if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!name.equals(other.name)) {
+        if (parentIdset != other.parentIdset) {
             return false;
         }
-        if (nameset != other.nameset) {
+        if (displaynameset != other.displaynameset) {
+            return false;
+        }
+        if (passwordMechset != other.passwordMechset) {
+            return false;
+        }
+        if (saltSet != other.saltSet) {
+            return false;
+        }
+        if (passwordset != other.passwordset) {
+            return false;
+        }
+        if (restrictionsset != other.restrictionsset) {
+            return false;
+        }
+
+        // Compare other values
+        if (id == null) {
+            if (other.id != null) {
+                return false;
+            }
+        } else if (!id.equals(other.id)) {
             return false;
         }
         if (parentId == null) {
@@ -609,7 +460,18 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
         } else if (!parentId.equals(other.parentId)) {
             return false;
         }
-        if (parentIdset != other.parentIdset) {
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        if (displayname == null) {
+            if (other.displayname != null) {
+                return false;
+            }
+        } else if (!displayname.equals(other.displayname)) {
             return false;
         }
         if (password == null) {
@@ -626,12 +488,6 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
         } else if (!passwordMech.equals(other.passwordMech)) {
             return false;
         }
-        if (passwordMechset != other.passwordMechset) {
-            return false;
-        }
-        if (passwordset != other.passwordset) {
-            return false;
-        }
         if (restrictions == null) {
             if (other.restrictions != null) {
                 return false;
@@ -639,29 +495,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
         } else if (!restrictions.equals(other.restrictions)) {
             return false;
         }
-        if (restrictionsset != other.restrictionsset) {
-            return false;
-        }
-        if (salt == null) {
-            if (other.salt != null) {
-                return false;
-            }
-        } else if (!salt.equals(other.salt)) {
-            return false;
-        }
-        if (saltSet != other.saltSet) {
-            return false;
-        }
-        if (taxonomies == null) {
-            if (other.taxonomies != null) {
-                return false;
-            }
-        } else if (!taxonomies.equals(other.taxonomies)) {
-            return false;
-        }
-        if (taxonomiesSet != other.taxonomiesSet) {
-            return false;
-        }
+
         return true;
     }
 
