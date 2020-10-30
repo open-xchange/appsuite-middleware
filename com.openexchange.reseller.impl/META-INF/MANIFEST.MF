@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Reseller Impl
+Bundle-Name: The Open-Xchange Reseller Implementation
 Bundle-SymbolicName: com.openexchange.reseller.impl
 Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
