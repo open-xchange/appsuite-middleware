@@ -65,6 +65,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.config.MailProxyConfig;
+import com.openexchange.net.HostList;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.config.IPOP3Properties;
@@ -400,10 +402,19 @@ public final class POP3CapabilityCache {
                             proxyHost = proxyHost.substring(0, i);
                         }
                         proxyPort = PropUtil.getIntProperty(System.getProperties(), "mail.pop3.proxy.port", proxyPort);
-                        if (connectionTimeout > 0) {
-                            s.connect(new InetSocketAddress(proxyHost, proxyPort), connectionTimeout);
+                        HostList nonProxyHosts = MailProxyConfig.getInstance().getPop3NonProxyHostList();
+                        if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(key.getAddress())) {
+                            if (connectionTimeout > 0) {
+                                s.connect(key, connectionTimeout);
+                            } else {
+                                s.connect(key);
+                            }
                         } else {
-                            s.connect(new InetSocketAddress(proxyHost, proxyPort));
+                            if (connectionTimeout > 0) {
+                                s.connect(new InetSocketAddress(proxyHost, proxyPort), connectionTimeout);
+                            } else {
+                                s.connect(new InetSocketAddress(proxyHost, proxyPort));
+                            }
                         }
                     }
                 } catch (IOException e) {
