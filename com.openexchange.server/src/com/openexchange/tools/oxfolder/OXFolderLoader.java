@@ -56,6 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
@@ -101,11 +102,11 @@ public final class OXFolderLoader {
     /**
      * Loads specified folder from database.
      *
-     * @param folderId The folder ID
+     * @param folderId The folder identifier
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @param loadPermissions <code>true</code> to load folder's permissions, otherwise <code>false</code>
-     * @param loadSubfolderList <code>true</code> to load subfolders, otherwise <code>false</code>
+     * @param loadSubfolderList <code>true</code> to load sub-folders, otherwise <code>false</code>
      * @return The loaded folder object from database
      * @throws OXException If folder cannot be loaded
      */
@@ -119,11 +120,11 @@ public final class OXFolderLoader {
     /**
      * Loads specified folder from database.
      *
-     * @param folderId The folder ID
+     * @param folderId The folder identifier
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @param loadPermissions <code>true</code> to load folder's permissions, otherwise <code>false</code>
-     * @param loadSubfolderList <code>true</code> to load subfolders, otherwise <code>false</code>
+     * @param loadSubfolderList <code>true</code> to load sub-folders, otherwise <code>false</code>
      * @param table The folder's working or backup table name
      * @param permTable The folder permissions' working or backup table name
      * @return The loaded folder object from database
@@ -178,7 +179,7 @@ public final class OXFolderLoader {
                     }
                 }
                 if (loadSubfolderList) {
-                    final ArrayList<Integer> subfolderList = getSubfolderIds(folderId, ctx, readCon, table);
+                    List<Integer> subfolderList = getSubfolderIds(folderId, ctx, readCon, table);
                     folderObj.setSubfolderIds(subfolderList);
                 }
 
@@ -202,11 +203,11 @@ public final class OXFolderLoader {
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
      *
-     * @param folderId The folder ID
+     * @param folderId The folder identifier
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @return The folder's permissions
-     * @throws SQLException If a SQL error occurs
+     * @throws SQLException If an SQL error occurs
      * @throws OXException If a pooling error occurs
      */
     public static OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
@@ -219,12 +220,12 @@ public final class OXFolderLoader {
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
      *
-     * @param folderId The folder ID
+     * @param folderId The folder identifier
      * @param ctx The context
      * @param readCon A connection with read capability; may be <code>null</code> to fetch from pool
      * @param table Either folder permissions working or backup table name
      * @return The folder's permissions
-     * @throws SQLException If a SQL error occurs
+     * @throws SQLException If an SQL error occurs
      * @throws OXException If a pooling error occurs
      */
     public static OCLPermission[] getFolderPermissions(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
@@ -264,13 +265,13 @@ public final class OXFolderLoader {
     }
 
     /**
-     * Gets the subfolder IDs and names of specified folder.
+     * Gets the sub-folder identifiers and names of specified folder.
      *
-     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param folderId The identifier of the folder whose sub-folders identifiers shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
-     * @return The subfolder IDs of specified folder
-     * @throws SQLException If a SQL error occurs
+     * @return The sub-folder identifiers of specified folder
+     * @throws SQLException If an SQL error occurs
      * @throws OXException If a pooling error occurs
      */
     public static List<IdAndName> getSubfolderIdAndNames(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
@@ -280,14 +281,14 @@ public final class OXFolderLoader {
     private static final String SQL_SEL2 = "SELECT fuid, fname FROM #TABLE# WHERE cid = ? AND parent = ? ORDER BY default_flag DESC, fname";
 
     /**
-     * Gets the subfolder IDs and names of specified folder.
+     * Gets the sub-folder identifiers and names of specified folder.
      *
-     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param folderId The identifier of the folder whose sub-folders identifiers shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @param table The folder's working or backup table name
-     * @return The subfolder IDs of specified folder
-     * @throws SQLException If a SQL error occurs
+     * @return The sub-folder identifiers of specified folder
+     * @throws SQLException If an SQL error occurs
      * @throws OXException If a pooling error occurs
      */
     public static List<IdAndName> getSubfolderIdAndNames(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
@@ -315,33 +316,33 @@ public final class OXFolderLoader {
     }
 
     /**
-     * Gets the subfolder IDs of specified folder.
+     * Gets the sub-folder identifiers of specified folder.
      *
-     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param folderId The identifier of the folder whose sub-folders identifiers shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
-     * @return The subfolder IDs of specified folder
-     * @throws SQLException If a SQL error occurs
+     * @return The sub-folder identifiers of specified folder
+     * @throws SQLException If an SQL error occurs
      * @throws OXException If a pooling error occurs
      */
-    public static ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
+    public static List<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
         return getSubfolderIds(folderId, ctx, readConArg, TABLE_OT);
     }
 
     private static final String SQL_SEL = "SELECT fuid FROM #TABLE# WHERE cid = ? AND parent = ? ORDER BY default_flag DESC, fname";
 
     /**
-     * Gets the subfolder IDs of specified folder.
+     * Gets the sub-folder identifiers of specified folder.
      *
-     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param folderId The identifier of the folder whose sub-folders identifiers shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @param table The folder's working or backup table name
-     * @return The subfolder IDs of specified folder
-     * @throws SQLException If a SQL error occurs
+     * @return The sub-folder identifiers of specified folder
+     * @throws SQLException If an SQL error occurs
      * @throws OXException If a pooling error occurs
      */
-    public static ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
+    public static List<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
         Connection readCon = readConArg;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -356,10 +357,10 @@ public final class OXFolderLoader {
             stmt.setInt(2, folderId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                return new ArrayList<Integer>(0);
+                return Collections.emptyList();
             }
 
-            ArrayList<Integer> retval = new ArrayList<Integer>();
+            List<Integer> retval = new ArrayList<Integer>();
             do {
                 retval.add(Integer.valueOf(rs.getInt(1)));
             } while (rs.next());
@@ -370,13 +371,13 @@ public final class OXFolderLoader {
     }
 
     /**
-     * Gets the subfolder IDs of specified folder.
+     * Gets the sub-folder identifiers of specified folder.
      *
-     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param folderId The identifier of the folder whose sub-folder identifiers shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
-     * @return The subfolder IDs of specified folder
-     * @throws SQLException If a SQL error occurs
+     * @return The sub-folder identifiers of specified folder
+     * @throws SQLException If an SQL error occurs
      * @throws OXException If a pooling error occurs
      */
     public static TIntList getSubfolderInts(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
@@ -384,14 +385,14 @@ public final class OXFolderLoader {
     }
 
     /**
-     * Gets the subfolder IDs of specified folder.
+     * Gets the sub-folder identifiers of specified folder.
      *
-     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param folderId The identifier of the folder whose sub-folders identifiers shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
      * @param table The folder's working or backup table name
-     * @return The subfolder IDs of specified folder
-     * @throws SQLException If a SQL error occurs
+     * @return The sub-folder identifiers of specified folder
+     * @throws SQLException If an SQL error occurs
      * @throws OXException If a pooling error occurs
      */
     public static TIntList getSubfolderInts(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
@@ -456,9 +457,9 @@ public final class OXFolderLoader {
         }
 
         /**
-         * Gets the folder ID
+         * Gets the folder identifier
          *
-         * @return The folder ID
+         * @return The folder identifier
          */
         public int getFolderId() {
             return fuid;

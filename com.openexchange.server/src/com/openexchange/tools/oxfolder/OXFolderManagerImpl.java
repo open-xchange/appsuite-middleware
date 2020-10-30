@@ -1303,16 +1303,17 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
             /*
              * Check if target is a descendant folder
              */
-            final TIntList parentIDList = new TIntArrayList(1);
+            TIntList parentIDList = new TIntArrayList(1);
             parentIDList.add(storageSrc.getObjectID());
             if (OXFolderUtility.isDescendentFolder(parentIDList, targetFolderId, readCon, ctx)) {
                 throw OXFolderExceptionCode.NO_SUBFOLDER_MOVE.create(I(storageSrc.getObjectID()), I(ctx.getContextId()));
             }
+            parentIDList = null;
             /*
              * Count all moveable subfolders: TODO: Recursive check???
              */
-            final int numOfMoveableSubfolders = OXFolderSQL.getNumOfMoveableSubfolders(storageSrc.getObjectID(), user.getId(), user.getGroups(), readCon, ctx);
-            if (numOfMoveableSubfolders != storageSrc.getSubfolderIds(true, ctx).size()) {
+            int numOfMoveableSubfolders = OXFolderSQL.getNumOfMoveableSubfolders(storageSrc.getObjectID(), user.getId(), user.getGroups(), readCon, ctx);
+            if (numOfMoveableSubfolders < storageSrc.getSubfolderIds(true, ctx).size()) {
                 throw OXFolderExceptionCode.NO_SUBFOLDER_MOVE_ACCESS.create(I(session.getUserId()), I(storageSrc.getObjectID()), I(ctx.getContextId()));
             }
         }

@@ -1545,7 +1545,7 @@ public final class OXFolderSQL {
         RetryingTransactionClosure.execute(updateSubfolderFlagClosure, folderId, writeCon);
     }
 
-    private static final String SQL_NUMSUB = "SELECT COUNT(ot.fuid) FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op" + " ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ?" + " WHERE op.permission_id IN #IDS# AND op.admin_flag > 0 AND ot.parent = ?";
+    private static final String SQL_NUMSUB = "SELECT ot.fuid FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? WHERE op.permission_id IN #IDS# AND op.admin_flag > 0 AND ot.parent = ?";
 
     /**
      * @return the number of subfolders of given folder which can be moved according to user's permissions
@@ -1565,18 +1565,23 @@ public final class OXFolderSQL {
             stmt.setInt(2, ctx.getContextId());
             stmt.setInt(3, folderId);
             rs = executeQuery(stmt);
-            if (rs.next()) {
-                return rs.getInt(1);
+            if (!rs.next()) {
+                return 0;
             }
+
+            TIntSet ids = new TIntHashSet();
+            do {
+                ids.add(rs.getInt(1));
+            } while (rs.next());
+            return ids.size();
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
-        return 0;
     }
 
-    private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions " + "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, type, sharedParentFolder) " + "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, type, sharedParentFolder) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
-    private static final String SQL_UPDATE_PARENT_SUBFOLDER_FLAG = "UPDATE oxfolder_tree " + "SET subfolder_flag = 1, changing_date = ? WHERE cid = ? AND fuid = ?";
+    private static final String SQL_UPDATE_PARENT_SUBFOLDER_FLAG = "UPDATE oxfolder_tree SET subfolder_flag = 1, changing_date = ? WHERE cid = ? AND fuid = ?";
 
     static void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folder, final long creatingTime, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
         insertFolderSQL(newFolderID, userId, folder, creatingTime, false, ctx, writeConArg);
