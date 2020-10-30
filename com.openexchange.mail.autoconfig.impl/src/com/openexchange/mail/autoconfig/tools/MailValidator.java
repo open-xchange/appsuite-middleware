@@ -66,7 +66,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.config.MailProxyConfig;
 import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.net.HostList;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.sun.mail.smtp.SMTPTransport;
 import com.sun.mail.util.PropUtil;
@@ -352,7 +354,21 @@ public class MailValidator {
                     proxyHost = proxyHost.substring(0, i);
                 }
                 proxyPort = PropUtil.getIntProperty(System.getProperties(), "mail." + name + ".proxy.port", proxyPort);
-                s.connect(new InetSocketAddress(proxyHost, proxyPort), DEFAULT_CONNECT_TIMEOUT);
+                HostList nonProxyHosts;
+                if ("imap".equals(name)) {
+                    nonProxyHosts = MailProxyConfig.getInstance().getImapNonProxyHostList();
+                } else if ("smtp".equals(name)) {
+                    nonProxyHosts = MailProxyConfig.getInstance().getSmtpNonProxyHostList();
+                } else if ("pop3".equals(name)) {
+                    nonProxyHosts = MailProxyConfig.getInstance().getPop3NonProxyHostList();
+                } else {
+                    nonProxyHosts = HostList.EMPTY;
+                }
+                if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(host)) {
+                    s.connect(new InetSocketAddress(host, port), DEFAULT_CONNECT_TIMEOUT);
+                } else {
+                    s.connect(new InetSocketAddress(proxyHost, proxyPort), DEFAULT_CONNECT_TIMEOUT);
+                }
             }
             s.setSoTimeout(DEFAULT_TIMEOUT);
             InputStream in = s.getInputStream();

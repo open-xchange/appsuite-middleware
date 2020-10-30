@@ -72,6 +72,8 @@ import com.openexchange.imap.util.HostAndPort;
 import com.openexchange.java.BoundaryExceededException;
 import com.openexchange.java.BoundedStringBuilder;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.config.MailProxyConfig;
+import com.openexchange.net.HostList;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.sun.mail.util.PropUtil;
 
@@ -319,10 +321,19 @@ public final class IMAPCapabilityAndGreetingCache {
                             proxyHost = proxyHost.substring(0, i);
                         }
                         proxyPort = PropUtil.getIntProperty(System.getProperties(), "mail.imap.proxy.port", proxyPort);
-                        if (connectionTimeout > 0) {
-                            s.connect(new InetSocketAddress(proxyHost, proxyPort), connectionTimeout);
+                        HostList nonProxyHosts = MailProxyConfig.getInstance().getImapNonProxyHostList();
+                        if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(endpoint.getHost())) {
+                            if (connectionTimeout > 0) {
+                                s.connect(toSocketAddress(endpoint) , connectionTimeout);
+                            } else {
+                                s.connect(toSocketAddress(endpoint));
+                            }
                         } else {
-                            s.connect(new InetSocketAddress(proxyHost, proxyPort));
+                            if (connectionTimeout > 0) {
+                                s.connect(new InetSocketAddress(proxyHost, proxyPort), connectionTimeout);
+                            } else {
+                                s.connect(new InetSocketAddress(proxyHost, proxyPort));
+                            }
                         }
                     }
                 }
