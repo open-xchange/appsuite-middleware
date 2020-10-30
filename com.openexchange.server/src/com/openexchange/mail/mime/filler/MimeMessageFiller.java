@@ -149,6 +149,7 @@ import com.openexchange.mail.utils.IpAddressRenderer;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -1983,7 +1984,8 @@ public class MimeMessageFiller {
         MailExceptionCode.MAIL_NOT_FOUND,
         MailExceptionCode.ATTACHMENT_NOT_FOUND,
         SnippetExceptionCodes.SNIPPET_NOT_FOUND,
-        SnippetExceptionCodes.ATTACHMENT_NOT_FOUND);
+        SnippetExceptionCodes.ATTACHMENT_NOT_FOUND,
+        MailAccountExceptionCodes.NOT_FOUND);
 
     private static boolean isIgnorableException(OXException e) {
         return IGNORABLE_CODES.contains(e) || isFolderNotFound(e);
