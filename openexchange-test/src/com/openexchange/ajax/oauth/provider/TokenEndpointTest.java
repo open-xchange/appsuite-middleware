@@ -150,7 +150,7 @@ public class TokenEndpointTest extends EndpointTest {
             }
         }
 
-        HttpPost redeemToken = new HttpPost(new URIBuilder().setScheme("https").setHost(hostname).setPath(TOKEN_ENDPOINT).build());
+        HttpPost redeemToken = new HttpPost(new URIBuilder().setScheme(scheme).setHost(hostname).setPath(TOKEN_ENDPOINT).build());
         redeemToken.setEntity(new UrlEncodedFormEntity(requestParams));
         HttpResponse tokenResponse = client.execute(redeemToken);
         String responseBody = EntityUtils.toString(tokenResponse.getEntity());
@@ -174,7 +174,7 @@ public class TokenEndpointTest extends EndpointTest {
             }
         }
         requestParams.add(new BasicNameValuePair(param, "invalid"));
-        redeemToken = new HttpPost(new URIBuilder().setScheme("https").setHost(hostname).setPath(TOKEN_ENDPOINT).build());
+        redeemToken = new HttpPost(new URIBuilder().setScheme(scheme).setHost(hostname).setPath(TOKEN_ENDPOINT).build());
         tokenResponse = client.execute(redeemToken);
         responseBody = EntityUtils.toString(tokenResponse.getEntity());
         assertEquals(HttpStatus.SC_BAD_REQUEST, tokenResponse.getStatusLine().getStatusCode());
@@ -204,7 +204,7 @@ public class TokenEndpointTest extends EndpointTest {
             }
         }
 
-        HttpPost redeemToken = new HttpPost(new URIBuilder().setScheme("https").setHost(hostname).setPath(TOKEN_ENDPOINT).build());
+        HttpPost redeemToken = new HttpPost(new URIBuilder().setScheme(scheme).setHost(hostname).setPath(TOKEN_ENDPOINT).build());
         redeemToken.setEntity(new UrlEncodedFormEntity(requestParams));
         HttpResponse tokenResponse = client.execute(redeemToken);
         String responseBody = EntityUtils.toString(tokenResponse.getEntity());
@@ -228,7 +228,7 @@ public class TokenEndpointTest extends EndpointTest {
             }
         }
         requestParams.add(new BasicNameValuePair(param, "invalid"));
-        redeemToken = new HttpPost(new URIBuilder().setScheme("https").setHost(hostname).setPath(TOKEN_ENDPOINT).build());
+        redeemToken = new HttpPost(new URIBuilder().setScheme(scheme).setHost(hostname).setPath(TOKEN_ENDPOINT).build());
         tokenResponse = client.execute(redeemToken);
         responseBody = EntityUtils.toString(tokenResponse.getEntity());
         assertEquals(HttpStatus.SC_BAD_REQUEST, tokenResponse.getStatusLine().getStatusCode());

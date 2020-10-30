@@ -107,7 +107,13 @@ public class POSTRequest extends AbstractRequest<POSTRequest> {
 
         List<NameValuePair> params = prepareParams(requestSpecificParams);
         try {
-            HttpPost request = new HttpPost(new URIBuilder().setScheme(scheme).setHost(hostname).setPath(EndpointTest.AUTHORIZATION_ENDPOINT).build());
+            HttpPost request = new HttpPost(
+                new URIBuilder()
+                    .setScheme(scheme)
+                    .setHost(hostname)
+                    .setPort(port)
+                    .setPath(EndpointTest.AUTHORIZATION_ENDPOINT)
+                    .build());
 
             for (String header : headers.keySet()) {
                 String value = headers.get(header);

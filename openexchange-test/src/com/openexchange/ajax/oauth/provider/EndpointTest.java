@@ -82,7 +82,6 @@ import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.ProvisioningSetup;
-import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
@@ -120,6 +119,8 @@ public abstract class EndpointTest {
 
     protected TestUser testUser;
 
+    protected static String scheme;
+
     protected static String hostname;
 
     protected TestContext testContext;
@@ -131,6 +132,7 @@ public abstract class EndpointTest {
     @BeforeClass
     public static void beforeClass() throws OXException {
         ProvisioningSetup.init();
+        scheme = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
         hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
     }
 
@@ -138,9 +140,9 @@ public abstract class EndpointTest {
     public void before() throws Exception {
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         testUser = testContext.acquireUser();
-        noReplyUser = testContext.getNoReplyUser();
-        noReplyClient = new AJAXClient(noReplyUser);
-        noReplyClient.execute(new ClearMailsRequest());
+        //noReplyUser = testContext.getNoReplyUser();
+        //noReplyClient = new AJAXClient(noReplyUser);
+        //noReplyClient.execute(new ClearMailsRequest());
         // prepare http client
         client = new DefaultHttpClient(new BasicClientConnectionManager());
         HttpParams params = client.getParams();

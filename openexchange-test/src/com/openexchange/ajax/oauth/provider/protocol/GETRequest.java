@@ -65,7 +65,12 @@ public final class GETRequest extends AbstractRequest<GETRequest> {
     }
 
     public GETResponse execute(HttpClient client) throws IOException {
-        URIBuilder uriBuilder = new URIBuilder().setScheme(scheme).setHost(hostname).setPath(EndpointTest.AUTHORIZATION_ENDPOINT);
+        URIBuilder uriBuilder = new URIBuilder()
+            .setScheme(scheme)
+            .setHost(hostname)
+            .setPort(port)
+            .setPath(EndpointTest.AUTHORIZATION_ENDPOINT);
+
         for (NameValuePair param : prepareParams()) {
             uriBuilder.setParameter(param.getName(), param.getValue());
         }

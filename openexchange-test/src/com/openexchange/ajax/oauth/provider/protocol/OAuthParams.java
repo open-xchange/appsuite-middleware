@@ -56,6 +56,7 @@ import com.openexchange.java.util.UUIDs;
  */
 public class OAuthParams {
 
+    private String scheme = "https";
     private String hostname = "localhost";
     private String clientId;
     private String redirectURI;
@@ -63,6 +64,11 @@ public class OAuthParams {
     private String state = UUIDs.getUnformattedStringFromRandom();
     private String responseType = "code";
     private String clientSecret;
+
+    public OAuthParams setScheme(String scheme) {
+        this.scheme = scheme;
+        return this;
+    }
 
     public OAuthParams setHostname(String hostname) {
         this.hostname = hostname;
@@ -97,6 +103,10 @@ public class OAuthParams {
     public OAuthParams setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
         return this;
+    }
+
+    public String getScheme() {
+        return scheme;
     }
 
     public String getHostname() {

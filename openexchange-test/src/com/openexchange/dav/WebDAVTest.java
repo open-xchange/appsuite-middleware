@@ -186,7 +186,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
             oAuthClientApp = AbstractOAuthTest.registerTestClient();
             DefaultHttpClient client = OAuthSession.newOAuthHttpClient();
             String state = UUIDs.getUnformattedStringFromRandom();
-            OAuthParams params = new OAuthParams().setHostname(Config.getHostname()).setClientId(oAuthClientApp.getId()).setClientSecret(oAuthClientApp.getSecret()).setRedirectURI(oAuthClientApp.getRedirectURIs().get(0)).setScope("carddav caldav").setState(state);
+            OAuthParams params = new OAuthParams().setScheme(Config.getProtocol()).setHostname(Config.getHostname()).setClientId(oAuthClientApp.getId()).setClientSecret(oAuthClientApp.getSecret()).setRedirectURI(oAuthClientApp.getRedirectURIs().get(0)).setScope("carddav caldav").setState(state);
             oAuthGrant = Protocol.obtainAccess(client, params, testUser.getLogin(), testUser.getPassword());
         }
     }
