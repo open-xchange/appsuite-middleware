@@ -4,8 +4,10 @@
     tags:
       - Mail
     summary: Resolves a given share reference
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []      
+        - oauth:
+          - read_mails    
     responses:
       '200':
         description: >

@@ -4,8 +4,11 @@
     tags:
       - Mail
     summary: Copies a mail to another folder.
+    security: 
+        - session: []      
+        - oauth:
+          - write_mails    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Object ID of the requested mail that shall be copied.

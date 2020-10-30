@@ -84,13 +84,13 @@ import com.openexchange.testing.httpclient.modules.UserApi;
 
 /**
  * {@link ITipOnBehalfTest}
- * 
+ *
  * Scenario:
  * User A from context 1
  * user C from context 1
- * 
+ *
  * User B from context 2
- * 
+ *
  * Share a calendar with another user (user C) of the same context (context 1) to check the "On behalf" functionality
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -161,7 +161,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         String summary = this.getClass().getSimpleName() + ".testOnBehalfOfInvitation";
         EventData data = EventFactory.createSingleTwoHourEvent(getUserId(), summary, defaultFolderId);
         Attendee replyingAttendee = prepareAttendees(data);
-        ChronosCalendarResultResponse response = new ChronosApi(apiClientC1_2).createEvent(apiClientC1_2.getSession(), sharedFolder, data, Boolean.FALSE, null, Boolean.TRUE, null, null, null, Boolean.FALSE, null);
+        ChronosCalendarResultResponse response = new ChronosApi(apiClientC1_2).createEvent(sharedFolder, data, Boolean.FALSE, null, Boolean.TRUE, null, null, null, Boolean.FALSE, null);
         assertNotNull(response);
         assertNull(response.getError());
         EventData secretaryEvent = response.getData().getCreated().get(0);
@@ -177,7 +177,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
 
         /*
          * Check notification mail within organizers inbox
-         * 
+         *
          */
         rememberMail(receiveNotification(apiClient, testUser.getLogin(), summary));
 

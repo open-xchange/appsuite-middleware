@@ -4,8 +4,10 @@
     tags:
       - Reminder
     summary: Deletes reminders.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security:
+      - session: []     
+      - oauth:
+        - write_reminders     
     responses:
       '200':
         description: >

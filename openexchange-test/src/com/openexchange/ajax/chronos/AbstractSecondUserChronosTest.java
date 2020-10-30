@@ -72,7 +72,7 @@ public class AbstractSecondUserChronosTest extends AbstractChronosTest {
         EnhancedApiClient enhancedApiClient2 = generateEnhancedClient(testUser2);
         rememberClient(enhancedApiClient2);
         userApi2 = new UserApi(apiClient2, enhancedApiClient2, testUser2, true);
-        defaultFolderId2 = getDefaultFolder(userApi2.getSession(), userApi2.getFoldersApi());
+        defaultFolderId2 = getDefaultFolder(userApi2.getFoldersApi());
         eventManager2 = new EventManager(userApi2, defaultFolderId2);
     }
 

@@ -77,7 +77,7 @@ public class DistributionListMemberSortingTest extends AbstractApiClientContactT
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        
+
         ContactData contact2 = createContactObject("Contact");
         contact2.setFirstName("BBB");
         contact2.setLastName("BBB");
@@ -89,7 +89,7 @@ public class DistributionListMemberSortingTest extends AbstractApiClientContactT
         contact1.setLastName("AAA");
         conAID = createContact(contact1);
         contact1.setId(conAID);
-        
+
         contactObj = new ContactData();
         contactObj.setDisplayName("DistributionList");
         contactObj.setMarkAsDistributionlist(Boolean.TRUE);
@@ -113,7 +113,7 @@ public class DistributionListMemberSortingTest extends AbstractApiClientContactT
 
     @Test
     public void testSorting() throws ApiException {
-        ContactResponse response = contactsApi.getContact(getSessionId(), conId, contactFolderId);
+        ContactResponse response = contactsApi.getContact(conId, contactFolderId);
         Assert.assertNull(response.getErrorDesc(), response.getError());
         Assert.assertNotNull("Data shouldn't be null", response.getData());
         ContactData data = response.getData();

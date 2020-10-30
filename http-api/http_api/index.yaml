@@ -278,7 +278,35 @@ tags:
 paths: 
    source: ./paths/ 
 
-components: 
+components:
+  securitySchemes:
+    session:
+      type: apiKey
+      in: query
+      name: session
+      description: The default session based security scheme. Used in combination with a session cookie.
+    oauth: 
+      type: oauth2
+      description: The security scheme for oauth enabled modules of the middleware
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.server.example.com/auth/realms/myrealm/protocol/openid-connect/auth
+          tokenUrl: https://auth.server.example.com/auth/realms/myrealm/protocol/openid-connect/token          
+          scopes:
+            write_userconfig: allows the user to make changes to the configuration
+            read_mails: allows to read mails
+            write_mails: allows to store, delete and sent mails
+            read_contacts: allows to read contacts
+            write_contacts: allows to create, update and delete contacts
+            read_calendar: allows to read events in the calendar
+            write_calendar: allows to create, update and delete events in the calendar
+            read_mailaccounts: allows to read the data of mail accounts
+            write_mailaccounts: allows to create, update and delete mail accounts
+            read_tasks: allows to read tasks
+            write_tasks: allows to create, update and delete tasks
+            read_reminders: allows read reminders
+            write_reminders: allows to update and delete reminders
+
   schemas: 
    $ref: ./components/schemas/index.yaml 
 

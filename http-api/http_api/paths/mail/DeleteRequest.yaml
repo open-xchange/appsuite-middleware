@@ -4,8 +4,11 @@
     tags:
       - Mail
     summary: Deletes mails.
+    security: 
+        - session: []
+        - oauth:
+          - write_mails    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
         description: 'Not IMAP: timestamp of the last update of the deleted mails.'

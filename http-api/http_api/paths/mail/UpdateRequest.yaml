@@ -6,6 +6,10 @@
     summary: >-
       Updates a mail or a folder's messages and/or moves a mail to another
       folder.
+    security: 
+        - session: []
+        - oauth:
+          - write_mails   
     description: >
       The update request can perform an update of the color label and flags of
       one mail object. Beside it
@@ -21,7 +25,6 @@
 
       accordingly.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - in: query
         name: id

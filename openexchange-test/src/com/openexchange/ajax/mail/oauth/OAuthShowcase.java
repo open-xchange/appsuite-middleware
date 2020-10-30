@@ -85,7 +85,6 @@ import com.openexchange.testing.httpclient.modules.SnippetApi;
 public class OAuthShowcase extends AbstractOAuthAPIClient {
 
     private static final String TREE = "0";
-    private static final String FAKE_SESSION_ID = USE_PREFIX ? "SOME_FAKE_ID" : null;
 
     private FoldersApi fApi;
     private MailApi mApi;
@@ -104,7 +103,7 @@ public class OAuthShowcase extends AbstractOAuthAPIClient {
     public void showcaseMailViaOAuth() throws ApiException, JSONException {
 
         // 1. Get all visible folders with mail content
-        FoldersVisibilityResponse visibleFolderResp = fApi.getVisibleFolders(FAKE_SESSION_ID, "mail", "1,300,314,308,316", TREE, null, Boolean.TRUE);
+        FoldersVisibilityResponse visibleFolderResp = fApi.getVisibleFolders("mail", "1,300,314,308,316", TREE, null, Boolean.TRUE);
         assertTrue(visibleFolderResp.getErrorDesc(), visibleFolderResp.getError() == null);
         ArrayList<ArrayList<Object>> priv = (ArrayList<ArrayList<Object>>) visibleFolderResp.getData().getPrivate();
         printList("Visible folders: ", priv);
@@ -114,34 +113,34 @@ public class OAuthShowcase extends AbstractOAuthAPIClient {
         String inboxFolderId = (String) inbox.get().get(0);
         print("Found inbox folder: " + inboxFolderId);
         // 2. Get inbox folder with all infos
-        FolderResponse resp = fApi.getFolder(FAKE_SESSION_ID, inboxFolderId, TREE, null, null);
+        FolderResponse resp = fApi.getFolder(inboxFolderId, TREE, null, null);
         assertTrue(resp.getError() == null);
         print("Details of inbox: " + new JSONObject(resp.getData().toJson()).toString(4));
 
         // 3. Get mail ids for the inbox
-        MailsResponse allMailsResp = mApi.getAllMails(FAKE_SESSION_ID, inboxFolderId, "600,607", null, Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null);
+        MailsResponse allMailsResp = mApi.getAllMails(inboxFolderId, "600,607", null, Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null);
         assertNull(allMailsResp.getError());
         print("Mails in the inbox: " + allMailsResp.getData().toString());
 
         // 4. Get first mail in the inbox
-        MailResponse mailResp = mApi.getMail(FAKE_SESSION_ID, inboxFolderId, allMailsResp.getData().get(0).get(0), null, null, null, null, Boolean.FALSE, null, null, null, null, null, null, null);
+        MailResponse mailResp = mApi.getMail(inboxFolderId, allMailsResp.getData().get(0).get(0), null, null, null, null, Boolean.FALSE, null, null, null, null, null, null, null);
         assertNull(mailResp.getError());
         print("Content of the first mail: " + new JSONObject(mailResp.getData().toJson()).toString(4));
 
         // 5. Sent mail to other user in the same context
-        String sendMail = mApi.sendMail(FAKE_SESSION_ID, createMail(), null);
+        String sendMail = mApi.sendMail(createMail(), null);
 
         print("Mail send:" + Jsoup.parse(sendMail).html());
     }
 
     @Test
     public void showcaseSnippetViaOAuth() throws ApiException, JSONException {
-        SnippetsResponse allSnippetsResp = sApi.getAllSnippets(FAKE_SESSION_ID, null);
+        SnippetsResponse allSnippetsResp = sApi.getAllSnippets(null);
         assertNull(allSnippetsResp.getErrorDesc(), allSnippetsResp.getError());
         printList("All snippets", allSnippetsResp.getData());
 
         if (allSnippetsResp.getData().size() > 0) {
-            SnippetResponse snippetResponse = sApi.getSnippet(FAKE_SESSION_ID, allSnippetsResp.getData().get(0).getId());
+            SnippetResponse snippetResponse = sApi.getSnippet(allSnippetsResp.getData().get(0).getId());
             assertNull(snippetResponse.getError());
             print("Snippet 1: " + new JSONObject(snippetResponse.getData().toJson()).toString(4));
         }
@@ -152,11 +151,11 @@ public class OAuthShowcase extends AbstractOAuthAPIClient {
                    .displayname("showcase")
                    .content("<p>test</p>");
         // @formatter:on
-        SnippetUpdateResponse createSnippetResp = sApi.createSnippet(FAKE_SESSION_ID, snippetData);
+        SnippetUpdateResponse createSnippetResp = sApi.createSnippet(snippetData);
         assertNull(createSnippetResp.getError());
         print("New snippet: " + createSnippetResp.getData());
 
-        SnippetResponse snippetResponse2 = sApi.getSnippet(FAKE_SESSION_ID, createSnippetResp.getData());
+        SnippetResponse snippetResponse2 = sApi.getSnippet(createSnippetResp.getData());
         assertNull(snippetResponse2.getError());
 
         print("Snippet new: " + new JSONObject(snippetResponse2.getData().toJson()).toString(4));

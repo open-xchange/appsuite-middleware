@@ -4,8 +4,10 @@
     tags:
       - Folders
     summary: Gets all visible folders of a certain module.
+    security: 
+        - session: []
+        - oauth: []
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamFolderTree'
       - in: query
         name: content_type

@@ -113,7 +113,7 @@ public class ReplyBugsTest extends AbstractITipAnalyzeTest {
          */
         MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
         rememberMail(reply);
-        MailSourceResponse source = new MailApi(apiClient).getMailSource(apiClient.getSession(), reply.getFolderId(), reply.getId(), reply.getId(), null, null);
+        MailSourceResponse source = new MailApi(apiClient).getMailSource(reply.getFolderId(), reply.getId(), reply.getId(), null, null);
         assertNull(source.getError());
         String mail = source.getData();
         mail.replaceAll(Pattern.quote("{{mailto}}"), "MAILTO");
@@ -149,7 +149,7 @@ public class ReplyBugsTest extends AbstractITipAnalyzeTest {
         writer.close();
 
         MailApi mailApi = new MailApi(getApiClient());
-        MailImportResponse importMail = mailApi.importMail(apiClient.getSession(), ITipUtil.FOLDER_MACHINE_READABLE, tmpFile, null, Boolean.TRUE);
+        MailImportResponse importMail = mailApi.importMail(ITipUtil.FOLDER_MACHINE_READABLE, tmpFile, null, Boolean.TRUE);
         return importMail.getData().get(0);
     }
 }

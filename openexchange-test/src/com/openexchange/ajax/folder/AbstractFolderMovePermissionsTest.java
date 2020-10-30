@@ -132,9 +132,9 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
 
     @Override
     public void tearDown() throws Exception {
-        api.deleteFolders(getApiClient().getSession(), createdFolders, TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
+        api.deleteFolders(createdFolders, TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         if (Strings.isNotEmpty(sharedFolderId)) {
-            api2.deleteFolders(api2.getApiClient().getSession(), Collections.singletonList(sharedFolderId), TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
+            api2.deleteFolders(Collections.singletonList(sharedFolderId), TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         }
         super.tearDown();
     }
@@ -194,7 +194,7 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
         }
         folder.setPermissions(perm);
         body.setFolder(folder);
-        FolderUpdateResponse response = api.createFolder(privateTree ? getPrivateInfostoreFolder(apiClient) : "15", getApiClient().getSession(), body, TREE, null, null, null);
+        FolderUpdateResponse response = api.createFolder(privateTree ? getPrivateInfostoreFolder(apiClient) : "15", body, TREE, null, null, null);
         String folderId = response.getData();
         createdFolders.add(folderId);
         return folderId;
@@ -259,7 +259,7 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
         perm.add(p2);
         folder.setPermissions(perm);
         body.setFolder(folder);
-        FolderUpdateResponse response = api2.createFolder(getPrivateInfostoreFolder(api2.getApiClient()), api2.getApiClient().getSession(), body, TREE, null, null, null);
+        FolderUpdateResponse response = api2.createFolder(getPrivateInfostoreFolder(api2.getApiClient()), body, TREE, null, null, null);
         return response.getData();
     }
 

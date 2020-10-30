@@ -142,7 +142,7 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
     }
 
     protected FolderCheckLimitsResponse checkLimits(FolderCheckLimitsData body, String folderId, String type) throws ApiException {
-        return foldersApi.checkLimits(quotaApiClient.getSession(), folderId, type, body);
+        return foldersApi.checkLimits(folderId, type, body);
     }
 
     /**

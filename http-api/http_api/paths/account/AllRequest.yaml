@@ -4,8 +4,11 @@
     tags:
       - Mailaccount
     summary: Gets all mail accounts.
+    security: 
+        - session: []      
+        - oauth:
+          - read_mailaccounts    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamAccountColumns'
     responses:
       '200':

@@ -151,10 +151,10 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
             mailListElement.setId(dest.getId());
             body.add(mailListElement);
         }
-        mailApi.deleteMails(getApiClient().getSession(), body, null, null, null);
+        mailApi.deleteMails(body, null, null, null);
 
         if (testFolderId != null) {
-            foldersApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(testFolderId), "0", null, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
+            foldersApi.deleteFolders(Collections.singletonList(testFolderId), "0", null, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         }
         super.tearDown();
     }
@@ -179,12 +179,12 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
             folder.setModule("mail");
             folder.setPermissions(null);
             body.setFolder(folder);
-            FolderUpdateResponse createFolder = foldersApi.createFolder(FOLDER, getApiClient().getSession(), body, "0", null, null, null);
+            FolderUpdateResponse createFolder = foldersApi.createFolder(FOLDER, body, "0", null, null, null);
             testFolderId = createFolder.getData();
         }
 
         File emlFile = new File(testMailDir, fileName);
-        MailImportResponse response = mailApi.importMail(getApiClient().getSession(), testFolderId, emlFile, null, Boolean.TRUE);
+        MailImportResponse response = mailApi.importMail(testFolderId, emlFile, null, Boolean.TRUE);
         List<MailDestinationData> data = response.getData();
         MailDestinationData mailWithAttachment = data.get(0);
         IMPORTED_EMAILS.add(mailWithAttachment);
@@ -201,7 +201,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
 
     protected String getMailAddress() throws Exception {
         ContactsApi contactsApi = new ContactsApi(apiClient);
-        ContactData data = contactsApi.getContactByUser(getSessionId(), apiClient.getUserId()).getData();
+        ContactData data = contactsApi.getContactByUser(apiClient.getUserId()).getData();
         assertNotNull("No contact data for user.", data);
         String mailAddress = data.getEmail1();
         assertFalse("No mail address for user.", Strings.isEmpty(mailAddress));
@@ -210,7 +210,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
 
     protected String getOtherMailAddress() throws Exception {
         ContactsApi contactsApi = new ContactsApi(apiClient);
-        ContactData data = contactsApi.getContactByUser(getSessionId(), I(getClient2().getValues().getUserId())).getData();
+        ContactData data = contactsApi.getContactByUser(I(getClient2().getValues().getUserId())).getData();
         assertNotNull("No contact data for other user.", data);
         String mailAddress = data.getEmail1();
         assertFalse("No mail address for other user.", Strings.isEmpty(mailAddress));

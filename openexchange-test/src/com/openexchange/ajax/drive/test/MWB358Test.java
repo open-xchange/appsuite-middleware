@@ -141,7 +141,7 @@ public class MWB358Test extends InfostoreApiClientTest {
     @Test
     public void testDeleteFolderWithSharedFile() throws ApiException {
         createShareAndSyncTwoFiles();
-        FoldersCleanUpResponse deleteFoldersResponse = foldersApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", L(new Date().getTime()), null, Boolean.FALSE, Boolean.TRUE, Boolean.FALSE, null, Boolean.FALSE);
+        FoldersCleanUpResponse deleteFoldersResponse = foldersApi.deleteFolders(Collections.singletonList(folderId), "1", L(new Date().getTime()), null, Boolean.FALSE, Boolean.TRUE, Boolean.FALSE, null, Boolean.FALSE);
         assertNull(deleteFoldersResponse.getErrorDesc(), deleteFoldersResponse.getError());
         checkForSyncAction();
     }

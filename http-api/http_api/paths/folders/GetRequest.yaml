@@ -4,8 +4,10 @@
     tags:
       - Folders
     summary: Gets a folder.
+    security: 
+        - session: []
+        - oauth: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Object ID of the requested folder.

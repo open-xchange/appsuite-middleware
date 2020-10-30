@@ -4,9 +4,12 @@
     tags:
       - Contacts
     summary: Search for contacts by anniversary.
+    security: 
+        - session: []      
+        - oauth:
+          - read_contacts    
     description: Finds contacts whose anniversary falls into a specified time range.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactColumns'
       - in: query
         name: start

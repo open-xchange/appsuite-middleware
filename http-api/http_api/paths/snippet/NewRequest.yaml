@@ -4,8 +4,10 @@
     tags:
       - Snippet
     summary: Creates a snippet.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []
+        - oauth: 
+          - write_userconfig    
     responses:
       '200':
         description: >

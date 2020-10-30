@@ -4,8 +4,9 @@
     tags:
       - Snippet
     summary: Gets a list of snippets.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []
+        - oauth: []    
     responses:
       '200':
         description: >

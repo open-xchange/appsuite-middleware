@@ -4,8 +4,11 @@
     tags:
       - Tasks
     summary: Gets a list of tasks.
+    security: 
+        - session: []      
+        - oauth:
+          - read_tasks    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamTaskColumns'
     responses:
       '200':

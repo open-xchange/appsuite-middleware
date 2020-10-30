@@ -4,8 +4,10 @@
     tags:
       - Mailaccount
     summary: Deletes a mail account.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []      
+        - oauth:
+          - write_mailaccounts    
     responses:
       '200':
         description: >

@@ -105,7 +105,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        folderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), getCalendaruser());
+        folderId = createAndRememberNewFolder(defaultUserApi, getDefaultFolder(), getCalendaruser());
 
         // prepare second user
         user2 = new UserApi(generateApiClient(testUser2), generateEnhancedClient(testUser2), testUser2, false);
@@ -124,7 +124,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         EventData createEvent = createEvent("dayThree", day3, day3 + TimeUnit.HOURS.toMillis(1));
         createEvent("dayFive", day5, day5 + TimeUnit.HOURS.toMillis(1));
 
-        ChronosFreeBusyResponse freeBusy = chronosApi.freebusy(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(day1).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue(), createAttendeesBody(getCalendaruser()), createEvent.getId(), Boolean.TRUE);
+        ChronosFreeBusyResponse freeBusy = chronosApi.freebusy(DateTimeUtil.getZuluDateTime(day1).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue(), createAttendeesBody(getCalendaruser()), createEvent.getId(), Boolean.TRUE);
 
         assertEquals(freeBusy.getError(), null, freeBusy.getErrorDesc());
         assertNotNull(freeBusy.getData());

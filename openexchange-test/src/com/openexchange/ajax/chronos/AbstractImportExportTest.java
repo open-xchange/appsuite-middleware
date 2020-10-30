@@ -101,7 +101,7 @@ public class AbstractImportExportTest extends AbstractChronosTest {
     @Override
     public void tearDown() throws Exception {
         if (contactsToDelete != null) {
-            contactsApi.deleteContacts(defaultUserApi.getSession(), L(System.currentTimeMillis()), new ArrayList<>(contactsToDelete));
+            contactsApi.deleteContacts(L(System.currentTimeMillis()), new ArrayList<>(contactsToDelete));
         }
         super.tearDown();
     }
@@ -125,7 +125,7 @@ public class AbstractImportExportTest extends AbstractChronosTest {
         if (Strings.isEmpty(contactsFolder)) {
             contactsFolder = getDefaultContactFolder();
         }
-        rememberContact(contactsApi.createContact(session, createContactData()).getData().getId());
+        rememberContact(contactsApi.createContact(createContactData()).getData().getId());
     }
 
     private ContactData createContactData() {

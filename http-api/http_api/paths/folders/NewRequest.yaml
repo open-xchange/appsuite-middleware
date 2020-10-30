@@ -4,6 +4,16 @@
     tags:
       - Folders
     summary: Creates a new folder.
+    security:
+        - session: []
+        - oauth: 
+          - write_mails
+        - oauth: 
+          - write_tasks
+        - oauth: 
+          - write_calendar
+        - oauth: 
+          - write_contacts             
     parameters:
       - in: query
         name: folder_id
@@ -11,7 +21,6 @@
         required: true
         schema:
           type: string
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamFolderTree'
       - $ref: '#/components/parameters/gblQueryParamAllowedModules'
       - in: query

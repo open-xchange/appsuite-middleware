@@ -110,7 +110,10 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.HashUtility;
@@ -124,7 +127,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @DispatcherNotes(allowPublicSession = true)
-@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
+@OAuthAction(OAuthAction.CUSTOM)
 public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAttachmentAction.class);
@@ -182,6 +185,18 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             return performGET(req);
         }
         return performPUT(req, bodyObject);
+    }
+
+    @OAuthScopeCheck
+    public boolean accessAllowed(final AJAXRequestData request, @SuppressWarnings("unused") final ServerSession session, final OAuthAccess access) throws OXException {
+        if (request.getData() != null) {
+            if (access.getScope().has(MailActionFactory.OAUTH_WRITE_SCOPE) == false) {
+                throw new OAuthInsufficientScopeException(MailActionFactory.OAUTH_WRITE_SCOPE);
+            }
+        } else if (access.getScope().has(MailActionFactory.OAUTH_READ_SCOPE) == false) {
+            throw new OAuthInsufficientScopeException(MailActionFactory.OAUTH_READ_SCOPE);
+        }
+        return true;
     }
 
     private JSONObject optJSONObject(MailRequest req) throws OXException {

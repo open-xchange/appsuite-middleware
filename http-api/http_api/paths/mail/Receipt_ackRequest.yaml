@@ -4,11 +4,13 @@
     tags:
       - Mail
     summary: Requests a delivery receipt for a priviously sent mail.
+    security: 
+        - session: []      
+        - oauth:
+          - write_mails    
     description: >-
       This delivery receipt only acknowledges that the message could be
       receipted on the recipients computer.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >

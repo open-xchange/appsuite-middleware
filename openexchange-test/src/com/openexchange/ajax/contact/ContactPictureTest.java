@@ -279,6 +279,6 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         ContactListElement element = new ContactListElement();
         element.setFolder(contactFolderId);
         element.setId(contactId);
-        contactsApi.deleteContacts(getSessionId(), L(Long.MAX_VALUE), Collections.singletonList(element));
+        contactsApi.deleteContacts(L(Long.MAX_VALUE), Collections.singletonList(element));
     }
 }

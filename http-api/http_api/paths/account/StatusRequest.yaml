@@ -4,8 +4,11 @@
     tags:
       - Mailaccount
     summary: Gets the status for a mail account.
+    security: 
+        - session: []      
+        - oauth:
+          - read_mailaccounts     
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: >-

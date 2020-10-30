@@ -4,8 +4,11 @@
     tags:
       - Contacts
     summary: Gets a list of contacts.
+    security: 
+        - session: []      
+        - oauth:
+          - read_contacts    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactColumns'
     responses:
       '200':

@@ -112,11 +112,13 @@ public class UserApi {
             login = login(user.getLogin(), user.getPassword(), enhancedApiClient);
             this.enhancedCalUser = login.getUserId().intValue();
             this.enhancedSession = login.getSession();
+            enhancedApiClient.setApiKey(enhancedSession);
         } else {
             this.calUser = client.getUserId();
             this.session = client.getSession();
             this.enhancedCalUser = enhancedApiClient.getUserId().intValue();
             this.enhancedSession = enhancedApiClient.getSession();
+            enhancedApiClient.setApiKey(enhancedSession);
         }
     }
 

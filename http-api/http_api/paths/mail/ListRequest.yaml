@@ -4,8 +4,11 @@
     tags:
       - Mail
     summary: Gets a list of mails.
+    security: 
+        - session: []      
+        - oauth:
+          - read_mails    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailColumns'
       - $ref: '#/components/parameters/gblQueryParamMailHeaders'
     responses:

@@ -2,7 +2,7 @@
   get:
     operationId: get
     tags:
-    - Share/Redeem
+      - Share/Redeem
     summary: Redeems a previously reserved token for extended parameters of the redirect location.  
     parameters:
       - in: query

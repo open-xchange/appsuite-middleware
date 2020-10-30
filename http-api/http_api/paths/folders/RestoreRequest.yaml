@@ -4,8 +4,17 @@
     tags:
       - Folders
     summary: Restore specified folders from trash folder
+    security:
+        - session: []
+        - oauth: 
+          - write_mails
+        - oauth: 
+          - write_tasks
+        - oauth: 
+          - write_calendar
+        - oauth: 
+          - write_contacts             
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamFolderTree'
       - in: query
         name: pushToken

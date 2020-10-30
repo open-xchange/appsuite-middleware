@@ -129,7 +129,7 @@ public class BasicCommentTest extends AbstractChronosTest {
         body.setEvent(eventData);
         body.setComment(UPDATE);
         eventData.setDescription("Description got updated.");
-        ChronosCalendarResultResponse response = chronosApi.updateEvent(apiClient.getSession(), getFolderId(), eventData.getId(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, null, Boolean.FALSE, null, null, null, null, Boolean.FALSE, null);
+        ChronosCalendarResultResponse response = chronosApi.updateEvent(getFolderId(), eventData.getId(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, null, Boolean.FALSE, null, null, null, null, Boolean.FALSE, null);
         Assert.assertThat(response.getErrorDesc(), response.getError(), nullValue());
 
         validateMailInSecondUsersInbox("Appointment changed: " + summary, UPDATE);
@@ -163,7 +163,7 @@ public class BasicCommentTest extends AbstractChronosTest {
         body.setComment(DELETE);
         body.setEvents(Collections.singletonList(getEventId()));
 
-        ChronosMultipleCalendarResultResponse response = chronosApi.deleteEvent(apiClient.getSession(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
+        ChronosMultipleCalendarResultResponse response = chronosApi.deleteEvent(Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
         Assert.assertThat(response.getErrorDesc(), response.getError(), nullValue());
         eventData = null;
 
@@ -175,20 +175,20 @@ public class BasicCommentTest extends AbstractChronosTest {
         rememberClient(apiClient2);
         MailApi mailApi = new MailApi(apiClient2);
 
-        MailResponse response = mailApi.getMail(apiClient2.getSession(), INBOX, getMailId(apiClient2, mailApi, mailSubject), null, null, null, null, null, null, null, null, null, null, null, null);
+        MailResponse response = mailApi.getMail(INBOX, getMailId(mailApi, mailSubject), null, null, null, null, null, null, null, null, null, null, null, null);
         MailData mailData = response.getData();
         Assert.assertThat("No mail data", mailData, notNullValue());
         MailAttachment mailAttachment = mailData.getAttachments().get(0);
         Assert.assertTrue("Should contain comment", mailAttachment.getContent().contains("<i>" + comment + "</i>"));
     }
 
-    private String getMailId(ApiClient apiClient2, MailApi mailApi, String summary) throws Exception {
+    private String getMailId(MailApi mailApi, String summary) throws Exception {
         int max = 5;
         String mailId = null;
         while (max > 0 && mailId == null) {
             max--;
             Thread.sleep(10000);
-            MailsResponse mailsResponse = mailApi.getAllMails(apiClient2.getSession(), INBOX, COLUMNS, null, Boolean.FALSE, Boolean.FALSE, "600", "desc", null, null, I(100), null);
+            MailsResponse mailsResponse = mailApi.getAllMails(INBOX, COLUMNS, null, Boolean.FALSE, Boolean.FALSE, "600", "desc", null, null, I(100), null);
             List<List<String>> data = mailsResponse.getData();
             if (data.size() == 0) {
                 continue;

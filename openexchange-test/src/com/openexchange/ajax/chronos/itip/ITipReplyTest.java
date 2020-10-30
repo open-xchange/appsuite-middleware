@@ -269,7 +269,7 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
          * Apply change as organizer via iTIP API
          */
         assertSingleEvent(update(constructBody(reply)), createdEvent.getUid());
-        EventResponse eventResponse = chronosApi.getEvent(apiClient.getSession(), createdEvent.getId(), createdEvent.getFolder(), createdEvent.getRecurrenceId(), null, null);
+        EventResponse eventResponse = chronosApi.getEvent(createdEvent.getId(), createdEvent.getFolder(), createdEvent.getRecurrenceId(), null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         createdEvent = eventResponse.getData();
         for (Attendee attendee : createdEvent.getAttendees()) {

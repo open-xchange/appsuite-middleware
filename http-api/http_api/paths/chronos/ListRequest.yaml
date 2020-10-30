@@ -4,8 +4,11 @@
     tags:
       - Chronos
     summary: Gets a list of events.
+    security: 
+        - session: []  
+        - oauth:
+          - read_calendar    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamChronosFields'
       - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
     responses:

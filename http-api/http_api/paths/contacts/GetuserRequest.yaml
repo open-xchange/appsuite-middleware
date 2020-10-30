@@ -4,8 +4,11 @@
     tags:
       - Contacts
     summary: Gets a contact by user ID.
+    security: 
+        - session: []      
+        - oauth:
+          - read_contacts    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: User ID (not Object ID) of the requested user.

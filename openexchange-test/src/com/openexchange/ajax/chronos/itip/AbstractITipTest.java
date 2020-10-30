@@ -190,7 +190,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
             throw new IllegalDataException("Need both users for iTIP tests!");
         }
 
-        folderIdC2 = getDefaultFolder(apiClientC2.getSession(), apiClientC2);
+        folderIdC2 = getDefaultFolder(apiClientC2);
 
         enhancedApiClientC2 = generateEnhancedClient(testUser);
         rememberClient(enhancedApiClientC2);
@@ -278,7 +278,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @See {@link ChronosApi#update(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse update(ApiClient apiClient, ConversionDataSource body) throws ApiException {
-        ActionResponse response = new ChronosApi(apiClient).update(apiClient.getSession(), DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        ActionResponse response = new ChronosApi(apiClient).update(DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
         validateActionResponse(response);
         return response;
     }
@@ -346,7 +346,8 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         elm.setId(data.getId());
         elm.setFolder(data.getFolderId());
         addTearDownOperation(() -> {
-            mailApi.deleteMails(apiClient.getSession(), Collections.singletonList(elm), now(), Boolean.TRUE, Boolean.FALSE);
+            mailApi.deleteMails(Collections.singletonList(elm), now(), Boolean.TRUE, Boolean.FALSE);
+
         });
     }
 
@@ -359,7 +360,8 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         elm.setId(data.getId());
         elm.setFolder(data.getFolderId());
         addTearDownOperation(() -> {
-            mailApi.deleteMails(apiClient.getSession(), Collections.singletonList(elm), now(), Boolean.TRUE, Boolean.FALSE);
+            mailApi.deleteMails(Collections.singletonList(elm), now(), Boolean.TRUE, Boolean.FALSE);
+
         });
     }
 
@@ -378,7 +380,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         addTearDownOperation(() -> {
             DeleteEventBody body = new DeleteEventBody();
             body.addEventsItem(eventId);
-            new ChronosApi(apiClient).deleteEvent(apiClient.getSession(), now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, "none");
+            new ChronosApi(apiClient).deleteEvent(now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, "none");
         });
     }
 }

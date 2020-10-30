@@ -4,8 +4,11 @@
     tags:
       - Chronos
     summary: Moves an event to another calendar folder.
+    security: 
+        - session: []
+        - oauth:
+          - write_calendar    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamChronosCheckConflicts'
       - $ref: '#/components/parameters/QueryParamChronosFolder'
       - $ref: '#/components/parameters/QueryParamChronosID'

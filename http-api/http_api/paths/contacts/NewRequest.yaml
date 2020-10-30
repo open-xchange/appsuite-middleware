@@ -4,11 +4,13 @@
     tags:
       - Contacts
     summary: Creates a contact.
+    security: 
+        - session: []
+        - oauth:
+          - write_contacts    
     description: |
       Creates a new contact. This request cannot add contact images. Therefor it
       is necessary to use the `POST` method.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >
@@ -34,6 +36,10 @@
     tags:
       - Contacts
     summary: Creates a contact.
+    security: 
+        - session: []
+        - oauth:
+          - write_contacts
     description: >
       Creates a new contact with contact images. The normal request body must be
       placed as form-data using the
@@ -43,8 +49,6 @@
 
       must be placed in a file field named `file` (see also [File
       uploads](#file-uploads)).
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >

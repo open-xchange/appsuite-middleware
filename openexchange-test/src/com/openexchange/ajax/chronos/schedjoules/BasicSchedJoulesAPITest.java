@@ -150,7 +150,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         Asset asset = assetManager.getAsset(AssetType.json, "schedjoulesPageNotFoundResponse.json");
         mock("http://example.com/pages/1138", assetManager.readAssetString(asset), HttpStatus.SC_NOT_FOUND, RESPONSE_HEADERS);
 
-        BrowseResponse response = chronosApi.browse(defaultUserApi.getSession(), I(1138), null, null);
+        BrowseResponse response = chronosApi.browse(I(1138), null, null);
         assertNotNull("There was no error returned", response.getError());
         assertEquals("The exception code does not match", "SCHEDJOULES-API-0012", response.getCode());
     }
@@ -165,7 +165,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         Asset rootPageAsset = assetManager.getAsset(AssetType.json, "schedjoulesRootPageResponse.json");
         mock("http://example.com/pages?locale=" + randomLanguage + "&location" + randomCountry, assetManager.readAssetString(rootPageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
 
-        BrowseResponse response = chronosApi.browse(defaultUserApi.getSession(), null, randomLanguage, randomCountry);
+        BrowseResponse response = chronosApi.browse(null, randomLanguage, randomCountry);
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
     }
@@ -180,7 +180,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         Asset rootPageAsset = assetManager.getAsset(AssetType.json, "schedjoulesRootPageResponse.json");
         mock("http://example.com/pages?locale=" + randomLanguage + "&location" + randomCountry, assetManager.readAssetString(rootPageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
 
-        BrowseResponse response = chronosApi.browse(defaultUserApi.getSession(), null, randomLanguage, randomCountry);
+        BrowseResponse response = chronosApi.browse(null, randomLanguage, randomCountry);
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
 
@@ -201,7 +201,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         Asset pageAsset = assetManager.getAsset(AssetType.json, "schedjoulesPageResponse.json");
         mock("http://example.com/pages/" + itemData.getItem().getItemId() + "?locale=" + randomLanguage, assetManager.readAssetString(pageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
 
-        response = chronosApi.browse(defaultUserApi.getSession(), itemData.getItem().getItemId(), getRandomLanguage(), null);
+        response = chronosApi.browse(itemData.getItem().getItemId(), getRandomLanguage(), null);
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
     }
@@ -230,7 +230,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
 
     /**
      * Get a random language from the available languages
-     * 
+     *
      * @return The ISO 6391 code of the selected language
      * @throws Exception
      */
@@ -252,7 +252,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
 
     /**
      * Get a random country from the available countries
-     * 
+     *
      * @returnThe ISO 3166 country code
      * @throws Exception
      */

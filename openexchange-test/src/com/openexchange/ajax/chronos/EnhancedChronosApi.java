@@ -93,13 +93,8 @@ public class EnhancedChronosApi extends ChronosApi {
      * with the API parameter<code>plainJson</code> to signal the response renderer to return a plain json object instead of the regular
      * HTML response. It also takes multiple files as parameters
      */
-    public String createEventWithAttachments(String session, String folder, String json0, List<File> files, Boolean checkConflicts, String scheduling) throws ApiException {
+    public String createEventWithAttachments(String folder, String json0, List<File> files, Boolean checkConflicts, String scheduling) throws ApiException {
         Object localVarPostBody = null;
-
-        // verify the required parameter 'session' is set
-        if (session == null) {
-            throw new ApiException(400, "Missing the required parameter 'session' when calling createEventWithAttachments");
-        }
 
         // verify the required parameter 'folder' is set
         if (folder == null) {
@@ -124,7 +119,6 @@ public class EnhancedChronosApi extends ChronosApi {
         Map<String, String> localVarHeaderParams = new HashMap<String, String>();
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
-        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "session", session));
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "folder", folder));
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "plainJson", Boolean.TRUE)); //Set this parameter explicitly to 'true' to return a regular json object instead of text/html
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "checkConflicts", checkConflicts));
@@ -144,7 +138,7 @@ public class EnhancedChronosApi extends ChronosApi {
         final String[] localVarContentTypes = { "multipart/form-data" };
         final String localVarContentType = enhancedApiClient.selectHeaderContentType(localVarContentTypes);
 
-        String[] localVarAuthNames = new String[] {};
+        String[] localVarAuthNames = new String[] { "oauth", "session" };
 
         GenericType<String> localVarReturnType = new GenericType<String>() {
             // empty
@@ -158,8 +152,8 @@ public class EnhancedChronosApi extends ChronosApi {
      * HTML response.
      */
     @Override
-    public String createEventWithAttachments(String session, String folder, String json0, File file0, Boolean checkConflicts, String scheduling, Boolean extendedEntities, String usedGroups) throws ApiException {
-        return createEventWithAttachments(session, folder, json0, Collections.singletonList(file0), checkConflicts, scheduling);
+    public String createEventWithAttachments(String folder, String json0, File file0, Boolean checkConflicts, String scheduling, Boolean extendedEntities, String usedGroups) throws ApiException {
+        return createEventWithAttachments(folder, json0, Collections.singletonList(file0), checkConflicts, scheduling);
     }
 
     /**
@@ -168,13 +162,8 @@ public class EnhancedChronosApi extends ChronosApi {
      * HTML response.
      */
     @Override
-    public String updateEventWithAttachments(String session, String folder, String id, Long timestamp, String json0, File file0, String recurrenceId, Boolean checkConflicts, String scheduling, Boolean extendedEntities, String usedGroups) throws ApiException {
+    public String updateEventWithAttachments(String folder, String id, Long timestamp, String json0, File file0, String recurrenceId, Boolean checkConflicts, String scheduling, Boolean extendedEntities, String usedGroups) throws ApiException {
         Object localVarPostBody = null;
-
-        // verify the required parameter 'session' is set
-        if (session == null) {
-            throw new ApiException(400, "Missing the required parameter 'session' when calling updateEventWithAttachments");
-        }
 
         // verify the required parameter 'folder' is set
         if (folder == null) {
@@ -209,7 +198,6 @@ public class EnhancedChronosApi extends ChronosApi {
         Map<String, String> localVarHeaderParams = new HashMap<String, String>();
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
-        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "session", session));
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "folder", folder));
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "id", id));
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "plainJson", Boolean.TRUE)); //Set this parameter explicitly to 'true' to return a regular json object instead of text/html
@@ -226,7 +214,7 @@ public class EnhancedChronosApi extends ChronosApi {
         final String[] localVarContentTypes = { "multipart/form-data" };
         final String localVarContentType = enhancedApiClient.selectHeaderContentType(localVarContentTypes);
 
-        String[] localVarAuthNames = new String[] {};
+        String[] localVarAuthNames = new String[] { "oauth", "session" };
 
         GenericType<String> localVarReturnType = new GenericType<String>() {
             //empty

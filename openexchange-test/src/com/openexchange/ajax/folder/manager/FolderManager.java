@@ -89,11 +89,11 @@ public class FolderManager {
     private final List<String> foldersToDelete = new ArrayList<>();
     private Long lastTimestamp;
     private final String tree;
-    private String session;
+    private final String session;
 
     /**
      * Initializes a new {@link FolderManager}.
-     * 
+     *
      * @param api The API to use
      * @param tree The tree ID to work on. Most likely you want <code>"1"</code>
      */
@@ -102,17 +102,6 @@ public class FolderManager {
         this.tree = tree;
         this.foldersApi = api.getFoldersApi();
         this.session = api.getSession();
-        this.lastTimestamp = Long.valueOf(0l);
-    }
-
-    /**
-     * Initializes a new {@link FolderManager}.
-     */
-    public FolderManager(FoldersApi api, String tree) {
-        super();
-        this.tree = tree;
-        this.foldersApi = api;
-        this.session = api.getApiClient().getSession();
         this.lastTimestamp = Long.valueOf(0l);
     }
 
@@ -169,7 +158,7 @@ public class FolderManager {
     public String createFolder(String parent, String name, String module) throws ApiException {
         NewFolderBody body = new NewFolderBody();
         body.setFolder(FolderFactory.getSimpleFolder(name, module));
-        FolderUpdateResponse createFolder = foldersApi.createFolder(parent, getSession(), body, tree, null, null, null);
+        FolderUpdateResponse createFolder = foldersApi.createFolder(parent, body, tree, null, null, null);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
         rememberFolder(createFolder.getData());
         lastTimestamp = createFolder.getTimestamp();
@@ -192,7 +181,7 @@ public class FolderManager {
         folder.setTitle(title);
         folder.setPermissions(permissions);
         body.setFolder(folder);
-        FolderUpdateResponse response = foldersApi.createFolder(parentFolder, session, body, null, null, null, null);
+        FolderUpdateResponse response = foldersApi.createFolder(parentFolder, body, null, null, null, null);
         checkResponse(response.getError(), response.getErrorDesc(), response.getData());
         rememberFolder(response.getData());
         rememberFolder(response.getData());
@@ -210,7 +199,7 @@ public class FolderManager {
      * @throws ApiException
      */
     public FoldersVisibilityData getAllFolders(String contentType, String columns, Boolean all) throws ApiException {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(getSession(), contentType, columns, tree, null, all);
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(contentType, columns, tree, null, all);
         return checkResponse(visibleFolders.getError(), visibleFolders.getErrorDesc(), visibleFolders.getData());
     }
 
@@ -224,7 +213,7 @@ public class FolderManager {
      * @throws ApiException
      */
     public ArrayList<ArrayList<Object>> listFolders(String parent, String columns, Boolean all) throws ApiException {
-        FoldersResponse resp = foldersApi.getSubFolders(getSession(), parent, columns, I(all == null || b(all) ? 1 : 0), tree, null, null, Boolean.FALSE);
+        FoldersResponse resp = foldersApi.getSubFolders(parent, columns, I(all == null || b(all) ? 1 : 0), tree, null, null, Boolean.FALSE);
         return (ArrayList<ArrayList<Object>>) checkResponse(resp.getError(), resp.getErrorDesc(), resp.getData());
     }
 
@@ -270,13 +259,13 @@ public class FolderManager {
 
     /**
      * Gets the given folder
-     * 
+     *
      * @param id The ID of the folder to get
      * @return {@link FolderData} The folder
      * @throws ApiException In case of error
      */
     public FolderData getFolder(String id) throws ApiException {
-        FolderResponse folderResponse = foldersApi.getFolder(getSession(), id, tree, null, null);
+        FolderResponse folderResponse = foldersApi.getFolder(id, tree, null, null);
         checkResponse(folderResponse.getError(), folderResponse.getErrorDesc(), folderResponse.getData());
         if (folderResponse.getTimestamp() != null && lastTimestamp != null && folderResponse.getTimestamp().longValue() > lastTimestamp.longValue()) {
             lastTimestamp = folderResponse.getTimestamp();
@@ -286,7 +275,7 @@ public class FolderManager {
     }
 
     /**
-     * 
+     *
      * Gets the name of the folder with the given folder id.
      *
      * @param The folder id.
@@ -299,7 +288,7 @@ public class FolderManager {
     }
 
     /**
-     * 
+     *
      * Gets the parent folder id of the given folder
      *
      * @param id The folder id.
@@ -323,14 +312,14 @@ public class FolderManager {
         folder.setFolderId(newParent);
         folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse updateFolder = foldersApi.updateFolder(getSession(), folderId, body, Boolean.FALSE, lastTimestamp, tree, null, Boolean.TRUE, null, null, ignoreWarnings);
+        FolderUpdateResponse updateFolder = foldersApi.updateFolder(folderId, body, Boolean.FALSE, lastTimestamp, tree, null, Boolean.TRUE, null, null, ignoreWarnings);
         checkFolderMoveResponse(updateFolder.getError(), updateFolder.getErrorDesc(), updateFolder.getData(), ignoreWarnings);
         lastTimestamp = updateFolder.getTimestamp();
     }
 
     /**
      * Finds the infostore root folder
-     * 
+     *
      * @return The folder id of the infostore root
      * @throws ApiException In case folder can't be catched
      */

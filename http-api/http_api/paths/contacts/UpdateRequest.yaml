@@ -4,13 +4,16 @@
     tags:
       - Contacts
     summary: Updates a contact.
+    security: 
+        - session: []
+        - oauth:
+          - write_contacts
     description: >
       Updates a contact's data. This request cannot change or add contact
       images. Therefore it
 
       is necessary to use the `POST` method.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactFolder'
       - in: query
         name: id
@@ -53,6 +56,10 @@
     tags:
       - Contacts
     summary: Updates a contact.
+    security: 
+        - session: []
+        - oauth:
+          - write_contacts    
     description: >
       Updates a contact's data and images. The normal request body must be
       placed as form-data using the
@@ -63,7 +70,6 @@
       must be placed in a file field named `file` (see also [File
       uploads](#file-uploads)).
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactFolder'
       - in: query
         name: id

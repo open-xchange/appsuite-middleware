@@ -76,7 +76,6 @@ import com.openexchange.testing.httpclient.models.MailsResponse;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.ContactsApi;
 import com.openexchange.testing.httpclient.modules.InfostoreApi;
-import com.openexchange.testing.httpclient.modules.LoginApi;
 import com.openexchange.testing.httpclient.modules.MailApi;
 
 /**
@@ -87,12 +86,9 @@ import com.openexchange.testing.httpclient.modules.MailApi;
  */
 public class PermissionTest extends AbstractAppPasswordTest {
 
-    private LoginApi loginApi;
-
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        loginApi = new LoginApi(getApiClient());
     }
 
     @Override
@@ -116,7 +112,7 @@ public class PermissionTest extends AbstractAppPasswordTest {
         try {
             MailApi mailApi = new MailApi(client);
             String inbox = getClient().getValues().getInboxFolder();
-            MailsResponse allMails = mailApi.getAllMails(getSessionId(), inbox, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);
+            MailsResponse allMails = mailApi.getAllMails(inbox, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);
             return allMails.getError() == null;
         } catch (OXException | IOException | JSONException e) {
             throw new ApiException(e.getMessage());
@@ -127,7 +123,7 @@ public class PermissionTest extends AbstractAppPasswordTest {
         try {
             InfostoreApi driveApi = new InfostoreApi(client);
             int folder = getClient().getValues().getPrivateInfostoreFolder();
-            InfoItemsResponse resp = driveApi.getAllInfoItems(getSessionId(), Integer.toString(folder), "1,2,3", "702", "asc", -9, 201, 10, false);
+            InfoItemsResponse resp = driveApi.getAllInfoItems(getSessionId(), Integer.toString(folder), "1,2,3", "702", "asc", I(-9), I(201), I(10), Boolean.FALSE);
             return resp.getError() == null;
         } catch (OXException | IOException | JSONException e) {
             throw new ApiException(e.getMessage());
@@ -138,7 +134,7 @@ public class PermissionTest extends AbstractAppPasswordTest {
         try {
             ContactsApi contactApi = new ContactsApi(client);
             int folder = getClient().getValues().getPrivateContactFolder();
-            ContactsResponse resp = contactApi.getAllContacts(getSessionId(), Integer.toString(folder), "1,20,101,607", "607", "asc", null);
+            ContactsResponse resp = contactApi.getAllContacts(Integer.toString(folder), "1,20,101,607", "607", "asc", Boolean.FALSE, null);
             return resp.getError() == null;
         } catch (OXException | IOException | JSONException e) {
             throw new ApiException(e.getMessage());
@@ -147,7 +143,7 @@ public class PermissionTest extends AbstractAppPasswordTest {
 
     private boolean tryCalendar(ApiClient client) throws ApiException {
         ChronosApi calApi = new ChronosApi(client);
-        EventsResponse resp = calApi.getAllEvents(getSessionId(),
+        EventsResponse resp = calApi.getAllEvents(
             DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime() - 10000).getValue(),
             DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(),
             null, null, null, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
@@ -187,7 +183,7 @@ public class PermissionTest extends AbstractAppPasswordTest {
     public void testPermissions() throws ApiException {
 
         List<AppPasswordApplication> apps = getApps(this.getSessionId());
-        assertThat(apps.size(), greaterThan(1));
+        assertThat(I(apps.size()), greaterThan(I(1)));
         String origLogin = testUser.getLogin();
         String origPassword = testUser.getPassword();
         Map<String, AppPasswordRegistrationResponseData> logins = new HashMap<String, AppPasswordRegistrationResponseData>();

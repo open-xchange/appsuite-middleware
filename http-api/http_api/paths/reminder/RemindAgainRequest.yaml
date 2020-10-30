@@ -4,8 +4,11 @@
     tags:
       - Reminder
     summary: Updates the reminder alarm.
+    security:
+      - session: []     
+      - oauth:
+        - write_reminders    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The ID of the reminder whose alarm date shall be changed.

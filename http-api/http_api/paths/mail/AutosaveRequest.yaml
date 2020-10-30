@@ -4,8 +4,11 @@
     tags:
       - Mail
     summary: Auto saves an e-mail as draft.
+    security: 
+        - session: []      
+        - oauth:
+          - write_mails    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: csid
         description: The "csid" parameter providing the composition space identifier.

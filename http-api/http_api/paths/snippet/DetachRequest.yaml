@@ -4,8 +4,11 @@
     tags:
       - Snippet
     summary: Detaches one or more files from an existing snippet.
+    security:
+        - session: [] 
+        - oauth: 
+          - write_userconfig    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The identifier of the snippet.

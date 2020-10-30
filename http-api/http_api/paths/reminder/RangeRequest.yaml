@@ -4,11 +4,14 @@
     tags:
       - Reminder
     summary: Gets a reminder range.
+    security:
+      - session: []     
+      - oauth:
+        - read_reminders     
     description: >-
       Gets all reminders which are scheduled until the specified time (end
       date).
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: end
         description: The end date of the reminder range.

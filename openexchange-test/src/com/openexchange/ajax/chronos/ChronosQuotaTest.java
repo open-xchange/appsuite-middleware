@@ -68,7 +68,6 @@ import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
-import com.openexchange.testing.httpclient.models.LoginResponse;
 import com.openexchange.testing.httpclient.models.QuotasResponse;
 import com.openexchange.testing.httpclient.modules.QuotaApi;
 
@@ -134,10 +133,10 @@ public class ChronosQuotaTest extends AbstractChronosTest {
          */
 
         // Try creating a new event
-        LoginResponse login = defaultUserApi.login(testUser.getLogin(), testUser.getPassword(), getApiClient());
+        defaultUserApi.login(testUser.getLogin(), testUser.getPassword(), getApiClient());
 
         // Can't use EventManager, we need to check the exception here
-        ChronosCalendarResultResponse resultResponse = defaultUserApi.getChronosApi().createEvent(login.getSession(), getDefaultFolder(login.getSession(), getApiClient()), createSingleEvent("SingleEventQuotaTest"), Boolean.TRUE, null, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
+        ChronosCalendarResultResponse resultResponse = defaultUserApi.getChronosApi().createEvent(getDefaultFolder(getApiClient()), createSingleEvent("SingleEventQuotaTest"), Boolean.TRUE, null, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
 
         // Check that creation failed
         assertThat("No response!", resultResponse, is(not(nullValue())));

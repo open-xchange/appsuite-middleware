@@ -4,8 +4,11 @@
     tags:
       - Chronos
     summary: Gets free-busy timeslots for the given attendees.
+    security: 
+        - session: []
+        - oauth:
+          - read_calendar    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/ChronosFromTimeRange'
       - $ref: '#/components/parameters/ChronosUntilTimeRange'
       - in: query

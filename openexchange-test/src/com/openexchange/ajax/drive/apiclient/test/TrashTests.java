@@ -94,9 +94,9 @@ public class TrashTests extends AbstractAPIClientSession {
         infostoreFolder = folderApi.getInfostoreFolder();
         folderManager = new FolderManager(folderApi, "0");
 
-        FoldersResponse rootFolders = folderApi.getFoldersApi().getRootFolders(folderApi.getSession(), "1,319", null, "infostore");
+        FoldersResponse rootFolders = folderApi.getFoldersApi().getRootFolders("1,319", null, "infostore");
         rootId = getFolderId("Infostore", rootFolders);
-        FoldersResponse subFolders = folderApi.getFoldersApi().getSubFolders(folderApi.getSession(), rootId, "1,319", I(1), "0", "infostore", null, Boolean.FALSE);
+        FoldersResponse subFolders = folderApi.getFoldersApi().getSubFolders(rootId, "1,319", I(1), "0", "infostore", null, Boolean.FALSE);
         String trashId = getFolderId("Trash", subFolders);
         driveApi = new DriveApi(client);
         driveApi.emptyTrash(folderApi.getSession(), rootId);

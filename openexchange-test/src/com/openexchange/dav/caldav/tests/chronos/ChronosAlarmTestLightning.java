@@ -1146,17 +1146,17 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
 
     }
-    
-    
-    
+
+
+
     @Test
     public void testAcknowledgeAlarmOfSingleExceptionWithFakeMaster() throws Exception{
-        // 1. Create event series 
+        // 1. Create event series
         Integer calUser = defaultUserApi.getCalUser();
         assertNotNull(calUser);
         EventData master = eventManager.createEvent(EventFactory.createSeriesEvent(calUser.intValue(), "testAckFakemaster", 5, defaultFolderId), true);
 
-        // 2. Invite second user to the second occurence 
+        // 2. Invite second user to the second occurence
         List<EventData> allEvents = eventManager.getAllEvents(new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)), new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(5)), true, defaultFolderId);
         List<EventData> occurences = getEventsByUid(allEvents, master.getUid());
         assertEquals(5, occurences.size());
@@ -1164,14 +1164,14 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         List<Attendee> attendees = exception.getAttendees();
         attendees.add(AttendeeFactory.createAttendee(I(getClient2().getValues().getUserId()), CuTypeEnum.INDIVIDUAL));
         eventManager.updateOccurenceEvent(exception, exception.getRecurrenceId(), true);
-        
+
         // 3. Create alarm as second user
         ApiClient apiClient2 = generateApiClient(testUser2);
         EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
         UserApi userApi2 = new UserApi(apiClient2, enhancedClient, testUser2, false);
-        String folder2 = getDefaultFolder(userApi2.getSession(), apiClient2);
+        String folder2 = getDefaultFolder(apiClient2);
         EventManager eventManager2 = new EventManager(userApi2, folder2);
-        
+
         allEvents = eventManager2.getAllEvents(new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)), new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(5)), true, folder2);
         occurences = getEventsByUid(allEvents, master.getUid());
         assertEquals(1, occurences.size());
@@ -1183,80 +1183,80 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         user2event.setAttendees(null);
         user2event.setCategories(null);
         eventManager2.updateOccurenceEvent(user2event, user2event.getRecurrenceId(), true);
-        
+
         EventData event = eventManager2.getEvent(folder2, user2event.getId(), user2event.getRecurrenceId(), false);
-        
+
         // 4. Acknowledge alarm via caldav
-        
+
         Date ack = new Date();
-        String iCal = "BEGIN:VCALENDAR\n" + 
-            "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" + 
-            "VERSION:2.0\n" + 
-            "BEGIN:VTIMEZONE\n" + 
-            "TZID:Europe/Berlin\n" + 
-            "BEGIN:DAYLIGHT\n" + 
-            "TZOFFSETFROM:+0100\n" + 
-            "TZOFFSETTO:+0200\n" + 
-            "TZNAME:CEST\n" + 
-            "DTSTART:19700329T020000\n" + 
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\n" + 
-            "END:DAYLIGHT\n" + 
-            "BEGIN:STANDARD\n" + 
-            "TZOFFSETFROM:+0200\n" + 
-            "TZOFFSETTO:+0100\n" + 
-            "TZNAME:CET\n" + 
-            "DTSTART:19701025T030000\n" + 
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\n" + 
-            "END:STANDARD\n" + 
-            "END:VTIMEZONE\n" + 
-            "BEGIN:VEVENT\n" + 
-            "CREATED:"+formatAsUTC(new Date(event.getCreated().longValue()))+"\n" + 
-            "LAST-MODIFIED:"+formatAsUTC(new Date(event.getLastModified().longValue()))+"\n" + 
-            "DTSTAMP:"+formatAsUTC(new Date(event.getTimestamp().longValue()))+"\n" + 
-            "UID:"+event.getUid()+"\n" + 
-            "RDATE;VALUE=DATE-TIME:"+event.getRecurrenceId()+"\n" + 
-            "X-MOZ-LASTACK:"+formatAsUTC(ack)+"\n" + 
-            "DTSTART:"+event.getRecurrenceId()+"\n" + 
-            "X-MOZ-FAKED-MASTER:1\n" + 
-            "X-MOZ-GENERATION:1\n" + 
-            "END:VEVENT\n" + 
-            "BEGIN:VEVENT\n" + 
-            "CREATED:"+formatAsUTC(new Date(event.getCreated().longValue()))+"\n" + 
-            "LAST-MODIFIED:"+formatAsUTC(new Date(event.getLastModified().longValue()))+"\n" + 
-            "DTSTAMP:"+formatAsUTC(new Date(event.getTimestamp().longValue()))+"\n" + 
-            "UID:"+event.getUid()+"\n" +  
-            "SUMMARY:"+event.getSummary()+"\n" + 
-            "RECURRENCE-ID:"+event.getRecurrenceId()+"\n" + 
-            formatOrganizer(event.getOrganizer()) + 
+        String iCal = "BEGIN:VCALENDAR\n" +
+            "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
+            "VERSION:2.0\n" +
+            "BEGIN:VTIMEZONE\n" +
+            "TZID:Europe/Berlin\n" +
+            "BEGIN:DAYLIGHT\n" +
+            "TZOFFSETFROM:+0100\n" +
+            "TZOFFSETTO:+0200\n" +
+            "TZNAME:CEST\n" +
+            "DTSTART:19700329T020000\n" +
+            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\n" +
+            "END:DAYLIGHT\n" +
+            "BEGIN:STANDARD\n" +
+            "TZOFFSETFROM:+0200\n" +
+            "TZOFFSETTO:+0100\n" +
+            "TZNAME:CET\n" +
+            "DTSTART:19701025T030000\n" +
+            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\n" +
+            "END:STANDARD\n" +
+            "END:VTIMEZONE\n" +
+            "BEGIN:VEVENT\n" +
+            "CREATED:"+formatAsUTC(new Date(event.getCreated().longValue()))+"\n" +
+            "LAST-MODIFIED:"+formatAsUTC(new Date(event.getLastModified().longValue()))+"\n" +
+            "DTSTAMP:"+formatAsUTC(new Date(event.getTimestamp().longValue()))+"\n" +
+            "UID:"+event.getUid()+"\n" +
+            "RDATE;VALUE=DATE-TIME:"+event.getRecurrenceId()+"\n" +
+            "X-MOZ-LASTACK:"+formatAsUTC(ack)+"\n" +
+            "DTSTART:"+event.getRecurrenceId()+"\n" +
+            "X-MOZ-FAKED-MASTER:1\n" +
+            "X-MOZ-GENERATION:1\n" +
+            "END:VEVENT\n" +
+            "BEGIN:VEVENT\n" +
+            "CREATED:"+formatAsUTC(new Date(event.getCreated().longValue()))+"\n" +
+            "LAST-MODIFIED:"+formatAsUTC(new Date(event.getLastModified().longValue()))+"\n" +
+            "DTSTAMP:"+formatAsUTC(new Date(event.getTimestamp().longValue()))+"\n" +
+            "UID:"+event.getUid()+"\n" +
+            "SUMMARY:"+event.getSummary()+"\n" +
+            "RECURRENCE-ID:"+event.getRecurrenceId()+"\n" +
+            formatOrganizer(event.getOrganizer()) +
             formatAttendee(event.getAttendees().get(0)) +
             formatAttendee(event.getAttendees().get(1)) +
-            "X-MOZ-LASTACK:"+formatAsUTC(ack)+"\n" + 
+            "X-MOZ-LASTACK:"+formatAsUTC(ack)+"\n" +
             "DTSTART:"+event.getRecurrenceId()+"\n" +
-            "DTEND:"+formatAsUTC(DateTimeUtil.parseDateTime(event.getEndDate()))+"\n" + 
-            "CLASS:PUBLIC\n" + 
-            "SEQUENCE:"+event.getSequence()+"\n" + 
-            "TRANSP:OPAQUE\n" + 
-            "BEGIN:VALARM\n" + 
-            "TRIGGER;RELATED=START:-PT20M\n" + 
-            "UID:"+event.getAlarms().get(0).getUid()+"\n" + 
-            "ACTION:DISPLAY\n" + 
-            "DESCRIPTION:This is the display message!\n" + 
-            "END:VALARM\n" +   
-            "END:VEVENT\n" + 
+            "DTEND:"+formatAsUTC(DateTimeUtil.parseDateTime(event.getEndDate()))+"\n" +
+            "CLASS:PUBLIC\n" +
+            "SEQUENCE:"+event.getSequence()+"\n" +
+            "TRANSP:OPAQUE\n" +
+            "BEGIN:VALARM\n" +
+            "TRIGGER;RELATED=START:-PT20M\n" +
+            "UID:"+event.getAlarms().get(0).getUid()+"\n" +
+            "ACTION:DISPLAY\n" +
+            "DESCRIPTION:This is the display message!\n" +
+            "END:VALARM\n" +
+            "END:VEVENT\n" +
             "END:VCALENDAR";
         WebDAVClient davClient = new WebDAVClient(testUser2, getDefaultUserAgent(), oAuthGrant);
         String caldavFolder = getCaldavFolder(folder2);
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(davClient, caldavFolder, event.getUid(), iCal, null));
-        
-        
+
+
         String uid = event.getUid();
         event = eventManager2.getEvent(folder2, user2event.getId(), user2event.getRecurrenceId(), false);
         assertNotNull(event.getAlarms());
         assertEquals(1, event.getAlarms().size());
         assertNotNull(event.getAlarms().get(0).getAcknowledged());
         assertEquals(event.getAlarms().get(0).getAcknowledged().longValue(), ack.getTime() / 1000 * 1000);
-        
-        ICalResource iCalResource = get(davClient, caldavFolder, event.getUid(), null, null); 
+
+        ICalResource iCalResource = get(davClient, caldavFolder, event.getUid(), null, null);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
@@ -1266,15 +1266,15 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         List<Component> events = iCalResource.getVEvents();
         assertTrue("Contains no fake master", events.get(0).getPropertyValue("X-MOZ-FAKED-MASTER") != null || events.get(1).getPropertyValue("X-MOZ-FAKED-MASTER") != null);
     }
-    
+
     private String formatAttendee(Attendee att) {
-        return "ATTENDEE;CN=\""+att.getCn()+"\";PARTSTAT="+att.getPartStat()+";CUTYPE=INDIVIDUAL;EMAIL="+att.getEmail()+":mailto:"+att.getEmail()+"\n"; 
+        return "ATTENDEE;CN=\""+att.getCn()+"\";PARTSTAT="+att.getPartStat()+";CUTYPE=INDIVIDUAL;EMAIL="+att.getEmail()+":mailto:"+att.getEmail()+"\n";
     }
-    
+
     private String formatOrganizer(CalendarUser calUser) {
-        return "ORGANIZER;CN=\""+calUser.getCn()+"\":mailto:"+calUser.getEmail()+"\n"; 
+        return "ORGANIZER;CN=\""+calUser.getCn()+"\":mailto:"+calUser.getEmail()+"\n";
     }
-    
-    
+
+
 
 }

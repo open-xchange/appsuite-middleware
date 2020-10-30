@@ -160,7 +160,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          * Take over accept and check in calendar
          */
         assertSingleEvent(update(constructBody(reply)), createdEvent.getUid());
-        EventResponse eventResponse = chronosApi.getEvent(apiClient.getSession(), createdEvent.getId(), createdEvent.getFolder(), createdEvent.getRecurrenceId(), null, null);
+        EventResponse eventResponse = chronosApi.getEvent(createdEvent.getId(), createdEvent.getFolder(), createdEvent.getRecurrenceId(), null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         createdEvent = eventResponse.getData();
         for (Attendee attendee : createdEvent.getAttendees()) {
@@ -335,9 +335,9 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
         File file = new File(asset.getAbsolutePath());
         String callbackHtml = chronosApi.updateEventWithAttachments( //@formatter:off
-            apiClient.getSession(), createdEvent.getFolder(), createdEvent.getId(), now(), 
-            prepareJsonForFileUpload(createdEvent.getId(), 
-            null == createdEvent.getFolder() ? defaultFolderId : createdEvent.getFolder(), asset.getFilename()), 
+            createdEvent.getFolder(), createdEvent.getId(), now(),
+            prepareJsonForFileUpload(createdEvent.getId(),
+            null == createdEvent.getFolder() ? defaultFolderId : createdEvent.getFolder(), asset.getFilename()),
             file, null, null, null, null, null); //@formatter:on
         assertNotNull(callbackHtml);
         assertTrue("Should contain attachment name: " + asset.getFilename(), callbackHtml.contains("\"filename\":\"" + asset.getFilename() + "\""));
@@ -370,20 +370,20 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         assertEquals("image/jpeg", attachment.getFmtType());
         byte[] attachmentData = eventManagerC2.getAttachment(eventData.getId(), i(attachment.getManagedId()),  eventData.getFolder());
         assertNotNull(attachmentData);
-        
+
         /*
          * Remove attachment as organizer
          */
         EventData deltaEvent = prepareDeltaEvent(createdEvent);
         deltaEvent.setAttachments(Collections.emptyList());
         updateEventAsOrganizer(deltaEvent);
-        
+
         /*
          * Lookup that event has been removed
          */
         EventData updated = eventManager.getEvent(createdEvent.getFolder(), createdEvent.getId());
         assertThat("Should not contain attachments", updated.getAttachments(), empty());
-        
+
         /*
          * Receive update as attendee and accept changes
          */
@@ -434,7 +434,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         String fromStr = DateTimeUtil.getZuluDateTime(new Date(now - TimeUnit.DAYS.toMillis(1)).getTime()).getValue();
         String untilStr = DateTimeUtil.getZuluDateTime(new Date(now + TimeUnit.DAYS.toMillis(30)).getTime()).getValue();
 
-        ChronosCalendarResultResponse calendarResultResponse = chronosApi.updateEvent(apiClient.getSession(), deltaEvent.getFolder(), deltaEvent.getId(), now(), getUpdateBody(deltaEvent), deltaEvent.getRecurrenceId(), null, null, null, null, null, null, fromStr, untilStr, Boolean.TRUE, null);
+        ChronosCalendarResultResponse calendarResultResponse = chronosApi.updateEvent(deltaEvent.getFolder(), deltaEvent.getId(), now(), getUpdateBody(deltaEvent), deltaEvent.getRecurrenceId(), null, null, null, null, null, null, fromStr, untilStr, Boolean.TRUE, null);
         assertNull(calendarResultResponse.getError());
         assertTrue(calendarResultResponse.getData().getUpdated().size() == 0);
         assertTrue(calendarResultResponse.getData().getCreated().size() == occurences);
@@ -644,7 +644,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         String fromStr = DateTimeUtil.getZuluDateTime(new Date(now - TimeUnit.DAYS.toMillis(1)).getTime()).getValue();
         String untilStr = DateTimeUtil.getZuluDateTime(new Date(now + TimeUnit.DAYS.toMillis(30)).getTime()).getValue();
 
-        ChronosCalendarResultResponse calendarResultResponse = chronosApi.updateEvent(apiClient.getSession(), deltaEvent.getFolder(), deltaEvent.getId(), now(), getUpdateBody(deltaEvent), deltaEvent.getRecurrenceId(), null, null, null, null, null, null, fromStr, untilStr, Boolean.TRUE, null);
+        ChronosCalendarResultResponse calendarResultResponse = chronosApi.updateEvent(deltaEvent.getFolder(), deltaEvent.getId(), now(), getUpdateBody(deltaEvent), deltaEvent.getRecurrenceId(), null, null, null, null, null, null, fromStr, untilStr, Boolean.TRUE, null);
         assertNull(calendarResultResponse.getError());
         assertTrue(calendarResultResponse.getData().getUpdated().size() == 1);
         createdEvent = calendarResultResponse.getData().getUpdated().get(0);

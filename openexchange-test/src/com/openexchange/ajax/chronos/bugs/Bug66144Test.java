@@ -78,7 +78,7 @@ import com.openexchange.testing.httpclient.modules.UserApi;
 
 /**
  * {@link Bug66144Test}
- * 
+ *
  * Missing events in freeBusy request
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -108,7 +108,7 @@ public class Bug66144Test extends AbstractChronosTest {
         String until = formatAsUTC(TimeTools.D("next monday at 17:00", TimeZone.getTimeZone(userData.getTimezone())));
         Attendee attendee = new Attendee().entity(getApiClient().getUserId()).cuType(CuTypeEnum.INDIVIDUAL);
         FreeBusyBody freeBusyBody = new FreeBusyBody().attendees(Collections.singletonList(attendee));
-        ChronosFreeBusyResponse freeBusyResponse = chronosApi.freebusy(defaultUserApi.getSession(), from, until, freeBusyBody, null, null);
+        ChronosFreeBusyResponse freeBusyResponse = chronosApi.freebusy(from, until, freeBusyBody, null, null);
         assertNull(freeBusyResponse.getError(), freeBusyResponse.getError());
         /*
          * verify the first occurrence of the event series is contained

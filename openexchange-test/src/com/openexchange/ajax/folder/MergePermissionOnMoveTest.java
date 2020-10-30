@@ -82,10 +82,10 @@ public class MergePermissionOnMoveTest extends AbstractFolderMovePermissionsTest
         folderData.setFolderId(privateFolderId);
         folderData.setPermissions(null);
         folderBody.setFolder(folderData);
-        FolderUpdateResponse response = api.updateFolder(getSessionId(), toMoveFolderId, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE, Boolean.TRUE);
+        FolderUpdateResponse response = api.updateFolder(toMoveFolderId, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE, Boolean.TRUE);
         assertNotNull(response);
 
-        FolderResponse resp = api.getFolder(getSessionId(), toMoveFolderId, TREE, null, null);
+        FolderResponse resp = api.getFolder(toMoveFolderId, TREE, null, null);
         assertNotNull(resp);
         FolderData respData = resp.getData();
         List<FolderPermission> permissions = respData.getPermissions();
@@ -111,10 +111,10 @@ public class MergePermissionOnMoveTest extends AbstractFolderMovePermissionsTest
         folderData.setFolderId(publicFolderId);
         folderData.setPermissions(null);
         folderBody.setFolder(folderData);
-        FolderUpdateResponse response = api.updateFolder(getSessionId(), toMoveFolderId, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE, Boolean.TRUE);
+        FolderUpdateResponse response = api.updateFolder(toMoveFolderId, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE, Boolean.TRUE);
         assertNotNull(response);
 
-        FolderResponse resp = api.getFolder(getSessionId(), toMoveFolderId, TREE, null, null);
+        FolderResponse resp = api.getFolder(toMoveFolderId, TREE, null, null);
         assertNotNull(resp);
         FolderData respData = resp.getData();
         List<FolderPermission> permissions = respData.getPermissions();
@@ -140,10 +140,10 @@ public class MergePermissionOnMoveTest extends AbstractFolderMovePermissionsTest
         folderData.setFolderId(sharedFolderId);
         folderData.setPermissions(null);
         folderBody.setFolder(folderData);
-        FolderUpdateResponse response = api.updateFolder(getSessionId(), toMoveFolderId, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE, Boolean.TRUE);
+        FolderUpdateResponse response = api.updateFolder(toMoveFolderId, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE, Boolean.TRUE);
         assertNotNull(response);
 
-        FolderResponse resp = api.getFolder(getSessionId(), toMoveFolderId, TREE, null, null);
+        FolderResponse resp = api.getFolder(toMoveFolderId, TREE, null, null);
         assertNotNull(resp);
         FolderData respData = resp.getData();
         List<FolderPermission> permissions = respData.getPermissions();

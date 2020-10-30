@@ -1,6 +1,5 @@
 /*
  *
- *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
  *    international copyright laws.
@@ -102,7 +101,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
     @Override
     public void tearDown() throws Exception {
         if (folderToDelete != null) {
-            foldersApi.deleteFolders(getSessionId(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "contacts", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
+            foldersApi.deleteFolders(new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "contacts", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         }
         super.tearDown();
     }
@@ -134,7 +133,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse createFolder = api.createFolder(parent, getSessionId(), body, "0", null, null, null);
+        FolderUpdateResponse createFolder = api.createFolder(parent, body, "0", null, null, null);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
 
         String result = createFolder.getData();
@@ -164,7 +163,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
      */
     @SuppressWarnings("unchecked")
     private String getDefaultFolder(String session) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "contacts", "1,308", "0", null, Boolean.TRUE);
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders("contacts", "1,308", "0", null, Boolean.TRUE);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }
@@ -188,7 +187,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
     public void testJPImport() throws ApiException {
         File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "jpcontact.csv");
         importApi.importCSV(getSessionId(), folderId, file, Boolean.FALSE, null);
-        ContactsResponse allContacts = contactsApi.getAllContacts(getSessionId(), folderId, COLUMNS, null, null, null);
+        ContactsResponse allContacts = contactsApi.getAllContacts(folderId, COLUMNS, null, null, null, null);
         Object data = checkResponse(allContacts.getError(), allContacts.getErrorDesc(), allContacts.getData());
         Assert.assertTrue("Wrong response type. Expected ArrayList but received: " + data.getClass().getSimpleName(), data instanceof ArrayList<?>);
         ArrayList<?> contacts = (ArrayList<?>) data;

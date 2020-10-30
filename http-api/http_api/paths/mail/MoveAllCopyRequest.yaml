@@ -4,8 +4,10 @@
     tags:
       - Mail
     summary: Moves all mails from a given source to a specified target folder.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []      
+        - oauth:
+          - write_mails    
     responses:
       '200':
         description: >

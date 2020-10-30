@@ -4,8 +4,10 @@
     tags:
       - Snippet
     summary: Gets the attachment of a snippet.
+    security: 
+        - session: []
+        - oauth: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The identifier of the snippet.

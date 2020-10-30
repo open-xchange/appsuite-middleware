@@ -123,7 +123,7 @@ public class ITipUtil {
 
     /**
      * Uploads a mail to the INBOX
-     * 
+     *
      * @param apiClient The {@link ApiClient}
      * @param eml The mail to upload
      * @return {@link MailDestinationData} with set mail ID and folder ID
@@ -136,7 +136,7 @@ public class ITipUtil {
         writer.close();
 
         MailApi mailApi = new MailApi(apiClient);
-        MailImportResponse importMail = mailApi.importMail(apiClient.getSession(), FOLDER_MACHINE_READABLE, tmpFile, null, Boolean.TRUE);
+        MailImportResponse importMail = mailApi.importMail(FOLDER_MACHINE_READABLE, tmpFile, null, Boolean.TRUE);
         return importMail.getData().get(0);
     }
 
@@ -249,7 +249,7 @@ public class ITipUtil {
 
     private static MailData lookupMail(ApiClient apiClient, String folder, String fromToMatch, String subjectToMatch, int sequenceToMatch, SchedulingMethod method) throws Exception {
         MailApi mailApi = new MailApi(apiClient);
-        MailsResponse mailsResponse = mailApi.getAllMails(apiClient.getSession(), folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
+        MailsResponse mailsResponse = mailApi.getAllMails(folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
         assertNull(mailsResponse.getError(), mailsResponse.getError());
         assertNotNull(mailsResponse.getData());
         for (List<String> mail : mailsResponse.getData()) {
@@ -257,7 +257,7 @@ public class ITipUtil {
             if (Strings.isEmpty(subject) || false == subject.contains(subjectToMatch)) {
                 continue;
             }
-            MailResponse mailResponse = mailApi.getMail(apiClient.getSession(), mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
+            MailResponse mailResponse = mailApi.getMail(mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
             assertNull(mailResponse.getError(), mailsResponse.getError());
             assertNotNull(mailResponse.getData());
             MailData mailData = mailResponse.getData();
@@ -343,13 +343,13 @@ public class ITipUtil {
 
     private static ImportedCalendar parseICalAttachment(ApiClient apiClient, String folder, String id, String attachmentId) throws Exception {
         MailApi mailApi = new MailApi(apiClient);
-        byte[] attachment = mailApi.getMailAttachment(apiClient.getSession(), folder, id, attachmentId, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        byte[] attachment = mailApi.getMailAttachment(folder, id, attachmentId, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING, true);
         return ICalUtils.importCalendar(Streams.newByteArrayInputStream(attachment), new ICalMapper(), null);
     }
 
     /**
-     * 
+     *
      * Prepares a JSON object for the upload of an JPG attachment with the chronos API.
      *
      * @param id The event id
@@ -363,7 +363,7 @@ public class ITipUtil {
     }
 
     /**
-     * 
+     *
      * Prepares a JSON object for the upload of an event.
      *
      * @param id The event id

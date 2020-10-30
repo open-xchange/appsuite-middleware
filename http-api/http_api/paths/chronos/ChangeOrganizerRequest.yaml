@@ -4,8 +4,11 @@
     tags:
       - Chronos
     summary: Changes an organizer of an event.
+    security: 
+        - session: []  
+        - oauth:
+          - write_calendar    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamChronosFolder'
       - $ref: '#/components/parameters/QueryParamChronosID'
       - $ref: '#/components/parameters/QueryParamChronosRecurrenceID'

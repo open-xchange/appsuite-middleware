@@ -4,6 +4,10 @@
     tags:
       - Mail
     summary: Sends a mail.
+    security: 
+        - session: []
+        - oauth:
+          - write_mails    
     description: >
       The request accepts file fields in upload form that denote referenced
       files that are going to be appended
@@ -18,7 +22,6 @@
 
       intact.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: lineWrapAfter
         description: >-
@@ -103,8 +106,11 @@
     summary: >-
       Sends or saves a mail as MIME data block
       ([RFC822](https://tools.ietf.org/html/rfc822)).
+    security: 
+        - session: []
+        - oauth:
+          - write_mails      
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: folder
         description: >

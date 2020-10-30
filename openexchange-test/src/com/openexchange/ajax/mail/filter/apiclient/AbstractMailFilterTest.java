@@ -50,8 +50,10 @@
 package com.openexchange.ajax.mail.filter.apiclient;
 
 import static com.openexchange.java.Autoboxing.B;
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.I;
+import static java.lang.Boolean.TRUE;
+import static java.lang.Boolean.FALSE;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -107,7 +109,8 @@ public abstract class AbstractMailFilterTest extends AbstractConfigAwareAPIClien
     public void tearDown() throws Exception {
         ApiException ex = null;
         try {
-            folderApi.deleteFolders(getSessionId(), foldersToDelete, "0", L(Long.MAX_VALUE), null, B(true), B(false), B(false), null, Boolean.FALSE);
+
+            folderApi.deleteFolders(foldersToDelete, "0", L(Long.MAX_VALUE), null, TRUE, FALSE, FALSE, null, FALSE);
             for (int ruleId : sieveRuleToDelete) {
                 MailFilterDeletionBody body = new MailFilterDeletionBody();
                 body.setId(I(ruleId));

@@ -4,8 +4,11 @@
     tags:
       - Chronos
     summary: Gets all events in folder.
+    security: 
+        - session: []      
+        - oauth:
+          - read_calendar    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: folder
         description: >-
@@ -56,8 +59,11 @@
     tags:
       - Chronos
     summary: Gets all events of multiple folders.
+    security: 
+        - oauth:
+          - read_calendar
+        - session: []
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: rangeStart
         description: >

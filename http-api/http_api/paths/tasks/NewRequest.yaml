@@ -4,8 +4,10 @@
     tags:
       - Tasks
     summary: Creates a task.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []      
+        - oauth:
+          - write_tasks    
     responses:
       '200':
         description: >

@@ -4,6 +4,10 @@
     tags:
       - Mail
     summary: Gets the complete message source as plain text.
+    security: 
+        - session: []      
+        - oauth:
+          - read_mails    
     description: >
       #### Note
 
@@ -15,7 +19,6 @@
 
       The parameters below specify the ones that have an effect on the request.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - in: query
         name: id

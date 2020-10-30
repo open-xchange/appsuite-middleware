@@ -4,8 +4,11 @@
     tags:
       - Mail
     summary: Examines a specifed mail folder and provides its basic status information
+    security: 
+        - session: []      
+        - oauth:
+          - read_mails    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: folder
         description: The identifier of the folder to provide the status information for

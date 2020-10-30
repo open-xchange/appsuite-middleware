@@ -140,7 +140,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
             }
         }
         if (tasksToDelete != null && !tasksToDelete.isEmpty()) {
-            taskApi.deleteTasks(getSessionId(), taskTimestamp, tasksToDelete);
+            taskApi.deleteTasks(taskTimestamp, tasksToDelete);
         }
         super.tearDown();
     }
@@ -203,7 +203,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
         participant.setId(groupIds[1]);
         participant.setType(TypeEnum.NUMBER_2); // 2 == user group
         task.addParticipantsItem(participant);
-        TaskUpdateResponse createTask = taskApi.createTask(getSessionId(), task);
+        TaskUpdateResponse createTask = taskApi.createTask(task);
         Assert.assertNull(createTask.getError(), createTask.getErrorDesc());
         rememberTask(task.getFolderId(), createTask.getData().getId(), createTask.getTimestamp());
 
@@ -226,7 +226,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
      * @throws Exception
      */
     private String getTaskFolderId() throws Exception {
-        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, getSessionId(), "tasks", "1,308", "0");
+        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, "tasks", "1,308", "0");
         if (privateList.size() == 1) {
             return (String) privateList.get(0).get(0);
         }

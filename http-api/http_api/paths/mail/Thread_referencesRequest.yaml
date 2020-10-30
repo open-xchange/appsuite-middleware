@@ -4,8 +4,11 @@
     tags:
       - Mail
     summary: Gets all mail thread references.
+    security: 
+        - session: []      
+        - oauth:
+          - read_mails    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - $ref: '#/components/parameters/gblQueryParamMailColumns'
       - $ref: '#/components/parameters/gblQueryParamMailHeaders'

@@ -7,8 +7,10 @@
     summary: >-
       Probe to check given ICal calendar properties before creating a new
       account.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []
+        - oauth:
+          - read_calendar      
     responses:
       '200':
         description: >

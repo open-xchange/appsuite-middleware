@@ -4,8 +4,11 @@
     tags:
       - Tasks
     summary: Search for tasks.
+    security: 
+        - session: []      
+        - oauth:
+          - read_tasks    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamTaskColumns'
       - in: query
         name: sort
