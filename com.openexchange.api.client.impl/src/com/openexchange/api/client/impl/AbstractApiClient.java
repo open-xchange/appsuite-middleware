@@ -66,7 +66,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import org.apache.http.HttpEntity;
@@ -143,7 +142,6 @@ public abstract class AbstractApiClient implements ApiClient {
     protected final CookieStore cookieStore;
 
     private final AtomicBoolean isClosed;
-    private final AtomicInteger counter;
     private final AtomicLong lastRelogin;
 
     /**
@@ -165,7 +163,6 @@ public abstract class AbstractApiClient implements ApiClient {
         this.cookieStore = HttpContextUtils.createCookieStore();
 
         this.isClosed = new AtomicBoolean(false);
-        this.counter = new AtomicInteger();
         this.lastRelogin = new AtomicLong(System.currentTimeMillis());
     }
 
@@ -210,7 +207,7 @@ public abstract class AbstractApiClient implements ApiClient {
         HttpResponse response = null;
         try {
             /*
-             * Execute the request
+             * Prepare context and execute the request
              */
             HttpContext httpContext = new BasicHttpContext();
             HttpContextUtils.addCookieStore(httpContext, cookieStore);
@@ -235,12 +232,6 @@ public abstract class AbstractApiClient implements ApiClient {
             if (null != oxException && !enquedRequest) {
                 throw oxException;
             }
-            /*
-             * Decrement counter after successful request
-             */
-            if (counter.get() > 0) {
-                counter.decrementAndGet();
-            }
 
             /**
              * Check if the request was enqueued on the remote side, because it takes longer.
@@ -251,7 +242,7 @@ public abstract class AbstractApiClient implements ApiClient {
             }
 
             /*
-             * Finally parse object
+             * Finally parse object. Wrap input streams so HTTP data is closed after the input stream is consumed
              */
             T ret = parser != null ? parser.parse(response, httpContext) : null;
             if (ret instanceof InputStream) {
@@ -576,7 +567,7 @@ public abstract class AbstractApiClient implements ApiClient {
 
         lastRelogin.set(System.currentTimeMillis());
         LOGGER.debug("The session on the remote system {} expired for user {} in context {}. Trying to re-login", loginLink.getHost(), I(userId), I(contextId));
-        for (; counter.get() <= DEFAULT_RETRIES; counter.incrementAndGet()) {
+        for (int counter = 0; counter <= DEFAULT_RETRIES; counter++) {
             try {
                 cookieStore.clear();
                 doLogin();
@@ -586,7 +577,7 @@ public abstract class AbstractApiClient implements ApiClient {
                     throw e;
                 }
 
-                if (counter.get() == DEFAULT_RETRIES) {
+                if (counter == DEFAULT_RETRIES) {
                     /*
                      * Login attempts failed. Throw error and close client. Logout doen't need to be performed, as no valid session is available
                      */
@@ -598,8 +589,8 @@ public abstract class AbstractApiClient implements ApiClient {
                 /*
                  * Try login after a certain amount of time again
                  */
-                int delay = RETRY_BASE_DELAY * counter.get();
-                LOGGER.debug("Error during automatic login (\"{}\"), trying again in {}ms ({}/{})...", e.getMessage(), I(delay), I(counter.get()), I(DEFAULT_RETRIES));
+                int delay = RETRY_BASE_DELAY * counter;
+                LOGGER.debug("Error during automatic login (\"{}\"), trying again in {}ms ({}/{})...", e.getMessage(), I(delay), I(counter), I(DEFAULT_RETRIES));
                 LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(delay));
             }
         }
