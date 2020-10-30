@@ -71,6 +71,7 @@ import org.json.JSONObject;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
 import com.openexchange.pgp.mail.PGPMimeService;
@@ -254,7 +255,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     }
 
     private Properties getSMTPProperties(LeanConfigurationService leanConfig) {
-        Properties properties = new Properties();
+        Properties properties = MimeDefaultSession.getDefaultMailProperties();
         SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
         if (factoryProvider != null) {
             String socketFactoryClass = factoryProvider.getDefault().getClass().getName();

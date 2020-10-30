@@ -69,8 +69,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.sun.mail.smtp.SMTPTransport;
+import com.sun.mail.util.PropUtil;
 
 /**
  * {@link MailValidator}
@@ -101,7 +103,7 @@ public class MailValidator {
             ConfigurationService configuration = Services.getService(ConfigurationService.class);
             SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
             String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
-            Properties props = new Properties();
+            Properties props = MimeDefaultSession.getDefaultMailProperties();
             if (ConnectMode.SSL == connectMode) {
                 props.put("mail.imap.socketFactory.class", socketFactoryClass);
             } else if (ConnectMode.STARTTLS == connectMode) {
@@ -175,7 +177,7 @@ public class MailValidator {
     public static boolean validatePop3(String host, int port, ConnectMode connectMode, String user, String pwd, Map<String, Object> optProperties) {
         Store store = null;
         try {
-            Properties props = new Properties();
+            Properties props = MimeDefaultSession.getDefaultMailProperties();
             SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
             String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
             if (ConnectMode.SSL == connectMode) {
@@ -250,7 +252,7 @@ public class MailValidator {
         try {
             SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
             String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
-            Properties props = new Properties();
+            Properties props = MimeDefaultSession.getDefaultMailProperties();
             if (ConnectMode.SSL == connectMode) {
                 props.put("mail.smtp.socketFactory.class", socketFactoryClass);
             } else if (ConnectMode.STARTTLS == connectMode) {
@@ -315,7 +317,7 @@ public class MailValidator {
      * @return <code>true</code> if such a socket could be successfully linked to the given IMAP end-point; otherwise <code>false</code>
      */
     public static boolean tryImapConnect(String host, int port, boolean secure) {
-        return tryConnect(host, port, secure, "A11 LOGOUT\r\n");
+        return tryConnect(host, port, secure, "A11 LOGOUT\r\n", "imap");
     }
 
     /**
@@ -327,7 +329,7 @@ public class MailValidator {
      * @return <code>true</code> if such a socket could be successfully linked to the given SMTP end-point; otherwise <code>false</code>
      */
     public static boolean trySmtpConnect(String host, int port, boolean secure) {
-        return tryConnect(host, port, secure, "QUIT\r\n");
+        return tryConnect(host, port, secure, "QUIT\r\n", "smtp");
     }
 
     /**
@@ -339,15 +341,33 @@ public class MailValidator {
      * @return <code>true</code> if such a socket could be successfully linked to the given POP3 end-point; otherwise <code>false</code>
      */
     public static boolean tryPop3Connect(String host, int port, boolean secure) {
-        return tryConnect(host, port, secure, "QUIT\r\n");
+        return tryConnect(host, port, secure, "QUIT\r\n", "pop3");
     }
 
-    private static boolean tryConnect(String host, int port, boolean secure, String closePhrase) {
+    private static boolean tryConnect(String host, int port, boolean secure, String closePhrase, String name) {
         try (Socket s = secure ? Services.getService(SSLSocketFactoryProvider.class).getDefault().createSocket() : new Socket()) {
             /*
              * Set connect timeout
              */
-            s.connect(new InetSocketAddress(host, port), DEFAULT_CONNECT_TIMEOUT);
+            String proxyHost = System.getProperties().getProperty("mail." + name + ".proxy.host", null);
+            int proxyPort = 80;
+            if (proxyHost == null) {
+                // No proxy configured
+                s.connect(new InetSocketAddress(host, port), DEFAULT_CONNECT_TIMEOUT);
+            } else {
+                // Proxy available via configuration
+                int i = proxyHost.indexOf(':');
+                if (i >= 0) {
+                    try {
+                        proxyPort = Integer.parseInt(proxyHost.substring(i + 1));
+                    } catch (NumberFormatException ex) {
+                        // ignore it
+                    }
+                    proxyHost = proxyHost.substring(0, i);
+                }
+                proxyPort = PropUtil.getIntProperty(System.getProperties(), "mail." + name + ".proxy.port", proxyPort);
+                s.connect(new InetSocketAddress(proxyHost, proxyPort), DEFAULT_CONNECT_TIMEOUT);
+            }
             s.setSoTimeout(DEFAULT_TIMEOUT);
             InputStream in = s.getInputStream();
             OutputStream out = s.getOutputStream();
