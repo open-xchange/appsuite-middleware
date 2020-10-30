@@ -201,6 +201,10 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
             accountAccess = fileStorageService.getAccountAccess(storageAccount.getId(), session);
             accountAccess.connect();
             setSubscribed(accountAccess, shareLink, false);
+            FileStorageFolder rootFolder = getShareRootFolder(accountAccess, getFolderFrom(shareLink));
+            if (rootFolder.isSubscribed()) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unsubscribe was not successful");
+            }
         } finally {
             if (null != accountAccess) {
                 accountAccess.close();

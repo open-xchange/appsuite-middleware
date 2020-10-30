@@ -107,6 +107,7 @@ import com.openexchange.share.subscription.XctxSessionManager;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
@@ -129,7 +130,13 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContextService.class, TemplateService.class, ConfigurationService.class, DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class, ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class, QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class, DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechRegistry.class, UserAliasStorage.class, SessiondService.class };
+        return new Class<?>[] { //@formatter:off
+            UserService.class, ContextService.class, TemplateService.class, ConfigurationService.class, DatabaseService.class,
+            HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class, ContactUserStorage.class, 
+            ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class, QuotaService.class, 
+            FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class, DispatcherPrefixService.class, 
+            CapabilityService.class, GroupService.class, PasswordMechRegistry.class, UserAliasStorage.class, SessiondService.class,
+            FolderSubscriptionHelper.class }; //@formatter:on
     }
 
     @Override
