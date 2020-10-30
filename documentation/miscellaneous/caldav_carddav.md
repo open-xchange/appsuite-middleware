@@ -89,7 +89,7 @@ The following picture shows an abstract request and response flow with the above
 
 ## Via Apache UserAgent detection
 
-For environments where it is inconvenient to setup a virtual host there is also the possibility to redirect to relevant servlets another way: Via useragent detection. This is not recommended for the following reason: Per definition this is a whitelist-approach and any client sending a useragent-string not explicitly listed in the configuration will not be able to connect . Useragent-strings may also change between different versions of an application or may even be actively changed into something non-standard.
+For environments where it is inconvenient to setup a virtual host there is also the possibility to redirect to relevant servlets another way: Via useragent detection. This is not recommended for the following reason: Per definition this is a whitelist-approach and any client sending a useragent-string not explicitly listed in the configuration will not be able to connect. Useragent-strings may also change between different versions of an application or may even be actively changed into something non-standard. Also, when a useragent is matched by one of the conditions, this will rewrite any requests of this client to the *DAV-servlets, which may break other client functionality like integrated web browsers. 
 
 ```
    $ vi <your-ox-site-configuration-file>
@@ -102,6 +102,7 @@ For environments where it is inconvenient to setup a virtual host there is also 
   RewriteCond %{HTTP_USER_AGENT}      DAVx5              [OR]
   RewriteCond %{HTTP_USER_AGENT}      "DAVdroid"         [OR]
   RewriteCond %{HTTP_USER_AGENT}      Lightning          [OR]
+  RewriteCond %{HTTP_USER_AGENT}      Thunderbird        [OR]
   RewriteCond %{HTTP_USER_AGENT}      Adresboek          [OR]
   RewriteCond %{HTTP_USER_AGENT}      dataaccessd        [OR]
   RewriteCond %{HTTP_USER_AGENT}      Preferences        [OR]
@@ -111,6 +112,7 @@ For environments where it is inconvenient to setup a virtual host there is also 
   RewriteCond %{HTTP_USER_AGENT}      CalendarStore      [OR]
   RewriteCond %{HTTP_USER_AGENT}      CalendarAgent      [OR]
   RewriteCond %{HTTP_USER_AGENT}      CalDAV%20Sync%20Adapter [OR]
+  RewriteCond %{HTTP_USER_AGENT}      CalDavSynchronizer [OR]
   RewriteCond %{HTTP_USER_AGENT}      accountsd          [OR]
   RewriteCond %{HTTP_USER_AGENT}      "eM Client"        [OR]
   RewriteCond %{HTTP_USER_AGENT}      "eMClient"        [OR]
