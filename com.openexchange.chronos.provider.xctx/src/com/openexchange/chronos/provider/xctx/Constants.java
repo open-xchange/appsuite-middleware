@@ -49,9 +49,9 @@
 
 package com.openexchange.chronos.provider.xctx;
 
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
 
 /**
  * {@link Constants}
@@ -62,8 +62,8 @@ import com.openexchange.groupware.modules.Module;
 public enum Constants {
     ;
 
-    /** The static identifier of the internal calendar provider */
-    static final String PROVIDER_ID = "xctx" + Module.CALENDAR.getFolderConstant();
+    /** The static identifier of the calendar provider for cross-context shares */
+    static final String PROVIDER_ID = CalendarProviders.ID_XCTX;
 
     /** The identifier of the folder tree the calendar provider is using */
     static final String TREE_ID = com.openexchange.folderstorage.FolderStorage.REAL_TREE_ID;

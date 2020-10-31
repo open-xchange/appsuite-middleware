@@ -50,9 +50,7 @@
 package com.openexchange.chronos.provider.xctx;
 
 import static com.openexchange.chronos.common.CalendarUtils.DISTANT_FUTURE;
-import static com.openexchange.chronos.common.CalendarUtils.optExtendedPropertyValue;
 import static com.openexchange.chronos.provider.CalendarAccount.DEFAULT_ACCOUNT;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.xctx.Constants.CONTENT_TYPE;
 import static com.openexchange.chronos.provider.xctx.Constants.PUBLIC_FOLDER_ID;
@@ -60,7 +58,6 @@ import static com.openexchange.chronos.provider.xctx.Constants.SHARED_FOLDER_ID;
 import static com.openexchange.chronos.provider.xctx.Constants.TREE_ID;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -69,7 +66,6 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import org.dmfs.rfc5545.DateTime;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -79,7 +75,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -195,18 +190,17 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         /*
          * update folder's configuration in underlying account's internal config
          */
-        JSONObject originalConfig = getFolderConfig(folderId);
-        JSONObject updatedConfig = new JSONObject(originalConfig);
+        JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
+        boolean updated = false;
         if (null != folder.isSubscribed()) {
-            updatedConfig.putSafe("subscribed", Boolean.FALSE.equals(folder.isSubscribed()) ? Boolean.FALSE : null);
+            updated = updated || new AccountConfigHelper(internalConfig).setSubscribed(folderId, folder.isSubscribed());
         }
         if (null != folder.getExtendedProperties()) {
-            ExtendedProperty colorProperty = folder.getExtendedProperties().get(COLOR_LITERAL);
-            updatedConfig.putSafe("color", null == colorProperty ? null : colorProperty.getValue());
+            updated = updated || new AccountConfigHelper(internalConfig).setColor(folderId, folder.getExtendedProperties().get(COLOR_LITERAL));
         }
-        if (false == Objects.equals(originalConfig, updatedConfig)) {
+        if (updated) {
             JSONObject userConfig = null != account.getUserConfiguration() ? account.getUserConfiguration() : new JSONObject();
-            userConfig.putSafe("internalConfig", setFolderConfig(folderId, updatedConfig));
+            userConfig.putSafe("internalConfig", internalConfig);
             services.getService(CalendarAccountService.class).updateAccount(localSession, account.getAccountId(), userConfig, clientTimestamp, null);
         }
         /*
@@ -475,19 +469,14 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         /*
          * derive extended properties, and 'subscribed' state from account config
          */
-        JSONObject folderConfig = getFolderConfig(folder.getID());
+        JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
+        AccountConfigHelper configHelper = new AccountConfigHelper(internalConfig);
         ExtendedProperties extendedProperties = new ExtendedProperties();
-        extendedProperties.add(COLOR(folderConfig.optString("color", null), false));
+        extendedProperties.add(configHelper.getColor(folder.getID()));
         calendarFolder.setExtendedProperties(extendedProperties);
-        calendarFolder.setSubscribed(folderConfig.hasAndNotNull("subscribed") ? B(folderConfig.optBoolean("subscribed")) : null);
+        calendarFolder.setSubscribed(configHelper.isSubscribed(folder.getID()));
         calendarFolder.setUsedForSync(UsedForSync.DEACTIVATED);
         return calendarFolder;
-    }
-
-    private void updateInternalConfig(JSONObject internalConfig) throws OXException {
-        JSONObject userConfig = null != account.getUserConfiguration() ? account.getUserConfiguration() : new JSONObject();
-        userConfig.putSafe("internalConfig", internalConfig);
-        services.getService(CalendarAccountService.class).updateAccount(localSession, account.getAccountId(), userConfig, DISTANT_FUTURE, null);
     }
 
     private GroupwareCalendarFolder rememberFolder(GroupwareCalendarFolder calendarFolder) {
@@ -498,93 +487,17 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         if (null == calendarFolders || calendarFolders.isEmpty()) {
             return calendarFolders;
         }
-        /*
-         * get or prepare "folders" configuration section
-         */
         JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
-        JSONObject foldersConfig = internalConfig.optJSONObject("folders");
-        if (null == foldersConfig) {
-            foldersConfig = new JSONObject();
-            internalConfig.putSafe("folders", foldersConfig);
-        }
-        /*
-         * update each folder in config as needed
-         */
-        boolean needsUpdate = false;
-        for (GroupwareCalendarFolder calendarFolder : calendarFolders) {
-            if (null == calendarFolder.getId()) {
-                LOG.warn("Unable to remember calendar folder {} without id.", calendarFolder);
-                continue;
-            }
-            JSONObject folderConfig = serializeFolder(calendarFolder);
-            if (false == Objects.equals(foldersConfig.optJSONObject(calendarFolder.getId()), folderConfig)) {
-                foldersConfig.putSafe(calendarFolder.getId(), folderConfig);
-                needsUpdate = true;
-            }
-        }
-        /*
-         * update account config if changed
-         */
-        if (needsUpdate) {
+        if (new AccountConfigHelper(internalConfig).rememberFolders(calendarFolders)) {
             try {
-                updateInternalConfig(internalConfig);
+                JSONObject userConfig = null != account.getUserConfiguration() ? account.getUserConfiguration() : new JSONObject();
+                userConfig.putSafe("internalConfig", internalConfig);
+                services.getService(CalendarAccountService.class).updateAccount(localSession, account.getAccountId(), userConfig, DISTANT_FUTURE, null);
             } catch (OXException e) {
                 LOG.warn("Error remembering calendar folders in account config", e);
             }
         }
         return calendarFolders;
-    }
-
-    private static JSONObject serializeFolder(GroupwareCalendarFolder calendarFolder) {
-        if (null == calendarFolder) {
-            return null;
-        }
-        return new JSONObject(8)
-            .putSafe("id", calendarFolder.getId())
-            .putSafe("parentId", calendarFolder.getParentId())
-            .putSafe("name", calendarFolder.getName())
-            .putSafe("type", null != calendarFolder.getType() ? calendarFolder.getType().name() : null)
-            .putSafe("subscribed", calendarFolder.isSubscribed())
-            .putSafe("color", optExtendedPropertyValue(calendarFolder.getExtendedProperties(), COLOR_LITERAL, String.class))
-        ;
-    }
-
-    /**
-     * Sets the configuration for a specific folder identified by its identifier in the internal configuration blob of the underlying account.
-     * 
-     * @param folderId The identifier of the folder to get the configuration for
-     * @param folderConfig The folder's config, or <code>null</code> to remove the config
-     * @return The updated (or newly prepared) internal configuration blob of the underlying account.
-     */
-    private JSONObject setFolderConfig(String folderId, JSONObject folderConfig) {
-        JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
-        JSONObject foldersObject = internalConfig.optJSONObject("folders");
-        if (null == foldersObject) {
-            foldersObject = new JSONObject();
-            internalConfig.putSafe("folders", foldersObject);
-        }
-        foldersObject.putSafe(folderId, folderConfig);
-        return internalConfig;
-    }
-
-    /**
-     * Gets the configuration for a specific folder by its identifier from the internal configuration blob of the underlying account.
-     * 
-     * @param folderId The identifier of the folder to get the configuration for
-     * @return The folder's config, or an empty JSON object if none is stored at the moment
-     */
-    private JSONObject getFolderConfig(String folderId) {
-        JSONObject internalConfig = account.getInternalConfiguration();
-        if (null != internalConfig) {
-            JSONObject foldersObject = internalConfig.optJSONObject("folders");
-            if (null != foldersObject) {
-                JSONObject folderObject = foldersObject.optJSONObject(folderId);
-                if (null != folderObject) {
-                    return folderObject;
-                }
-            }
-        }
-        return new JSONObject();
     }
 
 }

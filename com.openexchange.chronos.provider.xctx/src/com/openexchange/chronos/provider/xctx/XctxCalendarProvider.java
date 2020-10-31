@@ -55,8 +55,10 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
+import com.openexchange.chronos.provider.FallbackAwareCalendarProvider;
 import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -79,7 +81,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
-public class XctxCalendarProvider implements FolderCalendarProvider {
+public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwareCalendarProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(XctxCalendarProvider.class);
 
@@ -201,6 +203,11 @@ public class XctxCalendarProvider implements FolderCalendarProvider {
     private Session doGuestLogin(Session localSession, String shareUrl, String password) throws OXException {
         String baseToken = ShareLinks.extractBaseToken(shareUrl);
         return services.getServiceSafe(XctxSessionManager.class).getGuestSession(localSession, baseToken, password);
+    }
+
+    @Override
+    public CalendarAccess connectFallback(Session session, CalendarAccount account, CalendarParameters parameters, OXException error) {
+        return new FallbackXctxCalendarAccess(session, account, parameters, error);
     }
 
 }
