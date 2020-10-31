@@ -194,7 +194,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     default List<Event> getEventsInFolder(String folderId) throws OXException {
         EventsResult eventsResult = getEventsInFolders(Collections.singletonList(folderId)).get(folderId);
         if (null == eventsResult) {
-            return null;
+            return Collections.emptyList();
         }
         if (null != eventsResult.getError()) {
             throw eventsResult.getError();
