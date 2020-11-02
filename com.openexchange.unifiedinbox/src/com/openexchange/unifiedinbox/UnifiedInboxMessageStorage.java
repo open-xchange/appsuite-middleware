@@ -220,14 +220,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     private static List<MailAccount> getAccounts(boolean onlyEnabled, int unifiedMailAccountId, int userId, int contextId) throws OXException {
         MailAccount[] tmp = Services.getService(MailAccountStorageService.class).getUserMailAccounts(userId, contextId);
         List<MailAccount> accounts = new ArrayList<>(tmp.length);
-        int thisAccountId = unifiedMailAccountId;
-
         for (MailAccount mailAccount : tmp) {
-            if (thisAccountId != mailAccount.getId() && (!onlyEnabled || mailAccount.isUnifiedINBOXEnabled())) {
+            if (unifiedMailAccountId != mailAccount.getId() && (!onlyEnabled || mailAccount.isUnifiedINBOXEnabled())) {
                 accounts.add(mailAccount);
             }
         }
-
         return accounts;
     }
 
