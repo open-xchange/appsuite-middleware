@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.groupware;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_SCHEDULING;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -131,14 +132,26 @@ public final class CalendarDeleteListener implements DeleteListener {
     public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon) throws OXException {
         switch (deleteEvent.getType()) {
             case DeleteEvent.TYPE_USER:
-                if (DeleteEvent.SUBTYPE_ANONYMOUS_GUEST != deleteEvent.getSubType() && DeleteEvent.SUBTYPE_INVITED_GUEST != deleteEvent.getSubType()) {
-                    purgeUserData(new SimpleDBProvider(readCon, writeCon), deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getDestinationUserID(), deleteEvent.getSession());
+                try {
+                    if (DeleteEvent.SUBTYPE_ANONYMOUS_GUEST != deleteEvent.getSubType() && DeleteEvent.SUBTYPE_INVITED_GUEST != deleteEvent.getSubType()) {
+                        purgeUserData(new SimpleDBProvider(readCon, writeCon), deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getDestinationUserID(), deleteEvent.getSession());
+                    }
+                    break;
+                } catch (Exception e) {
+                    org.slf4j.LoggerFactory.getLogger(CalendarDeleteListener.class).error(
+                        "Unexpected error handling delete event for entity {} in context {}: {}", I(deleteEvent.getId()), I(deleteEvent.getContext().getContextId()), e.getMessage(), e);
+                    throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());  
                 }
-                break;
             case DeleteEvent.TYPE_GROUP:
             case DeleteEvent.TYPE_RESOURCE:
-                deleteAttendee(new SimpleDBProvider(readCon, writeCon), deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession());
-                break;
+                try {
+                    deleteAttendee(new SimpleDBProvider(readCon, writeCon), deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession());
+                    break;
+                } catch (Exception e) {
+                    org.slf4j.LoggerFactory.getLogger(CalendarDeleteListener.class).error(
+                        "Unexpected error handling delete event for entity {} in context {}: {}", I(deleteEvent.getId()), I(deleteEvent.getContext().getContextId()), e.getMessage(), e);
+                    throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());  
+                }
             case DeleteEvent.TYPE_RESOURCE_GROUP:
                 throw DeleteFailedExceptionCodes.ERROR.create("Deletion of type RESOURCE_GROUP is not supported!");
             case DeleteEvent.TYPE_CONTEXT:
