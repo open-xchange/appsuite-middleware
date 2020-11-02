@@ -52,6 +52,8 @@ package com.openexchange.chronos.provider.xctx;
 import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
 import static com.openexchange.chronos.common.CalendarUtils.getURI;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.common.CalendarUtils.removeExtendedParameter;
+import static com.openexchange.chronos.common.CalendarUtils.setExtendedParameter;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -724,6 +726,8 @@ public class EntityHelper extends XctxEntityHelper {
             return attendee;
         }
         mangleRemoteEntities(mangledAttendee, attendee.getCuType());
+        String identifier = mangleRemoteEntity(attendee.getEntity());
+        mangledAttendee.setExtendedParameters(setExtendedParameter(mangledAttendee.getExtendedParameters(), "X-OX-IDENTIFIER", identifier));
         return mangledAttendee;
     }
 
@@ -739,6 +743,7 @@ public class EntityHelper extends XctxEntityHelper {
             return attendee;
         }
         unmangleLocalEntities(unmangledAttendee, attendee.getCuType());
+        unmangledAttendee.setExtendedParameters(removeExtendedParameter(unmangledAttendee.getExtendedParameters(), "X-OX-IDENTIFIER"));
         return unmangledAttendee;
     }
 
