@@ -49,6 +49,7 @@
 
 package com.openexchange.reseller.data;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,7 +71,9 @@ import com.google.common.collect.ImmutableSet;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class ResellerAdmin implements PasswordMechObject, Cloneable {
+public class ResellerAdmin implements PasswordMechObject, Cloneable, Serializable {
+
+    private static final long serialVersionUID = -1123636946744408546L;
 
     /**
      * Creates a new builder instance.

@@ -79,12 +79,25 @@ import com.openexchange.server.ServiceLookup;
 public class CachingResellerService implements ResellerService {
 
     /**
-     * Caches a reverse index for the context-reseller. Stores {@link ResellerValue}s
+     * Caches a reverse index for the contextId-resellerId. Stores {@link ResellerValue}s
      */
     private static final String RESELLER_CONTEXT_NAME = "ResellerContext";
+    /**
+     * Stores {@link Set<ResellerCapability>} entries cached by resellerId.
+     */
     private static final String CAPABILITIES_REGION_NAME = "CapabilitiesReseller";
+    /**
+     * Stores {@link Map<String, ResellerConfigProperty>} entries cached by resellerId.
+     */
     private static final String CONFIGURATION_REGION_NAME = "ConfigurationReseller";
+    /**
+     * Stores {@link Set<ResellerTaxonomy>} entries cached by resellerId.
+     */
     private static final String TAXONOMIES_REGION_NAME = "TaxonomiesReseller";
+    /**
+     * Stores {@link ResellerAdmin} entries cached by resellerId.
+     */
+    private static final String RESELLER_ADMIN_NAME = "ResellerAdmin";
 
     private final ResellerServiceImpl delegate;
     private final ServiceLookup services;
@@ -100,19 +113,51 @@ public class CachingResellerService implements ResellerService {
 
     @Override
     public ResellerAdmin getReseller(int contextId) throws OXException {
-        ResellerAdmin resellerAdmin = delegate.getReseller(contextId);
-        CacheService cacheService = getCacheService();
-        Cache cache = cacheService.getCache(RESELLER_CONTEXT_NAME);
+        Cache cache = getCacheService().getCache(RESELLER_CONTEXT_NAME);
         Integer key = I(contextId);
-        if (null == cache.get(key)) {
-            cache.put(key, new ResellerValue(resellerAdmin.getId(), resellerAdmin.getParentId()), false);
+        Object candidate = cache.get(key);
+        if (candidate instanceof ResellerAdmin) {
+            return ResellerAdmin.class.cast(candidate);
         }
-        return resellerAdmin;
+
+        Lock lock = optSelfCleaningLockFor("getReseller-" + contextId);
+        lock.lock();
+        try {
+            candidate = cache.get(key);
+            if (candidate instanceof ResellerAdmin) {
+                return ResellerAdmin.class.cast(candidate);
+            }
+
+            ResellerAdmin resellerAdmin = delegate.getReseller(contextId);
+            cache.put(key, new ResellerValue(resellerAdmin.getId(), resellerAdmin.getParentId()), false);
+            return resellerAdmin;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public ResellerAdmin getResellerById(int resellerId) throws OXException {
-        return delegate.getResellerById(resellerId);
+        Cache cache = getCacheService().getCache(RESELLER_ADMIN_NAME);
+        Integer key = I(resellerId);
+        Object candidate = cache.get(key);
+        if (candidate instanceof ResellerAdmin) {
+            return ResellerAdmin.class.cast(candidate);
+        }
+        Lock lock = optSelfCleaningLockFor("getResellerById-" + resellerId);
+        lock.lock();
+        try {
+            candidate = cache.get(key);
+            if (candidate instanceof ResellerAdmin) {
+                return ResellerAdmin.class.cast(candidate);
+            }
+
+            ResellerAdmin admin = delegate.getResellerById(resellerId);
+            cache.put(key, admin, false);
+            return admin;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -149,8 +194,7 @@ public class CachingResellerService implements ResellerService {
         if (object instanceof Set) {
             return Set.class.cast(object);
         }
-
-        Lock lock = optSelfCleaningLockFor(new StringBuilder(32).append("getResellerCapabilities-").append(resellerId).toString());
+        Lock lock = optSelfCleaningLockFor("getResellerCapabilities-" + resellerId);
         lock.lock();
         try {
             object = cache.get(key);
@@ -207,7 +251,7 @@ public class CachingResellerService implements ResellerService {
             return Map.class.cast(object);
         }
 
-        Lock lock = optSelfCleaningLockFor(new StringBuilder(32).append("getAllResellerConfigProperties-").append(resellerId).toString());
+        Lock lock = optSelfCleaningLockFor("getAllConfigProperties-" + resellerId);
         lock.lock();
         try {
             object = cache.get(key);
@@ -300,7 +344,7 @@ public class CachingResellerService implements ResellerService {
             return Set.class.cast(object);
         }
 
-        Lock lock = optSelfCleaningLockFor(new StringBuilder(32).append("getResellerTaxonomies-").append(resellerId).toString());
+        Lock lock = optSelfCleaningLockFor("getTaxonomies-" + resellerId);
         lock.lock();
         try {
             object = cache.get(key);
@@ -338,6 +382,17 @@ public class CachingResellerService implements ResellerService {
     }
 
     ////////////////////////////////// HELPERS ///////////////////////////
+    /**
+     * Optionally gets the {@link LockService} lock or dummy lock if the service is absent.
+     *
+     * @param identifier The lock identifier
+     * @return the {@link Lock} or <code>null</code> if the service is absent.
+     * @throws OXException If lock cannot be returned
+     */
+    private Lock optSelfCleaningLockFor(String lockId) throws OXException {
+        LockService lockService = services.getOptionalService(LockService.class);
+        return null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append(lockId).append("-").toString());
+    }
 
     /**
      * Retrieves the cached {@link ResellerValue} for the specified context
@@ -367,17 +422,4 @@ public class CachingResellerService implements ResellerService {
     private CacheService getCacheService() throws OXException {
         return services.getServiceSafe(CacheService.class);
     }
-
-    /**
-     * Optionally gets the {@link LockService} lock or dummy lock if the service is absent.
-     *
-     * @param identifier The lock identifier
-     * @return the {@link LockService} or <code>null</code> if the service is absent.
-     * @throws OXException If lock cannot be returned
-     */
-    private Lock optSelfCleaningLockFor(String identifier) throws OXException {
-        LockService lockService =  services.getOptionalService(LockService.class);
-        return null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(identifier);
-    }
-
 }

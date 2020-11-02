@@ -107,8 +107,8 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     public ContextSetConfigProvider(ServiceLookup services) {
         super(services);
         userConfigAnalyzer = new UserConfigurationAnalyzer();
-        contextSetConfigs = new ConcurrentLinkedQueue<ContextSetConfig>();
-        additionalPredicates = new ConcurrentLinkedQueue<AdditionalPredicates>();
+        contextSetConfigs = new ConcurrentLinkedQueue<>();
+        additionalPredicates = new ConcurrentLinkedQueue<>();
         init();
     }
 
@@ -129,7 +129,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     protected Set<String> getSpecification(Context context, UserPermissionBits perms) throws OXException {
         // Gather available tags
-        final Set<String> tags = new HashSet<String>(64);
+        final Set<String> tags = new HashSet<>(64);
 
         // Tags from the reseller stack
         ResellerService resellerService = services.getOptionalService(ResellerService.class);
@@ -237,7 +237,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
             return Collections.emptyList();
         }
 
-        Set<String> allNames = new HashSet<String>();
+        Set<String> allNames = new HashSet<>();
         Set<String> tags = getSpecification(context, getUserPermissionBits(context, userId));
         boolean somethingAdded = false;
         for (ContextSetConfig c : contextSetConfigs) {
@@ -264,7 +264,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     }
 
     protected List<Map<String, Object>> getConfigData(Set<String> tags) {
-        List<Map<String, Object>> retval = new LinkedList<Map<String, Object>>();
+        List<Map<String, Object>> retval = new LinkedList<>();
         for (ContextSetConfig c : contextSetConfigs) {
             if (c.matches(tags)) {
                 retval.add(c.getConfiguration());

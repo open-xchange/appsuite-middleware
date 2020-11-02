@@ -446,7 +446,20 @@ public class ResellerServiceImpl implements ResellerService {
     }
 
     /**
+     * 
+     * Optionally retrieves the reseller admin for the specified context identifier
      *
+     * @param contextId The context identifier
+     * @param connection The optional connection
+     * @return The reseller admin or <code>null</code> if no admin exists
+     * @throws OXException if an error is occurred
+     */
+    private ResellerAdmin optResellerAdmin(int contextId, Connection connection) throws OXException {
+        return getResellerAdmin(contextId, connection, false);
+    }
+
+    /**
+     * 
      * Retrieves the reseller admin for the specified context identifier
      *
      * @param contextId The context identifier
