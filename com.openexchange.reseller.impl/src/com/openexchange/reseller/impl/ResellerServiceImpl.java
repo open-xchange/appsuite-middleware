@@ -519,15 +519,19 @@ public class ResellerServiceImpl implements ResellerService {
      * @throws OXException if an error is occurred
      */
     private ResellerAdmin getResellerById(int resellerId, Connection connection, boolean throwEx) throws OXException {
-        Connection con = dbService.getReadOnly();
+        boolean connectionInit = false;
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            prep = con.prepareStatement(GET_RESELLER);
+            if (connection == null) {
+                connection = dbService.getReadOnly();
+                connectionInit = true;
+            }
+            prep = connection.prepareStatement(GET_RESELLER);
             prep.setInt(1, resellerId);
             rs = prep.executeQuery();
             if (rs.next()) {
-                return getData(ResellerAdmin.builder().id(I(rs.getInt(1))).build(), con);
+                return getData(ResellerAdmin.builder().id(I(rs.getInt(1))).build(), connection);
             }
             if (throwEx) {
                 throw ResellerExceptionCodes.NO_RESELLER_FOUND.create(Integer.valueOf(resellerId));
@@ -538,7 +542,9 @@ public class ResellerServiceImpl implements ResellerService {
             throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(rs, prep);
-            dbService.backReadOnly(con);
+            if (connectionInit) {
+                dbService.backReadOnly(connection);
+            }
         }
     }
 
