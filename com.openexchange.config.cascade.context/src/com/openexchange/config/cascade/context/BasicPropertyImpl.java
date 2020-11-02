@@ -61,7 +61,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.ConvertUtils;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -121,9 +120,6 @@ final class BasicPropertyImpl implements BasicProperty {
         if (Boolean.parseBoolean(metadata.get("protected"))) {
             throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(property, "context");
         }
-        if (Strings.isEmpty(newValue)) {
-            throw ConfigCascadeExceptionCodes.UNEXPECTED_ERROR.create("New value is null");
-        }
 
         newValue = ConvertUtils.saveConvert(newValue, false, true);
 
@@ -133,32 +129,36 @@ final class BasicPropertyImpl implements BasicProperty {
             throw ServiceExceptionCode.absentService(ContextService.class);
         }
 
-        // Compose the attribute string to set
-        StringBuilder newValueBuilder = new StringBuilder(newValue.length() << 1).append(newValue.replace("%", "%25").replace(";", "%3B"));
-        if (null == this.value) {
-            // Newly set value
-            newValueBuilder.append("; protected=false");
-        } else {
-            // Keep old meta-data
-            int size = metadata.size();
-            if (size > 0) {
-                if (1 == size) {
-                    // Check if meta-data only contains "protected=true" (which is default)
-                    if (false == Boolean.parseBoolean(metadata.get("protected"))) {
+        StringBuilder newValueBuilder = null;
+
+        if (newValue != null) {
+            // Compose the attribute string to set
+            newValueBuilder = new StringBuilder(newValue.length() << 1).append(newValue.replace("%", "%25").replace(";", "%3B"));
+            if (null == this.value) {
+                // Newly set value
+                newValueBuilder.append("; protected=false");
+            } else {
+                // Keep old meta-data
+                int size = metadata.size();
+                if (size > 0) {
+                    if (1 == size) {
+                        // Check if meta-data only contains "protected=true" (which is default)
+                        if (false == Boolean.parseBoolean(metadata.get("protected"))) {
+                            for (Map.Entry<String, String> metaEntry : metadata.entrySet()) {
+                                newValueBuilder.append("; ").append(metaEntry.getKey()).append('=').append(metaEntry.getValue());
+                            }
+                        }
+                    } else {
                         for (Map.Entry<String, String> metaEntry : metadata.entrySet()) {
                             newValueBuilder.append("; ").append(metaEntry.getKey()).append('=').append(metaEntry.getValue());
                         }
-                    }
-                } else {
-                    for (Map.Entry<String, String> metaEntry : metadata.entrySet()) {
-                        newValueBuilder.append("; ").append(metaEntry.getKey()).append('=').append(metaEntry.getValue());
                     }
                 }
             }
         }
 
         // Set and unload
-        contextService.setAttribute(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString(), newValueBuilder.toString(), contextId);
+        contextService.setAttribute(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString(), newValueBuilder == null ? null : newValueBuilder.toString(), contextId);
         unload();
     }
 
