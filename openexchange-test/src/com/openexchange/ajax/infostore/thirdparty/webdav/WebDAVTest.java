@@ -173,7 +173,7 @@ public class WebDAVTest extends AbstractFileStorageAccountTest {
     /**
      * Deletes a folder
      *
-     * @param folderId The folder to deelte
+     * @param folderId The folder to delte
      * @param hardDelete true to perform a hard-delete, false to put the folder into the trash-bin
      * @return A list of folder IDs which could <b>NOT</b> be removed due conflicts or errors
      * @throws ApiException
