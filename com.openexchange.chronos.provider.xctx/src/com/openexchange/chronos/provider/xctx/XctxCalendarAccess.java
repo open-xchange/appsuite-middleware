@@ -441,7 +441,6 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         DefaultGroupwareCalendarFolder calendarFolder = CalendarFolderConverter.getCalendarFolder(folder);
         calendarFolder.setDefaultFolder(false);
         calendarFolder.setParentId(GroupwareFolderType.PUBLIC.equals(calendarFolder.getType()) ? PUBLIC_FOLDER_ID : SHARED_FOLDER_ID);
-        calendarFolder.setName(calendarFolder.getName() + " (" + folder.getCreatedFrom().getDisplayName() + ")");
         /*
          * qualify remote entities for usage in local session in storage account's context
          */
