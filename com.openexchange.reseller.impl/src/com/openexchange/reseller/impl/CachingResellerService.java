@@ -81,7 +81,7 @@ public class CachingResellerService implements ResellerService {
     /**
      * Caches a reverse index for the contextId-resellerId. Stores {@link ResellerValue}s
      */
-    private static final String RESELLER_CONTEXT_NAME = "ResellerContext";
+    public static final String RESELLER_CONTEXT_NAME = "ResellerContext";
     /**
      * Stores {@link Set<ResellerCapability>} entries cached by resellerId.
      */
@@ -382,6 +382,7 @@ public class CachingResellerService implements ResellerService {
     }
 
     ////////////////////////////////// HELPERS ///////////////////////////
+
     /**
      * Optionally gets the {@link LockService} lock or dummy lock if the service is absent.
      *

@@ -71,6 +71,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.osgi.framework.BundleContext;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
@@ -111,9 +112,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     private static final ResellerAdmin masteradmin = new ResellerAdmin(I(0), "oxadminmaster");
 
-    private static final String CAPABILITIES_REGION_NAME = "CapabilitiesReseller";
-    private static final String CONFIGURATION_REGION_NAME = "ConfigurationReseller";
-    private static final String TAXONOMIES_REGION_NAME = "TaxonomiesReseller";
+    private static final String RESELLER_CONTEXT_NAME = "ResellerContext";
+    private static final List<String> RESELLER_REGION_NAMES = ImmutableList.of("CapabilitiesReseller", "ConfigurationReseller", "TaxonomiesReseller", "ResellerAdmin");
 
     private static final String DATABASE_COLUMN_VALUE = "value";
     private static final String DATABASE_COLUMN_NAME = "name";
@@ -222,10 +222,11 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             changeCapabilities(adm, oxcon);
             changeConfiguration(adm, oxcon);
             changeTaxonomies(adm, oxcon);
-            invalidateResellerCaches(adm.getId().intValue(), CAPABILITIES_REGION_NAME, CONFIGURATION_REGION_NAME, TAXONOMIES_REGION_NAME);
 
             oxcon.commit();
             rollback = false;
+
+            invalidateResellerCaches(adm.getId().intValue());
         } catch (DataTruncation dt) {
             LOGGER.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
@@ -325,7 +326,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     public void delete(ResellerAdmin adm) throws StorageException {
         Connection oxcon = null;
         PreparedStatement prep = null;
-
         LOGGER.debug("delete admin {}", adm);
 
         boolean rollback = false;
@@ -336,6 +336,16 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             oxcon = cache.getWriteConnectionForConfigDB();
             oxcon.setAutoCommit(false);
             rollback = true;
+
+            prep = oxcon.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
+            prep.setInt(1, tmp.getId().intValue());
+            ResultSet rs = prep.executeQuery();
+            List<Integer> cids = new LinkedList<>();
+            while (rs.next()) {
+                cids.add(I(rs.getInt(1)));
+            }
+            rs.close();
+            prep.close();
 
             prep = oxcon.prepareStatement("DELETE FROM subadmin_restrictions WHERE sid=?");
             prep.setInt(1, tmp.getId().intValue());
@@ -363,6 +373,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             oxcon.commit();
             rollback = false;
+            
+            invalidateResellerCaches(adm.getId().intValue(), cids);
         } catch (DataTruncation dt) {
             LOGGER.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
@@ -406,7 +418,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             }
             rs = prep.executeQuery();
 
-            ArrayList<ResellerAdmin> ret = new ArrayList<ResellerAdmin>();
+            ArrayList<ResellerAdmin> ret = new ArrayList<>();
             while (rs.next()) {
                 ResellerAdmin adm = new ResellerAdmin();
                 adm.setId(I(rs.getInt("sid")));
@@ -452,7 +464,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            ArrayList<ResellerAdmin> ret = new ArrayList<ResellerAdmin>();
+            ArrayList<ResellerAdmin> ret = new ArrayList<>();
             con = cache.getReadConnectionForConfigDB();
             for (ResellerAdmin adm : admins) {
                 ResellerAdmin newadm = new ResellerAdmin(adm.getId(), adm.getName());
@@ -543,7 +555,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             rs = prep.executeQuery();
 
-            HashSet<Restriction> res = new HashSet<Restriction>();
+            HashSet<Restriction> res = new HashSet<>();
             while (rs.next()) {
                 Restriction r = new Restriction();
                 r.setId(I(rs.getInt(DATABASE_COLUMN_ID)));
@@ -986,7 +998,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.setString(2, search_patterntmp);
             rs = prep.executeQuery();
 
-            Map<String, Restriction> ret = new HashMap<String, Restriction>();
+            Map<String, Restriction> ret = new HashMap<>();
             while (rs.next()) {
                 String name = rs.getString(DATABASE_COLUMN_NAME);
                 ret.put(name, new Restriction(Integer.valueOf(rs.getInt(DATABASE_COLUMN_ID)), rs.getString(DATABASE_COLUMN_NAME)));
@@ -1013,7 +1025,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         HashSet<Restriction> restrictions = OXResellerTools.array2HashSet(adm.getRestrictions());
         // default is: not allowed to create SUBADMINS
         if (restrictions == null) {
-            restrictions = new HashSet<Restriction>();
+            restrictions = new HashSet<>();
         }
         {
             Restriction subadminCanCreateSubadminsRestriction = new Restriction(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS, "false");
@@ -1173,7 +1185,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.setInt(1, cid);
             rs = prep.executeQuery();
             if (rs.next()) {
-                dropped = new LinkedList<Restriction>();
+                dropped = new LinkedList<>();
                 do {
                     dropped.add(new Restriction(Integer.valueOf(rs.getInt(1)), null, rs.getString(2)));
                 } while (rs.next());
@@ -1419,7 +1431,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 return new CustomField[0];
             }
 
-            List<CustomField> dropped = new LinkedList<CustomField>();
+            List<CustomField> dropped = new LinkedList<>();
             do {
                 dropped.add(new CustomField(rs.getString(1), rs.getLong(2), rs.getLong(3)));
             } while (rs.next());
@@ -1523,7 +1535,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         try {
             con = cache.getWriteConnectionForConfigDB();
             cache.initAccessCombinations();
-            HashSet<String> usedCombinations = new HashSet<String>();
+            HashSet<String> usedCombinations = new HashSet<>();
             // find out, which restrictions are already used/referenced
             // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             for (String query : new String[] { "SELECT r.name FROM subadmin_restrictions AS sr LEFT JOIN restrictions AS r ON ( r.rid=sr.rid ) WHERE r.name LIKE ? OR r.name LIKE ? GROUP BY r.name", "SELECT r.name FROM context_restrictions  AS cr LEFT JOIN restrictions AS r ON ( r.rid=cr.rid ) WHERE r.name LIKE ? OR r.name LIKE ? GROUP BY r.name" }) {
@@ -1617,7 +1629,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection con = null;
         PreparedStatement prep = null;
 
-        HashSet<String> missingRestrictions = new HashSet<String>();
+        HashSet<String> missingRestrictions = new HashSet<>();
         Map<String, Restriction> curCombinations = listRestrictions("*");
         for (String res : Restriction.ALL_RESTRICTIONS) {
             if (!curCombinations.containsKey(res)) {
@@ -2089,7 +2101,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.setInt(1, ctx.getId().intValue());
             rs = prep.executeQuery();
 
-            HashSet<Restriction> res = new HashSet<Restriction>();
+            HashSet<Restriction> res = new HashSet<>();
             while (rs.next()) {
                 res.add(new Restriction(I(rs.getInt(DATABASE_COLUMN_ID)), rs.getString(DATABASE_COLUMN_NAME), rs.getString(DATABASE_COLUMN_VALUE)));
             }
@@ -2278,7 +2290,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 stmt.setInt(1, resellerId);
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    existing = new HashSet<String>(16);
+                    existing = new HashSet<>(16);
                     do {
                         existing.add(rs.getString(1));
                     } while (rs.next());
@@ -2289,7 +2301,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 stmt = null;
                 rs = null;
             }
-            Set<String> capsToInsert = new HashSet<String>(capsToAdd);
+            Set<String> capsToInsert = new HashSet<>(capsToAdd);
             // Delete existing ones
             if (null != capsToRemove && !capsToRemove.isEmpty()) {
                 for (String cap : capsToRemove) {
@@ -2470,9 +2482,18 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      * Invalidates reseller cache regions
      * 
      * @param resellerId The reseller identifier
-     * @param cacheRegions The cache regions
      */
-    private void invalidateResellerCaches(int resellerId, String... cacheRegions) {
+    private void invalidateResellerCaches(int resellerId) {
+        invalidateResellerCaches(resellerId, ImmutableList.of());
+    }
+
+    /**
+     * 
+     *
+     * @param resellerId
+     * @param contextIds
+     */
+    private void invalidateResellerCaches(int resellerId, List<Integer> contextIds) {
         BundleContext context = AdminCache.getBundleContext();
         if (null == context) {
             return;
@@ -2482,13 +2503,18 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             return;
         }
         try {
-            for (String cacheRegion : cacheRegions) {
+            for (String cacheRegion : RESELLER_REGION_NAMES) {
                 Cache cache = cacheService.getCache(cacheRegion);
                 cache.remove(I(resellerId));
+            }
+            Cache cache = cacheService.getCache(RESELLER_CONTEXT_NAME);
+            for (Integer cid : contextIds) {
+                cache.remove(cid);
             }
         } catch (OXException e) {
             LOGGER.error("", e);
         }
+        
     }
 
     /**
@@ -2539,7 +2565,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if (!rs.next()) {
                 return ImmutableSet.of();
             }
-            Set<String> taxonomies = new HashSet<String>();
+            Set<String> taxonomies = new HashSet<>();
             do {
                 taxonomies.add(rs.getString(1));
             } while (rs.next());
@@ -2570,7 +2596,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if (!rs.next()) {
                 return ImmutableSet.of();
             }
-            Set<String> capas = new HashSet<String>();
+            Set<String> capas = new HashSet<>();
             do {
                 capas.add(rs.getString(1));
             } while (rs.next());
@@ -2581,20 +2607,5 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
-    }
-
-    /**
-     * Builds the key subquery
-     *
-     * @param keys The set with keys
-     * @return The subquery
-     */
-    private String buildKeySubQuery(Set<?> keys) {
-        StringBuilder b = new StringBuilder();
-        for (int i = 0; i < keys.size(); i++) {
-            b.append("?,");
-        }
-        b.setLength(b.length() - 1);
-        return b.toString();
     }
 }

@@ -50,24 +50,26 @@
 package com.openexchange.reseller.osgi;
 
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.lock.LockService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.reseller.ResellerService;
+import com.openexchange.reseller.groupware.CacheInvalidationOnContextDelete;
 import com.openexchange.reseller.impl.CachingResellerService;
 import com.openexchange.reseller.impl.ResellerServiceImpl;
 
 /**
- * {@link Activator}
+ * {@link ResellerServiceActivator}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class Activator extends HousekeepingActivator {
+public class ResellerServiceActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link Activator}.
+     * Initializes a new {@link ResellerServiceActivator}.
      */
-    public Activator() {
+    public ResellerServiceActivator() {
         super();
     }
 
@@ -89,5 +91,6 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         registerService(ResellerService.class, new CachingResellerService(this, new ResellerServiceImpl(getService(DatabaseService.class))));
+        registerService(DeleteListener.class, new CacheInvalidationOnContextDelete(this));
     }
 }
