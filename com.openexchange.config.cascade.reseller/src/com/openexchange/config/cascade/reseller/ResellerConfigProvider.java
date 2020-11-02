@@ -81,10 +81,7 @@ public class ResellerConfigProvider implements ConfigProviderService {
             return NO_PROPERTY;
         }
         ResellerService resellerService = services.getOptionalService(ResellerService.class);
-        if (resellerService == null) {
-            return NO_PROPERTY;
-        }
-        if (false == resellerService.isEnabled()) {
+        if (resellerService == null || false == resellerService.isEnabled()) {
             return NO_PROPERTY;
         }
         return new ResellerBasicPropertyImpl(property, contextId, services);
@@ -96,10 +93,7 @@ public class ResellerConfigProvider implements ConfigProviderService {
             return ImmutableList.of();
         }
         ResellerService resellerService = services.getOptionalService(ResellerService.class);
-        if (resellerService == null) {
-            return ImmutableList.of();
-        }
-        if (false == resellerService.isEnabled()) {
+        if (resellerService == null || false == resellerService.isEnabled()) {
             return ImmutableList.of();
         }
         return resellerService.getAllConfigPropertiesByContext(contextId).keySet();

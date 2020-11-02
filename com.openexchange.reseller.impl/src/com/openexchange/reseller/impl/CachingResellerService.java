@@ -51,6 +51,8 @@ package com.openexchange.reseller.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -84,13 +86,13 @@ public class CachingResellerService implements ResellerService {
     private static final String CONFIGURATION_REGION_NAME = "ConfigurationReseller";
     private static final String TAXONOMIES_REGION_NAME = "TaxonomiesReseller";
 
-    private final ResellerService delegate;
+    private final ResellerServiceImpl delegate;
     private final ServiceLookup services;
 
     /**
      * Initializes a new {@link CachingResellerService}.
      */
-    public CachingResellerService(ServiceLookup services, ResellerService delegate) {
+    public CachingResellerService(ServiceLookup services, ResellerServiceImpl delegate) {
         super();
         this.services = services;
         this.delegate = delegate;
@@ -147,8 +149,8 @@ public class CachingResellerService implements ResellerService {
         if (object instanceof Set) {
             return Set.class.cast(object);
         }
-        LockService lockService = optLockService();
-        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("getResellerCapabilities-").append(resellerId).toString());
+
+        Lock lock = optSelfCleaningLockFor(new StringBuilder(32).append("getResellerCapabilities-").append(resellerId).toString());
         lock.lock();
         try {
             object = cache.get(key);
@@ -156,7 +158,7 @@ public class CachingResellerService implements ResellerService {
                 return Set.class.cast(object);
             }
             Set<ResellerCapability> capas = delegate.getCapabilities(resellerId);
-            cache.put(key, new HashSet<>(capas), false);
+            cache.put(key, (Serializable) capas, false);
             return capas;
         } finally {
             lock.unlock();
@@ -176,6 +178,7 @@ public class CachingResellerService implements ResellerService {
         }
 
         // Traverse the admin path to get all capabilities for the context
+        capabilities = new HashSet<>(capabilities);
         do {
             ResellerAdmin resellerAdmin = getResellerById(i(parentId));
             capabilities.addAll(getCapabilities(i(resellerAdmin.getId())));
@@ -204,8 +207,7 @@ public class CachingResellerService implements ResellerService {
             return Map.class.cast(object);
         }
 
-        LockService lockService = optLockService();
-        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("getAllConfigProperties-").append(resellerId).append("-").toString());
+        Lock lock = optSelfCleaningLockFor(new StringBuilder(32).append("getAllResellerConfigProperties-").append(resellerId).toString());
         lock.lock();
         try {
             object = cache.get(key);
@@ -213,7 +215,7 @@ public class CachingResellerService implements ResellerService {
                 return Map.class.cast(object);
             }
             Map<String, ResellerConfigProperty> props = delegate.getAllConfigProperties(resellerId);
-            cache.put(key, new HashMap<>(props), false);
+            cache.put(key, (Serializable) props, false);
             return props;
         } finally {
             lock.unlock();
@@ -233,6 +235,7 @@ public class CachingResellerService implements ResellerService {
         }
 
         // Traverse the admin path to get all properties for the context
+        properties = new HashMap<>(properties);
         do {
             ResellerAdmin resellerAdmin = getResellerById(i(parentId));
             properties.putAll(getAllConfigProperties(i(resellerAdmin.getId())));
@@ -243,26 +246,48 @@ public class CachingResellerService implements ResellerService {
 
     @Override
     public Map<String, ResellerConfigProperty> getConfigProperties(int resellerId, Set<String> keys) throws OXException {
+        if (keys == null) {
+            return Collections.emptyMap();
+        }
+        int numberOfKeys = keys.size();
+        if (numberOfKeys <= 0) {
+            return Collections.emptyMap();
+        }
         Map<String, ResellerConfigProperty> properties = getAllConfigProperties(resellerId);
-        Map<String, ResellerConfigProperty> ret = new HashMap<>();
+        Map<String, ResellerConfigProperty> ret = null;
         for (String key : keys) {
-            if (properties.containsKey(key)) {
-                ret.put(key, properties.get(key));
+            ResellerConfigProperty property = properties.get(key);
+            if (property != null) {
+                if (ret == null) {
+                    ret = new HashMap<>(numberOfKeys);
+                }
+                ret.put(key, property);
             }
         }
-        return ret;
+        return ret == null ? Collections.emptyMap() : ret;
     }
 
     @Override
     public Map<String, ResellerConfigProperty> getConfigPropertiesByContext(int contextId, Set<String> keys) throws OXException {
+        if (keys == null) {
+            return Collections.emptyMap();
+        }
+        int numberOfKeys = keys.size();
+        if (numberOfKeys <= 0) {
+            return Collections.emptyMap();
+        }
         Map<String, ResellerConfigProperty> configuration = getAllConfigPropertiesByContext(contextId);
-        Map<String, ResellerConfigProperty> ret = new HashMap<>();
-        for (String k : keys) {
-            if (configuration.containsKey(k)) {
-                ret.put(k, configuration.get(k));
+        Map<String, ResellerConfigProperty> ret = null;
+        for (String key : keys) {
+            ResellerConfigProperty property = configuration.get(key);
+            if (property != null) {
+                if (ret == null) {
+                    ret = new HashMap<>(numberOfKeys);
+                }
+                ret.put(key, property);
             }
         }
-        return ret;
+        return ret == null ? Collections.emptyMap() : ret;
     }
 
     @SuppressWarnings("unchecked")
@@ -275,8 +300,7 @@ public class CachingResellerService implements ResellerService {
             return Set.class.cast(object);
         }
 
-        LockService lockService = optLockService();
-        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("getTaxonomies-").append(resellerId).append("-").toString());
+        Lock lock = optSelfCleaningLockFor(new StringBuilder(32).append("getResellerTaxonomies-").append(resellerId).toString());
         lock.lock();
         try {
             object = cache.get(key);
@@ -284,7 +308,7 @@ public class CachingResellerService implements ResellerService {
                 return Set.class.cast(object);
             }
             Set<ResellerTaxonomy> taxonomies = delegate.getTaxonomies(resellerId);
-            cache.put(key, new HashSet<>(taxonomies), false);
+            cache.put(key, (Serializable) taxonomies, false);
             return taxonomies;
         } finally {
             lock.unlock();
@@ -304,6 +328,7 @@ public class CachingResellerService implements ResellerService {
         }
 
         // Traverse the admin path to get all taxonomies for the context
+        taxonomies = new HashSet<>(taxonomies);
         do {
             ResellerAdmin resellerAdmin = getResellerById(i(parentId));
             taxonomies.addAll(getTaxonomies(i(resellerAdmin.getId())));
@@ -335,7 +360,7 @@ public class CachingResellerService implements ResellerService {
 
     /**
      * Returns the {@link CacheService}
-     * 
+     *
      * @return the {@link CacheService}
      * @throws OXException if the service is absent.
      */
@@ -344,13 +369,15 @@ public class CachingResellerService implements ResellerService {
     }
 
     /**
-     * Optionally gets the {@link LockService} or <code>null</code>
-     * if the service is absent.
-     * 
+     * Optionally gets the {@link LockService} lock or dummy lock if the service is absent.
+     *
+     * @param identifier The lock identifier
      * @return the {@link LockService} or <code>null</code> if the service is absent.
+     * @throws OXException If lock cannot be returned
      */
-    private LockService optLockService() {
-        return services.getOptionalService(LockService.class);
+    private Lock optSelfCleaningLockFor(String identifier) throws OXException {
+        LockService lockService =  services.getOptionalService(LockService.class);
+        return null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(identifier);
     }
 
 }
