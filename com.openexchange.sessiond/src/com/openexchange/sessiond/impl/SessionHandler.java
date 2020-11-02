@@ -1413,7 +1413,7 @@ public final class SessionHandler {
      * @param considerLocalStorage <code>true</code> to consider local storage; otherwise <code>false</code>
      * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
      *            <code>false</code>
-     * @param peek <code>true</code> to only peek session from session storage ut don't add it to local SessionD; otherwise <code>false</code>
+     * @param peek <code>true</code> to only peek session from session storage but don't add it to local SessionD; otherwise <code>false</code>
      * @return The session associated with given session identifier; otherwise <code>null</code> if expired or none found
      */
     protected static SessionControl getSession(String sessionId, boolean considerLocalStorage, boolean considerSessionStorage, boolean peek) {
