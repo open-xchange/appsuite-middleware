@@ -293,6 +293,10 @@ public class ChronosJsonFields {
          * The group of the attendee.
          */
         public static final String GROUP = "group";
+        /**
+         * The extended parameters of the attendee. See {@link com.openexchange.chronos.Attendee#getExtendedParameters()}
+         */
+        public static final String EXTENDED_PARAMETERS = "extendedParameters";
 
     }
 

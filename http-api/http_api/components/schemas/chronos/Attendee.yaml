@@ -89,3 +89,5 @@ properties:
       then this field contains the data of this group.
     properties:
       $ref: ../groups/GroupDataRaw.yaml
+  extendedParameters:
+    $ref: ExtendedPropertyParameter.yaml
