@@ -52,12 +52,14 @@ package com.openexchange.chronos.json.converter.mapper;
 import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.json.fields.ChronosJsonFields;
@@ -132,6 +134,18 @@ public abstract class AttendeesMapping<O> extends ListItemMapping<Attendee, O, J
         if (null != from.getMember()) {
             jsonObject.put(ChronosJsonFields.Attendee.MEMBER, from.getMember());
         }
+        if (from.containsExtendedParameters()) {
+            List<ExtendedPropertyParameter> parameters = from.getExtendedParameters();
+            if (null == parameters) {
+                jsonObject.put(ChronosJsonFields.Attendee.EXTENDED_PARAMETERS, (JSONObject) null);
+            } else {
+                JSONObject o = new JSONObject(parameters.size());
+                for (ExtendedPropertyParameter parameter : parameters) {
+                    o.put(parameter.getName(), parameter.getValue());
+                }
+                jsonObject.put(ChronosJsonFields.Attendee.EXTENDED_PARAMETERS, o);
+            }
+        }
         return jsonObject;
     }
 
@@ -173,7 +187,18 @@ public abstract class AttendeesMapping<O> extends ListItemMapping<Attendee, O, J
                 attendee.setMember(list);
             }
         }
-
+        if (from.has(ChronosJsonFields.Attendee.EXTENDED_PARAMETERS)) {
+            JSONObject jsonObject = from.getJSONObject(ChronosJsonFields.Attendee.EXTENDED_PARAMETERS);
+            if (null == jsonObject) {
+                attendee.setExtendedParameters(null);
+            } else {
+                List<ExtendedPropertyParameter> extendedParameters = new ArrayList<ExtendedPropertyParameter>(jsonObject.length());
+                for (Entry<String, Object> entry : jsonObject.entrySet()) {
+                    extendedParameters.add(new ExtendedPropertyParameter(entry.getKey(), String.valueOf(entry.getValue())));
+                }
+                attendee.setExtendedParameters(extendedParameters);
+            }
+        }
         return attendee;
     }
 
