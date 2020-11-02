@@ -1018,17 +1018,14 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             Matcher matcher = IS_NUMBERED_PARENTHESIS.matcher(name);
             if (matcher.find()) {
                 return new StringBuilder(name).replace(matcher.start(), matcher.end(), " (" + String.valueOf(counter) + ')').toString();
-            } else {
-                return name + " (" + counter + ')';
             }
-        } else {
-            Matcher matcher = IS_NUMBERED.matcher(name);
-            if (matcher.find()) {
-                return new StringBuilder(name).replace(matcher.start(), matcher.end(), " " + counter).toString();
-            } else {
-                return name + ' ' + counter;
-            }
+            return name + " (" + counter + ')';
         }
+        Matcher matcher = IS_NUMBERED.matcher(name);
+        if (matcher.find()) {
+            return new StringBuilder(name).replace(matcher.start(), matcher.end(), " " + counter).toString();
+        }
+        return name + ' ' + counter;
     }
 
     protected static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY = new ThreadPools.ExpectedExceptionFactory<OXException>() {
