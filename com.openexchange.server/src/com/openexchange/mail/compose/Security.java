@@ -142,8 +142,7 @@ public class Security {
     private final String message;
     private final String pin;
     private final String msgRef;
-
-    private String authToken;
+    private final String authToken;
 
     /**
      * Initializes a new {@link Security}.
@@ -240,12 +239,13 @@ public class Security {
         return msgRef;
     }
 
+    /**
+     * Gets the auth token.
+     *
+     * @return The auth token
+     */
     public String getAuthToken() {
         return authToken;
-    }
-
-    public void setAuthToken(String authToken) {
-        this.authToken = authToken;
     }
 
     @Override
@@ -309,15 +309,13 @@ public class Security {
         } else if (!pin.equals(other.pin)) {
             return false;
         }
-
-        if(authToken == null) {
-            if(other.authToken != null) {
+        if (authToken == null) {
+            if (other.authToken != null) {
                 return false;
             }
-        } else if(!authToken.equals(other.authToken)) {
+        } else if (!authToken.equals(other.authToken)) {
             return false;
         }
-
 
         return true;
     }
