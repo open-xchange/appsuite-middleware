@@ -120,7 +120,8 @@ public final class CalendarDeleteListener implements DeleteListener {
 
     /**
      * Initializes a new {@link CalendarDeleteListener}.
-     *
+     * 
+     * @param services The service lookup 
      * @param calendarUtilities A reference to the calendar utilities
      * @param notificationService The {@link CalendarEventNotificationService}
      */
@@ -136,7 +137,7 @@ public final class CalendarDeleteListener implements DeleteListener {
         switch (deleteEvent.getType()) {
             case DeleteEvent.TYPE_USER:
                 try {
-                    if (DeleteEvent.SUBTYPE_ANONYMOUS_GUEST != deleteEvent.getSubType() && DeleteEvent.SUBTYPE_INVITED_GUEST != deleteEvent.getSubType()) {
+                    if (DeleteEvent.SUBTYPE_ANONYMOUS_GUEST != deleteEvent.getSubType()) {
                         purgeUserData(new SimpleDBProvider(readCon, writeCon), deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getDestinationUserID(), deleteEvent.getSession());
                     }
                     break;

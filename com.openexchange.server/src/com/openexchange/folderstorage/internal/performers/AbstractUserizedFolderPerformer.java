@@ -766,11 +766,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                             throw invalidPermissions(folder, guestPermission);
                         }
                     }
-                } else if (isReadOnlySharing(folder)) {
-                    /*
-                     * allow only "read-only" permissions for invited guests in non-infostore folders
-                     */
-                    checkReadOnly(folder, guestPermission);
+                } else {
+                    checkMaxPermissions(folder, guestPermission);
                 }
             }
             /*
@@ -835,11 +832,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             if (permission.getType() != FolderPermissionType.INHERITED && isNotEqualsTarget(session, folder, guestInfo.getLinkTarget())) {
                 throw invalidPermissions(folder, permission);
             }
-        } else if (isReadOnlySharing(folder)) {
-            /*
-             * allow only "read-only" permissions for invited guests in non-infostore folders
-             */
-            checkReadOnly(folder, permission);
+        } else {
+            checkMaxPermissions(folder, permission);
         }
     }
 
@@ -851,7 +845,17 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      */
     private static boolean isReadOnlySharing(Folder folder) {
         ContentType contentType = folder.getContentType();
-        return CalendarContentType.getInstance().equals(contentType) || TaskContentType.getInstance().equals(contentType) || ContactContentType.getInstance().equals(contentType);
+        return TaskContentType.getInstance().equals(contentType) || ContactContentType.getInstance().equals(contentType);
+    }
+
+    /**
+     * Gets a value indicating whether a folder's content type is associated with a calendar
+     *
+     * @param contentType The content type to check
+     * @return <code>true</code> if the folder is a calendar folder, <code>false</code>, otherwise
+     */
+    private static boolean isCalendarFolder(ContentType contentType) {
+        return CalendarContentType.getInstance().equals(contentType) || com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(contentType);
     }
 
     /**
@@ -865,12 +869,58 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         return FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(I(Permissions.createPermissionBits(permission)), I(permission.getEntity()), folder.getID() == null ? folder.getName() : folder.getID());
     }
 
+    /**
+     * Check that the folder has only read permissions set
+     *
+     * @param folder The folder to check permissions on
+     * @param p The permission to check
+     * @throws OXException In case permissions exceed read permissions
+     */
     private static void checkReadOnly(Folder folder, Permission p) throws OXException {
         boolean writeFolder = p.getFolderPermission() > Permission.READ_FOLDER;
         boolean writeItems = p.getWritePermission() > Permission.NO_PERMISSIONS;
         boolean deleteItems = p.getDeletePermission() > Permission.NO_PERMISSIONS;
         if (writeFolder || writeItems || deleteItems) {
             throw invalidPermissions(folder, p);
+        }
+    }
+
+    /**
+     * Checks that the given permissions are less than "administrator" permissions
+     *
+     * @param folder The folder the guest has permissions on
+     * @param p The guest permissions
+     * @throws OXException In case permissions are exceeded
+     */
+    private static void checkNotAdmin(Folder folder, Permission p) throws OXException {
+        boolean admin = p.isAdmin();
+        boolean writeFolder = p.getFolderPermission() >= Permission.MAX_PERMISSION;
+        boolean writeItems = p.getWritePermission() >= Permission.MAX_PERMISSION;
+        boolean deleteItems = p.getDeletePermission() >= Permission.MAX_PERMISSION;
+
+        if (admin || writeFolder || writeItems || deleteItems) {
+            throw invalidPermissions(folder, p);
+        }
+    }
+
+    /**
+     * Check that the guest permissions are appropriate for the given folder
+     *
+     * @param folder The folder to check the permissions for
+     * @param p The guest permissions on the folder
+     * @throws OXException In case permissions exceed maximums
+     */
+    private static void checkMaxPermissions(Folder folder, Permission p) throws OXException {
+        if (isReadOnlySharing(folder)) {
+            /*
+             * allow only "read-only" permissions for invited guests in non-infostore folders
+             */
+            checkReadOnly(folder, p);
+        } else if (isCalendarFolder(folder.getContentType())) {
+            /*
+             * allow only "author" permissions for invited guests in calendar folders
+             */
+            checkNotAdmin(folder, p);
         }
     }
 

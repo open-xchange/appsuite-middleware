@@ -18,7 +18,7 @@ The following chapters cover different topics regarding sharing and guest users 
 
 Basically, creating a share means adding an additional permission entity to the shared folder or item. Previously, this was only possible for &quot;internal&quot; entities, i.e. regular users or user groups. Now, the underlying permission system has been extended to support external entities, which can be either invited guest users, or special &quot;anonymous&quot; guest users who access a shared folder or item via a secret link. Anonymous and invited guest users are explained in more detail below.
 
-Sharing is available for the groupware modules Calendar, Contacts, Tasks and Drive (a.k.a. Infostore/Files). While the latter one also allows "writable" access for invited guest users, folders from the Calendar, Contacts and Tasks module may only be published in "read-only" mode to external guests.
+Sharing is available for the groupware modules Contacts, Tasks, Calendar and Drive (a.k.a. Infostore/Files). While the latter ones also allow "writable" access for invited guest users, folders from the Contacts and Tasks module may only be published in "read-only" mode to external guests.
 
 ## Invite Guests
 
