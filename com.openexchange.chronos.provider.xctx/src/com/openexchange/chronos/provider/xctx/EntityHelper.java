@@ -91,14 +91,18 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.service.UpdatesResult;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.EntityInfo;
-import com.openexchange.groupware.EntityInfo.Type;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.share.core.subscription.EntityMangler;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.core.subscription.XctxEntityHelper;
 import com.openexchange.tools.id.IDMangler;
+import com.openexchange.user.UserService;
 
 /**
  * {@link EntityHelper}
@@ -106,15 +110,39 @@ import com.openexchange.tools.id.IDMangler;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public class EntityHelper extends EntityMangler {
+public class EntityHelper extends XctxEntityHelper {
+
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link EntityHelper}.
      * 
+     * @param services A service lookup reference
      * @param account The calendar account
      */
-    public EntityHelper(CalendarAccount account) {
-        super(account.getProviderId(), String.valueOf(account.getAccountId()));
+    public EntityHelper(ServiceLookup services, CalendarAccount account) {
+        super(account.getProviderId(), String.valueOf(account.getAccountId()), account.getUserConfiguration().optString("url", null));
+        this.services = services;
+    }
+
+    @Override
+    protected UserService getUserService() throws OXException {
+        return services.getServiceSafe(UserService.class);
+    }
+
+    @Override
+    protected GroupService getGroupService() throws OXException {
+        return services.getServiceSafe(GroupService.class);
+    }
+
+    @Override
+    protected ShareService getShareService() throws OXException {
+        return services.getServiceSafe(ShareService.class);
+    }
+
+    @Override
+    protected DispatcherPrefixService getDispatcherPrefixService() throws OXException {
+        return services.getServiceSafe(DispatcherPrefixService.class);
     }
 
     /**
@@ -233,42 +261,13 @@ public class EntityHelper extends EntityMangler {
         if (null == permission) {
             return null;
         }
-        EntityInfo entityInfo = lookupEntity(session, permission.getEntity(), permission.isGroup());
+        EntityInfo entityInfo = lookupEntity(session.getSession(), permission.getEntity(), permission.isGroup());
         if (null == entityInfo) {
             return permission;
         }
         CalendarPermission enhancedPermission = new DefaultCalendarPermission(permission);
         enhancedPermission.setEntityInfo(entityInfo);
         return enhancedPermission;
-    }
-
-    /**
-     * Resolves and builds additional entity info for a certain user or group under perspective of the passed session's user.
-     * <p/>
-     * If no entity could be found in the session's context, a placeholder entity is returned.
-     * 
-     * @param session The session to use to resolve the entity
-     * @param entity The identifier of the entity to resolve
-     * @param isGroup <code>true</code> if the entity refers to a group, <code>false</code>, otherwise
-     * @return The entity info, or <code>null</code> if the referenced entity could not be resolved
-     */
-    private EntityInfo lookupEntity(CalendarSession session, int entity, boolean isGroup) {
-        if (0 > entity || 0 == entity && false == isGroup) {
-            getLogger(EntityHelper.class).warn("Unable to lookup entity info for {}", I(entity));
-            return null;
-        }
-        Attendee attendee = new Attendee();
-        attendee.setEntity(entity);
-        attendee.setCuType(isGroup ? CalendarUserType.GROUP : CalendarUserType.INDIVIDUAL);
-        try {
-            attendee = session.getEntityResolver().applyEntityData(attendee);
-        } catch (OXException e) {
-            getLogger(EntityHelper.class).warn("Error applying entity data for {} in context {}", I(entity), I(session.getContextId()), e);
-            return null;
-        }
-        //TODO: more sophisticated entity info 
-        EntityInfo.Type type = isGroup ? Type.GROUP : Type.USER;
-        return new EntityInfo(String.valueOf(entity), attendee.getCn(), null, null, null, attendee.getEMail(), entity, null, type);
     }
 
     public List<ImportResult> mangleRemoteImportResults(List<ImportResult> importResults) {

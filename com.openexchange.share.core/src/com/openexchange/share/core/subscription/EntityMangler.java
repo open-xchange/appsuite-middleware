@@ -76,7 +76,7 @@ public class EntityMangler {
     protected final String accountId;
 
     /**
-     * Initializes a new {@link XctxFolderConverter}.
+     * Initializes a new {@link EntityMangler}.
      * 
      * @param serviceId The service identifier to mangle into qualified identifiers
      * @param accountId The account identifier to mangle into qualified identifiers

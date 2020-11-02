@@ -147,7 +147,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         this.services = services;
         this.localSession = localSession;
         this.account = account;
-        this.entityHelper = new EntityHelper(account);
+        this.entityHelper = new EntityHelper(services, account);
     }
 
     @Override
