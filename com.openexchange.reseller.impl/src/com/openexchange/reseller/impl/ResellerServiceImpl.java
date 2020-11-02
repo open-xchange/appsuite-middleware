@@ -586,6 +586,8 @@ public class ResellerServiceImpl implements ResellerService {
                 Integer parentId = Integer.valueOf(rs.getInt("pid"));
                 ResellerAdminBuilder builder = parseResellerAdminBuilder(rs);
                 Databases.closeSQLStuff(rs, prep);
+                rs = null;
+                prep = null;
 
                 List<Restriction> restrictions = getRestrictionDataForAdmin(id, parentId, con);
                 if (false == restrictions.isEmpty()) {
