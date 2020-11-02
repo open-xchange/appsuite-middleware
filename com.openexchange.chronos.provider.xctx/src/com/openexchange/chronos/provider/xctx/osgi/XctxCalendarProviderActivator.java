@@ -62,8 +62,11 @@ import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.conversion.ConversionService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.group.GroupService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.share.ShareService;
 import com.openexchange.share.subscription.ShareSubscriptionProvider;
 import com.openexchange.share.subscription.XctxSessionManager;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
@@ -88,7 +91,8 @@ public class XctxCalendarProviderActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class, ConversionService.class, ConfigurationService.class,
-            CalendarAccountService.class, CalendarStorageFactory.class, CalendarUtilities.class, ConfigViewFactory.class, XctxSessionManager.class, CapabilityService.class
+            CalendarAccountService.class, CalendarStorageFactory.class, CalendarUtilities.class, ConfigViewFactory.class, XctxSessionManager.class, CapabilityService.class,
+            GroupService.class, ShareService.class, DispatcherPrefixService.class
         };
     }
 
