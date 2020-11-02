@@ -4253,10 +4253,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             cols = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(cols);
         }
         if (addCreatedFrom) {
-            cols = Metadata.addIfAbsent(columns, Metadata.CREATED_BY_LITERAL);
+            cols = Metadata.addIfAbsent(cols, Metadata.CREATED_BY_LITERAL);
         }
         if (addModifiedFrom) {
-            cols = Metadata.addIfAbsent(columns, Metadata.MODIFIED_BY_LITERAL);
+            cols = Metadata.addIfAbsent(cols, Metadata.MODIFIED_BY_LITERAL);
         }
         /*
          * get appropriate infostore iterator
