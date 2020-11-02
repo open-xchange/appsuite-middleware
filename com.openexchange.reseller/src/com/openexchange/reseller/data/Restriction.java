@@ -210,7 +210,7 @@ public class Restriction implements Cloneable, Serializable {
         try {
             return (Restriction) super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new InternalError("CloneNotSupportedException although Cloneable is implemented");
+            throw new InternalError("CloneNotSupportedException although Cloneable is implemented", e);
         }
     }
 

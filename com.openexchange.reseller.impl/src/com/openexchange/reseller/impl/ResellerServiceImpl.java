@@ -454,7 +454,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @return The reseller admin or <code>null</code> if no admin exists
      * @throws OXException if an error is occurred
      */
-    private ResellerAdmin optResellerAdmin(int contextId, Connection connection) throws OXException {
+    public ResellerAdmin optResellerAdmin(int contextId, Connection connection) throws OXException {
         return getResellerAdmin(contextId, connection, false);
     }
 

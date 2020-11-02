@@ -673,7 +673,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable, Serializabl
         try {
             return (ResellerAdmin) super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new InternalError("CloneNotSupportedException although Cloneable is implemented.");
+            throw new InternalError("CloneNotSupportedException although Cloneable is implemented.", e);
         }
     }
 

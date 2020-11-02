@@ -59,6 +59,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -98,6 +100,15 @@ public class CachingResellerService implements ResellerService {
      * Stores {@link ResellerAdmin} entries cached by resellerId.
      */
     private static final String RESELLER_ADMIN_NAME = "ResellerAdmin";
+
+    /**
+     * The default reseller admin for contexts that are not
+     * assigned to any reseller.
+     */
+    private static ResellerAdmin DEFAULT;
+    static {
+        DEFAULT = ResellerAdmin.builder().id(I(-1)).parentId(I(-1)).name("default").build();
+    }
 
     private final ResellerServiceImpl delegate;
     private final ServiceLookup services;
@@ -211,7 +222,10 @@ public class CachingResellerService implements ResellerService {
 
     @Override
     public Set<ResellerCapability> getCapabilitiesByContext(int contextId) throws OXException {
-        ResellerValue resellerValue = getResellerValue(contextId);
+        ResellerValue resellerValue = optResellerValue(contextId);
+        if (DEFAULT.getId().equals(resellerValue.getResellerId())) {
+            return ImmutableSet.of();
+        }
         Integer resellerId = resellerValue.getResellerId();
         Integer parentId = resellerValue.getParentId();
 
@@ -268,7 +282,10 @@ public class CachingResellerService implements ResellerService {
 
     @Override
     public Map<String, ResellerConfigProperty> getAllConfigPropertiesByContext(int contextId) throws OXException {
-        ResellerValue resellerValue = getResellerValue(contextId);
+        ResellerValue resellerValue = optResellerValue(contextId);
+        if (DEFAULT.getId().equals(resellerValue.getResellerId())) {
+            return ImmutableMap.of();
+        }
         Integer resellerId = resellerValue.getResellerId();
         Integer parentId = resellerValue.getParentId();
 
@@ -361,7 +378,10 @@ public class CachingResellerService implements ResellerService {
 
     @Override
     public Set<ResellerTaxonomy> getTaxonomiesByContext(int contextId) throws OXException {
-        ResellerValue resellerValue = getResellerValue(contextId);
+        ResellerValue resellerValue = optResellerValue(contextId);
+        if (DEFAULT.getId().equals(resellerValue.getResellerId())) {
+            return ImmutableSet.of();
+        }
         Integer resellerId = resellerValue.getResellerId();
         Integer parentId = resellerValue.getParentId();
 
@@ -396,13 +416,13 @@ public class CachingResellerService implements ResellerService {
     }
 
     /**
-     * Retrieves the cached {@link ResellerValue} for the specified context
+     * Optionally retrieves the cached {@link ResellerValue} for the specified context
      *
      * @param contextId The context identifier
      * @return The {@link ResellerValue}
      * @throws OXException if an error is occurred
      */
-    private ResellerValue getResellerValue(int contextId) throws OXException {
+    private ResellerValue optResellerValue(int contextId) throws OXException {
         CacheService cacheService = getCacheService();
         Cache cache = cacheService.getCache(RESELLER_CONTEXT_NAME);
         Integer key = I(contextId);
@@ -410,8 +430,44 @@ public class CachingResellerService implements ResellerService {
         if (object instanceof ResellerValue) {
             return ResellerValue.class.cast(object);
         }
-        ResellerAdmin ra = getReseller(contextId);
-        return new ResellerValue(ra.getId(), ra.getParentId());
+        ResellerAdmin resellerAdmin = optReseller(contextId);
+        return null == resellerAdmin ? null : new ResellerValue(resellerAdmin.getId(), resellerAdmin.getParentId());
+    }
+
+    /**
+     * Optionally retrieves the cached {@link ResellerAdmin} for the specified context
+     *
+     * @param contextId the context identifier
+     * @return The reseller admin
+     * @throws OXException if an error is occurred
+     */
+    private ResellerAdmin optReseller(int contextId) throws OXException {
+        Cache cache = getCacheService().getCache(RESELLER_CONTEXT_NAME);
+        Integer key = I(contextId);
+        Object candidate = cache.get(key);
+        if (candidate instanceof ResellerAdmin) {
+            return ResellerAdmin.class.cast(candidate);
+        }
+
+        Lock lock = optSelfCleaningLockFor("optReseller-" + contextId);
+        lock.lock();
+        try {
+            candidate = cache.get(key);
+            if (candidate instanceof ResellerAdmin) {
+                return ResellerAdmin.class.cast(candidate);
+            }
+
+            ResellerAdmin resellerAdmin = delegate.optResellerAdmin(contextId, null);
+            if (null == resellerAdmin) {
+                // Yes, fall-back to the DEFAULT reseller admin, as we don't want to 
+                // look-up the DB for the same unassigned context.
+                resellerAdmin = DEFAULT;
+            }
+            cache.put(key, new ResellerValue(resellerAdmin.getId(), resellerAdmin.getParentId()), false);
+            return resellerAdmin;
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
