@@ -36,7 +36,7 @@ properties:
     tags: ["Server", "HTTP Client"]
   - key: com.openenexchange.httpclient.[serviceIdentifer].keepAlive.duration
     description: |
-       The amount of time in seconds a connectuon is kept alive.
+       The amount of time in seconds a connection is kept alive.
     defaultValue: 20
     version: 7.10.4
     reloadable: true
