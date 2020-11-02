@@ -841,6 +841,24 @@ EOF
         rm $tmp
         ox_scr_done SCR-676-mw
     fi
+
+    SCR=SCR-740
+    if ox_scr_todo ${SCR}
+    then
+      prop_file=/opt/open-xchange/etc/system.properties
+      prop_key=com.openexchange.config.cascade.scopes
+      old_default_value="user, context, contextSets, server"
+      new_default_value="user, context, reseller, contextSets, server"
+      if ox_exists_property ${prop_key} ${prop_file}
+      then
+        prop_val=$(ox_read_property ${prop_key} ${prop_file})
+        if [ "${old_default_value}" = "${prop_val}" ]
+        then
+          ox_set_property ${prop_key} "${new_default_value}" ${prop_file}
+        fi
+      fi
+      ox_scr_done ${SCR}
+    fi
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
