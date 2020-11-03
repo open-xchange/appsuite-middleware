@@ -5,7 +5,7 @@ BuildArch:     noarch
 BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 12
+%define        ox_release 13
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -53,6 +53,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Nov 03 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-11-09 (5891)
 * Tue Oct 20 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-10-26 (5888)
 * Tue Oct 06 2020 Marcus Klein <marcus.klein@open-xchange.com>
