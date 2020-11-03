@@ -65,6 +65,7 @@ import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.share.Links;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.ShareConstants;
@@ -192,6 +193,60 @@ public class ShareLinks {
             getLogger(ShareLinks.class).warn("Error extracting host name from share link {}", shareLink, e);
         }
         return Strings.isNotEmpty(hostname) ? hostname : shareLink;
+    }
+
+    /**
+     * Extracts the hostdata-relevant parts of a share link and makes them available as {@link HostData}.
+     * 
+     * @param shareLink The share link to extract the hostdata from
+     * @return The host data
+     */
+    public static HostData extractHostData(String shareLink) throws OXException {
+        URI uri;
+        try {
+            uri = new URI(shareLink);
+        } catch (URISyntaxException e) {
+            throw ShareExceptionCodes.INVALID_LINK.create(e, shareLink);
+        }
+        return new HostData() {
+
+            @Override
+            public boolean isSecure() {
+                return "https".equals(uri.getScheme());
+            }
+
+            @Override
+            public String getRoute() {
+                return null;
+            }
+
+            @Override
+            public int getPort() {
+                return uri.getPort();
+            }
+
+            @Override
+            public String getHost() {
+                return uri.getHost();
+            }
+
+            @Override
+            public String getHTTPSession() {
+                return null;
+            }
+
+            @Override
+            public String getDispatcherPrefix() {
+                String path = uri.getPath();
+                if (null != path) {
+                    int idx = path.indexOf(SHARE_SERVLET + '/');
+                    if (-1 != idx) {
+                        return path.substring(0, idx);
+                    }
+                }
+                return "/appsuite/api/";
+            }
+        };
     }
 
     private static URIBuilder prepare(HostData hostData) {

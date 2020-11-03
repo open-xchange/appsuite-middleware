@@ -49,9 +49,11 @@
 
 package com.openexchange.share.subscription;
 
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.Ranked;
 import com.openexchange.session.Session;
+import com.openexchange.share.ShareExceptionCodes;
 
 /**
  * {@link ShareSubscriptionProvider} - A provider that handles CRUD operations for a certain kind of share in a specific module
@@ -117,5 +119,22 @@ public interface ShareSubscriptionProvider extends Ranked {
      * @throws OXException In case of missing service.
      */
     boolean unsubscribe(Session session, String shareLink) throws OXException;
+
+    /**
+     * Generates a <i>backward</i> link into the guest account of a subscribed share, pointing to a specific target, which can be used
+     * to open the regular, browser-based guest mode on the remote host.
+     * <p/>
+     * Only available if supported by the responsible provider.
+     * 
+     * @param session The user session
+     * @param shareLink The share link to identify the mounted object
+     * @param folder The targeted folder in the guest account
+     * @param item The targeted item in the guest account, or <code>null</code> when pointing to a folder
+     * @param additionals Additional data to include in the resulting backward link's share target, or <code>null</code> if not set
+     * @return The generated backward link
+     */
+    default String getBackwardLink(Session session, String shareLink, String folder, String item, Map<String, String> additionals) throws OXException {
+        throw ShareExceptionCodes.UNEXPECTED_ERROR.create("unsupported");
+    }
 
 }
