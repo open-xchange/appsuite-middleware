@@ -69,11 +69,8 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareService;
 import com.openexchange.share.core.tools.ShareToken;
-import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.subscription.XctxSessionManager;
 
 /**
@@ -113,13 +110,7 @@ public class XctxSessionCache implements XctxSessionManager {
     public Session getGuestSession(Session session, String baseToken, String password) throws OXException {
         ShareToken shareToken = new ShareToken(baseToken);
         if (session.getContextId() == shareToken.getContextID()) {
-            /*
-             * Allow context internal shares for anonymous links
-             */
-            GuestInfo guestInfo = services.getServiceSafe(ShareService.class).resolveGuest(baseToken);
-            if (false == RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType())) {
-                throw ShareExceptionCodes.INVALID_TOKEN.create(baseToken);
-            }
+            throw ShareExceptionCodes.INVALID_TOKEN.create(baseToken);
         }
         Reference<Session> newGuestSession = new Reference<Session>();
         String key = getKey(session, baseToken, password);
