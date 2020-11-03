@@ -86,7 +86,7 @@ public abstract class AbstractHttpResponseParser<T> implements HttpResponseParse
 
     /**
      * Initializes a new {@link AbstractHttpResponseParser}.
-     * 
+     *
      * @param throwOnError <code>true</code> to throw a {@link OXException} if found in the response object, <code>false</code> to set in the response object
      * @param handleStatusError <code>true</code> to throw a {@link OXException} if the status code implies a client or server error, <code>false</code> to ignore the status code
      */
@@ -99,7 +99,7 @@ public abstract class AbstractHttpResponseParser<T> implements HttpResponseParse
 
     /**
      * Initializes a new {@link AbstractHttpResponseParser}.
-     * 
+     *
      * @param throwOnError <code>true</code> to throw a {@link OXException} if found in the response object, <code>false</code> to set in the response object
      * @param handleStatusError <code>true</code> to throw a {@link OXException} if the status code implies a client or server error, <code>false</code> to ignore the status code
      * @param cookiePrefix Prefixes of cookies that shall be checked if set
@@ -116,13 +116,12 @@ public abstract class AbstractHttpResponseParser<T> implements HttpResponseParse
 
     @Override
     public T parse(HttpResponse response, HttpContext httpContext) throws OXException {
+        if (handleStatusError) {
+            Checks.checkStatusError(response);
+        }
         CommonApiResponse commonResponse = CommonApiResponse.build(response);
         if (throwOnError && commonResponse.hasOXException()) {
             throw commonResponse.getOXException();
-        }
-
-        if (handleStatusError) {
-            Checks.checkStatusError(response);
         }
 
         CookieStore cookieStore = HttpContextUtils.getCookieStore(httpContext);

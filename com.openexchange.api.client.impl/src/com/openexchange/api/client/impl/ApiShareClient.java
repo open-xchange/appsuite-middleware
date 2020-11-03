@@ -118,14 +118,8 @@ public class ApiShareClient extends AbstractApiClient {
         /*
          * Validate result and perform further calls if needed
          */
+        checkResponse(shareLoginInfos);
         String loginType = shareLoginInfos.getLoginType();
-        if ("message".equals(loginType) || "message_continue".equals(loginType)) {
-            if ("ERROR".equals(shareLoginInfos.getMessageType()) || "internal_error".equals(shareLoginInfos.getStatus())) {
-                throw ApiClientExceptions.REMOTE_SERVER_ERROR.create(shareLoginInfos.getMessage());
-            }
-            throw ApiClientExceptions.ACCESS_REVOKED.create();
-        }
-
         if ("anonymous_password".equals(loginType)) {
             /*
              * Perform anonymous login
@@ -152,6 +146,29 @@ public class ApiShareClient extends AbstractApiClient {
              * No session could be created
              */
             throw ApiClientExceptions.NO_ACCESS.create(loginLink);
+        }
+    }
+
+    /**
+     * Checks the response for common error cases
+     *
+     * @param shareLoginInfos The login infos
+     * @throws OXException In case the share can't be accessed
+     * @see {@link com.openexchange.share.servlet.utils.LoginType#MESSAGE}
+     * @see {@link com.openexchange.share.servlet.handler.WebUIShareHandler#redirectToLoginPage(AccessShareRequest, HttpServletRequest, HttpServletResponse)}
+     */
+    private void checkResponse(ShareLoginInformation shareLoginInfos) throws OXException {
+        String loginType = shareLoginInfos.getLoginType();
+        if ("message".equals(loginType)) {
+            /*
+             * This indicates a error that needs to be resolved by the user
+             */
+            throw ApiClientExceptions.REMOTE_SERVER_ERROR.create(null == shareLoginInfos.getMessage() ? "" : shareLoginInfos.getMessage());
+        } else if ("message_continue".equals(loginType)) {
+            /*
+             * This indicates a removed resource
+             */
+            throw ApiClientExceptions.ACCESS_REVOKED.create();
         }
     }
 }
