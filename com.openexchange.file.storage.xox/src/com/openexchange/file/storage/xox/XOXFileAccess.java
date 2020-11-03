@@ -78,6 +78,7 @@ import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileStorageZippableFolderFileAccess;
 import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.ThumbnailAware;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.share.core.subscription.SubscribedHelper;
@@ -101,7 +102,8 @@ public class XOXFileAccess implements /*@formatter:off*/
                                        FileStorageZippableFolderFileAccess,
                                        FileStorageCaseInsensitiveAccess,
                                        FileStorageAutoRenameFoldersAccess,
-                                       FileStorageRangeFileAccess {
+                                       FileStorageRangeFileAccess /*,
+                                       FileStorageAdvancedSearchFileAccess */{
                                        /*@formatter:on*/
 
     private final XOXAccountAccess accountAccess;
@@ -351,6 +353,32 @@ public class XOXFileAccess implements /*@formatter:off*/
         SubscribedHelper subscribedHelper = accountAccess.getSubscribedHelper();
         files = subscribedHelper.filterUnsubscribed(files, (id) -> subscribedHelper.addSubscribed(client.getFolder(id)));
         return new RangeAwareSearchIterator<File>(new SearchIteratorAdapter<File>(files.iterator(), files.size()), start, end);
+    }
+
+    /*
+    @Override
+    */
+    public SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
+        List<File> result = client.advancedSearch(folderIds, searchTerm, fields, sort, order, start, end);
+        if(result == null  || result.isEmpty()) {
+           return SearchIteratorAdapter.emptyIterator();
+        }
+        SubscribedHelper subscribedHelper = accountAccess.getSubscribedHelper();
+        result = subscribedHelper.filterUnsubscribed(result, (id) -> subscribedHelper.addSubscribed(client.getFolder(id)));
+        return new RangeAwareSearchIterator<File>(new SearchIteratorAdapter<File>(result.iterator(), result.size()), start, end);
+    }
+
+    /*
+    @Override
+    */
+    public SearchIterator<File> search(String folderId, boolean includeSubfolders, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
+        List<File> result = client.advancedSearch(folderId, includeSubfolders, searchTerm, fields, sort, order, start, end);
+        if(result == null  || result.isEmpty()) {
+           return SearchIteratorAdapter.emptyIterator();
+        }
+        SubscribedHelper subscribedHelper = accountAccess.getSubscribedHelper();
+        result = subscribedHelper.filterUnsubscribed(result, (id) -> subscribedHelper.addSubscribed(client.getFolder(id)));
+        return new RangeAwareSearchIterator<File>(new SearchIteratorAdapter<File>(result.iterator(), result.size()), start, end);
     }
 
     @Override

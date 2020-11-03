@@ -56,6 +56,8 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.conversion.ConversionService;
@@ -83,6 +85,8 @@ import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.tools.arrays.Collections;
 
+import static com.openexchange.java.Autoboxing.B;
+
 /**
  * {@link XOXAccountAccess}
  *
@@ -93,6 +97,8 @@ public class XOXAccountAccess implements CapabilityAware {
 
     /** The identifiers of the parent folders where adjusting the subscribed flag is supported, which mark the entry points for shared and public files */
     private static final Set<String> SUBSCRIBE_PARENT_IDS = Collections.unmodifiableSet("10", "15");
+
+    private static final Logger LOG = LoggerFactory.getLogger(XOXAccountAccess.class);
 
     private final FileStorageAccount account;
     private final FileStorageService service;
@@ -151,7 +157,7 @@ public class XOXAccountAccess implements CapabilityAware {
 
     /**
      * Gets a {@link SubscribedHelper} suitable for the connected file storage account.
-     * 
+     *
      * @return The subscribed helper
      */
     public SubscribedHelper getSubscribedHelper() {
@@ -160,7 +166,7 @@ public class XOXAccountAccess implements CapabilityAware {
 
     /**
      * Gets a {@link JSONObject} providing additional arbitrary metadata of the account for clients.
-     * 
+     *
      * @return The metadata
      */
     public JSONObject getMetadata() throws OXException {
@@ -313,7 +319,18 @@ public class XOXAccountAccess implements CapabilityAware {
 
     @Override
     public Boolean supports(FileStorageCapability capability) {
-        return FileStorageCapabilityTools.supportsByClass(XOXFileAccess.class, capability);
+        Boolean supported = FileStorageCapabilityTools.supportsByClass(XOXFileAccess.class, capability);
+        if (supported != null && supported == Boolean.TRUE && capability == FileStorageCapability.SEARCH_BY_TERM) {
+            //The advanced search is only available on the remote side if the version is > 7.10.5
+            try {
+                connect();
+                return B(shareClient.supportsFederatedSharing());
+            } catch (OXException e) {
+                LOG.error("Error while checking if federated sharing functionality is available on the remote host: ", e);
+                return B(false);
+            }
+        }
+        return supported;
     }
 
     private String getShareUrl() throws OXException {

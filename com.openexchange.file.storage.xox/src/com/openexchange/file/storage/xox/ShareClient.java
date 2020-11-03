@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -62,6 +63,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.api.client.ApiClient;
 import com.openexchange.api.client.common.calls.find.FindResponse;
@@ -74,6 +78,7 @@ import com.openexchange.api.client.common.calls.folders.GetFolderCall;
 import com.openexchange.api.client.common.calls.folders.ListFoldersCall;
 import com.openexchange.api.client.common.calls.folders.RemoteFolder;
 import com.openexchange.api.client.common.calls.folders.UpdateCall;
+import com.openexchange.api.client.common.calls.infostore.AdvancedSearch;
 import com.openexchange.api.client.common.calls.infostore.DeleteCall;
 import com.openexchange.api.client.common.calls.infostore.DetachCall;
 import com.openexchange.api.client.common.calls.infostore.DocumentCall;
@@ -106,6 +111,8 @@ import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.Range;
+import com.openexchange.file.storage.search.SearchTerm;
+import com.openexchange.file.storage.search.ToJsonSearchTermVisitor;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.results.Delta;
@@ -124,6 +131,8 @@ import com.openexchange.version.ServerVersion;
  */
 public class ShareClient {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ShareClient.class);
+
     protected static final String TREE_ID = FolderStorage.REAL_TREE_ID;
     protected static final String MODULE_FILES = "files";
     protected static final String TIMEZONE_UTC = "UTC";
@@ -141,7 +150,7 @@ public class ShareClient {
 
     /**
      * Initializes a new {@link ShareClient}.
-     * 
+     *
      * @param session A session
      * @param account The underlying file storage account
      * @param client The underlying {@link ApiClient} to use
@@ -176,7 +185,7 @@ public class ShareClient {
 
     /**
      * Gets the underlying file storage account
-     * 
+     *
      * @return The file storage account
      */
     protected FileStorageAccount getAccount() {
@@ -679,14 +688,126 @@ public class ShareClient {
         return fileConverter.getStorageFiles(result.getResultObjects(), fields);
     }
 
+    /**
+     * Performs an advanced search
+     *
+     * @param folderId The IDs of the folders to search within
+     * @param searchTerm The {@link SearchTerm}
+     * @param fields The fields to return for the found items
+     * @param sort The sorting field, or null if no sorting should be applied
+     * @param order The sorting order
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (inclusive) for the search results. Useful for paging.
+     * @return A list of found files
+     * @throws OXException
+     */
+    public List<File> advancedSearch(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
+        if (!checkServerVersion(API_LEVEL)) {
+            LOG.debug("Cannot perform advanced search. Remote server does not support it in prior versions.");
+            //We cannot perform an advanced search against the remote, because it was not available in prior versions
+            return Collections.emptyList();
+        }
+
+        List<File> ret = new ArrayList<>();
+        for (String folderId : folderIds) {
+            ret.addAll(advancedSearch(folderId, false, searchTerm, fields, null, null, -1, -1));
+        }
+
+        //sort & slice
+        ret.sort(order.comparatorBy(sort));
+        ret = ret.subList(start, end);
+
+        return ret;
+    }
+
+    /**
+     * Performs an advanced search
+     *
+     * @param folderId The ID of the folder to search within
+     * @param includeSubfolders Whether or not to search in sub folders
+     * @param searchTerm The {@link SearchTerm}
+     * @param fields The fields to return for the found items
+     * @param sort The sorting field, or null if no sorting should be applied
+     * @param order The sorting order
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (inclusive) for the search results. Useful for paging.
+     * @return A list of found files
+     * @throws OXException
+     */
+    public List<File> advancedSearch(String folderId, boolean includeSubfolders, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
+
+        if (!checkServerVersion(API_LEVEL)) {
+            LOG.debug("Cannot perform advanced search. Remote server does not support it in prior versions.");
+            //We cannot perform an advanced search against the remote, because it was not available in prior versions
+            return Collections.emptyList();
+        }
+
+        //SearchTerm to JSON
+        ToJsonSearchTermVisitor visitor = new ToJsonSearchTermVisitor();
+        searchTerm.visit(visitor);
+        final JSONObject jsonSearch = visitor.createJSON();
+
+        //Setup query
+        AdvancedSearch advancedSearch = new AdvancedSearch(folderId, toIdList(getFieldsToQuery(fields, Field.SEQUENCE_NUMBER)), jsonSearch);
+        advancedSearch.setIncludeSubfolders(B(includeSubfolders));
+
+        //Set options
+        if (sort != null) {
+            advancedSearch.setSortBy(sort.getName());
+        }
+        if (order != null) {
+            advancedSearch.setOrder(order == SortDirection.DESC ? UpdatesCall.SortOrder.DESC : UpdatesCall.SortOrder.ASC);
+        }
+        if (start >= 0) {
+            advancedSearch.setStart(I(start));
+        }
+        if (end >= 0) {
+            advancedSearch.setEnd(I(end));
+        }
+
+        //Do the search
+        List<DefaultFile> result = getApiClient().execute(advancedSearch);
+        return fileConverter.getStorageFiles(result, fields);
+    }
+
     /** A static reference since when the federated sharing feature was introduced and thus certain API functionality like the {@link Field#CREATED_FROM} field is available */
     private final static ServerVersion API_LEVEL = new ServerVersion(7, 10, 5, "0");
+
+    /**
+     * Checks if the remote server version if equals or higher a given version
+     *
+     * @param versionToCheck The version to check
+     * @return true if the remote server version is equals or higher the given version
+     * @throws OXException The
+     */
+    private final boolean checkServerVersion(ServerVersion versionToCheck) throws OXException {
+        String versionString = new AccountMetadataHelper(account, session).getCachedValue("serverVersion", TimeUnit.DAYS.toMillis(1L), String.class, () -> {
+            ServerVersion serverVersion = getApiClient().execute(new ServerVersionCall());
+            return null != serverVersion ? serverVersion.getVersionString() : null;
+        });
+        if (null == versionString || versionToCheck.compareTo(ServerVersion.parse(versionString)) > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks whether or not the connected <b>remote host</b> supports federated Sharing API functionality.
+     *
+     * This check is done by comparing the remote server version to "7.10.5"
+     *
+     * @return True, if the remote host's version is equals or higher "7.10.5", false otherwise
+     * @throws OXException
+     */
+    public final boolean supportsFederatedSharing() throws OXException {
+       return checkServerVersion(API_LEVEL);
+    }
 
     /**
      * Gets the metadata fields to query from the remote server, based on the fields requested that are actually requested.
      * <p/>
      * Fields that are not supported by the remote server are removed automatically.
-     * 
+     *
      * @param requestedFields The requested fields, or <code>null</code> if undefined
      * @param requiredFields Optional additional fields to include, may contain <code>null</code> elements
      * @return The fields to use when querying the remote server
@@ -696,11 +817,7 @@ public class ShareClient {
         /*
          * handle fields not supported by the remote server
          */
-        String versionString = new AccountMetadataHelper(account, session).getCachedValue("serverVersion", TimeUnit.DAYS.toMillis(1L), String.class, () -> {
-            ServerVersion serverVersion = getApiClient().execute(new ServerVersionCall());
-            return null != serverVersion ? serverVersion.getVersionString() : null;
-        });
-        if (null == versionString || API_LEVEL.compareTo(ServerVersion.parse(versionString)) > 0) {
+        if (!checkServerVersion(API_LEVEL)) {
             if (fields.remove(Field.CREATED_FROM)) {
                 fields.add(Field.CREATED_BY);
             }
