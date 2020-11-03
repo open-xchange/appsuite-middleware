@@ -97,10 +97,10 @@ public enum ApiClientExceptions implements DisplayableOXExceptionCode {
     ACCESS_REVOKED("The access to the share was revoked", Category.CATEGORY_ERROR, 11),
 
     /** The remote server responded with a client error: %1$s. */
-    CLIENT_ERROR("The remote server responded with a client error: %1$s.", Category.CATEGORY_USER_INPUT, 400),
+    CLIENT_ERROR("The remote server responded with a client error %1$s.", Category.CATEGORY_USER_INPUT, 400),
 
     /** The remote server responded with a server error: %1$s. */
-    REMOTE_SERVER_ERROR("The remote server responded with a server error: %1$s.", Category.CATEGORY_SERVICE_DOWN, 500),
+    REMOTE_SERVER_ERROR("The remote server responded with a server error %1$s.", Category.CATEGORY_SERVICE_DOWN, 500),
 
     /** The remote session is expired **/
     SESSION_EXPIRED("The remote session expired", Category.CATEGORY_TRY_AGAIN, 600, OXExceptionStrings.MESSAGE_RETRY),
