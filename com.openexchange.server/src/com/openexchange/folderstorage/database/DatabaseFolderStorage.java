@@ -2060,8 +2060,10 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 updatedFolder.setParentFolderID(newParentId);
                 if (false == isSubscribable(subscriptionHelper, updatedFolder, userId)) {
                     int[] affectedUserIds = getAffectedUserIds(context, originalFolder);
-                    subscriptionHelper.clearSubscribed(optCon, context.getContextId(), affectedUserIds, originalFolder.getObjectID(), originalFolder.getModule());
-                    subscriptionHelper.clearUsedForSync(optCon, context.getContextId(), affectedUserIds, originalFolder.getObjectID(), originalFolder.getModule());
+                    if (affectedUserIds.length > 0) {
+                        subscriptionHelper.clearSubscribed(optCon, context.getContextId(), affectedUserIds, originalFolder.getObjectID(), originalFolder.getModule());
+                        subscriptionHelper.clearUsedForSync(optCon, context.getContextId(), affectedUserIds, originalFolder.getObjectID(), originalFolder.getModule());
+                    }
                 }
             }
         }

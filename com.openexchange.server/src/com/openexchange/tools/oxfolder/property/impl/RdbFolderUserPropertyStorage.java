@@ -151,7 +151,7 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
             if (null != propertyKeys && 0 < propertyKeys.size()) {
                 stringBuilder.append(" AND name").append(Databases.getPlaceholders(propertyKeys.size()));
             }
-            sql = stringBuilder.append(';').toString();
+            sql = stringBuilder.toString();
         }
 
         PreparedStatement stmt = null;

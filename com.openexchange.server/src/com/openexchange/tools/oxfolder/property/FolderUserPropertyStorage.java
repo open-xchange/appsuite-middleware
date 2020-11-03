@@ -126,7 +126,8 @@ public interface FolderUserPropertyStorage {
      *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder
-     * @param userIds The identifiers of the users to delete the properties for
+     * @param userIds The identifiers of the users to delete the properties for. If the array is <code>null</code>
+     *            or empty all properties for the folder will be deleted
      * @param propertyKeys The properties to delete. If the {@link Set} is <code>null</code> or empty all properties will be deleted
      * @throws OXException In case of missing service or no connection could be obtained
      */
@@ -137,7 +138,8 @@ public interface FolderUserPropertyStorage {
      *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder
-     * @param userIds The identifiers of the users to delete the properties for
+     * @param userIds The identifiers of the users to delete the properties for. If the array is <code>null</code>
+     *            or empty all properties for the folder will be deleted
      * @param propertyKeys The properties to delete. If the {@link Set} is <code>null</code> or empty all properties will be deleted
      * @param connection The {@link Connection} to to use for the transaction
      * @throws OXException In case of missing service or no connection could be obtained
