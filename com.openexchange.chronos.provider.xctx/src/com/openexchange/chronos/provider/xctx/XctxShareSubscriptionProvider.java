@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.xctx;
 
 import static com.openexchange.osgi.Tools.requireService;
+import static com.openexchange.share.core.tools.ShareLinks.extractHostName;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE_WITH_PASSWORD;
 import static com.openexchange.share.subscription.ShareLinkState.FORBIDDEN;
@@ -84,6 +85,7 @@ import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult.Builder;
 import com.openexchange.share.subscription.ShareLinkState;
+import com.openexchange.share.subscription.ShareSubscriptionExceptions;
 import com.openexchange.share.subscription.ShareSubscriptionInformation;
 import com.openexchange.share.subscription.ShareSubscriptionProvider;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -128,13 +130,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
             return false;
         }
         try {
-            GuestInfo guestInfo = resolveGuest(shareLink);
-            if (null != guestInfo) {
-                /*
-                 * Skip checking if context or user are enabled. This provider is responsible for handling the link
-                 */
-                return hasCapability(session);
-            }
+            return hasCapability(session) && null != resolveGuest(shareLink);
         } catch (OXException e) {
             LOG.warn("Error checking if share link is supported", e);
         }
@@ -143,9 +139,12 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
 
     @Override
     public ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException {
-
-        //TODO: re-check if allowed
-
+        /*
+         * re-check if supported & allowed
+         */
+        if (false == isSupported(session, shareLink)) {
+            return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink)).build();
+        }
         /*
          * check if account already exists for this guest user
          */
@@ -153,8 +152,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         if (null != existingAccount) {
             FolderCalendarAccess calendarAccess = provider.connect(session, existingAccount, null);
             ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
-            String foreignRelativeFolderId = getRelativeFolderId(targetPath.getFolder());
-            CalendarFolder folder = calendarAccess.getFolder(foreignRelativeFolderId);
+            CalendarFolder folder = calendarAccess.getFolder(getRelativeFolderId(targetPath.getFolder()));
             ShareLinkState state = Boolean.FALSE.equals(folder.isSubscribed()) ? ShareLinkState.UNSUBSCRIBED : ShareLinkState.SUBSCRIBED;
             return new ShareLinkAnalyzeResult.Builder().state(state).infos(getSubscriptionInfo(existingAccount, targetPath)).build();
         }
@@ -167,23 +165,23 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         } catch (OXException e) {
             return new Builder().state(UNRESOLVABLE).error(ShareExceptionCodes.INVALID_LINK.create(e, shareLink)).build();
         }
-
         if (false == RecipientType.GUEST.equals(guestInfo.getRecipientType()) || Strings.isEmpty(guestInfo.getEmailAddress())) {
             return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create()).build();
         }
         if (false == UserAliasUtility.isAlias(guestInfo.getEmailAddress(), getAliases(ServerSessionAdapter.valueOf(session).getUser()))) {
             return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create()).build();
         }
-        
         return resolveState(shareLink, guestInfo).infos(new ShareSubscriptionInformation(null, Module.CALENDAR.getName(), null)).build();
     }
 
     @Override
     public ShareSubscriptionInformation subscribe(Session session, String shareLink, String shareName, String password) throws OXException {
-        
-        //TODO: re-check if allowed
-        //TODO: re-check if exists
-        
+        /*
+         * re-check if supported & allowed
+         */
+        if (false == isSupported(session, shareLink)) {
+            throw ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink);
+        }
         /*
          * update folder in existing account if account already exists for this guest user
          */
@@ -198,26 +196,43 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
             return getSubscriptionInfo(existingAccount, targetPath);
         }
         /*
-         * create new calendar account
+         * create new calendar account, otherwise
          */
         JSONObject userConfig = new JSONObject();
         userConfig.putSafe("url", shareLink);
         userConfig.putSafe("password", password); //TODO: crypt
-        userConfig.putSafe("name", shareName);
-        
+        userConfig.putSafe("name", Strings.isEmpty(shareName) ? extractHostName(shareLink) : shareName);
         CalendarAccountService accountService = services.getServiceSafe(CalendarAccountService.class);
         CalendarAccount account = accountService.createAccount(session, provider.getId(), userConfig, null);
-        
-        // TODO: ensure folder is subscribed / all others are unsubscribed?
-
         return getSubscriptionInfo(account, ShareTool.getShareTarget(shareLink));
     }
 
-
     @Override
     public ShareSubscriptionInformation resubscribe(Session session, String shareLink, String shareName, String password) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        /*
+         * re-check if supported & allowed
+         */
+        if (false == isSupported(session, shareLink)) {
+            throw ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink);
+        }
+        /*
+         * get targeted account for share link
+         */
+        CalendarAccount existingAccount = lookupExistingAccount(session, shareLink);
+        if (null == existingAccount) {
+            throw ShareSubscriptionExceptions.MISSING_SUBSCRIPTION.create(shareLink);
+        }
+        /*
+         * update account accordingly
+         */
+        JSONObject userConfig = null == existingAccount.getUserConfiguration() ? new JSONObject() : new JSONObject(existingAccount.getUserConfiguration());
+        userConfig.putSafe("password", password); //TODO: crypt
+        if (Strings.isNotEmpty(shareName)) {
+            userConfig.putSafe("name", shareName);
+        }
+        CalendarAccountService accountService = services.getServiceSafe(CalendarAccountService.class);
+        CalendarAccount updatedAccount = accountService.updateAccount(session, existingAccount.getAccountId(), userConfig, existingAccount.getLastModified().getTime(), null);
+        return getSubscriptionInfo(updatedAccount, ShareTool.getShareTarget(shareLink));
     }
 
     @Override
@@ -232,6 +247,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         FolderCalendarAccess calendarAccess = provider.connect(session, existingAccount, null);
         ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
         DefaultCalendarFolder folderUpdate = new DefaultCalendarFolder();
+        folderUpdate.setId(targetPath.getFolder());
         folderUpdate.setSubscribed(Boolean.FALSE);
         calendarAccess.updateFolder(targetPath.getFolder(), folderUpdate, CalendarUtils.DISTANT_FUTURE);
         return true;

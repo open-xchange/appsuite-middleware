@@ -73,10 +73,12 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
@@ -281,6 +283,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
 
     @Override
     public CalendarResult createEvent(String folderId, Event event) throws OXException {
+        Check.containsNoSuchAttendees(event, Boolean.TRUE, CalendarUserType.RESOURCE, CalendarUserType.ROOM, CalendarUserType.GROUP);
         Event unmangledEvent = entityHelper.unmangleLocalEvent(event);
         CalendarResult calendarResult = getCalendarService().createEvent(guestSession, folderId, unmangledEvent);
         return entityHelper.mangleRemoteCalendarResult(calendarResult);
@@ -288,6 +291,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
 
     @Override
     public CalendarResult updateEvent(EventID eventID, Event event, long clientTimestamp) throws OXException {
+        Check.containsNoSuchAttendees(event, Boolean.TRUE, CalendarUserType.RESOURCE, CalendarUserType.ROOM, CalendarUserType.GROUP);
         Event unmangledEvent = entityHelper.unmangleLocalEvent(event);
         CalendarResult calendarResult = getCalendarService().updateEvent(guestSession, eventID, unmangledEvent, clientTimestamp);
         return entityHelper.mangleRemoteCalendarResult(calendarResult);

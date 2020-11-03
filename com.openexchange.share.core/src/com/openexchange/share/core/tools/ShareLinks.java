@@ -178,6 +178,21 @@ public class ShareLinks {
         return -1 == endIndex ? path.substring(beginIndex) : path.substring(beginIndex, endIndex);
     }
 
+    /**
+     * Extracts the hostname part of a share link.
+     * 
+     * @param shareLink The share link to get the hostname for
+     * @return The hostname, fallink back to the passed link as-is if the hostname cannot be extracted
+     */
+    public static String extractHostName(String shareLink) {
+        String hostname = null;
+        try {
+            hostname = new URI(shareLink).getHost();
+        } catch (URISyntaxException e) {
+            getLogger(ShareLinks.class).warn("Error extracting host name from share link {}", shareLink, e);
+        }
+        return Strings.isNotEmpty(hostname) ? hostname : shareLink;
+    }
 
     private static URIBuilder prepare(HostData hostData) {
         return new URIBuilder()

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.common;
 
+import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.SearchStrings.lengthWithoutWildcards;
 import static com.openexchange.tools.arrays.Arrays.contains;
@@ -69,6 +70,7 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -489,6 +491,26 @@ public class Check {
         }
         selfProtection.checkEventResults(eventsResults, requestedFields);
         return eventsResults;
+    }
+
+    /**
+     * Checks that the given event contains no attendees fulfilling certain criteria.
+     * 
+     * @param event The event to check the attendees in
+     * @param internal {@link Boolean#TRUE} to prevent internal entities, {@link Boolean#FALSE} to prevent non-internal ones,
+     *            or <code>null</code> to not check against internal/external
+     * @param cuTypes The {@link CalendarUserType}s to prevent, or <code>null</code> to not check the calendar user type
+     * @return The passed event, after checking that no attendees matching the criteria are contained
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_CALENDAR_USER}
+     * @see CalendarUtils#filter(List, Boolean, CalendarUserType...)
+     */
+    public static Event containsNoSuchAttendees(Event event, Boolean internal, CalendarUserType... cuTypes) throws OXException {
+        List<Attendee> invalidAttendees = filter(event.getAttendees(), internal, cuTypes);
+        if (0 < invalidAttendees.size()) {
+            Attendee attendee = invalidAttendees.get(0);
+            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), I(attendee.getEntity()), attendee.getCuType());
+        }
+        return event;
     }
 
 }
