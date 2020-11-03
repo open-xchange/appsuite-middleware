@@ -209,10 +209,8 @@ public abstract class AbstractApiClient implements ApiClient {
             /*
              * Prepare context and execute the request
              */
-            HttpContext httpContext = new BasicHttpContext();
-            HttpContextUtils.addCookieStore(httpContext, cookieStore);
-
             LOGGER.trace("Sending request \"{}\" with cookies \"{}\"", request, cookieStore.toString());
+            HttpContext httpContext = prepareContext();
             response = getHttpClient().execute(request, httpContext);
 
             /*
@@ -290,9 +288,9 @@ public abstract class AbstractApiClient implements ApiClient {
             /*
              * Execute the logout request manually to avoid constrains from execute method (cookies, shutdown flag, etc.)
              */
+            HttpContext httpContext = prepareContext();
             request = buildRequest(new LogoutCall());
-
-            response = getHttpClient().execute(request);
+            response = getHttpClient().execute(request, httpContext);
             int status = response.getStatusLine().getStatusCode();
             if (HttpStatus.SC_OK != status) {
                 OXException oxException = getNestedOXException(response);
@@ -346,6 +344,12 @@ public abstract class AbstractApiClient implements ApiClient {
 
     private ManagedHttpClient getHttpClient() throws OXException {
         return services.getServiceSafe(HttpClientService.class).getHttpClient(HTTP_CLIENT_IDENTIFIER + "-" + loginLink.getHost());
+    }
+
+    private HttpContext prepareContext() {
+        HttpContext httpContext = new BasicHttpContext();
+        HttpContextUtils.addCookieStore(httpContext, cookieStore);
+        return httpContext;
     }
 
     /**
