@@ -66,6 +66,19 @@ public class Security {
         return new Builder();
     }
 
+    /**
+     * Creates a new builder for an instance of <code>Security</code> pre-filled with the arguments from given <code>Security</code> instance.
+     *
+     * @return The new builder
+     * @throws IllegalArgumentException If given <code>Security</code> instance is <code>null</code>
+     */
+    public static Builder builder(Security other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Security object must not be null");
+        }
+        return new Builder(other);
+    }
+
     /** The builder for an instance of <code>Security</code> */
     public static class Builder {
 
@@ -83,6 +96,21 @@ public class Security {
          */
         Builder() {
             super();
+        }
+
+        /**
+         * Initializes a new {@link Builder}.
+         */
+        Builder(Security other) {
+            this();
+            encrypt = other.isEncrypt();
+            pgpInline = other.isPgpInline();
+            sign = other.isSign();
+            language = other.getLanguage();
+            message = other.getMessage();
+            pin = other.getPin();
+            msgRef = other.getMsgRef();
+            authToken = other.getAuthToken();
         }
 
         public Builder withEncrypt(boolean encrypt) {

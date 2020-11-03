@@ -1347,15 +1347,18 @@ public class MailStorage implements IMailStorage {
      * @return The recent {@link SecuritySettings} to be used
      */
     private SecuritySettings prepareSecuritySettings(MessageDescription originalDescription, MessageDescription newDescription) {
-        if (originalDescription.containsSecurity() && newDescription.containsSecurity()) {
-            if(newDescription.getSecurity().isEncrypt() && Strings.isEmpty(newDescription.getSecurity().getAuthToken())) {
+        if (originalDescription.containsNotNullSecurity() && newDescription.containsNotNullSecurity()) {
+            Security newSecurity = null;
+            if (newDescription.getSecurity().isEncrypt() && Strings.isEmpty(newDescription.getSecurity().getAuthToken())) {
                 //we need to preserve the authentication token from the existing draft, if the caller want's us to encrypt but is missing an authToken
                 //otherwise the token would get overwritten and de-cryption would fail the next time
-                newDescription.getSecurity().setAuthToken(originalDescription.getSecurity().getAuthToken());
-            }
-            else if(newDescription.getSecurity().isEncrypt() == false && Strings.isNotEmpty(originalDescription.getSecurity().getAuthToken())) {
+                newSecurity = Security.builder(newDescription.getSecurity()).withAuthToken(originalDescription.getSecurity().getAuthToken()).build();
+            } else if (newDescription.getSecurity().isEncrypt() == false && Strings.isNotEmpty(originalDescription.getSecurity().getAuthToken())) {
                 //Remove the auth-token from the draft, because we don't need it anymore
-                newDescription.getSecurity().setAuthToken(null);
+                newSecurity = Security.builder(newDescription.getSecurity()).withAuthToken(null).build();
+            }
+            if (newSecurity != null) {
+                newDescription.setSecurity(newSecurity);
             }
         }
 

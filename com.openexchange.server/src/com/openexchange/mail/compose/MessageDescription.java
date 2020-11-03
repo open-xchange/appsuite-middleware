@@ -598,6 +598,15 @@ public class MessageDescription {
         return bSecurity;
     }
 
+    /**
+     * Checks if security object has been set before and its value is not <code>null</code>.
+     *
+     * @return <code>true</code> if previously set and not <code>null</code>; otherwise <code>false</code>
+     */
+    public boolean containsNotNullSecurity() {
+        return bSecurity && security != null;
+    }
+
     public void removeSecurity() {
         security = null;
         bSecurity = false;
