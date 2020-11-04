@@ -1123,49 +1123,9 @@ public class MailMessageProcessor {
             }
         }
         this.parsed = true;
-        LOG.debug("Current in memory representation:{}{}", System.lineSeparator(), getLoggableMessageRepresentation());
-    }
-
-    /**
-     * getLoggableMessageRepresentation
-     *
-     * @return
-     */
-    private Object getLoggableMessageRepresentation() {
-        return new Object() {
-            @Override
-            public String toString() {
-                String lf = System.lineSeparator();
-                StringBuilder sb = new StringBuilder("Composition space: ").append(UUIDs.getUnformattedString(compositionSpaceId)).append(lf)
-                    .append("Content type: ").append(contentType.getId()).append(lf)
-                    .append("Content (web): ").append(contentForWeb).append(lf)
-                    .append("Content (draft): ").append(contentForDraft).append(lf)
-                    .append("Attachments:");
-
-                if (attachments == null || attachments.isEmpty()) {
-                    sb.append(" []").append(lf);
-                } else {
-                    sb.append(lf);
-                    boolean first = true;
-                    for (ForwardingAttachmentIfNotSet attachment : attachments) {
-                        if (first) {
-                            first = false;
-                        } else {
-                            sb.append("  ---").append(lf);
-                        }
-                        sb.append("  ID: ").append(UUIDs.getUnformattedString(attachment.getId())).append(lf);
-                        sb.append("  Name: ").append(attachment.getName()).append(lf);
-                        sb.append("  Size: ").append(attachment.getSize()).append(lf);
-                        sb.append("  MIME Type: ").append(attachment.getMimeType()).append(lf);
-                        sb.append("  Disposition: ").append(attachment.getContentDisposition().getId()).append(lf);
-                        sb.append("  Origin: ").append(attachment.getOrigin()).append(lf);
-                        sb.append("  Drive Mail: ").append(Boolean.toString(attachment.getSharedAttachmentReference() != null)).append(lf);
-                    }
-                }
-
-                return sb.toString();
-            }
-        };
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Current in memory representation:{}{}", System.lineSeparator(), new LoggableMessageRepresentation(this));
+        }
     }
 
     private void parseContentAndType(MailMessage mailMessage, Optional<ContentType> optionalContentType, boolean isHtml, List<ContentId> contentIds) throws OXException {
@@ -2736,6 +2696,52 @@ public class MailMessageProcessor {
         @Override
         public InputStream getData() throws OXException {
             return attachment.getData();
+        }
+    }
+
+    /** String representation for processor's message state */
+    private static final class LoggableMessageRepresentation {
+
+        private final MailMessageProcessor processor;
+
+        LoggableMessageRepresentation(MailMessageProcessor processor) {
+            super();
+            this.processor = processor;
+        }
+
+        @Override
+        public String toString() {
+            String lf = System.lineSeparator();
+            StringBuilder sb = new StringBuilder(1024)
+                .append("Composition space: ").append(UUIDs.getUnformattedString(processor.compositionSpaceId)).append(lf)
+                .append("Content type: ").append(processor.contentType.getId()).append(lf)
+                .append("Content (web): ").append(processor.contentForWeb).append(lf)
+                .append("Content (draft): ").append(processor.contentForDraft).append(lf);
+
+            sb.append("Attachments:");
+            List<ForwardingAttachmentIfNotSet> attachments = processor.attachments;
+            if (attachments == null || attachments.isEmpty()) {
+                sb.append(" <none>").append(lf);
+            } else {
+                sb.append(lf);
+                boolean first = true;
+                for (ForwardingAttachmentIfNotSet attachment : attachments) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append("  ---").append(lf);
+                    }
+                    sb.append("  ID: ").append(UUIDs.getUnformattedString(attachment.getId())).append(lf);
+                    sb.append("  Name: ").append(attachment.getName()).append(lf);
+                    sb.append("  Size: ").append(attachment.getSize()).append(lf);
+                    sb.append("  MIME Type: ").append(attachment.getMimeType()).append(lf);
+                    sb.append("  Disposition: ").append(attachment.getContentDisposition().getId()).append(lf);
+                    sb.append("  Origin: ").append(attachment.getOrigin()).append(lf);
+                    sb.append("  Drive Mail: ").append(Boolean.toString(attachment.getSharedAttachmentReference() != null)).append(lf);
+                }
+            }
+
+            return sb.toString();
         }
     }
 
