@@ -289,10 +289,17 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
     }
 
     /**
-     * isDifferentFrom
+     * Checks if this association appears to be different from given mail storage identifier.
+     * <p>
+     * That is if either:
+     * <ul>
+     * <li>Different composition space identifier</li>
+     * <li>Different draft path</li>
+     * <li>Different file cache reference</li>
+     * </ul>
      *
-     * @param mailStorageId
-     * @return
+     * @param mailStorageId The mail storage identifier to compare against
+     * @return <code>true</code> if different; otherwise <code>false</code>
      */
     public boolean isDifferentFrom(MailStorageId mailStorageId) {
         if (!compositionSpaceId.equals(mailStorageId.getCompositionSpaceId())) {
