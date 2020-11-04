@@ -1123,9 +1123,7 @@ public class MailMessageProcessor {
             }
         }
         this.parsed = true;
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Current in memory representation:{}{}", System.lineSeparator(), new LoggableMessageRepresentation(this));
-        }
+        LOG.debug("Current in memory representation:{}{}", System.lineSeparator(), new LoggableMessageRepresentation(this));
     }
 
     private void parseContentAndType(MailMessage mailMessage, Optional<ContentType> optionalContentType, boolean isHtml, List<ContentId> contentIds) throws OXException {
