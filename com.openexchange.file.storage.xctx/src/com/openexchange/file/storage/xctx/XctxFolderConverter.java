@@ -55,6 +55,7 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.infostore.folder.FolderConverter;
 import com.openexchange.file.storage.infostore.folder.UserizedFileStorageFolder;
@@ -125,7 +126,7 @@ public class XctxFolderConverter extends FolderConverter {
          * adjust capabilities from remote folder & clear type to disable certain functionality
          */
         storageFolder.setCapabilities(getStorageCapabilities(storageFolder.getCapabilities()));
-        storageFolder.setType(null); // if not: parent folder may get exchanged to 15 or 10 at c.o.folderstorage.filestorage.FileStorageFolderImpl.FileStorageFolderImpl(FileStorageFolder, String, boolean, IDBasedFolderAccess)  
+        storageFolder.setType(FileStorageFolderType.NONE); // if not: parent folder may get exchanged to 15 or 10 at c.o.folderstorage.filestorage.FileStorageFolderImpl.FileStorageFolderImpl(FileStorageFolder, String, boolean, IDBasedFolderAccess)  
         return storageFolder;
     }
 
