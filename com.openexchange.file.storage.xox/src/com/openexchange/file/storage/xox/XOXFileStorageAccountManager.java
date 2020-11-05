@@ -62,6 +62,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.core.tools.ShareTool;
 
 /**
  * {@link XOXFileStorageAccountManager} - Wrapper that ensures that the {@link ApiClient} used by the account is
@@ -102,8 +103,8 @@ public class XOXFileStorageAccountManager implements FileStorageAccountManager {
              */
             Map<String, Object> configuration = account.getConfiguration();
             String shareUrl = (String) configuration.get(SHARE_URL);
-            if (Strings.isNotEmpty(shareUrl) && false == shareUrl.equals(storedShareUrl)) {
-                throw FileStorageExceptionCodes.NOT_ALLOWED_ACCOUNT_UPDATE.create("Share URL must not be changed.");
+            if (Strings.isNotEmpty(shareUrl) && false == ShareTool.equals(storedShareUrl, shareUrl)) {
+                throw FileStorageExceptionCodes.UNALLOWED_ACCOUNT_UPDATE.create("Share URL must not be changed.");
             }
 
             String password = (String) configuration.get(PASSWORD);
