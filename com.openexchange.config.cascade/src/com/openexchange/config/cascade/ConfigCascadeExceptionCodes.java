@@ -66,9 +66,18 @@ public enum ConfigCascadeExceptionCodes implements DisplayableOXExceptionCode {
      * An error occurred: %1$s
      */
     UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1),
+    /**
+     * "Could not coerce value %1$s into class %2$s"
+     */
     COULD_NOT_COERCE_VALUE("Could not coerce value %1$s into class %2$s", Category.CATEGORY_ERROR, 2),
-    CAN_NOT_DEFINE_METADATA("Can not define metadata %1$s in scope %2$s", Category.CATEGORY_ERROR, 3),
-    CAN_NOT_SET_PROPERTY("Can not set property %1$s in scope %2$s", Category.CATEGORY_ERROR, 4),
+    /**
+     * "Cannot define metadata %1$s in scope %2$s"
+     */
+    CAN_NOT_DEFINE_METADATA("Cannot define metadata %1$s in scope %2$s", Category.CATEGORY_ERROR, 3),
+    /**
+     * "Cannot set property %1$s in scope %2$s"
+     */
+    CAN_NOT_SET_PROPERTY("Cannot set property %1$s in scope %2$s", Category.CATEGORY_ERROR, 4),
     ;
 
     /**
@@ -92,7 +101,7 @@ public enum ConfigCascadeExceptionCodes implements DisplayableOXExceptionCode {
     public String getPrefix() {
         return PREFIX;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return OXExceptionStrings.MESSAGE;

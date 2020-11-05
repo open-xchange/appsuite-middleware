@@ -60,12 +60,11 @@ import com.google.common.collect.ImmutableList;
  */
 public class PropertyScope {
 
-    // TODO: Once MW-1387 is merged backed to develop, include the 'reseller' scope.
     /** A listing of scopes: <code>user</code> -&gt; <code>context</code> -&gt; <code>server</code> */
-    private static final List<String> SCOPES_FROM_USER = ImmutableList.of("user", "context", "server");
+    private static final List<String> SCOPES_FROM_USER = ImmutableList.of("user", "context", "reseller", "server");
 
     /** A listing of scopes: <code>context</code> -&gt; <code>server</code> */
-    private static final List<String> SCOPES_FROM_CONTEXT = ImmutableList.of("context", "server");
+    private static final List<String> SCOPES_FROM_CONTEXT = ImmutableList.of("context", "reseller", "server");
 
     /** A listing of scopes: <code>server</code> */
     private static final List<String> SCOPES_FROM_SERVER = ImmutableList.of("server");

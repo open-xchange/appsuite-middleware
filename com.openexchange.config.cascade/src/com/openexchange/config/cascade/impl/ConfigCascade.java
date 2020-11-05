@@ -131,7 +131,7 @@ public class ConfigCascade implements ConfigViewFactory {
         }
     }
 
-    // -----------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     final ConcurrentMap<String, ConfigProviderService> providers;
     final SearchPath searchPath;
@@ -220,7 +220,12 @@ public class ConfigCascade implements ConfigViewFactory {
 
         @Override
         public <T> ConfigProperty<T> property(final String scope, final String property, final Class<T> coerceTo) throws OXException {
-            return new CoercingConfigProperty<T>(coerceTo, providers.get(scope).get(property, context, user), stringParser);
+            ConfigProviderService configProviderService = providers.get(scope);
+            if (configProviderService == null) {
+                // No such config provider for specified scope
+                return new CoercingConfigProperty<T>(coerceTo, new NonExistentBasicProperty(property, scope), stringParser);
+            }
+            return new CoercingConfigProperty<T>(coerceTo, configProviderService.get(property, context, user), stringParser);
         }
 
         @Override
@@ -366,4 +371,47 @@ public class ConfigCascade implements ConfigViewFactory {
         }
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static final class NonExistentBasicProperty implements BasicProperty {
+
+        private final String property;
+        private final String scope;
+
+        NonExistentBasicProperty(String property, String scope) {
+            super();
+            this.property = property;
+            this.scope = scope;
+        }
+
+        @Override
+        public void set(String metadataName, String value) throws OXException {
+            throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, scope);
+        }
+
+        @Override
+        public void set(String value) throws OXException {
+            throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(property, scope);
+        }
+
+        @Override
+        public boolean isDefined() throws OXException {
+            return false;
+        }
+
+        @Override
+        public List<String> getMetadataNames() throws OXException {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public String get(String metadataName) throws OXException {
+            return null;
+        }
+
+        @Override
+        public String get() throws OXException {
+            return null;
+        }
+    }
 }
