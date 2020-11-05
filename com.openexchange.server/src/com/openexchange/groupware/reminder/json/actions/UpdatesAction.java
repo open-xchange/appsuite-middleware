@@ -77,8 +77,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
-import com.openexchange.groupware.reminder.json.ReminderActionFactory;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -89,8 +87,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(ReminderActionFactory.OAUTH_READ_SCOPE)
-@RestrictedAction(module = AbstractReminderAction.MODULE, type = RestrictedAction.Type.WRITE)
+@RestrictedAction(module = AbstractReminderAction.MODULE, type = RestrictedAction.Type.READ)
 public final class UpdatesAction extends AbstractReminderAction {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesAction.class);
