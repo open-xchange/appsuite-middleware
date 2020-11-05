@@ -50,6 +50,8 @@
 package com.openexchange.share.core.tools;
 
 import static com.openexchange.share.core.ShareConstants.SHARE_SERVLET;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -474,6 +476,43 @@ public class ShareTool {
             return null;
         }
         return ShareTargetPath.parse(targetPath);
+    }
+
+    /**
+     * Gets a value indicating whether two share URLs point to the
+     * same guest or not.
+     *
+     * @param shareUrl1 The one share URL
+     * @param shareUrl2 The other share URL
+     * @return <code>true</code> if both URLs point to the same guest, <code>false</code> otherwise
+     */
+    public static boolean equals(String shareUrl1, String shareUrl2) {
+        if (Strings.isEmpty(shareUrl1)) {
+            return Strings.isEmpty(shareUrl2);
+        } else if (Strings.isEmpty(shareUrl2)) {
+            return false;
+        }
+        /*
+         * Check for same host
+         */
+        try {
+            URL url1 = new URL(shareUrl1);
+            URL url2 = new URL(shareUrl2);
+
+            if (false == url1.getHost().equals(url2.getHost())) {
+                return false;
+            }
+        } catch (MalformedURLException e) {
+            LOGGER.debug("Can't parse URL", e.getMessage(), e);
+            return false;
+        }
+
+        /*
+         * Check if guest user is the same
+         */
+        ShareToken shareToken1 = getShareToken(shareUrl1);
+        ShareToken shareToken2 = getShareToken(shareUrl2);
+        return null == shareToken1 ? null == shareToken2 : shareToken1.equals(shareToken2);
     }
 
 }
