@@ -6,7 +6,14 @@
     summary: Gets all visible folders of a certain module.
     security: 
         - session: []
-        - oauth: []
+        - oauth: 
+          - read_mails
+        - oauth: 
+          - read_tasks
+        - oauth: 
+          - read_calendar
+        - oauth: 
+          - read_contacts
     parameters:
       - $ref: '#/components/parameters/gblQueryParamFolderTree'
       - in: query

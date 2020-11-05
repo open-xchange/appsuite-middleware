@@ -6,7 +6,14 @@
     summary: Gets the folders at the root level of the folder structure.
     security: 
         - session: []
-        - oauth: []    
+        - oauth: 
+          - read_mails
+        - oauth: 
+          - read_tasks
+        - oauth: 
+          - read_calendar
+        - oauth: 
+          - read_contacts    
     parameters:
       - $ref: '#/components/parameters/gblQueryParamFolderColumns'
       - $ref: '#/components/parameters/gblQueryParamFolderTree'
