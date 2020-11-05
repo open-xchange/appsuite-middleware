@@ -293,6 +293,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 }
             }
 
+            adm.setId(I(adm_id));
+
             insertCapabilities(adm, oxcon);
             insertConfiguration(adm, oxcon);
             insertTaxonomies(adm, oxcon);
@@ -300,7 +302,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             oxcon.commit();
             rollback = false;
 
-            adm.setId(I(adm_id));
+
             return adm;
         } catch (DataTruncation dt) {
             LOGGER.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
