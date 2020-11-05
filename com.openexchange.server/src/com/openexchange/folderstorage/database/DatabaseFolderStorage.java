@@ -100,6 +100,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.AfterReadAwareFolderStorage;
@@ -1523,7 +1524,11 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                         int taskCount = 0;
                         try {
                             final List<FileStorageService> allServices = fsr.getAllServices();
+                            boolean separateFederatedShares = StorageParametersUtility.getBoolParameter("separateFederatedShares", storageParameters);
                             for (final FileStorageService fsService : allServices) {
+                                if (false == separateFederatedShares && SharingFileStorageService.class.isInstance(fsService)) {
+                                    continue; // federated shares will be mounted below folders 10 and 15
+                                }
                                 Callable<Void> task = new Callable<Void>() {
 
                                     @Override
@@ -1631,14 +1636,15 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     }
 
                     /*
-                     * Add federal sharing folders
+                     * Add federal sharing folders unless already added below folder 9
                      */
-                    final boolean forceRetry = StorageParametersUtility.getBoolParameter("forceRetry", storageParameters);
-                    SortableId[] sharedFolders = FederatedSharingFolders.getFolders(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, storageParameters.getSession(), forceRetry);
-                    for(SortableId sharedFolder : sharedFolders){
-                        ret.add(new FileStorageId(sharedFolder.getId(), ordinal++, sharedFolder.getName()));
+                    if (false == StorageParametersUtility.getBoolParameter("separateFederatedShares", storageParameters)) {
+                        final boolean forceRetry = StorageParametersUtility.getBoolParameter("forceRetry", storageParameters);
+                        SortableId[] sharedFolders = FederatedSharingFolders.getFolders(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, storageParameters.getSession(), forceRetry);
+                        for (SortableId sharedFolder : sharedFolders) {
+                            ret.add(new FileStorageId(sharedFolder.getId(), ordinal++, sharedFolder.getName()));
+                        }
                     }
-
                     return ret.toArray(new SortableId[ret.size()]);
                 }
             }
@@ -1681,14 +1687,15 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 }
 
                 /*
-                 * Add federal sharing folders
+                 * Add federal sharing folders unless already added below folder 9
                  */
-                final boolean forceRetry = StorageParametersUtility.getBoolParameter("forceRetry", storageParameters);
-                SortableId[] sharedFolders = FederatedSharingFolders.getFolders(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, storageParameters.getSession(), forceRetry);
-                for (SortableId sharedFolder : sharedFolders) {
-                    ret.add(new FileStorageId(sharedFolder.getId(), ordinal++, sharedFolder.getName()));
+                if (false == StorageParametersUtility.getBoolParameter("separateFederatedShares", storageParameters)) {
+                    final boolean forceRetry = StorageParametersUtility.getBoolParameter("forceRetry", storageParameters);
+                    SortableId[] sharedFolders = FederatedSharingFolders.getFolders(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, storageParameters.getSession(), forceRetry);
+                    for (SortableId sharedFolder : sharedFolders) {
+                        ret.add(new FileStorageId(sharedFolder.getId(), ordinal++, sharedFolder.getName()));
+                    }
                 }
-
                 return ret.toArray(new SortableId[ret.size()]);
             }
 
