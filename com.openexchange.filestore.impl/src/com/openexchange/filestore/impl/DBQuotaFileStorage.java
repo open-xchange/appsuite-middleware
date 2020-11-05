@@ -756,6 +756,12 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
                 // End of stream has been reached unexpectedly during reading input
                 throw FileStorageCodes.CONNECTION_CLOSED.create(e.getCause(), new Object[0]);
             }
+            if (e instanceof StorageFullIOException) {
+                long required = ((StorageFullIOException) e).getActualSize();
+                long usage = getUsage();
+                notifyOnQuotaExceeded(null, quota, required, usage + required, usage);
+                throw QuotaFileStorageExceptionCodes.STORE_FULL.create(e, new Object[0]);
+            }
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (OXException e) {
             LogProperties.put(LogProperties.Name.FILESTORE_URI, uri);
