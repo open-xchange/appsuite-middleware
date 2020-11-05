@@ -1450,6 +1450,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         fileMetadata.setId(FileStorageFileAccess.NEW);
         fileMetadata.setFolderId(destFolderId);
         fileMetadata.setVersion(null);
+        fileMetadata.setCreatedBy(0);
+        fileMetadata.setCreatedFrom(null);
+        fileMetadata.setModifiedBy(0);
+        fileMetadata.setModifiedFrom(null);
 
         if (newData == null) {
             saveFileMetadata(fileMetadata, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
