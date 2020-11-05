@@ -116,12 +116,14 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
     /**
      * The read-only scope for OAuth requests
      */
-    public static final String OAUTH_READ_SCOPE = "read_mails";
+    @Deprecated
+    public static final String OAUTH_READ_SCOPE = "read_mail";
 
     /**
      * The writable scope for OAuth requests
      */
-    public static final String OAUTH_WRITE_SCOPE = "write_mails";
+    @Deprecated
+    public static final String OAUTH_WRITE_SCOPE = "write_mail";
 
     /**
      * Gets the action factory

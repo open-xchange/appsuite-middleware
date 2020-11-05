@@ -79,7 +79,7 @@ import okhttp3.Response;
  */
 public class AbstractOAuthAPIClient extends AbstractAPIClientSession {
 
-    protected static final boolean USE_PREFIX = true;
+    protected static final boolean USE_PREFIX = false;
 
     protected OAuthApiClient oauthclient;
     private volatile AccessTokenResponse accessTokenResponse;
@@ -144,7 +144,7 @@ public class AbstractOAuthAPIClient extends AbstractAPIClientSession {
             .add("username", testUser.getUser())
             .add("password", testUser.getPassword())
             .add("grant_type", "password")
-            .add("scope", "read_mails write_mails write_userconfig")
+            .add("scope", "read_mail write_mail write_userconfig")
             .build();
         // @formatter:on
 

@@ -62,7 +62,6 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.junit.Test;
 import com.openexchange.ajax.apiclient.oauth.AbstractOAuthAPIClient;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
@@ -78,7 +77,6 @@ import com.openexchange.testing.httpclient.modules.SnippetApi;
 
 /**
  * {@link OAuthShowcase} - is not a test but rather a showcase for the oauth mail and snippet functionality.
- * You need to configure the {@link AJAXConfig.Property#OAUTH_TOKEN} for this to work. This token should contain the <code>read_mails</code>, <code>write_mails</code> and <code>write_userconfig</code> scopes only.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.5
