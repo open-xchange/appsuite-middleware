@@ -212,5 +212,9 @@ public class OAuthShowcase extends AbstractOAuthAPIClient {
         return mail.toString();
     }
 
+    @Override
+    public String getScopes() {
+        return "read_mail write_mail write_userconfig";
+    }
 
 }

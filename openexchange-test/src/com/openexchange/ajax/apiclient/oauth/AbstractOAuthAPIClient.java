@@ -77,7 +77,7 @@ import okhttp3.Response;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.5
  */
-public class AbstractOAuthAPIClient extends AbstractAPIClientSession {
+public abstract class AbstractOAuthAPIClient extends AbstractAPIClientSession {
 
     protected static final boolean USE_PREFIX = false;
 
@@ -144,7 +144,7 @@ public class AbstractOAuthAPIClient extends AbstractAPIClientSession {
             .add("username", testUser.getUser())
             .add("password", testUser.getPassword())
             .add("grant_type", "password")
-            .add("scope", "read_mail write_mail write_userconfig")
+            .add("scope", getScopes())
             .build();
         // @formatter:on
 
@@ -173,5 +173,7 @@ public class AbstractOAuthAPIClient extends AbstractAPIClientSession {
         this.accessTokenResponse = resp;
         return resp.getAccessToken();
     }
+
+    public abstract String getScopes();
 
 }
