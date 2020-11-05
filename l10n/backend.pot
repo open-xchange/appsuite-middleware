@@ -9245,7 +9245,7 @@ msgstr ""
 
 #. The user started a Drive Mail once and re-accesses the associated composition space. However, the folder containing the attachments to share (via a share link) does no more exist.
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:108
-msgid "The folder containing the attachments to share does no more exist."
+msgid "The folder containing the attachments to share no longer exists."
 msgstr ""
 
 #. The user started a Drive Mail once and re-accesses the associated composition space. However, there are either attachments not existing in composition space or there are references to attachments that do not exist
