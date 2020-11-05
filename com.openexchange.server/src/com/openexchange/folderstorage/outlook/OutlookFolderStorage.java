@@ -89,6 +89,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -1749,8 +1750,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                             CompletionService<Void> completionService = new CallerRunsCompletionService<Void>();
                             int taskCount = 0;
                             try {
+                                boolean separateFederatedShares = StorageParametersUtility.getBoolParameter("separateFederatedShares", storageParameters);
                                 final List<FileStorageService> allServices = fsr.getAllServices();
                                 for (final FileStorageService fsService : allServices) {
+                                    if (false == separateFederatedShares && SharingFileStorageService.class.isInstance(fsService)) {
+                                        continue; // federated shares will be mounted below folders 10 and 15
+                                    }
                                     Callable<Void> task = new Callable<Void>() {
 
                                         @Override
