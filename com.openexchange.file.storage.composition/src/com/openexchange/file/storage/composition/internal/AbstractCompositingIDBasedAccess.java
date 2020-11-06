@@ -319,19 +319,20 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
     /**
      * Gets a list of all file storage account accesses.
      *
-     * @return The account accesses.
+     * @return The connected account accesses.
      */
     protected List<FileStorageFileAccess> getAllFileStorageAccesses() throws OXException {
-        return getAllFileStorageAccesses(null);
+        return getAllFileStorageAccesses(null, false);
     }
 
     /**
      * Gets a list of all file storage account accesses.
      *
      * @param filter A predicate which defines the {@link FileStorageService}s which should only be returned, or <code>null</code> to return all services.
+     * @param ignoreConnectionErrors <code>true</code> in order to not return {@link FileStorageFileAccess}es which failed to connect, <code>false</code> to throw an Exception
      * @return The account accesses.
      */
-    protected List<FileStorageFileAccess> getAllFileStorageAccesses(Predicate<FileStorageService> filter) throws OXException {
+    protected List<FileStorageFileAccess> getAllFileStorageAccesses(Predicate<FileStorageService> filter, boolean ignoreConnectionErrors) throws OXException {
         List<FileStorageService> allFileStorageServices = getFileStorageServiceRegistry().getAllServices();
         List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>(allFileStorageServices.size());
         for (FileStorageService fsService : getFileStorageServiceRegistry().getAllServices()) {
@@ -350,7 +351,14 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
             }
             for (FileStorageAccount fileStorageAccount : accounts) {
                 FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
-                retval.add(connect(accountAccess).getFileAccess());
+                try {
+                    retval.add(connect(accountAccess).getFileAccess());
+                }
+                catch(Exception e) {
+                   if(!ignoreConnectionErrors) {
+                      throw e;
+                   }
+                }
             }
         }
         return retval;
