@@ -448,8 +448,8 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         /*
          * qualify remote entities for usage in local session in storage account's context
          */
-        calendarFolder.setCreatedFrom(entityHelper.mangleRemoteEntity(calendarFolder.getCreatedFrom()));
-        calendarFolder.setModifiedFrom(entityHelper.mangleRemoteEntity(calendarFolder.getModifiedFrom()));
+        calendarFolder.setCreatedFrom(entityHelper.mangleRemoteEntity(entityHelper.addEntityInfo(guestSession.getSession(), calendarFolder.getCreatedFrom())));
+        calendarFolder.setModifiedFrom(entityHelper.mangleRemoteEntity(entityHelper.addEntityInfo(guestSession.getSession(), calendarFolder.getModifiedFrom())));
         /*
          * enhance & qualify remote entities in folder permissions for usage in local session in storage account's context
          */

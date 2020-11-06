@@ -50,10 +50,14 @@
 package com.openexchange.share.impl.xctx;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
@@ -68,6 +72,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.core.tools.ShareToken;
@@ -79,9 +84,12 @@ import com.openexchange.share.subscription.XctxSessionManager;
  * @author <a href="mailto:tobias.friedrich@open-xchange.org">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public class XctxSessionCache implements XctxSessionManager {
+public class XctxSessionCache implements XctxSessionManager, EventHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(XctxSessionCache.class);
+
+    /** The parameter used to decorate regular sessions that spawned at least one cross-context session. */
+    private static final String PARAM_XCTX_SESSIONS = "__session.xctx_sessions";
 
     private final ServiceLookup services;
     private final Cache<String, String> guestSessionCache;
@@ -152,6 +160,20 @@ public class XctxSessionCache implements XctxSessionManager {
         return guestSession;
     }
     
+    @Override
+    public void handleEvent(Event event) {
+        if (null != event && SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(event.getTopic())) {
+            try {
+                Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                if (null != session && session.containsParameter(PARAM_XCTX_SESSIONS)) {
+                    invalidateGuestSessions(session.getSessionID());
+                }
+            } catch (Exception e) {
+                LOG.warn("Unexpected error invalidating cross-context sessions after local session was removed", e);
+            }
+        }
+    }
+
     /**
      * Performs the login.
      * 
@@ -179,6 +201,7 @@ public class XctxSessionCache implements XctxSessionManager {
         }
         LOG.debug("Successful login for share {} with guest user {} in context {}, using session {}.", 
             baseToken, I(loginResult.getUser().getId()), I(loginResult.getContext().getContextId()), loginResult.getSession().getSessionID());
+        session.setParameter(PARAM_XCTX_SESSIONS, Boolean.TRUE);
         return loginResult.getSession();
     }
 
@@ -198,6 +221,19 @@ public class XctxSessionCache implements XctxSessionManager {
             }
         } catch (OXException e) {
             LOG.warn("Error removing cross-context guest session", e);
+        }
+    }
+
+    private void invalidateGuestSessions(String sessionId) {
+        List<String> toInvalidate = new ArrayList<String>();
+        for (String key : guestSessionCache.asMap().keySet()) {
+            if (key.startsWith(sessionId)) {
+                toInvalidate.add(key);
+            }
+        }
+        if (false == toInvalidate.isEmpty()) {
+            guestSessionCache.invalidateAll(toInvalidate);
+            LOG.debug("Successfully invalidated {} cross-context session(s) spawned by local session {}.", I(toInvalidate.size()), sessionId);
         }
     }
 

@@ -49,24 +49,24 @@
 
 package com.openexchange.chronos.provider.xctx;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.groupware.DefaultGroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.FallbackGroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permissions;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -77,15 +77,21 @@ import com.openexchange.session.Session;
  */
 public class FallbackXctxCalendarAccess extends FallbackGroupwareCalendarAccess {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FallbackXctxCalendarAccess.class);
-
+    private final ServiceLookup services;
     private final OXException error;
-    private final Session session;
+    private final Session localSession;
 
-    public FallbackXctxCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters, OXException error) {
+    /**
+     * @param services A service lookup reference
+     * @param account The underlying calendar account
+     * @param localSession The user's <i>local</i> session associated with the file storage account
+     * @param error The error to include in the folders
+     */
+    public FallbackXctxCalendarAccess(ServiceLookup services, CalendarAccount account, Session localSession, OXException error) {
         super(account);
+        this.services = services;
         this.error = error;
-        this.session = session;
+        this.localSession = localSession;
     }
 
     @Override
@@ -104,10 +110,23 @@ public class FallbackXctxCalendarAccess extends FallbackGroupwareCalendarAccess 
         if (null != folder.getName() || null != folder.getPermissions()) {
             throw unsupportedOperation();
         }
-
-        //TODO: still allow to update 'subscribed' flag? 
-
-        return super.updateFolder(folderId, folder, clientTimestamp);
+        /*
+         * update folder's configuration in underlying account's internal config
+         */
+        JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
+        boolean updated = false;
+        if (null != folder.isSubscribed()) {
+            updated = updated || new AccountConfigHelper(internalConfig).setSubscribed(folderId, folder.isSubscribed());
+        }
+        if (null != folder.getExtendedProperties()) {
+            updated = updated || new AccountConfigHelper(internalConfig).setColor(folderId, folder.getExtendedProperties().get(COLOR_LITERAL));
+        }
+        if (updated) {
+            JSONObject userConfig = null != account.getUserConfiguration() ? account.getUserConfiguration() : new JSONObject();
+            userConfig.putSafe("internalConfig", internalConfig);
+            services.getService(CalendarAccountService.class).updateAccount(localSession, account.getAccountId(), userConfig, clientTimestamp, null);
+        }
+        return folderId;
     }
 
     @Override

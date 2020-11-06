@@ -49,8 +49,10 @@
 
 package com.openexchange.chronos.provider.xctx;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Locale;
+import java.util.Set;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +69,6 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.core.tools.ShareLinks;
@@ -153,10 +154,6 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
             throw CalendarExceptionCodes.INVALID_CONFIGURATION.create("url");
         }
         String password = userConfig.optString("password", null);
-        if (Strings.isNotEmpty(password)) {
-            //TODO: implement secret handling
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(getId());
-        }
         /*
          * implicitly check access by logging in as guest user
          */
@@ -207,7 +204,12 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
 
     @Override
     public CalendarAccess connectFallback(Session session, CalendarAccount account, CalendarParameters parameters, OXException error) {
-        return new FallbackXctxCalendarAccess(session, account, parameters, error);
+        return new FallbackXctxCalendarAccess(services, account, session, error);
+    }
+
+    @Override
+    public Set<String> getSecretProperties() {
+        return Collections.singleton("password");
     }
 
 }

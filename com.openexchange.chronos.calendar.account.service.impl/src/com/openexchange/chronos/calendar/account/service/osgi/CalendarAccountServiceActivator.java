@@ -63,6 +63,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.secret.SecretEncryptionFactoryService;
 
 /**
  * {@link CalendarAccountServiceActivator}
@@ -81,7 +82,7 @@ public class CalendarAccountServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { CalendarProviderRegistry.class, DatabaseService.class, CalendarStorageFactory.class, CapabilityService.class, ConfigViewFactory.class };
+        return new Class<?>[] { CalendarProviderRegistry.class, DatabaseService.class, CalendarStorageFactory.class, CapabilityService.class, ConfigViewFactory.class, SecretEncryptionFactoryService.class };
     }
 
     @Override

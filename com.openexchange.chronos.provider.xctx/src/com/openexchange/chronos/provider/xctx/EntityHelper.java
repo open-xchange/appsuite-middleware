@@ -272,6 +272,23 @@ public class EntityHelper extends XctxEntityHelper {
         return enhancedPermission;
     }
 
+    /**
+     * Looks up and returns a new {@link EntityInfo} object in case the supplied one only carries an identifier.
+     * 
+     * @param session The session under which perspective the entity infos should be looked up
+     * @param entityInfo The entity info to enrich as needed
+     * @return The (possibly replaced) entity info, or the passed one if not needed
+     */
+    public EntityInfo addEntityInfo(Session session, EntityInfo entityInfo) {
+        if (null != entityInfo && null == entityInfo.getDisplayName() && null == entityInfo.getEmail1() && NOT_SET != entityInfo.getEntity()) {
+            EntityInfo lookedUpEntityInfo = lookupEntity(session, entityInfo.getEntity(), EntityInfo.Type.GROUP.equals(entityInfo.getType()));
+            if (null != lookedUpEntityInfo) {
+                return lookedUpEntityInfo;
+            }
+        }
+        return entityInfo;
+    }
+
     public List<ImportResult> mangleRemoteImportResults(List<ImportResult> importResults) {
         if (null == importResults || importResults.isEmpty()) {
             return importResults;
