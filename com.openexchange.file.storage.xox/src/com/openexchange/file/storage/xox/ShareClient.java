@@ -607,13 +607,14 @@ public class ShareClient {
     /**
      * Gets the filestorage / infostore quota
      *
+     * @param folderId The ID of the folder to get the quota for
      * @return The {@link AccountQuota} for module "filestorage" and account "infostore"
      * @throws OXException In case of error
      */
-    public AccountQuota getInfostoreQuota() throws OXException {
+    public AccountQuota getInfostoreQuota(String folderId) throws OXException {
         final String module = "filestorage";
         final String account = INFOSTORE;
-        List<AccountQuota> accountQuota = getApiClient().execute(new com.openexchange.api.client.common.calls.quota.GetCall(module, account));
+        List<AccountQuota> accountQuota = getApiClient().execute(new com.openexchange.api.client.common.calls.quota.GetCall(module, account, folderId));
         return accountQuota.get(0);
     }
 

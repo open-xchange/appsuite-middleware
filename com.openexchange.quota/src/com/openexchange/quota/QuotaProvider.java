@@ -94,6 +94,21 @@ public interface QuotaProvider {
     AccountQuota getFor(Session session, String accountID) throws OXException;
 
     /**
+     * Gets the quota and usage for a session-specific user, folder and a given account.
+     *
+     * @param session The session, never <code>null</code>.
+     * @param accountID The id of a possible account for the user within this module,
+     *  never <code>null</code>.
+     * @param folderId The folderId to get the quota for
+     * @return The quota and usage, never <code>null</code>.
+     * @throws OXException If no account was found for the given id, {@link QuotaExceptionCodes#UNKNOWN_ACCOUNT}
+     * is thrown. Other exception codes denote occurred errors while calculating quota and usage.
+     */
+    default AccountQuota getFor(Session session, String accountID, String folderId) throws OXException {
+        return getFor(session, accountID);
+    }
+
+    /**
      * Gets the quota and usage for all accounts for the session-specific
      * user within this module.
      *
@@ -103,5 +118,4 @@ public interface QuotaProvider {
      * @throws OXException If an error occurs while calculating quota and usage.
      */
     AccountQuotas getFor(Session session) throws OXException;
-
 }

@@ -90,6 +90,7 @@ public class GetAction extends AbstractUnifiedQuotaAction {
     protected AJAXRequestResult perform(QuotaAJAXRequest req) throws OXException, JSONException {
         String module = req.getParameter("module");
         String accountID = req.getParameter("account");
+        String folder = req.getParameter("folder");
 
         QuotaService quotaService = services.getOptionalService(QuotaService.class);
         if (quotaService == null) {
@@ -98,14 +99,14 @@ public class GetAction extends AbstractUnifiedQuotaAction {
 
         try {
             List<OXException> warnings = new LinkedList<>();
-            JSONValue result = performRequest(quotaService, req.getSession(), module, accountID, warnings);
+            JSONValue result = performRequest(quotaService, req.getSession(), module, accountID, folder, warnings);
             return new AJAXRequestResult(result, "json").addWarnings(warnings);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
     }
 
-    private JSONValue performRequest(QuotaService quotaService, ServerSession session, String module, String accountID, List<OXException> warnings) throws JSONException, OXException {
+    private JSONValue performRequest(QuotaService quotaService, ServerSession session, String module, String accountID, String folder, List<OXException> warnings) throws JSONException, OXException {
         if (module == null) {
             JSONObject allQuotas = new JSONObject();
             for (QuotaProvider provider : quotaService.getAllProviders()) {
@@ -166,7 +167,7 @@ public class GetAction extends AbstractUnifiedQuotaAction {
         }
 
         // Account available...
-        AccountQuota quota = provider.getFor(session, accountID);
+        AccountQuota quota = provider.getFor(session, accountID, folder);
         if (quota == null) {
             throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("No account '" + accountID + "' exists for module '" + module + "'.");
         }

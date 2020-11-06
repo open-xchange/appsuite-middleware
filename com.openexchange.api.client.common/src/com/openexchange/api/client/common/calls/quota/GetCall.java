@@ -78,6 +78,7 @@ public class GetCall extends AbstractGetCall<List<AccountQuota>> {
 
     private final String module;
     private final String account;
+    private final String folder;
 
     /**
      * Initializes a new {@link GetCall}.
@@ -86,8 +87,20 @@ public class GetCall extends AbstractGetCall<List<AccountQuota>> {
      * @param account The account identifier within the module to get quota information for.
      */
     public GetCall(String module, String account) {
+        this(module, account, null);
+    }
+
+    /**
+     * Initializes a new {@link GetCall}.
+     *
+     * @param module The module identifier (e.g. "share_links", "filestorage", ...) to get quota information for, required if account is set.
+     * @param account The account identifier within the module to get quota information for.
+     * @param folder The ID of the folder to query the quota for
+     */
+    public GetCall(String module, String account, String folder) {
         this.module = module;
         this.account = account;
+        this.folder = folder;
     }
 
     @Override
@@ -113,7 +126,7 @@ public class GetCall extends AbstractGetCall<List<AccountQuota>> {
              * @param json The {@link JSONobject} to parse
              * @return The parse {@link AccountQuota} object
              * @throws OXException
-             * @throws JSONException 
+             * @throws JSONException
              */
             private AccountQuota parseSingle(JSONObject json) throws OXException, JSONException {
                 String accountID = null, accountName = null;
@@ -173,6 +186,7 @@ public class GetCall extends AbstractGetCall<List<AccountQuota>> {
     protected void fillParameters(Map<String, String> parameters) {
         putIfNotEmpty(parameters, "module", module);
         putIfNotEmpty(parameters, "account", account);
+        putIfNotEmpty(parameters, "folder", folder);
     }
 
     @Override
