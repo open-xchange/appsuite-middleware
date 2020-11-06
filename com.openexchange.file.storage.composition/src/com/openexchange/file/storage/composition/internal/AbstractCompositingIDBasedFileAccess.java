@@ -1933,7 +1933,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             FolderID folderID = new FolderID(folderIds.get(0));
             FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
             List<String> folders = Collections.singletonList(folderID.getFolderId());
-            if (PUBLIC_INFOSTORE_ID.equals(folderID.getFolderId()) || SHARED_INFOSTORE_ID.equals(folderID.getFolderId())) {
+            if (false == isSeparateFederatedShares() && (PUBLIC_INFOSTORE_ID.equals(folderID.getFolderId()) || SHARED_INFOSTORE_ID.equals(folderID.getFolderId()))) {
                 List<FileStorageFileAccess> additionalFileAccesses = getAllFileStorageAccesses((fs) -> fs instanceof SharingFileStorageService, true);
                 if (null != additionalFileAccesses && 0 < additionalFileAccesses.size()) {
                     Map<FileStorageFileAccess, List<String>> foldersByFileAccess = new HashMap<FileStorageFileAccess, List<String>>(additionalFileAccesses.size() + 1);
@@ -1957,7 +1957,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                     fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
                     fileAccessesByAccount.put(key, fileAccess);
                 }
-                if (PUBLIC_INFOSTORE_ID.equals(folderID.getFolderId()) || SHARED_INFOSTORE_ID.equals(folderID.getFolderId())) {
+                if (false == isSeparateFederatedShares() && (PUBLIC_INFOSTORE_ID.equals(folderID.getFolderId()) || SHARED_INFOSTORE_ID.equals(folderID.getFolderId()))) {
                     List<FileStorageFileAccess> additionalFileAccesses = getAllFileStorageAccesses((fs) -> fs instanceof SharingFileStorageService, true);
                     if (null != additionalFileAccesses && 0 < additionalFileAccesses.size()) {
                         for (FileStorageFileAccess additionalFileAccess : additionalFileAccesses) {
