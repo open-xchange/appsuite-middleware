@@ -53,7 +53,6 @@ import static com.openexchange.file.storage.composition.internal.FileStorageTool
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getEventProperties;
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getPath;
 import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.withRelativeID;
-import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.withUniqueID;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,6 +98,7 @@ import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
@@ -189,21 +189,6 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
             return folders;
         }
         return withUniqueID(folders, folderID.getService(), folderID.getAccountId());
-    }
-
-    private FolderID[] getPathIds(String folderId, String accountId, String serviceId, FileStorageFolderAccess folderAccess) throws OXException {
-        if (folderAccess instanceof PathKnowingFileStorageFolderAccess) {
-            PathKnowingFileStorageFolderAccess pathKnowing = (PathKnowingFileStorageFolderAccess) folderAccess;
-            String[] pathIds = pathKnowing.getPathIds2DefaultFolder(folderId);
-            FolderID[] path = new FolderID[pathIds.length];
-            for (int i = 0; i < pathIds.length; i++) {
-                path[i] = new FolderID(serviceId, accountId, pathIds[i]);
-            }
-            return path;
-        }
-
-        FileStorageFolder[] pathFolders = folderAccess.getPath2DefaultFolder(folderId);
-        return getPath(pathFolders, serviceId, accountId);
     }
 
     @Override
@@ -606,6 +591,21 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         return Collections.emptyMap();
     }
 
+    private FolderID[] getPathIds(String folderId, String accountId, String serviceId, FileStorageFolderAccess folderAccess) throws OXException {
+        if (folderAccess instanceof PathKnowingFileStorageFolderAccess) {
+            PathKnowingFileStorageFolderAccess pathKnowing = (PathKnowingFileStorageFolderAccess) folderAccess;
+            String[] pathIds = pathKnowing.getPathIds2DefaultFolder(folderId);
+            FolderID[] path = new FolderID[pathIds.length];
+            for (int i = 0; i < pathIds.length; i++) {
+                path[i] = new FolderID(serviceId, accountId, pathIds[i]);
+            }
+            return path;
+        }
+
+        FileStorageFolder[] pathFolders = folderAccess.getPath2DefaultFolder(folderId);
+        return getPath(pathFolders, serviceId, accountId);
+    }
+
     private Map<String,FolderID[]> getFolderPaths(List<String> folderIds, FileStorageFolderAccess folderAccess) throws OXException {
         Map<String,FolderID[]> folderPaths = new HashMap<>();
         for (String folder : folderIds) {
@@ -650,6 +650,41 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
 
         FileStorageAccount account = service.getAccountManager().getAccount(accountID, session);
         return getRootFolder(session.getUserId(), serviceID, accountID, account.getDisplayName(), rootFolderPermissions);
+    }
+
+    /**
+     * Create a new {@link FileStorageFolder} instance delegating all regular calls to the supplied folder, but returning the unique ID
+     * representations of the folder's own object and the parent folder ID properties based on the underlying service- and account IDs.
+     *
+     * @param delegate The folder delegate
+     * @param serviceId The service ID
+     * @param accountId The account ID
+     * @return A folder with unique IDs
+     */
+    protected FileStorageFolder withUniqueID(FileStorageFolder delegate, String serviceId, String accountId) {
+        String id = null != delegate.getId() ? getUniqueFolderId(delegate.getId(), serviceId, accountId) : null;
+        String parentId = null != delegate.getParentId() ? getUniqueFolderId(delegate.getParentId(), serviceId, accountId) : null;
+        return new IDManglingFolder(delegate, id, parentId);
+    }
+
+    /**
+     * Creates {@link FileStorageFolder} instances delegating all regular calls to the supplied folders, but returning the unique ID
+     * representations of the folder's own object and the parent folder ID properties based on the underlying service- and account IDs.
+     *
+     * @param delegates The folder delegates
+     * @param serviceId The service ID
+     * @param accountId The account ID
+     * @return An array of folders with unique IDs
+     */
+    protected FileStorageFolder[] withUniqueID(FileStorageFolder[] delegates, String serviceId, String accountId) {
+        if (null == delegates) {
+            return null;
+        }
+        FileStorageFolder[] idManglingFolders = new IDManglingFolder[delegates.length];
+        for (int i = 0; i < idManglingFolders.length; i++) {
+            idManglingFolders[i] = withUniqueID(delegates[i], serviceId, accountId);
+        }
+        return idManglingFolders;
     }
 
     /**

@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.composition.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -68,7 +69,9 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.WarningsAware;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.session.Session;
@@ -365,6 +368,40 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
     }
 
     /**
+     * Constructs the unique folder identifier for the supplied storage-relative folder identifier in a specific file storage account.
+     * 
+     * @param relativeId The relative folder identifier to get the unique composite identifier for
+     * @param serviceId The file storage service identifier the referenced folder originates in 
+     * @param accountId The identifier of the account the referenced folder originates in
+     * @return The unique folder identifier
+     */
+    protected String getUniqueFolderId(String relativeId, String serviceId, String accountId) {
+        if (null == relativeId || FileID.INFOSTORE_SERVICE_ID.equals(serviceId) && FileID.INFOSTORE_ACCOUNT_ID.equals(accountId)) {
+            return relativeId;
+        }   
+        /*
+         * check if special handling of shared root folders for federated shares applies
+         */
+        if ((SHARED_INFOSTORE_ID.equals(relativeId) || PUBLIC_INFOSTORE_ID.equals(relativeId)) && false == isSeparateFederatedShares()) {
+            FileStorageService fileStorageService = null;
+            try {
+                FileStorageAccountAccess accountAccess = optAccountAccess(serviceId, accountId);
+                fileStorageService = null == accountAccess ? getFileStorageServiceRegistry().getFileStorageService(serviceId) : accountAccess.getService();        
+            } catch (OXException e) {
+                getLogger(AbstractCompositingIDBasedAccess.class).warn(
+                    "Unexpected error determining file storage service for {} / {}, falling back to static ID mangling", serviceId, accountId, e);
+            }
+            if (null != fileStorageService && SharingFileStorageService.class.isInstance(fileStorageService)) {
+                /*
+                 * do not mangle shared/public root folders of integrated federated shares
+                 */
+                return relativeId;
+            }
+        }
+        return new FolderID(serviceId, accountId, relativeId).toUniqueID();
+    }
+
+    /**
      * Connects the supplied account access if not already done, remembering the account for closing during the {@link #finish()}.
      *
      * @param accountAccess The account access to connect
@@ -399,6 +436,16 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         accounts.put(id, accountAccess);
         accessesToClose.get().add(accountAccess);
         return accountAccess;
+    }
+
+    /**
+     * Gets a value indicating whether <i>federated</i> shares from other servers/contexts are mounted at a separate location in the
+     * folder tree, or if they're integrated into the common system folders "Shared Files" / "Public Files".
+     * 
+     * @return <code>true</code> if federated shares appear as separate account, <code>false</code> if they're integrated into the default folders
+     */
+    protected boolean isSeparateFederatedShares() {
+        return false; // not separated for now
     }
 
 }
