@@ -55,12 +55,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
-import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.osgi.OSGIFileStorageServiceRegistry;
+import com.openexchange.java.Strings;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.DefaultAccountQuota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -95,6 +95,11 @@ public class FileStorageQuotaProvider implements QuotaProvider {
 
     @Override
     public AccountQuota getFor(Session session, String compositeAccountID) throws OXException {
+        return getFor(session, compositeAccountID, null);
+    }
+
+    @Override
+    public  AccountQuota getFor(Session session, String compositeAccountID, String folderId) throws OXException {
         String accountID = compositeAccountID;
         String serviceID = null;
         {
@@ -108,13 +113,13 @@ public class FileStorageQuotaProvider implements QuotaProvider {
         if (serviceID == null) {
             List<FileStorageService> storageServices = storageRegistry.getAllServices();
             for (FileStorageService storageService : storageServices) {
-                AccountQuota accountQuota = getForService(session, accountID, storageService);
+                AccountQuota accountQuota = getForService(session, accountID, folderId, storageService);
                 if (accountQuota != null) {
                     return accountQuota;
                 }
             }
         } else {
-            AccountQuota accountQuota = getForService(session, accountID, storageRegistry.getFileStorageService(serviceID));
+            AccountQuota accountQuota = getForService(session, accountID, folderId, storageRegistry.getFileStorageService(serviceID));
             if (accountQuota != null) {
                 return accountQuota;
             }
@@ -130,18 +135,18 @@ public class FileStorageQuotaProvider implements QuotaProvider {
             FileStorageAccountManager accountManager = storageService.getAccountManager();
             List<FileStorageAccount> accounts = accountManager.getAccounts(session);
             for (FileStorageAccount account : accounts) {
-                accountQuotas.add(getAccountQuota(account, session));
+                accountQuotas.add(getAccountQuota(account, null, session));
             }
         }
 
         return accountQuotas;
     }
 
-    private AccountQuota getForService(Session session, String accountID, FileStorageService storageService) throws OXException {
+    private AccountQuota getForService(Session session, String accountID, String folderId, FileStorageService storageService) throws OXException {
         FileStorageAccountManager accountManager = storageService.getAccountManager();
         try {
             FileStorageAccount account = accountManager.getAccount(accountID, session);
-            return getAccountQuota(account, session);
+            return getAccountQuota(account, folderId, session);
         } catch (OXException e) {
             // Could not be retrieved
         }
@@ -149,14 +154,23 @@ public class FileStorageQuotaProvider implements QuotaProvider {
         return null;
     }
 
-    private static AccountQuota getAccountQuota(FileStorageAccount account, Session session) throws OXException {
+    /**
+     * Gets the {@link AccountQuota} for the given account
+     *
+     * @param account The account to get the quota for
+     * @param folder The, optional, folder to get the quota for or null in order to get the quota for the root folder.
+     * @param session The session
+     * @return The {@link AccountQuota}
+     * @throws OXException
+     */
+    private static AccountQuota getAccountQuota(FileStorageAccount account, String folder, Session session) throws OXException {
         String accountID = account.getId();
         FileStorageAccountAccess accountAccess = account.getFileStorageService().getAccountAccess(accountID, session);
         accountAccess.connect();
         try {
             FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
-            FileStorageFolder rootFolder = folderAccess.getRootFolder();
-            Quota[] quotas = folderAccess.getQuotas(rootFolder.getId(), new Type[] { Type.FILE, Type.STORAGE });
+            String folderId = Strings.isNotEmpty(folder) ? folder : folderAccess.getRootFolder().getId();
+            Quota[] quotas = folderAccess.getQuotas(folderId, new Type[] { Type.FILE, Type.STORAGE });
 
             DefaultAccountQuota accountQuota = new DefaultAccountQuota(accountID, account.getDisplayName());
             if (quotas != null) {
