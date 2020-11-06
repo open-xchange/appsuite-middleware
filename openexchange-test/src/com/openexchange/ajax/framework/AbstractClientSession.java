@@ -224,7 +224,7 @@ public class AbstractClientSession {
             }
         } catch (Exception e) {
             LOG.error("Could not generate new client for user {} in context {}.", user.getUser(), user.getContext(), e);
-            throw new OXException();
+            throw new OXException(e);
         }
         return newClient;
     }
