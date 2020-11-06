@@ -535,7 +535,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     @Override
     public SearchIterator<File> getUserSharedDocuments(List<Field> fields, Field sort, SortDirection order) throws OXException {
         List<SearchIterator<File>> searchIterators = new ArrayList<>();
-        List<FileStorageFileAccess> fileStorageAccesses = getAllFileStorageAccesses( (fs) -> fs instanceof SharingFileStorageService);
+        List<FileStorageFileAccess> fileStorageAccesses = getAllFileStorageAccesses( (fs) -> !(fs instanceof SharingFileStorageService));
         for (FileStorageFileAccess fileAccess : fileStorageAccesses) {
             if (ObjectPermissionAware.class.isInstance(fileAccess)) {
                 SearchIterator<File> searchIterator = ((ObjectPermissionAware) fileAccess).getUserSharedDocuments(fields, sort, order);
