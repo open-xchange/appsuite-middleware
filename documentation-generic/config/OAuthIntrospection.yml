@@ -2,62 +2,62 @@ feature_name: OAuth Introspection
 feature_description: |
   Configuration for validation of opaque OAuth Access Tokens via Token Introspection.
 properties:
-  - key: com.openexchange.oauth.provider.introspection.endpoint
+  - key: com.openexchange.oauth.provider.endpoint
     description: |
       A OAuth2-compliant Token Introspection Endpoint which clients can use to query the server to determine the active state of a Token.
     defaultValue: true
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.introspection.basicAuthEnabled", "com.openexchange.oauth.provider.introspection.clientID", "com.openexchange.oauth.provider.introspection.clientSecret"]
+    related: ["com.openexchange.oauth.provider.basicAuthEnabled", "com.openexchange.oauth.provider.clientID", "com.openexchange.oauth.provider.clientSecret"]
     file: oauth-provider-introspection.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "Introspection"]
-  - key: com.openexchange.oauth.provider.introspection.basicAuthEnabled
+  - key: com.openexchange.oauth.provider.basicAuthEnabled
     description: |
       Indicates if HTTP basic auth should be used for Token Information Request
     defaultValue: true
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.introspection.endpoint", "com.openexchange.oauth.provider.introspection.clientID", "com.openexchange.oauth.provider.introspection.clientSecret"]
-    file: oauth-provider-introspection.properties
+    related: ["com.openexchange.oauth.provider.endpoint", "com.openexchange.oauth.provider.clientID", "com.openexchange.oauth.provider.clientSecret"]
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "Introspection"]
-  - key: com.openexchange.oauth.provider.introspection.clientID
+  - key: com.openexchange.oauth.provider.clientID
     description: |
       The client identifier.
     defaultValue:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.introspection.endpoint", "com.openexchange.oauth.provider.introspection.basicAuthEnabled", "com.openexchange.oauth.provider.introspection.clientSecret"]
-    file: oauth-provider-introspection.properties
+    related: ["com.openexchange.oauth.provider.endpoint", "com.openexchange.oauth.provider.basicAuthEnabled", "com.openexchange.oauth.provider.clientSecret"]
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "Introspection"]
-  - key: com.openexchange.oauth.provider.introspection.clientSecret
+  - key: com.openexchange.oauth.provider.clientSecret
     description: |
       The client secret.
     defaultValue: 
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.introspection.endpoint", "com.openexchange.oauth.provider.introspection.basicAuthEnabled", "com.openexchange.oauth.provider.introspection.clientID"]
-    file: oauth-provider-introspection.properties
+    related: ["com.openexchange.oauth.provider.endpoint", "com.openexchange.oauth.provider.basicAuthEnabled", "com.openexchange.oauth.provider.clientID"]
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "Introspection"]
-  - key: com.openexchange.oauth.provider.introspection.contextLookupClaim
+  - key: com.openexchange.oauth.provider.contextLookupClaim
     description: |
       Name of the claim that will be used to resolve a context.
     defaultValue: sub
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: com.openexchange.oauth.provider.introspection.contextLookupNamePart
-    file: oauth-provider-introspection.properties
+    related: com.openexchange.oauth.provider.contextLookupNamePart
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "Introspection"]
-  - key: com.openexchange.oauth.provider.introspection.contextLookupNamePart
+  - key: com.openexchange.oauth.provider.contextLookupNamePart
     description: |
       Gets the name part of the claim value used for
       determining the context of a user. Possible values are
@@ -73,22 +73,22 @@ properties:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: com.openexchange.oauth.provider.introspection.contextLookupClaim
+    related: com.openexchange.oauth.provider.contextLookupClaim
     file: oauth-provider-introspection.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "Introspection"]
-  - key: com.openexchange.oauth.provider.introspection.userLookupClaim
+  - key: com.openexchange.oauth.provider.userLookupClaim
     description: |
       Name of the claim that will be used to resolve a user.
     defaultValue: sub
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: com.openexchange.oauth.provider.introspection.userLookupNamePart
-    file: oauth-provider-introspection.properties
+    related: com.openexchange.oauth.provider.userLookupNamePart
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "Introspection"]
-  - key: com.openexchange.oauth.provider.introspection.userLookupNamePart
+  - key: com.openexchange.oauth.provider.userLookupNamePart
     description: |
       Gets the name part of the claim value used for
       determining a user within a context. Possible values are
@@ -104,7 +104,7 @@ properties:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: com.openexchange.oauth.provider.introspection.userLookupClaim
-    file: oauth-provider-introspection.properties
+    related: com.openexchange.oauth.provider.userLookupClaim
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "Introspection"]

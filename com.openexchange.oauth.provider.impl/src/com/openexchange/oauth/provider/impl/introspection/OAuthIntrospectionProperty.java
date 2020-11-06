@@ -59,27 +59,27 @@ import com.openexchange.config.lean.Property;
  * @since 7.10.5
  */
 public enum OAuthIntrospectionProperty implements Property{
-    
+
     /**
      * The token introspection endpoint.
      */
     ENDPOINT("endpoint", OAuthIntrospectionProperty.EMPTY),
-    
+
     /**
      * Enable basic authentication for introspection
      */
     BASIC_AUTH_ENABLED("basicAuthEnabled", Boolean.TRUE),
-    
+
     /**
      * ID of the OAuth client.
      */
     CLIENT_ID("clientID", OAuthIntrospectionProperty.EMPTY),
-    
+
     /**
      * Secret of the OAuth client.
      */
     CLIENT_SECRET("clientSecret", OAuthIntrospectionProperty.EMPTY),
-        
+
     /**
      * Name of the claim that will be used to resolve a context.
      */
@@ -104,14 +104,14 @@ public enum OAuthIntrospectionProperty implements Property{
      */
     USER_LOOKUP_NAME_PART("userLookupNamePart", NamePart.LOCAL_PART.getConfigName());
 
-    public static final String PREFIX = "com.openexchange.oauth.provider.introspection.";
+    public static final String PREFIX = "com.openexchange.oauth.provider.";
     private static final String EMPTY = "";
     private final String fqn;
     private final Object defaultValue;
 
     /**
      * Initializes a new {@link OAuthIntrospectionProperty}.
-     * 
+     *
      * @param suffix the suffix
      * @param defaultValue the default value
      */

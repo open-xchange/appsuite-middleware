@@ -110,14 +110,14 @@ public enum OAuthJWTProperty implements Property {
      */
     USER_LOOKUP_NAME_PART("userLookupNamePart", NamePart.LOCAL_PART.getConfigName());
 
-    public static final String PREFIX = "com.openexchange.oauth.provider.jwt.";
+    public static final String PREFIX = "com.openexchange.oauth.provider.";
     private static final String EMPTY = "";
     private final String fqn;
     private final Object defaultValue;
 
     /**
      * Initializes a new {@link OAuthJWTProperty}.
-     * 
+     *
      * @param suffix the suffix
      * @param defaultValue the default value
      */

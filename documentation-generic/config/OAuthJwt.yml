@@ -2,7 +2,7 @@ feature_name: OAuth JWT
 feature_description: |
   Configuration for usage of OAuth 2.0 Bearer Access Tokens that are JWTs.
 properties:
-  - key: com.openexchange.oauth.provider.jwt.jwks.endpoint
+  - key: com.openexchange.oauth.provider.jwks.endpoint
     description: |
       Specifies (and thus enables) a JWKS endpoint used to fetch signature keys for validation
       Examples:
@@ -13,44 +13,44 @@ properties:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: com.openexchange.oauth.provider.jwt.keystore.path
-    file: oauth-provider-jwt.properties
+    related: com.openexchange.oauth.provider.keystore.path
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
-  - key: com.openexchange.oauth.provider.jwt.keystore.path
+  - key: com.openexchange.oauth.provider.keystore.path
     description: |
       Specifies (and thus enables) a path to locally populated keystore if JWKs are not fetched from remote.
     defaultValue: 
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.jwt.jwks.endpoint", "com.openexchange.oauth.provider.jwt.keystore.password", "com.openexchange.oauth.provider.jwt.keystore.type"]
-    file: oauth-provider-jwt.properties
+    related: ["com.openexchange.oauth.provider.jwks.endpoint", "com.openexchange.oauth.provider.keystore.password", "com.openexchange.oauth.provider.keystore.type"]
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
-  - key: com.openexchange.oauth.provider.jwt.keystore.password
+  - key: com.openexchange.oauth.provider.keystore.password
     description: |
       Password for the locally populated keystore.
     defaultValue: 
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.jwt.keystore.path", "com.openexchange.oauth.provider.jwt.keystore.type"]
-    file: oauth-provider-jwt.properties
+    related: ["com.openexchange.oauth.provider.keystore.path", "com.openexchange.oauth.provider.keystore.type"]
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
-  - key: com.openexchange.oauth.provider.jwt.keystore.type
+  - key: com.openexchange.oauth.provider.keystore.type
     description: |
       Specifies the type of the used keystore.
     defaultValue: JKS
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.jwt.keystore.path", "com.openexchange.oauth.provider.jwt.keystore.password"]
-    file: oauth-provider-jwt.properties
+    related: ["com.openexchange.oauth.provider.keystore.path", "com.openexchange.oauth.provider.keystore.password"]
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
-  - key: com.openexchange.oauth.provider.jwt.allowedIssuer
+  - key: com.openexchange.oauth.provider.allowedIssuer
     description: |
       A comma sperated list of issuer names (JWT claim "iss") that tokens are accepted from. 
       If this property is empty, tokens are accepted from all issuers.
@@ -59,10 +59,10 @@ properties:
     reloadable: true
     configcascadeAware: true
     related: 
-    file: oauth-provider-jwt.properties
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
-  - key: com.openexchange.oauth.provider.jwt.contextLookupClaim
+  - key: com.openexchange.oauth.provider.contextLookupClaim
     description: |
       Specifies the name of claim that shall be used for context resolution. 
       Default is the JWT claim "sub" (subject) that identifies the principal 
@@ -72,10 +72,10 @@ properties:
     reloadable: true
     configcascadeAware: true
     related: com.openexchange.oauth.provider.contextLookupNamePart
-    file: oauth-provider-jwt.properties
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
-  - key: com.openexchange.oauth.provider.jwt.contextLookupNamePart
+  - key: com.openexchange.oauth.provider.contextLookupNamePart
     description: |
       Gets the name part of the JWT claim value used for
       determining the context of a user. Possible values are
@@ -92,10 +92,10 @@ properties:
     reloadable: true
     configcascadeAware: true
     related: com.openexchange.oauth.provider.contextLookupClaim
-    file: oauth-provider-jwt.properties
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
-  - key: com.openexchange.oauth.provider.jwt.userLookupClaim
+  - key: com.openexchange.oauth.provider.userLookupClaim
     description: |
       Specifies the name of claim that shall be used for user resolution. 
       Default is the JWT claim "sub" (subject) that identifies the principal 
@@ -104,11 +104,11 @@ properties:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: com.openexchange.oauth.provider.jwt.userLookupNamePart
-    file: oauth-provider-jwt.properties
+    related: com.openexchange.oauth.provider.userLookupNamePart
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
-  - key: com.openexchange.oauth.provider.jwt.userLookupNamePart
+  - key: com.openexchange.oauth.provider.userLookupNamePart
     description: |
       Gets the name part of the JWT claim value used for
       determining a user within a context. Possible values are
@@ -124,8 +124,8 @@ properties:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: com.openexchange.oauth.provider.jwt.userLookupClaim
-    file: oauth-provider-jwt.properties
+    related: com.openexchange.oauth.provider.userLookupClaim
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
   - key: com.openexchange.oauth.provider.scope.[EXTERNAL_SCOPE]
@@ -141,6 +141,6 @@ properties:
     reloadable: true
     configcascadeAware: true
     related: 
-    file: oauth-provider-jwt.propertie
+    file: oauth-provider.propertie
     packageName: open-xchange-oauth-provider
     tags: ["OAuth", "JWT"]
