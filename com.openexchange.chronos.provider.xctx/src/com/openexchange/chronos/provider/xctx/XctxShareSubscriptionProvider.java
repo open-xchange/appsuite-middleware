@@ -163,7 +163,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         try {
             guestInfo = resolveGuest(shareLink);
         } catch (OXException e) {
-            return new Builder().state(UNRESOLVABLE).error(ShareExceptionCodes.INVALID_LINK.create(e, shareLink)).build();
+            return new Builder().state(UNRESOLVABLE).error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink, e)).build();
         }
         if (false == RecipientType.GUEST.equals(guestInfo.getRecipientType()) || Strings.isEmpty(guestInfo.getEmailAddress())) {
             return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create()).build();
@@ -299,7 +299,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
     private Builder resolveState(String shareLink, GuestInfo guestInfo) {
         Builder builder = new Builder();
         if (null == guestInfo || null == guestInfo.getAuthentication()) {
-            return builder.state(UNRESOLVABLE).error(ShareExceptionCodes.INVALID_LINK.create(shareLink));
+            return builder.state(UNRESOLVABLE).error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink));
         }
         AuthenticationMode mode = guestInfo.getAuthentication();
         switch (mode) {
@@ -314,7 +314,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
             case GUEST:
                 return builder.state(ADDABLE);
             default:
-                return builder.state(UNRESOLVABLE).error(ShareExceptionCodes.INVALID_LINK.create(shareLink));
+                return builder.state(UNRESOLVABLE).error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink));
         }
     }
 

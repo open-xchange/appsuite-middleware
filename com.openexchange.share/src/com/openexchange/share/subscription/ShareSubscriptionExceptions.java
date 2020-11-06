@@ -86,7 +86,7 @@ public enum ShareSubscriptionExceptions implements DisplayableOXExceptionCode {
     /**
      * Unable to interpret the link \"%1$s\".
      */
-    NOT_USABLE("Unable to interpret the link \"%1$s\".", Category.CATEGORY_ERROR, 5),
+    NOT_USABLE("Unable to interpret the link \"%1$s\".", Category.CATEGORY_USER_INPUT, 5),
 
     /**
      * You don't have enough permissions to perform the operation.

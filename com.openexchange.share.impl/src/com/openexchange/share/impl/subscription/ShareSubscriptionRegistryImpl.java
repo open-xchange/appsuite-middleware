@@ -52,11 +52,12 @@ package com.openexchange.share.impl.subscription;
 import java.util.Iterator;
 import java.util.Map;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.session.Session;
-import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
 import com.openexchange.share.subscription.ShareLinkState;
 import com.openexchange.share.subscription.ShareSubscriptionExceptions;
@@ -72,6 +73,8 @@ import com.openexchange.share.subscription.ShareSubscriptionRegistry;
  */
 public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServiceTracker<ShareSubscriptionProvider> implements ShareSubscriptionRegistry {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShareSubscriptionRegistryImpl.class);
+
     /**
      * Initializes a new {@link ShareSubscriptionRegistryImpl}.
      * 
@@ -86,12 +89,14 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
         checkLinkIsUsable(shareLink);
         ShareSubscriptionProvider provider = getProvider(session, shareLink);
         if (null == provider) {
+            LOGGER.trace("Found no provider for share link {}", shareLink);
             return unresovable(shareLink);
         }
         ShareLinkAnalyzeResult infos = provider.analyze(session, shareLink);
         if (null != infos) {
             return infos;
         }
+        LOGGER.trace("Provider {} was unable to produce information about the share link {}", provider.getClass(), shareLink);
         return unresovable(shareLink);
     }
 
@@ -165,7 +170,7 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
     }
 
     private ShareLinkAnalyzeResult unresovable(String shareLink) {
-        return new ShareLinkAnalyzeResult(ShareLinkState.UNRESOLVABLE, ShareExceptionCodes.INVALID_LINK.create(shareLink), null);
+        return new ShareLinkAnalyzeResult(ShareLinkState.UNRESOLVABLE, ShareSubscriptionExceptions.NOT_USABLE.create(shareLink), null);
     }
 
 }
