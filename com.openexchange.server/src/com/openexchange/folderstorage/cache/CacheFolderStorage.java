@@ -109,9 +109,7 @@ import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
-import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.EntityInfoLoader;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -1461,18 +1459,9 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             /*
              * Fill return value
              */
-            EntityInfoLoader loader = new EntityInfoLoader();
             for (Entry<String, Folder> entry : fromStorage.entrySet()) {
                 Folder folder = entry.getValue();
                 int index = toLoad.get(entry.getKey());
-                if (0 < folder.getCreatedBy()) {
-                    EntityInfo entityInfo = loader.load(folder.getCreatedBy(), storageParameters.getSession());
-                    folder.setCreatedFrom(entityInfo);
-                }
-                if (0 < folder.getModifiedBy()) {
-                    EntityInfo entityInfo = loader.load(folder.getModifiedBy(), storageParameters.getSession());
-                    folder.setModifiedFrom(entityInfo);
-                }
                 /*
                  * Put into cache
                  */
