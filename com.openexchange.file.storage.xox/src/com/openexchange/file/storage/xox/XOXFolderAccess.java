@@ -126,11 +126,12 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
     /**
      * Internal method to get the remote infostore {@link AccountQuota}
      *
+     * @param folderId The ID of the folder to get the quota for
      * @return The {@link AccountQuota} for module "filestorage" and account "infostore"
      * @throws OXException
      */
-    private AccountQuota getInfostoreAccountQuota() throws OXException {
-        return client.getInfostoreQuota();
+    private AccountQuota getInfostoreAccountQuota(String folderId) throws OXException {
+        return client.getInfostoreQuota(folderId);
     }
 
     @Override
@@ -261,12 +262,12 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public Quota getStorageQuota(String folderId) throws OXException {
-        return getStorageQuota(getInfostoreAccountQuota());
+        return getStorageQuota(getInfostoreAccountQuota(folderId));
     }
 
     @Override
     public Quota getFileQuota(String folderId) throws OXException {
-        return getFileQuota(getInfostoreAccountQuota());
+        return getFileQuota(getInfostoreAccountQuota(folderId));
     }
 
     @Override
@@ -278,7 +279,7 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
         final List<Type> quotaTypes = Arrays.asList(types);
         if (quotaTypes.contains(Type.FILE) || quotaTypes.contains(Type.STORAGE)) {
             //Fetch quota information from remote
-            final AccountQuota accountQuota = getInfostoreAccountQuota();
+            final AccountQuota accountQuota = getInfostoreAccountQuota(folder);
             for (Type t : quotaTypes) {
                 switch (t) {
                     case FILE:
