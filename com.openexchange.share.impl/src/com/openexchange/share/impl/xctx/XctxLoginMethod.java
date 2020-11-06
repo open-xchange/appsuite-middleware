@@ -106,7 +106,8 @@ public class XctxLoginMethod implements LoginMethodClosure {
         if (false == context.isEnabled()) {
             throw LoginExceptionCodes.USER_NOT_ACTIVE.create();
         }
-        User guestUser = services.getServiceSafe(UserService.class).getUser(guestInfo.getGuestID(), context);
+        UserService userService = services.getServiceSafe(UserService.class);
+        User guestUser = userService.getUser(guestInfo.getGuestID(), context);
         if (false == guestUser.isMailEnabled()) {
             throw LoginExceptionCodes.USER_NOT_ACTIVE.create();
         }
@@ -118,12 +119,17 @@ public class XctxLoginMethod implements LoginMethodClosure {
             case GUEST:
                 return new XctxAuthenticated(guestUser, context);
             case ANONYMOUS_PASSWORD:
-                if (Strings.isNotEmpty(password) && password.equals(services.getServiceSafe(PasswordMechRegistry.class).get(ShareConstants.PASSWORD_MECH_ID).decode(guestUser.getUserPassword(), guestUser.getSalt()))) {
+                if (Strings.isNotEmpty(password) && password.equals(services.getServiceSafe(PasswordMechRegistry.class)
+                    .get(ShareConstants.PASSWORD_MECH_ID).decode(guestUser.getUserPassword(), guestUser.getSalt()))) {
                     return new XctxAuthenticated(guestUser, context);
                 }
                 throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
             case GUEST_PASSWORD:
-                if (Strings.isNotEmpty(password) && services.getServiceSafe(GuestService.class).authenticate(guestUser, context.getContextId(), password)) {
+                if (Strings.isNotEmpty(password) && userService.authenticate(guestUser, password)) {
+                    return new XctxAuthenticated(guestUser, context);
+                }
+                GuestService guestService = services.getOptionalService(GuestService.class);
+                if (null != guestService && guestService.authenticate(guestUser, context.getContextId(), password)) {
                     return new XctxAuthenticated(guestUser, context);
                 }
                 throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();

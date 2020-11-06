@@ -49,8 +49,10 @@
 
 package com.openexchange.chronos.provider;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Locale;
+import java.util.Set;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -156,6 +158,19 @@ public interface CalendarProvider {
      */
     default boolean isAvailable(Session session) {
         return true;
+    }
+
+    /**
+     * Gets a collection of <i>secret</i> properties (as used as keys within the account's <i>user</i> configuration object). Each key
+     * indicated here will lead to the associated value being encrypted automatically when account data of the provider is stored, and
+     * decrypted automatically when account data of the provider is loaded again from the storage.
+     * <p/>
+     * Returns an ampty set by default, override as needed.
+     * 
+     * @return The <i>secret</i> properties in account configurations of this calendar provider, or an empty set if there are none
+     */
+    default Set<String> getSecretProperties() {
+        return Collections.emptySet();
     }
 
 }

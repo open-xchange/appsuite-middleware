@@ -79,6 +79,7 @@ import com.openexchange.folderstorage.calendar.ExtendedPropertiesField;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.tools.id.IDMangler;
 
 /**
@@ -273,7 +274,16 @@ public class CalendarFolderConverter {
      */
     public static DefaultGroupwareCalendarFolder getCalendarFolder(Folder folder) {
         DefaultGroupwareCalendarFolder calendarFolder = new DefaultGroupwareCalendarFolder();
-        calendarFolder.setCreatedFrom(folder.getCreatedFrom());
+        if (null != folder.getCreatedFrom()) {
+            calendarFolder.setCreatedFrom(folder.getCreatedFrom());
+        } else if (0 < folder.getCreatedBy()) {
+            calendarFolder.setCreatedFrom(new EntityInfo(String.valueOf(folder.getCreatedBy()), null, null, null, null, null, folder.getCreatedBy(), null, EntityInfo.Type.USER));
+        }
+        if (null != folder.getModifiedFrom()) {
+            calendarFolder.setModifiedFrom(folder.getModifiedFrom());
+        } else if (0 < folder.getModifiedBy()) {
+            calendarFolder.setModifiedFrom(new EntityInfo(String.valueOf(folder.getModifiedBy()), null, null, null, null, null, folder.getModifiedBy(), null, EntityInfo.Type.USER));
+        }
         calendarFolder.setCreationDate(folder.getCreationDate());
         calendarFolder.setDefaultFolder(folder.isDefault());
         calendarFolder.setFolderType(getCalendarType(folder.getType()));

@@ -56,6 +56,8 @@ import java.util.concurrent.ExecutorService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.cluster.timer.ClusterTimerService;
@@ -81,6 +83,7 @@ import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.core.ModuleAdjuster;
@@ -215,7 +218,9 @@ public class ShareActivator extends HousekeepingActivator {
         rememberTracker(shareSubscriptionRegistry);
         registerService(ShareSubscriptionRegistry.class, shareSubscriptionRegistry);
         registerService(ShareSubscriptionProvider.class, new ContextInternalSubscriptionProvider(this));
-        registerService(XctxSessionManager.class, new XctxSessionCache(this));
+        XctxSessionCache xctxSessionCache = new XctxSessionCache(this);
+        registerService(EventHandler.class, xctxSessionCache, singletonDictionary(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_REMOVE_SESSION));
+        registerService(XctxSessionManager.class, xctxSessionCache);
 
         trackService(ModuleSupport.class);
         trackService(IDBasedFileAccessFactory.class);

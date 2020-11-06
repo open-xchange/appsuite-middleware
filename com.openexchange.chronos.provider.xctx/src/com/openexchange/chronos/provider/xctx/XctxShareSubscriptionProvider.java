@@ -60,6 +60,7 @@ import java.util.Set;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -150,8 +151,17 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
          */
         CalendarAccount existingAccount = lookupExistingAccount(session, shareLink);
         if (null != existingAccount) {
-            FolderCalendarAccess calendarAccess = provider.connect(session, existingAccount, null);
             ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
+            FolderCalendarAccess calendarAccess;
+            try {
+                calendarAccess = provider.connect(session, existingAccount, null);
+            } catch (OXException e) {
+                if (LoginExceptionCodes.INVALID_GUEST_PASSWORD.equals(e)) {
+                    return new ShareLinkAnalyzeResult.Builder().state(ShareLinkState.CREDENTIALS_REFRESH).infos(getSubscriptionInfo(existingAccount, targetPath)).build();
+                }
+                throw e;
+            }
+
             CalendarFolder folder = calendarAccess.getFolder(getRelativeFolderId(targetPath.getFolder()));
             ShareLinkState state = Boolean.FALSE.equals(folder.isSubscribed()) ? ShareLinkState.UNSUBSCRIBED : ShareLinkState.SUBSCRIBED;
             return new ShareLinkAnalyzeResult.Builder().state(state).infos(getSubscriptionInfo(existingAccount, targetPath)).build();
@@ -226,7 +236,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
          * update account accordingly
          */
         JSONObject userConfig = null == existingAccount.getUserConfiguration() ? new JSONObject() : new JSONObject(existingAccount.getUserConfiguration());
-        userConfig.putSafe("password", password); //TODO: crypt
+        userConfig.putSafe("password", password);
         if (Strings.isNotEmpty(shareName)) {
             userConfig.putSafe("name", shareName);
         }
