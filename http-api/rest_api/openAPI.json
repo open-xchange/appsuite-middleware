@@ -258,12 +258,11 @@
             }
           }
         },
-        "x-ox-examples" : {
-          "Example" : {
-            "description" : "Export user feedback from 2016-01-01 to 2016-12-31",
-            "example" : "GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1/raw?start=1451606400&end=1483228799"
-          }
-        }
+        "x-ox-examples" : [ {
+          "Example" : null,
+          "description" : "Export user feedback from 2016-01-01 to 2016-12-31",
+          "example" : "GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1/raw?start=1451606400&end=1483228799"
+        } ]
       }
     },
     "/userfeedback/v1/export/{context-group}/{type}" : {
@@ -373,12 +372,11 @@
             }
           }
         },
-        "x-ox-examples" : {
-          "Example" : {
-            "description" : "Export user feedback from 2016-01-01 to 2016-12-31 as CSV",
-            "example" : "GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1?start=1451606400&end=1483228799"
-          }
-        }
+        "x-ox-examples" : [ {
+          "Example" : null,
+          "description" : "Export user feedback from 2016-01-01 to 2016-12-31 as CSV",
+          "example" : "GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1?start=1451606400&end=1483228799"
+        } ]
       }
     },
     "/userfeedback/v1/send/{context-group}/{type}" : {
@@ -468,12 +466,11 @@
             }
           }
         },
-        "x-ox-examples" : {
-          "Example" : {
-            "description" : "Export user feedback from 2016-01-01 to 2016-12-31 and send it via mail to user1@example.org and user2@example.org",
-            "example" : "POST http://localhost:8009/userfeedback/v1/send/default/star-rating-v1?start=1451606400&end=1483228799 {\"subject\":\"User Feedback\",\n \"body\":\"User Feedback\",\n \"compress\":true,\n \"recipients\": [\n   {\"address\":\"user1@example.org\",\n    \"displayName\":\"User 1\",\n    \"pgp_key\":\"-----BEGIN PGP PUBLIC KEY BLOCK-----\\r\\nVersion: BCPG v1.56....\"},\n   {\"address\":\"user2@example.org\",\n    \"displayName\":\"User 2\",\n    \"pgp_key\":\"-----BEGIN PGP PUBLIC KEY BLOCK-----\\r\\nVersion: BCPG v1.56....\"}\n ]\n}\n"
-          }
-        },
+        "x-ox-examples" : [ {
+          "Example" : null,
+          "description" : "Export user feedback from 2016-01-01 to 2016-12-31 and send it via mail to user1@example.org and user2@example.org",
+          "example" : "POST http://localhost:8009/userfeedback/v1/send/default/star-rating-v1?start=1451606400&end=1483228799 {\"subject\":\"User Feedback\",\n \"body\":\"User Feedback\",\n \"compress\":true,\n \"recipients\": [\n   {\"address\":\"user1@example.org\",\n    \"displayName\":\"User 1\",\n    \"pgp_key\":\"-----BEGIN PGP PUBLIC KEY BLOCK-----\\r\\nVersion: BCPG v1.56....\"},\n   {\"address\":\"user2@example.org\",\n    \"displayName\":\"User 2\",\n    \"pgp_key\":\"-----BEGIN PGP PUBLIC KEY BLOCK-----\\r\\nVersion: BCPG v1.56....\"}\n ]\n}\n"
+        } ],
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -631,12 +628,11 @@
             }
           }
         },
-        "x-ox-examples" : {
-          "Example" : {
-            "description" : "Delete user feedback from 2016-01-01 to 2016-12-31",
-            "example" : "DELETE http://localhost:8009/userfeedback/v1/default/star-rating-v1?start=1451606400&end=1483228799"
-          }
-        }
+        "x-ox-examples" : [ {
+          "Example" : null,
+          "description" : "Delete user feedback from 2016-01-01 to 2016-12-31",
+          "example" : "DELETE http://localhost:8009/userfeedback/v1/default/star-rating-v1?start=1451606400&end=1483228799"
+        } ]
       }
     },
     "/health" : {
@@ -669,12 +665,11 @@
             }
           }
         },
-        "x-ox-examples" : {
-          "Example" : {
-            "description" : "Get health status",
-            "example" : "GET http://localhost:8009/health"
-          }
-        }
+        "x-ox-examples" : [ {
+          "Example" : null,
+          "description" : "Get health status",
+          "example" : "GET http://localhost:8009/health"
+        } ]
       }
     },
     "/admin/v1/close-sessions/by-context" : {
