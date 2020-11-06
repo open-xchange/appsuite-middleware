@@ -129,8 +129,10 @@ public class IDManglingFolder implements TypeAware, CacheAware, OriginAwareFileS
      * Initializes a new {@link IDManglingFolder}.
      *
      * @param delegate The delegate
+     * @param id The new folder identifier to take over
+     * @param parentId The new parent folder identifier to take over
      */
-    IDManglingFolder(FileStorageFolder delegate, String id, String parentId) {
+    public IDManglingFolder(FileStorageFolder delegate, String id, String parentId) {
         super();
         this.delegate = delegate;
         this.id = id;
