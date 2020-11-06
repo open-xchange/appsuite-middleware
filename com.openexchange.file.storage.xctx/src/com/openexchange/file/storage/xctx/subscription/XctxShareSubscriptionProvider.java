@@ -74,6 +74,7 @@ import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult.Builder;
 import com.openexchange.share.subscription.ShareLinkState;
+import com.openexchange.share.subscription.ShareSubscriptionExceptions;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -212,7 +213,7 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
     private Builder resolveState(String shareLink, GuestInfo guestInfo) {
         Builder builder = new Builder();
         if (null == guestInfo || null == guestInfo.getAuthentication()) {
-            return builder.state(UNRESOLVABLE).error(ShareExceptionCodes.INVALID_LINK.create(shareLink));
+            return builder.state(UNRESOLVABLE).error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink));
         }
         AuthenticationMode mode = guestInfo.getAuthentication();
         switch (mode) {
@@ -227,7 +228,7 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
             case GUEST:
                 return builder.state(ADDABLE);
             default:
-                return builder.state(UNRESOLVABLE).error(ShareExceptionCodes.INVALID_LINK.create(shareLink));
+                return builder.state(UNRESOLVABLE).error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink));
         }
     }
 
@@ -243,7 +244,7 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
     private ShareLinkAnalyzeResult unknownGuest(String shareLink) {
         return new Builder() // @formatter:off
             .state(UNRESOLVABLE)
-            .error(ShareExceptionCodes.INVALID_LINK.create(shareLink))
+            .error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink))
             .infos(null)
             .build(); // @formatter:on
     }

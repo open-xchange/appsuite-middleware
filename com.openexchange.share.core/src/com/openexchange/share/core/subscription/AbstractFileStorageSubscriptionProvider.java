@@ -265,6 +265,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         FileStorageAccountAccess accountAccess = null;
         try {
             accountAccess = fileStorageService.getAccountAccess(storageAccount.getId(), session);
+            accountAccess.connect();
             return testAndGenerateInfos(accountAccess, shareLink);
         } finally {
             if (null != accountAccess) {
@@ -415,14 +416,15 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
             accountAccess.connect();
 
             String folderId = getFolderFrom(shareLink);
-            if (Strings.isNotEmpty(folderId)) {
-                FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
-                folderAccess.getPath2DefaultFolder(folderId);
-                if (isSubscribed(accountAccess, shareLink)) {
-                    return builder.state(SUBSCRIBED);
-                }
-                return builder.state(UNSUBSCRIBED).error(ShareSubscriptionExceptions.UNSUBSCRIEBED_FOLDER.create(folderId));
+            if (Strings.isEmpty(folderId)) {
+                throw ShareSubscriptionExceptions.NOT_USABLE.create(shareLink);
             }
+            FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
+            folderAccess.getPath2DefaultFolder(folderId);
+            if (isSubscribed(accountAccess, shareLink)) {
+                return builder.state(SUBSCRIBED);
+            }
+            return builder.state(UNSUBSCRIBED).error(ShareSubscriptionExceptions.UNSUBSCRIEBED_FOLDER.create(folderId));
         } catch (OXException e) {
             if (isPasswordMissing(e)) {
                 /*
@@ -434,10 +436,10 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
                 return builder.state(REMOVED).error(e);
             }
             logExcpetionDebug(e);
+            return builder.state(INACCESSIBLE).error(e);
         } finally {
             accountAccess.close();
         }
-        return builder.state(INACCESSIBLE);
     }
 
     /**
@@ -451,7 +453,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      */
     protected ShareSubscriptionInformation testAndGenerateInfos(FileStorageAccountAccess accountAccess, String shareLink) throws OXException {
         String folderId = getFolderFrom(shareLink);
-        accountAccess.getFolderAccess().getFolder(folderId);
+        accountAccess.getFolderAccess().getPath2DefaultFolder(folderId);
         return generateInfos(accountAccess, shareLink);
     }
 

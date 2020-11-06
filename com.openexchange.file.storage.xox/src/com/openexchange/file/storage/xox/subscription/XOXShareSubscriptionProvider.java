@@ -75,6 +75,7 @@ import com.openexchange.share.core.subscription.AbstractFileStorageSubscriptionP
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult.Builder;
+import com.openexchange.share.subscription.ShareSubscriptionExceptions;
 import com.openexchange.share.subscription.ShareSubscriptionInformation;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.userconf.UserPermissionService;
@@ -173,7 +174,7 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
                     }
                 }
             } else {
-                builder.state(UNRESOLVABLE).error(ShareExceptionCodes.INVALID_LINK.create(shareLink));
+                builder.state(UNRESOLVABLE).error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink));
             }
         } catch (OXException e) {
             /*
@@ -184,7 +185,7 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
             } else if(isFolderRemoved(e)) {
                 builder.state(REMOVED);
             }else {
-                builder.state(UNRESOLVABLE).error(ShareExceptionCodes.INVALID_LINK.create(shareLink));
+                builder.state(UNRESOLVABLE).error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink, e));
             }
             logExcpetionDebug(e);
         } finally {
@@ -199,8 +200,8 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
 
     @Override
     public ShareSubscriptionInformation resubscribe(Session session, String shareLink, String shareName, String password) throws OXException {
-        ShareSubscriptionInformation information = super.resubscribe(session, shareLink, shareName, password);
         clearRemoteSessions(session, shareLink);
+        ShareSubscriptionInformation information = super.resubscribe(session, shareLink, shareName, password);
         return information;
     }
 
