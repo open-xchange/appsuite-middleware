@@ -81,7 +81,7 @@ public class FilteringContactService implements ContactService {
         this.services = lServices;
     }
 
-    private SearchIterator<Contact> removeAdmin(int contextId, SearchIterator<Contact> contacts) throws OXException {
+    private SearchIterator<Contact> removeAdmin(int contextId, SearchIterator<Contact> contacts) {
         HideAdminService hideAdminService = services.getOptionalService(HideAdminService.class);
         if (hideAdminService == null) {
             return contacts;
@@ -136,7 +136,7 @@ public class FilteringContactService implements ContactService {
         if (hideAdminService == null) {
             return countContacts;
         }
-        return hideAdminService.showAdmin(session.getContextId()) || FolderObject.SYSTEM_LDAP_FOLDER_ID == com.openexchange.contact.internal.Tools.parse(folderId) ? countContacts : countContacts - 1;
+        return FolderObject.SYSTEM_LDAP_FOLDER_ID == com.openexchange.contact.internal.Tools.parse(folderId) && hideAdminService.showAdmin(session.getContextId()) == false ? countContacts - 1 : countContacts;
     }
 
     @Override
