@@ -288,7 +288,9 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         fsFolder.setParentId(folder.getParentID());
         // Other
         fsFolder.setName(folder.getName());
-        fsFolder.setSubscribed(folder.isSubscribed());
+        if (false == SetterAwareFolder.class.isInstance(folder) || ((SetterAwareFolder) folder).containsSubscribed()) {
+            fsFolder.setSubscribed(folder.isSubscribed());
+        }
         // Permissions
         final Permission[] permissions = folder.getPermissions();
         if (null != permissions && permissions.length > 0) {
@@ -785,7 +787,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         fileStorageFolder.setId(folder.getID());
         fileStorageFolder.setParentId(folder.getParentID());
         fileStorageFolder.setName(folder.getName());
-        if (SetterAwareFolder.class.isInstance(folder) && ((SetterAwareFolder) folder).containsSubscribed()) {
+        if (false == SetterAwareFolder.class.isInstance(folder) || ((SetterAwareFolder) folder).containsSubscribed()) {
             fileStorageFolder.setSubscribed(folder.isSubscribed());
         }
         fileStorageFolder.setPermissions(FileStorageUtils.getFileStoragePermissions(folder.getPermissions()));

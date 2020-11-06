@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.SetterAwareFileStorageFolder;
 import com.openexchange.file.storage.infostore.osgi.Services;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
@@ -117,7 +118,11 @@ public final class FolderParser {
             {
                 folder.setContentType(getContentType());
             }
-            folder.setSubscribed(fsFolder.isSubscribed());
+
+            if (false == SetterAwareFileStorageFolder.class.isInstance(fsFolder) || ((SetterAwareFileStorageFolder) fsFolder).containsSubscribed()) {
+                folder.setSubscribed(fsFolder.isSubscribed());
+            }
+
             {
                 final List<FileStoragePermission> permissions = fsFolder.getPermissions();
                 if (null != permissions && !permissions.isEmpty()) {

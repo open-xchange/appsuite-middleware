@@ -62,6 +62,7 @@ import com.openexchange.file.storage.OriginAwareFileStorageFolder;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.i18n.LocaleTools;
 
@@ -96,7 +97,9 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
         setPermissions(getFileStoragePermissions(folder.getPermissions()));
         setOwnPermission(getFileStoragePermission(folder.getOwnPermission()));
         setRootFolder(folder.getParentID() == null);
-        setSubscribed(folder.isSubscribed());
+        if (false == SetterAwareFolder.class.isInstance(folder) || ((SetterAwareFolder) folder).containsSubscribed()) {
+            setSubscribed(folder.isSubscribed());
+        }
         setSubscribedSubfolders(folder.hasSubscribedSubfolders());
         String[] subfolderIDs = folder.getSubfolderIDs();
         setSubfolders(subfolderIDs != null && subfolderIDs.length > 0);
