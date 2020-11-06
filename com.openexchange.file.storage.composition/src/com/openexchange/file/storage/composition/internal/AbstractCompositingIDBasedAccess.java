@@ -328,7 +328,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
     /**
      * Gets a list of all file storage account accesses.
      *
-     * @param filter A predicate which defines the {@link FileStorageService}s which should be ignored
+     * @param filter A predicate which defines the {@link FileStorageService}s which should only be returned, or <code>null</code> to return all services.
      * @return The account accesses.
      */
     protected List<FileStorageFileAccess> getAllFileStorageAccesses(Predicate<FileStorageService> filter) throws OXException {
@@ -337,7 +337,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         for (FileStorageService fsService : getFileStorageServiceRegistry().getAllServices()) {
 
             if (filter != null && false == filter.test(fsService)) {
-                //ignore filtered services
+                //ignore not matching service
                 continue;
             }
 
