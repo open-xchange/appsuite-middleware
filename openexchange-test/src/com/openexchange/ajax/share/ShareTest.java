@@ -520,6 +520,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         NewInfostoreRequest newRequest = new NewInfostoreRequest(metadata, new ByteArrayInputStream(data));
         newRequest.setNotifyPermissionEntities(Transport.MAIL);
         NewInfostoreResponse newResponse = client.execute(newRequest);
+        assertFalse(newResponse.getErrorMessage(), newResponse.hasError());
         String id = newResponse.getID();
         metadata.setId(id);
         GetInfostoreRequest getRequest = new GetInfostoreRequest(id);
