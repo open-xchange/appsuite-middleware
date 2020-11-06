@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.writer;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,6 +92,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.infostore.EntityInfoLoader;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
 import com.openexchange.server.impl.OCLPermission;
@@ -448,6 +450,8 @@ public final class FolderWriter {
 
     private static final TIntObjectMap<FolderFieldWriter> STATIC_WRITERS_MAP;
 
+    private static final Map<Integer, EntityInfoLoader> ENTITY_INFO_LOADERS = new HashMap<Integer, EntityInfoLoader>();
+
     private static final int[] ALL_FIELDS;
 
     static {
@@ -746,6 +750,9 @@ public final class FolderWriter {
             @Override
             public void writeField(JSONValuePutter jsonValue, UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 EntityInfo entityInfo = folder.getCreatedFrom();
+                if (null == entityInfo) {
+                    entityInfo = resolveEntityInfo(folder.getCreatedBy(), session);
+                }
                 jsonValue.put(jsonValue.withKey() ? FolderField.CREATED_FROM.getName() : null, null == entityInfo ? JSONObject.NULL : entityInfo.toJSON());
             }
         });
@@ -754,6 +761,9 @@ public final class FolderWriter {
             @Override
             public void writeField(JSONValuePutter jsonValue, UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 EntityInfo entityInfo = folder.getModifiedFrom();
+                if (null == entityInfo) {
+                    entityInfo = resolveEntityInfo(folder.getModifiedBy(), session);
+                }
                 jsonValue.put(jsonValue.withKey() ? FolderField.MODIFIED_FROM.getName() : null, null == entityInfo ? JSONObject.NULL : entityInfo.toJSON());
             }
         });
@@ -770,6 +780,28 @@ public final class FolderWriter {
         }
         ALL_FIELDS = new int[j];
         System.arraycopy(allFields, 0, ALL_FIELDS, 0, j);
+    }
+
+    /**
+     * Resolve entity information for given user identifier
+     *
+     * @param forUserId The user identifier to get the entity info for
+     * @param session The calling user's session
+     * @return The entity information or <code>null</code> in case it cannot be resolved
+     */
+    static EntityInfo resolveEntityInfo(int forUserId, ServerSession session) {
+        Integer ctxId = I(session.getContextId());
+        EntityInfoLoader loader = ENTITY_INFO_LOADERS.get(ctxId);
+        if (null == loader) {
+            loader = new EntityInfoLoader();
+            ENTITY_INFO_LOADERS.put(ctxId, loader);
+        }
+        try {
+            return loader.load(forUserId, session);
+        } catch (OXException e) {
+            LOG.debug("Could not resolve entity information for user {} in context {}.", I(forUserId), ctxId);
+            return null;
+        }
     }
 
     static FolderObject turnIntoFolderObject(UserizedFolder folder) {
