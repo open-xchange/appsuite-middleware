@@ -69,9 +69,11 @@ import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
 import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageExtendedMetadata;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
+import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
@@ -102,6 +104,8 @@ public class XOXFileAccess implements /*@formatter:off*/
                                        FileStorageZippableFolderFileAccess,
                                        FileStorageCaseInsensitiveAccess,
                                        FileStorageAutoRenameFoldersAccess,
+                                       FileStoragePersistentIDs,
+                                       FileStorageExtendedMetadata,
                                        FileStorageRangeFileAccess /*,
                                        FileStorageAdvancedSearchFileAccess */{
                                        /*@formatter:on*/
@@ -475,4 +479,10 @@ public class XOXFileAccess implements /*@formatter:off*/
     public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
         return client.moveFolder(folderId, newParentId, newName, DISTANT_FUTURE, autoRename);
     }
+
+    @Override
+    public List<Field> getSupportedFields() {
+        return Arrays.asList(File.Field.values()); // all supported
+    }
+
 }
