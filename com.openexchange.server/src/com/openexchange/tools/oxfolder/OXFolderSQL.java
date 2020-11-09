@@ -1569,11 +1569,11 @@ public final class OXFolderSQL {
                 return 0;
             }
 
-            TIntSet ids = new TIntHashSet();
-            do {
-                ids.add(rs.getInt(1));
-            } while (rs.next());
-            return ids.size();
+            int count = 1;
+            while (rs.next()) {
+                count++;
+            }
+            return count;
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
