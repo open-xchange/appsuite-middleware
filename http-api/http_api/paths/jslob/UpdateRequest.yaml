@@ -62,10 +62,11 @@
     tags:
       - JSlob
     summary: Updates a JSlob.
+    security: 
+        - session: []     
     description: >-
       When a valid jslobPath is provided the JSlob sub path is replaced by the given request data.    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The JSlob indentifier.

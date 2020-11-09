@@ -5,7 +5,9 @@
       - Calendar
     summary: Deletes appointments.
     security: 
-        - session: []    
+        - session: []
+        - oauth: 
+          - write_calendar            
     parameters:
       - in: query
         name: timestamp

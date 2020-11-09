@@ -5,7 +5,9 @@
       - Filestorage
     summary: Gets all file storage services.
     security: 
-        - session: []    
+        - session: []
+        - oauth:
+          - read_files    
     responses:
       '200':
         description: >

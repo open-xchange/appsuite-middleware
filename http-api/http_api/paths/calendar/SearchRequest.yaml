@@ -5,7 +5,9 @@
       - Calendar
     summary: Searches for appointments.
     security: 
-        - session: []    
+        - session: []
+        - oauth: 
+          - read_calendar            
     parameters:
       - $ref: '#/components/parameters/gblQueryParamCalendarColumns'
     responses:

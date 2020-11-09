@@ -5,7 +5,9 @@
       - Calendar
     summary: Gets all appointments.
     security: 
-        - session: []    
+        - session: []
+        - oauth: 
+          - read_calendar    
     parameters:
       - $ref: '#/components/parameters/gblQueryParamCalendarColumns'
       - in: query

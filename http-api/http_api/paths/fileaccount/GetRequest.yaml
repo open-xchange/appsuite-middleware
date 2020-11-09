@@ -6,6 +6,8 @@
     summary: Gets a file storage account.
     security: 
         - session: []    
+        - oauth:
+          - read_files 
     parameters:
       - in: query
         name: filestorageService

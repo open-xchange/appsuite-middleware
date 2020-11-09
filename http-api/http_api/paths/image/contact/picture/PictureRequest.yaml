@@ -4,6 +4,10 @@
     tags:
       - Image
     summary: Requests a contact's profile image.
+    security:
+        - session: []
+        - oauth:
+          - read_contacts    
     description: >-
       #### Important: 
       This endpoint is deprecated and will be removed in the

@@ -5,7 +5,9 @@
       - Calendar
     summary: Requests whether there are appointments on days in a specified time range.
     security: 
-        - session: []    
+        - session: []
+        - oauth: 
+          - read_calendar            
     parameters:
       - in: query
         name: start

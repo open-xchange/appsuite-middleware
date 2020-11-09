@@ -7,7 +7,7 @@
     security:
       - session: []     
       - oauth:
-        - write_reminders
+        - write_reminder
     requestBody:
       content:
         application/json:

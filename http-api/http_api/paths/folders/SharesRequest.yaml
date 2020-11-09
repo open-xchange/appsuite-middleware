@@ -6,14 +6,7 @@
     summary: Gets shared folders of a certain module.
     security: 
         - session: []
-        - oauth: 
-          - read_mails
-        - oauth: 
-          - read_tasks
-        - oauth: 
-          - read_calendar
-        - oauth: 
-          - read_contacts    
+        - oauth: []   
     parameters:
       - $ref: '#/components/parameters/gblQueryParamFolderColumns'
       - in: query

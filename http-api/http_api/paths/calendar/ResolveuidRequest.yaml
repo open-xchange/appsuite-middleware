@@ -5,7 +5,9 @@
       - Calendar
     summary: Resolves the UID to an OX object ID.
     security: 
-        - session: []    
+        - session: []
+        - oauth: 
+          - read_calendar            
     parameters:
       - in: query
         name: uid

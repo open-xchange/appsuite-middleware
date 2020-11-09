@@ -9,7 +9,7 @@
     security: 
         - session: []
         - oauth:
-          - write_mails      
+          - write_mail      
     description: >
       This request can be used to store a single or a lot of mails in the OX
       mail storage backend. This

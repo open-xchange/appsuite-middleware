@@ -7,7 +7,7 @@
     security: 
         - session: []      
         - oauth:
-          - write_mails    
+          - write_mail    
     description: >-
       This delivery receipt only acknowledges that the message could be
       receipted on the recipients computer.

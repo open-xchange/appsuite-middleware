@@ -3,7 +3,9 @@
     operationId: getFreeAndBusy
     summary: Gets appointments between a specified time range.
     security: 
-        - session: []    
+        - session: []
+        - oauth: 
+          - read_calendar            
     tags:
       - Calendar
     parameters:

@@ -7,7 +7,7 @@
     security: 
         - session: []
         - oauth:
-          - write_mails    
+          - write_mail    
     description: >
       The request accepts file fields in upload form that denote referenced
       files that are going to be appended

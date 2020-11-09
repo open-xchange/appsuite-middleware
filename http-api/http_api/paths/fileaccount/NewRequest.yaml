@@ -6,6 +6,8 @@
     summary: Creates a file storage account.
     security: 
         - session: []    
+        - oauth:
+          - write_files   
     description: >
       #### Example for creating a new OAuth-based file storage account
 

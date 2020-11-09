@@ -7,7 +7,7 @@
     security:
       - session: []     
       - oauth:
-        - read_reminders     
+        - read_reminder     
     description: >-
       Gets all reminders which are scheduled until the specified time (end
       date).

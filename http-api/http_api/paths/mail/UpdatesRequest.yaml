@@ -7,7 +7,7 @@
     security: 
         - session: []      
         - oauth:
-          - read_mails    
+          - read_mail    
     description: >
       Provides a list of updated mails. 
 

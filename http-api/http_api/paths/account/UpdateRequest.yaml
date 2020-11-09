@@ -7,7 +7,7 @@
     security: 
         - session: [] 
         - oauth:
-          - write_mailaccounts     
+          - write_mailaccount     
     requestBody:
       content:
         application/json:

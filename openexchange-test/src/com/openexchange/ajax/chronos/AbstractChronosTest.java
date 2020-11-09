@@ -386,7 +386,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      */
     protected void changeTimezone(TimeZone tz) throws ApiException {
         String body = "{timezone: \"" + tz.getID() + "\"}";
-        CommonResponse updateJSlob = defaultUserApi.getJslob().updateJSlob("io.ox/core", null, body, null);
+        CommonResponse updateJSlob = defaultUserApi.getJslob().updateJSlob("io.ox/core", body, null);
         assertNull(updateJSlob.getErrorDesc(), updateJSlob.getError());
     }
 

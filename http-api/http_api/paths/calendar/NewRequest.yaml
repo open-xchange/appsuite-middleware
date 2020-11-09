@@ -5,7 +5,9 @@
       - Calendar
     summary: Creates an appointment.
     security: 
-        - session: []    
+        - session: []
+        - oauth: 
+          - write_calendar            
     responses:
       '200':
         description: >

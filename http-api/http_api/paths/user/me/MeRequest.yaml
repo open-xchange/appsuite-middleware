@@ -5,7 +5,8 @@
       - User/Me
     summary: Gets information about current user
     security: 
-        - session: []    
+        - session: []
+        - oauth: []            
     responses:
       '200':
         description: >

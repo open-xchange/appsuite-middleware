@@ -5,7 +5,9 @@
       - Filestorage
     summary: Gets a file storage service.
     security: 
-        - session: []    
+        - session: []  
+        - oauth:
+          - read_files     
     parameters:
       - in: query
         name: id

@@ -5,7 +5,8 @@
       - Config
     summary: Gets data of a configuration node.
     security: 
-        - session: []    
+        - session: []   
+        - oauth: [] 
     description: >
       The configuration is stored in a tree. Each node of the tree has a name
       and a value.
@@ -38,7 +39,9 @@
       - Config
     summary: Sets the value of a configuration node.
     security: 
-        - session: []    
+        - session: []   
+        - oauth:
+          - write_userconfig  
     description: >
       The configuration is stored in a tree. Each node of the tree has a name
       and a value.

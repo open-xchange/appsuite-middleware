@@ -7,7 +7,7 @@
     security: 
         - session: []      
         - oauth:
-          - write_mails    
+          - write_mail    
     parameters:
       - in: query
         name: timestamp

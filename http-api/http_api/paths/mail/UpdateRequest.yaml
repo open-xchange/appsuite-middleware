@@ -9,7 +9,7 @@
     security: 
         - session: []
         - oauth:
-          - write_mails   
+          - write_mail   
     description: >
       The update request can perform an update of the color label and flags of
       one mail object. Beside it

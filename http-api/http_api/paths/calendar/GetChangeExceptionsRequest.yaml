@@ -5,7 +5,9 @@
       - Calendar
     summary: Gets all change exceptions.
     security: 
-        - session: []    
+        - session: []
+        - oauth: 
+          - read_calendar            
     parameters:
       - in: query
         name: id

@@ -7,7 +7,7 @@
     security: 
         - session: []      
         - oauth:
-          - read_mails    
+          - read_mail    
     description: Returns the data for the message that shall be forwarded.
     parameters:
       - $ref: '#/components/parameters/gblQueryParamMailFolder'

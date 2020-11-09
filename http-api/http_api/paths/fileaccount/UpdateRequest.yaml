@@ -6,6 +6,8 @@
     summary: Updates a file storage account.
     security: 
         - session: []    
+        - oauth:
+          - write_files   
     responses:
       '200':
         description: >-
