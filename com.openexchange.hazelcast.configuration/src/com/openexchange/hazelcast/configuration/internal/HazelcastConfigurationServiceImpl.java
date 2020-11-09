@@ -218,6 +218,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         }
 
         // Disable other network join alternatives
+        config.getNetworkConfig().getJoin().getAutoDetectionConfig().setEnabled(false);
         config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
         config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
 
@@ -336,11 +337,13 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         config.setLiteMember(configService.getBoolProperty("com.openexchange.hazelcast.liteMember", config.isLiteMember()));
         switch (join) {
             case EMPTY:
+                config.getNetworkConfig().getJoin().getAutoDetectionConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
                 break;
             case STATIC:
+                config.getNetworkConfig().getJoin().getAutoDetectionConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true);
@@ -362,6 +365,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 }
                 break;
             case MULTICAST:
+                config.getNetworkConfig().getJoin().getAutoDetectionConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(true);
@@ -384,6 +388,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                  *  - "connection-retries": number of retries while connecting to AWS API; default to 3
                  *  - "hz-port": a range of ports where the plugin looks for Hazelcast members; default is 5701-5708
                  */
+                config.getNetworkConfig().getJoin().getAutoDetectionConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(true);
@@ -411,6 +416,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 hazelcastConfig.reinitializeDnsLookUp(config, configService);
                 break;
             case KUBERNETES:
+                config.getNetworkConfig().getJoin().getAutoDetectionConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
                 config.getNetworkConfig().getJoin().getKubernetesConfig().setEnabled(true);
                 config.getNetworkConfig().getJoin().getKubernetesConfig().setProperty("namespace", configService.getProperty("com.openexchange.hazelcast.network.join.k8s.namespace", "default"));
