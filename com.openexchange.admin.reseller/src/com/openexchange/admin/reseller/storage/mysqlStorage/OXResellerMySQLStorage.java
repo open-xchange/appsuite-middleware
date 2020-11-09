@@ -161,6 +161,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 }
                 sid = rs.getInt("sid");
                 prep.close();
+                adm.setId(I(sid));
             } else {
                 throw new InvalidDataException("either ID or name must be specified");
             }
