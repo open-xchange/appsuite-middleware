@@ -81,6 +81,8 @@ import com.openexchange.groupware.upload.StreamedUploadFile;
 import com.openexchange.groupware.upload.StreamedUploadFileIterator;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.lock.AccessControl;
+import com.openexchange.lock.LockService;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
@@ -114,10 +116,14 @@ import com.openexchange.mail.compose.Type;
 import com.openexchange.mail.compose.UploadLimits;
 import com.openexchange.mail.compose.VCardAndFileName;
 import com.openexchange.mail.compose.mailstorage.MailStorageExclusiveOperation.MailStorageCallable;
+import com.openexchange.mail.compose.mailstorage.association.AssociationLock;
 import com.openexchange.mail.compose.mailstorage.association.AttachmentMetadata;
 import com.openexchange.mail.compose.mailstorage.association.CompositionSpaceToDraftAssociation;
+import com.openexchange.mail.compose.mailstorage.association.CompositionSpaceToDraftAssociationUpdate;
 import com.openexchange.mail.compose.mailstorage.association.DraftMetadata;
 import com.openexchange.mail.compose.mailstorage.association.IAssociationStorage;
+import com.openexchange.mail.compose.mailstorage.association.IAssociationStorageManager;
+import com.openexchange.mail.compose.mailstorage.association.AssociationLock.LockResult;
 import com.openexchange.mail.compose.mailstorage.open.EditCopy;
 import com.openexchange.mail.compose.mailstorage.open.Forward;
 import com.openexchange.mail.compose.mailstorage.open.OpenState;
@@ -126,6 +132,7 @@ import com.openexchange.mail.compose.mailstorage.open.Resend;
 import com.openexchange.mail.compose.mailstorage.storage.ComposeRequestAndMeta;
 import com.openexchange.mail.compose.mailstorage.storage.DefaultMailStorageId;
 import com.openexchange.mail.compose.mailstorage.storage.IMailStorage;
+import com.openexchange.mail.compose.mailstorage.storage.LookUpOutcome;
 import com.openexchange.mail.compose.mailstorage.storage.MailStorageId;
 import com.openexchange.mail.compose.mailstorage.storage.MailStorageResult;
 import com.openexchange.mail.compose.mailstorage.storage.MessageInfo;
@@ -167,7 +174,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
 
     private final ServiceLookup services;
     private final IMailStorage mailStorage;
-    private final IAssociationStorage associationStorage;
+    private final IAssociationStorageManager associationStorageManager;
     private final String serviceId;
     private final Session session;
     private final List<OXException> warnings;
@@ -177,20 +184,20 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
      *
      * @param session The session
      * @param mailStorage The mail storage
-     * @param associationStorage The storage for active composition spaces having a backing draft message
+     * @param associationStorageManager The storage manager for active composition spaces having a backing draft message
      * @param services The service look-up
      * @param serviceId The service identifier
      */
-    public MailStorageCompositionSpaceService(Session session, IMailStorage mailStorage, IAssociationStorage associationStorage, ServiceLookup services, String serviceId) {
+    public MailStorageCompositionSpaceService(Session session, IMailStorage mailStorage, IAssociationStorageManager associationStorageManager, ServiceLookup services, String serviceId) {
         super();
         this.session = session;
-        this.associationStorage = associationStorage;
+        this.associationStorageManager = associationStorageManager;
         this.serviceId = serviceId;
         if (null == mailStorage) {
             throw new IllegalArgumentException("Storage must not be null");
         }
-        if (null == associationStorage) {
-            throw new IllegalArgumentException("Association storage must not be null");
+        if (null == associationStorageManager) {
+            throw new IllegalArgumentException("Association storage manager must not be null");
         }
         if (null == services) {
             throw new IllegalArgumentException("Service registry must not be null");
@@ -210,12 +217,12 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
     }
 
     /**
-     * Gets the association storage access used by this instance.
+     * Gets the association storage manager access used by this instance.
      *
      * @return The association storage
      */
-    IAssociationStorage getAssociationStorage() {
-        return associationStorage;
+    IAssociationStorageManager getAssociationStorageManager() {
+        return associationStorageManager;
     }
 
     /**
@@ -248,6 +255,8 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         return warnings;
     }
 
+
+
     /**
      * Gets the association for given composition space identifier.
      *
@@ -268,29 +277,59 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
 
     private LookUpResult optCompositionSpaceToDraftAssociation(UUID compositionSpaceId) throws OXException {
         // Check local storage
+        IAssociationStorage associationStorage = associationStorageManager.getStorageFor(session);
         Optional<CompositionSpaceToDraftAssociation> optionalAssociation = associationStorage.opt(compositionSpaceId, session);
         if (optionalAssociation.isPresent()) {
             LOG.debug("Got association from cache: {}", getUUIDForLogging(compositionSpaceId));
-            return new LookUpResult(optionalAssociation.get(), true);
+            return new LookUpResult(optionalAssociation.get(), true, associationStorage);
         }
 
         // Not contained in local storage. Try to look-up
+        LockService lockService = services.getOptionalService(LockService.class);
+        if (lockService == null) {
+            return lookUpCompositionSpace(compositionSpaceId, associationStorage);
+        }
+
+        AccessControl accessControl = lockService.getAccessControlFor(new StringBuilder(getUnformattedString(compositionSpaceId)).append("-msgcs.lookup").toString(), 1, session.getUserId(), session.getContextId());
+        try {
+            accessControl.acquireGrant();
+
+            optionalAssociation = associationStorage.opt(compositionSpaceId, session);
+            if (optionalAssociation.isPresent()) {
+                LOG.debug("Got association from cache: {}", getUUIDForLogging(compositionSpaceId));
+                return new LookUpResult(optionalAssociation.get(), true, associationStorage);
+            }
+
+            return lookUpCompositionSpace(compositionSpaceId, associationStorage);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        } finally {
+            Streams.close(accessControl);
+        }
+    }
+
+    private LookUpResult lookUpCompositionSpace(UUID compositionSpaceId, IAssociationStorage associationStorage) throws OXException {
         MailStorageResult<Optional<MailStorageId>> storageResult = mailStorage.lookUp(compositionSpaceId, session);
         warnings.addAll(storageResult.getWarnings());
         Optional<MailStorageId> optMailStorageId = storageResult.getResult();
         if (!optMailStorageId.isPresent()) {
             LOG.debug("Found no composition space for ID: {}", getUUIDForLogging(compositionSpaceId));
-            return LookUpResult.EMPTY_RESULT;
+            return LookUpResult.emptyResult(associationStorage);
         }
 
         // Add to local storage
-        CompositionSpaceToDraftAssociation association = CompositionSpaceToDraftAssociation.builder(true).withMailStorageId(optMailStorageId.get()).withSession(session).build();
-        associationStorage.store(association);
+        CompositionSpaceToDraftAssociation newAssociation = CompositionSpaceToDraftAssociation.builder(true).withMailStorageId(optMailStorageId.get()).withSession(session).build();
+        CompositionSpaceToDraftAssociation association = associationStorage.storeIfAbsent(newAssociation);
+        if (association == null) {
+            association = newAssociation;
+        }
         LOG.debug("Got association from mail storage: {}", getUUIDForLogging(compositionSpaceId));
-        return new LookUpResult(association, false);
+        return new LookUpResult(association, false, associationStorage);
     }
 
     private CompositionSpaceInfo getCurrentCompositionSpaceInfo(UUID compositionSpaceId) throws OXException {
+        IAssociationStorage associationStorage = associationStorageManager.getStorageFor(session);
         return new ImmutableCompositionSpaceInfo(new CompositionSpaceId(serviceId, compositionSpaceId), associationStorage.get(compositionSpaceId, session).getDraftPath());
     }
 
@@ -303,7 +342,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             String disposition = com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT.getId();
             StreamedUploadFileIterator uploadedAttachments = optionalUploadedAttachments.get();
             addAttachmentToCompositionSpace(compositionSpaceId, uploadedAttachments, disposition);
-            association = associationStorage.get(compositionSpaceId, session);
+            association = lookUpResult.getAssociationStorage().get(compositionSpaceId, session);
         }
 
         MailServletInterface mailInterface = null;
@@ -429,7 +468,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                 }
 
                 try {
-                    associationStorage.delete(compositionSpaceId, serverSession, false);
+                    lookUpResult.getAssociationStorage().delete(compositionSpaceId, serverSession, false);
                 } catch (Exception e) {
                     LOG.warn("Failed to delete composition-space-to-draft association of compositon space {}.", getUnformattedString(compositionSpaceId), e);
                 }
@@ -452,7 +491,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             return sentMailPath;
         } catch (MissingDraftException e) {
             LOG.debug("Unable to load draft for transport due to invalid draft path: {}", association);
-            associationStorage.delete(compositionSpaceId, session, false);
+            lookUpResult.getAssociationStorage().delete(compositionSpaceId, session, false);
             throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create(e);
         } finally {
             if (transportResult != null) {
@@ -571,7 +610,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             String disposition = com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT.getId();
             StreamedUploadFileIterator uploadedAttachments = optionalUploadedAttachments.get();
             addAttachmentToCompositionSpace(compositionSpaceId, uploadedAttachments, disposition);
-            association = associationStorage.get(compositionSpaceId, session);
+            association = lookUpResult.getAssociationStorage().get(compositionSpaceId, session);
         }
 
         if (deleteAfterSave) {
@@ -583,7 +622,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                 }
             };
             MailPath path = MailStorageExclusiveOperation.performOperation(lookUpResult, this, saveAsFinalDraftCallable);
-            associationStorage.delete(compositionSpaceId, session, false);
+            lookUpResult.getAssociationStorage().delete(compositionSpaceId, session, false);
             return path;
         }
 
@@ -609,7 +648,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             }
 
             // Generate composition space identifier
-            UUID uuid = UUID.randomUUID();
+            UUID compositionSpaceId = UUID.randomUUID();
 
             // Compile message (draft) for the new composition space
             MessageDescription messageDesc = new MessageDescription();
@@ -649,7 +688,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             } else if (Type.SMS == type) {
                 messageDesc.setMeta(Meta.META_SMS);
             } else {
-                OpenState args = new OpenState(uuid, messageDesc, encrypt, Meta.builder());
+                OpenState args = new OpenState(compositionSpaceId, messageDesc, encrypt, Meta.builder());
                 try {
                     Meta.Builder metaBuilder = args.metaBuilder;
                     metaBuilder.withType(Meta.MetaType.metaTypeFor(type));
@@ -703,7 +742,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
 
                 // Compile attachment (if not contained)
                 if (!contained) {
-                    AttachmentDescription attachmentDesc = AttachmentStorages.createVCardAttachmentDescriptionFor(userVCard, uuid, true);
+                    AttachmentDescription attachmentDesc = AttachmentStorages.createVCardAttachmentDescriptionFor(userVCard, compositionSpaceId, true);
                     DefaultAttachment.Builder attachment = DefaultAttachment.builder(attachmentDesc);
                     attachment.withDataProvider(new ByteArrayDataProvider(userVCard.getVcard()));
 
@@ -720,7 +759,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                 messageDesc.setAttachments(attachments);
             }
 
-            MailStorageResult<MessageInfo> storageResult = mailStorage.createNew(uuid, messageDesc, Optional.ofNullable(sharedFolderRef), session);
+            MailStorageResult<MessageInfo> storageResult = mailStorage.createNew(compositionSpaceId, messageDesc, Optional.ofNullable(sharedFolderRef), session);
             warnings.addAll(storageResult.getWarnings());
             MessageInfo messageInfo = storageResult.getResult();
 
@@ -736,11 +775,11 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             }
 
             long now = System.currentTimeMillis();
-            CompositionSpaceToDraftAssociation association = CompositionSpaceToDraftAssociation.builder().withMailStorageId(storageResult.getMailStorageId()).withDraftMetadata(DraftMetadata.fromMessageInfo(messageInfo)).withSession(session).build();
-            associationStorage.store(association);
+            CompositionSpaceToDraftAssociation newAssociation = CompositionSpaceToDraftAssociation.builder().withMailStorageId(storageResult.getMailStorageId()).withDraftMetadata(DraftMetadata.fromMessageInfo(messageInfo)).withSession(session).build();
+            associationStorageManager.getStorageFor(session).storeIfAbsent(newAssociation);
 
             ImmutableMessage message = ImmutableMessage.builder().fromMessageDescription(messageInfo.getMessage()).build();
-            CompositionSpace compositionSpace = new ImmutableCompositionSpace(new CompositionSpaceId(serviceId, uuid), storageResult.getMailStorageId().getDraftPath(), message, now);
+            CompositionSpace compositionSpace = new ImmutableCompositionSpace(new CompositionSpaceId(serviceId, compositionSpaceId), storageResult.getMailStorageId().getDraftPath(), message, now);
             LOG.debug("Opened composition space '{}'", compositionSpace.getId());
             attachments = null; // Avoid premature deletion
             return compositionSpace;
@@ -822,15 +861,16 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         }
 
         // Calculate change in draft size and check quota
+        ContentDisposition contentDisposition = ContentDisposition.dispositionFor(disposition);
         long additionalBytes = uploadedAttachments.getRawTotalBytes() - oldAttachmentMeta.get().getSize();
         if (additionalBytes > 0) {
-            checkStorageQuota(association, uploadedAttachments.getRawTotalBytes(), ContentDisposition.dispositionFor(disposition));
-            checkMaxMailSize(association, uploadedAttachments.getRawTotalBytes(), ContentDisposition.dispositionFor(disposition));
+            checkStorageQuota(association, uploadedAttachments.getRawTotalBytes(), contentDisposition);
+            checkMaxMailSize(association, uploadedAttachments.getRawTotalBytes(), contentDisposition);
         }
 
         Attachment newAttachment = null;
         try {
-            newAttachment = spoolNextUploadFile(compositionSpaceId, attachmentId, uploadedAttachments, disposition);
+            newAttachment = spoolNextUploadFile(compositionSpaceId, attachmentId, uploadedAttachments, contentDisposition);
             if (newAttachment == null) {
                 throw CompositionSpaceErrorCode.ERROR.create("Upload must not be empty");
             }
@@ -868,24 +908,24 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         LOG.debug("Adding uploaded attachments stream with disposition {} to composition space: {}", disposition, getUUIDForLogging(compositionSpaceId));
 
         LookUpResult lookUpResult = getCompositionSpaceToDraftAssociation(compositionSpaceId);
-        checkStorageQuota(lookUpResult.getAssociation(), uploadedAttachments.getRawTotalBytes(), ContentDisposition.dispositionFor(disposition));
-        checkMaxMailSize(lookUpResult.getAssociation(), uploadedAttachments.getRawTotalBytes(), ContentDisposition.dispositionFor(disposition));
+        ContentDisposition contentDisposition = ContentDisposition.dispositionFor(disposition);
+        checkStorageQuota(lookUpResult.getAssociation(), uploadedAttachments.getRawTotalBytes(), contentDisposition);
+        checkMaxMailSize(lookUpResult.getAssociation(), uploadedAttachments.getRawTotalBytes(), contentDisposition);
 
-        List<Attachment> newAttachments = spoolUploadFiles(compositionSpaceId, uploadedAttachments, disposition);
+        List<Attachment> newAttachments = spoolUploadFiles(compositionSpaceId, uploadedAttachments, contentDisposition);
         if (newAttachments.isEmpty()) {
             throw CompositionSpaceErrorCode.ERROR.create("Upload must not be empty");
         }
 
-        final List<Attachment> spooledAttachments = newAttachments;
-        MailStorageCallable<NewAttachmentsInfo> addAttachmentsCallable = new MailStorageCallable<NewAttachmentsInfo>() {
-
-            @Override
-            public MailStorageResult<NewAttachmentsInfo> call(LookUpResult lookUpResult, IMailStorage mailStorage, Session session) throws OXException, MissingDraftException {
-                return mailStorage.addAttachments(lookUpResult.getAssociation(), spooledAttachments, session);
-            }
-        };
-
         try {
+            final List<Attachment> spooledAttachments = newAttachments;
+            MailStorageCallable<NewAttachmentsInfo> addAttachmentsCallable = new MailStorageCallable<NewAttachmentsInfo>() {
+
+                @Override
+                public MailStorageResult<NewAttachmentsInfo> call(LookUpResult lookUpResult, IMailStorage mailStorage, Session session) throws OXException, MissingDraftException {
+                    return mailStorage.addAttachments(lookUpResult.getAssociation(), spooledAttachments, session);
+                }
+            };
             NewAttachmentsInfo result = MailStorageExclusiveOperation.performOperation(lookUpResult, this, addAttachmentsCallable);
             newAttachments = null; // upload successful, resources already closed
             return attachmentResultFor(result.getNewAttachments(), getCurrentCompositionSpaceInfo(compositionSpaceId));
@@ -966,33 +1006,59 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         return ensureDraftMetadataIsSet(association, false);
     }
 
-    private CompositionSpaceToDraftAssociation ensureDraftMetadataIsSet(final CompositionSpaceToDraftAssociation association, final boolean isRetry) throws OXException {
+    private CompositionSpaceToDraftAssociation ensureDraftMetadataIsSet(CompositionSpaceToDraftAssociation association, boolean isRetry) throws OXException {
         if (association.getOptionalDraftMetadata().isPresent()) {
             LOG.debug("Draft metadata is already contained in association: {}", association);
             return association;
         }
 
-        try {
-            MailStorageResult<MessageInfo> storageResult = mailStorage.getMessage(association, session);
-            LOG.debug("Loaded missing draft metadata for association: {}", association);
+        IAssociationStorage associationStorage = associationStorageManager.getStorageFor(session);
+        do {
+            AssociationLock lock = association.getLock();
+            LockResult lockResult = lock.lock();
+            try {
+                if (LockResult.IMMEDIATE_ACQUISITION == lockResult) {
+                    if (association.getOptionalDraftMetadata().isPresent()) {
+                        LOG.debug("Draft metadata is already contained in association: {}", association);
+                        return association;
+                    }
 
-            warnings.addAll(storageResult.getWarnings());
-            MessageInfo messageInfo = storageResult.getResult();
-            DraftMetadata draftMetadata = DraftMetadata.fromMessageInfo(messageInfo);
-            CompositionSpaceToDraftAssociation newAssociation = CompositionSpaceToDraftAssociation.builder(association).withDraftMetadata(draftMetadata).build();
-            getAssociationStorage().store(newAssociation);
-            return newAssociation;
-        } catch (MissingDraftException e) {
-            if (isRetry) {
-                throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create(e);
+                    MailStorageResult<MessageInfo> storageResult = mailStorage.getMessage(association, session);
+                    LOG.debug("Loaded missing draft metadata for association: {}", association);
+
+                    warnings.addAll(storageResult.getWarnings());
+                    MessageInfo messageInfo = storageResult.getResult();
+                    DraftMetadata draftMetadata = DraftMetadata.fromMessageInfo(messageInfo);
+
+                    CompositionSpaceToDraftAssociationUpdate update =
+                        new CompositionSpaceToDraftAssociationUpdate(association.getCompositionSpaceId())
+                        .setDraftMetadata(draftMetadata)
+                        .setValidate(false);
+                    associationStorage.update(update);
+                    return association;
+                }
+
+                // Lock could not be immediately acquired
+                if (association.getOptionalDraftMetadata().isPresent()) {
+                    LOG.debug("Draft metadata is already contained in association: {}", association);
+                    return association;
+                }
+                Optional<CompositionSpaceToDraftAssociation> optionalAssociation = associationStorage.opt(association.getCompositionSpaceId(), session);
+                association = optionalAssociation.orElse(null);
+            } catch (MissingDraftException e) {
+                if (isRetry) {
+                    throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create(e);
+                }
+
+                // retry once as cache result might be outdated
+                associationStorage.delete(association.getCompositionSpaceId(), session, false);
+                LOG.debug("Loading missing draft metadata for association failed. Retrying: {}");
+                CompositionSpaceToDraftAssociation reloadedAssociation = getCompositionSpaceToDraftAssociation(association.getCompositionSpaceId()).getAssociation();
+                return ensureDraftMetadataIsSet(reloadedAssociation, true);
+            } finally {
+                lock.unlock();
             }
-
-            // retry once as cache result might be outdated
-            associationStorage.delete(association.getCompositionSpaceId(), session, false);
-            LOG.debug("Loading missing draft metadata for association failed. Retrying: {}");
-            CompositionSpaceToDraftAssociation reloadedAssociation = getCompositionSpaceToDraftAssociation(association.getCompositionSpaceId()).getAssociation();
-            return ensureDraftMetadataIsSet(reloadedAssociation, true);
-        }
+        } while (true);
     }
 
     private void checkMailStorageQuota(long additionalBytes) throws OXException {
@@ -1078,6 +1144,27 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
 
     @Override
     public CompositionSpace getCompositionSpace(UUID compositionSpaceId) throws OXException {
+        IAssociationStorage associationStorage = associationStorageManager.getStorageFor(session);
+
+        Optional<CompositionSpaceToDraftAssociation> optionalAssociation = associationStorage.opt(compositionSpaceId, session);
+        if (optionalAssociation.isPresent()) {
+            CompositionSpaceToDraftAssociation association = optionalAssociation.get();
+            LookUpResult lookUpResult = new LookUpResult(association, true, associationStorage);
+
+            MailStorageCallable<MessageInfo> getCompositionSpaceCallable = new MailStorageCallable<MessageInfo>() {
+
+                @Override
+                public MailStorageResult<MessageInfo> call(LookUpResult lookUpResult, IMailStorage mailStorage, Session session) throws OXException, MissingDraftException {
+                    return mailStorage.lookUpMessage(compositionSpaceId, session);
+                }
+            };
+
+            MessageInfo messageInfo = MailStorageExclusiveOperation.performOperation(lookUpResult, this, getCompositionSpaceCallable);
+            ImmutableMessage message = ImmutableMessage.builder().fromMessageDescription(messageInfo.getMessage()).build();
+            return new ImmutableCompositionSpace(new CompositionSpaceId(serviceId, compositionSpaceId), association.getDraftPath(), message, messageInfo.getLastModified());
+        }
+
+        // No such association in cache, yet
         try {
             MailStorageResult<MessageInfo> storageResult = mailStorage.lookUpMessage(compositionSpaceId, session);
             warnings.addAll(storageResult.getWarnings());
@@ -1085,12 +1172,16 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             MailStorageId mailStorageId = storageResult.getMailStorageId();
             MessageInfo messageInfo = storageResult.getResult();
 
-            CompositionSpaceToDraftAssociation association = CompositionSpaceToDraftAssociation.builder()
+            CompositionSpaceToDraftAssociation association = CompositionSpaceToDraftAssociation.builder(true)
                 .withMailStorageId(mailStorageId)
                 .withDraftMetadata(DraftMetadata.fromMessageInfo(messageInfo))
                 .withSession(session)
                 .build();
-            associationStorage.store(association);
+            CompositionSpaceToDraftAssociation existent = associationStorage.storeIfAbsent(association);
+            if (existent != null) {
+                // Another thread inserted in the meantime
+                return getCompositionSpace(compositionSpaceId);
+            }
 
             ImmutableMessage message = ImmutableMessage.builder().fromMessageDescription(messageInfo.getMessage()).build();
             return new ImmutableCompositionSpace(new CompositionSpaceId(serviceId, compositionSpaceId), mailStorageId.getDraftPath(), message, messageInfo.getLastModified());
@@ -1106,11 +1197,12 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
     @Override
     public List<CompositionSpace> getCompositionSpaces(MessageField[] fields) throws OXException {
         // Look-up what really exists in mail storage
-        MailStorageResult<com.openexchange.mail.compose.mailstorage.storage.LookUpResult> storageResult = mailStorage.lookUp(session);
+        MailStorageResult<LookUpOutcome> storageResult = mailStorage.lookUp(session);
         warnings.addAll(storageResult.getWarnings());
         Map<MailPath, UUID> existingDraftPaths = storageResult.getResult().getDraftPath2CompositionSpaceId();
 
         // Get node-local ones
+        IAssociationStorage associationStorage = associationStorageManager.getStorageFor(session);
         List<CompositionSpaceToDraftAssociation> associations = associationStorage.getAllForUser(session);
 
         if (existingDraftPaths.isEmpty()) {
@@ -1133,8 +1225,11 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         if (!existingDraftPaths.isEmpty()) {
             // There are composition spaces in mail storage that are not contained in node-local associations
             for (Map.Entry<MailPath, UUID> path2Uuid : existingDraftPaths.entrySet()) {
-                CompositionSpaceToDraftAssociation association = CompositionSpaceToDraftAssociation.builder(true).withMailStorageId(new DefaultMailStorageId(path2Uuid.getKey(), path2Uuid.getValue(), Optional.empty())).withSession(session).build();
-                associationStorage.store(association);
+                CompositionSpaceToDraftAssociation association = CompositionSpaceToDraftAssociation.builder(true)
+                    .withMailStorageId(new DefaultMailStorageId(path2Uuid.getKey(), path2Uuid.getValue(), Optional.empty()))
+                    .withSession(session)
+                    .build();
+                associationStorage.storeIfAbsent(association);
                 somethingChanged = true;
             }
         }
@@ -1205,11 +1300,28 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             return false;
         }
 
-        Optional<CompositionSpaceToDraftAssociation> association = associationStorage.delete(compositionSpaceId, session, false);
-        MailStorageId toDelete = association.orElse(lookUpResult.getAssociation());
-        MailStorageResult<Boolean> storageResult = mailStorage.delete(toDelete, true, session);
-        warnings.addAll(storageResult.getWarnings());
-        return storageResult.getResult().booleanValue();
+        IAssociationStorage associationStorage = lookUpResult.getAssociationStorage();
+        CompositionSpaceToDraftAssociation association = lookUpResult.getAssociation();
+        do {
+            AssociationLock lock = association.getLock();
+            LockResult lockResult = lock.lock();
+            try {
+                if (LockResult.IMMEDIATE_ACQUISITION == lockResult) {
+                    Optional<CompositionSpaceToDraftAssociation> optionalAssociation = associationStorage.delete(compositionSpaceId, session, false);
+                    MailStorageId toDelete = optionalAssociation.orElse(lookUpResult.getAssociation());
+                    MailStorageResult<Boolean> storageResult = mailStorage.delete(toDelete, true, session);
+                    warnings.addAll(storageResult.getWarnings());
+                    return storageResult.getResult().booleanValue();
+                }
+
+                // Already closed by another thread
+                Optional<CompositionSpaceToDraftAssociation> optionalAssociation = associationStorage.opt(compositionSpaceId, session);
+                association = optionalAssociation.orElse(null);
+            } finally {
+                lock.unlock();
+            }
+        } while (association != null);
+        return false;
     }
 
     @Override
@@ -1239,41 +1351,40 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             throw CompositionSpaceErrorCode.ERROR.create("Attachment identifier must not be null");
         }
 
-        final int maxRetries = 1;
-        int retryCount = 0;
-        do {
-            // Load/fetch association
-            LookUpResult lookUpResult = getCompositionSpaceToDraftAssociation(compositionSpaceId);
-            CompositionSpaceToDraftAssociation association = lookUpResult.getAssociation();
-            try {
-                if (association.needsValidation()) {
-                    MailStorageCallable<Optional<MailPath>> validateCallable = new MailStorageCallable<Optional<MailPath>>() {
+        // Load/fetch association
+        LookUpResult lookUpResult = getCompositionSpaceToDraftAssociation(compositionSpaceId);
+        CompositionSpaceToDraftAssociation association = lookUpResult.getAssociation();
 
-                        @Override
-                        public MailStorageResult<Optional<MailPath>> call(LookUpResult lookUpResult, IMailStorage mailStorage, Session session) throws OXException, MissingDraftException {
-                            return mailStorage.validate(lookUpResult.getAssociation(), session);
-                        }
-                    };
-                    Optional<MailPath> optional = MailStorageExclusiveOperation.performOperation(lookUpResult, this, validateCallable);
-                    if (optional.isPresent()) {
-                        lookUpResult = getCompositionSpaceToDraftAssociation(compositionSpaceId);
-                        association = lookUpResult.getAssociation();
+        if (association.needsValidation()) {
+            MailStorageCallable<Optional<MailPath>> validateCallable = new MailStorageCallable<Optional<MailPath>>() {
+
+                @Override
+                public MailStorageResult<Optional<MailPath>> call(LookUpResult lookUpResult, IMailStorage mailStorage, Session session) throws OXException, MissingDraftException {
+                    CompositionSpaceToDraftAssociation azzociation = lookUpResult.getAssociation();
+                    if (azzociation.needsValidation()) {
+                        return mailStorage.validate(azzociation, session);
                     }
-                }
 
-                MailStorageResult<Attachment> storageResult = mailStorage.getAttachment(association, attachmentId, session);
-                warnings.addAll(storageResult.getWarnings());
-                return attachmentResultFor(storageResult.getResult(), getCurrentCompositionSpaceInfo(association.getCompositionSpaceId()));
-            } catch (MissingDraftException e) {
-                // retry once as cache result might be outdated
-                associationStorage.delete(compositionSpaceId, session, false);
-                if (++retryCount > 0) {
-                    LOG.debug("Re-trying get attachment operation due to invalid draft path ({} / {}): {}", retryCount, maxRetries, association);
+                    // Another thread already performed validation
+                    return MailStorageResult.resultFor(azzociation, Optional.of(azzociation.getDraftPath()), true);
                 }
+            };
+            Optional<MailPath> optional = MailStorageExclusiveOperation.performOperation(lookUpResult, this, validateCallable);
+            if (optional.isPresent()) {
+                lookUpResult = getCompositionSpaceToDraftAssociation(compositionSpaceId);
+                association = lookUpResult.getAssociation();
             }
-        } while (retryCount <= maxRetries);
+        }
 
-        throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+        MailStorageCallable<Attachment> getAttachmentCallable = new MailStorageCallable<Attachment>() {
+
+            @Override
+            public MailStorageResult<Attachment> call(LookUpResult lookUpResult, IMailStorage mailStorage, Session session) throws OXException, MissingDraftException {
+                return mailStorage.getAttachment(lookUpResult.getAssociation(), attachmentId, session);
+            }
+        };
+        Attachment attachment = MailStorageExclusiveOperation.performOperation(lookUpResult, this, getAttachmentCallable);
+        return attachmentResultFor(attachment, getCurrentCompositionSpaceInfo(association.getCompositionSpaceId()));
     }
 
     @Override
@@ -1305,11 +1416,11 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         return UploadLimits.get(type, session);
     }
 
-    private List<Attachment> spoolUploadFiles(UUID compositionSpaceId, StreamedUploadFileIterator uploadedAttachments, String disposition) throws OXException {
+    private List<Attachment> spoolUploadFiles(UUID compositionSpaceId, StreamedUploadFileIterator uploadedAttachments, ContentDisposition contentDisposition) throws OXException {
         List<Attachment> newAttachments = new LinkedList<>();
         try {
             while (uploadedAttachments.hasNext()) {
-                Attachment newAttachment = spoolNextUploadFile(compositionSpaceId, uploadedAttachments, disposition);
+                Attachment newAttachment = spoolNextUploadFile(compositionSpaceId, uploadedAttachments, contentDisposition);
                 if (newAttachment != null) {
                     newAttachments.add(newAttachment);
                 }
@@ -1325,14 +1436,14 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         return newAttachments;
     }
 
-    private Attachment spoolNextUploadFile(UUID compositionSpaceId, StreamedUploadFileIterator uploadedAttachments, String disposition) throws OXException {
-        return spoolNextUploadFile(compositionSpaceId, null, uploadedAttachments, disposition);
+    private Attachment spoolNextUploadFile(UUID compositionSpaceId, StreamedUploadFileIterator uploadedAttachments, ContentDisposition contentDisposition) throws OXException {
+        return spoolNextUploadFile(compositionSpaceId, null, uploadedAttachments, contentDisposition);
     }
 
-    private Attachment spoolNextUploadFile(UUID compositionSpaceId, @Nullable UUID attachmentId, StreamedUploadFileIterator uploadedAttachments, String disposition) throws OXException {
+    private Attachment spoolNextUploadFile(UUID compositionSpaceId, @Nullable UUID attachmentId, StreamedUploadFileIterator uploadedAttachments, ContentDisposition contentDisposition) throws OXException {
         if (uploadedAttachments.hasNext()) {
             StreamedUploadFile uploadFile = uploadedAttachments.next();
-            AttachmentDescription attachmentDesc = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, disposition, compositionSpaceId);
+            AttachmentDescription attachmentDesc = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, contentDisposition, compositionSpaceId);
             if (attachmentId != null) {
                 attachmentDesc.setId(attachmentId);
             }

@@ -87,10 +87,10 @@ public interface IMailStorage {
      * Looks-up the draft mails associated with given session-associated user.
      *
      * @param session The session providing user data
-     * @return The look-up result
+     * @return The look-up outcome
      * @throws OXException If mapping cannot be returned
      */
-    MailStorageResult<LookUpResult> lookUp(Session session) throws OXException;
+    MailStorageResult<LookUpOutcome> lookUp(Session session) throws OXException;
 
     /**
      * Looks-up the most recent draft mail for given composition space and validates it.

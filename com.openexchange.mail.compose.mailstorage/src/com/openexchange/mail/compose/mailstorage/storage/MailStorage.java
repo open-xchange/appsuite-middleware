@@ -202,7 +202,7 @@ public class MailStorage implements IMailStorage {
     }
 
     @Override
-    public MailStorageResult<LookUpResult> lookUp(Session session) throws OXException {
+    public MailStorageResult<LookUpOutcome> lookUp(Session session) throws OXException {
         MailService mailService = services.getServiceSafe(MailService.class);
         MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = null;
         try {
@@ -226,7 +226,7 @@ public class MailStorage implements IMailStorage {
 
             // No such mails
             if (mailMessages == null || mailMessages.length == 0) {
-                return MailStorageResult.resultFor(null, LookUpResult.EMPTY, false, mailAccess);
+                return MailStorageResult.resultFor(null, LookUpOutcome.EMPTY, false, mailAccess);
             }
 
             // Filter duplicate ones and trim to "maxSpacesPerUser"
@@ -264,8 +264,8 @@ public class MailStorage implements IMailStorage {
                 mailPathsToUUIDs.put(new MailPath(MailAccount.DEFAULT_ID, draftsFolder, id2MessageEntry.getValue().getMailId()), id2MessageEntry.getKey());
             }
             LOG.debug("Found {} open composition spaces", I(mailPathsToUUIDs.size()));
-            LookUpResult lookUpResult = new LookUpResult(mailPathsToUUIDs, duplicateSpaces == null ? Collections.emptyMap() : duplicateSpaces);
-            return MailStorageResult.resultFor(null, lookUpResult, false, mailAccess);
+            LookUpOutcome lookUpOutcome = new LookUpOutcome(mailPathsToUUIDs, duplicateSpaces == null ? Collections.emptyMap() : duplicateSpaces);
+            return MailStorageResult.resultFor(null, lookUpOutcome, false, mailAccess);
         } finally {
             if (mailAccess != null) {
                 mailAccess.close(true);

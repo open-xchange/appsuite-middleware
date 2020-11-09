@@ -210,12 +210,23 @@ public class AttachmentStorages {
      * @throws OXException If attachment description cannot be created
      */
     public static AttachmentDescription createUploadFileAttachmentDescriptionFor(StreamedUploadFile uploadFile, String disposition, UUID compositionSpaceId) throws OXException {
+        ContentDisposition contentDisposition = ContentDisposition.dispositionFor(disposition);
+        return createUploadFileAttachmentDescriptionFor(uploadFile, contentDisposition, compositionSpaceId);
+    }
+
+    /**
+     * Creates an attachment description for given upload file.
+     *
+     * @param uploadFile The upload file
+     * @param contentDisposition The disposition to set
+     * @param compositionSpaceId The The identifier of the composition space
+     * @return The newly created attachment description
+     * @throws OXException If attachment description cannot be created
+     */
+    public static AttachmentDescription createUploadFileAttachmentDescriptionFor(StreamedUploadFile uploadFile, ContentDisposition contentDisposition, UUID compositionSpaceId) throws OXException {
         AttachmentDescription attachment = new AttachmentDescription();
         attachment.setCompositionSpaceId(compositionSpaceId);
-        {
-            ContentDisposition contentDisposition = ContentDisposition.dispositionFor(disposition);
-            attachment.setContentDisposition(null == contentDisposition ? ATTACHMENT : contentDisposition);
-        }
+        attachment.setContentDisposition(null == contentDisposition ? ATTACHMENT : contentDisposition);
         ContentType contentType = new ContentType(uploadFile.getContentType());
         attachment.setMimeType(contentType.getBaseType());
         {

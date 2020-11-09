@@ -51,75 +51,33 @@
 
 package com.openexchange.mail.compose.mailstorage.association;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link IAssociationStorage} - The in-memory cache for opened composition spaces having an associated draft mail.
+ * {@link IAssociationStorageManager} - The in-memory manager for user-sensitive association storages.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.5
  */
-public interface IAssociationStorage {
+public interface IAssociationStorageManager {
 
     /**
-     * Updates an existent association with specified arguments.
+     * Gets the association storage for given session-associated user.
      *
-     * @param association The updated association
-     * @return The updated association
-     * @throws OXException If there is no such association
-     * @throws IllegalArgumentException If given association update is <code>null</code>
+     * @param session The session providing user information
+     * @return The association storage
+     * @throws OXException If no such association storage can be returned
      */
-    CompositionSpaceToDraftAssociation update(CompositionSpaceToDraftAssociationUpdate associationUpdate) throws OXException;
+    IAssociationStorage getStorageFor(Session session) throws OXException;
 
     /**
-     * Stores given association if not already present.
+     * Gets the optional association storage for given session-associated user.
      *
-     * @param association The association
-     * @return The already existent association (if any) or <code>null</code> if there was none and given one has therefore been stored
+     * @param session The session providing user information
+     * @return The association storage or empty
      */
-    CompositionSpaceToDraftAssociation storeIfAbsent(CompositionSpaceToDraftAssociation association);
-
-    /**
-     * Gets the association for given arguments.
-     *
-     * @param compositionSpaceId The composition space identifier
-     * @param session The session
-     * @return The association
-     * @throws OXException If there is no such association available
-     */
-    CompositionSpaceToDraftAssociation get(UUID compositionSpaceId, Session session) throws OXException;
-
-    /**
-     * Gets all associations belonging to session-associated user.
-     *
-     * @param session The session
-     * @return All associations belonging to session-associated user
-     * @throws OXException If associations cannot be returned
-     */
-    List<CompositionSpaceToDraftAssociation> getAllForUser(Session session) throws OXException;
-
-    /**
-     * (Optionally) Gets the association for given arguments.
-     *
-     * @param compositionSpaceId The composition space identifier
-     * @param session The session
-     * @return The association or empty
-     */
-    Optional<CompositionSpaceToDraftAssociation> opt(UUID compositionSpaceId, Session session);
-
-    /**
-     * Deletes the association.
-     *
-     * @param compositionSpaceId The composition space identifier
-     * @param session The session
-     * @param ensureExistent Whether to ensure if such an association is existent prior to deleting it
-     * @return The association or empty
-     * @throws OXException If deletion fails
-     */
-    Optional<CompositionSpaceToDraftAssociation> delete(UUID compositionSpaceId, Session session, boolean ensureExistent) throws OXException;
+    Optional<IAssociationStorage> optStorageFor(Session session);
 
 }

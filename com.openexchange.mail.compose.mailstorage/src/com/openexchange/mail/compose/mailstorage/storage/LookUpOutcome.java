@@ -55,26 +55,26 @@ import java.util.UUID;
 import com.openexchange.mail.MailPath;
 
 /**
- * {@link LookUpResult} - The result for a look-up of draft mails associated with a composition space.
+ * {@link LookUpOutcome} - The result for a look-up of draft mails associated with a composition space.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.5
  */
-public class LookUpResult {
+public class LookUpOutcome {
 
     /** The empty look-up result */
-    public static final LookUpResult EMPTY = new LookUpResult(Collections.emptyMap(), Collections.emptyMap());
+    public static final LookUpOutcome EMPTY = new LookUpOutcome(Collections.emptyMap(), Collections.emptyMap());
 
     private final Map<MailPath, UUID> draftPath2CompositionSpaceId;
     private final Map<MailPath, UUID> duplicateCompositionSpaces;
 
     /**
-     * Initializes a new {@link LookUpResult}.
+     * Initializes a new {@link LookUpOutcome}.
      *
      * @param draftPath2compositionSpaceId The mapping of draft path to composition space identifier
      * @param duplicateCompositionSpaces The paths of those draft messages which are considered as duplicates of a composition space
      */
-    public LookUpResult(Map<MailPath, UUID> draftPath2compositionSpaceId, Map<MailPath, UUID> duplicateCompositionSpaces) {
+    public LookUpOutcome(Map<MailPath, UUID> draftPath2compositionSpaceId, Map<MailPath, UUID> duplicateCompositionSpaces) {
         super();
         this.draftPath2CompositionSpaceId = draftPath2compositionSpaceId;
         this.duplicateCompositionSpaces = duplicateCompositionSpaces;

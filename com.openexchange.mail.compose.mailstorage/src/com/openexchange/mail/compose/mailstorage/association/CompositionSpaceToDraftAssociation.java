@@ -52,6 +52,7 @@ package com.openexchange.mail.compose.mailstorage.association;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.compose.mailstorage.cache.CacheReference;
 import com.openexchange.mail.compose.mailstorage.storage.MailStorageId;
@@ -92,11 +93,11 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
      * @return The newly created builder
      */
     public static Builder builder(CompositionSpaceToDraftAssociation other) {
-        Builder builder = builder(other.validate)
+        Builder builder = builder(other.variants.get().validate)
             .withMailStorageId(other)
             .withContextId(other.contextId)
             .withUserId(other.userId)
-            .withDraftMetadata(other.draftMetadata);
+            .withDraftMetadata(other.variants.get().draftMetadata);
 
         if (other.session != null) {
             builder.withSession(other.session);
@@ -195,15 +196,33 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
+    private static class AssociationVariants {
+
+        final MailPath draftPath;
+        final Optional<CacheReference> fileCacheReference;
+        final DraftMetadata draftMetadata;
+        final boolean validate;
+
+        /**
+         * Initializes a new {@link AssociationVariants}.
+         */
+        AssociationVariants(MailPath draftPath, Optional<CacheReference> fileCacheReference, DraftMetadata draftMetadata, boolean validate) {
+            super();
+            this.draftPath = draftPath;
+            this.fileCacheReference = fileCacheReference;
+            this.draftMetadata = draftMetadata;
+            this.validate = validate;
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private final UUID compositionSpaceId;
-    private final MailPath draftPath;
-    private final Optional<CacheReference> cacheReference;
     private final int contextId;
     private final int userId;
-    private final DraftMetadata draftMetadata;
     private final Session session;
     private final AssociationLock lock;
-    private final boolean validate;
+    private final AtomicReference<AssociationVariants> variants;
     private int hash;
 
     /**
@@ -214,13 +233,28 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
         this.compositionSpaceId = compositionSpaceId;
         this.contextId = contextId;
         this.userId = userId;
-        this.draftPath = draftPath;
-        this.draftMetadata = draftMetadata;
-        this.cacheReference = cacheReference;
-        this.validate = validate;
+        this.variants = new AtomicReference<>(new AssociationVariants(draftPath, cacheReference, draftMetadata, validate));
         this.session = session;
         lock = new AssociationLock();
         hash = 0;
+    }
+
+    /**
+     * Updates the variants.
+     *
+     * @param associationUpdate The update
+     */
+    void updateVariants(CompositionSpaceToDraftAssociationUpdate associationUpdate) {
+        AssociationVariants prev;
+        AssociationVariants newVariants;
+        do {
+            prev = variants.get();
+            MailPath draftPath = associationUpdate.containsDraftPath() ? associationUpdate.getDraftPath() : prev.draftPath;
+            Optional<CacheReference> fileCacheReference = associationUpdate.containsFileCacheReference() ? associationUpdate.getFileCacheReference() : prev.fileCacheReference;
+            DraftMetadata draftMetadata = associationUpdate.containsDraftMetadata() ? associationUpdate.getDraftMetadata() : prev.draftMetadata;
+            boolean validate = associationUpdate.containsValidate() ? associationUpdate.isValidate() : prev.validate;
+            newVariants = new AssociationVariants(draftPath, fileCacheReference, draftMetadata, validate);
+        } while (!variants.compareAndSet(prev, newVariants));
     }
 
     /**
@@ -257,12 +291,12 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
 
     @Override
     public MailPath getDraftPath() {
-        return draftPath;
+        return variants.get().draftPath;
     }
 
     @Override
     public Optional<CacheReference> getFileCacheReference() {
-        return cacheReference;
+        return variants.get().fileCacheReference;
     }
 
     /**
@@ -271,12 +305,12 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
      * @return The draft metadata
      */
     public Optional<DraftMetadata> getOptionalDraftMetadata() {
-        return Optional.ofNullable(draftMetadata);
+        return Optional.ofNullable(variants.get().draftMetadata);
     }
 
     @Override
     public boolean needsValidation() {
-        return validate;
+        return variants.get().validate;
     }
 
     /**
@@ -306,11 +340,11 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
             return true;
         }
 
-        if (!draftPath.equals(mailStorageId.getDraftPath())) {
+        if (!getDraftPath().equals(mailStorageId.getDraftPath())) {
             return true;
         }
 
-        if (!cacheReference.equals(mailStorageId.getFileCacheReference())) {
+        if (!getFileCacheReference().equals(mailStorageId.getFileCacheReference())) {
             return true;
         }
 
@@ -321,6 +355,7 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
     public int hashCode() {
         int result = hash;
         if (result == 0) {
+            MailPath draftPath = getDraftPath();
             int prime = 31;
             result = prime * 1 + ((compositionSpaceId == null) ? 0 : compositionSpaceId.hashCode());
             result = prime * result + ((draftPath == null) ? 0 : draftPath.hashCode());
@@ -345,11 +380,11 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
         } else if (!compositionSpaceId.equals(other.getCompositionSpaceId())) {
             return false;
         }
-        if (draftPath == null) {
+        if (getDraftPath() == null) {
             if (other.getDraftPath() != null) {
                 return false;
             }
-        } else if (!draftPath.equals(other.getDraftPath())) {
+        } else if (!getDraftPath().equals(other.getDraftPath())) {
             return false;
         }
         return true;
@@ -357,7 +392,7 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
 
     @Override
     public String toString() {
-        return "CompositionSpaceToDraftAssociation [compositionSpaceId=" + compositionSpaceId + ", draftPath=" + draftPath + ", cacheReference=" + cacheReference + "]";
+        return "CompositionSpaceToDraftAssociation [compositionSpaceId=" + compositionSpaceId + ", draftPath=" + getDraftPath() + ", cacheReference=" + getFileCacheReference() + "]";
     }
 
 }

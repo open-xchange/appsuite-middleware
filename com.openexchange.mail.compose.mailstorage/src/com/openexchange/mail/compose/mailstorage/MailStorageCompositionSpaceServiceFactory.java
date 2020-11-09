@@ -52,7 +52,7 @@ package com.openexchange.mail.compose.mailstorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
-import com.openexchange.mail.compose.mailstorage.association.IAssociationStorage;
+import com.openexchange.mail.compose.mailstorage.association.IAssociationStorageManager;
 import com.openexchange.mail.compose.mailstorage.storage.IMailStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -69,23 +69,23 @@ public class MailStorageCompositionSpaceServiceFactory implements CompositionSpa
 
     private final ServiceLookup services;
     private final IMailStorage mailStorage;
-    private final IAssociationStorage associationStorage;
+    private final IAssociationStorageManager associationStorageManager;
 
     /**
      * Initializes a new {@link MailStorageCompositionSpaceServiceFactory}.
      *
      * @param mailStorage The mail storage
-     * @param associationStorage The storage for active composition spaces having a backing draft message
+     * @param associationStorageManager The storage manager for active composition spaces having a backing draft message
      * @param services The service look-up
      */
-    public MailStorageCompositionSpaceServiceFactory(IMailStorage mailStorage, IAssociationStorage associationStorage, ServiceLookup services) {
+    public MailStorageCompositionSpaceServiceFactory(IMailStorage mailStorage, IAssociationStorageManager associationStorageManager, ServiceLookup services) {
         super();
-        this.associationStorage = associationStorage;
+        this.associationStorageManager = associationStorageManager;
         if (null == mailStorage) {
             throw new IllegalArgumentException("Storage must not be null");
         }
-        if (null == associationStorage) {
-            throw new IllegalArgumentException("Association storage must not be null");
+        if (null == associationStorageManager) {
+            throw new IllegalArgumentException("Association storage manager must not be null");
         }
         if (null == services) {
             throw new IllegalArgumentException("Service registry must not be null");
@@ -111,7 +111,7 @@ public class MailStorageCompositionSpaceServiceFactory implements CompositionSpa
 
     @Override
     public CompositionSpaceService createServiceFor(Session session) throws OXException {
-        return new MailStorageCompositionSpaceService(session, mailStorage, associationStorage, services, SERICE_ID);
+        return new MailStorageCompositionSpaceService(session, mailStorage, associationStorageManager, services, SERICE_ID);
     }
 
 }

@@ -2858,9 +2858,11 @@ public final class IMAPCommandsCollection {
                         for (int j = 0; j < len; j++) {
                             IMAPResponse imapResponse = (IMAPResponse) r[j];
                             if (STR_FETCH.equals(imapResponse.getKey())) {
-                                UID uidItem = getItemOf(UID.class, (FetchResponse) r[j], STR_UID);
-                                seqNum2Uid.put(imapResponse.getNumber(), uidItem.uid);
-                                r[j] = null;
+                                UID uidItem = getItemOf(UID.class, (FetchResponse) r[j]);
+                                if (uidItem != null) {
+                                    seqNum2Uid.put(imapResponse.getNumber(), uidItem.uid);
+                                    r[j] = null;
+                                }
                             }
                         }
                         notifyResponseHandlers(r, p);
@@ -2935,8 +2937,11 @@ public final class IMAPCommandsCollection {
                 if (response.isOK()) {
                     for (int j = 0; j < len; j++) {
                         if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                            uids.add(getItemOf(UID.class, (FetchResponse) r[j], STR_UID).uid);
-                            r[j] = null;
+                            UID uid = getItemOf(UID.class, (FetchResponse) r[j]);
+                            if (uid != null) {
+                                uids.add(uid.uid);
+                                r[j] = null;
+                            }
                         }
                     }
                     notifyResponseHandlers(r, p);
@@ -3069,9 +3074,11 @@ public final class IMAPCommandsCollection {
                         for (int j = 0; j < len; j++) {
                             if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
                                 final FetchResponse fr = (FetchResponse) r[j];
-                                final UID uidItem = getItemOf(UID.class, fr, STR_UID);
-                                seqNumMap.put(uidItem.uid, fr.getNumber());
-                                r[j] = null;
+                                final UID uidItem = getItemOf(UID.class, fr);
+                                if (uidItem != null) {
+                                    seqNumMap.put(uidItem.uid, fr.getNumber());
+                                    r[j] = null;
+                                }
                             }
                         }
                         notifyResponseHandlers(r, p);
@@ -3153,9 +3160,11 @@ public final class IMAPCommandsCollection {
                         for (int j = 0; j < len; j++) {
                             if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
                                 final FetchResponse fr = (FetchResponse) r[j];
-                                final UID uidItem = getItemOf(UID.class, fr, STR_UID);
-                                uid2seqNum.put(uidItem.uid, fr.getNumber());
-                                r[j] = null;
+                                final UID uidItem = getItemOf(UID.class, fr);
+                                if (uidItem != null) {
+                                    uid2seqNum.put(uidItem.uid, fr.getNumber());
+                                    r[j] = null;
+                                }
                             }
                         }
                         notifyResponseHandlers(r, p);
@@ -3219,8 +3228,11 @@ public final class IMAPCommandsCollection {
                 if (response.isOK()) {
                     for (int j = 0; j < len; j++) {
                         if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                            l.add(getItemOf(UID.class, (FetchResponse) r[j], STR_UID).uid);
-                            r[j] = null;
+                            UID uidItem = getItemOf(UID.class, (FetchResponse) r[j], STR_UID);
+                            if (uidItem != null) {
+                                l.add(uidItem.uid);
+                                r[j] = null;
+                            }
                         }
                     }
                     notifyResponseHandlers(r, p);

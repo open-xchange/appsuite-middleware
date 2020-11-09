@@ -57,6 +57,7 @@ import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.mailstorage.association.AssociationLock;
 import com.openexchange.mail.compose.mailstorage.association.AssociationLock.LockResult;
 import com.openexchange.mail.compose.mailstorage.association.CompositionSpaceToDraftAssociation;
+import com.openexchange.mail.compose.mailstorage.association.CompositionSpaceToDraftAssociationUpdate;
 import com.openexchange.mail.compose.mailstorage.association.DraftMetadata;
 import com.openexchange.mail.compose.mailstorage.storage.IMailStorage;
 import com.openexchange.mail.compose.mailstorage.storage.MailStorageId;
@@ -145,20 +146,22 @@ public class MailStorageExclusiveOperation {
                         MailStorageId newMailStorageId = storageResult.getMailStorageId();
                         if (newMailStorageId != null) {
                             if (association.isDifferentFrom(newMailStorageId)) {
-                                association = CompositionSpaceToDraftAssociation.builder()
-                                    .withMailStorageId(newMailStorageId)
-                                    .withDraftMetadata(tryGetMetadataFrom(storageResult))
-                                    .withSession(session)
-                                    .build();
-                                compositionSpaceService.getAssociationStorage().store(association);
+                                CompositionSpaceToDraftAssociationUpdate update =
+                                    new CompositionSpaceToDraftAssociationUpdate(newMailStorageId.getCompositionSpaceId())
+                                    .setDraftPath(newMailStorageId.getDraftPath())
+                                    .setFileCacheReference(newMailStorageId.getFileCacheReference())
+                                    .setDraftMetadata(tryGetMetadataFrom(storageResult))
+                                    .setValidate(false);
+                                lookUpResult.getAssociationStorage().update(update);
                             } else if (association.needsValidation() && storageResult.isValidated()) {
                                 // Store new association w/o "validate" flag
-                                association = CompositionSpaceToDraftAssociation.builder()
-                                    .withMailStorageId(newMailStorageId)
-                                    .withDraftMetadata(tryGetMetadataFrom(storageResult))
-                                    .withSession(session)
-                                    .build();
-                                compositionSpaceService.getAssociationStorage().store(association);
+                                CompositionSpaceToDraftAssociationUpdate update =
+                                    new CompositionSpaceToDraftAssociationUpdate(newMailStorageId.getCompositionSpaceId())
+                                    .setDraftPath(newMailStorageId.getDraftPath())
+                                    .setFileCacheReference(newMailStorageId.getFileCacheReference())
+                                    .setDraftMetadata(tryGetMetadataFrom(storageResult))
+                                    .setValidate(false);
+                                lookUpResult.getAssociationStorage().update(update);
                             }
                         }
 
@@ -170,7 +173,7 @@ public class MailStorageExclusiveOperation {
                     lookUpResult = compositionSpaceService.getCompositionSpaceToDraftAssociation(compositionSpaceId);
                     association = lookUpResult.getAssociation();
                 } catch (MissingDraftException e) {
-                    compositionSpaceService.getAssociationStorage().delete(compositionSpaceId, session, false);
+                    lookUpResult.getAssociationStorage().delete(compositionSpaceId, session, false);
                     if (lookUpResult.isFromCache()) {
                         // Cache entry might be outdated => reload & retry
                         lookUpResult = compositionSpaceService.getCompositionSpaceToDraftAssociation(compositionSpaceId);

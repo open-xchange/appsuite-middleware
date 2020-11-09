@@ -68,12 +68,13 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageActionFactory;
+import com.openexchange.lock.LockService;
 import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
 import com.openexchange.mail.compose.mailstorage.MailStorageCompositionSpaceConfig;
 import com.openexchange.mail.compose.mailstorage.MailStorageCompositionSpaceImageDataSource;
 import com.openexchange.mail.compose.mailstorage.MailStorageCompositionSpaceServiceFactory;
-import com.openexchange.mail.compose.mailstorage.association.AssociationStorage;
+import com.openexchange.mail.compose.mailstorage.association.AssociationStorageManager;
 import com.openexchange.mail.compose.mailstorage.cache.CacheManagerFactory;
 import com.openexchange.mail.compose.mailstorage.cache.file.FileCacheManagerFactory;
 import com.openexchange.mail.compose.mailstorage.cleanup.CompositionSpaceCleanUpRegistry;
@@ -103,6 +104,7 @@ import com.openexchange.user.UserService;
 public class MailStorageCompositionSpaceActivator extends HousekeepingActivator {
 
     private FileCacheManagerFactory cacheManagerFactory;
+    private AssociationStorageManager associationStorageManager;
 
     /**
      * Initializes a new {@link MailStorageCompositionSpaceActivator}.
@@ -126,6 +128,7 @@ public class MailStorageCompositionSpaceActivator extends HousekeepingActivator 
         trackService(CryptographicAwareMailAccessFactory.class);
         trackService(CryptographicServiceAuthenticationFactory.class);
         trackService(EncryptedMailService.class);
+        trackService(LockService.class);
         openTrackers();
 
         MailStorageCompositionSpaceConfig config = MailStorageCompositionSpaceConfig.initInstance(this);
@@ -137,10 +140,11 @@ public class MailStorageCompositionSpaceActivator extends HousekeepingActivator 
         registerService(Reloadable.class, cacheManagerFactory);
 
         MailStorage mailStorage = new MailStorage(this);
-        AssociationStorage associationStorage = new AssociationStorage();
+        AssociationStorageManager associationStorageManager = new AssociationStorageManager();
+        this.associationStorageManager = associationStorageManager;
 
-        MailStorageCompositionSpaceServiceFactory compositionSpaceServiceFactory = new MailStorageCompositionSpaceServiceFactory(mailStorage, associationStorage, this);
-        associationStorage.setCompositionSpaceServiceFactory(compositionSpaceServiceFactory);
+        MailStorageCompositionSpaceServiceFactory compositionSpaceServiceFactory = new MailStorageCompositionSpaceServiceFactory(mailStorage, associationStorageManager, this);
+        associationStorageManager.setCompositionSpaceServiceFactory(compositionSpaceServiceFactory);
 
         {
             MailStorageCompositionSpaceImageDataSource mailStorageCompositionSpaceImageDataSource = MailStorageCompositionSpaceImageDataSource.getInstance();
@@ -200,6 +204,11 @@ public class MailStorageCompositionSpaceActivator extends HousekeepingActivator 
             cacheManagerFactory.shutDown();
         }
         removeService(CacheManagerFactory.class);
+        AssociationStorageManager associationStorageManager = this.associationStorageManager;
+        if (associationStorageManager != null) {
+            this.associationStorageManager = null;
+            associationStorageManager.shutDown();
+        }
         super.stopBundle();
     }
 

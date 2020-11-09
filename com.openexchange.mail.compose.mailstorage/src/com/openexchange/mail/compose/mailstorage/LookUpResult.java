@@ -50,6 +50,7 @@
 package com.openexchange.mail.compose.mailstorage;
 
 import com.openexchange.mail.compose.mailstorage.association.CompositionSpaceToDraftAssociation;
+import com.openexchange.mail.compose.mailstorage.association.IAssociationStorage;
 
 /**
  * A look-up result for a "composition space to draft" association.
@@ -59,22 +60,34 @@ import com.openexchange.mail.compose.mailstorage.association.CompositionSpaceToD
  */
 public class LookUpResult {
 
-    /** The constant for advertising an empty look-up result */
-    public static final LookUpResult EMPTY_RESULT = new LookUpResult(null, false);
+    /**
+     * Creates an empty look-up.
+     *
+     * @param associationStorage The association storage for which to signal empty look-up
+     * @return The empty look-up
+     */
+    public static final LookUpResult emptyResult(IAssociationStorage associationStorage) {
+        return new LookUpResult(null, false, associationStorage);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final CompositionSpaceToDraftAssociation association;
     private final boolean fromCache;
+    private final IAssociationStorage associationStorage;
 
     /**
      * Initializes a new {@link LookUpResult}.
      *
      * @param association The "composition space to draft" association
      * @param fromCache Whether the association was fetched from cache or not
+     * @param associationStorage The association storage from which the association was looked-up
      */
-    public LookUpResult(CompositionSpaceToDraftAssociation association, boolean fromCache) {
+    public LookUpResult(CompositionSpaceToDraftAssociation association, boolean fromCache, IAssociationStorage associationStorage) {
         super();
         this.association = association;
         this.fromCache = fromCache;
+        this.associationStorage = associationStorage;
     }
 
     /**
@@ -103,4 +116,14 @@ public class LookUpResult {
     public boolean isEmpty() {
         return association == null;
     }
+
+    /**
+     * Gets the association storage from which the association was looked-up.
+     *
+     * @return The association storage
+     */
+    public IAssociationStorage getAssociationStorage() {
+        return associationStorage;
+    }
+
 }

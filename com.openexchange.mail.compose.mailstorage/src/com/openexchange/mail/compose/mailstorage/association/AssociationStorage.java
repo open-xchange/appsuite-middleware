@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.compose.mailstorage.association;
 
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -57,21 +56,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalNotification;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
-import com.openexchange.mail.compose.mailstorage.MailStorageCompositionSpaceConfig;
 import com.openexchange.session.Session;
-import com.openexchange.session.UserAndContext;
 
 /**
  * {@link AssociationStorage} - The association storage implementation backed by Google Cache.
@@ -86,56 +82,31 @@ public class AssociationStorage implements IAssociationStorage {
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AssociationStorage.class);
     }
 
-    private final LoadingCache<UserAndContext, Cache<UUID, CompositionSpaceToDraftAssociation>> user2Spaces;
-    final AtomicReference<CompositionSpaceServiceFactory> compositionSpaceServiceFactoryReference;
+    private final Cache<UUID, CompositionSpaceToDraftAssociation> associations;
 
     /**
      * Initializes a new {@link AssociationStorage}.
-     * @throws OXException
+     *
+     * @param maxIdleSeconds The max. idle seconds
+     * @param compositionSpaceServiceFactoryReference The reference to composition space service factory
      */
-    public AssociationStorage() throws OXException {
+    public AssociationStorage(long maxIdleSeconds, AtomicReference<CompositionSpaceServiceFactory> compositionSpaceServiceFactoryReference) {
         super();
-        long maxIdleSeconds = MailStorageCompositionSpaceConfig.getInstance().getInMemoryCacheMaxIdleSeconds();
-        AtomicReference<CompositionSpaceServiceFactory> compositionSpaceServiceFactoryReference = new AtomicReference<CompositionSpaceServiceFactory>(null);
-        this.compositionSpaceServiceFactoryReference = compositionSpaceServiceFactoryReference;
-        user2Spaces = CacheBuilder.newBuilder()
+        associations = CacheBuilder.newBuilder()
             .expireAfterAccess(Duration.ofSeconds(maxIdleSeconds))
-            .removalListener((RemovalNotification<UserAndContext, Cache<UUID, CompositionSpaceToDraftAssociation>> notification) -> {
+            .removalListener((RemovalNotification<UUID, CompositionSpaceToDraftAssociation> notification) -> {
                 if (notification.wasEvicted()) {
                     CompositionSpaceServiceFactory compositionSpaceServiceFactory = compositionSpaceServiceFactoryReference.get();
                     if (compositionSpaceServiceFactory == null) {
-                        UserAndContext uac = notification.getKey();
-                        LoggerHolder.LOG.error("Could not save drafts of user {} in context {} because of absent CompositionSpaceServiceFactory on eviction of user-associated composition spaces", I(uac.getUserId()), I(uac.getContextId()));
+                        LoggerHolder.LOG.error("Could not save draft because of absent CompositionSpaceServiceFactory on eviction of space {}", notification.getKey());
                         return;
                     }
 
-                    Cache<UUID, CompositionSpaceToDraftAssociation> activeUserSpaces = notification.getValue();
-                    for (CompositionSpaceToDraftAssociation association : activeUserSpaces.asMap().values()) {
-                        handleEvictedAssociation(association, compositionSpaceServiceFactory);
-                    }
+                    CompositionSpaceToDraftAssociation association = notification.getValue();
+                    handleEvictedAssociation(association, compositionSpaceServiceFactory);
                 }
             })
-            .build(new CacheLoader<UserAndContext, Cache<UUID, CompositionSpaceToDraftAssociation>>() {
-
-                @Override
-                public Cache<UUID, CompositionSpaceToDraftAssociation> load(UserAndContext key) throws Exception {
-                    return CacheBuilder.newBuilder()
-                        .expireAfterAccess(Duration.ofSeconds(maxIdleSeconds))
-                        .removalListener((RemovalNotification<UUID, CompositionSpaceToDraftAssociation> notification) -> {
-                            if (notification.wasEvicted()) {
-                                CompositionSpaceServiceFactory compositionSpaceServiceFactory = compositionSpaceServiceFactoryReference.get();
-                                if (compositionSpaceServiceFactory == null) {
-                                    LoggerHolder.LOG.error("Could not save draft because of absent CompositionSpaceServiceFactory on eviction of space {}", notification.getKey());
-                                    return;
-                                }
-
-                                CompositionSpaceToDraftAssociation association = notification.getValue();
-                                handleEvictedAssociation(association, compositionSpaceServiceFactory);
-                            }
-                        })
-                        .build();
-                }
-            });
+            .build();
     }
 
     /**
@@ -164,18 +135,35 @@ public class AssociationStorage implements IAssociationStorage {
     }
 
     /**
-     * Sets the composition space service factory to use,
+     * Signals eviction to this association storage
      *
      * @param compositionSpaceServiceFactory The composition space service factory to use
      */
-    public void setCompositionSpaceServiceFactory(CompositionSpaceServiceFactory compositionSpaceServiceFactory) {
-        compositionSpaceServiceFactoryReference.set(compositionSpaceServiceFactory);
+    public void signalEviction(CompositionSpaceServiceFactory compositionSpaceServiceFactory) {
+        for (CompositionSpaceToDraftAssociation association : associations.asMap().values()) {
+            handleEvictedAssociation(association, compositionSpaceServiceFactory);
+        }
+        associations.invalidateAll();
     }
 
     @Override
-    public void store(CompositionSpaceToDraftAssociation association) {
-        Cache<UUID, CompositionSpaceToDraftAssociation> activeUserSpaces = user2Spaces.getUnchecked(UserAndContext.newInstance(association.getSession()));
-        activeUserSpaces.put(association.getCompositionSpaceId(), association);
+    public CompositionSpaceToDraftAssociation update(CompositionSpaceToDraftAssociationUpdate associationUpdate) throws OXException {
+        if (associationUpdate == null) {
+            throw new IllegalArgumentException("Association update must not be null");
+        }
+        UUID compositionSpaceId = associationUpdate.getCompositionSpaceId();
+        CompositionSpaceToDraftAssociation association = associations.getIfPresent(compositionSpaceId);
+        if (association == null) {
+            throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(getUnformattedString(compositionSpaceId));
+        }
+        association.updateVariants(associationUpdate);
+        return association;
+    }
+
+    @Override
+    public CompositionSpaceToDraftAssociation storeIfAbsent(CompositionSpaceToDraftAssociation association) {
+        ConcurrentMap<UUID, CompositionSpaceToDraftAssociation> activeUserAssociations = associations.asMap();
+        return activeUserAssociations.putIfAbsent(association.getCompositionSpaceId(), association);
     }
 
     @Override
@@ -189,37 +177,17 @@ public class AssociationStorage implements IAssociationStorage {
 
     @Override
     public List<CompositionSpaceToDraftAssociation> getAllForUser(Session session) throws OXException {
-        Cache<UUID, CompositionSpaceToDraftAssociation> activeUserSpaces = user2Spaces.getIfPresent(UserAndContext.newInstance(session));
-        if (null == activeUserSpaces) {
-            return Collections.emptyList();
-        }
-        return activeUserSpaces.size() <= 0 ? Collections.emptyList() : new ArrayList<>(activeUserSpaces.asMap().values());
+        return associations.size() <= 0 ? Collections.emptyList() : new ArrayList<>(associations.asMap().values());
     }
 
     @Override
     public Optional<CompositionSpaceToDraftAssociation> opt(UUID compositionSpaceId, Session session) {
-        Cache<UUID, CompositionSpaceToDraftAssociation> activeUserSpaces = user2Spaces.getIfPresent(UserAndContext.newInstance(session));
-        if (null == activeUserSpaces) {
-            return Optional.empty();
-        }
-        CompositionSpaceToDraftAssociation association = activeUserSpaces.getIfPresent(compositionSpaceId);
-        if (null == association) {
-            return Optional.empty();
-        }
-        return Optional.of(association);
+        return Optional.ofNullable(associations.getIfPresent(compositionSpaceId));
     }
 
     @Override
     public Optional<CompositionSpaceToDraftAssociation> delete(UUID compositionSpaceId, Session session, boolean ensureExistent) throws OXException {
-        Cache<UUID, CompositionSpaceToDraftAssociation> activeUserSpaces = user2Spaces.getIfPresent(UserAndContext.newInstance(session));
-        if (null == activeUserSpaces) {
-            if (ensureExistent) {
-                throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(getUnformattedString(compositionSpaceId));
-            }
-            return Optional.empty();
-        }
-
-        CompositionSpaceToDraftAssociation removedAssociation = activeUserSpaces.asMap().remove(compositionSpaceId);
+        CompositionSpaceToDraftAssociation removedAssociation = associations.asMap().remove(compositionSpaceId);
         if (null == removedAssociation) {
             if (ensureExistent) {
                 throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(getUnformattedString(compositionSpaceId));
