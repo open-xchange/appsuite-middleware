@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
@@ -73,6 +74,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.5
  */
+@NotThreadSafe
 public class EntityInfoLoader {
 
     private final Map<String, EntityInfo> knownUsers;
