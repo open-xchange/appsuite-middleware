@@ -190,7 +190,7 @@ public abstract class AbstractApiClient implements ApiClient {
                 /*
                  * Try relogin if session expired. Wrap error if no session can be established again
                  */
-                reLogin();
+                reLogin(e);
                 return execute(buildRequest(call), call.getParser());
             }
             throw e;
@@ -559,11 +559,16 @@ public abstract class AbstractApiClient implements ApiClient {
      *
      * @throws OXException In case a valid session can't be obtained, or the login fails because of another reason then {@link SessionExceptionCodes#SESSION_EXPIRED}
      */
-    private synchronized void reLogin() throws OXException {
+    private synchronized void reLogin(OXException oxException) throws OXException {
         if (System.currentTimeMillis() - lastRelogin.get() < TimeUnit.MINUTES.toMillis(1)) {
             LOGGER.trace("Already tried relogin in the last minute. Using local data to determine state");
             LoginInformation loginInformation = getLoginInformation();
-            if (null == loginInformation || Strings.isEmpty(loginInformation.getRemoteSessionId())) {
+            String expiredSessionId = (String) oxException.getDisplayArgs()[0];
+            /*
+             * Check if new session has been set meanwhile
+             */
+            if (null == loginInformation || Strings.isEmpty(loginInformation.getRemoteSessionId()) || //@formatter:off
+                Strings.isEmpty(expiredSessionId) || expiredSessionId.equals(loginInformation.getRemoteSessionId())) { //@formatter:on
                 throw ApiClientExceptions.SESSION_EXPIRED.create();
             }
             return;
@@ -578,6 +583,11 @@ public abstract class AbstractApiClient implements ApiClient {
                 return;
             } catch (OXException e) {
                 if (false == matches(ApiClientExceptions.NO_ACCESS, e)) {
+                    /*
+                     * Login failed due another reason besides session creation
+                     */
+                    isClosed.set(true);
+                    cookieStore.clear();
                     throw e;
                 }
 

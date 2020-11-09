@@ -73,7 +73,7 @@ public class ApiClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class[] { LeanConfigurationService.class, VersionService.class };
+        return new Class[] { VersionService.class };
     }
 
     @Override
