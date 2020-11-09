@@ -95,14 +95,14 @@ For further information, please check [here](https://socket.io/docs/internals/).
 
 #### Topc "ox:mail.new"
 
-The "ox:mail:new" is the reserved identifier of the Open-Xcange Middleware to deliver "new mail" events to the client.
+The "ox:mail:new" is the reserved identifier of the Open-Xchange Middleware to deliver "new mail" events to the client.
 
 Its payload is a JSON object consisting of the fields:
 
 - `"folder"` The identifier of the mailbox folder, in which the new mail has been received
 - `id` The identifier of the newly received mail
-- `"email"` The address portional of the sender's E-Mail address
-- `"displayname"` The display name (or personal) portional of the sender's E-Mail address
+- `"email"` The address part of the sender's E-Mail address
+- `"displayname"` The display name (or personal) part of the sender's E-Mail address (if any)
 - `"subject"` The subject line taken from newly received mail
 - `"unread"` The new unread (or unseen) count for the denoted mailbox folder
 - `"teaser"` A teaser of the mail's text body
