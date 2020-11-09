@@ -93,7 +93,7 @@ In general, the communication that happens via a Web Socket connection implement
 
 For further information, please check [here](https://socket.io/docs/internals/).
 
-#### Topc "ox:mail.new"
+##### Topic "ox:mail.new"
 
 The "ox:mail:new" is the reserved identifier of the Open-Xcange Middleware to deliver "new mail" events to the client.
 
@@ -112,6 +112,22 @@ Example:
 ```
 42["ox:mail:new",{"folder":"default0/INBOX","id":"113","email":"jane.doe@foobar.com","displayname":"Jane Doe","subject":"Let's meet","unread":83,"teaser":"Hello"}]
 ```
+
+##### Topic "ox:calendar:updates"
+
+"ox:calendar:updates" is the reserved identifier of the Open-Xcange Middleware to indicate any kind of changes in the user's calendars to the client.
+
+Its payload is a JSON object consisting of the fields:
+
+- `needsAction` A JSON array of the identifiers of new or updated events where the user attendee's participation status equals "NEEDS-ACTION"
+- `folders` A JSON array of the identifiers of folders whose contents contain significant changes so that a refresh of the user interface is suggested.
+
+Example:
+
+```
+{"name":"ox:calendar:updates","args":[{"folders":["cal://0/216759","cal://0/30"]}],"namespace":"/"}
+```
+
 
 ### APNS transport
 
