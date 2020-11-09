@@ -50,38 +50,24 @@
 package com.openexchange.api.client.impl.osgi;
 
 import org.apache.http.impl.client.HttpClientBuilder;
-import com.openexchange.annotation.NonNull;
-import com.openexchange.rest.client.httpclient.AbstractHttpClientModifer;
-import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
 
 /**
- * {@link ApiClientWildcardProvider}
+ * {@link ApiClientConfigConfigProvider}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class ApiClientWildcardProvider extends AbstractHttpClientModifer implements WildcardHttpClientConfigProvider {
+public class ApiClientConfigConfigProvider extends DefaultHttpClientConfigProvider {
 
     /** The identifier for HTTP clients that are used to communicate with other OX nodes */
     public static final String HTTP_CLIENT_IDENTIFIER = "apiClient";
 
     /**
-     * Initializes a new {@link ApiClientWildcardProvider}.
+     * Initializes a new {@link ApiClientConfigConfigProvider}.
      */
-    public ApiClientWildcardProvider() {
-        super(AbstractHttpClientModifer.DEFAULT_UA);
-    }
-
-    @Override
-    @NonNull
-    public String getClientIdPattern() {
-        return HTTP_CLIENT_IDENTIFIER + "*";
-    }
-
-    @Override
-    @NonNull
-    public String getGroupName() {
-        return HTTP_CLIENT_IDENTIFIER;
+    public ApiClientConfigConfigProvider() {
+        super(HTTP_CLIENT_IDENTIFIER);
     }
 
     @Override

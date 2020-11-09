@@ -54,7 +54,7 @@ import com.openexchange.api.client.impl.ApiClientServiceImpl;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.httpclient.HttpClientService;
-import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.user.UserService;
 import com.openexchange.version.VersionService;
 
@@ -73,13 +73,13 @@ public class ApiClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class[] { LeanConfigurationService.class, VersionService.class };
+        return new Class[] { VersionService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         registerService(ApiClientService.class, new ApiClientServiceImpl(this));
-        registerService(WildcardHttpClientConfigProvider.class, new ApiClientWildcardProvider());
+        registerService(SpecificHttpClientConfigProvider.class, new ApiClientConfigConfigProvider());
     }
 
 }
