@@ -52,12 +52,64 @@ Hence, it is possible to append client and topic to the property name according 
 `com.openexchange.pns.transport.websocket.enabled + ("." + {client})? + ("." + {topic})?`
 
 Example:
+
 ```
 com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:mail:new=true
 com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:calendar:new=false
 ```
+
 That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
 via Web Socket, but not for "new appointment".
+
+#### Payloads for known topics
+
+This section describes the payloads transferred via Web Socket packets for well-known topics. 
+
+##### Socket.IO
+
+In general, the communication that happens via a Web Socket connection implements the Socket.IO-specified protocol. Socket.IO itself is a library that enables real-time, bidirectional and event-based communication between the browser and the server by adding additional metadata to each packet.
+
+- Client establishes a Web Socket connection; e.g.:
+  
+  ```
+  wss://my.ox.com/socket.io/appsuite/?session=XYZ&connection=160491815377&EIO=3&transport=websocket
+  ```
+
+- Server responds with first Socket.IO packet providing JSON-formatted meta-data about newly opened Socket.IO Web Socket connection:
+  
+  ```
+  0{"sid":"NMUj7A0","upgrades":["websocket"],"pingInterval":25000,"pingTimeout":5000}
+  ```
+  
+- Client and server exchange periodic ping-pong packets to keep Socket.IO Web Socket connection alive
+
+- When a message is delivered via that connection, it looks like:
+  
+  ```
+  42[<String-topic-name>,<JSON-payload>]
+  ```
+  
+  So, basically a JSON array consisting of two elements. The first is the topic name and the second the arbitrary JSON-formatted payload.
+
+#### Topc "ox:mail.new"
+
+The "ox:mail:new" is the reserved identifier of the Open-Xcange Middleware to deliver "new mail" events to the client.
+
+Its payload is a JSON object consisting of the fields:
+
+- `"folder"` The identifier of the mailbox folder, in which the new mail has been received
+- `id` The identifier of the newly received mail
+- `"email"` The address portional of the sender's E-Mail address
+- `"displayname"` The display name (or personal) portional of the sender's E-Mail address
+- `"subject"` The subject line taken from newly received mail
+- `"unread"` The new unread (or unseen) count for the denoted mailbox folder
+- `"teaser"` A teaser of the mail's text body
+
+Example:
+
+```
+42["ox:mail:new",{"folder":"default0/INBOX","id":"113","email":"jane.doe@foobar.com","displayname":"Jane Doe","subject":"Let's meet","unread":83,"teaser":"Hello"}]
+```
 
 ### APNS transport
 
