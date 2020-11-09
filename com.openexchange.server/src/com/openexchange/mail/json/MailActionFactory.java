@@ -113,6 +113,8 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
 
     private static final AtomicReference<MailActionFactory> INSTANCE_REFERENCE = new AtomicReference<MailActionFactory>();
 
+    public static final String MODULE = "mail";
+
     /**
      * The read-only scope for OAuth requests
      */

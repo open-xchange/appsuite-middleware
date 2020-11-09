@@ -61,7 +61,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@OAuthAction(OAuthAction.GRANT_ALL)
+@RestrictedAction()
 public final class RootAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_ROOT;

@@ -68,8 +68,9 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction.Type;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.contacts.json.ContactActionFactory;
@@ -425,24 +426,23 @@ public abstract class AbstractFolderAction implements AJAXActionService {
          * @return A set of valid {@link ContentType}s
          */
         static Set<ContentType> contentTypesForReadScope(String scope) {
-            switch (scope) {
+            switch (Type.READ.getModule(scope)) {
                 // Contacts
-                case ContactActionFactory.OAUTH_READ_SCOPE:
-                    return Collections.singleton((ContentType) ContactsContentType.getInstance());
-
+                case ContactActionFactory.MODULE:
+                    return Collections.singleton((ContentType) ContactContentType.getInstance());
                 // Calendar
-                case ChronosOAuthScope.OAUTH_READ_SCOPE:
+                case ChronosOAuthScope.MODULE:
                     Set<ContentType> result = new HashSet<>(2);
                     result.add(CalendarContentType.getInstance());
                     result.add(com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance());
                     return result;
 
                 // Tasks
-                case TaskActionFactory.OAUTH_READ_SCOPE:
+                case TaskActionFactory.MODULE:
                     return Collections.singleton((ContentType) TaskContentType.getInstance());
 
                 // Mails
-                case MailActionFactory.OAUTH_READ_SCOPE:
+                case MailActionFactory.MODULE:
                     Set<ContentType> mailContentTypes = new HashSet<>(4);
                     mailContentTypes.add(MailContentType.getInstance());
                     mailContentTypes.add(DraftsContentType.getInstance());
@@ -463,24 +463,24 @@ public abstract class AbstractFolderAction implements AJAXActionService {
          * @return A set of valid {@link ContentType}s
          */
         static Set<ContentType> contentTypesForWriteScope(String scope) {
-            switch (scope) {
-                // Contacts
-                case ContactActionFactory.OAUTH_WRITE_SCOPE:
-                    return Collections.singleton((ContentType) ContactsContentType.getInstance());
 
+            switch (Type.WRITE.getModule(scope)) {
+                // Contacts
+                case ContactActionFactory.MODULE:
+                    return Collections.singleton((ContentType) ContactContentType.getInstance());
                 // Calendar
-                case ChronosOAuthScope.OAUTH_WRITE_SCOPE:
+                case ChronosOAuthScope.MODULE:
                     Set<ContentType> result = new HashSet<>(2);
                     result.add(CalendarContentType.getInstance());
                     result.add(com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance());
                     return result;
 
                 // Tasks
-                case TaskActionFactory.OAUTH_WRITE_SCOPE:
+                case TaskActionFactory.MODULE:
                     return Collections.singleton((ContentType) TaskContentType.getInstance());
 
                 // Mails
-                case MailActionFactory.OAUTH_WRITE_SCOPE:
+                case MailActionFactory.MODULE:
                     Set<ContentType> mailContentTypes = new HashSet<>(4);
                     mailContentTypes.add(MailContentType.getInstance());
                     mailContentTypes.add(DraftsContentType.getInstance());
@@ -495,40 +495,40 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         }
 
         static String readScopeForContentType(ContentType contentType) {
-            if (contentType == ContactsContentType.getInstance()) {
-                return ContactActionFactory.OAUTH_READ_SCOPE;
+            if (contentType == ContactContentType.getInstance()) {
+                return Type.READ.getScope(ContactActionFactory.MODULE);
             } else if (contentType == CalendarContentType.getInstance()) {
-                return AppointmentActionFactory.OAUTH_READ_SCOPE;
+                return Type.READ.getScope(AppointmentActionFactory.MODULE);
             } else if (contentType == com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance()) {
-                return ChronosOAuthScope.OAUTH_READ_SCOPE;
+                return Type.READ.getScope(ChronosOAuthScope.MODULE);
             } else if (contentType == TaskContentType.getInstance()) {
-                return TaskActionFactory.OAUTH_READ_SCOPE;
+                return Type.READ.getScope(TaskActionFactory.MODULE);
             } else if (contentType == MailContentType.getInstance() ||
                        contentType == DraftsContentType.getInstance() ||
                        contentType == SentContentType.getInstance() ||
                        contentType == SpamContentType.getInstance() ||
                        contentType == TrashContentType.getInstance()) {
-                return MailActionFactory.OAUTH_READ_SCOPE;
+                return Type.READ.getScope(MailActionFactory.MODULE);
             }
 
             return null;
         }
 
         static String writeScopeForContentType(ContentType contentType) {
-            if (contentType == ContactsContentType.getInstance()) {
-                return ContactActionFactory.OAUTH_WRITE_SCOPE;
+            if (contentType == ContactContentType.getInstance()) {
+                return Type.WRITE.getScope(ContactActionFactory.MODULE);
             } else if (contentType == CalendarContentType.getInstance()) {
-                return AppointmentActionFactory.OAUTH_WRITE_SCOPE;
+                return Type.WRITE.getScope(AppointmentActionFactory.MODULE);
             } else if (contentType == com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance()) {
-                return ChronosOAuthScope.OAUTH_WRITE_SCOPE;
+                return Type.WRITE.getScope(ChronosOAuthScope.MODULE);
             } else if (contentType == TaskContentType.getInstance()) {
-                return TaskActionFactory.OAUTH_WRITE_SCOPE;
+                return Type.WRITE.getScope(TaskActionFactory.MODULE);
             } else if ( contentType == MailContentType.getInstance() ||
                         contentType == DraftsContentType.getInstance() ||
                         contentType == SentContentType.getInstance() ||
                         contentType == SpamContentType.getInstance() ||
                         contentType == TrashContentType.getInstance()) {
-                return MailActionFactory.OAUTH_WRITE_SCOPE;
+                return Type.WRITE.getScope(MailActionFactory.MODULE);
             }
 
             return null;

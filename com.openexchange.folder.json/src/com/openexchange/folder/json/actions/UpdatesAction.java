@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.GRANT_ALL)
+@RestrictedAction()
 public final class UpdatesAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATES;

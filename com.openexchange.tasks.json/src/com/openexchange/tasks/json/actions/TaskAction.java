@@ -72,6 +72,7 @@ import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -89,7 +90,7 @@ import gnu.trove.list.array.TIntArrayList;
 @RestrictedAction(module = TaskAction.MODULE, type = RestrictedAction.Type.READ)
 public abstract class TaskAction implements AJAXActionService {
 
-    protected static final String MODULE = "tasks";
+    protected static final String MODULE = TaskActionFactory.MODULE;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskAction.class);
 

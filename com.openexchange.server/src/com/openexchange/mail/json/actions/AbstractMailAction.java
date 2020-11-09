@@ -90,6 +90,7 @@ import com.openexchange.mail.OAuthMailErrorCodes;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailActionConstants;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.utils.Column;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -112,7 +113,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAction.class);
 
-    protected static final String MODULE = "mail";
+    protected static final String MODULE = MailActionFactory.MODULE;
 
     private static final class MailInterfacePostProcessor implements AJAXRequestResultPostProcessor {
 

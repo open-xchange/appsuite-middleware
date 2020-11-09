@@ -84,7 +84,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true, publicSessionAuth = true)
-@OAuthAction(OAuthAction.GRANT_ALL)
+@RestrictedAction()
 public class ImageGetAction implements AJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageGetAction.class);

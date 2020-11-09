@@ -69,7 +69,7 @@ import com.openexchange.snippet.json.SnippetRequest;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.GRANT_ALL)
+@RestrictedAction()
 public final class ListAction extends SnippetAction {
 
     /**

@@ -82,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@OAuthAction(OAuthAction.CUSTOM)
+@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.READ, hasCustomOAuthScopeCheck = true)
 public final class NotifyAction extends AbstractFolderAction {
 
     /** The action identifier */

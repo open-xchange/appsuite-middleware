@@ -80,6 +80,7 @@ import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.mapper.AlarmMapper;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.EventID;
@@ -109,7 +110,8 @@ import com.openexchange.tools.session.ServerSession;
 @RestrictedAction(type = RestrictedAction.Type.READ, module = ChronosAction.MODULE)
 public abstract class ChronosAction extends AbstractChronosAction {
 
-    public static final String MODULE = "calendar";
+    public static final String MODULE = ChronosOAuthScope.MODULE;
+    
     protected static final String EVENT = "event";
 
     protected static final String EVENTS = "events";

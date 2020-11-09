@@ -88,7 +88,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @OAuthAction(OAuthAction.CUSTOM)
 @DispatcherNotes(enqueueable = true)
-@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE)
+@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE, hasCustomOAuthScopeCheck = true)
 public final class UpdateAction extends AbstractFolderAction implements EnqueuableAJAXActionService {
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;

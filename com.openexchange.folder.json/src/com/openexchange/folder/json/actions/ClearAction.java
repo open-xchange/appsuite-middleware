@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.CUSTOM)
+@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE, hasCustomOAuthScopeCheck = true)
 public final class ClearAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_CLEAR;

@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AbstractAJAXActionAnnotationProcessor;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.authentication.application.exceptions.AppPasswordExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
@@ -102,40 +103,43 @@ public class RestrictedActionAnnotationProcessor extends AbstractAJAXActionAnnot
             return; // Not a restricted session or an oAuth access, just return
         }
         RestrictedAction restrAction = action.getClass().getAnnotation(RestrictedAction.class);
-        String requiredScope = restrAction.type().val() + restrAction.module();
+        String requiredScope = restrAction.type().getScope(restrAction.module());
 
         // Return if grant all
         if (RestrictedAction.GRANT_ALL.equals(restrAction.module())) {
             return;
         }
 
-        if(restrParam != null) {
+        if (restrParam != null) {
             processAppPassswordRequest(requestData, restrParam, restrAction, requiredScope);
-        }else if(isOAuth != null) {
+        } else if (isOAuth != null) {
             processOAuthRequest(requestData, action, restrAction, requiredScope, session);
         }
     }
 
+    @SuppressWarnings("deprecation")
+    private static final String OAUTH_SUB_MODULE = "/" + OAuthConstants.OAUTH_SERVLET_SUBPREFIX;
+
     /**
      * Verifies that the incoming request, which is based on a session with restricted capabilities, is authorized to perform the requested action.
      *
-     * @param requestData
-     * @param restrParam
-     * @param restrAction
-     * @param requiredScope
-     * @throws OXException
+     * @param requestData The request data
+     * @param restrParam The {@link Session#PARAM_RESTRICTED} session parameter
+     * @param restrAction The {@link RestrictedAction}
+     * @param requiredScope The required scope
+     * @throws OXException In case the session is not authorized
      */
-    private void processAppPassswordRequest(AJAXRequestData requestData, Object restrParam, RestrictedAction restrAction, String requiredScope) throws OXException {
+    private static void processAppPassswordRequest(AJAXRequestData requestData, Object restrParam, @NonNull RestrictedAction restrAction, String requiredScope) throws OXException {
         // Use AppPasswordAnnotationProcessor only on requests against the "normal" API and not against oauth/modules/ sub-path.
         // Can be removed once the sub-path is no longer used
         HttpServletRequest servletRequest = requestData.optHttpServletRequest();
         if(servletRequest != null) {
-            if(servletRequest.getServletPath().contains(OAuthConstants.OAUTH_SERVLET_SUBPREFIX)) {
+            if (servletRequest.getServletPath().startsWith(OAUTH_SUB_MODULE)) {
                 return;
             }
         }
 
-        // Check if this action requires full auth.  If so, reject now
+        // Check if this action requires full auth and rejects the request if not
         if (RestrictedAction.REQUIRES_FULL_AUTH.equals(restrAction.module())) {
             throw AppPasswordExceptionCodes.NOT_AUTHORIZED.create(requiredScope);
         }
@@ -156,19 +160,19 @@ public class RestrictedActionAnnotationProcessor extends AbstractAJAXActionAnnot
     /**
      * Checks if the incoming oAuth request has sufficient permissions to perform annotated action.
      *
-     * @param requestData
-     * @param action
-     * @param restrAction
-     * @param requiredScope
-     * @param session
-     * @throws OXException
+     * @param requestData The {@link AJAXRequestData}
+     * @param action The {@link AJAXActionService}
+     * @param restrAction The {@link RestrictedAction} annotation of the action
+     * @param requiredScope Th required scope
+     * @param session The session to check
+     * @throws OXException in case the session is not authorized
      */
-    private void processOAuthRequest(AJAXRequestData requestData, AJAXActionService action, RestrictedAction restrAction, String requiredScope, ServerSession session) throws OXException {
+    private static void processOAuthRequest(AJAXRequestData requestData, AJAXActionService action, RestrictedAction restrAction, String requiredScope, ServerSession session) throws OXException {
         OAuthAccess oAuthAccess = requestData.getProperty(OAuthConstants.PARAM_OAUTH_ACCESS);
 
         if(oAuthAccess != null) {
             LOG.debug("OAuth access for module " + requestData.getModule() + " action:" + requestData.getAction() + " required:" + requiredScope);
-            if (restrAction.customOAuthScopeCheck() == true) {
+            if (restrAction.hasCustomOAuthScopeCheck()) {
                 for (Method method : action.getClass().getMethods()) {
                     if (method.isAnnotationPresent(OAuthScopeCheck.class)) {
                         if (hasScopeCheckSignature(method)) {
@@ -176,6 +180,7 @@ public class RestrictedActionAnnotationProcessor extends AbstractAJAXActionAnnot
                                 if (((Boolean) method.invoke(action, requestData, session, oAuthAccess)).booleanValue()) {
                                     return;
                                 }
+                                break;
                             } catch (InvocationTargetException e) {
                                 Throwable cause = e.getCause();
                                 if (cause instanceof OXException) {
@@ -187,9 +192,8 @@ public class RestrictedActionAnnotationProcessor extends AbstractAJAXActionAnnot
                                 LOG.error("Could not check scope", e);
                                 throw new OXException(e);
                             }
-                        } else {
-                            LOG.warn("Method ''{}.{}'' is annotated with @OAuthScopeCheck but its signature is invalid!", action.getClass(), method.getName());
                         }
+                        LOG.warn("Method ''{}.{}'' is annotated with @OAuthScopeCheck but its signature is invalid!", action.getClass(), method.getName());
                     }
                 }
                 throw new OAuthInsufficientScopeException(requiredScope);
@@ -202,8 +206,8 @@ public class RestrictedActionAnnotationProcessor extends AbstractAJAXActionAnnot
     /**
      * Checks whether the method annotated with @OAuthScopeCheck has the correct signature.
      *
-     * @param method
-     * @return whether the given signature is valid or not
+     * @param method The method to check
+     * @return <code>true</code> if the method is valid, <code>false</code> otherwise
      */
     private static boolean hasScopeCheckSignature(Method method) {
         if (Modifier.isPublic(method.getModifiers()) && method.getReturnType().isAssignableFrom(boolean.class)) {

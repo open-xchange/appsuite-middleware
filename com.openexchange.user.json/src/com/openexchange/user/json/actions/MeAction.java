@@ -63,7 +63,7 @@ import com.openexchange.user.json.dto.Me;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.GRANT_ALL)
+@RestrictedAction()
 public final class MeAction extends AbstractUserAction {
 
     /**

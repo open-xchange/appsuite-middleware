@@ -61,6 +61,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -78,6 +79,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 @RestrictedAction(module = IDBasedContactAction.MODULE, type = RestrictedAction.Type.READ)
 public abstract class ContactAction implements AJAXActionService {
+
+    protected static final String MODULE = ContactActionFactory.MODULE;
+
+    /** Named logger instance */
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactAction.class);
 
     private final ServiceLookup serviceLookup;
 
@@ -208,7 +214,7 @@ public abstract class ContactAction implements AJAXActionService {
     /**
      * Obtains a service from the local {@link ServiceLookup} instance and returns it. If the
      * service is not available, {@link ServiceExceptionCode#SERVICE_UNAVAILABLE} is thrown.
-     * 
+     *
      * @param <S> The service type
      * @param serviceClass The service class to obtain
      * @return The service

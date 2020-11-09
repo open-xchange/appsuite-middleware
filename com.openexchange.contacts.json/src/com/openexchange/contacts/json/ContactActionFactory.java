@@ -83,6 +83,8 @@ import com.openexchange.server.ServiceLookup;
 @OAuthModule
 public class ContactActionFactory implements AJAXActionServiceFactory {
 
+    public static final String MODULE = "contacts";
+
     /**
      * The read-only scope for OAuth requests
      */
