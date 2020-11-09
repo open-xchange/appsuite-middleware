@@ -91,6 +91,8 @@ In general, the communication that happens via a Web Socket connection implement
   
   So, basically a JSON array consisting of two elements. The first is the topic name and the second the arbitrary JSON-formatted payload.
 
+For further information, please check [here](https://socket.io/docs/internals/).
+
 #### Topc "ox:mail.new"
 
 The "ox:mail:new" is the reserved identifier of the Open-Xcange Middleware to deliver "new mail" events to the client.
