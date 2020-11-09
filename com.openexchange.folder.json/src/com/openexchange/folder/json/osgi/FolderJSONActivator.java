@@ -68,6 +68,7 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link FolderJSONActivator} - Activator for JSON folder interface.
@@ -113,6 +114,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
              */
             track(FileLimitService.class, new RegistryServiceTrackerCustomizer<FileLimitService>(context, getInstance(), FileLimitService.class));
             track(FolderService.class, new RegistryServiceTrackerCustomizer<FolderService>(context, getInstance(), FolderService.class));
+            track(UserService.class, new RegistryServiceTrackerCustomizer<UserService>(context, getInstance(), UserService.class));
             track(ContentTypeDiscoveryService.class, new RegistryServiceTrackerCustomizer<ContentTypeDiscoveryService>(
                 context,
                 getInstance(),

@@ -92,13 +92,14 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.EntityInfoLoader;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
+import com.openexchange.user.UserService;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -450,8 +451,6 @@ public final class FolderWriter {
 
     private static final TIntObjectMap<FolderFieldWriter> STATIC_WRITERS_MAP;
 
-    private static final Map<Integer, EntityInfoLoader> ENTITY_INFO_LOADERS = new HashMap<Integer, EntityInfoLoader>();
-
     private static final int[] ALL_FIELDS;
 
     static {
@@ -750,8 +749,8 @@ public final class FolderWriter {
             @Override
             public void writeField(JSONValuePutter jsonValue, UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 EntityInfo entityInfo = folder.getCreatedFrom();
-                if (null == entityInfo) {
-                    entityInfo = resolveEntityInfo(folder.getCreatedBy(), session);
+                if (null == entityInfo && 0 < folder.getCreatedBy()) {
+                    entityInfo = resolveEntityInfo(session, folder.getCreatedBy());
                 }
                 jsonValue.put(jsonValue.withKey() ? FolderField.CREATED_FROM.getName() : null, null == entityInfo ? JSONObject.NULL : entityInfo.toJSON());
             }
@@ -761,8 +760,8 @@ public final class FolderWriter {
             @Override
             public void writeField(JSONValuePutter jsonValue, UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 EntityInfo entityInfo = folder.getModifiedFrom();
-                if (null == entityInfo) {
-                    entityInfo = resolveEntityInfo(folder.getModifiedBy(), session);
+                if (null == entityInfo && 0 < folder.getModifiedBy()) {
+                    entityInfo = resolveEntityInfo(session, folder.getModifiedBy());
                 }
                 jsonValue.put(jsonValue.withKey() ? FolderField.MODIFIED_FROM.getName() : null, null == entityInfo ? JSONObject.NULL : entityInfo.toJSON());
             }
@@ -785,23 +784,19 @@ public final class FolderWriter {
     /**
      * Resolve entity information for given user identifier
      *
-     * @param forUserId The user identifier to get the entity info for
      * @param session The calling user's session
+     * @param forUserId The user identifier to get the entity info for
      * @return The entity information or <code>null</code> in case it cannot be resolved
      */
-    static EntityInfo resolveEntityInfo(int forUserId, ServerSession session) {
-        Integer ctxId = I(session.getContextId());
-        EntityInfoLoader loader = ENTITY_INFO_LOADERS.get(ctxId);
-        if (null == loader) {
-            loader = new EntityInfoLoader();
-            ENTITY_INFO_LOADERS.put(ctxId, loader);
-        }
+    static EntityInfo resolveEntityInfo(ServerSession session, int forUserId) {
         try {
-            return loader.load(forUserId, session);
+            User user = ServiceRegistry.getInstance().getService(UserService.class, true).getUser(forUserId, session.getContext());
+            EntityInfo.Type type = user.isGuest() ? (user.isAnonymousGuest() ? EntityInfo.Type.ANONYMOUS : EntityInfo.Type.GUEST) : EntityInfo.Type.USER;
+            return new EntityInfo(String.valueOf(user.getId()), user.getDisplayName(), null, user.getGivenName(), user.getSurname(), user.getMail(), user.getId(), null, type);
         } catch (OXException e) {
-            LOG.debug("Could not resolve entity information for user {} in context {}.", I(forUserId), ctxId);
-            return null;
+            LOG.debug("Error resolving entity information for user {} in context {}.", I(forUserId), I(session.getContextId()), e);
         }
+        return new EntityInfo(String.valueOf(forUserId), null, null, null, null, null, forUserId, null, EntityInfo.Type.USER);
     }
 
     static FolderObject turnIntoFolderObject(UserizedFolder folder) {
