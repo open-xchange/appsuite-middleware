@@ -112,7 +112,10 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
         }
         for (Attachment attachment : attachments) {
             if (attachment.getManagedId() == managedId) {
-                return new FileHolder(storage.getAttachmentStorage().loadAttachmentData(managedId), attachment.getSize(), attachment.getFormatType(), attachment.getFilename());
+                FileHolder fileHolder = new FileHolder(storage.getAttachmentStorage().loadAttachmentData(managedId), attachment.getSize(), attachment.getFormatType(), attachment.getFilename());
+                fileHolder.setDelivery("download");
+                fileHolder.setDisposition("attachment");
+                return fileHolder;
             }
         }
         throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(I(managedId), eventId, folder.getId());
