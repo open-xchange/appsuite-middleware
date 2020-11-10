@@ -71,13 +71,11 @@ public class UserComparison extends AbstractComparison implements Comparison<Use
         return MatchType.user;
     }
 
-    @SuppressWarnings("unused")
     @Override
     public void setArgument(UserComparisonArgument argument, Object value) {
         throw new UnsupportedOperationException("The '" + MatchType.user + "' comparison type can not have any arguments");
     }
 
-    @SuppressWarnings("unused")
     @Override
     public Object getArgument(UserComparisonArgument argument) {
         throw new UnsupportedOperationException("The '" + MatchType.user + "' comparison type does not have any arguments");

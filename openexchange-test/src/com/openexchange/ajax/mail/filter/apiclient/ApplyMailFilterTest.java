@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.apiclient;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static java.lang.Boolean.FALSE;
 import static org.junit.Assert.assertNull;
@@ -82,13 +83,19 @@ import com.openexchange.testing.httpclient.models.Result.ResultEnum;
 public class ApplyMailFilterTest extends AbstractMailFilterTest {
 
     /**
+     * Initializes a new {@link ApplyMailFilterTest}.
+     */
+    public ApplyMailFilterTest() {
+        super();
+    }
+
+    /**
      * Tests the apply mailfilter action
      *
      * @throws ApiException
      */
     @Test
     public void testApplyMailfilterAction() throws ApiException {
-
         // Create a new mail folder
         NewFolderBody body = new NewFolderBody();
         NewFolderBodyFolder folder = new NewFolderBodyFolder();
@@ -103,11 +110,11 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
         String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
         File f = new File(testMailDir, "mailfilter1.eml");
         Assert.assertTrue(f.exists());
-        MailImportResponse importResponse = mailApi.importMail(getSessionId(), folderId, f, null, true);
+        MailImportResponse importResponse = mailApi.importMail(getSessionId(), folderId, f, null, B(true));
         Assert.assertNull(importResponse.getErrorDesc(), importResponse.getError());
         f = new File(testMailDir, "mailfilter2.eml");
         Assert.assertTrue(f.exists());
-        importResponse = mailApi.importMail(getSessionId(), folderId, f, null, true);
+        importResponse = mailApi.importMail(getSessionId(), folderId, f, null, B(true));
         Assert.assertNull(importResponse.getErrorDesc(), importResponse.getError());
         List<MailDestinationData> data = importResponse.getData();
         Assert.assertNotNull(data);

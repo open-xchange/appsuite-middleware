@@ -72,13 +72,11 @@ public class MatchesComparison extends AbstractComparison implements Comparison<
         return MatchType.matches;
     }
 
-    @SuppressWarnings("unused")
     @Override
     public void setArgument(MatchesComparisonArgument argument, Object value) {
         throw new UnsupportedOperationException("The '" + MatchType.matches + "' comparison type can not have any arguments");
     }
 
-    @SuppressWarnings("unused")
     @Override
     public Object getArgument(MatchesComparisonArgument argument) {
         throw new UnsupportedOperationException("The '" + MatchType.matches + "' comparison type does not have any arguments");

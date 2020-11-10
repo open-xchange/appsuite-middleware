@@ -69,7 +69,6 @@ public class KeepParserImpl implements ActionParser {
         super();
     }
 
-    @SuppressWarnings("unused")
     @Override
     public Action<KeepActionArgument> parse(JSONObject jsonObject) throws JSONException {
         return new Keep();

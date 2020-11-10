@@ -69,7 +69,6 @@ public class StopParserImpl implements ActionParser {
         super();
     }
 
-    @SuppressWarnings("unused")
     @Override
     public Action<StopActionArgument> parse(JSONObject jsonObject) throws JSONException {
         return new Stop();

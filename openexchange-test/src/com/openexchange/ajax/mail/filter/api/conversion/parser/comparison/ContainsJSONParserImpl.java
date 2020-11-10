@@ -67,7 +67,6 @@ public class ContainsJSONParserImpl implements ComparisonParser {
         super();
     }
 
-    @SuppressWarnings("unused")
     @Override
     public ContainsComparison parse(JSONObject jsonObject) throws JSONException {
         return new ContainsComparison();
