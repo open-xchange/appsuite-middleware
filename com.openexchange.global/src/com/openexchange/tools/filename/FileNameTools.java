@@ -111,7 +111,6 @@ public class FileNameTools {
                     char nc = fileNameToCheck.charAt(i + 1);
                     if (Character.isSurrogatePair(ch, nc)) {
                         k--;
-                        i++;
                         int codePoint = Character.toCodePoint(ch, nc);
                         if (isAllowedUnicodeBlock(codePoint)) {
                             if (null != sb) {
@@ -120,6 +119,7 @@ public class FileNameTools {
                         } else {
                             sb = appendOrReplaceCodePoint(codePoint, len, fileNameToCheck, i, sb);
                         }
+                        i++;
                     } else {
                         sb = appendOrReplaceCharacter(ch, len, fileNameToCheck, i, sb);
                     }
