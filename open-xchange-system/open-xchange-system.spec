@@ -16,7 +16,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: coreutils
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 26
+%define        ox_release 27
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -77,6 +77,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %ghost /opt/open-xchange/etc/scr_db
 
 %changelog
+* Tue Nov 03 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-11-09 (5890)
 * Tue Oct 20 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-10-26 (5887)
 * Tue Oct 06 2020 Marcus Klein <marcus.klein@open-xchange.com>

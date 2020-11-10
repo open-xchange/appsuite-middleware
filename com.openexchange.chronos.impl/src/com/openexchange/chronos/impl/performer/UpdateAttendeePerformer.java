@@ -216,17 +216,19 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
          */
         resultTracker.trackUpdate(originalEvent, updatedEvent);
         if (isSeriesException(originalEvent)) {
-            Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
+            Event originalSeriesMaster = optEventData(originalEvent.getSeriesId());
             if (isReply(originalAttendee, updatedAttendee)) {
                 schedulingHelper.trackReply(updatedEvent, originalSeriesMaster, originalAttendee, updatedAttendee);
             }
             /*
              * also 'touch' the series master in case of an exception update
              */
-            resultTracker.rememberOriginalEvent(originalSeriesMaster);
-            touch(originalEvent.getSeriesId());
-            Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId());
-            resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
+            if (null != originalSeriesMaster) {
+                resultTracker.rememberOriginalEvent(originalSeriesMaster);
+                touch(originalEvent.getSeriesId());
+                Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId());
+                resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
+            }
         } else {
             schedulingHelper.trackReply(updatedEvent, originalAttendee, updatedAttendee);
         }
