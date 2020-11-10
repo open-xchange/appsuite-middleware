@@ -127,12 +127,19 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
         ConversionService conversionService = getServiceSafe(ConversionService.class);
         DataHandler ox2jsonDataHandler = conversionService.getDataHandler(DataHandlers.OXEXCEPTION2JSON);
         DataHandler json2oxDataHandler = conversionService.getDataHandler(DataHandlers.JSON2OXEXCEPTION);
-        this.errorHandler = new FileStorageAccountErrorHandler(ox2jsonDataHandler, json2oxDataHandler, this, session, retryAfterError);
+        //@formatter:off
+        this.errorHandler = new FileStorageAccountErrorHandler(ox2jsonDataHandler,
+            json2oxDataHandler,
+            this,
+            session,
+            retryAfterError,
+            new FileStorageAccountErrorHandler.IgnoreExceptionPrefixes("SES"));
+        //@formatter:on
     }
 
     /**
      * Gets the underlying filestorage account.
-     * 
+     *
      * @return The file storage account
      */
     public FileStorageAccount getAccount() {
@@ -141,7 +148,7 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
 
     /**
      * Gets a {@link SubscribedHelper} suitable for the connected file storage account.
-     * 
+     *
      * @return The subscribed helper
      */
     public SubscribedHelper getSubscribedHelper() {
@@ -189,7 +196,7 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
 
     /**
      * Gets a {@link JSONObject} providing additional arbitrary metadata of the account for clients.
-     * 
+     *
      * @return The metadata
      */
     public JSONObject getMetadata() throws OXException {

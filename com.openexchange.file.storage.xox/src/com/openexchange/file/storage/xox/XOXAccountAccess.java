@@ -58,6 +58,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.conversion.ConversionService;
@@ -119,13 +120,14 @@ public class XOXAccountAccess implements CapabilityAware {
      * @param retryAfterError The amount of seconds after which accessing an error afflicted account should be retried.
      * @throws OXException If services are missing
      */
-    public XOXAccountAccess(/* @formatter:off */
+    //@formatter:off
+    public XOXAccountAccess(
                             FileStorageService service,
                             ServiceLookup services,
                             FileStorageAccount account,
                             Session session,
                             int retryAfterError
-                            /*@formatter:on*/) throws OXException {
+                            ) throws OXException {
         this.service = Objects.requireNonNull(service, "service must not be null");
         this.account = Objects.requireNonNull(account, "account must not be null");
         this.session = Objects.requireNonNull(session, "session must not be null");
@@ -134,8 +136,16 @@ public class XOXAccountAccess implements CapabilityAware {
         ConversionService conversionService = services.getServiceSafe(ConversionService.class);
         DataHandler ox2jsonDataHandler = conversionService.getDataHandler(DataHandlers.OXEXCEPTION2JSON);
         DataHandler json2oxDataHandler = conversionService.getDataHandler(DataHandlers.JSON2OXEXCEPTION);
-        this.errorHandler = new FileStorageAccountErrorHandler(ox2jsonDataHandler, json2oxDataHandler, this, session, retryAfterError);
+        this.errorHandler = new FileStorageAccountErrorHandler(ox2jsonDataHandler,
+            json2oxDataHandler,
+            this,
+            session,
+            retryAfterError,
+            new FileStorageAccountErrorHandler.CompositingFilter()
+                .add(new FileStorageAccountErrorHandler.IgnoreExceptionPrefixes("SES"))
+                .add(new FileStorageAccountErrorHandler.IgnoreExceptionCodes(ApiClientExceptions.SESSION_EXPIRED)));
     }
+    //@formatter:on
 
     /**
      * Gets the {@link Session}
