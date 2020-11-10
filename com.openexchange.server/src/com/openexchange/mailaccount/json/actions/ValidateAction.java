@@ -197,7 +197,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
                 }
             }
 
-            checkNeededFields(accountDescription);
+            checkNeededFields(accountDescription, false);
 
             if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
                 // Deny validation of Unified Mail account

@@ -47,49 +47,61 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.impl.imip.osgi;
+package com.openexchange.mail.compose.impl.storage.db.filecache;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.scheduling.TransportProvider;
-import com.openexchange.chronos.scheduling.impl.imip.IMipTransportProvider;
-import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.contact.ContactService;
-import com.openexchange.html.HtmlService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
-import com.openexchange.version.VersionService;
+import java.util.Optional;
+import java.util.UUID;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SchedulingIMipActivator}
+ * {@link FileCache} - A file cache storing very big message contents for database-backed composition space storage.
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.3
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.5
  */
-public class SchedulingIMipActivator extends HousekeepingActivator {
+public interface FileCache {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SchedulingIMipActivator.class);
+    /** The file name prefix */
+    public static final String FILE_NAME_PREFIX = "open-xchange-tmpcscontent-";
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ICalService.class, RecurrenceService.class };
-    }
+    /**
+     * Gets the optional cached content for given arguments.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The cached content or empty
+     * @throws OXException If loading cached content fails fatally
+     */
+    Optional<String> getCachedContent(UUID compositionSpaceId, int userId, int contextId) throws OXException;
 
-    @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class[] { ContactService.class, HtmlService.class, UserService.class, VersionService.class, LeanConfigurationService.class };
-    }
+    /**
+     * Stores given content in cache.
+     *
+     * @param content The content to store
+     * @param compositionSpaceId The composition space identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if content has been successfully cached; otherwise <code>false</code>
+     * @throws OXException If store attempt fails
+     */
+    boolean storeCachedContent(String content, UUID compositionSpaceId, int userId, int contextId) throws OXException;
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOGGER.info("Starting transport provider for iMIP");
+    /**
+     * Deletes cached content for given arguments.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If deletion fails
+     */
+    void deleteCachedContent(UUID compositionSpaceId, int userId, int contextId) throws OXException;
 
-        /*
-         * Register TransportProvider
-         */
-        registerService(TransportProvider.class, new IMipTransportProvider(this));
-    }
+    /**
+     * Signals that application is going to be stopped.
+     *
+     * @throws OXException If operation fails fatally
+     */
+    void signalStop() throws OXException;
 
 }

@@ -114,9 +114,10 @@ public class MailAccountJsonUtility {
      * Checks validity of values for needed fields.
      *
      * @param accountDescription The account description
+     * @param checkForPrimaryAddress <code>true</code> to check for primary address presence; otherwise <code>false</code>
      * @throws OXException If a needed field's value is invalid
      */
-    public static void checkNeededFields(final MailAccountDescription accountDescription) throws OXException {
+    public static void checkNeededFields(final MailAccountDescription accountDescription, boolean checkForPrimaryAddress) throws OXException {
         // Check needed fields
         if (isEmpty(accountDescription.getMailServer())) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.MAIL_URL);
@@ -127,7 +128,7 @@ public class MailAccountJsonUtility {
         if (isEmpty(accountDescription.getPassword()) && false == accountDescription.isMailOAuthAble()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.PASSWORD);
         }
-        if (isEmpty(accountDescription.getPrimaryAddress())) {
+        if (checkForPrimaryAddress && isEmpty(accountDescription.getPrimaryAddress())) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.PRIMARY_ADDRESS);
         }
     }

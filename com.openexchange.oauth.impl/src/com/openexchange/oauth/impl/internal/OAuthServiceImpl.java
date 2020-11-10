@@ -308,7 +308,7 @@ public class OAuthServiceImpl implements OAuthService {
             String userIdentity = service.getUserIdentity(session, -1, account.getToken(), account.getSecret());
             account.setUserIdentity(userIdentity);
 
-            DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData);
+            DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData, false);
             if (existingAccount == null) {
                 oauthAccountStorage.storeAccount(session, account);
             } else {
@@ -411,11 +411,11 @@ public class OAuthServiceImpl implements OAuthService {
      * @throws OXException if an error is occurred
      */
     private DefaultOAuthAccount getExistingAccount(Session session, String userIdentity, String serviceMetaData, int accountId) throws OXException {
-        DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData);
+        DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData, false);
         if (existingAccount == null) {
-            // Try by account id if provided; should always be present in case of 'reauthorize'
+            // Try by account identifier if provided; should always be present in case of 'reauthorize'
             if (accountId > 0) {
-                existingAccount = (DefaultOAuthAccount) oauthAccountStorage.getAccount(session, accountId);
+                existingAccount = (DefaultOAuthAccount) oauthAccountStorage.getAccount(session, accountId, false);
             }
         }
         return existingAccount;

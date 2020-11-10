@@ -303,7 +303,7 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
             accountDescription.setPassword(tokenInfo.getToken());
         }
 
-        checkNeededFields(accountDescription);
+        checkNeededFields(accountDescription, false);
     }
 
     private static void fillTransportServerCredentials(MailAccountDescription accountDescription, ServerSession session, boolean invalidate) throws OXException {

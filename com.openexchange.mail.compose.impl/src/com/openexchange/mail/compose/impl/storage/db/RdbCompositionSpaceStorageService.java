@@ -49,14 +49,17 @@
 
 package com.openexchange.mail.compose.impl.storage.db;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageService;
@@ -70,6 +73,8 @@ import com.openexchange.mail.compose.MessageField;
 import com.openexchange.mail.compose.impl.storage.AbstractCompositionSpaceStorageService;
 import com.openexchange.mail.compose.impl.storage.ImmutableCompositionSpace;
 import com.openexchange.mail.compose.impl.storage.ImmutableMessage;
+import com.openexchange.mail.compose.impl.storage.db.filecache.FileCache;
+import com.openexchange.mail.compose.impl.storage.db.filecache.FileCacheImpl;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -85,6 +90,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
 
     private final DBProvider dbProvider;
     private final AttachmentStorageService attachmentStorageService;
+    private final FileCache fileCache;
 
     /**
      * Initializes a new {@link RdbCompositionSpaceStorageService}.
@@ -92,11 +98,13 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
      * @param dbProvider The provider for connections to database
      * @param attachmentStorageService The attachment storage service to use
      * @param services The service look-up
+     * @throws OXException If initialization fails
      */
-    public RdbCompositionSpaceStorageService(DBProvider dbProvider, AttachmentStorageService attachmentStorageService, ServiceLookup services) {
+    public RdbCompositionSpaceStorageService(DBProvider dbProvider, AttachmentStorageService attachmentStorageService, ServiceLookup services) throws OXException {
         super(services);
         this.dbProvider = dbProvider;
         this.attachmentStorageService = attachmentStorageService;
+        fileCache = new FileCacheImpl(this, services);
     }
 
     private CompositionSpaceDbStorage newDbStorageFor(Session session) {
@@ -109,6 +117,15 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         } catch (@SuppressWarnings("unused") Exception e) {
             // Ignore...
         }
+    }
+
+    /**
+     * Signals that application is going to be stopped.
+     *
+     * @throws OXException If operation fails fatally
+     */
+    public void signalStop() throws OXException {
+        fileCache.signalStop();
     }
 
     /**
@@ -138,6 +155,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         }
 
         MessageDescription m = cs.getMessage();
+        applyCachedContent(m, id, session);
         List<Attachment> attachmentsToUpdate = resolveAttachments(m, Optional.empty(), session);
         Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
         ImmutableCompositionSpace ics = new ImmutableCompositionSpace(id, message, cs.getLastModified().getTime());
@@ -165,9 +183,13 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
 
         List<CompositionSpace> spaces = new ArrayList<>(size);
         boolean attachmentsQueried = MessageField.isContained(fieldsToQuery, MessageField.ATTACHMENTS);
+        boolean contentQueried = MessageField.isContained(fieldsToQuery, MessageField.CONTENT);
         List<CompositionSpaceContainer> toUpdate = null;
         for (CompositionSpaceContainer cs : containers) {
             MessageDescription m = cs.getMessage();
+            if (contentQueried) {
+                applyCachedContent(m, cs.getUuid(), session);
+            }
             if (attachmentsQueried) {
                 List<Attachment> attachmentsToUpdate = resolveAttachments(m, Optional.empty(), session);
                 if (!attachmentsToUpdate.isEmpty()) {
@@ -206,7 +228,9 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         CompositionSpaceContainer csc = new CompositionSpaceContainer();
         csc.setLastModified(new Date(System.currentTimeMillis()));
         if (compositionSpaceDesc != null) {
-            csc.setUuid(null == compositionSpaceDesc.getUuid() ? UUID.randomUUID() : compositionSpaceDesc.getUuid());
+            UUID compositionSpaceId = null == compositionSpaceDesc.getUuid() ? UUID.randomUUID() : compositionSpaceDesc.getUuid();
+            prepareContentFrom(compositionSpaceDesc, dbStorage, compositionSpaceId, session);
+            csc.setUuid(compositionSpaceId);
             csc.setMessage(compositionSpaceDesc.getMessage());
         } else {
             csc.setUuid(UUID.randomUUID());
@@ -227,6 +251,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         }
 
         CompositionSpaceDbStorage dbStorage = newDbStorageFor(session);
+        prepareContentFrom(compositionSpaceDesc, dbStorage, compositionSpaceDesc.getUuid(), session);
         CompositionSpaceContainer cs = dbStorage.updateCompositionSpace(CompositionSpaceContainer.fromCompositionSpaceDescription(compositionSpaceDesc), true);
 
         MessageDescription m = cs.getMessage();
@@ -246,14 +271,20 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
 
     @Override
     public boolean closeCompositionSpace(Session session, UUID id) throws OXException {
-        CompositionSpaceDbStorage dbStorage = newDbStorageFor(session);
-        return dbStorage.delete(id);
+        try {
+            CompositionSpaceDbStorage dbStorage = newDbStorageFor(session);
+            return dbStorage.delete(id);
+        } finally {
+            deleteCachedContentSafe(session, id);
+        }
     }
 
     @Override
     public List<UUID> deleteExpiredCompositionSpaces(Session session, long maxIdleTimeMillis) throws OXException {
         CompositionSpaceDbStorage dbStorage = newDbStorageFor(session);
-        return dbStorage.deleteExpired(maxIdleTimeMillis);
+        List<UUID> deletedOnes = dbStorage.deleteExpired(maxIdleTimeMillis);
+        deletedOnes.forEach(compositionSpaceId -> deleteCachedContentSafe(session, compositionSpaceId));
+        return deletedOnes;
     }
 
     /**
@@ -315,7 +346,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         AttachmentStorage attachmentStorage = attachmentStorageService.getAttachmentStorageFor(session);
         List<Attachment> attachmentsToSet = new ArrayList<>(size);
         boolean modified = false;
-        for (Attachment attachment : attachmentStorage.getAttachments(getIdsFrom(availableAttachments, size), optionalEncrypt, session)) {
+        for (Attachment attachment : attachmentStorage.getAttachments(getIdsFrom(availableAttachments), optionalEncrypt, session)) {
             if (null == attachment) {
                 modified = true;
             } else {
@@ -328,19 +359,57 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
             return Collections.emptyList();
         }
 
-        List<Attachment> attachmentsToUpdate = new ArrayList<>(attachmentsToSet.size());
-        for (Attachment attachment : attachmentsToSet) {
-            attachmentsToUpdate.add(DefaultAttachment.createWithId(attachment.getId(), null));
-        }
-        return attachmentsToUpdate;
+        return attachmentsToSet.stream().map(attachment -> DefaultAttachment.createWithId(attachment.getId(), null)).collect(Collectors.toList());
     }
 
-    private List<UUID> getIdsFrom(List<Attachment> availableAttachments, int size) {
-        List<UUID> ids = new ArrayList<>(size);
-        for (Attachment a : availableAttachments) {
-            ids.add(a.getId());
+    private List<UUID> getIdsFrom(List<Attachment> availableAttachments) {
+        return availableAttachments.stream().map(a -> a.getId()).collect(Collectors.toList());
+    }
+
+    // ----------------------------------------------- File cache stuff --------------------------------------------------------------------
+
+    private void applyCachedContent(MessageDescription m, UUID id, Session session) throws OXException {
+        Optional<String> cachedContent = fileCache.getCachedContent(id, session.getUserId(), session.getContextId());
+        if (cachedContent.isPresent()) {
+            m.setContent(cachedContent.get());
         }
-        return ids;
+    }
+
+    private void prepareContentFrom(CompositionSpaceDescription compositionSpaceDesc, CompositionSpaceDbStorage dbStorage, UUID id, Session session) throws OXException {
+        MessageDescription messageDesc = compositionSpaceDesc.getMessage();
+        if (messageDesc == null) {
+            return;
+        }
+
+        if (!messageDesc.containsContent() && messageDesc.getContent() == null) {
+            return;
+        }
+
+        String content = messageDesc.getContent();
+        if (Strings.isEmpty(content)) {
+            return;
+        }
+
+        long maxAllowedPacketSize = dbStorage.getMaxAllowedPacketSize();
+        if (maxAllowedPacketSize > 0) {
+            // Keep a buffer for non-binary portion of the package
+            maxAllowedPacketSize = (long) (maxAllowedPacketSize * 0.66);
+        }
+
+        if (maxAllowedPacketSize > 0 && (content.length() > maxAllowedPacketSize || content.getBytes(StandardCharsets.UTF_8).length > maxAllowedPacketSize)) {
+            boolean stored = fileCache.storeCachedContent(content, id, session.getUserId(), session.getContextId());
+            if (stored) {
+                messageDesc.setContent("");
+            }
+        }
+    }
+
+    private void deleteCachedContentSafe(Session session, UUID id) {
+        try {
+            fileCache.deleteCachedContent(id, session.getUserId(), session.getContextId());
+        } catch (Exception e) {
+            // Ignore...
+        }
     }
 
 }

@@ -92,6 +92,7 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 import com.openexchange.version.VersionService;
+import com.sun.mail.smtp.SMTPMessage;
 
 /**
  * {@link MimeMessageBuilder} - builds the actual mail based on the given data
@@ -110,13 +111,13 @@ public class MimeMessageBuilder {
      */
     public MimeMessageBuilder() {
         super();
-        this.mime = new MimeMessage(MimeDefaultSession.getDefaultSession());
+        this.mime = new SMTPMessage(MimeDefaultSession.getDefaultSession());
     }
 
     /**
      * Set the <code>FROM</code> header
      * 
-     * @param originator The {@link CalendarUser} who sends the message
+     * @param originator The {@link CalendarUser} who the message originated from
      * @return This {@link MimeMessageBuilder} instance
      * @throws OXException If mail is missing
      */
@@ -146,6 +147,24 @@ public class MimeMessageBuilder {
             mime.setRecipients(RecipientType.TO, addresses);
         } catch (MessagingException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Recipient email could not be set", e);
+        }
+        return this;
+    }
+
+    /**
+     * Set the <code>SENDER</code> header
+     * 
+     * @param sender The {@link InternetAddress} who sends the message
+     * @return This {@link MimeMessageBuilder} instance
+     * @throws OXException If mail is missing
+     */
+    public MimeMessageBuilder setSender(InternetAddress sender) throws OXException {
+        try {
+            if (sender != null) {
+                mime.setSender(sender);
+            }
+        } catch (MessagingException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Sender email could not be set", e);
         }
         return this;
     }

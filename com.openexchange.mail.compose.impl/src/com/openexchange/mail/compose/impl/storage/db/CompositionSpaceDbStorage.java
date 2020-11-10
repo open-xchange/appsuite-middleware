@@ -117,6 +117,18 @@ public class CompositionSpaceDbStorage {
         this.context = getContext(contextId);
     }
 
+    public long getMaxAllowedPacketSize() throws OXException {
+        Connection connection = dbProvider.getReadConnection(context);
+        try {
+            return Databases.getMaxAllowedPacketSize(connection);
+        } catch (SQLException e) {
+            LoggerHolder.LOG.error("Failed to retrieve the value for 'max_allowed_packet' setting. Assuming \"-1\" instead.", e);
+            return -1L;
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
     public int countAll() throws OXException {
         Connection connection = dbProvider.getReadConnection(context);
         try {
@@ -143,6 +155,17 @@ public class CompositionSpaceDbStorage {
         Connection connection = dbProvider.getReadConnection(context);
         try {
             return isContentEncrypted(connection, compositionSpaceId);
+        } catch (SQLException e) {
+            throw handleException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    public boolean exists(UUID compositionSpaceId) throws OXException {
+        Connection connection = dbProvider.getReadConnection(context);
+        try {
+            return exists(connection, compositionSpaceId);
         } catch (SQLException e) {
             throw handleException(e);
         } finally {
@@ -419,6 +442,18 @@ public class CompositionSpaceDbStorage {
                 }
 
                 return rs.getBoolean(1);
+            }
+        }
+    }
+
+    private boolean exists(Connection connection, UUID compositionSpaceId) throws SQLException {
+        String sql = "SELECT 1 FROM compositionSpace WHERE cid=? AND user=? AND uuid=?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setBytes(3, UUIDs.toByteArray(compositionSpaceId));
+            try (ResultSet rs = stmt.executeQuery()) {
+                return (rs.next());
             }
         }
     }
