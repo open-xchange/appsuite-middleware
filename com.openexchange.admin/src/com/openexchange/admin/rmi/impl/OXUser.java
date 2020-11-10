@@ -66,13 +66,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterfaceExtended;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
+import com.openexchange.admin.properties.PropertyScope;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -120,6 +122,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
@@ -2450,7 +2453,34 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /**
      * Property name black list REGEX. Taken from the oxsysreport
      */
-    private static final Pattern PROPERTY_BLACK_LIST = Pattern.compile("[pP]assword[[:blank:]]*|[sS]ecret[[:blank:]]*|[kK]ey[[:blank:]]*|secretSource[[:blank:]]*|secretRandom[[:blank:]]*|[sS]alt[[:blank:]]*|SSLKey(Pass|Name)[[:blank:]]*|[lL]ogin[[:blank:]]*");
+    private static final Pattern PROPERTY_NAME_BLACK_LIST = Pattern.compile("[pP]assword[[:blank:]]*|[pP]asswd[[:blank:]]*|[sS]ecret[[:blank:]]*|[kK]ey[[:blank:]]*|secretSource[[:blank:]]*|secretRandom[[:blank:]]*|[sS]alt[[:blank:]]*|SSLKey(Pass|Name)[[:blank:]]*|[lL]ogin[[:blank:]]*|[uU]ser[[:blank:]]*");
+
+    private static final List<String> PROPERTY_VALUE_BLACK_LIST_TOKENS = ImmutableList.of("user", "login", "password", "passwd", "secret", "key");
+
+    private static boolean isBlacklisted(ConfigurationProperty property, Optional<Pattern> optionalAdditionalConfigCheckPattern) {
+        if (PROPERTY_NAME_BLACK_LIST.matcher(property.getName()).find()) {
+            return true;
+        }
+
+        // Optional<Boolean> found = optionalAdditionalConfigCheckPattern.map((p) -> Boolean.valueOf(p.matcher(property.getName()).find()));
+        if (optionalAdditionalConfigCheckPattern.isPresent() && optionalAdditionalConfigCheckPattern.get().matcher(property.getName()).find()) {
+            return true;
+        }
+
+        String value = Strings.asciiLowerCase(property.getValue());
+        StringBuilder tokenBuilder = new StringBuilder();
+        for (String token : PROPERTY_VALUE_BLACK_LIST_TOKENS) {
+            tokenBuilder.setLength(0);
+            if (value.indexOf(tokenBuilder.append(token).append('=').toString()) >= 0) {
+                return true;
+            }
+            tokenBuilder.setLength(0);
+            if (value.indexOf(tokenBuilder.append(token).append(':').toString()) >= 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      *
@@ -2465,8 +2495,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new InvalidDataException("Invalid context id.");
         }
 
-        List<UserProperty> userProperties = new ArrayList<UserProperty>();
-
         Credentials auth = credentials == null ? new Credentials(EMPTY_STRING, EMPTY_STRING) : credentials;
 
         try {
@@ -2480,17 +2508,25 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final CapabilityService capabilityService = AdminServiceRegistry.getInstance().getService(CapabilityService.class);
             if (capabilityService == null) {
                 log(LogLevel.WARNING, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), null, "CapabilityService absent. Unable to retrieve user configuration.");
-                return userProperties;
+                return Collections.emptyList();
             }
-            List<ConfigurationProperty> capabilitiesSource = capabilityService.getConfigurationSource(user_id, ctx.getId().intValue(), searchPattern);
 
+            Optional<Pattern> optionalAdditionalConfigCheckPattern = Optional.empty();
+            try {
+                String regex = AdminProperties.optScopedProperty(AdminProperties.User.ADDITIONAL_CONFIG_CHECK_REGEX, PropertyScope.propertyScopeForDefaultSearchPath(user_id, ctx.getId().intValue()), String.class);
+                optionalAdditionalConfigCheckPattern = Optional.ofNullable(Strings.isEmpty(regex) ? null : Pattern.compile(regex.trim()));
+            } catch (PatternSyntaxException e) {
+                log(LogLevel.WARNING, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), e, "Unable to compile the value of the '{}' property to a regular expression.", AdminProperties.User.ADDITIONAL_CONFIG_CHECK_REGEX);
+            }
+
+            List<ConfigurationProperty> capabilitiesSource = capabilityService.getConfigurationSource(user_id, ctx.getId().intValue(), searchPattern);
+            List<UserProperty> userProperties = new ArrayList<UserProperty>(capabilitiesSource.size());
             for (ConfigurationProperty property : capabilitiesSource) {
-                Matcher m = PROPERTY_BLACK_LIST.matcher(property.getName());
-                String value = m.find() ? "<OBFUSCATED>" : property.getValue();
+                String value = isBlacklisted(property, optionalAdditionalConfigCheckPattern) ? "<OBFUSCATED>" : property.getValue();
                 userProperties.add(new UserProperty(property.getScope(), property.getName(), value, property.getMetadata()));
             }
 
-            Collections.sort(userProperties, new OXUserPropertySorter());
+            Collections.sort(userProperties, OXUserPropertySorter.getInstance());
 
             return userProperties;
         } catch (OXException e) {

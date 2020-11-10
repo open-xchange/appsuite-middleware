@@ -66,7 +66,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -984,36 +983,38 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      */
     @Override
     public List<ConfigurationProperty> getConfigurationSource(int userId, int contextId, String searchPattern) throws OXException {
-        List<ConfigurationProperty> properties = new ArrayList<ConfigurationProperty>();
         ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
         if (configViews == null) {
-            return properties;
+            return Collections.emptyList();
         }
 
         ConfigView view = configViews.getView(userId, contextId);
         if (view == null) {
-            return properties;
+            return Collections.emptyList();
         }
 
         Map<String, ComposedConfigProperty<String>> all = view.all();
-        for (Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+        List<ConfigurationProperty> properties = new ArrayList<ConfigurationProperty>(all.size());
+        for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
             String key = entry.getKey();
-
-            if (!StringUtils.containsIgnoreCase(key, searchPattern)) {
-                continue;
+            if (StringUtils.containsIgnoreCase(key, searchPattern)) {
+                ComposedConfigProperty<String> property = entry.getValue();
+                String value = property.get();
+                if ((property.getScope() == null) && (value == null)) {
+                    LOG.info("Scope and value for property '{}' are null. Going to ignore it", key);
+                } else {
+                    List<String> metadataNames = property.getMetadataNames();
+                    if (metadataNames.isEmpty()) {
+                        properties.add(new ConfigurationProperty(property.getScope(), key, value, ImmutableMap.of()));
+                    } else {
+                        ImmutableMap.Builder<String, String> metadata = ImmutableMap.builderWithExpectedSize(metadataNames.size());
+                        for (String metadataName : property.getMetadataNames()) {
+                            metadata.put(metadataName, property.get(metadataName));
+                        }
+                        properties.add(new ConfigurationProperty(property.getScope(), key, value, metadata.build()));
+                    }
+                }
             }
-            ComposedConfigProperty<String> property = entry.getValue();
-            String value = property.get();
-            if ((property.getScope() == null) && (value == null)) {
-                LOG.info("Scope and value for property {} null. Going to ignore it", key);
-                continue;
-            }
-
-            Map<String, String> metadata = property.getMetadataNames().isEmpty() ? ImmutableMap.of() : new HashMap<>(4);
-            for (String metadataName : property.getMetadataNames()) {
-                metadata.put(metadataName, property.get(metadataName));
-            }
-            properties.add(new ConfigurationProperty(property.getScope(), key, value, metadata));
         }
         return properties;
     }

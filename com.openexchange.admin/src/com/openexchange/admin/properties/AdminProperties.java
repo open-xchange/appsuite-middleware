@@ -49,8 +49,11 @@
 
 package com.openexchange.admin.properties;
 
+import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.config.cascade.ConfigViews;
 
 /**
  * This class will hold the properties setting from now on
@@ -137,6 +140,7 @@ public class AdminProperties {
         public static final String DEFAULT_TIMEZONE = "DEFAULT_TIMEZONE";
         public static final String ENABLE_ADMIN_MAIL_CHECKS = "com.openexchange.admin.enableAdminMailChecks";
         public static final String ADDITIONAL_EMAIL_CHECK_REGEX = "com.openexchange.admin.additionalEmailCheckRegex";
+        public static final String ADDITIONAL_CONFIG_CHECK_REGEX = "com.openexchange.admin.additionalConfigCheckRegex";
     }
 
     /**
@@ -154,17 +158,31 @@ public class AdminProperties {
             return null;
         }
 
+        Optional<List<String>> optionalScopes = propertyScope.getScopes();
         try {
+            // Obtain config-cascade view
             com.openexchange.config.cascade.ConfigView view = viewFactory.getView(propertyScope.getUserId(), propertyScope.getContextId());
-            for (String scope : propertyScope.getScopes()) {
-                com.openexchange.config.cascade.ConfigProperty<T> configProperty = view.property(scope, propertyName, coerceTo);
-                if (false == configProperty.isDefined()) {
-                    continue;
+
+            // Determine appropriate property value w/ or w/o given scopes
+            if (optionalScopes.isPresent()) {
+                // Scopes given
+                for (String scope : optionalScopes.get()) {
+                    com.openexchange.config.cascade.ConfigProperty<T> configProperty = view.property(scope, propertyName, coerceTo);
+                    if (false == configProperty.isDefined()) {
+                        continue;
+                    }
+                    return configProperty.get();
                 }
-                return configProperty.get();
+            } else {
+                // No scopes given. Follow regular search path
+                return ConfigViews.getDefinedPropertyFrom(propertyName, view, coerceTo);
             }
         } catch (Exception e) {
-            LoggerHolder.LOG.warn("Unable to get the value of the '{}' property for the '{}' scope(s)!", propertyName, propertyScope.getScopes(), e);
+            if (optionalScopes.isPresent()) {
+                LoggerHolder.LOG.warn("Unable to get the value of the '{}' property for the '{}' scope(s)!", propertyName, optionalScopes.get(), e);
+            } else {
+                LoggerHolder.LOG.warn("Unable to get the value of the '{}' property!", propertyName, e);
+            }
         }
         return null;
     }

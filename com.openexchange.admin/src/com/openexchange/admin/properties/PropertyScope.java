@@ -50,6 +50,7 @@
 package com.openexchange.admin.properties;
 
 import java.util.List;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -103,11 +104,22 @@ public class PropertyScope {
         return new PropertyScope(userId, contextId, SCOPES_FROM_USER);
     }
 
+    /**
+     * Gets the property scope for default search path.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The property scope
+     */
+    public static PropertyScope propertyScopeForDefaultSearchPath(int userId, int contextId) {
+        return new PropertyScope(userId, contextId, null);
+    }
+
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final int contextId;
     private final int userId;
-    private final List<String> scopes;
+    private final Optional<List<String>> optionalScopes;
 
     /**
      * Initializes a new {@link PropertyScope}.
@@ -120,7 +132,7 @@ public class PropertyScope {
         super();
         this.userId = userId;
         this.contextId = contextId;
-        this.scopes = scopes;
+        this.optionalScopes = Optional.ofNullable(scopes);
     }
 
     /**
@@ -142,11 +154,13 @@ public class PropertyScope {
     }
 
     /**
-     * Gets the scopes.
+     * Gets the optional scopes to iterate.
+     * <p>
+     * If absent/empty the regular search path is taken.
      *
      * @return The scopes
      */
-    public List<String> getScopes() {
-        return scopes;
+    public Optional<List<String>> getScopes() {
+        return optionalScopes;
     }
 }
