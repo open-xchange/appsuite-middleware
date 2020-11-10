@@ -2304,9 +2304,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 stmt = null;
                 rs = null;
             }
-            Set<String> capsToInsert = new HashSet<>(capsToAdd);
+
+            Set<String> capsToInsert = capsToAdd != null ? new HashSet<>(capsToAdd) : new HashSet<>();
             // Delete existing ones
-            if (null != capsToRemove && !capsToRemove.isEmpty()) {
+            if (null != capsToRemove && false == capsToRemove.isEmpty()) {
                 for (String cap : capsToRemove) {
                     if (existing.contains(cap)) {
                         if (null == stmt) {
@@ -2339,7 +2340,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 }
             }
             // Insert new ones
-            if (!capsToInsert.isEmpty()) {
+            if (!capsToInsert.isEmpty() && capsToAdd != null && false == capsToAdd.isEmpty()) {
                 for (String capToAdd : capsToAdd) {
                     String minusCap = "-" + capToAdd;
                     if (existing.contains(minusCap)) {
@@ -2395,7 +2396,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         int resellerId = i(resellerAdmin.getId());
         PreparedStatement stmt = null;
         try {
-            if (resellerAdmin.isConfigurationToRemoveSet() && false == resellerAdmin.getConfigurationToRemove().isEmpty()) {
+            if (resellerAdmin.isConfigurationToRemoveSet() && null != resellerAdmin.getConfigurationToRemove() && false == resellerAdmin.getConfigurationToRemove().isEmpty()) {
                 Set<String> keys = resellerAdmin.getConfigurationToRemove().stream().filter(p -> !p.startsWith("com.openexchange.capability")).collect(Collectors.toSet());
                 String sql = "DELETE FROM subadmin_config_properties WHERE sid = ? AND propertyKey IN (";
                 stmt = connection.prepareStatement(Databases.getIN(sql, keys.size()) + ";");
@@ -2409,7 +2410,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 stmt = null;
             }
 
-            if (resellerAdmin.isConfigurationToAddSet() && false == resellerAdmin.getConfigurationToAdd().isEmpty()) {
+            if (resellerAdmin.isConfigurationToAddSet() && null != resellerAdmin.getConfigurationToAdd() && false == resellerAdmin.getConfigurationToAdd().isEmpty()) {
                 stmt = connection.prepareStatement("INSERT INTO subadmin_config_properties (sid, propertyKey, propertyValue) VALUES (?,?,?) ON DUPLICATE KEY UPDATE propertyKey=?, propertyValue=?;");
                 stmt.setInt(1, resellerId);
                 for (Entry<String, String> entry : resellerAdmin.getConfigurationToAdd().entrySet()) {
@@ -2446,7 +2447,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         int resellerId = i(resellerAdmin.getId());
         PreparedStatement stmt = null;
         try {
-            if (resellerAdmin.isTaxonomiesToRemoveSet() && false == resellerAdmin.getTaxonomiesToRemove().isEmpty()) {
+            if (resellerAdmin.isTaxonomiesToRemoveSet() && null != resellerAdmin.getTaxonomiesToRemove() && false == resellerAdmin.getTaxonomiesToRemove().isEmpty()) {
                 Set<String> keys = resellerAdmin.getTaxonomiesToRemove();
                 String sql = "DELETE FROM subadmin_taxonomies WHERE sid = ? AND taxonomy IN (";
                 stmt = connection.prepareStatement(Databases.getIN(sql, keys.size()) + ";");
@@ -2460,7 +2461,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 stmt = null;
             }
 
-            if (resellerAdmin.isTaxonomiesToAddSet() && false == resellerAdmin.getTaxonomiesToAdd().isEmpty()) {
+            if (resellerAdmin.isTaxonomiesToAddSet() && null != resellerAdmin.getTaxonomiesToAdd() && false == resellerAdmin.getTaxonomiesToAdd().isEmpty()) {
                 stmt = connection.prepareStatement("INSERT INTO subadmin_taxonomies (sid, taxonomy) VALUES (?,?) ON DUPLICATE KEY UPDATE taxonomy=?;");
                 stmt.setInt(1, resellerId);
                 for (String entry : resellerAdmin.getTaxonomiesToAdd()) {
