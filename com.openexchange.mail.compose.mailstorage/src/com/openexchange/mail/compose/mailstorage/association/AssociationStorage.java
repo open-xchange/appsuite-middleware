@@ -118,7 +118,7 @@ public class AssociationStorage implements IAssociationStorage {
     static void handleEvictedAssociation(CompositionSpaceToDraftAssociation association, CompositionSpaceServiceFactory compositionSpaceServiceFactory) {
         try {
             CompositionSpaceService compositionSpaceService = compositionSpaceServiceFactory.createServiceFor(association.getSession());
-            compositionSpaceService.saveCompositionSpaceToDraftMail(association.getCompositionSpaceId(), Optional.empty(), true);
+            compositionSpaceService.saveCompositionSpaceToDraftMail(association.getCompositionSpaceId(), Optional.empty(), false);
             LoggerHolder.LOG.debug("Saved draft for evicted composition space association: {}", UUIDs.getUnformattedString(association.getCompositionSpaceId()));
         } catch (Exception e) {
             LoggerHolder.LOG.error("Error while saving draft on eviction of composition space asociation: {}", UUIDs.getUnformattedString(association.getCompositionSpaceId()), e);
