@@ -70,6 +70,18 @@ public class LookUpResult {
         return new LookUpResult(null, false, associationStorage);
     }
 
+    /**
+     * Create the look-up result for given arguments.
+     *
+     * @param association The "composition space to draft" association
+     * @param fromCache Whether the association was fetched from cache or not
+     * @param associationStorage The association storage from which the association was looked-up
+     * @return The look-up result
+     */
+    public static final LookUpResult resultFor(CompositionSpaceToDraftAssociation association, boolean fromCache, IAssociationStorage associationStorage) {
+        return association == null ? emptyResult(associationStorage) : new LookUpResult(association, fromCache, associationStorage);
+    }
+
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final CompositionSpaceToDraftAssociation association;
@@ -83,7 +95,7 @@ public class LookUpResult {
      * @param fromCache Whether the association was fetched from cache or not
      * @param associationStorage The association storage from which the association was looked-up
      */
-    public LookUpResult(CompositionSpaceToDraftAssociation association, boolean fromCache, IAssociationStorage associationStorage) {
+    private LookUpResult(CompositionSpaceToDraftAssociation association, boolean fromCache, IAssociationStorage associationStorage) {
         super();
         this.association = association;
         this.fromCache = fromCache;

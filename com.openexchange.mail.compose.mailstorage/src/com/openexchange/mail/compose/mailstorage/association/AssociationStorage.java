@@ -188,15 +188,18 @@ public class AssociationStorage implements IAssociationStorage {
     @Override
     public Optional<CompositionSpaceToDraftAssociation> delete(UUID compositionSpaceId, Session session, boolean ensureExistent) throws OXException {
         CompositionSpaceToDraftAssociation removedAssociation = associations.asMap().remove(compositionSpaceId);
+
         if (null == removedAssociation) {
+            // No such association
             if (ensureExistent) {
                 throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(getUnformattedString(compositionSpaceId));
             }
-        } else {
-            removedAssociation.getFileCacheReference().ifPresent(r -> r.cleanUp());
+            return Optional.empty();
         }
 
-        return Optional.ofNullable(removedAssociation);
+        removedAssociation.getFileCacheReference().ifPresent(r -> r.cleanUp());
+        removedAssociation.invalidate();
+        return Optional.of(removedAssociation);
     }
 
 }

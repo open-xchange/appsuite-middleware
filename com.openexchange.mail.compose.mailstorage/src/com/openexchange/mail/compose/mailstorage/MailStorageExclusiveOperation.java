@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose.mailstorage;
 
+import static com.openexchange.java.util.UUIDs.getUnformattedString;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -137,6 +138,11 @@ public class MailStorageExclusiveOperation {
                 LockResult lockResult = lock.lock();
                 try {
                     if (LockResult.IMMEDIATE_ACQUISITION == lockResult) {
+                        // Check validity
+                        if (association.isInvalid()) {
+                            throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(getUnformattedString(compositionSpaceId));
+                        }
+
                         // Execute operation to assign storage result to local variable
                         MailStorageResult<V> storageResult = callable.call(lookUpResult, compositionSpaceService.getMailStorage(), session);
 
@@ -170,13 +176,13 @@ public class MailStorageExclusiveOperation {
                     }
 
                     // Lock could not be immediately acquired. Need to re-fetch association to be sure newest one is handled.
-                    lookUpResult = compositionSpaceService.getCompositionSpaceToDraftAssociation(compositionSpaceId);
+                    lookUpResult = compositionSpaceService.requireCompositionSpaceToDraftAssociation(compositionSpaceId);
                     association = lookUpResult.getAssociation();
                 } catch (MissingDraftException e) {
                     lookUpResult.getAssociationStorage().delete(compositionSpaceId, session, false);
                     if (lookUpResult.isFromCache()) {
                         // Cache entry might be outdated => reload & retry
-                        lookUpResult = compositionSpaceService.getCompositionSpaceToDraftAssociation(compositionSpaceId);
+                        lookUpResult = compositionSpaceService.requireCompositionSpaceToDraftAssociation(compositionSpaceId);
                         association = lookUpResult.getAssociation();
                     } else {
                         throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create(e);
@@ -194,7 +200,7 @@ public class MailStorageExclusiveOperation {
                 exponentialBackoffWait(++retryCount, 1000L);
 
                 // Reload & retry
-                lookUpResult = compositionSpaceService.getCompositionSpaceToDraftAssociation(compositionSpaceId);
+                lookUpResult = compositionSpaceService.requireCompositionSpaceToDraftAssociation(compositionSpaceId);
                 association = lookUpResult.getAssociation();
             }
         } while (true);

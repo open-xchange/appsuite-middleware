@@ -202,16 +202,18 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
         final Optional<CacheReference> fileCacheReference;
         final DraftMetadata draftMetadata;
         final boolean validate;
+        final boolean invalid;
 
         /**
          * Initializes a new {@link AssociationVariants}.
          */
-        AssociationVariants(MailPath draftPath, Optional<CacheReference> fileCacheReference, DraftMetadata draftMetadata, boolean validate) {
+        AssociationVariants(MailPath draftPath, Optional<CacheReference> fileCacheReference, DraftMetadata draftMetadata, boolean validate, boolean invalid) {
             super();
             this.draftPath = draftPath;
             this.fileCacheReference = fileCacheReference;
             this.draftMetadata = draftMetadata;
             this.validate = validate;
+            this.invalid = invalid;
         }
     }
 
@@ -233,7 +235,7 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
         this.compositionSpaceId = compositionSpaceId;
         this.contextId = contextId;
         this.userId = userId;
-        this.variants = new AtomicReference<>(new AssociationVariants(draftPath, cacheReference, draftMetadata, validate));
+        this.variants = new AtomicReference<>(new AssociationVariants(draftPath, cacheReference, draftMetadata, validate, false));
         this.session = session;
         lock = new AssociationLock();
         hash = 0;
@@ -253,7 +255,23 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
             Optional<CacheReference> fileCacheReference = associationUpdate.containsFileCacheReference() ? associationUpdate.getFileCacheReference() : prev.fileCacheReference;
             DraftMetadata draftMetadata = associationUpdate.containsDraftMetadata() ? associationUpdate.getDraftMetadata() : prev.draftMetadata;
             boolean validate = associationUpdate.containsValidate() ? associationUpdate.isValidate() : prev.validate;
-            newVariants = new AssociationVariants(draftPath, fileCacheReference, draftMetadata, validate);
+            newVariants = new AssociationVariants(draftPath, fileCacheReference, draftMetadata, validate, prev.invalid);
+        } while (!variants.compareAndSet(prev, newVariants));
+    }
+
+    /**
+     * Invalidates this association.
+     */
+    void invalidate() {
+        AssociationVariants prev;
+        AssociationVariants newVariants;
+        do {
+            prev = variants.get();
+            MailPath draftPath = prev.draftPath;
+            Optional<CacheReference> fileCacheReference = prev.fileCacheReference;
+            DraftMetadata draftMetadata = prev.draftMetadata;
+            boolean validate = prev.validate;
+            newVariants = new AssociationVariants(draftPath, fileCacheReference, draftMetadata, validate, true);
         } while (!variants.compareAndSet(prev, newVariants));
     }
 
@@ -311,6 +329,15 @@ public class CompositionSpaceToDraftAssociation implements ValidateAwareMailStor
     @Override
     public boolean needsValidation() {
         return variants.get().validate;
+    }
+
+    /**
+     * Checks if this association is marked as invalid (associated composition space has been closed).
+     *
+     * @return <code>true</code> if invalid; otherwise <code>false</code>
+     */
+    public boolean isInvalid() {
+        return variants.get().invalid;
     }
 
     /**
