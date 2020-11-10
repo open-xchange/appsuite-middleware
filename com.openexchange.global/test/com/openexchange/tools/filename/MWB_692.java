@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,38 +47,35 @@
  *
  */
 
-package com.openexchange.global;
+package com.openexchange.tools.filename;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.exception.interception.Bug50893Test;
-import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
-import com.openexchange.global.tools.id.IDManglerTest;
-import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
-import com.openexchange.i18n.I18nServiceRegistryTest;
-import com.openexchange.sessiond.SessionFilterTest;
-import com.openexchange.tools.filename.Bug53791Test;
-import com.openexchange.tools.filename.Bug55271Test;
-import com.openexchange.tools.filename.MWB_692;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import org.junit.Test;
 
 /**
- * {@link UnitTests}
+ * {@link MWB_692}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.5
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    IDManglerTest.class,
-    MergingSearchIteratorTest.class,
-    OXExceptionInterceptorRegistrationTest.class,
-    SessionFilterTest.class,
-    Bug50893Test.class,
-    Bug53791Test.class,
-    Bug55271Test.class,
-    com.openexchange.tools.filename.Bug56499Test.class,
-    com.openexchange.tools.filename.Bug58052Test.class,
-    I18nServiceRegistryTest.class,
-    MWB_692.class
-})
-public class UnitTests {
+public class MWB_692 {
+
+    @Test
+    public void testUTF16withSanitizing() {
+        String filename = "ab\ud83c\udc00cd";
+        CharsetEncoder utf16Encoder = Charset.forName("UTF-16").newEncoder();
+        String sanitized = FileNameTools.sanitizeFilename(filename);
+        try {
+            utf16Encoder.encode(CharBuffer.wrap(sanitized));
+            assertEquals("Unexpected result: " + sanitized, "ab_cd", sanitized);
+        } catch (CharacterCodingException e) {
+            fail(e.getMessage());
+        }
+    }
+
 }
