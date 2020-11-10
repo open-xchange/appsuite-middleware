@@ -414,6 +414,20 @@ properties:
       file: AdminUser.properties
       packageName: open-xchange-admin
       tags: ["Admin", "User"]
+    - key: com.openexchange.admin.additionalConfigCheckRegex
+      description: |
+        Regex that can be specified by the administration to specify a regular expression that is additionally applied when checking for
+        sane property when calling c.o.admin.rmi.OXUserInterface.getUserConfigurationSource(); e.g. via "getuserconfigurationsource"
+        command-line tool.
+        
+      defaultValue:
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: AdminUser.properties
+      packageName: open-xchange-admin
+      tags: ["Admin", "User"]
     - key: DEFAULT_PASSWORD_MECHANISM
       description: |
         Defines the hash algorithm that will be used to hash the user password.
