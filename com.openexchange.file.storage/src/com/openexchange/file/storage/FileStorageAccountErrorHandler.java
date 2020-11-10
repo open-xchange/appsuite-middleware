@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -64,7 +65,11 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.session.Session;
+
+import static com.openexchange.java.Autoboxing.b;
+import static com.openexchange.java.Autoboxing.B;
 
 /**
  * {@link FileStorageAccountErrorHandler} - provides functionality to handle and persist errors occurred while accessing a {@link FileStorageAccount}
@@ -81,63 +86,136 @@ public class FileStorageAccountErrorHandler {
     private final Session session;
     private final DataHandler json2error;
     private final DataHandler error2json;
-
-    /* a a static list of error prefix which should be ignored */
-    private static final List<String> IGNORED_ERROR_PREFIX = new ArrayList<>(Arrays.asList(
-        "SES" /* do not store session related exceptions */
-    ));
+    private final Function<OXException, Boolean> shouldSaveExceptionFunc;
 
     /**
-     * {@link ErrorHandledOperation} - represents an operation for which error handling is applied
+     * {@link CompositingFilter} - A compositing filter function which allows to set more than one filter functions.
      *
      * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
      * @since v7.10.5
-     * @param <T> The result type of the operation
      */
-    public static abstract class ErrorHandledOperation<T> {
+    public static class CompositingFilter implements Function<OXException, Boolean> {
+
+        private final List<Function<OXException, Boolean>> functions;
 
         /**
-         * Executes the operation
-         *
-         * @return The result of the operation
-         * @throws OXException
+         * Initializes a new {@link CompositingFilter}.
          */
-        protected abstract T execute() throws OXException;
+        public CompositingFilter() {
+            this.functions = new ArrayList<>();
+        }
 
         /**
-         * Executes the operation and applies necessary error handling
+         * Initializes a new {@link CompositingFilter}.
          *
-         * @param errorHandler The {@link FileStorageAccountErrorHandler} to use for applying error handling
-         * @return T The result of the operation
-         * @throws OXException
+         * @param functions The filter functions to use
          */
-        public T executeOperation(FileStorageAccountErrorHandler errorHandler) throws OXException {
-            errorHandler.assertNoRecentException();
-            try {
-                return execute();
-            } catch (OXException e) {
-                throw errorHandler.handleException(e);
+        public CompositingFilter(List<Function<OXException, Boolean>> functions) {
+            this.functions = functions;
+        }
+
+        /**
+         * Adds a new filter function
+         *
+         * @param function The function to add
+         * @return this
+         */
+        public CompositingFilter add(Function<OXException, Boolean> function) {
+            functions.add(function);
+            return this;
+        }
+
+        @Override
+        public Boolean apply(OXException t) {
+            if (functions != null) {
+                for (Function<OXException, Boolean> function : functions) {
+                    if (function.apply(t) == Boolean.FALSE) {
+                        return Boolean.FALSE;
+                    }
+                }
             }
+            return Boolean.TRUE;
         }
     }
 
     /**
-     * Executes an {@link ErrorHandledOperation} with error handling applied
+     * {@link IgnoreExceptionPrefixes} - Defines a {@link Function} which will ignore certain {@link OXException} based on their prefix ({@link OXException#getPrefix()}).
      *
-     * @param <T> The result type of the operation
-     * @param operation The operation to apply
-     * @return The result of the operation
-     * @throws OXException In case the operation throws an {@link OXException}
+     * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+     * @since v7.10.5
      */
-    public <T> T executeOperation(ErrorHandledOperation<T> operation) throws OXException {
-        return operation.executeOperation(this);
+    public static class IgnoreExceptionPrefixes implements Function<OXException, Boolean> {
+
+        private final List<String> ignoredPrefixes;
+
+        /**
+         * Initializes a new {@link IgnoreExceptionPrefixes}.
+         *
+         * @param ignoredPrefixes A list of exception prefixes to ignore
+         */
+        public IgnoreExceptionPrefixes(List<String> ignoredPrefixes) {
+            this.ignoredPrefixes = ignoredPrefixes;
+        }
+
+        /**
+         * Initializes a new {@link IgnoreExceptionPrefixes}.
+         *
+         * @param ignoredPrefixes A list of exception prefixes to ignore
+         */
+        public IgnoreExceptionPrefixes(String... ignoredPrefixes) {
+            this.ignoredPrefixes = Arrays.asList(ignoredPrefixes);
+        }
+
+        @Override
+        public Boolean apply(OXException exception) {
+            return B(exception != null && !ignoredPrefixes.contains(exception.getPrefix()));
+        }
     }
 
     /**
-     * Initializes a new {@link FileStorageAccountErrorHandler}.
+     * {@link IgnoreExceptionCodes} - A filter function which will ignore certain {@link OXExceptionCode}s.
+     *
+     * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+     * @since v7.10.5
+     */
+    public static class IgnoreExceptionCodes implements Function<OXException, Boolean> {
+
+        private final List<OXExceptionCode> ignoredCodes;
+
+        /**
+         * Initializes a new {@link IgnoreExceptionCodes}.
+         *
+         * @param ignoredCodes The list of {@link OXExceptionCode}s to ignore.
+         */
+        public IgnoreExceptionCodes(List<OXExceptionCode> ignoredCodes) {
+            this.ignoredCodes = ignoredCodes;
+        }
+
+        /**
+         * Initializes a new {@link IgnoreExceptionCodes}.
+         *
+         * @param ignoredCodes The list of {@link OXExceptionCode}s to ignore.
+         */
+        public IgnoreExceptionCodes(OXExceptionCode... ignoredCodes) {
+            this.ignoredCodes = Arrays.asList(ignoredCodes);
+        }
+
+        @Override
+        public Boolean apply(OXException exception) {
+            if (exception != null && ignoredCodes != null) {
+                if (ignoredCodes.stream().anyMatch(code -> exception.similarTo(code))) {
+                    return Boolean.FALSE;
+                }
+            }
+            return Boolean.TRUE;
+        }
+    }
+
+    /**
+     * Initializes a new {@link FileStorageAccountErrorHandler} which handles all errors.
      *
      * @param error2jsonDataHandler A {@link DataHandler} which will used to serialize an error
-     * @param json2errorDataHandler A {@link DataHandler} which will used to de-serialze an error
+     * @param json2errorDataHandler A {@link DataHandler} which will used to de-serialize an error
      * @param accountAccess The related {@link XOXAccountAccess}
      * @param session The {@link Session}
      * @param retryAfterError The amount of time in seconds after which an persistent account error should be ignored.
@@ -149,11 +227,34 @@ public class FileStorageAccountErrorHandler {
             FileStorageAccountAccess accountAccess,
             Session session,
             int retryAfterError) {
+        this(error2jsonDataHandler, json2errorDataHandler, accountAccess, session, retryAfterError, (e) -> Boolean.TRUE);
+    }
+    //@formatter:on
+
+    /**
+     * Initializes a new {@link FileStorageAccountErrorHandler}.
+     *
+     * @param error2jsonDataHandler A {@link DataHandler} which will used to serialize an error
+     * @param json2errorDataHandler A {@link DataHandler} which will used to de-serialize an error
+     * @param accountAccess The related {@link XOXAccountAccess}
+     * @param session The {@link Session}
+     * @param retryAfterError The amount of time in seconds after which an persistent account error should be ignored.
+     * @param A {@link Function} indicating which errors should be handled and saved.
+     */
+    //@formatter:off
+    public FileStorageAccountErrorHandler(
+            DataHandler error2jsonDataHandler,
+            DataHandler json2errorDataHandler,
+            FileStorageAccountAccess accountAccess,
+            Session session,
+            int retryAfterError,
+            Function<OXException, Boolean> shouldSaveExceptionFunc) {
         this.json2error = Objects.requireNonNull(json2errorDataHandler, "json2errorDataHandler must not be null");
         this.error2json = Objects.requireNonNull(error2jsonDataHandler, "error2JsonDataHandler must not be null");
         this.accountAccess = Objects.requireNonNull(accountAccess, "accountAccess must not be null");
         this.session = Objects.requireNonNull(session, "session must not be null");
         this.retryAfterError = retryAfterError;
+        this.shouldSaveExceptionFunc = shouldSaveExceptionFunc;
     }
     //@formatter:on
 
@@ -164,12 +265,18 @@ public class FileStorageAccountErrorHandler {
      * @return <code>True</code> if the exception should be stored to the DB, <code>false</code> otherwise
      */
     private boolean shouldSaveException(OXException exception) {
-        if (exception != null && !IGNORED_ERROR_PREFIX.contains(exception.getPrefix())) {
-            return true;
+        if (exception != null && shouldSaveExceptionFunc != null) {
+            return b(shouldSaveExceptionFunc.apply(exception));
         }
         return false;
     }
 
+    /**
+     * Internal method to get the related {@link FileStorageAccount}
+     *
+     * @return The related {@link FileStorageAccount}
+     * @throws OXException
+     */
     private FileStorageAccount getAccount() throws OXException {
         return accountAccess.getService().getAccountManager().getAccount(accountAccess.getAccountId(), session);
     }
