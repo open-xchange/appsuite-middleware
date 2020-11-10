@@ -809,7 +809,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
 
             LookUpResult lookUpResult = getCompositionSpaceToDraftAssociation(compositionSpaceId);
             checkStorageQuota(lookUpResult.getAssociation(), attachmentDesc.getSize(), attachmentDesc.getContentDisposition());
-            checkMaxMailSize(lookUpResult.getAssociation(), attachmentDesc.getSize(), attachmentDesc.getContentDisposition());
+            checkMaxMailSize(lookUpResult.getAssociation(), attachmentDesc.getSize());
 
             Attachment newAttachment = null;
             try {
@@ -865,7 +865,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         long additionalBytes = uploadedAttachments.getRawTotalBytes() - oldAttachmentMeta.get().getSize();
         if (additionalBytes > 0) {
             checkStorageQuota(association, uploadedAttachments.getRawTotalBytes(), contentDisposition);
-            checkMaxMailSize(association, uploadedAttachments.getRawTotalBytes(), contentDisposition);
+            checkMaxMailSize(association, uploadedAttachments.getRawTotalBytes());
         }
 
         Attachment newAttachment = null;
@@ -910,7 +910,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         LookUpResult lookUpResult = getCompositionSpaceToDraftAssociation(compositionSpaceId);
         ContentDisposition contentDisposition = ContentDisposition.dispositionFor(disposition);
         checkStorageQuota(lookUpResult.getAssociation(), uploadedAttachments.getRawTotalBytes(), contentDisposition);
-        checkMaxMailSize(lookUpResult.getAssociation(), uploadedAttachments.getRawTotalBytes(), contentDisposition);
+        checkMaxMailSize(lookUpResult.getAssociation(), uploadedAttachments.getRawTotalBytes());
 
         List<Attachment> newAttachments = spoolUploadFiles(compositionSpaceId, uploadedAttachments, contentDisposition);
         if (newAttachments.isEmpty()) {
@@ -985,7 +985,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         }
     }
 
-    private void checkMaxMailSize(CompositionSpaceToDraftAssociation association, long additionalBytes, ContentDisposition disposition) throws OXException {
+    private void checkMaxMailSize(CompositionSpaceToDraftAssociation association, long additionalBytes) throws OXException {
         if (!MailStorageCompositionSpaceConfig.getInstance().isEagerUploadChecksEnabled()) {
             LOG.debug("Skipping max mail size check because eager upload checks are disabled: {}", association);
             return;
@@ -1013,47 +1013,48 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         }
 
         IAssociationStorage associationStorage = associationStorageManager.getStorageFor(session);
+        CompositionSpaceToDraftAssociation azzociation = association;
         do {
-            AssociationLock lock = association.getLock();
+            AssociationLock lock = azzociation.getLock();
             LockResult lockResult = lock.lock();
             try {
                 if (LockResult.IMMEDIATE_ACQUISITION == lockResult) {
-                    if (association.getOptionalDraftMetadata().isPresent()) {
-                        LOG.debug("Draft metadata is already contained in association: {}", association);
-                        return association;
+                    if (azzociation.getOptionalDraftMetadata().isPresent()) {
+                        LOG.debug("Draft metadata is already contained in association: {}", azzociation);
+                        return azzociation;
                     }
 
-                    MailStorageResult<MessageInfo> storageResult = mailStorage.getMessage(association, session);
-                    LOG.debug("Loaded missing draft metadata for association: {}", association);
+                    MailStorageResult<MessageInfo> storageResult = mailStorage.getMessage(azzociation, session);
+                    LOG.debug("Loaded missing draft metadata for association: {}", azzociation);
 
                     warnings.addAll(storageResult.getWarnings());
                     MessageInfo messageInfo = storageResult.getResult();
                     DraftMetadata draftMetadata = DraftMetadata.fromMessageInfo(messageInfo);
 
                     CompositionSpaceToDraftAssociationUpdate update =
-                        new CompositionSpaceToDraftAssociationUpdate(association.getCompositionSpaceId())
+                        new CompositionSpaceToDraftAssociationUpdate(azzociation.getCompositionSpaceId())
                         .setDraftMetadata(draftMetadata)
                         .setValidate(false);
                     associationStorage.update(update);
-                    return association;
+                    return azzociation;
                 }
 
                 // Lock could not be immediately acquired
-                if (association.getOptionalDraftMetadata().isPresent()) {
-                    LOG.debug("Draft metadata is already contained in association: {}", association);
-                    return association;
+                if (azzociation.getOptionalDraftMetadata().isPresent()) {
+                    LOG.debug("Draft metadata is already contained in association: {}", azzociation);
+                    return azzociation;
                 }
-                Optional<CompositionSpaceToDraftAssociation> optionalAssociation = associationStorage.opt(association.getCompositionSpaceId(), session);
-                association = optionalAssociation.orElse(null);
+                Optional<CompositionSpaceToDraftAssociation> optionalAssociation = associationStorage.opt(azzociation.getCompositionSpaceId(), session);
+                azzociation = optionalAssociation.orElse(null);
             } catch (MissingDraftException e) {
                 if (isRetry) {
                     throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create(e);
                 }
 
                 // retry once as cache result might be outdated
-                associationStorage.delete(association.getCompositionSpaceId(), session, false);
+                associationStorage.delete(azzociation.getCompositionSpaceId(), session, false);
                 LOG.debug("Loading missing draft metadata for association failed. Retrying: {}");
-                CompositionSpaceToDraftAssociation reloadedAssociation = getCompositionSpaceToDraftAssociation(association.getCompositionSpaceId()).getAssociation();
+                CompositionSpaceToDraftAssociation reloadedAssociation = getCompositionSpaceToDraftAssociation(azzociation.getCompositionSpaceId()).getAssociation();
                 return ensureDraftMetadataIsSet(reloadedAssociation, true);
             } finally {
                 lock.unlock();
