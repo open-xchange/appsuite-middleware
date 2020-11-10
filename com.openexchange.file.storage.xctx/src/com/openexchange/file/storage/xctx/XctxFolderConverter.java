@@ -98,11 +98,13 @@ public class XctxFolderConverter extends FolderConverter {
         UserizedFileStorageFolder storageFolder = super.getStorageFolder(folder);
         storageFolder.setCacheable(Boolean.FALSE);
         /*
-         * qualify remote entities for usage in local session in storage account's context & erase ambiguous numerical identifiers
+         * enhance & qualify remote entities for usage in local session in storage account's context & erase ambiguous numerical identifiers
          */
-        storageFolder.setCreatedFrom(entityHelper.mangleRemoteEntity(folder.getCreatedFrom()));
-        storageFolder.setCreatedBy(0);
-        storageFolder.setModifiedFrom(entityHelper.mangleRemoteEntity(folder.getModifiedFrom()));
+        storageFolder.setCreatedFrom(entityHelper.mangleRemoteEntity(null == folder.getCreatedFrom() && 0 < folder.getCreatedBy() ? 
+            entityHelper.optEntityInfo(guestSession, folder.getCreatedBy(), false) : folder.getCreatedFrom()));
+        storageFolder.setCreatedBy(0);        
+        storageFolder.setModifiedFrom(entityHelper.mangleRemoteEntity(null == folder.getModifiedFrom() && 0 < folder.getModifiedBy() ? 
+            entityHelper.optEntityInfo(guestSession, folder.getModifiedBy(), false) : folder.getModifiedFrom()));
         storageFolder.setModifiedBy(0);
         /*
          * exchange remote guest user id with local session user's id in own permissions

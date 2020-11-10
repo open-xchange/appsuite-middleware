@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.xctx;
 
+import static com.openexchange.java.Autoboxing.I;
+import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -82,6 +84,22 @@ public class EntityHelper extends XctxEntityHelper {
     public EntityHelper(XctxAccountAccess accountAccess) {
         super(accountAccess.getService().getId(), accountAccess.getAccountId(), (String) accountAccess.getAccount().getConfiguration().get("url"));
         this.accountAccess = accountAccess;
+    }
+
+    /**
+     * Resolves and builds additional entity info for a certain user or group under perspective of the passed session's user.
+     * 
+     * @param session The session to use to resolve the entities in
+     * @param entity The identifier of the entity to resolve
+     * @param isGroup <code>true</code> if the entity refers to a group, <code>false</code>, otherwise
+     * @return The entity info, or <code>null</code> if the referenced entity could not be resolved
+     */
+    public EntityInfo optEntityInfo(Session session, int entity, boolean isGroup) {
+        if (0 > entity || 0 == entity && false == isGroup) {
+            getLogger(EntityHelper.class).warn("Unable to lookup entity info for {}", I(entity));
+            return null;
+        }
+        return lookupEntity(session, entity, isGroup);
     }
 
     /**
