@@ -61,13 +61,13 @@ com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:calend
 That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
 via Web Socket, but not for "new appointment".
 
-#### Payloads for known topics
+#### Web Socket payloads for known topics
 
 This section describes the payloads transferred via Web Socket packets for well-known topics. 
 
 ##### Socket.IO
 
-In general, the communication that happens via a Web Socket connection implements the Socket.IO-specified protocol. Socket.IO itself is a library that enables real-time, bidirectional and event-based communication between the browser and the server by adding additional metadata to each packet.
+In general, the communication that happens via a Web Socket connection implements the Socket.IO-specified protocol. Socket.IO itself is a library that enables real-time, bidirectional and event-based communication between the browser and the server.
 
 - Client establishes a Web Socket connection; e.g.:
   
@@ -78,7 +78,7 @@ In general, the communication that happens via a Web Socket connection implement
 - Server responds with first Socket.IO packet providing JSON-formatted meta-data about newly opened Socket.IO Web Socket connection:
   
   ```
-  0{"sid":"NMUj7A0","upgrades":["websocket"],"pingInterval":25000,"pingTimeout":5000}
+  {"sid":"NMUj7A0","upgrades":["websocket"],"pingInterval":25000,"pingTimeout":5000}
   ```
   
 - Client and server exchange periodic ping-pong packets to keep Socket.IO Web Socket connection alive
@@ -86,48 +86,51 @@ In general, the communication that happens via a Web Socket connection implement
 - When a message is delivered via that connection, it looks like:
   
   ```
-  42[<String-topic-name>,<JSON-payload>]
+  [<topic-name>,<argument1>,...,<argumentN>]
   ```
   
-  So, basically a JSON array consisting of two elements. The first is the topic name and the second the arbitrary JSON-formatted payload.
+  So, basically a JSON array consisting of a topic name as first element followed by one ore more arguments (each a JSON primitive, array or object).
 
 For further information, please check [here](https://socket.io/docs/internals/).
 
 ##### Topic "ox:mail.new"
 
-The "ox:mail:new" is the reserved identifier of the Open-Xchange Middleware to deliver "new mail" events to the client.
+The `"ox:mail:new"` topic is the reserved identifier of the Open-Xchange Middleware to deliver "new mail" events to the client.
 
-Its payload is a JSON object consisting of the fields:
+Its payload argument is a JSON object consisting of the fields:
 
-- `"folder"` The identifier of the mailbox folder, in which the new mail has been received
-- `id` The identifier of the newly received mail
-- `"email"` The address part of the sender's E-Mail address
-- `"displayname"` The display name (or personal) part of the sender's E-Mail address (if any)
-- `"subject"` The subject line taken from newly received mail
-- `"unread"` The new unread (or unseen) count for the denoted mailbox folder
-- `"teaser"` A teaser of the mail's text body
+| Field name    | Field description                                                             |
+|---------------|-------------------------------------------------------------------------------|
+| `folder`      | The identifier of the mailbox folder, in which the new mail has been received |
+| `id`          | The identifier of the newly received mail                                     |
+| `email`       | The address part of the sender's E-Mail address                               |
+| `displayname` | The display name (or personal) part of the sender's E-Mail address (if any)   |
+| `subject`     | The subject line taken from newly received mail                               |
+| `unread`      | The new unread (or unseen) count for the denoted mailbox folder               |
+| `teaser`      | A teaser/preview of the mail's text body                                      |
 
 Example:
 
 ```
-42["ox:mail:new",{"folder":"default0/INBOX","id":"113","email":"jane.doe@foobar.com","displayname":"Jane Doe","subject":"Let's meet","unread":83,"teaser":"Hello"}]
+["ox:mail:new",{"folder":"default0/INBOX","id":"113","email":"jane.doe@foobar.com","displayname":"Jane Doe","subject":"Let's meet","unread":83,"teaser":"Hello"}]
 ```
 
 ##### Topic "ox:calendar:updates"
 
-"ox:calendar:updates" is the reserved identifier of the Open-Xcange Middleware to indicate any kind of changes in the user's calendars to the client.
+The `"ox:calendar:updates"` topic is the reserved identifier of the Open-Xcange Middleware to indicate any kind of changes in the user's calendars to the client.
 
-Its payload is a JSON object consisting of the fields:
+Its payload argument is a JSON object consisting of the fields:
 
-- `needsAction` A JSON array of the identifiers of new or updated events where the user attendee's participation status equals "NEEDS-ACTION"
-- `folders` A JSON array of the identifiers of folders whose contents contain significant changes so that a refresh of the user interface is suggested.
+| Field name     | Field description                                                                                                                           |
+|----------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| `needsAction ` | A JSON array of the identifiers of new or updated events where the user attendee's participation status equals "NEEDS-ACTION"               |
+| `folders `     | A JSON array of the identifiers of folders whose contents contain significant changes so that a refresh of the user interface is suggested. |
 
 Example:
 
 ```
-{"name":"ox:calendar:updates","args":[{"folders":["cal://0/216759","cal://0/30"]}],"namespace":"/"}
+["ox:calendar:updates",{"folders":["cal://0/216759","cal://0/30"]}]
 ```
-
 
 ### APNS transport
 
