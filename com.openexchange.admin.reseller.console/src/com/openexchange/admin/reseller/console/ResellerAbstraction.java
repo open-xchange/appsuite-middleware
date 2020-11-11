@@ -58,7 +58,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
@@ -257,60 +259,54 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void parseAndSetAdminname(final AdminParser parser, final ResellerAdmin adm) {
-        final String adminname = (String) parser.getOptionValue(this.adminNameOption);
-        if (null != adminname) {
-            this.adminname = adminname;
-            adm.setName(adminname);
+        String adminName = (String) parser.getOptionValue(this.adminNameOption);
+        if (null == adminName) {
+            return;
         }
+        this.adminname = adminName;
+        adm.setName(adminName);
     }
 
     protected void parseAndSetAdminId(final AdminParser parser, final ResellerAdmin adm) {
-        final String optionValue = (String) parser.getOptionValue(this.idOption);
-        if (null != optionValue) {
-            this.adminid = new Integer(optionValue);
-            adm.setId(adminid);
+        String optionValue = (String) parser.getOptionValue(this.idOption);
+        if (null == optionValue) {
+            return;
         }
+        this.adminid = new Integer(optionValue);
+        adm.setId(adminid);
     }
 
     protected void parseAndSetParentId(final AdminParser parser, final ResellerAdmin adm) {
-        final String optionValue = (String) parser.getOptionValue(this.parentIdOption);
+        String optionValue = (String) parser.getOptionValue(this.parentIdOption);
         if (null != optionValue) {
             adm.setParentId(new Integer(optionValue));
         }
     }
 
     protected void parseAndSetDisplayname(final AdminParser parser, final ResellerAdmin adm) {
-        final String displayname = (String) parser.getOptionValue(this.displayNameOption);
+        String displayname = (String) parser.getOptionValue(this.displayNameOption);
         if (null != displayname) {
             adm.setDisplayname(displayname);
         }
     }
 
     protected void parseAndSetPassword(final AdminParser parser, final ResellerAdmin adm) {
-        final String password = (String) parser.getOptionValue(this.passwordOption);
+        String password = (String) parser.getOptionValue(this.passwordOption);
         if (null != password) {
             adm.setPassword(password);
         }
     }
 
     protected void parseAndSetPasswordMech(final AdminParser parser, final ResellerAdmin adm) {
-        final String passwordMech = (String) parser.getOptionValue(this.passwordMechOption);
+        String passwordMech = (String) parser.getOptionValue(this.passwordMechOption);
         if (null != passwordMech) {
             adm.setPasswordMech(passwordMech);
         }
     }
 
     public static HashSet<String> getRestrictionsToRemove(final AdminParser parser, final CLIOption option) {
-        final Collection<Object> resopts = parser.getOptionValues(option);
-        if (0 == resopts.size()) {
-            return null;
-        }
-        final HashSet<String> ret = new HashSet<String>();
-
-        for (Object opt : resopts) {
-            ret.add((String) opt);
-        }
-        return ret;
+        Collection<Object> resopts = parser.getOptionValues(option);
+        return 0 == resopts.size() ? null : resopts.stream().map(o -> (String) o).collect(Collectors.toCollection(HashSet::new));
     }
 
     public static HashSet<Restriction> getRestrictionsToEdit(final AdminParser parser, final CLIOption option) throws InvalidDataException {
@@ -325,10 +321,10 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     }
 
     public static HashSet<Restriction> parseRestrictions(final AdminParser parser, final CLIOption option) throws InvalidDataException {
-        final Collection<Object> resopts = parser.getOptionValues(option);
-        HashSet<Restriction> res = new HashSet<Restriction>();
-        for (final Object obj : resopts) {
-            final String opt = (String) obj;
+        Collection<Object> resopts = parser.getOptionValues(option);
+        HashSet<Restriction> res = new HashSet<>();
+        for (Object obj : resopts) {
+            String opt = (String) obj;
             res.add(getRestrictionFromString(opt));
         }
         return res;
@@ -338,12 +334,11 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         if (opt.indexOf('=') < 0) {
             throw new InvalidDataException("Restriction must be key=value pair");
         }
-        final String[] keyval = opt.split("=");
+        String[] keyval = opt.split("=");
         if (keyval.length > 2) {
             throw new InvalidDataException("Restriction must only contain one \"=\" character");
         }
-        final Restriction restriction = new Restriction(keyval[0], keyval[1]);
-        return restriction;
+        return new Restriction(keyval[0], keyval[1]);
     }
 
     public Set<String> parseAndSetCapabilitiesToAdd(final AdminParser parser) {
@@ -393,7 +388,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         }
         // Split
         String[] arr = s.split(" *, *", 0);
-        Set<String> set = new HashSet<String>(arr.length);
+        Set<String> set = new HashSet<>(arr.length);
         for (String element : arr) {
             String cap = element;
             if (Strings.isNotEmpty(cap)) {
@@ -404,35 +399,29 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     }
 
     public static final String parseCustomId(final AdminParser parser, final CLIOption customIdOption) {
-        final String customid = (String) parser.getOptionValue(customIdOption);
-        return customid;
+        return (String) parser.getOptionValue(customIdOption);
     }
 
     protected final ResellerAdmin parseDeleteOptions(final AdminParser parser) {
-        final ResellerAdmin adm = new ResellerAdmin();
-
+        ResellerAdmin adm = new ResellerAdmin();
         parseAndSetAdminId(parser, adm);
         parseAndSetAdminname(parser, adm);
-
         return adm;
     }
 
     protected final ResellerAdmin parseChangeOptions(final AdminParser parser) throws InvalidDataException {
-        final ResellerAdmin adm = parseCreateOptions(parser);
+        ResellerAdmin adm = parseCreateOptions(parser);
         parseAndSetParentId(parser, adm);
-
         return adm;
     }
 
     protected final ResellerAdmin parseCreateOptions(final AdminParser parser) throws InvalidDataException {
-        final ResellerAdmin adm = new ResellerAdmin();
-
+        ResellerAdmin adm = new ResellerAdmin();
         parseAndSetAdminname(parser, adm);
         parseAndSetDisplayname(parser, adm);
         parseAndSetPassword(parser, adm);
         parseAndSetPasswordMech(parser, adm);
         parseAndSetAddRestrictions(parser, adm, this.addRestrictionsOption);
-
         return adm;
     }
 
@@ -445,57 +434,101 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         return "admin";
     }
 
-    public static HashSet<Restriction> handleAddEditRemoveRestrictions(final HashSet<Restriction> dbres, final HashSet<Restriction> addres, HashSet<String> removeRes, HashSet<Restriction> editRes) throws OXResellerException {
+    /**
+     * Adds, edits and/or removes restrictions from the database set
+     *
+     * @param dbRes The database set
+     * @param addRes the restrictions to add
+     * @param removeRes The restrictions to remove
+     * @param editRes The restrictions to edit
+     * @return The new database set with the restrictions
+     * @throws OXResellerException if an error is occurred
+     */
+    public static HashSet<Restriction> handleAddEditRemoveRestrictions(final HashSet<Restriction> dbRes, final HashSet<Restriction> addRes, HashSet<String> removeRes, HashSet<Restriction> editRes) throws OXResellerException {
         // check whether user want's to remove restrictions
-        final boolean wants2add = addres != null && addres.size() > 0;
+        final boolean wants2add = addRes != null && addRes.size() > 0;
         final boolean wants2edit = editRes != null && editRes.size() > 0;
         final boolean wants2remove = removeRes != null && removeRes.size() > 0;
         // XOR, either remove or add
-        if ((wants2remove ^ wants2add ^ wants2edit) ^ (wants2remove && wants2add && wants2edit)) {
-            if (wants2remove) {
-                // remove existing restrictions from db
-                if (dbres == null || dbres.size() == 0) {
-                    throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "delete.");
-                }
-                final HashSet<Restriction> newres = new HashSet<Restriction>();
-                for (final Restriction key : dbres) {
-                    if (!removeRes.contains(key.getName())) {
-                        if (!newres.add(key)) {
-                            throw new OXResellerException(Code.RESTRICTION_ALREADY_CONTAINED, key.getName());
-                        }
-                    }
-                }
-                return newres;
-            } else if (wants2add) {
-                // add new restrictions to db
-                if (dbres != null) {
-                    final HashSet<Restriction> newset = new HashSet<Restriction>(addres);
-                    for (final Restriction res : dbres) {
-                        if (!newset.add(res)) {
-                            throw new OXResellerException(Code.RESTRICTION_ALREADY_CONTAINED, res.getName());
-                        }
-                    }
-                    return newset;
-                }
-                return addres;
-            } else {
-                // edit restrictions
-                if (dbres == null || dbres.size() == 0) {
-                    throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "edit.");
-                }
-                if (editRes != null) {
-                    for (final Restriction key : editRes) {
-                        if (!dbres.contains(key)) {
-                            throw new OXResellerException(Code.RESTRICTION_NOT_CONTAINED, key.getName());
-                        }
-                        dbres.remove(key);
-                        dbres.add(key);
-                    }
-                }
-                return dbres;
+        if (false == (wants2remove ^ wants2add ^ wants2edit) ^ (wants2remove && wants2add && wants2edit)) {
+            return null;
+        }
+        if (wants2remove) {
+            return removeExistingRestrictionsFromDB(dbRes, removeRes);
+        }
+        if (wants2add) {
+            return addRestrictionsToDB(dbRes, addRes);
+        }
+        return editRestrictions(dbRes, editRes);
+    }
+
+    /**
+     * Adds the restrictions specified by the <code>addRes</code> set to the <code>dbRes</code> set
+     *
+     * @param dbRes The set with the DB restrictions
+     * @param addRes The set with the restrictions to add
+     * @return a new set with the removed restrictions
+     * @throws OXResellerException if the restrictions cannot be added
+     */
+    private static HashSet<Restriction> addRestrictionsToDB(HashSet<Restriction> dbRes, HashSet<Restriction> addRes) throws OXResellerException {
+        if (dbRes == null) {
+            return addRes;
+        }
+        HashSet<Restriction> newset = new HashSet<>(addRes);
+        for (Restriction res : dbRes) {
+            if (false == newset.add(res)) {
+                throw new OXResellerException(Code.RESTRICTION_ALREADY_CONTAINED, res.getName());
             }
         }
-        return null;
+        return newset;
+    }
+
+    /**
+     * Edits, i.e. adds the restrictions from the specified <code>editRes</code> set to the <code>dbRes</code> set.
+     *
+     * @param dbRes The set with the DB restrictions
+     * @param editRes The set with the restrictions to edit, i.e. add to the dbRes
+     * @return The dbRes set with the edited restrictions
+     * @throws OXResellerException if the restrictions cannot be edited
+     */
+    private static HashSet<Restriction> editRestrictions(HashSet<Restriction> dbRes, HashSet<Restriction> editRes) throws OXResellerException {
+        if (dbRes == null || dbRes.isEmpty()) {
+            throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "edit.");
+        }
+        if (editRes == null) {
+            return dbRes;
+        }
+        for (Restriction key : editRes) {
+            if (false == dbRes.contains(key)) {
+                throw new OXResellerException(Code.RESTRICTION_NOT_CONTAINED, key.getName());
+            }
+            dbRes.add(key);
+        }
+        return dbRes;
+    }
+
+    /**
+     * Removes the existing restrictions specified in the <code>removeRes</code> from the <code>dbRes</code>
+     *
+     * @param dbRes The set with the DB restrictions
+     * @param removeRes The set with the restrictions to remove
+     * @return a new set with the removed restrictions
+     * @throws OXResellerException if the restrictions cannot be removed
+     */
+    private static HashSet<Restriction> removeExistingRestrictionsFromDB(HashSet<Restriction> dbRes, HashSet<String> removeRes) throws OXResellerException {
+        if (dbRes == null || dbRes.isEmpty()) {
+            throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "delete.");
+        }
+        HashSet<Restriction> newRes = new HashSet<>();
+        for (final Restriction key : dbRes) {
+            if (null == removeRes || removeRes.contains(key.getName())) {
+                continue;
+            }
+            if (false == newRes.add(key)) {
+                throw new OXResellerException(Code.RESTRICTION_ALREADY_CONTAINED, key.getName());
+            }
+        }
+        return newRes;
     }
 
     /**
@@ -505,20 +538,18 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
      * @return
      */
     public static String getObjectsAsString(final Restriction[] objects) {
-        final StringBuilder sb = new StringBuilder();
-        if (null != objects && objects.length > 0) {
-            for (final Restriction id : objects) {
-                sb.append(id.getName());
-                sb.append("=");
-                sb.append(id.getValue());
-                sb.append(',');
-            }
-            sb.deleteCharAt(sb.length() - 1);
-
-            return sb.toString();
-        } else {
+        if (null == objects || objects.length > 0) {
             return "";
         }
+        StringBuilder sb = new StringBuilder();
+        for (Restriction id : objects) {
+            sb.append(id.getName());
+            sb.append("=");
+            sb.append(id.getValue());
+            sb.append(',');
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
     }
 
     /**
@@ -536,39 +567,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         Set<String> taxonomiesToRemove = new HashSet<>();
 
         for (Map.Entry<String, Map<String, String>> namespaced : dynamicArguments.entrySet()) {
-            String namespace = namespaced.getKey();
-            for (Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
-                String name = pair.getKey();
-                String value = pair.getValue();
-                DynamicNamespace dynamicNamespace;
-                try {
-                    dynamicNamespace = DynamicNamespace.valueOf(namespace.replace("-", "_"));
-                } catch (IllegalArgumentException e) {
-                    System.err.println("Unknown option '" + namespace + "'");
-                    sysexit(1);
-                    return;
-                }
-                switch (dynamicNamespace) {
-                    case config:
-                        checkPropertyName(name);
-                        configToAdd.put(name, value);
-                        break;
-                    case remove_config:
-                        checkPropertyName(name);
-                        configToRemove.add(name);
-                        break;
-                    case taxonomy:
-                        checkTaxonomy(name);
-                        taxonomiesToAdd.add(value);
-                        break;
-                    case remove_taxonomy:
-                        checkTaxonomy(name);
-                        taxonomiesToRemove.add(value);
-                        break;
-                    default:
-                        break;
-                }
-            }
+            processDynamicArgument(namespaced, configToAdd, configToRemove, taxonomiesToAdd, taxonomiesToRemove);
         }
         // Configuration
         adm.setConfigurationToAdd(configToAdd);
@@ -577,6 +576,64 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         // Taxonomies
         adm.setTaxonomiesToAdd(taxonomiesToAdd);
         adm.setTaxonomiesToRemove(taxonomiesToRemove);
+    }
+
+    /**
+     * Processes the specified dynamic argument
+     * 
+     * @param namespaced The dynamic argument
+     * @param configToAdd The config to add
+     * @param configToRemove The config to remove
+     * @param taxonomiesToAdd The taxonomies to add
+     * @param taxonomiesToRemove The taxonomies to remove
+     */
+    private void processDynamicArgument(Entry<String, Map<String, String>> namespaced, Map<String, String> configToAdd, Set<String> configToRemove, Set<String> taxonomiesToAdd, Set<String> taxonomiesToRemove) {
+        String namespace = namespaced.getKey();
+        for (Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
+            try {
+                processDynamicNamespace(DynamicNamespace.valueOf(namespace.replace("-", "_")), pair, configToAdd, configToRemove, taxonomiesToAdd, taxonomiesToRemove);
+            } catch (IllegalArgumentException e) {
+                System.err.println("Unknown option '" + namespace + "'");
+                sysexit(1);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Processes the specified {@link DynamicNamespace}
+     *
+     * @param dynamicNamespace The {@link DynamicNamespace} to process
+     * @param pair The name/value pair
+     * @param configToAdd The config to add
+     * @param configToRemove The config to remove
+     * @param taxonomiesToAdd The taxonomies to add
+     * @param taxonomiesToRemove The taxonomies to remove
+     */
+    private void processDynamicNamespace(DynamicNamespace dynamicNamespace, Entry<String, String> pair, Map<String, String> configToAdd, Set<String> configToRemove, Set<String> taxonomiesToAdd, Set<String> taxonomiesToRemove) {
+        String name = pair.getKey();
+        String value = pair.getValue();
+        switch (dynamicNamespace) {
+            case config:
+                checkPropertyName(name);
+                configToAdd.put(name, value);
+                return;
+            case remove_config:
+                checkPropertyName(name);
+                configToRemove.add(name);
+                return;
+            case taxonomy:
+                checkTaxonomy(name);
+                taxonomiesToAdd.add(value);
+                return;
+            case remove_taxonomy:
+                checkTaxonomy(name);
+                taxonomiesToRemove.add(value);
+                return;
+            default:
+                System.err.println("Unknown dynamic space '" + dynamicNamespace + "' - Skipping");
+                return;
+        }
     }
 
     /**
@@ -598,7 +655,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
      * @param name The name to check
      */
     void checkPropertyName(String name) {
-        if (!name.startsWith(CAPABILIITY_PREFIX)) {
+        if (false == name.startsWith(CAPABILIITY_PREFIX)) {
             return;
         }
         System.err.println("Changing a capability via --config is not allowed. Please use the appropriate command-line switches for that.");
