@@ -64,7 +64,6 @@ import com.openexchange.mail.compose.impl.storage.db.RdbCompositionSpaceStorageS
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import com.openexchange.uploaddir.UploadDirService;
 
 
 /**
@@ -80,7 +79,10 @@ public class FileCacheImpl implements FileCache {
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FileCacheImpl.class);
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private final ServiceLookup services;
+    private final LocationSelector locationSelector;
     private volatile ScheduledTimerTask timerTask;
 
     /**
@@ -93,6 +95,7 @@ public class FileCacheImpl implements FileCache {
     public FileCacheImpl(RdbCompositionSpaceStorageService storageService, ServiceLookup services) throws OXException {
         super();
         this.services = services;
+        locationSelector = new LocationSelector(services);
         Runnable task = new Runnable() {
 
             @Override
@@ -120,19 +123,14 @@ public class FileCacheImpl implements FileCache {
         }
     }
 
-    private static String buildFileName(UUID compositionSpaceId, int userId, int contextId) {
-        return new StringBuilder(FILE_NAME_PREFIX).append(UUIDs.getUnformattedString(compositionSpaceId)).append('-').append(userId).append('-').append(contextId).append(".tmp").toString();
-    }
-
     @Override
     public Optional<String> getCachedContent(UUID compositionSpaceId, int userId, int contextId) throws OXException {
-        UploadDirService uploadDirService = services.getOptionalService(UploadDirService.class);
-        if (uploadDirService == null) {
+        Optional<File> optionalFile = locationSelector.getFileFor(compositionSpaceId, userId, contextId);
+        if (!optionalFile.isPresent()) {
             return Optional.empty();
         }
-        File uploadDir = uploadDirService.getUploadDir();
 
-        File file = new File(uploadDir, buildFileName(compositionSpaceId, userId, contextId));
+        File file = optionalFile.get();
         if (!file.exists() || !file.isFile() || !file.canRead()) {
             return Optional.empty();
         }
@@ -153,17 +151,16 @@ public class FileCacheImpl implements FileCache {
 
     @Override
     public boolean storeCachedContent(String content, UUID compositionSpaceId, int userId, int contextId) throws OXException {
-        UploadDirService uploadDirService = services.getOptionalService(UploadDirService.class);
-        if (uploadDirService == null) {
-            LoggerHolder.LOG.error("Missing service: {}", UploadDirService.class.getName());
+        Optional<File> optionalDir = locationSelector.getLocation(userId, contextId);
+        if (!optionalDir.isPresent()) {
+            LoggerHolder.LOG.error("Missing location");
             return false;
         }
 
         File file = null;
         FileOutputStream fos = null;
         try {
-            File uploadDir = uploadDirService.getUploadDir();
-            file = new File(uploadDir, buildFileName(compositionSpaceId, userId, contextId));
+            file = new File(optionalDir.get(), buildFileName(compositionSpaceId, userId, contextId));
 
             if (!file.exists()) {
                 boolean created = file.createNewFile();
@@ -178,11 +175,7 @@ public class FileCacheImpl implements FileCache {
             fos.write(content.getBytes(StandardCharsets.UTF_8));
             fos.flush();
             return true;
-        } catch (OXException e) {
-            // Failed to read cached content
-            LoggerHolder.LOG.error("Failed to write cached content", e);
-            deleteFileSafe(file);
-        } catch (IOException e) {
+        } catch (Exception e) {
             // Failed to read cached content
             LoggerHolder.LOG.error("Failed to write cached content", e);
             deleteFileSafe(file);
@@ -194,29 +187,35 @@ public class FileCacheImpl implements FileCache {
 
     @Override
     public void deleteCachedContent(UUID compositionSpaceId, int userId, int contextId) throws OXException {
-        UploadDirService uploadDirService = services.getOptionalService(UploadDirService.class);
-        if (uploadDirService == null) {
-            return;
-        }
-        File uploadDir = uploadDirService.getUploadDir();
-
-        File file = new File(uploadDir, buildFileName(compositionSpaceId, userId, contextId));
-        if (!file.exists() || !file.isFile()) {
-            // No such file
-            return;
-        }
-
-        deleteFileSafe(file);
+        locationSelector.deleteFileFor(compositionSpaceId, userId, contextId);
     }
 
-    private static void deleteFileSafe(File file) {
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Builds the file name for given arguments.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The file name
+     */
+    static String buildFileName(UUID compositionSpaceId, int userId, int contextId) {
+        return new StringBuilder(FILE_NAME_PREFIX).append(UUIDs.getUnformattedString(compositionSpaceId)).append('-').append(userId).append('-').append(contextId).append(".tmp").toString();
+    }
+
+    /**
+     * (Safely) Deletes given file.
+     *
+     * @param file The file to delete
+     */
+    static void deleteFileSafe(File file) {
         if (file == null) {
             return;
         }
 
         try {
-            boolean deleted = file.delete();
-            if (false == deleted) {
+            if (false == file.delete()) {
                 LoggerHolder.LOG.error("Failed to delete cached content held by file {}", file);
             }
         } catch (Exception e) {
