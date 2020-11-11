@@ -86,6 +86,16 @@ public class IDMangling {
     protected static final String SHARED_PREFIX = "u:";
 
     /**
+     * Gets the qualified identifier for of a calendar account, as used in external APIs.
+     * 
+     * @param accountId The identifier of the account to get the qualified identifier for
+     * @return The qualified account identifier
+     */
+    public static String getQualifiedAccountId(int accountId) {
+        return IDMangler.mangle(CAL_PREFIX, String.valueOf(accountId));
+    }
+
+    /**
      * Gets the relative representation of a specific unique composite folder identifier.
      * <p/>
      * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly, same goes for identifiers starting with {@link IDMangling#SHARED_PREFIX}.

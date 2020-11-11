@@ -159,27 +159,23 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
 
     @Override
     public List<GroupwareCalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException {
-        List<UserizedFolder> folders;
         switch (type) {
             case PRIVATE:
-                folders = Collections.emptyList();
-                break;
+                return Collections.emptyList();
             case SHARED:
-                folders = getSubfoldersRecursively(getFolderService(), initDecorator(), SHARED_FOLDER_ID);
-                break;
+                return rememberVisibleCalendars(getCalendarFolders(
+                    getSubfoldersRecursively(getFolderService(), initDecorator(), SHARED_FOLDER_ID)), type);
             case PUBLIC:
-                folders = getSubfoldersRecursively(getFolderService(), initDecorator(), PUBLIC_FOLDER_ID);
-                break;
+                return rememberVisibleCalendars(getCalendarFolders(
+                    getSubfoldersRecursively(getFolderService(), initDecorator(), PUBLIC_FOLDER_ID)), type);
             default:
                 throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
         }
-        return rememberFolders(getCalendarFolders(folders));
     }
 
     @Override
     public GroupwareCalendarFolder getFolder(String folderId) throws OXException {
-        UserizedFolder folder = getFolderService().getFolder(TREE_ID, folderId, guestSession.getSession(), initDecorator());
-        return rememberFolder(getCalendarFolder(folder));
+        return getCalendarFolder(getFolderService().getFolder(TREE_ID, folderId, guestSession.getSession(), initDecorator()));
     }
 
     @Override
@@ -482,16 +478,22 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         return calendarFolder;
     }
 
-    private GroupwareCalendarFolder rememberFolder(GroupwareCalendarFolder calendarFolder) {
-        return null != calendarFolder ? rememberFolders(Collections.singletonList(calendarFolder)).get(0) : null;
-    }
-
-    private List<GroupwareCalendarFolder> rememberFolders(List<GroupwareCalendarFolder> calendarFolders) {
-        if (null == calendarFolders || calendarFolders.isEmpty()) {
+    /**
+     * Remembers the calendar folders for a certain folder type within the account configuration.
+     * <p/>
+     * Previously remembered folders of this type are purged implicitly, so that the passed collection of folders will effectively replace
+     * the last known state for this folder type afterwards.
+     * 
+     * @param calendarFolders The calendar folders to remember
+     * @param type The folder type to remember the calendars for
+     * @return The passed calendar folders after they were remembered
+     */
+    private List<GroupwareCalendarFolder> rememberVisibleCalendars(List<GroupwareCalendarFolder> calendarFolders, GroupwareFolderType type) {
+        if (null == calendarFolders || null == type) {
             return calendarFolders;
         }
         JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
-        if (new AccountConfigHelper(internalConfig).rememberFolders(calendarFolders)) {
+        if (new AccountConfigHelper(internalConfig).rememberVisibleCalendars(calendarFolders, type)) {
             try {
                 JSONObject userConfig = null != account.getUserConfiguration() ? account.getUserConfiguration() : new JSONObject();
                 userConfig.putSafe("internalConfig", internalConfig);

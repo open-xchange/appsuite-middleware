@@ -51,6 +51,7 @@ package com.openexchange.folderstorage;
 
 import static com.openexchange.chronos.provider.CalendarCapability.getCapabilities;
 import static com.openexchange.chronos.provider.CalendarCapability.getCapabilityNames;
+import static com.openexchange.chronos.provider.composition.IDMangling.getQualifiedAccountId;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.b;
 import java.util.ArrayList;
@@ -80,7 +81,6 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.EntityInfo;
-import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link CalendarFolderConverter}
@@ -119,7 +119,7 @@ public class CalendarFolderConverter {
      */
     public static ParameterizedFolder getStorageFolder(String treeId, ContentType contentType, CalendarFolder calendarFolder, String providerId, int accountId, JSONObject userConfig) {
         ParameterizedFolder folder = new CalendarStorageFolder(treeId, contentType, isDefaultAccountFolder(calendarFolder));
-        folder.setAccountID(getQualifiedAccountID(accountId));
+        folder.setAccountID(getQualifiedAccountId(accountId));
         folder.setID(calendarFolder.getId());
         folder.setLastModified(calendarFolder.getLastModified());
         folder.setName(calendarFolder.getName());
@@ -484,10 +484,6 @@ public class CalendarFolderConverter {
             }
         }
         return defaultValue;
-    }
-
-    private static String getQualifiedAccountID(int accountId) {
-        return IDMangler.mangle("cal", String.valueOf(accountId));
     }
 
     /**
