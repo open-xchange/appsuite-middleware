@@ -10,10 +10,8 @@
     responses:
       '200':
         description: >
-          An empty json object in case of success. In case of errors the
-          responsible fields in the response are
-
-          filled (see [Error handling](#error-handling)).
+          An json object holding the account information in case of success. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
         content:
           application/json:
             schema:

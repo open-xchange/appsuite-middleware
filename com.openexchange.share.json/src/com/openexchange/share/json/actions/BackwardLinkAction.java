@@ -50,9 +50,6 @@
 package com.openexchange.share.json.actions;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -61,7 +58,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.subscription.ShareSubscriptionRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -69,21 +65,21 @@ import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link GetBackwardLinkAction}
+ * {@link BackwardLinkAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public class GetBackwardLinkAction implements AJAXActionService {
+public class BackwardLinkAction implements AJAXActionService {
 
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link GetBackwardLinkAction}.
+     * Initializes a new {@link BackwardLinkAction}.
      * 
      * @param services The service lookup
      */
-    public GetBackwardLinkAction(ServiceLookup services) {
+    public BackwardLinkAction(ServiceLookup services) {
         super();
         this.services = services;
     }
@@ -95,34 +91,23 @@ public class GetBackwardLinkAction implements AJAXActionService {
             /*
              * parse parameters & generate backward link
              */
-            JSONObject json = (JSONObject) request.requireData();
-            String shareLink = json.optString(AbstractShareSubscriptionAction.LINK, null);
-            if (Strings.isEmpty(shareLink)) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AbstractShareSubscriptionAction.LINK);
-            }
-            String folder = json.optString("folder", null);
-            String item = json.optString("item", null);
-            Map<String, String> additionals = new HashMap<String, String>();
-            JSONObject additionalsJson = json.optJSONObject("additionals");
-            if (null != additionalsJson) {
-                for (Entry<String, Object> entry : additionalsJson.entrySet()) {
-                    additionals.put(entry.getKey(), String.valueOf(entry.getValue()));
-                }
-            }
-            String link = services.getServiceSafe(ShareSubscriptionRegistry.class).getBackwardLink(session, shareLink, folder, item, additionals);
+            String link = request.checkParameter(AbstractShareSubscriptionAction.LINK);
+            String folder = request.checkParameter("folder");
+            String item = request.getParameter("item");
+            String backwardLink = services.getServiceSafe(ShareSubscriptionRegistry.class).getBackwardLink(session, link, folder, item, null);
             /*
              * send redirect if requested & possible, otherwise return as api response
              */
             if (redirect) {
                 HttpServletResponse response = request.optHttpServletResponse();
                 try {
-                    response.sendRedirect(link);
+                    response.sendRedirect(backwardLink);
                     return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(ResultType.DIRECT);
                 } catch (IOException e) {
                     throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
                 }
             }
-            return new AJAXRequestResult(new JSONObject().putSafe("link", link), "json");
+            return new AJAXRequestResult(new JSONObject().putSafe("link", backwardLink), "json");
         } catch (OXException e) {
             if (redirect) {
                 HttpServletResponse response = request.optHttpServletResponse();
