@@ -15933,7 +15933,7 @@
     },
     "/share/management?action=remount" : {
       "put" : {
-        "operationId" : "remount",
+        "operationId" : "resubscribeShare",
         "tags" : [ "Share/Management", "FederatedSharing" ],
         "summary" : "Updates an existing share that is associated with a specific share link from a remote server",
         "parameters" : [ {
@@ -36898,10 +36898,6 @@
               "folder" : {
                 "type" : "string",
                 "description" : "The folder ID of the subscrition"
-              },
-              "service" : {
-                "type" : "string",
-                "description" : "The ID of the service that created the result."
               }
             }
           },
@@ -37214,6 +37210,11 @@
           "category" : {
             "type" : "integer",
             "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "metadata" : {
+            "type" : "object",
+            "description" : "A JSON object providing additional arbitrary metadata of the account.",
+            "readOnly" : true
           },
           "capabilities" : {
             "type" : "array",
