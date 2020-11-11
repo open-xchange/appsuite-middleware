@@ -51,12 +51,15 @@ package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -74,6 +77,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -95,6 +99,15 @@ public abstract class OXCommonImpl {
     private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXCommonImpl.class);
 
     protected final OXToolStorageInterface tool;
+
+    private static final Map<Class<?>, ExceptionHandler> exceptionHandlers;
+    static {
+        Map<Class<?>, ExceptionHandler> eh = new HashMap<>();
+        eh.put(AbstractAdminRmiException.class, (t, credentials) -> logAndReturnException(LOGGER, ((AbstractAdminRmiException) t), credentials));
+        eh.put(RemoteException.class, (t, credentials) -> enhanceException(credentials, (RemoteException) t));
+        eh.put(Exception.class, (t, credentials) -> enhanceException(credentials, RemoteExceptionUtils.convertException((Exception) t)));
+        exceptionHandlers = ImmutableMap.copyOf(eh);
+    }
 
     /**
      * Initializes a new {@link OXCommonImpl}.
@@ -383,6 +396,33 @@ public abstract class OXCommonImpl {
         return logAndReturnException(logger, e, exceptionId, creds, null, null);
     }
 
+    /**
+     * Enhances and logs the specified {@link Throwable}
+     *
+     * @param t the {@link Throwable} to enhance and log
+     * @param credentials The credentials
+     */
+    protected static void enhanceAndLogException(Throwable t, Credentials credentials) {
+        ExceptionHandler exceptionHandler = exceptionHandlers.get(t.getClass().getSuperclass());
+        if (exceptionHandler == null) {
+            LOGGER.error("", t);
+            return;
+        }
+        exceptionHandler.handle(t, credentials);
+    }
+
+    /**
+     * Enhances the specified remote exception with the admin name and logs it
+     *
+     * @param credentials The credentials
+     * @param remoteException The remote exception to enhance
+     */
+    private static void enhanceException(Credentials credentials, RemoteException remoteException) {
+        String exceptionId = AbstractAdminRmiException.generateExceptionId();
+        RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+        logAndReturnException(LOGGER, remoteException, exceptionId, credentials);
+    }
+
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     /**
@@ -515,4 +555,18 @@ public abstract class OXCommonImpl {
         log(level, logger, creds, null, null, e, message, new Object[] {});
     }
 
+    /**
+     * {@link ExceptionHandler}
+     */
+    @FunctionalInterface
+    private interface ExceptionHandler {
+
+        /**
+         * Handles the specified {@link Throwable}
+         *
+         * @param t The {@link Throwable} to handle
+         * @param credentials The credentials to optionally decorate the exception with the admin name
+         */
+        void handle(Throwable t, Credentials credentials);
+    }
 }

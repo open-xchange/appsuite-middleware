@@ -73,7 +73,6 @@ import com.openexchange.admin.reseller.services.PluginInterfaces;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -100,6 +99,11 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     private final OXResellerStorageInterface oxresell;
     private final ResellerAuth resellerauth;
 
+    /**
+     * Initializes a new {@link OXReseller}.
+     * 
+     * @throws StorageException if an error is occurred
+     */
     public OXReseller() throws StorageException {
         super();
         log(LogLevel.DEBUG, LOGGER, null, null, "Class loaded: {}", this.getClass().getName());
@@ -111,22 +115,6 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         } catch (StorageException e) {
             log(LogLevel.ERROR, LOGGER, null, e, "");
             throw e;
-        }
-    }
-
-    private void logAndEnhanceException(Throwable t, final Credentials credentials) {
-        if (t instanceof AbstractAdminRmiException) {
-            logAndReturnException(LOGGER, ((AbstractAdminRmiException) t), credentials);
-        } else if (t instanceof RemoteException) {
-            RemoteException remoteException = (RemoteException) t;
-            String exceptionId = AbstractAdminRmiException.generateExceptionId();
-            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
-            logAndReturnException(LOGGER, remoteException, exceptionId, credentials);
-        } else if (t instanceof Exception) {
-            RemoteException remoteException = RemoteExceptionUtils.convertException((Exception) t);
-            String exceptionId = AbstractAdminRmiException.generateExceptionId();
-            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
-            logAndReturnException(LOGGER, remoteException, exceptionId, credentials);
         }
     }
 
@@ -238,7 +226,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 }
             }
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -256,7 +244,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             checkResellerChangeSelfData(admin);
             oxresell.change(admin);
         } catch (Throwable e) {
-            logAndEnhanceException(e, credentials);
+            enhanceAndLogException(e, credentials);
             throw e;
         }
     }
@@ -311,7 +299,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             // Trigger plugin extensions
             {
-                final List<OXResellerPluginInterface> interfacelist = new ArrayList<OXResellerPluginInterface>();
+                final List<OXResellerPluginInterface> interfacelist = new ArrayList<>();
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
                     for (final OXResellerPluginInterface oxresellpi : pluginInterfaces.getResellerPlugins().getServiceList()) {
@@ -347,7 +335,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             logAndReturnException(LOGGER, remoteException, e.getExceptionId(), creds);
             throw remoteException;
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -397,7 +385,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             dbadm.setParentName(parent.isPresent() ? parent.get().getName() : null);
 
-            final ArrayList<OXResellerPluginInterface> interfacelist = new ArrayList<OXResellerPluginInterface>();
+            final ArrayList<OXResellerPluginInterface> interfacelist = new ArrayList<>();
 
             // Trigger plugin extensions
             {
@@ -419,7 +407,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.delete(dbadm);
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -442,13 +430,13 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 throw new OXResellerException(Code.UNABLE_TO_LOAD_AVAILABLE_RESTRICTIONS_FROM_DATABASE);
             }
 
-            final HashSet<Restriction> ret = new HashSet<Restriction>();
+            final HashSet<Restriction> ret = new HashSet<>();
             for (final Entry<String, Restriction> entry : validRestrictions.entrySet()) {
                 ret.add(entry.getValue());
             }
             return ret.toArray(new Restriction[ret.size()]);
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -496,7 +484,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             return oxresell.getData(admins);
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -524,7 +512,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             return oxresell.getRestrictionsFromContext(ctx);
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -539,7 +527,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
             oxresell.initDatabaseRestrictions();
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -562,7 +550,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             int pid = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0].getId().intValue();
             return oxresell.list(search_pattern, pid);
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -578,7 +566,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.removeDatabaseRestrictions();
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -595,7 +583,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.updateModuleAccessRestrictions();
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -687,9 +675,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.updateRestrictions();
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
-
 }

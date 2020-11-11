@@ -583,7 +583,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @throws SQLException if an SQL error is occurred
      * @throws OXException if an OX error is occurred
      */
-    private List<ResellerAdmin> getData(final List<ResellerAdmin> admins, Connection con) throws SQLException, OXException {
+    private List<ResellerAdmin> getData(List<ResellerAdmin> admins, Connection con) throws SQLException, OXException {
         PreparedStatement prep = null;
         ResultSet rs = null;
         boolean connectionInit = false;
@@ -593,7 +593,7 @@ public class ResellerServiceImpl implements ResellerService {
                 connectionInit = true;
             }
             List<ResellerAdmin> ret = new ArrayList<>(admins.size());
-            for (final ResellerAdmin adm : admins) {
+            for (ResellerAdmin adm : admins) {
                 prep = con.prepareStatement(GET_RESELLER_DATA);
                 prep.setInt(1, adm.getId().intValue());
                 rs = prep.executeQuery();
@@ -644,7 +644,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @return The restrictions
      * @throws SQLException if an SQL error is occurred
      */
-    private List<Restriction> getRestrictionDataForAdmin(Integer id, Integer parentId, final Connection con) throws SQLException {
+    private List<Restriction> getRestrictionDataForAdmin(Integer id, Integer parentId, Connection con) throws SQLException {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
@@ -654,7 +654,7 @@ public class ResellerServiceImpl implements ResellerService {
 
             ImmutableList.Builder<Restriction> res = null;
             while (rs.next()) {
-                final Restriction r = parseRestriction(rs);
+                Restriction r = parseRestriction(rs);
                 if (i(parentId) > 0 && Restriction.SUBADMIN_CAN_CREATE_SUBADMINS.equals(r.getName())) {
                     continue;
                 }

@@ -2182,7 +2182,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     /**
-     * Inserts the coonfiguration for the specified reseller admin
+     * Inserts the configuration for the specified reseller admin
      *
      * @param resellerAdmin The reseller admin
      * @param connection The writeable connection
