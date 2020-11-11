@@ -539,7 +539,7 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
             setOptVarChar(6, attachmentDesc.getName(), stmt);
             stmt.setLong(7, identifierAndSize.size);
             setOptVarChar(8, attachmentDesc.getMimeType(), stmt);
-            setOptVarChar(9, contentId.getContentId(), stmt);
+            setOptVarChar(9, contentId == null ? null : contentId.getContentId(), stmt);
             setOptVarChar(10, null == attachmentDesc.getContentDisposition() ? null : attachmentDesc.getContentDisposition().getId(), stmt);
             setOptVarChar(11, null == attachmentDesc.getOrigin() ? null : attachmentDesc.getOrigin().getIdentifier(), stmt);
             stmt.setBytes(12, UUIDs.toByteArray(attachmentDesc.getCompositionSpaceId()));
