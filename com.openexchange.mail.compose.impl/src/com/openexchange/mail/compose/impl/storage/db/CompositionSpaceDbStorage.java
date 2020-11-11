@@ -82,7 +82,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link CompositionSpaceDbStorage}
+ * {@link CompositionSpaceDbStorage} - The database storage managing composition spaces' meta-data and content.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.2
@@ -103,10 +103,25 @@ public class CompositionSpaceDbStorage {
     private final Context context;
     private final ServiceLookup services;
 
+    /**
+     * Initializes a new {@link CompositionSpaceDbStorage}.
+     *
+     * @param dbProvider The database provider
+     * @param session The session providing user information
+     * @param services The service look-up
+     */
     public CompositionSpaceDbStorage(DBProvider dbProvider, /*DBTransactionPolicy txPolicy,*/ Session session, ServiceLookup services) {
         this(dbProvider, session.getUserId(), session.getContextId(), services);
     }
 
+    /**
+     * Initializes a new {@link CompositionSpaceDbStorage}.
+     *
+     * @param dbProvider The database provider
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param services The service look-up
+     */
     public CompositionSpaceDbStorage(DBProvider dbProvider, /*DBTransactionPolicy txPolicy,*/ int userId, int contextId, ServiceLookup services) {
         super();
         // this.txPolicy = txPolicy;
@@ -117,6 +132,12 @@ public class CompositionSpaceDbStorage {
         this.context = getContext(contextId);
     }
 
+    /**
+     * Gets the value for 'max_allowed_packet' setting.
+     *
+     * @return The max. allowed packet size in bytes or <code>-1</code> if unknown
+     * @throws OXException If max. allowed packet size cannot be returned
+     */
     public long getMaxAllowedPacketSize() throws OXException {
         Connection connection = dbProvider.getReadConnection(context);
         try {
@@ -129,6 +150,12 @@ public class CompositionSpaceDbStorage {
         }
     }
 
+    /**
+     * Counts all currently opened composition spaces of the user.
+     *
+     * @return The number of currently opened composition spaces
+     * @throws OXException If the number of currently opened composition spaces cannot be returned; e.g. due to an SQL error
+     */
     public int countAll() throws OXException {
         Connection connection = dbProvider.getReadConnection(context);
         try {
@@ -140,6 +167,13 @@ public class CompositionSpaceDbStorage {
         }
     }
 
+    /**
+     * Lists all currently open composition spaces and pre-fills given fields.
+     *
+     * @param fields The fields to pre-fill; pass <code>null</code> or empty array to fill all fields
+     * @return The currently open composition spaces
+     * @throws OXException If currently open composition spaces cannot be returned
+     */
     public List<CompositionSpaceContainer> selectAll(MessageField[] fields) throws OXException {
         Connection connection = dbProvider.getReadConnection(context);
         try {
@@ -151,6 +185,13 @@ public class CompositionSpaceDbStorage {
         }
     }
 
+    /**
+     * Checks if the content of denoted composition space is marked as encrypted.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @return <code>true</code> if content is encrypted; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
     public boolean isContentEncrypted(UUID compositionSpaceId) throws OXException {
         Connection connection = dbProvider.getReadConnection(context);
         try {
@@ -162,6 +203,13 @@ public class CompositionSpaceDbStorage {
         }
     }
 
+    /**
+     * Checks if such a composition space exists; e.g. is currently open.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @return <code>true</code> if existent; otherwise <code>false</code>
+     * @throws OXException If existence cannot be checked
+     */
     public boolean exists(UUID compositionSpaceId) throws OXException {
         Connection connection = dbProvider.getReadConnection(context);
         try {
@@ -173,6 +221,13 @@ public class CompositionSpaceDbStorage {
         }
     }
 
+    /**
+     * Loads the denoted composition space.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @return The composition space
+     * @throws OXException If composition space cannot be returned
+     */
     public CompositionSpaceContainer select(UUID compositionSpaceId) throws OXException {
         Connection connection = dbProvider.getReadConnection(context);
         try {
