@@ -89,6 +89,47 @@ public class FileStorageAccountErrorHandler {
     private final Function<OXException, Boolean> shouldSaveExceptionFunc;
 
     /**
+     * {@link Result} - represents a result for handling an {@link OXException}
+     *
+     * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+     * @since v7.10.5
+     */
+    public static class Result {
+
+        private final boolean handled;
+        private final OXException exception;
+
+        /**
+         * Initializes a new {@link Result}.
+         *
+         * @param handled <code>true</code> if the error was handled, <code>false</code> if it was ignored.
+         * @param exception The {@link OXException}
+         */
+        public Result(boolean handled, OXException exception) {
+            this.handled = handled;
+            this.exception = exception;
+        }
+
+        /**
+         * Gets the handled
+         *
+         * @return <code>true</code> if the error was handled, <code>false</code> if it was ignored.
+         */
+        public boolean isHandled() {
+            return handled;
+        }
+
+        /**
+         * Gets the exception
+         *
+         * @return The {@link OXException}
+         */
+        public OXException getException() {
+            return exception;
+        }
+    }
+
+    /**
      * {@link CompositingFilter} - A compositing filter function which allows to set more than one filter functions.
      *
      * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
@@ -379,8 +420,9 @@ public class FileStorageAccountErrorHandler {
      * @return The exception
      * @throws OXException If the exception could not be saved
      */
-    public OXException handleException(OXException exception) throws OXException {
+    public Result handleException(OXException exception) throws OXException {
         try {
+            boolean handled = false;
             if (shouldSaveException(exception)) {
                 FileStorageAccount account = getAccount();
                 JSONObject metadata = FileStorageAccountMetaDataUtil.getAccountMetaData(account);
@@ -398,8 +440,9 @@ public class FileStorageAccountErrorHandler {
                 }
 
                 accountAccess.getService().getAccountManager().updateAccount(account, session);
+                handled = true;
             }
-            return exception;
+            return new Result(handled, exception);
         } catch (JSONException e) {
             throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

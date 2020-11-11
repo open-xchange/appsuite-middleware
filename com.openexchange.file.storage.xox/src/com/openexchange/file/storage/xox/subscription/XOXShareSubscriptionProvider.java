@@ -182,9 +182,9 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
              */
             if (isPasswordMissing(e)) {
                 builder.state(ADDABLE_WITH_PASSWORD);
-            } else if(isFolderRemoved(e)) {
+            } else if (isFolderRemoved(e)) {
                 builder.state(REMOVED);
-            }else {
+            } else {
                 builder.state(UNRESOLVABLE).error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink, e));
             }
             logExcpetionDebug(e);
