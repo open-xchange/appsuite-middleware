@@ -170,7 +170,8 @@ public final class SystemInfostoreFolder {
                      * only include public infostore root if there are visible subfolders, or user has full public folder access and is able to create subfolders
                      */
                     if (permissionBits.hasFullPublicFolderAccess() && folder.getEffectiveUserPermission(user.getId(), permissionBits, connection).canCreateSubfolders() ||
-                        0 < OXFolderIteratorSQL.getVisibleSubfolders(folder.getObjectID(), user.getId(), user.getGroups(), permissionBits.getAccessibleModules(), context, connection).size()) {
+                        0 < OXFolderIteratorSQL.getVisibleSubfolders(folder.getObjectID(), user.getId(), user.getGroups(), permissionBits.getAccessibleModules(), context, connection).size() ||
+                        FederatedSharingFolders.hasFederalSharingAccount(session)) {
                         String name = stringHelper.getString(altNames ? SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
                         subfolderIDs.add(new String[] { String.valueOf(folder.getObjectID()), name });
                     }
