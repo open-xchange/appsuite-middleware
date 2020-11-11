@@ -465,7 +465,9 @@ public class TransformImageAction implements IFileResponseRendererAction {
                             final ThresholdFileHolder optImageFileHolder = ((transformedImageFile instanceof ThresholdFileHolder) ? (ThresholdFileHolder) transformedImageFile : null);
                             final long size = transformedImage.getSize();
 
-                            if (transformedImage.getTransformationExpenses() == ImageTransformations.HIGH_EXPENSE) {
+                            // writing into cache is only needed if expense is high and
+                            // IC was not able to perform caching on IC server side
+                            if ((transformedImage.getTransformationExpenses() == ImageTransformations.HIGH_EXPENSE) && (null == xformParams.getICCacheKey())) {
                                 writeCachedResource(session, cacheKey, xformParams.getImageMimeType(), transformedImage, optImageFileHolder, fileName, size);
                             }
 
