@@ -69,6 +69,7 @@ import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.ErrorStateFolderAccess;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountErrorHandler;
+import com.openexchange.file.storage.FileStorageAccountErrorHandler.Result;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -121,13 +122,11 @@ public class XOXAccountAccess implements CapabilityAware {
      * @throws OXException If services are missing
      */
     //@formatter:off
-    public XOXAccountAccess(
-                            FileStorageService service,
+    public XOXAccountAccess(FileStorageService service,
                             ServiceLookup services,
                             FileStorageAccount account,
                             Session session,
-                            int retryAfterError
-                            ) throws OXException {
+                            int retryAfterError) throws OXException {
         this.service = Objects.requireNonNull(service, "service must not be null");
         this.account = Objects.requireNonNull(account, "account must not be null");
         this.session = Objects.requireNonNull(session, "session must not be null");
@@ -290,10 +289,11 @@ public class XOXAccountAccess implements CapabilityAware {
             }
             //the client might just come from a cache so we ensure that we can access the remote by performing a ping
             shareClient.ping();
+            isConnected = true;
         } catch (OXException e) {
-            errorHandler.handleException(e);
+            Result handlingResult = errorHandler.handleException(e);
+            isConnected = handlingResult.isHandled();
         }
-        isConnected = true;
     }
 
     @Override

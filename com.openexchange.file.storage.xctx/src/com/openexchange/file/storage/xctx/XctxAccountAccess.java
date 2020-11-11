@@ -68,6 +68,7 @@ import com.openexchange.file.storage.ErrorStateFolderAccess;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountErrorHandler;
+import com.openexchange.file.storage.FileStorageAccountErrorHandler.Result;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -253,11 +254,11 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
 
         try {
             this.guestSession = ServerSessionAdapter.valueOf(services.getServiceSafe(XctxSessionManager.class).getGuestSession(session, baseToken, password));
+            isConnected = true;
         } catch (OXException e) {
-            errorHandler.handleException(e);
+            Result handlingResult = errorHandler.handleException(e);
+            isConnected = handlingResult.isHandled();
         }
-
-        isConnected = true;
     }
 
     @Override
