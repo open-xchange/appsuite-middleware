@@ -203,6 +203,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
             folderUpdate.setId(targetPath.getFolder());
             folderUpdate.setSubscribed(Boolean.TRUE);
             calendarAccess.updateFolder(targetPath.getFolder(), folderUpdate, CalendarUtils.DISTANT_FUTURE);
+            calendarAccess.close();
             return getSubscriptionInfo(existingAccount, targetPath);
         }
         /*
@@ -349,7 +350,8 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         }
         String foreignRelativeFolderId = getRelativeFolderId(targetPath.getFolder());
         String localUniqueFolderId = getUniqueFolderId(account, foreignRelativeFolderId);
-        return new ShareSubscriptionInformation(String.valueOf(account.getAccountId()), Module.CALENDAR.getName(), localUniqueFolderId);
+        String qualifiedAccountId = com.openexchange.chronos.provider.composition.IDMangling.getQualifiedAccountId(account.getAccountId());
+        return new ShareSubscriptionInformation(qualifiedAccountId, Module.CALENDAR.getName(), localUniqueFolderId);
     }
 
     private static String getUniqueFolderId(CalendarAccount account, String relativeFolderId) {

@@ -55,8 +55,10 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LIT
 import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,14 +131,17 @@ public class AccountConfigHelper {
         return false;
     }
 
-    public boolean rememberFolder(GroupwareCalendarFolder calendarFolder) {
-        return null != calendarFolder ? rememberFolders(Collections.singletonList(calendarFolder)) : false;
-    }
-
-    public boolean rememberFolders(List<GroupwareCalendarFolder> calendarFolders) {
-        if (null == calendarFolders || calendarFolders.isEmpty()) {
-            return false;
-        }
+    /**
+     * Remembers the calendar folders for a certain folder type within the account configuration.
+     * <p/>
+     * Previously remembered folders of this type are purged implicitly, so that the passed collection of folders will effectively replace
+     * the last known state for this folder type afterwards.
+     * 
+     * @param calendarFolders The calendar folders to remember
+     * @param type The folder type to remember the calendars for
+     * @return <code>true</code> if the configuration was effectively changed by this operation, <code>false</code>, otherwise
+     */
+    public boolean rememberVisibleCalendars(List<GroupwareCalendarFolder> calendarFolders, GroupwareFolderType type) {
         /*
          * get or prepare "folders" configuration section
          */
@@ -146,17 +151,37 @@ public class AccountConfigHelper {
             config.putSafe("folders", foldersConfig);
         }
         /*
-         * update each folder in config as needed
+         * add or update each folder in config as needed
          */
         boolean needsUpdate = false;
+        Set<String> rememberedIds = new HashSet<String>(calendarFolders.size());
         for (GroupwareCalendarFolder calendarFolder : calendarFolders) {
             if (null == calendarFolder.getId()) {
                 LOG.warn("Unable to remember calendar folder {} without id.", calendarFolder);
                 continue;
             }
+            rememberedIds.add(calendarFolder.getId());
             JSONObject folderConfig = serializeFolder(calendarFolder);
             if (false == Objects.equals(foldersConfig.optJSONObject(calendarFolder.getId()), folderConfig)) {
                 foldersConfig.putSafe(calendarFolder.getId(), folderConfig);
+                needsUpdate = true;
+            }
+        }
+        /*
+         * remove no longer indicated calendars of this type
+         */
+        List<String> idsToRemove = new ArrayList<String>();
+        for (String folderId : foldersConfig.keySet()) {
+            if (rememberedIds.contains(folderId)) {
+                continue;
+            }
+            JSONObject folderConfig = foldersConfig.optJSONObject(folderId);
+            if (null != folderConfig && type.equals(Enums.parse(GroupwareFolderType.class, folderConfig.optString("type", null), null))) {
+                idsToRemove.add(folderId);
+            }
+        }
+        for (String folderId : idsToRemove) {
+            if (null != foldersConfig.remove(folderId)) {
                 needsUpdate = true;
             }
         }

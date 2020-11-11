@@ -90,6 +90,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
@@ -97,9 +98,13 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionStrategy;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
+import com.openexchange.secret.recovery.EncryptedItemDetectorService;
+import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeException;
 import net.jodah.failsafe.RetryPolicy;
@@ -110,7 +115,7 @@ import net.jodah.failsafe.RetryPolicy;
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public class CalendarAccountServiceImpl implements CalendarAccountService, AdministrativeCalendarAccountService {
+public class CalendarAccountServiceImpl implements CalendarAccountService, AdministrativeCalendarAccountService, SecretMigrator, EncryptedItemDetectorService, EncryptedItemCleanUpService {
 
     /** Simple comparator for calendar accounts to deliver accounts in a deterministic order */
     private static final Comparator<CalendarAccount> ACCOUNT_COMPARATOR = new Comparator<CalendarAccount>() {
@@ -270,7 +275,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         if (null != storedAccount.getLastModified() && storedAccount.getLastModified().getTime() > clientTimestamp) {
             throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), L(clientTimestamp), L(storedAccount.getLastModified().getTime()));
         }
-        CalendarProvider calendarProvider = getProviderRegistry().getCalendarProvider(storedAccount.getProviderId());
+        CalendarProvider calendarProvider = optProvider(storedAccount.getProviderId());
         if (null != calendarProvider && AutoProvisioningCalendarProvider.class.isInstance(calendarProvider)) {
             throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(calendarProvider.getId());
         }
@@ -307,6 +312,18 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 storedAccount.getProviderId(), storedAccount, CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(storedAccount.getProviderId()));
         } else {
             calendarProvider.onAccountDeleted(session, storedAccount, parameters);
+        }
+    }
+
+    @Override
+    public void deleteAccounts(int contextId, int userId, List<CalendarAccount> accounts) throws OXException {
+        CalendarAccountStorage accountStorage = initAccountStorage(contextId, null);
+        for (CalendarAccount acc : accounts) {
+            try {
+                accountStorage.deleteAccount(userId, acc.getAccountId(), Long.MAX_VALUE);
+            } finally {
+                invalidateStorage(contextId, userId, acc.getAccountId());
+            }
         }
     }
 
@@ -435,7 +452,89 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     public CalendarAccount updateAccount(int contextId, int userId, int accountId, JSONObject internalConfig, JSONObject userConfig, long clientTimestamp) throws OXException {
         return updateAccount(contextId, userId, accountId, internalConfig, userConfig, clientTimestamp, null);
     }
+    
+    @Override
+    public void migrate(String oldSecret, String newSecret, ServerSession session) throws OXException {
+        for (CalendarAccount account : getAccountsWithSecretProperties(session.getContextId(), session.getUserId())) {
+            if (migrateSecret(account, oldSecret, newSecret)) {
+                updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), null, account.getUserConfiguration(), account.getLastModified().getTime());
+            }
+        }
+    }
 
+    @Override
+    public boolean hasEncryptedItems(ServerSession session) throws OXException {
+        return 0 < getAccountsWithSecretProperties(session.getContextId(), session.getUserId()).size();
+    }
+
+    @Override
+    public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
+        for (CalendarAccount account : getAccountsWithSecretProperties(session.getContextId(), session.getUserId())) {
+            if (removeUnDecryptableValues(account, secret)) {
+                updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), null, account.getUserConfiguration(), account.getLastModified().getTime());
+            }
+        }
+    }
+
+    @Override
+    public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException {
+        for (CalendarAccount account : getAccountsWithSecretProperties(session.getContextId(), session.getUserId())) {
+            if (removeUnDecryptableValues(account, secret)) {
+                deleteAccounts(session.getContextId(), session.getUserId(), Collections.singletonList(account));
+            }
+        }
+    }
+
+    private boolean removeUnDecryptableValues(CalendarAccount account, String secret) throws OXException {
+        boolean needsUpdate = false;
+        for (String key : getProvider(account.getProviderId()).getSecretProperties()) {
+            JSONObject userConfig = account.getUserConfiguration();
+            if (null == userConfig || userConfig.isEmpty()) {
+                continue;
+            }
+            String encryptedValue = userConfig.optString(key, null);
+            if (Strings.isNotEmpty(encryptedValue)) {
+                /*
+                 * check if decryption works using the supplied secret, clear property, otherwise
+                 */
+                CryptoService cryptoService = requireService(CryptoService.class, services);
+                try {
+                    cryptoService.decrypt(encryptedValue, secret);
+                } catch (OXException e) {
+                    LoggerFactory.getLogger(CalendarAccountServiceImpl.class).trace("Decryption not possible in account {}, removing unencryptable value.", account, e);
+                    userConfig.putSafe(key, "");
+                    needsUpdate = true;
+                }
+            }
+        }
+        return needsUpdate;
+    }
+
+    private boolean migrateSecret(CalendarAccount account, String oldSecret, String newSecret) throws OXException {
+        boolean needsUpdate = false;
+        for (String key : getProvider(account.getProviderId()).getSecretProperties()) {
+            JSONObject userConfig = account.getUserConfiguration();
+            if (null == userConfig || userConfig.isEmpty()) {
+                continue;
+            }
+            String encryptedValue = userConfig.optString(key, null);
+            if (Strings.isNotEmpty(encryptedValue)) {
+                /*
+                 * check if decryption works using the new secret, migrate to new secret otherwise
+                 */
+                CryptoService cryptoService = requireService(CryptoService.class, services);
+                try {
+                    cryptoService.decrypt(encryptedValue, newSecret);
+                } catch (OXException e) {
+                    LoggerFactory.getLogger(CalendarAccountServiceImpl.class).trace("Decryption using new secret not successful in account {}, continuing with secret migration.", account, e);
+                    userConfig.putSafe(key, cryptoService.encrypt(cryptoService.decrypt(encryptedValue, oldSecret), newSecret));
+                    needsUpdate = true;
+                }
+            }
+        }
+        return needsUpdate;
+    }
+    
     private CalendarAccount updateAccount(int contextId, int userId, int accountId, JSONObject internalConfig, JSONObject userConfig, long clientTimestamp, CalendarParameters parameters) throws OXException {
         try {
             return new OSGiCalendarStorageOperation<CalendarAccount>(services, contextId, -1, parameters) {
@@ -530,6 +629,17 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         }
         storage.insertAccount(new DefaultCalendarAccount(providerId, accountId, userId, internalConfig, userConfig, new Date()), maxAccounts);
         return storage.loadAccount(userId, accountId);
+    }
+
+    /**
+     * Optionally gets the calendar provider by its provider identifier.
+     * 
+     * @param providerId The identifier of the provider to get
+     * @return The calendar provider, or <code>null</code> if unknown
+     */
+    CalendarProvider optProvider(String providerId) {
+        CalendarProviderRegistry providerRegistry = services.getOptionalService(CalendarProviderRegistry.class);
+        return null != providerRegistry ? providerRegistry.getCalendarProvider(providerId) : null;
     }
 
     private CalendarProvider getProvider(String providerId) throws OXException {
@@ -646,7 +756,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         if (null == account || null == account.getUserConfiguration() || account.getUserConfiguration().isEmpty()) {
             return account;
         }
-        CalendarProvider calendarProvider = getProviderRegistry().getCalendarProvider(account.getProviderId());
+        CalendarProvider calendarProvider = optProvider(account.getProviderId());
         if (null == calendarProvider) {
             return account;
         }
@@ -671,22 +781,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         }
         return userConfig;
     }
-
-    private static List<CalendarAccount> sort(List<CalendarAccount> accounts) {
-        if (null != accounts && 1 < accounts.size()) {
-            accounts.sort(ACCOUNT_COMPARATOR);
-        }
-        return accounts;
-    }
-
-    @Override
-    public void deleteAccounts(int contextId, int userId, List<CalendarAccount> accounts) throws OXException {
-        CalendarAccountStorage accountStorage = initAccountStorage(contextId, null);
-        for(CalendarAccount acc: accounts) {
-            accountStorage.deleteAccount(userId, acc.getAccountId(), Long.MAX_VALUE);
-        }
-    }
-
+    
     private SecretEncryptionStrategy<String> getSecretEncryptionStrategy(Session session, int accountId) {
         AdministrativeCalendarAccountService accountService = this;
         return new SecretEncryptionStrategy<String>() {
@@ -701,6 +796,34 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 accountService.updateAccount(session.getContextId(), session.getUserId(), accountId, null, userConfig, account.getLastModified().getTime());
             }
         };
+    }
+
+    private List<CalendarAccount> getAccountsWithSecretProperties(int contextId, int userId) throws OXException {
+        List<CalendarAccount> accountsWithSecretProperties = new ArrayList<CalendarAccount>();
+        for (CalendarAccount account : getAccounts(contextId, userId)) {
+            JSONObject userConfig = account.getUserConfiguration();
+            if (null == userConfig || userConfig.isEmpty()) {
+                continue;
+            }
+            CalendarProvider provider = optProvider(account.getProviderId());
+            if (null == provider || null == provider.getSecretProperties() || provider.getSecretProperties().isEmpty()) {
+                continue;
+            }
+            for (String key : provider.getSecretProperties()) {
+                if (Strings.isNotEmpty(userConfig.optString(key, null))) {
+                    accountsWithSecretProperties.add(account);
+                    continue;
+                }
+            }
+        }
+        return accountsWithSecretProperties;
+    }
+
+    private static List<CalendarAccount> sort(List<CalendarAccount> accounts) {
+        if (null != accounts && 1 < accounts.size()) {
+            accounts.sort(ACCOUNT_COMPARATOR);
+        }
+        return accounts;
     }
 
 }
