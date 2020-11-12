@@ -50,7 +50,6 @@
 package com.openexchange.saml.tools;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
-import java.util.Collection;
 import java.util.Map;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -63,10 +62,8 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.saml.SAMLSessionParameters;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
@@ -108,11 +105,6 @@ public class SAMLLoginTools {
      * The <code>samlLogout</code> login action.
      */
     public static final String ACTION_SAML_LOGOUT = "samlLogout";
-
-    /**
-     * The prefix of the auto-login cookie (<code>open-xchange-saml-</code>).
-     */
-    public static final String AUTO_LOGIN_COOKIE_PREFIX = "open-xchange-saml-";
 
     /**
      * Generates the relative redirect location to enter the web front-end directly with a session.
@@ -159,39 +151,26 @@ public class SAMLLoginTools {
         return location.toString();
     }
 
-    /**
-     * Gets the {@code open-xchange-saml-<hash>} cookie from given HTTP request, if available.
-     *
-     * @param httpRequest The inbound HTTP request
-     * @param loginConfiguration The current login configuration
-     * @return The cookie or <code>null</code>
-     * @throws OXException If an unexpected error occurs
-     */
-    public static Cookie getSAMLCookie(HttpServletRequest httpRequest, LoginConfiguration loginConfiguration) throws OXException {
+    public static Cookie getSessionCookie(HttpServletRequest httpRequest, LoginConfiguration loginConfiguration) throws OXException {
         String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
         Map<String, Cookie> cookies = Cookies.cookieMapFor(httpRequest);
-        return cookies.get(SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + hash);
+        return cookies.get(LoginServlet.SESSION_PREFIX + hash);
     }
 
     /**
-     * Gets the node-local session object that belongs to given {@code open-xchange-saml-<hash>} cookie, if available.
+     * Gets the (possibly cluster-wide distributed) session object that belongs to given {@code open-xchange-session-<hash>} cookie, if available.
      *
-     * @param samlCookie The SAML cookie or <code>null</code>
+     * @param sessionCookie The session cookie or <code>null</code>
      * @param sessiondService The {@link SessiondService} instance to lookup the session
      * @return The session or <code>null</code> if it doesn't exist or cookie was <code>null</code>
      * @throws OXException  If an unexpected error occurs
      */
-    public static Session getLocalSessionForSAMLCookie(Cookie samlCookie, SessiondService sessiondService) throws IllegalArgumentException, OXException {
-        if (samlCookie == null) {
+    public static Session getSessionForSessionCookie(Cookie sessionCookie, SessiondService sessiondService) throws IllegalArgumentException {
+        if (sessionCookie == null) {
             return null;
         }
 
-        Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + SAMLSessionParameters.SESSION_COOKIE + "=" + samlCookie.getValue() + ")"));
-        if (sessions.size() > 0) {
-            return sessiondService.getSession(sessions.iterator().next());
-        }
-
-        return null;
+        return sessiondService.getSession(sessionCookie.getValue());
     }
 
     /**
@@ -218,7 +197,7 @@ public class SAMLLoginTools {
      * @return {@code true} if the session valid, other wise {@code false}
      * @throws OXException
      */
-    public static boolean isValidSession(HttpServletRequest httpRequest, Session session, String cookieHash) throws OXException {
+    public static boolean isValidSession(HttpServletRequest httpRequest, Session session, String cookieHash) {
         // IP check
         try {
             SessionUtility.checkIP(session, httpRequest.getRemoteAddr());

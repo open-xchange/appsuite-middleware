@@ -271,12 +271,10 @@ properties:
     - key: com.openexchange.oidc.autologinCookieMode
       description: |
         Which login mode is enabled look at {@link OIDCBackendConfig.AutologinMode} for all valid values,
-        so far the following values are valid: {off, ox_direct, sso_redirect}.
+        so far the following values are valid: {off, ox_direct}.
         off - no autologin
         ox_direct - load user session from cookie and load Appsuite directly
-        sso_redirect - check for a valid session on OPs side before login into
-          a valid session loaded from a cookie
-      defaultValue: 'off'
+      defaultValue: 'ox_direct'
       version: 7.10.0
       reloadable: true
       configcascadeAware: false

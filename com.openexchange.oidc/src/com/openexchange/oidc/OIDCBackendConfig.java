@@ -84,6 +84,7 @@ public interface OIDCBackendConfig {
          * <br>
          * - autologinCookieMode <br>
          */
+        @Deprecated
         SSO_REDIRECT("sso_redirect"),
         /**
          * OX_DIRECT - Directly login into a valid OXSession

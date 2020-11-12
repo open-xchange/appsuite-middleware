@@ -211,13 +211,7 @@ public class SAMLLoginRequestHandlerTest {
 
     @Test
     public void deepLinkWithAutoLogin() throws Exception {
-        final String samlCookieValue = UUIDs.getUnformattedString(UUID.randomUUID());
-        Session session = sessiondService.addSession(buildAddSessionParameter(new SessionEnhancement() {
-            @Override
-            public void enhanceSession(Session session) {
-                session.setParameter(SAMLSessionParameters.SESSION_COOKIE, samlCookieValue);
-            }
-        }));
+        Session session = sessiondService.addSession(buildAddSessionParameter());
 
         String sessionToken = sessionReservationService.reserveSessionFor(1, 1, 10, TimeUnit.SECONDS, Collections.emptyMap());
 
@@ -237,8 +231,8 @@ public class SAMLLoginRequestHandlerTest {
             LoginTools.parseUserAgent(loginHTTPRequest),
             LoginTools.parseClient(loginHTTPRequest, false, loginConfigurationLookup.getLoginConfiguration().getDefaultClient()));
         List<Cookie> cookies = new ArrayList<>();
-        cookies.add(new Cookie(SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + cookieHash, samlCookieValue));
         cookies.add(new Cookie(LoginServlet.SECRET_PREFIX + cookieHash, session.getSecret()));
+        cookies.add(new Cookie(LoginServlet.SESSION_PREFIX + cookieHash, session.getSessionID()));
         loginHTTPRequest.setCookies(cookies);
 
         SimHttpServletResponse loginResponse = new SimHttpServletResponse();
@@ -313,7 +307,7 @@ public class SAMLLoginRequestHandlerTest {
         }
 
         @Override
-        protected LoginResult login(HttpServletRequest httpRequest, Context context, User user, Map<String, String> optState, LoginConfiguration loginConfiguration, String samlCookieValue) throws OXException {
+        protected LoginResult login(HttpServletRequest httpRequest, Context context, User user, Map<String, String> optState, LoginConfiguration loginConfiguration) throws OXException {
             LoginResult result = this.result;
             if (result == null) {
                 Assert.fail("No login result expected");
