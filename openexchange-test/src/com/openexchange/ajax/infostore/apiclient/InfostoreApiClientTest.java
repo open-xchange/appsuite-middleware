@@ -198,22 +198,27 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
         return uploadInfoItem.getData();
     }
 
-    protected InfoItemUpdateResponse uploadInfoItemWithError(String id, File file, String mimeType, String versionComment) throws ApiException, FileNotFoundException, IOException {
+    protected void uploadInfoItemWithError(String id, File file, String mimeType, String versionComment) throws FileNotFoundException, IOException {
         byte[] bytes = IOTools.getBytes(new FileInputStream(file));
-        return uploadInfoItemWithError(id, file, mimeType, versionComment, bytes, null, null, null);
+        uploadInfoItemWithError(id, file, mimeType, versionComment, bytes, null, null, null);
     }
 
-    protected InfoItemUpdateResponse uploadInfoItemWithError(String id, File file, String mimeType, String versionComment, String filename) throws ApiException, FileNotFoundException, IOException {
+    protected void uploadInfoItemWithError(String id, File file, String mimeType, String versionComment, String filename) throws FileNotFoundException, IOException {
         byte[] bytes = IOTools.getBytes(new FileInputStream(file));
-        return uploadInfoItemWithError(id, file, mimeType, versionComment, bytes, null, null, filename);
+        uploadInfoItemWithError(id, file, mimeType, versionComment, bytes, null, null, filename);
     }
 
-    protected InfoItemUpdateResponse uploadInfoItemWithError(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, String filename) throws ApiException {
-        String name = filename == null ? file.getName() : filename;
-        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, name, bytes, timestamp, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, Boolean.FALSE, Boolean.FALSE, offset, null);
-        Assert.assertNotNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
-        timestamp = uploadInfoItem.getTimestamp();
-        return uploadInfoItem;
+    protected void uploadInfoItemWithError(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, String filename) {
+        try {
+            String name = filename == null ? file.getName() : filename;
+            infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, name, bytes, timestamp, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, Boolean.FALSE, Boolean.FALSE, offset, null);
+            // Should not succeed
+            Assert.fail("Request expected to fail but succeeded");
+        } catch (ApiException e) {
+            // Expected to get here
+            Assert.assertEquals("Status code does not match", 413, e.getCode());
+            Assert.assertTrue("Wrong error message", e.getMessage().contains("exceeds the maximum configured file size"));
+        }
     }
 
     protected void rememberFile(String id, String folder) {

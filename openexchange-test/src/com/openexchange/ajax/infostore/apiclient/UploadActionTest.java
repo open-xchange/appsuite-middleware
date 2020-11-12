@@ -13,7 +13,6 @@ import org.junit.Test;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.InfoItemData;
-import com.openexchange.testing.httpclient.models.InfoItemUpdateResponse;
 import com.openexchange.tools.io.IOTools;
 
 /**
@@ -27,7 +26,7 @@ public class UploadActionTest extends InfostoreApiClientTest {
 
     public static final int SIZE = 15; // Size of the large file in Megabytes
 
-    private static final byte[] megabyte = new byte[1000000];
+    private static final byte[] megabyte = new byte[1048576];
 
     /*
      * Create tests ---------------------------------------------------------------------------------------------------------------------
@@ -44,7 +43,6 @@ public class UploadActionTest extends InfostoreApiClientTest {
 
     @Test
     public void testUploadEmptyFile_considerEmptyUpdate() throws Exception {
-
         final File file = File.createTempFile("infostore-new-test", ".txt");
         String id = uploadInfoItem(file, MIME_TEXT_PLAIN);
 
@@ -69,9 +67,7 @@ public class UploadActionTest extends InfostoreApiClientTest {
                 out.close();
             }
         }
-
-        InfoItemUpdateResponse response = uploadInfoItemWithError(null, file, MIME_TEXT_PLAIN, null);
-        Assert.assertEquals("FLS-0003", response.getCode());
+        uploadInfoItemWithError(null, file, MIME_TEXT_PLAIN, null);
     }
 
     // Bug 3928
