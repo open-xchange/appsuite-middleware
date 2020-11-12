@@ -4,7 +4,7 @@ icon: fa-book
 tags: OAuth, API
 ---
 
-With OX App Suite v7.8.0 a service provider can decide to publish a certain subset of the OX HTTP API via OAuth 2.0. See the [developer guide](02_developer_guide.html) for an overview of the available APIs. The feature as a whole is contained in separate optional packages and requires some configuration. Supported client applications must be of type `confidential` according to the `web application` profile defined in [RFC 6749](http://tools.ietf.org/html/rfc6749). The OX middleware will act as `resource server` and by default also as `authorization server`.
+With OX App Suite v7.8.0 a service provider can decide to publish a certain subset of the OX HTTP API via OAuth 2.0. See the [developer guide](02_client_developer_guide.html#available-apis) for an overview of the available APIs. The feature as a whole is contained in separate optional packages and requires some configuration. Supported client applications must be of type `confidential` according to the `web application` profile defined in [RFC 6749](http://tools.ietf.org/html/rfc6749). The OX middleware will act as `resource server` and by default also as `authorization server`.
 
 When acting as `authorization server`, every application must be registered at the OX backend. The registration process is up to you, while the backend provides SOAP and RMI interfaces to persist those registrations and generates the client-specific credentials that are needed to gain access for granting users. With OX App Suite v7.8.1 it is possible to use an external authorization server.
 
@@ -39,7 +39,7 @@ The internal authorization server needs some configuration, that also takes plac
     #    ** UI Provisioning interfaces to manage trusted clients are enabled
     #
     # expect_jwt
-    #  * Defines whether the enabled OAuth 2.0 provider is accesible with OAuth 2.0 Bearer Access Tokens that are JWTs, which were issued by an external Identity & Access management System.
+    #  * Defines whether the enabled OAuth 2.0 provider is accessible with OAuth 2.0 Bearer Access Tokens that are JWTs, which were issued by an external Identity & Access management System.
     #
     # token_introspection
     #  * Defines whether the enabled OAuth 2.0 provider is able to grant access based on opaque bearer tokens through token introspection.
@@ -1009,41 +1009,211 @@ Disabled clients can of course be enabled again. If the client was already enabl
        </soap:Body>
     </soap:Envelope>
 
-
 # Using an external authorization server
 
 When using an external authorization server, the internal client and grant management are deactivated. The according provisioning interfaces will not be available and the "External Apps" section within the App Suite settings page will not show up. The whole client and grant management will be off-loaded to the external identity management system.
 
-You need to deactivate the internal authorization server, by setting [com.openexchange.oauth.provider.isAuthorizationServer](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.oauth.provider.isAuthorizationServer) in `/opt/open-xchange/etc/oauth-provider.properties` to `false`. Additionally you need to provide an implementation of `com.openexchange.oauth.provider.authorizationserver.spi.OAuthAuthorizationService` as OSGi service. Its purpose is to validate the access tokens of incoming requests and to identify the according OX user. The service provider interface is contained in bundle `com.openexchange.oauth.provider`.
+In order to validate incoming requests that have been authorized by an external authorization server, two implementations of the `com.openexchange.oauth.provider.authorizationserver.spi.OAuthAuthorizationService` are available since v7.10.5.
+On the configuration side, these implementations are reflected as so-called "modes", which can be set via `com.openexchange.oauth.provider.mode` in `/opt/open-xchange/etc/oauth-provider.properties`.
 
-With OX App Suite v7.10.5 `com.openexchange.oauth.provider.isAuthorizationServer` was transferred to `com.openexchange.oauth.provider.mode`. To deactivate the internal authorization server, which is activated using the value `auth_server`, the value must be set to one of the offered implementations of the `com.openexchange.oauth.provider.authorizationserver.spi.OAuthAuthorizationService`. Here `expect_jwt` or `token_introspection` are available.
+The following sections will describe the configuration of the available modes in detail.
 
-## Example
+## JSON Web Token (JWT)
 
-An example implementation using the [WSO2 Identity Server 5.1.0](http://wso2.com/products/identity-server/) can be found here: <https://code.open-xchange.com/git/examples/backend-samples> as project `com.openexchange.oauth.provider.wso2`. It is based on this [blog post](http://shanakaweerasinghe.blogspot.de/2016_01_01_archive.html).
+If you want to use an external Identity and Access management System that issues JWTs, this must be configured accordingly in `/opt/open-xchange/etc/oauth-provider.properties`.
+To do this, you first have to activate the OAuth provider and set `com.openexchange.oauth.provider.mode` to `expect_jwt`.
 
-If you want to test the WSO2 provider in production, you need to create a proper bundle JAR and install it to your OX middleware OSGi runtime. The endpoint of the WSO2 `OAuth2TokenValidationService` must be configured via `/opt/open-xchange/etc/wso2-oauth.properties`. Example content:
+    # Set to 'true' to basically enable the OAuth 2.0 provider. This setting can then be overridden
+    # via config cascade to disallow granting access for certain users. If the provider is enabled,
+    # an encryption key (see below) must be set!
+    #
+    # Default: false
+    com.openexchange.oauth.provider.enabled=true
 
-    com.openexchange.oauth.provider.wso2.tokenEndpoint = https://localhost:9443/services/OAuth2TokenValidationService
-    com.openexchange.oauth.provider.wso2.apiUser = admin
-    com.openexchange.oauth.provider.wso2.apiPassword = admin
+    # Besides the functionality to act as an OAuth 2.0 provider, there are three different modes to choose from:
+    #
+    # auth_server
+    #  * Defines whether the enabled OAuth 2.0 provider does not only act as resource server but also as authorization server. The following functionality will be provided:
+    #    ** An authorization endpoint, token endpoint and revocation endpoint are made available via HTTP
+    #    ** API calls for revoking access to external clients are made available, access can be revoked via App Suite
+    #    ** UI Provisioning interfaces to manage trusted clients are enabled
+    #
+    # expect_jwt
+    #  * Defines whether the enabled OAuth 2.0 provider is accessible with OAuth 2.0 Bearer Access Tokens that are JWTs, which were issued by an external Identity & Access management System.
+    #
+    # token_introspection
+    #  * Defines whether the enabled OAuth 2.0 provider is able to grant access based on opaque bearer tokens through token introspection.
+    #
+    # Default: auth_server
+    com.openexchange.oauth.provider.mode=expect_jwt
 
-The WSO2 identity server also needs some configuration:
+In order to validate the incoming JWTs, it is necessary to specify where the required signature keys should be fetched from.
+There are two possible configurations:
 
--   Edit `wso2is-5.1.0/repository/conf/identity/identity.xml` and change the `<Enabled>` element of `<AuthorizationContextTokenGeneration>` to `true`
--   Edit and change `<HideAdminServiceWSDLs>` to `false`
--   Restart the server and login as admin to the management console
--   Add a new service provider with name "OAuth" and configure OAuth as inbound authentication mechanism
-	-   OAuth Version: 2.0
-	-   Callback Url: depends on your application
-	-   Allowed Grant Types: Code and Refresh Token
--   Copy the shown client credentials and configure your test application accordingly
--   Add a new user
-	-   Assign the role "Application/OAuth"
-	-   Edit its profile and configure the email address to match the pattern `<ox-user-name>@<ox-context-name>`. The context name must end with a TLD, you'll need an according login mapping within OX.
+The first option is to retrieve them from a JWKS endpoint.
 
-You can now configure your client with the according authorization and token endpoint URLs:
+	#Specifies (and thus enables) a JWKS endpoint used to fetch signature keys for validation
+	com.openexchange.oauth.provider.jwks.endpoint=http://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/certs
 
--   Authorization endpoint: `https://<wso2-host>:9443/oauth2/authorize`
--   Token endpoint: `https://<wso2-host>:9443/oauth2/token`
+
+The second is to load them from a locally populated keystore.
+
+	#Specifies (and thus enables) a keystore used for validation
+	com.openexchange.oauth.provider.keystore.path=keystore.jks
+
+	#Determines password for the keystore used for validation
+	com.openexchange.oauth.provider.keystore.password=secret
+
+	#Determines the type of the specified keystore. Default is "JKS"
+	com.openexchange.oauth.provider.keystore.type
+
+Furthermore the allowed token issuers can be specified. If you do not configure this property, tokens are accepted from all issuers.
+
+	#Specifies the allowed token issuers
+	com.openexchange.oauth.provider.allowedIssuer
+
+The user resolution can also be configured. For this purpose, the values required for the resolution of user and context are first read from the JWT. The names of the claims that contain the information can be specified with the following configuration properties:
+
+	#Specifies the name of claim that shall be used for context resolution. Default is "sub"
+	com.openexchange.oauth.provider.contextLookupClaim
+
+	#Specifies the name of claim that shall be used for user resolution. Default is "sub"
+	com.openexchange.oauth.provider.userLookupClaim
+
+How the queried values are subsequently processed is configured via the following configuration properties.
+
+	#Specifies what portion of the value used for context resolution is supposed to be used for context look-up. Default value is "domain"
+	#Possible values:
+	# full
+	#  *The full string as returned by the authorization server
+	#
+	# local-part
+	#  *The local part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.
+	#
+	# domain
+	#  *The domain part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.
+	com.openexchange.oauth.provider.contextLookupNamePart
+
+	#Specifies what portion of the value used for user resolution is supposed to be used for user look-up. Default value is "local-part"
+	#Possible values:
+	# full
+	#  *The full string as returned by the authorization server
+	#
+	# local-part
+	#  *The local part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.
+	#
+	# domain
+	#  *The domain part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.
+	com.openexchange.oauth.provider.userLookupNamePart
+
+The last property enables a generic, configurable scope-mapping of external authorization server scopes to internal middleware scopes. 
+To specify an external scope replace `[EXTERNAL_SCOPE]` with the corresponding external scope name.
+
+	#Specifies external scopes and their mapping to internal middleware scopes.
+	#E.g. com.openexchange.oauth.provider.scope.mail = read_mail, write_mail.
+	com.openexchange.oauth.provider.scope.[EXTERNAL_SCOPE]
+
+
+
+Example:
+
+	com.openexchange.oauth.provider.enabled=true
+	com.openexchange.oauth.provider.mode=expect_jwt
+	com.openexchange.oauth.provider.jwks.endpoint=http://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/certs
+	com.openexchange.oauth.provider.contextLookupClaim=email
+	com.openexchange.oauth.provider.userLookupClaim=email
+	com.openexchange.oauth.provider.scope.mail = read_mail, write_mail
+
+
+## Token introspection
+
+To be able to validate opaque OAuth Access Tokens issued by an external Identity and Access management System via token introspection you need a proper configuration, which is done in `/opt/open-xchange/etc/oauth-provider.properties`.
+As a first step the OAuth provider must be activated and `com.openexchange.oauth.provider.mode` must be set to `token_introspection`.
+
+    # Set to 'true' to basically enable the OAuth 2.0 provider. This setting can then be overridden
+    # via config cascade to disallow granting access for certain users. If the provider is enabled,
+    # an encryption key (see below) must be set!
+    #
+    # Default: false
+    com.openexchange.oauth.provider.enabled=true
+
+
+    # Besides the functionality to act as an OAuth 2.0 provider, there are three different modes to choose from:
+    #
+    # auth_server
+    #  * Defines whether the enabled OAuth 2.0 provider does not only act as resource server but also as authorization server. The following functionality will be provided:
+    #    ** An authorization endpoint, token endpoint and revocation endpoint are made available via HTTP
+    #    ** API calls for revoking access to external clients are made available, access can be revoked via App Suite
+    #    ** UI Provisioning interfaces to manage trusted clients are enabled
+    #
+    # expect_jwt
+    #  * Defines whether the enabled OAuth 2.0 provider is accessible with OAuth 2.0 Bearer Access Tokens that are JWTs, which were issued by an external Identity & Access management System.
+    #
+    # token_introspection
+    #  * Defines whether the enabled OAuth 2.0 provider is able to grant access based on opaque bearer tokens through token introspection.
+    #
+    # Default: auth_server
+    com.openexchange.oauth.provider.mode=token_introspection
+
+Afterwards the introspection endpoint must be defined from which information about the received token is retrieved. This property is mandatory if you want to use token introspection.
+
+	#Specifies the endpoint for the introspection service
+	com.openexchange.oauth.provider.introspection.endpoint=http://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/token/introspect
+
+If HTTP Basic.Auth is supposed to be used for the token information request, this must be configured via the following configuration properties:
+
+	#Enables using HTTP Basic-Auth for the introspection endpoint. Default is false
+	com.openexchange.oauth.provider.introspection.basicAuthEnabled=true
+
+	#Specifies the client identifier used as user name for HTTP Basic-Auth
+	com.openexchange.oauth.provider.introspection.clientID=OAuthShowcase
+
+	#Specifies the client secret used as password for HTTP Basic-Auth
+	com.openexchange.oauth.provider.introspection.clientSecret=bef75a68-f3d8-499c-8c0a-65155de13dbb
+
+The token introspection endpoint should respond with a JSON object that contains information about the user, among other things. The resolution of this user is configurable. 
+To do this, the values required to resolve user and context are first read from the JSON object. The names of the properties that contain the information can be specified using the following configuration properties:
+
+	#Specifies the name of the property that shall be used for context resolution. Default is "sub"
+	com.openexchange.oauth.provider.introspection.contextLookupClaim=email
+
+	#Specifies the name of the property that shall be used for user resolution. Default is "sub"
+	com.openexchange.oauth.provider.introspection.userLookupClaim=email
+
+How the queried values are subsequently processed is configured via the following configuration properties.
+
+	#Specifies what portion of the value used for context resolution is supposed to be used for context look-up. Default value is {{"domain"}}
+	#Possible values:
+	# full
+	#  *The full string as returned by the authorization server
+	#
+	# local-part
+	#  *The local part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.
+	#
+	# domain
+	#  *The domain part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.
+	com.openexchange.oauth.provider.introspection.contextLookupNamePart
+
+	#Specifies what portion of the value used for user resolution is supposed to be used for user look-up. Default value is {{"local-part"}}
+	#Possible values:
+	# full
+	#  *The full string as returned by the authorization server
+	#
+	# local-part
+	#  *The local part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.
+	#
+	# domain
+	#  *The domain part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.
+	com.openexchange.oauth.provider.introspection.userLookupNamePart
+
+Example:
+
+	com.openexchange.oauth.provider.enabled=true
+	com.openexchange.oauth.provider.mode=token_introspection
+	com.openexchange.oauth.provider.contextLookupClaim=email
+	com.openexchange.oauth.provider.userLookupClaim=email
+	com.openexchange.oauth.provider.endpoint=http://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/token/introspect
+	com.openexchange.oauth.provider.clientID=OAuthShowcase
+	com.openexchange.oauth.provider.clientSecret=bef75a68-f3d8-499c-8c0a-65155de13dbb
+
 
