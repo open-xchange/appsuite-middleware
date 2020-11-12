@@ -63,7 +63,7 @@ public enum OAuthIntrospectionProperty implements Property{
     /**
      * The token introspection endpoint.
      */
-    ENDPOINT("endpoint", OAuthIntrospectionProperty.EMPTY),
+    ENDPOINT("introspection.endpoint", OAuthIntrospectionProperty.EMPTY),
 
     /**
      * Enable basic authentication for introspection
