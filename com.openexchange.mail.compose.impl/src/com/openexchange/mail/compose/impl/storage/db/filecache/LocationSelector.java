@@ -222,7 +222,8 @@ public class LocationSelector {
                 } else {
                     if (retval == null) {
                         String expectedFileName = buildFileName(compositionSpaceId, userId, contextId);
-                        for (File file : files) {
+                        for (int i = files.length; retval == null && i-- > 0;) {
+                            File file = files[i];
                             if (expectedFileName.equals(file.getName())) {
                                 retval = file;
                             }
@@ -276,19 +277,17 @@ public class LocationSelector {
                 } else {
                     if (!deleted) {
                         String expectedFileName = buildFileName(compositionSpaceId, userId, contextId);
-                        for (File file : files) {
+                        for (int i = files.length; !deleted &&  i-- > 0;) {
+                            File file = files[i];
                             if (expectedFileName.equals(file.getName())) {
                                 deleteFileSafe(file);
                                 deleted = true;
                             }
                         }
-                        if (deleted) {
-                            files = getUserFiles(location, userId, contextId);
-                            if (files == null || files.length <= 0) {
-                                // Contains no user files at all
-                                directories.remove(location.location);
-                                anyRemoved = true;
-                            }
+                        if (deleted && files.length == 1) {
+                            // Deleted last file in location
+                            directories.remove(location.location);
+                            anyRemoved = true;
                         }
                     }
                 }
