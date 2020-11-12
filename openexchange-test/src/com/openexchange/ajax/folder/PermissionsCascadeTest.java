@@ -81,7 +81,7 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class PermissionsCascadeTest extends AbstractAJAXSession {
 
-    private final List<FolderObject> testFolders = new ArrayList<FolderObject>();
+    private final List<FolderObject> testFolders = new ArrayList<>();
 
     private FolderObject rootFolder;
 
@@ -190,7 +190,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         }
 
         // Fetch all of its sub-folders.
-        List<FolderObject> tree = new ArrayList<FolderObject>();
+        List<FolderObject> tree = new ArrayList<>();
         fetchAllSubfolders(rootNodeIdOfSubTree, tree);
 
         // Assert that there is a tree
@@ -251,7 +251,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         assertFalse(cascadeResponse.getErrorMessage(), cascadeResponse.hasError());
 
         // Assert permissions
-        assertPermissions(rootNode, new int[] { owner, user3 }, new int[] { user2 }, getClient());
+        assertPermissions(rootNode, new int[] { owner }, new int[] { user2 }, getClient());
         assertPermissions(leaf, new int[] { owner, user3 }, new int[] { user2 }, getClient());
         assertPermissions(leafOfLeaf, new int[] { user2 }, new int[] { owner, user3 }, client2);
     }
