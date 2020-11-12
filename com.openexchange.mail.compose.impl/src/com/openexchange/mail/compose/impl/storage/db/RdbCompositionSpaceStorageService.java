@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.compose.impl.storage.db;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,6 +64,8 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CountingOutputStream;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.AttachmentStorage;
@@ -413,12 +417,56 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
          * Examine the effective max. content size. Either max. content size is 0 (zero) in which case every content is supposed to be
          * stored as a file OR it is greater than 0 (zero) and current content's size exceeds that max. content size.
          */
-        if ((effectiveMaxContentSize == 0) || (effectiveMaxContentSize > 0 && (content.length() > effectiveMaxContentSize || content.getBytes(StandardCharsets.UTF_8).length > effectiveMaxContentSize))) {
+        if ((effectiveMaxContentSize == 0) || exceedsMaxContentSize(content, effectiveMaxContentSize)) {
             boolean stored = fileCache.storeCachedContent(content, id, session.getUserId(), session.getContextId());
             if (stored) {
                 // Successfully stored as file. Set content to set to an empty string.
                 messageDesc.setContent("");
             }
+        }
+    }
+
+    /** Size of write buffer. Aligned to java.io.Writer.WRITE_BUFFER_SIZE */
+    private static final int WRITE_BUFFER_LENGTH = 1024;
+
+    private static boolean exceedsMaxContentSize(String content, long maxContentSize) throws OXException {
+        // Fast check
+        int numberOfCharacters = content.length();
+        if (numberOfCharacters > maxContentSize) {
+            // Number of unicode code points is yet greater than given max. content size. Thus the limit is exceeded in any case.
+            return true;
+        }
+
+        // UTF-8 has at max. 2 bytes per character. Thus if that max. number of bytes is less than max. content size, the content does fit.
+        long estimate = numberOfCharacters << 1;
+        if (estimate <= maxContentSize) {
+            return false;
+        }
+
+        // Might exceed max. content size. Need to check precisely through generating UTF-8 bytes.
+        CountingOutputStream counter = null;
+        OutputStreamWriter osw = null;
+        try {
+            counter = new CountingOutputStream();
+            osw = new OutputStreamWriter(counter, StandardCharsets.UTF_8);
+
+            for (int i = 0; i < numberOfCharacters;) {
+                int end = i + WRITE_BUFFER_LENGTH;
+                if (end > numberOfCharacters) {
+                    end = numberOfCharacters;
+                }
+                osw.write(content.substring(i, end));
+                i = end;
+            }
+            osw.flush();
+            osw.close();
+            osw = null;
+
+            return counter.getCount() > maxContentSize;
+        } catch (IOException e) {
+            throw CompositionSpaceErrorCode.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(osw, counter);
         }
     }
 
