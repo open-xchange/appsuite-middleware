@@ -57,6 +57,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.extensions.Conference;
+import com.openexchange.chronos.ical.ical4j.extensions.Feature;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -117,7 +118,7 @@ public class ConferencesMapping extends AbstractICalMapping<VEvent, Event> {
             property.getParameters().add(new XParameter("LABEL", conference.getLabel()));
         }
         if (null != conference.getFeatures() && 0 < conference.getFeatures().size()) {
-            property.getParameters().add(new XParameter("FEATURE", Strings.join(conference.getFeatures(), ",")));
+            property.getParameters().add(new Feature(conference.getFeatures()));
         }
         if (null != conference.getExtendedParameters() && 0 < conference.getExtendedParameters().size()) {
             for (ExtendedPropertyParameter parameter : conference.getExtendedParameters()) {
@@ -145,7 +146,7 @@ public class ConferencesMapping extends AbstractICalMapping<VEvent, Event> {
                     case "LABEL":
                         label = value;
                         break;
-                    case "FEATURE":
+                    case Feature.PARAMETER_NAME:
                         String[] splitted = Strings.splitByCommaNotInQuotes(value);
                         if (null != splitted) {
                             features.addAll(Arrays.asList(splitted));
