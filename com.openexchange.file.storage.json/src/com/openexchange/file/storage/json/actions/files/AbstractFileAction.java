@@ -347,7 +347,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      */
     protected List<IdVersionPair> parsePairs(JSONArray jPairs) throws JSONException, OXException {
         int len = jPairs.length();
-        List<IdVersionPair> idVersionPairs = new ArrayList<IdVersionPair>(len);
+        List<IdVersionPair> idVersionPairs = new ArrayList<>(len);
         for (int i = 0; i < len; i++) {
             JSONObject tuple = jPairs.getJSONObject(i);
 

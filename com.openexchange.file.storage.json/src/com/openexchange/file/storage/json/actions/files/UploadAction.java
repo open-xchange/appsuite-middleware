@@ -81,7 +81,6 @@ public class UploadAction extends AbstractWriteAction {
 
     @Override
     protected AJAXRequestResult handle(InfostoreRequest request) throws OXException {
-
         if (Strings.isEmpty(request.getParameter(File.Field.FOLDER_ID.getName()))) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(File.Field.FOLDER_ID.getName());
         }
