@@ -49,10 +49,13 @@
 
 package com.openexchange.ajax.infostore.thirdparty.webdav;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.infostore.thirdparty.AbstractFileStorageAccountTest;
 import com.openexchange.java.Strings;
@@ -164,7 +167,7 @@ public class WebDAVTest extends AbstractFileStorageAccountTest {
 
     @Override
     protected Map<String, String> getNeededConfigurations() {
-        HashMap<String, String> configuration = new HashMap<String, String>();
+        HashMap<String, String> configuration = new HashMap<>();
         configuration.put("com.openexchange.capability.filestorage_webdav", Boolean.TRUE.toString());
         configuration.put("com.openexchange.file.storage.webdav.blacklistedHosts", "");
         return configuration;
@@ -178,6 +181,7 @@ public class WebDAVTest extends AbstractFileStorageAccountTest {
      * @return A list of folder IDs which could <b>NOT</b> be removed due conflicts or errors
      * @throws ApiException
      */
+    @Override
     protected List<String> deleteFolder(String folderId, boolean hardDelete) throws ApiException {
         final boolean failOnError = true;
         final boolean extendedResponse = false;
