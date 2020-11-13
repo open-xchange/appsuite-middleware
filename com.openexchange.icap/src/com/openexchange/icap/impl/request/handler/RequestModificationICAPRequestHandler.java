@@ -53,9 +53,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.apache.commons.io.IOUtils;
 import com.openexchange.icap.ICAPRequest;
 import com.openexchange.icap.ICAPResponse;
+import com.openexchange.tools.io.IOUtils;
 
 /**
  * {@link RequestModificationICAPRequestHandler} - Handles the Request Modification Mode's Response

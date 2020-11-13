@@ -172,6 +172,9 @@ public class ResponseModificationICAPRequestHandler extends AbstractICAPRequestH
             return Integer.parseInt(previewSizeStr);
         } catch (NumberFormatException e) {
             LOG.warn("Invalid value '{}' for the '{}' header was detected in the ICAPRequest.", previewSizeStr, ICAPRequestHeader.PREVIEW);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("", e);
+            }
             return -1;
         }
     }
@@ -181,9 +184,8 @@ public class ResponseModificationICAPRequestHandler extends AbstractICAPRequestH
      * 
      * @param request The {@link ICAPRequest} from which to fetch the 'Content-Length' header
      * @return The value of the 'Content-Length' header or <code>-1</code> if none available
-     * @throws IOException if an I/O error occurs
      */
-    private long getContentLength(ICAPRequest request) throws IOException {
+    private long getContentLength(ICAPRequest request) {
         String contentLengthStr = request.getHeaders().get(ICAPRequestHeader.CONTENT_LENGTH);
         return Strings.isEmpty(contentLengthStr) ? -1 : Long.parseLong(contentLengthStr);
     }

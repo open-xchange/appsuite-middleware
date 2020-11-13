@@ -54,8 +54,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.Arrays;
-import org.apache.commons.io.IOUtils;
 import com.openexchange.java.Charsets;
+import com.openexchange.tools.io.IOUtils;
 
 /**
  * {@link ICAPInputStream} - A wrapper class for the ICAP server input stream.

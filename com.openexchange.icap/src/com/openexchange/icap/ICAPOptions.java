@@ -49,8 +49,8 @@
 
 package com.openexchange.icap;
 
-import java.util.Collections;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * {@link ICAPOptions}
@@ -61,19 +61,31 @@ import java.util.Set;
 public class ICAPOptions {
 
     private long previewSize;
-    private boolean allow;
-    private Set<ICAPMethod> supportedMethods;
-    private String isTag;
     private long ttl;
-    private String serviceId;
-    private String service;
     private long created;
 
+    private boolean allow;
+
+    private Set<ICAPMethod> supportedMethods;
+
+    private String isTag;
+    private String serviceId;
+    private String service;
+
     /**
-     * Initialises a new {@link ICAPOptions}.
+     * Initializes a new {@link ICAPOptions}.
+     * 
+     * @param builder the builder instance
      */
-    public ICAPOptions() {
-        super();
+    ICAPOptions(Builder builder) {
+        this.previewSize = builder.previewSize;
+        this.allow = builder.allow;
+        this.supportedMethods = builder.supportedMethods;
+        this.isTag = builder.isTag;
+        this.ttl = builder.ttl;
+        this.serviceId = builder.serviceId;
+        this.service = builder.service;
+        this.created = builder.created;
     }
 
     /**
@@ -148,91 +160,33 @@ public class ICAPOptions {
         return created;
     }
 
-    /////////////////////// PRIVATE SETTERS /////////////////////////
+    //////////////////////////BUILDER ///////////////////////////
 
     /**
-     * Sets the previewSize
-     *
-     * @param previewSize The previewSize to set
+     * Creates builder to build {@link ICAPOptions}.
+     * 
+     * @return created builder
      */
-    private void setPreviewSize(long previewSize) {
-        this.previewSize = previewSize;
+    public static Builder builder() {
+        return new Builder();
     }
 
     /**
-     * Sets the allow
-     *
-     * @param allow The allow to set
+     * Builder to build {@link ICAPOptions}.
      */
-    private void setAllow(boolean allow) {
-        this.allow = allow;
-    }
-
-    /**
-     * Sets the supportedMethods
-     *
-     * @param supportedMethods The supportedMethods to set
-     */
-    private void setSupportedMethods(Set<ICAPMethod> supportedMethods) {
-        this.supportedMethods = Collections.unmodifiableSet(supportedMethods);
-    }
-
-    /**
-     * Sets the isTag
-     *
-     * @param isTag The isTag to set
-     */
-    private void setIsTag(String isTag) {
-        this.isTag = isTag;
-    }
-
-    /**
-     * Sets the optionsTTL
-     *
-     * @param optionsTTL The optionsTTL to set
-     */
-    private void setTTL(long optionsTTL) {
-        this.ttl = optionsTTL;
-    }
-
-    /**
-     * Sets the serviceId
-     *
-     * @param serviceId The serviceId to set
-     */
-    private void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
-    }
-
-    /**
-     * Sets the service
-     *
-     * @param service The service to set
-     */
-    private void setService(String service) {
-        this.service = service;
-    }
-
-    /**
-     * Sets the created
-     *
-     * @param created The created to set
-     */
-    private void setCreated(long created) {
-        this.created = created;
-    }
-
-    ////////////////////////// BUILDER ///////////////////////////
-
     public static final class Builder {
 
-        private long previewSize;
-        private boolean allow;
-        private Set<ICAPMethod> supportedMethods;
-        private String isTag;
-        private long ttl;
-        private String service;
-        private String serviceId;
+        long previewSize;
+        long ttl;
+        long created;
+
+        boolean allow;
+
+        Set<ICAPMethod> supportedMethods = ImmutableSet.of();
+
+        String isTag;
+        String serviceId;
+        String service;
 
         /**
          * Initialises a new {@link ICAPOptions.Builder}.
@@ -273,7 +227,7 @@ public class ICAPOptions {
          * @return
          */
         public Builder withSupportedMethods(Set<ICAPMethod> methods) {
-            this.supportedMethods = methods;
+            this.supportedMethods = ImmutableSet.copyOf(methods);
             return this;
         }
 
@@ -318,21 +272,12 @@ public class ICAPOptions {
         }
 
         /**
-         * Builds the {@link ICAPOptions}
-         * 
-         * @return The built {@link ICAPOptions}
+         * Builds the ICAPOptions
+         *
+         * @return The new {@link ICAPOptions}
          */
         public ICAPOptions build() {
-            ICAPOptions options = new ICAPOptions();
-            options.setAllow(allow);
-            options.setIsTag(isTag);
-            options.setTTL(ttl);
-            options.setPreviewSize(previewSize);
-            options.setSupportedMethods(supportedMethods);
-            options.setService(service);
-            options.setServiceId(serviceId);
-            options.setCreated(System.currentTimeMillis());
-            return options;
+            return new ICAPOptions(this);
         }
     }
 }
