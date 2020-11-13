@@ -50,6 +50,7 @@
 package com.openexchange.api.client.impl;
 
 import java.net.URL;
+import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.Credentials;
@@ -156,19 +157,48 @@ public class ApiShareClient extends AbstractApiClient {
      * @throws OXException In case the share can't be accessed
      * @see {@link com.openexchange.share.servlet.utils.LoginType#MESSAGE}
      * @see {@link com.openexchange.share.servlet.handler.WebUIShareHandler#redirectToLoginPage(AccessShareRequest, HttpServletRequest, HttpServletResponse)}
+     * @see {@link com.openexchange.share.servlet.utils.LoginLocation#status(String)}
      */
     private void checkResponse(ShareLoginInformation shareLoginInfos) throws OXException {
-        String loginType = shareLoginInfos.getLoginType();
-        if ("message".equals(loginType)) {
+        boolean message = "message".equals(shareLoginInfos.getLoginType());
+        boolean message_comtinue = "message_continue".equals(shareLoginInfos.getLoginType());
+        if (false == (message || message_comtinue)) {
             /*
-             * This indicates a error that needs to be resolved by the user
+             * No errors, continue.
              */
-            throw ApiClientExceptions.REMOTE_SERVER_ERROR.create(null == shareLoginInfos.getMessage() ? "" : shareLoginInfos.getMessage());
-        } else if ("message_continue".equals(loginType)) {
-            /*
-             * This indicates a removed resource
-             */
-            throw ApiClientExceptions.ACCESS_REVOKED.create();
+            return;
         }
+        /*
+         * Resolve token and get more infos
+         */
+        ShareLoginInformation errorInfos = execute(new RedeemTokenCall(shareLoginInfos.getToken()));
+        if (Strings.isNotEmpty(errorInfos.getStatus())) {
+            String status = errorInfos.getStatus();
+            if (status.startsWith("not_found")) {
+                /*
+                 * This indicates a removed resource
+                 */
+                throw ApiClientExceptions.ACCESS_REVOKED.create();
+            } else if (status.equals("internal_error")) {
+                /*
+                 * Try again later error
+                 */
+                throw ApiClientExceptions.REMOTE_SERVER_ERROR.create(null == errorInfos.getMessage() ? "" : errorInfos.getMessage());
+            } else if (status.equals("client_blacklisted")) {
+                /*
+                 * Permanent error, can only be resolved by the remote server
+                 */
+                LoggerFactory.getLogger(ApiShareClient.class).info("Remote OX {} blacklisted API client. Can't resolve share.", loginLink.getHost());
+                throw ApiClientExceptions.NO_ACCESS.create(loginLink);
+            }
+        }
+
+        /*
+         * Fallback to general analyze ..
+         */
+        if (message) {
+            throw ApiClientExceptions.REMOTE_SERVER_ERROR.create(null == errorInfos.getMessage() ? "" : errorInfos.getMessage());
+        }
+        throw ApiClientExceptions.ACCESS_REVOKED.create();
     }
 }

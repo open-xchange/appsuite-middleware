@@ -258,7 +258,7 @@ public class ShareLoginInformation extends DefaultLoginInformation {
                     information.setStatus(parseString(value));
                     break;
                 case "message":
-                    information.setMessageType(parseString(value));
+                    information.setMessage(parseString(value));
                     break;
                 case "message_type":
                     information.setMessageType(parseString(value));

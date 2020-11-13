@@ -100,7 +100,7 @@ public enum ApiClientExceptions implements DisplayableOXExceptionCode {
     CLIENT_ERROR("The remote server responded with a client error %1$s.", Category.CATEGORY_USER_INPUT, 400),
 
     /** The remote server responded with a server error: %1$s. */
-    REMOTE_SERVER_ERROR("The remote server responded with a server error %1$s.", Category.CATEGORY_SERVICE_DOWN, 500),
+    REMOTE_SERVER_ERROR("The remote server responded with a server error %1$s.", Category.CATEGORY_SERVICE_DOWN, 500, OXExceptionStrings.MESSAGE_RETRY),
 
     /** The remote session is expired **/
     SESSION_EXPIRED("The remote session expired", Category.CATEGORY_TRY_AGAIN, 600, OXExceptionStrings.MESSAGE_RETRY),
