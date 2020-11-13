@@ -48,7 +48,7 @@
  */
 
 package com.openexchange.subscribe.google.parser.consumers;
-
+import static com.openexchange.java.Autoboxing.b;
 import java.util.function.BiConsumer;
 import com.google.gdata.data.contacts.ContactEntry;
 import com.google.gdata.data.extensions.PostalAddress;
@@ -81,7 +81,7 @@ public class StructuredPostalAddressConsumer implements BiConsumer<ContactEntry,
         }
         int count = 0;
         for (StructuredPostalAddress spa : t.getStructuredPostalAddresses()) {
-            if (spa.getPrimary()) {
+            if (b(spa.getPrimary())) {
                 setHomeAddress(spa, u);
                 continue;
             }
