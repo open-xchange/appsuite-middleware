@@ -70,6 +70,13 @@ public class Property {
     private List<String> tags;
 
     /**
+     * Initializes a new {@link Property}.
+     */
+    public Property() {
+        super();
+    }
+
+    /**
      * Gets the key
      *
      * @return The key
@@ -278,5 +285,4 @@ public class Property {
 
         return false;
     }
-
 }
