@@ -274,14 +274,16 @@ public final class ResponseParser {
      *            the error message arguments will be stored in this exception.
      */
     private static Object[] parseErrorMessageArgs(final JSONArray jArgs) {
-        if (null != jArgs) {
-            final Object[] args = new Object[jArgs.length()];
-            for (int i = 0; i < jArgs.length(); i++) {
-                args[i] = jArgs.opt(i);
-            }
-            return args;
+        if (null == jArgs) {
+            return new Object[0];
         }
-        return new Object[0];
+
+        int length = jArgs.length();
+        Object[] args = new Object[length];
+        for (int i = length; i-- > 0;) {
+            args[i] = jArgs.opt(i);
+        }
+        return args;
     }
 
     private static void parseProblematics(final JSONArray probs, final OXException exc) throws JSONException {
