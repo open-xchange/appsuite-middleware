@@ -149,6 +149,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     InheritPermissionOnMoveTest.class,
     MergePermissionOnMoveTest.class,
 
+    MWB682Test.class,
+
 })
 public final class FolderTestSuite {
 
