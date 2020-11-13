@@ -155,15 +155,6 @@ public class IOSApnsHttp2DriveEventPublisher extends ApnsHttp2DriveEventPublishe
                 }
                 break;
         }
-        /*
-         * check for a registered APNs options provider as fallback, otherwise
-         */
-        ApnsHttp2OptionsProvider provider = services.getOptionalService(ApnsHttp2OptionsProvider.class);
-        if (null != provider) {
-            LOG.trace("Using fallback certificate provider for push via {} for user {} in context {}.", getServiceID(), I(userId), I(contextId));
-            return provider.getOptions();
-        }
-        LOG.trace("No configuration for push via {} found for user {} in context {}.", getServiceID(), I(userId), I(contextId));
         return options;
     }
 

@@ -61,12 +61,12 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.apn.APNAccess;
-import com.openexchange.drive.events.apn.APNAccess.AuthType;
 import com.openexchange.drive.events.apn.APNCertificateProvider;
 import com.openexchange.drive.events.apn2.util.ApnsHttp2Options;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.Task;
@@ -121,40 +121,13 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         /*
          * get APN options via config cascade if configured
          */
-        String sType = configService.getProperty(userId, contextId, DriveEventsAPNProperty.authtype, optionals);
-        AuthType type = AuthType.authTypeFor(sType);
-        if (null == type) {
-            LOG.debug("Missing or invalid authentication type for push via {} for user {} in context {}. Using fall-back \"certificate\".", serviceId, I(userId), I(contextId));
-            type = AuthType.CERTIFICATE;
-        }
-        switch (type) {
-            case CERTIFICATE:
-                /*
-                 * APN with certificate in keystore is configured
-                 */
-                String keystore = configService.getProperty(userId, contextId, DriveEventsAPNProperty.keystore, optionals);
-                if (Strings.isEmpty(keystore)) {
-                    String password = configService.getProperty(userId, contextId, DriveEventsAPNProperty.password, optionals);
-                    boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPNProperty.production, optionals);
-                    String topic = configService.getProperty(userId, contextId, DriveEventsAPNProperty.topic, optionals);
-                    LOG.trace("Using configured keystore {}, {} service for push via {} for user {} in context {}.", keystore, production ? "production" : "sandbox", serviceId, I(userId), I(contextId));
-                    return new APNAccess(keystore, password, production, topic);
-                }
-                break;
-            case JWT:
-                /*
-                 * APN with private key is configured
-                 */
-                String privateKey = configService.getProperty(userId, contextId, DriveEventsAPNProperty.privatekey, optionals);
-                if (Strings.isNotEmpty(privateKey)) {
-                    String keyId = configService.getProperty(userId, contextId, DriveEventsAPNProperty.keyid, optionals);
-                    String teamId = configService.getProperty(userId, contextId, DriveEventsAPNProperty.teamid, optionals);
-                    String topic = configService.getProperty(userId, contextId, DriveEventsAPNProperty.topic, optionals);
-                    boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPNProperty.production, optionals);
-                    LOG.trace("Using configured private key {}, {} service for push via {} for user {} in context {}.", privateKey, production ? "production" : "sandbox", serviceId, I(userId), I(contextId));
-                    return new APNAccess(privateKey, keyId, teamId, topic, production);
-                }
-                break;
+        String keystore = configService.getProperty(userId, contextId, DriveEventsAPNProperty.keystore, optionals);
+        if (Strings.isNotEmpty(keystore)) {
+            String password = configService.getProperty(userId, contextId, DriveEventsAPNProperty.password, optionals);
+            boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPNProperty.production, optionals);
+            String topic = configService.getProperty(userId, contextId, DriveEventsAPNProperty.topic, optionals);
+            LOG.trace("Using configured keystore {}, {} service for push via {} for user {} in context {}.", keystore, production ? "production" : "sandbox", serviceId, I(userId), I(contextId));
+            return new APNAccess(keystore, password, production, topic);
         }
         /*
          * check for a registered APN options provider as fallback, otherwise
@@ -175,7 +148,8 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
          */
         List<Subscription> subscriptions = null;
         try {
-            subscriptions = requireService(DriveSubscriptionStore.class, services).getSubscriptions(event.getContextID(), new String[] { serviceId }, event.getFolderIDs());
+            subscriptions = requireService(DriveSubscriptionStore.class, services).getSubscriptions(
+                event.getContextID(), new String[] { serviceId }, event.getFolderIDs());
         } catch (OXException e) {
             LOG.error("unable to get subscriptions for service {}", serviceId, e);
         }
@@ -214,45 +188,23 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
     }
 
     private ApnsHttp2Options getApn2Options(APNAccess access) {
-        switch (access.getAuthType()) {
-            case CERTIFICATE: {
-                Object store = access.getKeystore();
-                String password = access.getPassword();
-                boolean production = access.isProduction();
-                String topic = access.getTopic();
-                if (store instanceof byte[]) {
-                    return new ApnsHttp2Options((byte[]) store, password, production, topic);
-                }
-                if (!(store instanceof String)) {
-                    break;
-                }
-
-                try (FileInputStream in = new FileInputStream((String) store)) {
-                    return new ApnsHttp2Options(IOUtils.toByteArray(in), password, production, topic);
-                } catch (Exception e) {
-                    LOG.error("Error loading keystore", e);
-                }
-                break;
-            }
-            case JWT: {
-                Object privateKey = access.getPrivateKey();
-                String keyId = access.getKeyId();
-                String teamId = access.getTeamId();
-                String topic = access.getTopic();
-                boolean production = access.isProduction();
-                if (privateKey instanceof byte[]) {
-                    return new ApnsHttp2Options((byte[]) privateKey, keyId, teamId, production, topic);
-                }
-                if (!(privateKey instanceof String)) {
-                    break;
-                }
-
-                try (FileInputStream in = new FileInputStream((String) privateKey)) {
-                    return new ApnsHttp2Options(IOUtils.toByteArray(in), keyId, teamId, production, topic);
-                } catch (Exception e) {
-                    LOG.error("Error loading private key", e);
-                }
-                break;
+        Object store = access.getKeystore();
+        String password = access.getPassword();
+        boolean production = access.isProduction();
+        String topic = access.getTopic();
+        if (store instanceof byte[]) {
+            return new ApnsHttp2Options((byte[]) store, password, production, topic);
+        }
+        if (store instanceof String) {
+            FileInputStream in = null;
+            try {
+                in = new FileInputStream((String) store);
+                byte[] data = IOUtils.toByteArray(in);
+                return new ApnsHttp2Options(data, password, production, topic);
+            } catch (Exception e) {
+                LOG.error("Error loading keystore", e);
+            } finally {
+                Streams.close(in);
             }
         }
         return null;

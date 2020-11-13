@@ -52,7 +52,6 @@ package com.openexchange.pns.transport.apn.osgi;
 import static com.openexchange.osgi.Tools.withRanking;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -65,6 +64,7 @@ import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushExceptionCodes;
@@ -73,8 +73,8 @@ import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.transport.apn.DefaultApnOptionsProvider;
 import com.openexchange.pns.transport.apn.internal.ApnPushNotificationTransport;
 import com.openexchange.pns.transport.apns_http2.util.ApnOptions;
-import com.openexchange.pns.transport.apns_http2.util.ApnOptions.AuthType;
 import com.openexchange.pns.transport.apns_http2.util.ApnOptionsProvider;
+
 
 /**
  * {@link ApnPushNotificationTransportActivator}
@@ -109,7 +109,10 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
 
     @Override
     public Interests getInterests() {
-        return DefaultInterests.builder().configFileNames(CONFIGFILE_APNS_OPTIONS).propertiesOfInterest("com.openexchange.pns.transport.apn.ios.enabled").build();
+        return DefaultInterests.builder()
+            .configFileNames(CONFIGFILE_APNS_OPTIONS)
+            .propertiesOfInterest("com.openexchange.pns.transport.apn.ios.enabled")
+            .build();
     }
 
     @Override
@@ -203,108 +206,43 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
 
             // Enabled?
             Boolean enabled = getBooleanOption("enabled", Boolean.TRUE, values);
-            if (false == enabled.booleanValue()) {
+            if (enabled.booleanValue()) {
+                // Keystore name
+                String keystoreName = getStringOption("keystore", values);
+                if (Strings.isEmpty(keystoreName)) {
+                    LOG.info("Missing \"keystore\" APNS option for client {}. Ignoring that client's configuration.", client);
+                } else {
+                    String password = getStringOption("password", values);
+                    if (Strings.isEmpty(password)) {
+                        LOG.info("Missing \"password\" APNS option for client {}. Ignoring that client's configuration.", client);
+                    } else {
+                        String topic = getStringOption("topic", values);
+                        if (Strings.isEmpty(topic)) {
+                            LOG.info("Missing \"topic\" APNS option for client {}. Ignoring that client's configuration.", client);
+                        } else {
+                            Boolean production = getBooleanOption("production", Boolean.TRUE, values);
+                            ApnOptions apnOptions;
+                            try {
+                                apnOptions = createOptions(keystoreName, password, production.booleanValue(), topic, client);
+                            } catch (Exception e) {
+                                apnOptions = null;
+                                LOG.warn("Failed to parse APNS options for client {}.", client, e);
+                            }
+                            if (null != apnOptions) {
+                                options.put(client, apnOptions);
+                                LOG.info("Parsed APNS options for client {}.", client);
+                            }
+                        }
+                    }
+                }
+            } else {
                 LOG.info("APNS options for client {} is disabled.", client);
-                continue;
-            }
-
-            // Auth type
-            AuthType authType = AuthType.authTypeFor(getStringOption("authtype", values));
-            if (null == authType) {
-                // Missing or invalid auth type. Assume "certificate" as fall-back.
-                LOG.debug("Missing or invalid authentication type in APNS HTTP/2 options for client {}. Using fall-back \"certificate\".", client);
-                authType = AuthType.CERTIFICATE;
-            }
-            switch (authType) {
-                case CERTIFICATE:
-                    processCertificate(client, options, values);
-                    break;
-                case JWT:
-                    processJWT(client, options, values);
-                    break;
-                default:
-                    LOG.debug("Unsupported auth type {}", authType);
             }
         }
         return options;
     }
 
-    /**
-     * Process the {@link AuthType#CERTIFICATE}
-     *
-     * @param client The client
-     * @param options the options
-     * @param values The values
-     * @return <code>true</code> if appropriate options have been initialized for given client; otherwise <code>false</code>
-     */
-    private static boolean processCertificate(String client, Map<String, ApnOptions> options, Map<String, Object> values) {
-        String keystoreName = getStringOption("keystore", values);
-        if (Strings.isEmpty(keystoreName)) {
-            LOG.info("Missing \"keystore\" APNS option for client {}. Ignoring that client's configuration.", client);
-            return false;
-        }
-        String password = getStringOption("password", values);
-        if (Strings.isEmpty(password)) {
-            LOG.info("Missing \"password\" APNS option for client {}. Ignoring that client's configuration.", client);
-            return false;
-        }
-        String topic = getStringOption("topic", values);
-        if (Strings.isEmpty(topic)) {
-            LOG.info("Missing \"topic\" APNS option for client {}. Ignoring that client's configuration.", client);
-            return false;
-        }
-        Boolean production = getBooleanOption("production", Boolean.TRUE, values);
-        try {
-            options.put(client, new ApnOptions(getResourceBytes(keystoreName), password, production.booleanValue(), topic, client));
-            LOG.info("Parsed APNS options for client {}.", client);
-            return true;
-        } catch (Exception e) {
-            LOG.warn("Failed to parse APNS options for client {}.", client, e);
-        }
-        return false;
-    }
-
-    /**
-     * Process the {@link AuthType#JWT}
-     *
-     * @param client The client
-     * @param options the options
-     * @param values The values
-     * @return <code>true</code> if appropriate options have been initialized for given client; otherwise <code>false</code>
-     */
-    private static boolean processJWT(String client, Map<String, ApnOptions> options, Map<String, Object> values) {
-        String privateKeyName = getStringOption("privatekey", values);
-        if (Strings.isEmpty(privateKeyName)) {
-            LOG.info("Missing \"privatekey\" APNS option for client {}. Ignoring that client's configuration.", client);
-            return false;
-        }
-        String keyId = getStringOption("keyid", values);
-        if (Strings.isEmpty(keyId)) {
-            LOG.info("Missing \"keyid\" APNS option for client {}. Ignoring that client's configuration.", client);
-            return false;
-        }
-        String teamId = getStringOption("teamid", values);
-        if (Strings.isEmpty(teamId)) {
-            LOG.info("Missing \"teamid\" APNS option for client {}. Ignoring that client's configuration.", client);
-            return false;
-        }
-        String topic = getStringOption("topic", values);
-        if (Strings.isEmpty(topic)) {
-            LOG.info("Missing \"topic\" APNS option for client {}. Ignoring that client's configuration.", client);
-            return false;
-        }
-        Boolean production = getBooleanOption("production", Boolean.TRUE, values);
-        try {
-            options.put(client, new ApnOptions(getResourceBytes(privateKeyName), keyId, teamId, production.booleanValue(), topic, client));
-            LOG.info("Parsed APNS options for client {}.", client);
-            return true;
-        } catch (Exception e) {
-            LOG.warn("Failed to parse APNS options for client {}.", client, e);
-        }
-        return false;
-    }
-
-    private static Boolean getBooleanOption(String name, Boolean def, Map<String, Object> values) {
+    private Boolean getBooleanOption(String name, Boolean def, Map<String, Object> values) {
         Object object = values.get(name);
         if (object instanceof Boolean) {
             return (Boolean) object;
@@ -312,7 +250,7 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
         return null == object ? def : Boolean.valueOf(object.toString());
     }
 
-    private static String getStringOption(String name, Map<String, Object> values) {
+    private String getStringOption(String name, Map<String, Object> values) {
         Object object = values.get(name);
         if (null == object) {
             return null;
@@ -321,9 +259,14 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
         return Strings.isEmpty(str) ? null : str.trim();
     }
 
-    private static byte[] getResourceBytes(String resourceName) throws IOException {
-        try (InputStream resourceStream = new FileInputStream(new File(resourceName))) {
-            return IOUtils.toByteArray(resourceStream);
+    private ApnOptions createOptions(String resourceName, String password, boolean production, String topic, String client) throws Exception {
+        InputStream resourceStream = null;
+        try {
+            resourceStream = new FileInputStream(new File(resourceName));
+            return new ApnOptions(IOUtils.toByteArray(resourceStream), password, production, topic, client);
+        } finally {
+            Streams.close(resourceStream);
         }
     }
+
 }

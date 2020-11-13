@@ -50,7 +50,6 @@
 package com.openexchange.drive.events.apn.osgi;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -169,37 +168,8 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
     protected APNAccess createAccess(Properties properties, OperationSystemType type, FragmentPropertiesLoader loader, String topic) {
         try {
             Map<String, String> optionals = Collections.singletonMap(DriveEventsAPNProperty.OPTIONAL_FIELD, type.getName());
+            String keystore = getProperty(properties, DriveEventsAPNProperty.keystore, optionals);
 
-            // Try with PKCS#8 private key first
-            String privateKey = optProperty(properties, DriveEventsAPNProperty.privatekey, optionals);
-            if (Strings.isNotEmpty(privateKey)) {
-                String keyId = getProperty(properties, DriveEventsAPNProperty.keyid, optionals);
-                String teamId = getProperty(properties, DriveEventsAPNProperty.teamid, optionals);
-                boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPNProperty.production, optionals));
-
-                // Check file path validity
-                if (new File(privateKey).exists()) {
-                    try (FileInputStream keyIn = new FileInputStream(privateKey)) {
-                        return new APNAccess(Streams.stream2bytes(keyIn), keyId, teamId, topic, production);
-                    } catch (IOException e) {
-                        LOG.warn("Could not read file: {}", privateKey, e);
-                    }
-                }
-
-                // Assume file is given as resource identifier
-                try {
-                    byte[] privateKeyBytes = Streams.stream2bytes(loader.loadResource(privateKey));
-                    if (privateKeyBytes.length == 0) {
-                        return null;
-                    }
-                    return new APNAccess(privateKeyBytes, keyId, teamId, topic, production);
-                } catch (IOException e) {
-                    LOG.warn("Error instantiating APNS options from resource {}", privateKey, e);
-                }
-            }
-
-            // Use PKCS#12 keystore as fall-back
-            String keystore = optProperty(properties, DriveEventsAPNProperty.keystore, optionals);
             if (Strings.isNotEmpty(keystore)) {
                 String password = getProperty(properties, DriveEventsAPNProperty.password, optionals);
                 boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPNProperty.production, optionals));
@@ -221,7 +191,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                 }
             }
         } catch (OXException e) {
-            LOG.debug("Error while creating APN access", e);
+            // nothing to do
         }
         return null;
     }
@@ -241,22 +211,6 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
             // This should never happen as long as the shipped fragment contains a proper properties file
             LOG.error("Missing required property from fragment: {}", prop.getFQPropertyName());
             throw OXException.general("Missing property: " + prop.getFQPropertyName());
-        }
-        return result;
-    }
-
-    /**
-     * Get the given property from the {@link Properties} object or <code>null</code>
-     *
-     * @param properties The {@link Properties} object
-     * @param prop The {@link Property} to return
-     * @param optional The optional
-     * @return The string value of the property or <code>null</code> in case property is missing
-     */
-    private String optProperty(Properties properties, Property prop, Map<String, String> optional) {
-        String result = properties.getProperty(prop.getFQPropertyName(optional));
-        if (null == result) {
-            LOG.debug("Missing required property from fragment: {}", prop.getFQPropertyName());
         }
         return result;
     }

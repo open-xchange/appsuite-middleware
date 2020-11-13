@@ -61,6 +61,7 @@ import com.openexchange.drive.events.apn2.internal.DriveEventsAPN2IOSProperty;
 import com.openexchange.drive.events.apn2.internal.IOSApnsHttp2DriveEventPublisher;
 import com.openexchange.drive.events.apn2.util.ApnsHttp2Options;
 import com.openexchange.drive.events.apn2.util.ApnsHttp2OptionsProvider;
+import com.openexchange.drive.events.apn2.util.ApnsHttp2Options.AuthType;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.exception.OXException;
 import com.openexchange.fragment.properties.loader.FragmentPropertiesLoader;
@@ -155,11 +156,54 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
      * @return the {@link ApnsHttp2Options} or null if some properties are missing
      */
     protected ApnsHttp2Options createOption(Properties properties, FragmentPropertiesLoader service) {
-        try {
 
-            // Try with PKCS#8 private key first
-            String privateKeyFileName = optProperty(properties, DriveEventsAPN2IOSProperty.privatekey);
-            if (Strings.isNotEmpty(privateKeyFileName)) {
+        AuthType authType;
+        try {
+            String authTypeString = optProperty(properties, DriveEventsAPN2IOSProperty.authtype);
+            if (Strings.isEmpty(authTypeString)) {
+                LOG.debug("Apn2 is not configured in the given properties object. Fallback to null.");
+                return null;
+            }
+            authType = AuthType.authTypeFor(authTypeString);
+            if (AuthType.CERTIFICATE.equals(authType)) {
+                /*
+                 * get certificate options
+                 */
+                String keystoreName = getProperty(properties, DriveEventsAPN2IOSProperty.keystore);
+                if (Strings.isEmpty(keystoreName)) {
+                    return null;
+                }
+
+                String topic = getProperty(properties, DriveEventsAPN2IOSProperty.topic);
+                String password = getProperty(properties, DriveEventsAPN2IOSProperty.password);
+                boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPN2IOSProperty.production));
+
+                // Check file path validity
+                File keystoreFile = new File(keystoreName);
+                if (keystoreFile.exists()) {
+                    return new ApnsHttp2Options(keystoreFile, password, production, topic);
+                }
+
+                // Assume keystore file is given as resource identifier
+                try {
+                    byte[] keystoreBytes = Streams.stream2bytes(service.loadResource(keystoreName));
+                    if (keystoreBytes.length == 0) {
+                        return null;
+                    }
+                    return new ApnsHttp2Options(keystoreBytes, password, production, topic);
+                } catch (IOException e) {
+                    LOG.warn("Failed to load keystore from resource {}", keystoreName, e);
+                }
+            }
+            if (AuthType.JWT.equals(authType)) {
+                /*
+                 * get jwt options
+                 */
+                String privateKeyFileName = getProperty(properties, DriveEventsAPN2IOSProperty.privatekey);
+                if (Strings.isEmpty(privateKeyFileName)) {
+                    return null;
+                }
+
                 try {
                     byte[] privateKey;
                     File privateKeyFile = new File(privateKeyFileName);
@@ -183,39 +227,11 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
                     return null;
                 }
             }
-
-            // Use PKCS#12 keystore as fall-back
-            String keystoreFileName = optProperty(properties, DriveEventsAPN2IOSProperty.keystore);
-            if (Strings.isNotEmpty(keystoreFileName)) {
-                try {
-                    byte[] keystore;
-                    File keystoreFile = new File(keystoreFileName);
-                    if (keystoreFile.exists()) {
-                        keystore = Files.readAllBytes(keystoreFile.toPath());
-                    } else {
-                        // Assume keystore file is given as resource identifier
-                        keystore = Streams.stream2bytes(service.loadResource(keystoreFileName));
-                        if (keystore.length == 0) {
-                            return null;
-                        }
-                    }
-
-                    String password = getProperty(properties, DriveEventsAPN2IOSProperty.password);
-                    String topic = getProperty(properties, DriveEventsAPN2IOSProperty.topic);
-                    boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPN2IOSProperty.production));
-                    return new ApnsHttp2Options(keystore, password, production, topic);
-                } catch (IOException e) {
-                    LOG.error("Error instantiating APNS HTTP/2 options from {}", keystoreFileName, e);
-                    return null;
-                }
-            }
-        } catch (OXException e) {
-            LOG.debug("Error while creating APNS HTTP/2 options", e);
+        } catch (OXException e1) {
+            // nothing to do
         }
         return null;
     }
-
-
 
     /**
      * Get the given property from the {@link Properties} object
@@ -226,29 +242,25 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
      * @throws OXException In case the property is missing
      */
     private String getProperty(Properties properties, Property prop) throws OXException {
-        String result = properties.getProperty(prop.getFQPropertyName());
+        String result = optProperty(properties, prop);
         if (result == null) {
             // This should never happen as long as the shipped fragment contains a proper properties file
-            LOG.error("Missing required property from fragment: {}", prop.getFQPropertyName());
-            throw OXException.general("Missing property: " + prop.getFQPropertyName());
+            String propertyName = prop.getFQPropertyName();
+            LOG.error("Missing required property from fragment: {}", propertyName);
+            throw OXException.general("Missing property: " + propertyName);
         }
         return result;
     }
 
     /**
-     * Get the given property from the {@link Properties} object or <code>null</code>
+     * Optionally gets the given property from the {@link Properties} object.
      *
      * @param properties The {@link Properties} object
      * @param prop The {@link Property} to return
-     * @return The string value of the property or <code>null</code> in case property is missing
+     * @return The string value of the property or null
      */
     private String optProperty(Properties properties, Property prop) {
-        String result = properties.getProperty(prop.getFQPropertyName());
-        if (result == null) {
-            // This should never happen as long as the shipped fragment contains a proper properties file
-            LOG.debug("Missing required property from fragment: {}", prop.getFQPropertyName());
-        }
-        return result;
+        return properties.getProperty(prop.getFQPropertyName());
     }
 
 }
