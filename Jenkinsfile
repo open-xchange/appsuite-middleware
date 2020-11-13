@@ -135,11 +135,7 @@ spec:
         }
         stage('Configuration documentation') {
             when {
-                allOf {
-                    // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
-                    expression { Trigger.isStartedByTrigger(currentBuild.buildCauses, Trigger.Triggers.TIMER, Trigger.Triggers.USER) }
-                    expression { null != version4Documentation(env.BRANCH_NAME) }
-                }
+                expression { null != version4Documentation(env.BRANCH_NAME) }
             }
             steps {
                 script {
@@ -221,13 +217,7 @@ spec:
         }
         stage('HTTP API documentation') {
             when {
-                allOf {
-                    expression { null != version4Documentation(env.BRANCH_NAME) }
-                    anyOf {
-                        triggeredBy 'TimerTrigger'
-                        triggeredBy cause: 'UserIdCause'
-                    }
-                }
+                expression { null != version4Documentation(env.BRANCH_NAME) }
             }
             steps {
                 script {
