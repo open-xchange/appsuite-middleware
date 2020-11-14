@@ -90,8 +90,8 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
     /** The static identifier <code>10</code> of the <i>Shared Files</i> root folder ("userstore" / <code>FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID</code>) */
     public static final String USER_INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
 
-    /** The tree identifier used when getting folders from the underlying folder service (<code>FolderStorage#REAL_TREE_ID</code>) */
-    protected static final String TREE_ID = "0";
+    /** The tree identifier used when getting folders from the underlying folder service (<code>OutlookFolderStorage#OUTLOOK_TREE_ID</code>) */
+    protected static final String TREE_ID = "1";
 
     protected final ServerSession session;
 
@@ -107,7 +107,7 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
 
     /**
      * Gets the utility to convert {@link FileStorageFolder} arguments to their {@link Folder} equivalents and vice-versa.
-     * 
+     *
      * @return The folder converter
      */
     protected FolderConverter getConverter() {
@@ -116,14 +116,14 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
 
     /**
      * Gets the folder service, throwing an appropriate exception in case the service is absent.
-     * 
+     *
      * @return The folder service
      */
     protected abstract FolderService getFolderService() throws OXException;
 
     /**
      * Gets the infostore facade, throwing an appropriate exception in case the service is absent.
-     * 
+     *
      * @return The infostore facade
      */
     protected abstract InfostoreFacade getInfostore() throws OXException;
@@ -314,7 +314,7 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
 
     /**
      * Gets the user's default folder of a certain type.
-     * 
+     *
      * @param type The type to get the default folder for
      * @return The default folder
      */
