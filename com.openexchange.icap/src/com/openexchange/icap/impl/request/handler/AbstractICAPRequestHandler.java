@@ -301,6 +301,7 @@ abstract class AbstractICAPRequestHandler implements ICAPRequestHandler {
                     }
                     if (statusCode == 100) {
                         // We got 100 back, instruct the client to send the rest of the data.
+                        parseICAPHeaders(builder, split);
                         return builder.withStatusCode(statusCode).build();
                     }
                     parseICAPHeaders(builder, split);
@@ -376,6 +377,7 @@ abstract class AbstractICAPRequestHandler implements ICAPRequestHandler {
                     return true;
                 }
             } catch (NumberFormatException e) {
+                LOG.debug("", e);
                 return false;
             }
         }
@@ -454,9 +456,9 @@ abstract class AbstractICAPRequestHandler implements ICAPRequestHandler {
         if (Strings.isEmpty(encapsulatedStatusLine)) {
             return;
         }
-        if (!encapsulatedStatusLine.startsWith("HTTP")) {
-            return;
-        }
+        //        if (!encapsulatedStatusLine.startsWith("HTTP")) {
+        //            return;
+        //        }
         responseBuilder.withEncapsulatedStatusLine(encapsulatedStatusLine);
         responseBuilder.withEncapsulatedStatusCode(readStatusCode(encapsulatedStatusLine));
     }
@@ -476,7 +478,7 @@ abstract class AbstractICAPRequestHandler implements ICAPRequestHandler {
         try {
             return Integer.parseInt(split[1]);
         } catch (NumberFormatException e) {
-            LOG.debug("Unable to determine any status code from '{}'", split[1]);
+            LOG.debug("Unable to determine any status code from '{}'", split[1], e);
             return -1;
         }
     }

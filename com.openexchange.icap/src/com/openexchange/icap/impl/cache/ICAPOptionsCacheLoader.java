@@ -131,7 +131,7 @@ public class ICAPOptionsCacheLoader extends CacheLoader<GenericICAPCacheKey, ICA
         for (String s : split) {
             try {
                 methodSet.add(ICAPMethod.valueOf(s));
-            } catch (IllegalArgumentException e) {
+            } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
                 LOG.debug("Unsupported method detected '{}'. Ignoring", s);
                 continue;
             }

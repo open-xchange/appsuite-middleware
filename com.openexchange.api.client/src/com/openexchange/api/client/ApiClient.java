@@ -62,21 +62,21 @@ import com.openexchange.exception.OXException;
 public interface ApiClient {
 
     /**
-     * Get the context identifier that belongs to the local server
+     * Gets the context identifier that belongs to the local server
      *
      * @return The local context ID
      */
     int getContextId();
 
     /**
-     * Get the user identifier that belongs to the local server
+     * Gets the user identifier that belongs to the local server
      *
      * @return The local user ID
      */
     int getUserId();
 
     /**
-     * Get the link to the login or rather the URL for the remote App Suite instance
+     * Gets the link to the login or rather the URL for the remote App Suite instance
      *
      * @return The initial link, e.g. <code>share.appsuite.example.org/share/1123</code>
      */
@@ -91,7 +91,7 @@ public interface ApiClient {
     Credentials getCredentials();
 
     /**
-     * Get information that were acquired during login
+     * Gets information that were acquired during login
      *
      * @return The information or <code>null</code> if the client is not yet logged in
      */

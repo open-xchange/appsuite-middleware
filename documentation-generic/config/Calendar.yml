@@ -133,6 +133,30 @@ properties:
       file: subscribe.properties
       packageName: open-xchange-subscribe
       tags: ["Calendar","Subscribe","Share","Limit"]
+    - key: com.openexchange.calendar.xctx2.autoRemoveUnknownShares
+      description: |
+        Enables or disables the automatic removal of accounts in the <i>cross-context</i> calendar provider that refer to a no longer 
+        existing guest user in the remote context. 
+      defaultValue: true
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Share"]
+    - key: com.openexchange.calendar.xctx2.retryAfterErrorInterval
+      description: |
+        Configures the interval in milliseconds when a retry attempt should be performed after an error occurred when initializing the 
+        cross-context calendar access.  
+      defaultValue: 3600000
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Share"]
     - key: com.openexchange.calendar.maxEventResults
       description: |
         Defines a maximum number of event in event results. The intention of this limit is to prevent out of memory situations.

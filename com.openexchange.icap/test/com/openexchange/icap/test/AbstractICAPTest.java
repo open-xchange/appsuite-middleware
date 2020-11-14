@@ -102,7 +102,7 @@ public abstract class AbstractICAPTest {
      * @throws IOException
      */
     @Before
-    public void setUp() throws IOException {
+    public void setUp() {
         LeanConfigurationService leanConfigServiceMock = PowerMockito.mock(LeanConfigurationService.class);
         PowerMockito.when(I(leanConfigServiceMock.getIntProperty(ICAPClientProperty.SOCKET_TIMEOUT))).thenReturn(I(10000));
 

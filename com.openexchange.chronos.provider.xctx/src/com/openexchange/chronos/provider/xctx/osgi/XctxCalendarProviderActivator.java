@@ -59,8 +59,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.folderstorage.FolderService;
@@ -69,7 +68,6 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.subscription.ShareSubscriptionProvider;
 import com.openexchange.share.subscription.XctxSessionManager;
-import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.user.UserService;
 
 /**
@@ -90,15 +88,10 @@ public class XctxCalendarProviderActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class, ConversionService.class, ConfigurationService.class,
-            CalendarAccountService.class, CalendarStorageFactory.class, CalendarUtilities.class, ConfigViewFactory.class, XctxSessionManager.class, CapabilityService.class,
+            FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class, ConversionService.class, CalendarAccountService.class, 
+            CalendarStorageFactory.class, CalendarUtilities.class, LeanConfigurationService.class, XctxSessionManager.class, CapabilityService.class,
             GroupService.class, ShareService.class, DispatcherPrefixService.class
         };
-    }
-
-    @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { FolderUserPropertyStorage.class };
     }
 
     @Override

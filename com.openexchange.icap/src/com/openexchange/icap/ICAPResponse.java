@@ -64,19 +64,45 @@ import com.google.common.collect.ImmutableMap;
 public class ICAPResponse {
 
     private String statusLine;
-    private int statusCode;
-    private Map<String, String> headers;
-
-    private String encapsulatedStatusLine;
-    private int encapsulatedStatusCode;
     private String encapsulatedBody;
+    private String encapsulatedStatusLine;
+
+    private int statusCode;
+    private int encapsulatedStatusCode;
+
+    private Map<String, String> headers;
     private Map<String, String> encapsulatedHeaders;
 
     /**
      * Initialises a new {@link ICAPResponse}.
+     * 
+     * @param builder The builder instance
      */
-    public ICAPResponse() {
-        super();
+    ICAPResponse(Builder builder) {
+        this.statusLine = builder.statusLine;
+        this.statusCode = builder.statusCode;
+        this.headers = toImmutableMap(builder.headers, String::toLowerCase, v -> v);
+        this.encapsulatedStatusLine = builder.encapsulatedStatusLine;
+        this.encapsulatedStatusCode = builder.encapsulatedStatusCode;
+        this.encapsulatedBody = builder.encapsulatedBody;
+        this.encapsulatedHeaders = toImmutableMap(builder.encapsulatedHeaders, k -> k, v -> v);
+    }
+
+    /**
+     * Converts the specified {@link Map} to an {@link ImmutableMap} while processing the keys and values
+     * with the specified {@link Function}s
+     * 
+     * @param map The {@link Map} to convert
+     * @param keyProcessor The key processor
+     * @param valueProcessor The value processor
+     * @return The {@link ImmutableMap}
+     */
+    private ImmutableMap<String, String> toImmutableMap(Map<String, String> map, Function<String, String> keyProcessor, Function<String, String> valueProcessor) {
+        ImmutableMap.Builder<String, String> mapBuilder = new ImmutableMap.Builder<>();
+        for (Entry<String, String> entry : map.entrySet()) {
+            mapBuilder.put(keyProcessor.apply(entry.getKey()), valueProcessor.apply(entry.getValue()));
+        }
+        return mapBuilder.build();
     }
 
     /**
@@ -166,88 +192,31 @@ public class ICAPResponse {
         return encapsulatedHeaders;
     }
 
-    ///////////////// PRIVATE SETTERS ///////////////////
-
-    /**
-     * Sets the specific headers to the response.
-     * 
-     * The ICAP header names are case-insensitive, thus we convert them to lower-case.
-     * 
-     * @param key The header's name
-     * @param value The header's value
-     * @see <a href="https://tools.ietf.org/html/rfc3507#section-4.3">RFC-3507, Section 4.3</a>
-     */
-    private void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-
-    /**
-     * Sets the specific encapsulated header to the response
-     * 
-     * @param key The header's name
-     * @param value The header's value
-     */
-    private void setEncapsulatedHeaders(Map<String, String> encapsulatedHeaders) {
-        this.encapsulatedHeaders = encapsulatedHeaders;
-    }
-
-    /**
-     * Sets the statusLine
-     *
-     * @param statusLine The statusLine to set
-     */
-    private void setStatusLine(String statusLine) {
-        this.statusLine = statusLine;
-    }
-
-    /**
-     * Sets the responseCode
-     *
-     * @param responseCode The responseCode to set
-     */
-    private void setStatusCode(int responseCode) {
-        this.statusCode = responseCode;
-    }
-
-    /**
-     * Sets the encapsulated body
-     * 
-     * @param encapsulatedBody The body to set
-     */
-    private void setEncapsulatedBody(String encapsulatedBody) {
-        this.encapsulatedBody = encapsulatedBody;
-    }
-
-    /**
-     * Sets the encapsulatedStatusLine
-     *
-     * @param encapsulatedStatusLine The encapsulatedStatusLine to set
-     */
-    private void setEncapsulatedStatusLine(String encapsulatedStatusLine) {
-        this.encapsulatedStatusLine = encapsulatedStatusLine;
-    }
-
-    /**
-     * Sets the encapsulatedStatusCode
-     *
-     * @param encapsulatedStatusCode The encapsulatedStatusCode to set
-     */
-    private void setEncapsulatedStatusCode(int encapsulatedStatusCode) {
-        this.encapsulatedStatusCode = encapsulatedStatusCode;
-    }
-
     ////////////////////// BUILDER ///////////////////////
 
+    /**
+     * Creates builder to build {@link ICAPResponse}.
+     * 
+     * @return created builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Builder to build {@link ICAPResponse}.
+     */
     public static final class Builder {
 
-        private int statusCode;
-        private String statusLine;
-        private final Map<String, String> headers;
+        int statusCode;
+        int encapsulatedStatusCode;
 
-        private String encapsulatedStatusLine;
-        private int encapsulatedStatusCode;
-        private String encapsulatedBody;
-        private final Map<String, String> encapsulatedHeaders;
+        String statusLine;
+        String encapsulatedBody;
+        String encapsulatedStatusLine;
+
+        Map<String, String> headers = ImmutableMap.of();
+        Map<String, String> encapsulatedHeaders = ImmutableMap.of();
 
         /**
          * Initialises a new {@link ICAPResponse.Builder}.
@@ -347,32 +316,7 @@ public class ICAPResponse {
          * @return The built {@link ICAPResponse}
          */
         public ICAPResponse build() {
-            ICAPResponse response = new ICAPResponse();
-            response.setStatusLine(statusLine);
-            response.setStatusCode(statusCode);
-            response.setHeaders(toImmutableMap(headers, (k) -> k.toLowerCase(), (v) -> v));
-            response.setEncapsulatedStatusLine(encapsulatedStatusLine);
-            response.setEncapsulatedStatusCode(encapsulatedStatusCode);
-            response.setEncapsulatedBody(encapsulatedBody);
-            response.setEncapsulatedHeaders(toImmutableMap(encapsulatedHeaders, (k) -> k, (v) -> v));
-            return response;
-        }
-
-        /**
-         * Converts the specified {@link Map} to an {@link ImmutableMap} while processing the keys and values
-         * with the specified {@link Function}s
-         * 
-         * @param map The {@link Map} to convert
-         * @param keyProcessor The key processor
-         * @param valueProcessor The value processor
-         * @return The {@link ImmutableMap}
-         */
-        private ImmutableMap<String, String> toImmutableMap(Map<String, String> map, Function<String, String> keyProcessor, Function<String, String> valueProcessor) {
-            ImmutableMap.Builder<String, String> mapBuilder = new ImmutableMap.Builder<String, String>();
-            for (Entry<String, String> entry : map.entrySet()) {
-                mapBuilder.put(keyProcessor.apply(entry.getKey()), valueProcessor.apply(entry.getValue()));
-            }
-            return mapBuilder.build();
+            return new ICAPResponse(this);
         }
     }
 }

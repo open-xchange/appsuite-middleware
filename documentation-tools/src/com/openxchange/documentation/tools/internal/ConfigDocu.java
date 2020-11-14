@@ -53,11 +53,11 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -70,11 +70,12 @@ import org.yaml.snakeyaml.constructor.Constructor;
  */
 public class ConfigDocu {
 
-    private ArrayList<YamlFile> data;
+    private List<YamlFile> data;
 
     /**
      * Initializes a new {@link ConfigDocu}.
      *
+     * @param yamlFolder the folder containing the YAML files
      * @throws FileNotFoundException
      */
     public ConfigDocu(File yamlFolder) throws FileNotFoundException {
@@ -83,14 +84,8 @@ public class ConfigDocu {
         propertyDescription.addPropertyParameters("data", Property.class);
         constructor.addTypeDescription(propertyDescription);
         Yaml yaml = new Yaml(constructor);
-        data = new ArrayList<>();
-        FileFilter filter = new FileFilter() {
-
-            @Override
-            public boolean accept(File file) {
-                return !file.isDirectory() && file.getName().endsWith(".yml") && !file.getName().equals("template.yml");
-            }
-        };
+        data = new LinkedList<>();
+        FileFilter filter = file -> !file.isDirectory() && file.getName().endsWith(".yml") && !file.getName().equals("template.yml");
         File[] files = yamlFolder.listFiles(filter);
         Arrays.sort(files);
         for (File file : files) {
@@ -99,29 +94,23 @@ public class ConfigDocu {
         }
     }
 
-    public List<Property> getProperties(){
-        List<Property> result = new ArrayList<>(data.size() * 5);
-        for(YamlFile file: data) {
-            result.addAll(file.getProperties());
-        }
-        return result;
+    /**
+     * Returns all the properties
+     *
+     * @return A list with all properties
+     */
+    public List<Property> getProperties() {
+        return data.stream().map(YamlFile::getProperties).flatMap(List::stream).collect(Collectors.toList());
     }
 
     /**
      * Returns all properties with the given tag
+     * 
      * @param tag The tag
      * @return A list of properties
      */
-    public List<Property> getProperties(String tag){
-        List<Property> result = new ArrayList<>(20);
-        for(YamlFile file: data) {
-            for(Property prop: file.getProperties()) {
-                if (prop.getTags().contains(tag)) {
-                    result.add(prop);
-                }
-            }
-        }
-        return result;
+    public List<Property> getProperties(String tag) {
+        return data.stream().map(YamlFile::getProperties).flatMap(List::stream).filter(prop -> prop.getTags().contains(tag)).collect(Collectors.toList());
     }
 
     /**
@@ -130,14 +119,6 @@ public class ConfigDocu {
      * @return the list of tags
      */
     public Set<String> getTags() {
-        HashSet<String> result = new HashSet<>();
-        for(YamlFile file: data) {
-            for(Property prop: file.getProperties()) {
-                result.addAll(prop.getTags());
-            }
-        }
-        return result;
+        return data.stream().map(YamlFile::getProperties).flatMap(List::stream).map(Property::getTags).flatMap(List::stream).collect(Collectors.toSet());
     }
-
-
 }

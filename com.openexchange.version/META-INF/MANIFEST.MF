@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.version
 Automatic-Module-Name: com.openexchange.version
 Bundle-Version: 7.10.5
 OXVersion: 7.10.5
-OXBuildDate: release-7.10.4
+OXBuildDate: release-7.10.5
 OXRevision: 0
 Bundle-Activator: com.openexchange.version.osgi.VersionActivator
 Bundle-Vendor: OX Software GmbH

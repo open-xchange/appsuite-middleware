@@ -134,8 +134,8 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
             FolderUpdaterRegistry folderUpdaterRegistry = services.getOptionalService(FolderUpdaterRegistry.class);
             ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
             FolderUpdaterService<Contact> folderUpdater = null == folderUpdaterRegistry ? null : folderUpdaterRegistry.<Contact> getFolderUpdater(subscription);
-            if (threadPool == null || folderUpdater == null) {
-                return fetchInForeground(cQuery, feed, firstBatch, googleContactsService, parser);
+            if (null == threadPool || null == folderUpdater) {
+                return fetchInForeground(cQuery, feed.getTotalResults(), firstBatch, googleContactsService, parser);
             }
             scheduleInBackground(subscription, cQuery, total, startOffset, threadPool, folderUpdater, googleContactsService, parser);
             return firstBatch;
@@ -184,22 +184,21 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
      * Fetches all contacts in the foreground (blocking thread)
      * 
      * @param cQuery The {@link Query}
-     * @param feed The {@link ContactFeed} with the first batch
+     * @param total The amount of all contacts
      * @param firstBatch The first batch of contacts
      * @return A {@link List} with all fetched contacts
      * @throws IOException if an I/O error is occurred
      * @throws ServiceException if a remote service error is occurred
      */
-    private List<Contact> fetchInForeground(Query cQuery, ContactFeed feed, List<Contact> firstBatch, ContactsService googleContactsService, ContactParser parser) throws IOException, ServiceException {
-        int total = feed.getTotalResults();
+    private List<Contact> fetchInForeground(Query cQuery, int total, List<Contact> firstBatch, ContactsService googleContactsService, ContactParser parser) throws IOException, ServiceException {
         int offset = firstBatch.size();
 
-        List<Contact> contacts = new ArrayList<Contact>(total);
+        List<Contact> contacts = new ArrayList<>(total);
         contacts.addAll(firstBatch);
 
         while (total > offset) {
             cQuery.setStartIndex(offset);
-            feed = googleContactsService.query(cQuery, ContactFeed.class);
+            ContactFeed feed = googleContactsService.query(cQuery, ContactFeed.class);
             List<Contact> batch = parser.parseFeed(feed);
             contacts.addAll(batch);
             offset += batch.size();
@@ -227,9 +226,8 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
                 int offset = startOffset;
                 while (total > offset) {
                     cQuery.setStartIndex(offset);
-                    ContactFeed feed = googleContactsService.query(cQuery, ContactFeed.class);
-                    List<Contact> batch = parser.parseFeed(feed);
-                    folderUpdater.save(new SearchIteratorDelegator<Contact>(batch), subscription);
+                    List<Contact> batch = parser.parseFeed(googleContactsService.query(cQuery, ContactFeed.class));
+                    folderUpdater.save(new SearchIteratorDelegator<>(batch), subscription);
                     offset += batch.size();
                 }
                 return null;

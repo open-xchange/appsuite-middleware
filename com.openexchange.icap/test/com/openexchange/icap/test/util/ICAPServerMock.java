@@ -57,7 +57,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import org.apache.commons.io.IOUtils;
+import com.openexchange.tools.io.IOUtils;
 
 /**
  * {@link ICAPServerMock}

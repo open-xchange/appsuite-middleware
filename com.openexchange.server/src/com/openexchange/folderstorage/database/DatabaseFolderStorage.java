@@ -591,7 +591,11 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                      */
                     permissions.add(newMaxPermissionFor(userId));
                 }
-                if (!isSystem) {
+                TIntSet pim = new TIntHashSet(3);
+                pim.add(FolderObject.CALENDAR);
+                pim.add(FolderObject.CONTACT);
+                pim.add(FolderObject.TASK);
+                if (!isSystem && !pim.contains(createMe.getModule())) {
                     final TIntSet ignore = new TIntHashSet(4);
                     ignore.add(userId);
                     ignore.add(OCLPermission.ALL_GUESTS);

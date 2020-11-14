@@ -54,7 +54,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.io.IOUtils;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
@@ -67,6 +66,7 @@ import com.openexchange.icap.impl.request.handler.OptionsICAPRequestHandler;
 import com.openexchange.icap.impl.request.handler.RequestModificationICAPRequestHandler;
 import com.openexchange.icap.impl.request.handler.ResponseModificationICAPRequestHandler;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.io.IOUtils;
 
 /**
  * {@link ICAPClient}

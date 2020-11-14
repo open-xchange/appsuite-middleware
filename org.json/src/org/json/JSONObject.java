@@ -1203,7 +1203,7 @@ public class JSONObject extends AbstractJSONValue {
         }
         if (value != null) {
             final int max = MAX_SIZE.get();
-            if (max > 0 && this.myHashMap.size() >= max) {
+            if (max > 0 && this.myHashMap.size() >= max && !this.myHashMap.containsKey(key)) {
                 throw new IllegalStateException("Max. size (" + max + ") for JSON object exceeded");
             }
             this.myHashMap.put(key, value);
@@ -1254,7 +1254,7 @@ public class JSONObject extends AbstractJSONValue {
         }
         if (value != null) {
             final int max = MAX_SIZE.get();
-            if (max > 0 && this.myHashMap.size() >= max) {
+            if (max > 0 && this.myHashMap.size() >= max && !this.myHashMap.containsKey(key)) {
                 throw new IllegalStateException("Max. size (" + max + ") for JSON object exceeded");
             }
             this.myHashMap.put(key, value);

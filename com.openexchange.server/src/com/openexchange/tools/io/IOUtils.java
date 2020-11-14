@@ -90,6 +90,22 @@ public final class IOUtils {
     }
 
     /**
+     * Convenience method for closing an I/O resource quietly.
+     *
+     * @param closeable The I/O resource to close.
+     */
+    public static void closeQuietly(Closeable closeable) {
+        if (null == closeable) {
+            return;
+        }
+        try {
+            closeable.close();
+        } catch (@SuppressWarnings("unused") IOException e) {
+            // Ignore
+        }
+    }
+
+    /**
      * Convenience method for closing streams.
      *
      * @param input The stream to close.

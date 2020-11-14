@@ -106,7 +106,7 @@ public class BirthdayConsumer implements BiConsumer<ContactEntry, Contact> {
         Birthday birthday = t.getBirthday();
         try {
             u.setBirthday(BIRTHDAY_FORMAT.get().parse(birthday.getValue()));
-        } catch (ParseException e) {
+        } catch (@SuppressWarnings("unused") ParseException e) {
             LOG.warn("Unable to parse '{}' as a birthday.", birthday.getValue());
         }
     }
