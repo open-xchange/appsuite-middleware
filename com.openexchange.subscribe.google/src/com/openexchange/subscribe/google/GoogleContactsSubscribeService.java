@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.google;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -87,7 +88,8 @@ import com.openexchange.tools.iterator.SearchIteratorDelegator;
  */
 public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GoogleContactsSubscribeService.class);
+    /** The logger constant */
+    static final Logger LOG = LoggerFactory.getLogger(GoogleContactsSubscribeService.class);
 
     public static final String SOURCE_ID = KnownApi.GOOGLE.getServiceId() + ".contact";
 
@@ -102,7 +104,7 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
 
     /**
      * Initialises a new {@link GoogleContactsSubscribeService}.
-     * 
+     *
      * @param oAuthServiceMetaData The {@link OAuthServiceMetaData}
      * @param services The {@link ServiceLookup}
      */
@@ -124,12 +126,15 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
             cQuery.setMaxResults(CHUNK_SIZE);
             ContactFeed feed = googleContactsService.query(cQuery, ContactFeed.class);
             if (CHUNK_SIZE > feed.getTotalResults()) {
-                return parser.parseFeed(feed);
+                List<Contact> contacts = parser.parseFeed(feed);
+                LOG.debug("Parsed {} contacts for Google contact subscription for user {} in context {}", I(contacts.size()), I(subscription.getSession().getUserId()), I(subscription.getSession().getContextId()));
+                return contacts;
             }
 
             List<Contact> firstBatch = parser.parseFeed(feed);
             int total = feed.getTotalResults();
             int startOffset = firstBatch.size();
+            LOG.debug("Parsed first batch with size {} of {} contacts for Google contact subscription for user {} in context {}", I(firstBatch.size()), I(total), I(subscription.getSession().getUserId()), I(subscription.getSession().getContextId()));
 
             FolderUpdaterRegistry folderUpdaterRegistry = services.getOptionalService(FolderUpdaterRegistry.class);
             ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
@@ -143,14 +148,15 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
             LOG.error("", e);
             throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
         } catch (ServiceException e) {
-            LOG.error("", e);
+            String responseBody = e.getResponseBody();
+            LOG.error(responseBody == null ? "" : responseBody, e);
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e, e.getMessage());
         }
     }
 
     /**
      * Pings the contact service
-     * 
+     *
      * @throws OXException
      */
     public void ping(Session session, OAuthAccount account) throws OXException {
@@ -159,8 +165,11 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
             cQuery.setMaxResults(1);
             createContactsService(session, account).query(cQuery, ContactFeed.class);
         } catch (IOException e) {
+            LOG.error("", e);
             throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
         } catch (ServiceException e) {
+            String responseBody = e.getResponseBody();
+            LOG.error(responseBody == null ? "" : responseBody, e);
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e, e.getMessage());
         }
 
@@ -168,7 +177,7 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
 
     /**
      * Creates a new {@link ContactsService} for the specified oauth account
-     * 
+     *
      * @param session The {@link Session}
      * @param oauthAccount The {@link OAuthAccount}
      * @return The {@link ContactsService}
@@ -182,7 +191,7 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
 
     /**
      * Fetches all contacts in the foreground (blocking thread)
-     * 
+     *
      * @param cQuery The {@link Query}
      * @param total The amount of all contacts
      * @param firstBatch The first batch of contacts
@@ -209,7 +218,7 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
 
     /**
      * Schedules a task to fetch all contacts and executes it in the background
-     * 
+     *
      * @param subscription The {@link Subscription}
      * @param cQuery The {@link Query}
      * @param total The amount of all contacts
@@ -223,12 +232,28 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
 
             @Override
             public Void call() throws Exception {
-                int offset = startOffset;
-                while (total > offset) {
-                    cQuery.setStartIndex(offset);
-                    List<Contact> batch = parser.parseFeed(googleContactsService.query(cQuery, ContactFeed.class));
-                    folderUpdater.save(new SearchIteratorDelegator<>(batch), subscription);
-                    offset += batch.size();
+                Integer iUserId = I(subscription.getSession().getUserId());
+                Integer iContextId = I(subscription.getSession().getContextId());
+                Integer iTotal = I(total);
+                try {
+                    int offset = startOffset;
+                    while (total > offset) {
+                        cQuery.setStartIndex(offset);
+                        List<Contact> batch = parser.parseFeed(googleContactsService.query(cQuery, ContactFeed.class));
+                        folderUpdater.save(new SearchIteratorDelegator<>(batch), subscription);
+                        LOG.debug("Stored next batch with size {} of {} contacts for Google contact subscription for user {} in context {}", I(batch.size()), iTotal, iUserId, iContextId);
+                        offset += batch.size();
+                    }
+                    LOG.debug("Finished storing {} contacts for Google contact subscription for user {} in context {}", iTotal, iUserId, iContextId);
+                } catch (ServiceException e) {
+                    String responseBody = e.getResponseBody();
+                    if (responseBody == null) {
+                        LOG.error("Failed storing {} contacts for Google contact subscription for user {} in context {}", iTotal, iUserId, iContextId, e);
+                    } else {
+                        LOG.error("Failed storing {} contacts for Google contact subscription for user {} in context {}: {}", iTotal, iUserId, iContextId, responseBody, e);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Failed storing {} contacts for Google contact subscription for user {} in context {}", iTotal, iUserId, iContextId, e);
                 }
                 return null;
             }

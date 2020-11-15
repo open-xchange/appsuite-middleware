@@ -49,7 +49,6 @@
 
 package com.openexchange.subscribe.google.parser;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import com.google.common.collect.ImmutableList;
@@ -80,7 +79,7 @@ public final class ContactParser {
 
     /**
      * Initialises a new {@link ContactParser}.
-     * 
+     *
      * @param googleContactsService The Google's {@link ContactsService}
      */
     public ContactParser(ContactsService googleContactsService) {
@@ -100,13 +99,14 @@ public final class ContactParser {
 
     /**
      * Parses the specified {@link ContactFeed} and returns it as a {@link List} of {@link Contact}s
-     * 
+     *
      * @param feed The {@link ContactFeed} to parse
      * @return a {@link List} of {@link Contact}s
      */
     public List<Contact> parseFeed(ContactFeed feed) {
-        List<Contact> contacts = new LinkedList<Contact>();
-        for (ContactEntry contact : feed.getEntries()) {
+        List<ContactEntry> entries = feed.getEntries();
+        List<Contact> contacts = new java.util.ArrayList<Contact>(entries.size());
+        for (ContactEntry contact : entries) {
             contacts.add(parseContactEntry(contact));
         }
         return contacts;
@@ -114,7 +114,7 @@ public final class ContactParser {
 
     /**
      * Parses the specified {@link ContactEntry} to a {@link Contact}
-     * 
+     *
      * @param entry The {@link ContactEntry} to parse
      * @return a new {@link Contact}
      */

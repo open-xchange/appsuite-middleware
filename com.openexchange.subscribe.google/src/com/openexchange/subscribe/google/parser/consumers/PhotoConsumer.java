@@ -54,14 +54,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.BiConsumer;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.google.gdata.client.Service.GDataRequest;
 import com.google.gdata.client.contacts.ContactsService;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.contacts.ContactEntry;
 import com.google.gdata.util.ServiceException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.subscribe.google.GoogleContactsSubscribeService;
 import com.openexchange.tools.io.IOUtils;
 
 /**
@@ -72,7 +70,10 @@ import com.openexchange.tools.io.IOUtils;
  */
 public class PhotoConsumer implements BiConsumer<ContactEntry, Contact> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GoogleContactsSubscribeService.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PhotoConsumer.class);
+    }
 
     private final ContactsService googleContactsService;
 
@@ -106,7 +107,7 @@ public class PhotoConsumer implements BiConsumer<ContactEntry, Contact> {
             u.setImage1(out.toByteArray());
             u.setImageContentType(photoLink.getType());
         } catch (IOException | ServiceException e) {
-            LOG.debug("Error fetching contact's image from '{}'", photoLink.getHref(), e);
+            LoggerHolder.LOG.debug("Error fetching contact's image from '{}'", photoLink.getHref(), e);
         } finally {
             if (request != null) {
                 request.end();
