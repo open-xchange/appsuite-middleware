@@ -103,6 +103,11 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
         }
     }
 
+    /**
+     * Handles the specified exception
+     * 
+     * @param e The exception to handle
+     */
     private void handleNotActiveException(HazelcastInstanceNotActiveException e) {
         notActive.set(true);
     }

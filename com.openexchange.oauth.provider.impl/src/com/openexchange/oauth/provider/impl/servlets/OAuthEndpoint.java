@@ -234,7 +234,7 @@ public abstract class OAuthEndpoint extends HttpServlet {
         return locale;
     }
 
-    private void writeErrorPage(Writer writer, String message, Locale locale) throws OXException, IOException {
+    private void writeErrorPage(Writer writer, String message, Locale locale) throws OXException {
         TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
         TemplateService templateService = requireService(TemplateService.class, services);
         Translator translator = translatorFactory.translatorFor(locale);

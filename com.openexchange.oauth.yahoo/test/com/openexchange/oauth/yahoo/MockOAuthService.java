@@ -113,11 +113,13 @@ public class MockOAuthService implements OAuthService {
                 return null;
             }
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public String getSecret() {
                 return tokenSecret;
             }
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public String getToken() {
                 return token;

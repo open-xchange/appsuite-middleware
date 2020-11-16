@@ -56,8 +56,8 @@ Import-Package: com.fasterxml.jackson.core,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
- org.osgi.service.event;version="1.3.1",
- org.osgi.util.tracker;version="1.5.1",
+ org.osgi.service.event,
+ org.osgi.util.tracker,
  org.scribe.builder,
  org.scribe.builder.api,
  org.scribe.exceptions,
@@ -70,3 +70,4 @@ Import-Package: com.fasterxml.jackson.core,
 Export-Package: com.openexchange.oauth.yahoo,
  com.openexchange.oauth.yahoo.access
 Bundle-ClassPath: .
+Automatic-Module-Name: com.openexchange.oauth.yahoo
