@@ -2244,11 +2244,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             } while (rs.next());
                             groupCache.remove(keys);
                         }
-                        rs.close();
-                        rs = null;
-                        stmt.close();
                     } catch (OXException e) {
                         LOG.error("", e);
+                    } finally {
+                        if(rs != null) {
+                            rs.close();
+                            rs = null;
+                        }
+                        stmt.close();
                     }
                 }
                 // Delete from groups member
