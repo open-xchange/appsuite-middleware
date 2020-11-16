@@ -53,6 +53,8 @@ import static com.openexchange.java.util.UUIDs.getUnformattedString;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.mailstorage.association.AssociationLock;
@@ -74,6 +76,8 @@ import com.openexchange.session.Session;
  * @since v7.10.5
  */
 public class MailStorageExclusiveOperation {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MailStorageExclusiveOperation.class);
 
     /**
      * A task that returns a result against mail storage and may throw an exception.
@@ -182,8 +186,10 @@ public class MailStorageExclusiveOperation {
                     lookUpResult.getAssociationStorage().delete(compositionSpaceId, session, false);
                     if (lookUpResult.isFromCache()) {
                         // Cache entry might be outdated => reload & retry
+                        LOG.warn("Draft mail is missing for association: {}. Reloading.", association, e);
                         lookUpResult = compositionSpaceService.requireCompositionSpaceToDraftAssociation(compositionSpaceId);
                         association = lookUpResult.getAssociation();
+                        LOG.debug("Found new association on reload: {}", association);
                     } else {
                         throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create(e);
                     }

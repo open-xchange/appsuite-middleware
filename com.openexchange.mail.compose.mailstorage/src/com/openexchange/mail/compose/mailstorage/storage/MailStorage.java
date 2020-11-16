@@ -264,7 +264,7 @@ public class MailStorage implements IMailStorage {
             for (Map.Entry<UUID, MailMessage> id2MessageEntry : id2Message.entrySet()) {
                 mailPathsToUUIDs.put(new MailPath(MailAccount.DEFAULT_ID, draftsFolder, id2MessageEntry.getValue().getMailId()), id2MessageEntry.getKey());
             }
-            LOG.debug("Found {} open composition spaces", I(mailPathsToUUIDs.size()));
+            LOG.debug("Found open composition spaces: {}", mailPathsToUUIDs.values().stream().map(uuid -> getUUIDForLogging(uuid)).collect(toList()));
             LookUpOutcome lookUpOutcome = new LookUpOutcome(mailPathsToUUIDs, duplicateSpaces == null ? Collections.emptyMap() : duplicateSpaces);
             return MailStorageResult.resultFor(null, lookUpOutcome, false, mailAccess);
         } finally {
@@ -602,7 +602,7 @@ public class MailStorage implements IMailStorage {
 
             tryCleanUpFileCacheReference(mailStorageId);
 
-            MailMessage draftMail = requireDraftMail(mailStorageId, mailAccess,false);
+            MailMessage draftMail = requireDraftMail(mailStorageId, mailAccess, false);
 
             if (deleteSharedAttachmentsFolderIfPresent) {
                 String headerValue = HeaderUtility.decodeHeaderValue(draftMail.getFirstHeader(HeaderUtility.HEADER_X_OX_SHARED_ATTACHMENTS));
@@ -1524,6 +1524,7 @@ public class MailStorage implements IMailStorage {
                 MailPath[] removedPaths = enhancedDeletion.hardDeleteMessages(draftPath.getFolder(), new String[] { draftPath.getMailID() });
                 if (removedPaths == null || removedPaths.length <= 0 || !draftPath.equals(removedPaths[0])) {
                     // Another process deleted draft mail
+                    // TODO: is it good to throw this here?
                     throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
                 }
             }
@@ -1693,7 +1694,12 @@ public class MailStorage implements IMailStorage {
             }
             return Optional.ofNullable(in);
         } catch (OXException e) {
-            LOG.debug("Failed to fetch full MIME stream of draft {}/{}", fullName, mailId, e);
+            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+                LOG.debug("Failed to fetch full MIME stream of draft {}/{} because mail does not exist anymore", fullName, mailId);
+                return Optional.empty();
+            }
+
+            LOG.warn("Failed to fetch full MIME stream of draft {}/{}", fullName, mailId, e);
             throw e;
         }
     }
@@ -1763,7 +1769,12 @@ public class MailStorage implements IMailStorage {
             }
             return Optional.ofNullable(mail);
         } catch (OXException e) {
-            LOG.debug("Failed to fetch full draft {}/{}", fullName, mailId, e);
+            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+                LOG.debug("Failed to fetch full draft {}/{} because mail does not exist anymore", fullName, mailId);
+                return Optional.empty();
+            }
+
+            LOG.warn("Failed to fetch full draft {}/{}", fullName, mailId, e);
             throw e;
         }
     }
