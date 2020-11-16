@@ -873,7 +873,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             if (null != result && null != result.getData() && JSONObject.class.isInstance(result.getData())) {
                 JSONObject errorJson = (JSONObject) result.getData();
                 errorJson.remove("error_stack");
-                errorJson.remove("error");
                 errorJson.putSafe("error", exception.getDisplayMessageUnformatted());
                 internalConfig.putSafe("lastError", errorJson);
             }
