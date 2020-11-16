@@ -97,7 +97,7 @@ public class OAuthHTTPClient extends AbstractHTTPClient implements HTTPClient {
             return (R) new StringReader(payload);
         }
 
-        for (Class inputType : Arrays.asList(String.class, Reader.class, InputStream.class)) {
+        for (Class<?> inputType : Arrays.asList(String.class, Reader.class, InputStream.class)) {
             List<HTTPResponseProcessor> procList = processors.get(inputType);
             for (HTTPResponseProcessor processor : procList) {
                 if (processor.getTypes()[1] == targetFormat) {

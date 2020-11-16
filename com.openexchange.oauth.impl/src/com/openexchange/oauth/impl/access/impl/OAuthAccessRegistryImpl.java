@@ -50,7 +50,6 @@
 package com.openexchange.oauth.impl.access.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -239,10 +238,6 @@ public class OAuthAccessRegistryImpl implements OAuthAccessRegistry {
 
         void addAccess(int oauthAccountId, OAuthAccess access) {
             map.put(I(oauthAccountId), access);
-        }
-
-        Collection<OAuthAccess> allAccesses() {
-            return map.values();
         }
 
         boolean removeAccess(int oauthAccountId) {

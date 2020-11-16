@@ -49,25 +49,10 @@
 
 package com.openexchange.admin.console.oauth;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.console.CLIIllegalOptionValueException;
-import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.console.CLIParseException;
-import com.openexchange.admin.console.CLIUnknownOptionException;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
-import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementException;
 
 /**
  * {@link GetOAuthClientManagementCLT}
@@ -75,117 +60,49 @@ import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementExceptio
  * A CLT to get an oauth client
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.0
  */
 public class GetOAuthClientManagementCLT extends AbstractOAuthCLT {
 
-    private static final String CLIENT_ID_LONG = "id";
-
-
-    private CLIOption clientID = null;
-
-
+    /**
+     * Entry point
+     *
+     * @param args the command-line arguments
+     */
     public static void main(String[] args) {
         new GetOAuthClientManagementCLT().execute(args);
     }
 
+    /**
+     * Executes
+     *
+     * @param args the command-line arguments
+     */
     private void execute(String[] args) {
         final AdminParser parser = new AdminParser("getoauthclient");
         setOptions(parser);
-        FileInputStream fis = null;
-        BufferedInputStream bis = null;
+        RemoteClientManagement remote = getRemoteClientManagement(parser);
         try {
             parser.ownparse(args);
-            final Credentials auth = new Credentials(checkEmpty(this.adminUserOption, (String) parser.getOptionValue(this.adminUserOption)), checkEmpty(this.adminPassOption, (String) parser.getOptionValue(this.adminPassOption)));
-            final RemoteClientManagement remote = (RemoteClientManagement) Naming.lookup(RMI_HOSTNAME + RemoteClientManagement.RMI_NAME);
-
-            if (null == remote) {
-                System.err.println("Unable to connect to rmi.");
-                sysexit(1);
-            }
-
-
-                String id = checkEmpty(clientID, (String) parser.getOptionValue(this.clientID));
-                ClientDto client = remote.getClientById(id, auth);
-
-                if (null == client) {
-                System.out.println("Client not found!");
-                    sysexit(1);
-                } else {
-                    printClient(client);
-                }
-        } catch (CLIParseException e) {
-            printError("Parsing command-line failed : " + e.getMessage(), parser);
-            parser.printUsage();
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (CLIIllegalOptionValueException e) {
-            printError("Illegal option value : " + e.getMessage(), parser);
-            parser.printUsage();
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (CLIUnknownOptionException e) {
-            printError("Unrecognized options on the command line: " + e.getMessage(), parser);
-            parser.printUsage();
-            sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (MissingOptionException e) {
-            printError(e.getMessage(), parser);
-            parser.printUsage();
-            sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (MalformedURLException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (RemoteException e) {
-            printServerException(e, parser);
-            sysexit(SYSEXIT_REMOTE_ERROR);
-        } catch (NotBoundException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (RemoteClientManagementException e) {
-            printError(e.getMessage(), parser);
-            sysexit(BasicCommandlineOptions.SYSEXIT_COMMUNICATION_ERROR);
-        } catch (InvalidCredentialsException e) {
-            printServerException(e, parser);
-            sysexit(SYSEXIT_INVALID_CREDENTIALS);
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
-
-            if (bis != null) {
-                try {
-                    bis.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
-
+            Credentials auth = getCredentials(this.adminUserOption, this.adminPassOption, parser);
+            String id = getClientId(clientID, parser);
+            ClientDto client = remote.getClientById(id, auth);
+            nullCheck(client, "Client not found!");
+            printClient(client);
+        } catch (Exception e) {
+            handleException(e, parser);
         }
-
     }
 
     /**
-     * Checks if an argument string is null or empty
+     * Sets further options to the specified admin parser
      *
-     * @param opt
-     * @param str
-     * @return the string if not empty or null
-     * @throws CLIIllegalOptionValueException
+     * @param parser The admin parser
      */
-    private String checkEmpty(CLIOption opt, String str) throws CLIIllegalOptionValueException {
-
-        if (null == str || str.isEmpty()) {
-            throw new CLIIllegalOptionValueException(opt, str);
-        }
-
-        return str;
-    }
-
-    private void setOptions(final AdminParser parser) {
+    private void setOptions(AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-        this.clientID = setLongOpt(parser, CLIENT_ID_LONG, "id", "The id of the oauth client", true, true, false);
+        setClientIdOption(parser);
     }
 
     /**
@@ -202,9 +119,8 @@ public class GetOAuthClientManagementCLT extends AbstractOAuthCLT {
         System.out.println("Contact address = " + client.getContactAddress());
         System.out.println("Default scope = " + client.getDefaultScope());
         System.out.println("Redirect URL's = " + client.getRedirectURIs());
-        System.out.println("Client's current secret = "+client.getSecret());
+        System.out.println("Client's current secret = " + client.getSecret());
         System.out.println("-------------------------------------------------------------------------------------");
     }
 
 }
-

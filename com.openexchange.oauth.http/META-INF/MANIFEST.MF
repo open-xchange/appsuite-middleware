@@ -17,3 +17,4 @@ Import-Package: com.openexchange.exception,
  com.openexchange.osgi.annotation,
  com.openexchange.session
 Export-Package: com.openexchange.oauth.http
+Automatic-Module-Name: com.openexchange.oauth.http

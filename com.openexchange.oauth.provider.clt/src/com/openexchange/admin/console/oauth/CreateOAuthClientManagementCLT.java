@@ -52,14 +52,9 @@ package com.openexchange.admin.console.oauth;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.tika.config.TikaConfig;
@@ -67,19 +62,12 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeTypes;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.console.CLIIllegalOptionValueException;
 import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.console.CLIParseException;
-import com.openexchange.admin.console.CLIUnknownOptionException;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.rmi.client.IconDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
-import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementException;
 
 /**
  * {@link CreateOAuthClientManagementCLT}
@@ -87,6 +75,7 @@ import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementExceptio
  * A CLT to register an oauth client
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.0
  */
 public class CreateOAuthClientManagementCLT extends AbstractOAuthCLT {
@@ -117,146 +106,86 @@ public class CreateOAuthClientManagementCLT extends AbstractOAuthCLT {
     private CLIOption default_scope = null;
     private CLIOption redirect_urls = null;
 
+    /**
+     * Entry point
+     *
+     * @param args the command-line arguments
+     */
     public static void main(String[] args) {
         new CreateOAuthClientManagementCLT().execute(args);
     }
 
+    /**
+     * Executes
+     *
+     * @param args the command-line arguments
+     */
     private void execute(String[] args) {
-        final AdminParser parser = new AdminParser("createoauthclient");
+        AdminParser parser = new AdminParser("createoauthclient");
         setOptions(parser);
+
+        RemoteClientManagement remote = getRemoteClientManagement(parser);
+
         FileInputStream fis = null;
         BufferedInputStream bis = null;
         try {
             parser.ownparse(args);
-            final Credentials auth = new Credentials(checkEmpty(this.adminUserOption, (String) parser.getOptionValue(this.adminUserOption)), checkEmpty(this.adminPassOption, (String) parser.getOptionValue(this.adminPassOption)));
-            final RemoteClientManagement remote = (RemoteClientManagement) Naming.lookup(RMI_HOSTNAME + RemoteClientManagement.RMI_NAME);
 
-            if (null == remote) {
-                System.err.println("Unable to connect to rmi.");
-                sysexit(1);
-            }
+            Credentials auth = getCredentials(this.adminUserOption, this.adminPassOption, parser);
 
+            String contextGroup = getContextGroup(this.ctxGroupID, parser);
+            String name = checkEmpty(this.name, String.class.cast(parser.getOptionValue(this.name)));
+            String desc = checkEmpty(this.description, String.class.cast(parser.getOptionValue(this.description)));
+            String website = checkEmpty(this.website, String.class.cast(parser.getOptionValue(this.website)));
+            String contact = checkEmpty(this.contact_address, String.class.cast(parser.getOptionValue(this.contact_address)));
+            String icon_path = checkEmpty(this.icon_path, String.class.cast(parser.getOptionValue(this.icon_path)));
+            String scope = checkEmpty(this.default_scope, String.class.cast(parser.getOptionValue(this.default_scope)));
+            String urlsString = checkEmpty(this.redirect_urls, String.class.cast(parser.getOptionValue(this.redirect_urls)));
 
-                String contextGroup = (String) parser.getOptionValue(this.ctxGroupID);
-                if (null == contextGroup || contextGroup.isEmpty()) {
-                    contextGroup = RemoteClientManagement.DEFAULT_GID;
-                }
+            ClientDataDto clientData = new ClientDataDto();
+            clientData.setName(name);
+            clientData.setDescription(desc);
+            clientData.setWebsite(website);
+            clientData.setContactAddress(contact);
 
-                String name = checkEmpty(this.name, (String) parser.getOptionValue(this.name));
-                String desc = checkEmpty(this.description, (String) parser.getOptionValue(this.description));
-                String website = checkEmpty(this.website, (String) parser.getOptionValue(this.website));
-                String contact = checkEmpty(this.contact_address, (String) parser.getOptionValue(this.contact_address));
-                String icon_path = checkEmpty(this.icon_path, (String) parser.getOptionValue(this.icon_path));
-                String scope = checkEmpty(this.default_scope, (String) parser.getOptionValue(this.default_scope));
-                String urlsString = checkEmpty(this.redirect_urls, (String) parser.getOptionValue(this.redirect_urls));
+            IconDto icon = new IconDto();
+            Path path = Paths.get(icon_path);
+            fis = new FileInputStream(new File(icon_path));
+            bis = new BufferedInputStream(fis);
 
-                ClientDataDto clientData = new ClientDataDto();
-                clientData.setName(name);
-                clientData.setDescription(desc);
-                clientData.setWebsite(website);
-                clientData.setContactAddress(contact);
+            byte[] byteArray = Files.readAllBytes(path);
+            MimeTypes mimeTypes = TikaConfig.getDefaultConfig().getMimeRepository();
+            MediaType mime = mimeTypes.detect(bis, new Metadata());
 
-                IconDto icon = new IconDto();
-                Path path = Paths.get(icon_path);
-                fis = new FileInputStream(new File(icon_path));
-                bis = new BufferedInputStream(fis);
+            icon.setMimeType(mime.toString());
+            icon.setData(byteArray);
+            clientData.setIcon(icon);
 
-                byte[] byteArray = Files.readAllBytes(path);
-                MimeTypes mimeTypes = TikaConfig.getDefaultConfig().getMimeRepository();
-                MediaType mime = mimeTypes.detect(bis, new Metadata());
+            clientData.setDefaultScope(scope);
 
-                icon.setMimeType(mime.toString());
-                icon.setData(byteArray);
-                clientData.setIcon(icon);
+            List<String> urls = Arrays.asList(urlsString.trim().split("\\s*,\\s*"));
+            clientData.setRedirectURIs(urls);
+            ClientDto retval = remote.registerClient(contextGroup, clientData, auth);
+            nullCheck(retval, "The registration of oauth client has failed");
 
-                clientData.setDefaultScope(scope);
-
-                List<String> urls = Arrays.asList(urlsString.trim().split("\\s*,\\s*"));
-                clientData.setRedirectURIs(urls);
-                ClientDto retval = remote.registerClient(contextGroup, clientData, auth);
-
-                if (null == retval) {
-                    System.out.println("The registration of oauth client has failed");
-                    sysexit(1);
-                } else {
-                    System.out.println("The registration of oauth client was successful");
-                    System.out.println("The registered oauth client: ");
-                    printClient(retval);
-                    sysexit(0);
-                }
-        } catch (CLIParseException e) {
-            printError("Parsing command-line failed : " + e.getMessage(), parser);
-            parser.printUsage();
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (CLIIllegalOptionValueException e) {
-            printError("Illegal option value : " + e.getMessage(), parser);
-            parser.printUsage();
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (CLIUnknownOptionException e) {
-            printError("Unrecognized options on the command line: " + e.getMessage(), parser);
-            parser.printUsage();
-            sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (MissingOptionException e) {
-            printError(e.getMessage(), parser);
-            parser.printUsage();
-            sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (MalformedURLException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (RemoteException e) {
-            printServerException(e, parser);
-            sysexit(SYSEXIT_REMOTE_ERROR);
-        } catch (NotBoundException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (RemoteClientManagementException e) {
-            printError(e.getMessage(), parser);
-            sysexit(BasicCommandlineOptions.SYSEXIT_COMMUNICATION_ERROR);
-        } catch (InvalidCredentialsException e) {
-            printServerException(e, parser);
-            sysexit(SYSEXIT_INVALID_CREDENTIALS);
-        } catch (IOException e) {
-            printError(e.getMessage(), parser);
-            sysexit(1);
+            System.out.println("The registration of oauth client was successful");
+            System.out.println("The registered oauth client: ");
+            printClient(retval);
+            sysexit(0);
+        } catch (Exception e) {
+            handleException(e, parser);
         } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
-
-            if (bis != null) {
-                try {
-                    bis.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
-
+            closeQuietly(fis);
+            closeQuietly(bis);
         }
-
     }
 
     /**
-     * Checks if an argument string is null or empty
+     * Sets further options to the specified admin parser
      *
-     * @param opt
-     * @param str
-     * @return the string if not empty or null
-     * @throws CLIIllegalOptionValueException
+     * @param parser The admin parser
      */
-    private String checkEmpty(CLIOption opt, String str) throws CLIIllegalOptionValueException {
-
-        if (null == str || str.isEmpty()) {
-            throw new CLIIllegalOptionValueException(opt, str);
-        }
-
-        return str;
-    }
-
-    private void setOptions(final AdminParser parser) {
+    private void setOptions(AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
         this.ctxGroupID = setShortLongOpt(parser, GROUP_CTX_ID_SHORT, GROUP_CTX_ID_LONG, "cgid", "The id of the context group", true);
@@ -283,9 +212,8 @@ public class CreateOAuthClientManagementCLT extends AbstractOAuthCLT {
         System.out.println("Contact address = " + client.getContactAddress());
         System.out.println("Default scope = " + client.getDefaultScope());
         System.out.println("Redirect URL's = " + client.getRedirectURIs());
-        System.out.println("Client's current secret = "+client.getSecret());
+        System.out.println("Client's current secret = " + client.getSecret());
         System.out.println("-------------------------------------------------------------------------------------");
     }
 
 }
-
