@@ -69,6 +69,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
@@ -674,7 +675,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             if (!stringsEqual(normalizePath(expectedReferer.getPath()), normalizePath(actualReferer.getPath()))) {
                 return true;
             }
-        } catch (URISyntaxException e) {
+        } catch (@SuppressWarnings("unused") URISyntaxException e) {
             return true;
         }
 
@@ -1181,6 +1182,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 int intCode = Integer.parseInt(code);
                 return errorsByCodes.get(I(intCode));
             } catch (NumberFormatException e) {
+                LoggerFactory.getLogger(LoginError.class).debug("Code {} cannot be parsed as integer", code, e);
                 return null;
             }
         }

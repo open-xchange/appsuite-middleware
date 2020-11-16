@@ -120,7 +120,7 @@ public class OAuthTokensGetterSetter {
             try {
                 long expiryMillis = Long.parseLong(expiryString);
                 expiryDate = new Date(expiryMillis);
-            } catch (NumberFormatException e) {
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
                 LOG.warn("Invalid expiry date string for OAuth access token in session: {}", expiryString);
             }
         }
@@ -269,22 +269,24 @@ public class OAuthTokensGetterSetter {
     }
 
     private void releaseAndClose(AccessControl accessControl) {
-        if (null != accessControl) {
-            try {
-                accessControl.release();
-            } catch (Exception e) {
-                // Ignore
-            }
+        if (null == accessControl) {
+            return;
+        }
+        try {
+            accessControl.release();
+        } catch (@SuppressWarnings("unused") Exception e) {
+            // Ignore
         }
     }
 
     private void releaseAndClose(AccessControl accessControl, boolean aquired) {
-        if (null != accessControl) {
-            try {
-                accessControl.release(aquired);
-            } catch (Exception e) {
-                // Ignore
-            }
+        if (null == accessControl) {
+            return;
+        }
+        try {
+            accessControl.release(aquired);
+        } catch (@SuppressWarnings("unused") Exception e) {
+            // Ignore
         }
     }
 

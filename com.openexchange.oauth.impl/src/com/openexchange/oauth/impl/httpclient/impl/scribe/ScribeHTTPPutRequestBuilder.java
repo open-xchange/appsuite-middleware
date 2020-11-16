@@ -62,63 +62,61 @@ import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 import com.openexchange.java.Streams;
 import com.openexchange.oauth.impl.httpclient.OAuthHTTPRequestBuilder;
 
-public class ScribeHTTPPutRequestBuilder extends
-		ScribeGenericHTTPRequestBuilder<HTTPPutRequestBuilder> implements
-		HTTPPutRequestBuilder {
+public class ScribeHTTPPutRequestBuilder extends ScribeGenericHTTPRequestBuilder<HTTPPutRequestBuilder> implements HTTPPutRequestBuilder {
 
-	private String payload = "";
-	private String contentType = "application/octet-stream";
+    private String payload = "";
+    private String contentType = "application/octet-stream";
 
-	public ScribeHTTPPutRequestBuilder(OAuthHTTPRequestBuilder coreBuilder) {
-		super(coreBuilder);
-	}
+    public ScribeHTTPPutRequestBuilder(OAuthHTTPRequestBuilder coreBuilder) {
+        super(coreBuilder);
+    }
 
-	@Override
-	public Verb getVerb() {
-		return Verb.PUT;
-	}
+    @Override
+    public Verb getVerb() {
+        return Verb.PUT;
+    }
 
-	@Override
-	public HTTPPutRequestBuilder body(String body) {
-		payload = body;
-		return this;
-	}
+    @Override
+    public HTTPPutRequestBuilder body(String body) {
+        payload = body;
+        return this;
+    }
 
-	@Override
-	public HTTPPutRequestBuilder body(InputStream body) throws OXException {
-		InputStreamReader isr;
-		try {
-			isr = new InputStreamReader(new BufferedInputStream(body, 65536), com.openexchange.java.Charsets.UTF_8);
-		} catch (UnsupportedCharsetException e1) {
-			return null;
-		}
-		StringBuilder b = new StringBuilder();
-		int ch = -1;
-		try {
-			while ((ch = isr.read()) != -1) {
-				b.append((char) ch);
-			}
+    @Override
+    public HTTPPutRequestBuilder body(InputStream body) throws OXException {
+        InputStreamReader isr;
+        try {
+            isr = new InputStreamReader(new BufferedInputStream(body, 65536), com.openexchange.java.Charsets.UTF_8);
+        } catch (@SuppressWarnings("unused") UnsupportedCharsetException e) {
+            return null;
+        }
+        StringBuilder b = new StringBuilder();
+        int ch = -1;
+        try {
+            while ((ch = isr.read()) != -1) {
+                b.append((char) ch);
+            }
             payload = b.toString();
-		} catch (IOException e) {
-			throw OxHttpClientExceptionCodes.IO_ERROR.create(e.getMessage());
-		} finally {
-		    Streams.close(isr);
-		}
-		return this;
-	}
+        } catch (IOException e) {
+            throw OxHttpClientExceptionCodes.IO_ERROR.create(e.getMessage());
+        } finally {
+            Streams.close(isr);
+        }
+        return this;
+    }
 
-	@Override
-	public HTTPPutRequestBuilder contentType(String ctype) {
-		this.contentType = ctype;
-		return this;
-	}
+    @Override
+    public HTTPPutRequestBuilder contentType(String ctype) {
+        this.contentType = ctype;
+        return this;
+    }
 
-	@Override
-	protected void modify(OAuthRequest request) {
-		request.addPayload(payload);
-		if (contentType != null) {
-			request.addHeader("Content-Type", contentType);
-		}
-	}
+    @Override
+    protected void modify(OAuthRequest request) {
+        request.addPayload(payload);
+        if (contentType != null) {
+            request.addHeader("Content-Type", contentType);
+        }
+    }
 
 }

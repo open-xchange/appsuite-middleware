@@ -93,7 +93,7 @@ public abstract class AbstractOAuthAccountAssociation implements OAuthAccountAss
         AbstractOAuthAccess access = newAccess(session);
         try {
             access.initialize();
-        } catch (OXException e) {
+        } catch (@SuppressWarnings("unused") OXException e) {
             return Status.RECREATION_NEEDED;
         }
         boolean success = access.ping();

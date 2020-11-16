@@ -95,7 +95,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     protected AbstractOAuthAccess(Session session) {
         super();
         this.session = session;
-        oauthClientRef = new AtomicReference<OAuthClient<?>>();
+        oauthClientRef = new AtomicReference<>();
     }
 
     @Override
@@ -141,6 +141,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
         // Other checks?
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> OAuthClient<T> getClient() throws OXException {
         OAuthClient<?> client = oauthClientRef.get();
@@ -184,6 +185,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      *
      * @return The {@link OAuthClient} instance or <code>null</code>
      */
+    @SuppressWarnings("unchecked")
     protected <T> OAuthClient<T> getOAuthClient() {
         return (OAuthClient<T>) oauthClientRef.get();
     }

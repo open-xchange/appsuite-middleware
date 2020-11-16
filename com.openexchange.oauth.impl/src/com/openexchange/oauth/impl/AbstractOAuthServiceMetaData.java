@@ -97,7 +97,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      */
     protected AbstractOAuthServiceMetaData(OAuthScope... scopes) {
         super();
-        properties = new ConcurrentHashMap<OAuthPropertyID, OAuthConfigurationProperty>(OAuthPropertyID.values().length, 0.9f, 1);
+        properties = new ConcurrentHashMap<>(OAuthPropertyID.values().length, 0.9f, 1);
         availableScopes = ImmutableSet.copyOf(scopes);
     }
 
@@ -333,7 +333,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     protected static String urlEncode(final String s) {
         try {
             return URLEncoder.encode(s, "ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
+        } catch (@SuppressWarnings("unused") UnsupportedEncodingException e) {
             return s;
         }
     }

@@ -134,6 +134,7 @@ public abstract class OAuthTokenValidationEndpoint extends OAuthEndpoint {
             } catch (AuthorizationException e) {
                 throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, "An error occurred while trying to validate an access token.");
             } catch (java.lang.IllegalArgumentException e) {
+                LOG.debug("", e);
                 handleMalformedToken(accessToken, request, resp);
                 return;
             }

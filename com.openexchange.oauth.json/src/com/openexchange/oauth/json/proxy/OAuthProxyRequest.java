@@ -321,7 +321,7 @@ public class OAuthProxyRequest {
 		method = HTTPMethod.valueOf(methodName);
 
 		JSONObject paramsObj = proxyRequest.optJSONObject("params");
-		parameters = new TreeMap<String,String>();
+		parameters = new TreeMap<>();
 		if (paramsObj != null){
 			for(Entry<String, Object> entry : paramsObj.entrySet()){
 				parameters.put(entry.getKey(), String.valueOf(entry.getValue()));
@@ -329,7 +329,7 @@ public class OAuthProxyRequest {
 		}
 
 		JSONObject headerObj = proxyRequest.optJSONObject("header");
-		headers = new TreeMap<String,String>();
+		headers = new TreeMap<>();
 		if (headerObj != null){
 			for(Entry<String, Object> entry : headerObj.entrySet()){
 				headers.put(entry.getKey(), String.valueOf(entry.getValue()));
@@ -350,7 +350,7 @@ public class OAuthProxyRequest {
 
 		try {
 			url = proxyRequest.getString("url");
-		} catch (JSONException e) {
+        } catch (@SuppressWarnings("unused") JSONException e) {
 			throw AjaxExceptionCodes.MISSING_PARAMETER.create("url");
 		}
 

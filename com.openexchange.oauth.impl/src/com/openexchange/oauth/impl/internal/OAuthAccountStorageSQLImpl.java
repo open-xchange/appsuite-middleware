@@ -141,7 +141,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         ((DefaultOAuthAccount) account).setId(idGenerator.getId(OAuthConstants.TYPE_ACCOUNT, contextId));
 
         // Create INSERT command
-        ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
+        ArrayList<Object> values = new ArrayList<>(SQLStructure.OAUTH_COLUMN.values().length);
         INSERT insert = SQLStructure.insertAccount(account, contextId, user, values);
         // Execute INSERT command
         executeUpdate(contextId, insert, values);
@@ -257,7 +257,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             /*
              * Create UPDATE command
              */
-            final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
+            final ArrayList<Object> values = new ArrayList<>(SQLStructure.OAUTH_COLUMN.values().length);
             final UPDATE update = SQLStructure.updateAccount(account, contextId, userId, values);
             Databases.startTransaction(writeCon);
             rollback = 1;
@@ -412,7 +412,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>(8);
+            final List<OAuthAccount> accounts = new ArrayList<>(8);
             do {
                 try {
                     final DefaultOAuthAccount account = new DefaultOAuthAccount();
@@ -470,7 +470,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>(8);
+            final List<OAuthAccount> accounts = new ArrayList<>(8);
             do {
 
                 try {
@@ -565,7 +565,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             if (!rs.next()) {
                 return;
             }
-            final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>(8);
+            final List<OAuthAccount> accounts = new ArrayList<>(8);
             do {
                 try {
                     // Try using the new secret. Maybe this account doesn't need the migration
@@ -578,9 +578,11 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                         cryptoService.decrypt(accessSecret, newSecret);
                     }
                 } catch (OXException e) {
+                    int accountId = rs.getInt(1);
+                    LOG.debug("Cannot decrypt access token and/or secret tokens with old password. The account with id {} of user {} in context {} needs migration.", I(accountId), I(session.getUserId()), I(contextId), e);
                     // Needs migration
                     final DefaultOAuthAccount account = new DefaultOAuthAccount();
-                    account.setId(rs.getInt(1));
+                    account.setId(accountId);
                     account.setToken(cryptoService.decrypt(rs.getString(2), oldSecret));
                     account.setSecret(cryptoService.decrypt(rs.getString(3), oldSecret));
                     accounts.add(account);
@@ -629,7 +631,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             if (!rs.next()) {
                 return;
             }
-            final List<Integer> accounts = new ArrayList<Integer>(8);
+            final List<Integer> accounts = new ArrayList<>(8);
             do {
                 try {
                     // Try using the secret.
@@ -643,7 +645,9 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     }
                 } catch (OXException e) {
                     // Clean-up
-                    accounts.add(Integer.valueOf(rs.getInt(1)));
+                    int accountId = rs.getInt(1);
+                    LOG.debug("Cannot encrypt access and/or secret tokens of account {} for user {} in context {}. Performing clean-up", I(accountId), I(session.getUserId()), I(contextId), e);
+                    accounts.add(I(accountId));
                 }
             } while (rs.next());
             closeSQLStuff(rs, stmt);
@@ -701,7 +705,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             if (!rs.next()) {
                 return;
             }
-            final List<Integer> accounts = new ArrayList<Integer>(8);
+            final List<Integer> accounts = new ArrayList<>(8);
             do {
                 try {
                     // Try using the secret.
@@ -715,6 +719,8 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     }
                 } catch (OXException e) {
                     // Clean-up
+                    int accountId = rs.getInt(1);
+                    LOG.debug("Cannot decrypt access and/or secret tokens of account {} for user {} in context {}. Removing unrecoverable item.", I(accountId), I(session.getUserId()), I(contextId), e);
                     accounts.add(Integer.valueOf(rs.getInt(1)));
                 }
             } while (rs.next());
@@ -1088,7 +1094,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      */
     @SuppressWarnings("unchecked")
     private List<Setter> setterFrom(final Map<String, Object> arguments, int accountId) throws OXException {
-        final List<Setter> ret = new ArrayList<Setter>(4);
+        final List<Setter> ret = new ArrayList<>(4);
         /*
          * Check for display name
          */
