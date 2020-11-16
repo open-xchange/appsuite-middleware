@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.services.capabilities;
 
+import static com.openexchange.java.Autoboxing.I;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -103,10 +104,10 @@ public class CapabilitiesRESTService {
         }
 
         if (context <= 0) {
-            throw CapabilityExceptionCodes.INVALID_CONTEXT.create(context);
+            throw CapabilityExceptionCodes.INVALID_CONTEXT.create(I(context));
         }
         if (user <= 0) {
-            throw CapabilityExceptionCodes.INVALID_USER.create(user);
+            throw CapabilityExceptionCodes.INVALID_USER.create(I(user));
         }
 
         try {

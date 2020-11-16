@@ -154,7 +154,7 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
      * @throws IOException if an I/O error is occurred
      * @throws OXException if any other error is occurred
      */
-    private RESTResponse prepareResponse(HttpResponse httpResponse) throws IOException, OXException {
+    private RESTResponse prepareResponse(HttpResponse httpResponse) throws OXException {
         RESTResponse response = new RESTResponse(httpResponse.getStatusLine().getStatusCode(), httpResponse.getStatusLine().getReasonPhrase());
         parseHeaders(httpResponse, response);
 

@@ -20,3 +20,4 @@ Import-Package: com.openexchange.auth,
  org.json,
  org.osgi.framework
 Bundle-Activator: com.openexchange.rest.services.adminAuth.osgi.AdminAuthRESTActivator
+Automatic-Module-Name: com.openexchange.rest.services.adminAuth

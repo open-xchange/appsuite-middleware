@@ -131,9 +131,9 @@ public class RequestTool {
      *
      * @param context The request headers
      * @return The request data
-     * @throws OXException if parsing fails
+     * @throws BadRequestException if parsing fails
      */
-    public static AJAXRequestData getAJAXRequestData(RequestContext context) throws OXException {
+    public static AJAXRequestData getAJAXRequestData(RequestContext context) throws BadRequestException {
         return getAJAXRequestData(
             context.getHttpHeaders(),
             context.getUriInfo(),
@@ -149,9 +149,9 @@ public class RequestTool {
      * @param servletRequest The Servlet request
      * @param servletResponse The Servlet response
      * @return The request data
-     * @throws OXException if parsing fails
+     * @throws BadRequestException if parsing fails
      */
-    public static AJAXRequestData getAJAXRequestData(HttpHeaders httpHeaders, UriInfo uriInfo, HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws OXException {
+    public static AJAXRequestData getAJAXRequestData(HttpHeaders httpHeaders, UriInfo uriInfo, HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws BadRequestException {
         AJAXRequestData requestData;
         try {
             boolean multipartFormData = MediaType.MULTIPART_FORM_DATA_TYPE.isCompatible(httpHeaders.getMediaType());

@@ -61,6 +61,7 @@ import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.java.Strings;
 import com.openexchange.rest.client.API;
 
 /**
@@ -335,24 +336,30 @@ public enum RESTExceptionCodes implements DisplayableOXExceptionCode {
      */
     public static boolean isValidWithNullBody(final HttpResponse response) {
         int code = response.getStatusLine().getStatusCode();
-        if (code == HTTPResponseCodes._302_FOUND) {
-            String location = getHeader(response, "location");
-
-            if (location != null) {
-                int loc = location.indexOf("://");
-                if (loc > -1) {
-                    location = location.substring(loc + 3);
-                    loc = location.indexOf('/');
-                    if (loc > -1) {
-                        location = location.substring(0, loc);
-                        if (location.toLowerCase().contains(API.getServer())) {
-                            return true;
-                        }
-                    }
+        switch (code) {
+            case HTTPResponseCodes._304_NOT_MODIFIED:
+                return true;
+            case HTTPResponseCodes._302_FOUND:
+                String location = getHeader(response, "location");
+                if (Strings.isEmpty(location)) {
+                    break;
                 }
-            }
-        } else if (code == HTTPResponseCodes._304_NOT_MODIFIED) {
-            return true;
+                int loc = location.indexOf("://");
+                if (loc < 0) {
+                    break;
+                }
+                location = location.substring(loc + 3);
+                loc = location.indexOf('/');
+                if (loc < 0) {
+                    break;
+                }
+                location = location.substring(0, loc);
+                if (location.toLowerCase().contains(API.getServer())) {
+                    return true;
+                }
+                break;
+            default:
+                return false;
         }
         return false;
     }

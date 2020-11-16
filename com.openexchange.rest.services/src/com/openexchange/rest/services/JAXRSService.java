@@ -63,7 +63,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -146,7 +145,6 @@ public abstract class JAXRSService {
      * @throws BadRequestException if parsing fails
      */
     protected AJAXRequestData getAJAXRequestData() {
-        try {
             AJAXRequestData ajaxRequestData = RequestTool.getAJAXRequestData(
                 httpHeaders,
                 uriInfo,
@@ -154,9 +152,6 @@ public abstract class JAXRSService {
                 servletResponse);
 
             return ajaxRequestData;
-        } catch (OXException e) {
-            throw new BadRequestException(e);
-        }
     }
 
     /**
@@ -168,13 +163,12 @@ public abstract class JAXRSService {
      */
     protected <T> T getService(Class<T> clazz) {
         T service = optService(clazz);
-        if (service == null) {
-            ServiceUnavailableException e = new ServiceUnavailableException();
-            LoggerHolder.LOG.error("Service '{}' is not available.", clazz.getName(), e);
-            throw e;
+        if (service != null) {
+            return service;
         }
-
-        return service;
+        ServiceUnavailableException e = new ServiceUnavailableException();
+        LoggerHolder.LOG.error("Service '{}' is not available.", clazz.getName(), e);
+        throw e;
     }
 
     /**

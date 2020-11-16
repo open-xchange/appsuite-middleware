@@ -127,8 +127,8 @@ public class MailMappingServiceTest {
         assertEquals(1, resolved.length());
 
         JSONObject resolvedEntry = resolved.getJSONObject("charlie@test.invalid");
-        assertEquals(12, resolvedEntry.get("uid"));
-        assertEquals(42, resolvedEntry.get("cid"));
+        assertEquals(I(12), resolvedEntry.get("uid"));
+        assertEquals(I(42), resolvedEntry.get("cid"));
 
         JSONObject user = resolvedEntry.getJSONObject("user");
         assertEquals("en_US", user.get("language"));
@@ -153,12 +153,12 @@ public class MailMappingServiceTest {
         assertEquals(2, resolved.length());
 
         JSONObject charlie = resolved.getJSONObject("charlie@test.invalid");
-        assertEquals(12, charlie.get("uid"));
-        assertEquals(42, charlie.get("cid"));
+        assertEquals(I(12), charlie.get("uid"));
+        assertEquals(I(42), charlie.get("cid"));
 
         JSONObject linus = resolved.getJSONObject("linus@test.invalid");
-        assertEquals(13, linus.get("uid"));
-        assertEquals(42, linus.get("cid"));
+        assertEquals(I(13), linus.get("uid"));
+        assertEquals(I(42), linus.get("cid"));
 
     }
 
@@ -173,5 +173,9 @@ public class MailMappingServiceTest {
 
         JSONObject resolved = service.resolve(segment);
         assertTrue(resolved.isEmpty());
+    }
+
+    private static Integer I(int i) {
+        return Integer.valueOf(i);
     }
 }
