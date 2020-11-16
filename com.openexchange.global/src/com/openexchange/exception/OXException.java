@@ -1009,12 +1009,23 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Gets the compound error code: &lt;prefix&gt; + "-" + &lt;code&gt;
+     * Gets the compound error code: &lt;prefix&gt; + <code>"-"</code> + &lt;code&gt;
      *
-     * @return The compound error code
+     * @return The compound error code; e.g. <code>"FLD-0016"</code>
      */
     public final String getErrorCode() {
         return new StringBuilder(getPrefix()).append('-').append(String.format("%04d", Integer.valueOf(code))).toString();
+    }
+
+    /**
+     * Gets the unformatted, untranslated message intended for being displayed to user;<br>
+     * e.g. <code>"Folder %1$s does not exist"</code>.
+     *
+     * @return The unformatted (and untranslated) message
+     * @see #getDisplayMessage(Locale)
+     */
+    public String getDisplayMessageUnformatted() {
+        return displayMessage;
     }
 
     /**
@@ -1022,6 +1033,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      *
      * @param locale The locale providing the language to which the message shall be translated
      * @return The internationalized message
+     * @see #getDisplayMessageUnformatted()
      */
     public String getDisplayMessage(Locale locale) {
         String msg = getDisplayMessage0(locale);

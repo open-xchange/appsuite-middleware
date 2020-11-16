@@ -873,6 +873,8 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             if (null != result && null != result.getData() && JSONObject.class.isInstance(result.getData())) {
                 JSONObject errorJson = (JSONObject) result.getData();
                 errorJson.remove("error_stack");
+                errorJson.remove("error");
+                errorJson.putSafe("error", exception.getDisplayMessageUnformatted());
                 internalConfig.putSafe("lastError", errorJson);
             }
         } catch (OXException e1) {
@@ -1206,7 +1208,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Gets the account config helper providing access to configuration data stored in the underyling calendar account.
-     * 
+     *
      * @return The account configuration helper
      */
     protected AccountConfigHelper getConfigHelper() {
