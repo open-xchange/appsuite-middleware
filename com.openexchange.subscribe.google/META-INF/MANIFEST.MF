@@ -43,6 +43,7 @@ Import-Package: com.google.api.client.auth.oauth2,
  com.openexchange.threadpool,
  com.openexchange.tools.io,
  com.openexchange.tools.iterator,
+ com.openexchange.tools.session,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
