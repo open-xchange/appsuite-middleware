@@ -100,14 +100,12 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     private static final int[] MATCH_COLUMNS = I2i(Arrays.remove(i2I(Contact.CONTENT_COLUMNS), I(Contact.USERFIELD20)));
 
-    private final boolean managesSubscriptionAdminFlag;
 
     /**
      * Initializes a new {@link ContactFolderUpdaterStrategy}.
      */
     public ContactFolderUpdaterStrategy() {
         super();
-        managesSubscriptionAdminFlag = false;
     }
 
     @Override
@@ -185,7 +183,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @Override
     public Collection<Contact> getData(final TargetFolderDefinition target, final Object session) throws OXException {
-        List<Contact> contacts = new ArrayList<Contact>();
+        List<Contact> contacts = new ArrayList<>();
         Object sqlInterface = getFromSession(CONTACT_SERVICE, session);
         Object targetFolderSession = getFromSession(SESSION, session);
         if (sqlInterface instanceof ContactService && targetFolderSession instanceof Session) {
@@ -249,7 +247,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @Override
     public Object startSession(final TargetFolderDefinition target) {
-        final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
+        final Map<Integer, Object> userInfo = new HashMap<>();
         ContactService contactService = SubscriptionServiceRegistry.getInstance().getService(ContactService.class);
         userInfo.put(I(CONTACT_SERVICE), contactService);
         userInfo.put(I(TARGET), target);
@@ -289,6 +287,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
      * @param errors The optional errors
      * @return <code>true</code> if problematic data was corrected and the operation may be tried again, <code>false</code>, otherwise
      */
+    @SuppressWarnings("unused")
     private boolean handle(OXException e, Contact contact, Collection<OXException> errors) {
         if (ContactExceptionCodes.DATA_TRUNCATION.equals(e)) {
             try {

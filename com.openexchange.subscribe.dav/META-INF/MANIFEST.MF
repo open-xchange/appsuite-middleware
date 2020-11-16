@@ -131,3 +131,4 @@ Import-Package: com.google.common.annotations,
  org.xml.sax.helpers
 Bundle-Activator: com.openexchange.subscribe.dav.osgi.DAVSubscribeActivator
 Export-Package: com.openexchange.subscribe.dav
+Automatic-Module-Name: com.openexchange.subscribe.dav

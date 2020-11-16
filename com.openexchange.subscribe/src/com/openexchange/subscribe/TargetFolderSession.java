@@ -55,7 +55,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import org.slf4j.Logger;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
@@ -69,11 +68,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TargetFolderSession implements Session {
-
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TargetFolderSession.class);
-    }
 
     private final int                 contextId;
     private final int                 userId;
@@ -92,7 +86,7 @@ public class TargetFolderSession implements Session {
             params = null;
         } else {
             session = null;
-            params = new HashMap<String, Object>(8);
+            params = new HashMap<>(8);
         }
     }
 
@@ -267,7 +261,7 @@ public class TargetFolderSession implements Session {
 
     @Override
     public Set<String> getParameterNames() {
-        Set<String> retval = new HashSet<String>(8);
+        Set<String> retval = new HashSet<>(8);
         if (null != params) {
             retval.addAll(params.keySet());
         } else {

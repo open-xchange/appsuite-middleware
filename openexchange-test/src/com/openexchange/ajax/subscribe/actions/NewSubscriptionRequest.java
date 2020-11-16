@@ -54,7 +54,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.json.SubscriptionJSONWriter;
 
@@ -94,11 +93,7 @@ public class NewSubscriptionRequest extends AbstractSubscriptionRequest<NewSubsc
 
     @Override
     public Object getBody() throws JSONException {
-        try {
-            return new SubscriptionJSONWriter().write(getSubscription(), getFormDescription(), null, null);
-        } catch (OXException e) {
-            throw new JSONException(e);
-        }
+        return new SubscriptionJSONWriter().write(getSubscription(), getFormDescription(), null, null);
     }
 
     @Override

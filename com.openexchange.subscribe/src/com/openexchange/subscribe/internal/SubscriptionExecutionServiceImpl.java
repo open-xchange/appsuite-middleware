@@ -92,7 +92,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
      * -------------------------------- Guard stuff -------------------------------
      */
 
-    private static final ConcurrentMap<SubscriptionKey, Object> GUARD_MAP = new ConcurrentHashMap<SubscriptionKey, Object>(1024, 0.9f, 1);
+    private static final ConcurrentMap<SubscriptionKey, Object> GUARD_MAP = new ConcurrentHashMap<>(1024, 0.9f, 1);
 
     private static final Object PRESENT = new Object();
 
@@ -263,78 +263,78 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         for (Subscription subscription : subscriptionsToRefresh) {
             if (!subscription.isEnabled()) {
                 LOG.debug("Skipping subscription {} because it is disabled", subscription.getDisplayName());
-            } else {
-                final int subscriptionId = subscription.getId();
-                if (tryLock(subscriptionId, session)) {
-                    subscription.setSession(session);
-                    LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
-                    try {
-                        // Get subscription source
-                        SubscriptionSource source = subscription.getSource();
-                        if (source == null) {
-                            throw INACTIVE_SOURCE.create();
-                        }
-
-                        // Get associated subscription service
-                        SubscribeService subscribeService = source.getSubscribeService();
-                        subscribeService.touch(session.getContext(), subscriptionId);
-
-                        // Fetch data elements & store them batch-wise
-                        SearchIterator<?> data = subscribeService.loadContent(subscription);
-                        try {
-                            storeData(data, subscription, optErrors);
-                            sum += data.size();
-                        } catch (OXException e) {
-                            // Failed batch storing - fall back to one-by-one if optional "error collecting" is enabled
-                            if (null == optErrors) {
-                                throw e;
-                            }
-
-                            // Re-fetch data elements & close remaining resources
-                            SearchIterator<?> newData;
-                            if (data instanceof SearchIteratorDelegator) {
-                                newData = ((SearchIteratorDelegator) data).newSearchIterator();
-                            } else {
-                                newData = subscribeService.loadContent(subscription);
-                            }
-                            SearchIterators.close(data);
-                            data = null;
-
-                            // Store them one-by-one
-                            sum = 0;
-                            while (newData.hasNext()) {
-                                Object element = newData.next();
-
-                                try {
-                                    data = new SingleSearchIterator<Object>(element);
-                                    storeData(data, subscription, null);
-                                    sum++;
-                                } catch (OXException x) {
-                                    optErrors.add(x);
-                                }
-                            }
-                        } finally {
-                            SearchIterators.close(data);
-                        }
-                    } catch (OXException oxException) {
-                        if (subscriptionsToRefresh.size() == 1) {
-                            throw oxException;
-                        }
-                        LOG.warn("Subscription for {} cannot be updated. Move to next one.", subscription.getSource().getId(), oxException);
-                    } finally {
-                        LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
-                        unlock(subscriptionId, session);
-                    }
-                }
+                continue;
             }
+            final int subscriptionId = subscription.getId();
+            if (false == tryLock(subscriptionId, session)) {
+                continue;
+            }
+            subscription.setSession(session);
+            LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
+            try {
+                // Get subscription source
+                SubscriptionSource source = subscription.getSource();
+                if (source == null) {
+                    throw INACTIVE_SOURCE.create();
+                }
 
+                // Get associated subscription service
+                SubscribeService subscribeService = source.getSubscribeService();
+                subscribeService.touch(session.getContext(), subscriptionId);
+
+                // Fetch data elements & store them batch-wise
+                SearchIterator<?> data = subscribeService.loadContent(subscription);
+                try {
+                    storeData(data, subscription, optErrors);
+                    sum += data.size();
+                } catch (OXException e) {
+                    // Failed batch storing - fall back to one-by-one if optional "error collecting" is enabled
+                    if (null == optErrors) {
+                        throw e;
+                    }
+
+                    // Re-fetch data elements & close remaining resources
+                    SearchIterator<?> newData;
+                    if (data instanceof SearchIteratorDelegator) {
+                        newData = SearchIteratorDelegator.class.cast(data).newSearchIterator();
+                    } else {
+                        newData = subscribeService.loadContent(subscription);
+                    }
+                    SearchIterators.close(data);
+                    data = null;
+
+                    // Store them one-by-one
+                    sum = 0;
+                    while (newData.hasNext()) {
+                        Object element = newData.next();
+
+                        try {
+                            data = new SingleSearchIterator<>(element);
+                            storeData(data, subscription, null);
+                            sum++;
+                        } catch (OXException x) {
+                            optErrors.add(x);
+                        }
+                    }
+                } finally {
+                    SearchIterators.close(data);
+                }
+            } catch (OXException oxException) {
+                if (subscriptionsToRefresh.size() == 1) {
+                    throw oxException;
+                }
+                LOG.warn("Subscription for {} cannot be updated. Move to next one.", subscription.getSource().getId(), oxException);
+            } finally {
+                LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
+                unlock(subscriptionId, session);
+            }
         }
         return sum;
     }
 
     private boolean isThereMoreThanOneSubscriptionOnThisFolder(final Context context, final String folder, final String secret) throws OXException {
         final List<SubscriptionSource> sources = discoverer.getSources();
-        final List<Subscription> allSubscriptionsOnThisFolder = new ArrayList<Subscription>(10);
+        final List<Subscription> allSubscriptionsOnThisFolder = new ArrayList<>(10);
         for (final SubscriptionSource subscriptionSource : sources) {
             final Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(context, folder, secret);
             if (subscriptions != null) {

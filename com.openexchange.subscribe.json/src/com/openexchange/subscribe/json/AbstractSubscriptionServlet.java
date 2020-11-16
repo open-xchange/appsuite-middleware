@@ -67,6 +67,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractSubscriptionServlet extends PermissionServlet {
 
+    private static final long serialVersionUID = -5028531694735004787L;
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractSubscriptionServlet.class);
 
     @Override

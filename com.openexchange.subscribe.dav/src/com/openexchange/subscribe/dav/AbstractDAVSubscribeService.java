@@ -153,18 +153,18 @@ public abstract class AbstractDAVSubscribeService extends AbstractSubscribeServi
      */
     protected Document getResponseBodyAsDocument(HttpResponse httpResponse) throws IOException {
         InputStream in = httpResponse.getEntity().getContent();
-        if (in != null) {
-            try {
-                return DomUtil.parseDocument(in);
-            } catch (ParserConfigurationException e) {
-                throw new IOException("XML parser configuration error", e);
-            } catch (SAXException e) {
-                throw new IOException("XML parsing error", e);
-            } finally {
-                Streams.close(in);
-            }
+        if (in == null) {
+            return null;
         }
-        return null;
+        try {
+            return DomUtil.parseDocument(in);
+        } catch (ParserConfigurationException e) {
+            throw new IOException("XML parser configuration error", e);
+        } catch (SAXException e) {
+            throw new IOException("XML parsing error", e);
+        } finally {
+            Streams.close(in);
+        }
     }
 
     /**
@@ -173,12 +173,13 @@ public abstract class AbstractDAVSubscribeService extends AbstractSubscribeServi
      * @param request The HTTP request
      */
     protected static void reset(HttpRequestBase request) {
-        if (null != request) {
-            try {
-                request.reset();
-            } catch (Exception e) {
-                // Ignore
-            }
+        if (null == request) {
+            return;
+        }
+        try {
+            request.reset();
+        } catch (Exception e) {
+            // Ignore
         }
     }
 
@@ -188,15 +189,17 @@ public abstract class AbstractDAVSubscribeService extends AbstractSubscribeServi
      * @param response The HTTP response to consume and close
      */
     protected static void consume(HttpResponse response) {
-        if (null != response) {
-            HttpEntity entity = response.getEntity();
-            if (null != entity) {
-                try {
-                    EntityUtils.consume(entity);
-                } catch (Exception e) {
-                    // Ignore
-                }
-            }
+        if (null == response) {
+            return;
+        }
+        HttpEntity entity = response.getEntity();
+        if (null == entity) {
+            return;
+        }
+        try {
+            EntityUtils.consume(entity);
+        } catch (Exception e) {
+            // Ignore
         }
     }
 
