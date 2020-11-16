@@ -156,7 +156,7 @@ public class ContactPictureCall extends AbstractGetCall<ContactPicture> {
         };
     }
 
-    private class ContactPictureResponse extends ContactPicture implements InputStreamAwareResponse {
+    private static class ContactPictureResponse extends ContactPicture implements InputStreamAwareResponse {
 
         private InputStream in;
 
