@@ -2190,7 +2190,10 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
 
     private FolderStorage[] getFolderStoragesForParent(String treeId, String parentId, StorageParameters storageParameters) {
         FolderStorage[] folderStorages = registry.getFolderStoragesForParent(treeId, parentId);
-        if (null == folderStorages || 0 == folderStorages.length || null == storageParameters.getDecorator()) {
+        if (null == folderStorages) {
+            return new FolderStorage[0];
+        }
+        if (0 == folderStorages.length || null == storageParameters.getDecorator()) {
             return folderStorages;
         }
         List<ContentType> allowedContentTypes = storageParameters.getDecorator().getAllowedContentTypes();
