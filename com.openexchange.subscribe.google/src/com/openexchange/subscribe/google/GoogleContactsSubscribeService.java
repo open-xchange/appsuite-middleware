@@ -67,6 +67,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
+import com.openexchange.log.LogProperties;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -225,6 +226,7 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
      * @param startOffset The stating 1-based index offset
      * @param threadPool the {@link ThreadPoolService}
      * @param folderUpdater The {@link FolderUpdaterService}
+     * @param backgroundTaskMarker The background task marker
      */
     private void scheduleInBackground(Subscription subscription, Query cQuery, int total, int startOffset, ThreadPoolService threadPool, FolderUpdaterService<Contact> folderUpdater, ContactsService googleContactsService, ContactParser parser) {
         // Schedule task for remainder...
@@ -235,14 +237,15 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
                 Integer iUserId = I(subscription.getSession().getUserId());
                 Integer iContextId = I(subscription.getSession().getContextId());
                 Integer iTotal = I(total);
+                LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
                 try {
                     int offset = startOffset;
                     while (total > offset) {
                         cQuery.setStartIndex(offset);
                         List<Contact> batch = parser.parseFeed(googleContactsService.query(cQuery, ContactFeed.class));
                         folderUpdater.save(new SearchIteratorDelegator<>(batch), subscription);
-                        LOG.debug("Stored next batch with size {} of {} contacts for Google contact subscription for user {} in context {}", I(batch.size()), iTotal, iUserId, iContextId);
                         offset += batch.size();
+                        LOG.debug("Stored next batch with size {} ({} of {} contacts) for Google contact subscription for user {} in context {}", I(batch.size()), I(offset), iTotal, iUserId, iContextId);
                     }
                     LOG.debug("Finished storing {} contacts for Google contact subscription for user {} in context {}", iTotal, iUserId, iContextId);
                 } catch (ServiceException e) {
@@ -254,6 +257,8 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
                     }
                 } catch (Exception e) {
                     LOG.error("Failed storing {} contacts for Google contact subscription for user {} in context {}", iTotal, iUserId, iContextId, e);
+                } finally {
+                    LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
                 }
                 return null;
             }

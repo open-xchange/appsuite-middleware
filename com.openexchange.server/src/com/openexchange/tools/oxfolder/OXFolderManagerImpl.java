@@ -119,6 +119,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.ComparedOCLFolderPermissions;
@@ -2074,11 +2075,11 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
     }
 
     private void deleteContainedContacts(final int folderID) throws OXException {
-        session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
+        LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
         try {
             ServerServiceRegistry.getInstance().getService(ContactService.class).deleteContacts(session, String.valueOf(folderID));
         } finally {
-            session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
+            LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
         }
     }
 

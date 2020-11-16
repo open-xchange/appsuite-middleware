@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
-import com.openexchange.session.Session;
+import com.openexchange.log.LogProperties;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -138,11 +138,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     @Override
     public void closeSession(final Object session) {
-        if (session instanceof Map<?,?>) {
-            @SuppressWarnings("unchecked") Map<Integer, Object> userInfo = (Map<Integer, Object>) session;
-            Session ses = (Session) userInfo.get(I(SESSION));
-            ses.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
-        }
+        LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
     }
 
     @Override
@@ -214,7 +210,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         ContactService contactService = SubscriptionServiceRegistry.getInstance().getService(ContactService.class);
         userInfo.put(I(SQL_INTERFACE), contactService);
         userInfo.put(I(TARGET), target);
-        session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
+        LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
         userInfo.put(I(SESSION), session);
         return userInfo;
     }
