@@ -55,6 +55,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.java.BufferingQueue;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
@@ -73,11 +74,12 @@ public class InMemoryCompositionSpace implements CompositionSpace {
     private final InMemoryMessage message;
     private final int userId;
     private final int contextId;
+    private final ClientToken clientToken;
 
     /**
      * Initializes a new {@link InMemoryCompositionSpace}.
      */
-    public InMemoryCompositionSpace(UUID id, MessageDescription initialMessageDesc, BufferingQueue<InMemoryMessage> bufferingQueue, int userId, int contextId) {
+    public InMemoryCompositionSpace(UUID id, MessageDescription initialMessageDesc, BufferingQueue<InMemoryMessage> bufferingQueue, int userId, int contextId, ClientToken clientToken) {
         super();
         this.id = new CompositionSpaceId(CompositionSpaceServiceFactory.DEFAULT_SERVICE_ID, id);
         this.userId = userId;
@@ -85,6 +87,7 @@ public class InMemoryCompositionSpace implements CompositionSpace {
 
         lastModifiedStamp = new AtomicLong(System.currentTimeMillis());
         message = new InMemoryMessage(id, initialMessageDesc, bufferingQueue, userId, contextId);
+        this.clientToken = clientToken;
     }
 
     /**
@@ -123,6 +126,11 @@ public class InMemoryCompositionSpace implements CompositionSpace {
     @Override
     public InMemoryMessage getMessage() {
         return message;
+    }
+
+    @Override
+    public ClientToken getClientToken() {
+        return clientToken;
     }
 
     /**

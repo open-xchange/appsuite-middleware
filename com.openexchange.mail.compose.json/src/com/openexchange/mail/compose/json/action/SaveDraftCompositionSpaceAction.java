@@ -131,7 +131,7 @@ public class SaveDraftCompositionSpaceAction extends AbstractMailComposeAction {
                 if (null != jMessage) {
                     MessageDescription md = new MessageDescription();
                     parseJSONMessage(jMessage, md);
-                    compositionSpaceService.updateCompositionSpace(compositionSpaceId.getId(), md);
+                    compositionSpaceService.updateCompositionSpace(compositionSpaceId.getId(), md, getClientToken(requestData));
                 }
 
                 if (hasFileUploads) {
@@ -155,7 +155,7 @@ public class SaveDraftCompositionSpaceAction extends AbstractMailComposeAction {
                 if (null != jMessage) {
                     MessageDescription md = new MessageDescription();
                     parseJSONMessage(jMessage, md);
-                    compositionSpaceService.updateCompositionSpace(compositionSpaceId.getId(), md);
+                    compositionSpaceService.updateCompositionSpace(compositionSpaceId.getId(), md, getClientToken(requestData));
                 }
 
                 if (hasFileUploads) {
@@ -164,7 +164,8 @@ public class SaveDraftCompositionSpaceAction extends AbstractMailComposeAction {
             }
         }
 
-        MailPath mailPath = compositionSpaceService.saveCompositionSpaceToDraftMail(compositionSpaceId.getId(), optionalUploadedAttachments, true);
+        MailPath mailPath = compositionSpaceService.saveCompositionSpaceToDraftMail(
+            compositionSpaceId.getId(), optionalUploadedAttachments, true, getClientToken(requestData));
         JSONObject jMailPath = CompositionSpaceJSONResultConverter.convertMailPath(mailPath);
         return new AJAXRequestResult(jMailPath, "json").addWarnings(compositionSpaceService.getWarnings());
     }

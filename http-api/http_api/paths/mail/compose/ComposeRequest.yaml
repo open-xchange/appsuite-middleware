@@ -25,6 +25,12 @@
         required: false
         schema:
           type: boolean
+      - name: claim
+        in: query
+        required: false
+        description: 'A unique client token to prevent conflicts due to concurrent editing. Must be a 16-character string consisting of [a-zA-Z0-9] only.'
+        schema:
+          type: string
     responses:
       '200':
         description: A JSON object containing the newly created message model.

@@ -61,6 +61,7 @@ import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.RandomAccessAttachment;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.session.Session;
 
 /**
@@ -101,7 +102,7 @@ public class AttachmentFileHolder implements IFileHolder {
      */
     void deleteSafe() {
         try {
-            compositionSpaceService.deleteAttachment(attachment.getCompositionSpaceId(), attachment.getId());
+            compositionSpaceService.deleteAttachment(attachment.getCompositionSpaceId(), attachment.getId(), ClientToken.NONE);
         } catch (Exception e) {
             LoggerHolder.LOG.warn("Failed to delete non-existent attachment {} from composition space {}", UUIDs.getUnformattedString(attachment.getId()), UUIDs.getUnformattedString(attachment.getCompositionSpaceId()), e);
         }

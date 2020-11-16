@@ -65,10 +65,10 @@ public interface CompositionSpace extends CompositionSpaceInfo {
     Message getMessage();
 
     /**
-     * Gets the last-modified time stamp, which is the number of milliseconds since January 1, 1970, 00:00:00 GMT.
+     * Gets the currently attached client token.
      *
-     * @return The last-modified time stamp
+     * @return The client token
      */
-    long getLastModified();
+    ClientToken getClientToken();
 
 }

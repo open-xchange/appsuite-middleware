@@ -103,6 +103,7 @@ import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentOrigin;
 import com.openexchange.mail.compose.AttachmentStorages;
 import com.openexchange.mail.compose.ByteArrayDataProvider;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.compose.DefaultAttachment;
@@ -275,7 +276,7 @@ public class MailStorage implements IMailStorage {
     }
 
     @Override
-    public MailStorageResult<ComposeRequestAndMeta> getForTransport(MailStorageId mailStorageId, AJAXRequestData request, Session session) throws OXException, MissingDraftException {
+    public MailStorageResult<ComposeRequestAndMeta> getForTransport(MailStorageId mailStorageId, ClientToken clientToken, AJAXRequestData request, Session session) throws OXException, MissingDraftException {
         UUID compositionSpaceId = mailStorageId.getCompositionSpaceId();
         MailPath draftPath = mailStorageId.getDraftPath();
         if (draftPath.getAccountId() != MailAccount.DEFAULT_ID) {
@@ -292,6 +293,8 @@ public class MailStorage implements IMailStorage {
             MailMessage draftMail = requireDraftMail(mailStorageId, defaultMailAccess);
 
             MailMessageProcessor processor = MailMessageProcessor.initForTransport(compositionSpaceId, draftMail, session, services);
+            checkClientToken(clientToken, processor.getClientToken());
+
             validateIfNeeded(mailStorageId, processor);
 
             Meta meta = processor.getCurrentDraft(MessageField.META).getMeta();
@@ -471,14 +474,14 @@ public class MailStorage implements IMailStorage {
     }
 
     @Override
-    public MailStorageResult<MessageInfo> createNew(UUID compositionSpaceId, MessageDescription draftMessage, Optional<SharedFolderReference> optionalSharedFolderRef, Session session) throws OXException {
+    public MailStorageResult<MessageInfo> createNew(UUID compositionSpaceId, MessageDescription draftMessage, Optional<SharedFolderReference> optionalSharedFolderRef, ClientToken clientToken, Session session) throws OXException {
         MailService mailService = services.getServiceSafe(MailService.class);
         MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
             mailAccess.connect(true);
 
-            MailMessageProcessor processor = MailMessageProcessor.initNew(compositionSpaceId, optionalSharedFolderRef, session, services);
+            MailMessageProcessor processor = MailMessageProcessor.initNew(compositionSpaceId, optionalSharedFolderRef, clientToken, session, services);
             processor.applyUpdate(draftMessage);
             processor.addAttachments(draftMessage.getAttachments());
             MessageDescription update = processor.getCurrentDraft();
@@ -507,7 +510,7 @@ public class MailStorage implements IMailStorage {
     }
 
     @Override
-    public MailStorageResult<MailPath> saveAsFinalDraft(MailStorageId mailStorageId, Session session) throws OXException, MissingDraftException {
+    public MailStorageResult<MailPath> saveAsFinalDraft(MailStorageId mailStorageId, ClientToken clientToken, Session session) throws OXException, MissingDraftException {
         MailPath draftPath = mailStorageId.getDraftPath();
         if (draftPath.getAccountId() != MailAccount.DEFAULT_ID) {
             throw CompositionSpaceErrorCode.ERROR.create("Cannot operate on drafts outside of the default mail account!");
@@ -519,7 +522,7 @@ public class MailStorage implements IMailStorage {
             mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
             mailAccess.connect(false);
 
-            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, mailAccess);
+            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, mailAccess, clientToken);
             validateIfNeeded(mailStorageId, processor);
             MessageDescription originalDescription = processor.getCurrentDraft();
 
@@ -543,7 +546,7 @@ public class MailStorage implements IMailStorage {
     }
 
     @Override
-    public MailStorageResult<MessageInfo> update(MailStorageId mailStorageId, MessageDescription newDescription, Session session) throws OXException, MissingDraftException {
+    public MailStorageResult<MessageInfo> update(MailStorageId mailStorageId, MessageDescription newDescription, ClientToken clientToken, Session session) throws OXException, MissingDraftException {
         UUID compositionSpaceId = mailStorageId.getCompositionSpaceId();
         MailPath draftPath = mailStorageId.getDraftPath();
         if (draftPath.getAccountId() != MailAccount.DEFAULT_ID) {
@@ -557,7 +560,7 @@ public class MailStorage implements IMailStorage {
             mailAccess.connect(false);
 
             String authToken = newDescription.getSecurity() != null ? newDescription.getSecurity().getAuthToken() : null;
-            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, mailAccess, authToken);
+            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, mailAccess, authToken, clientToken);
             boolean changed = validateIfNeeded(mailStorageId, processor);
             MessageDescription originalDescription = processor.getCurrentDraft();
 
@@ -588,7 +591,7 @@ public class MailStorage implements IMailStorage {
     }
 
     @Override
-    public MailStorageResult<Boolean> delete(MailStorageId mailStorageId, boolean deleteSharedAttachmentsFolderIfPresent, Session session) throws OXException {
+    public MailStorageResult<Boolean> delete(MailStorageId mailStorageId, boolean deleteSharedAttachmentsFolderIfPresent, ClientToken clientToken, Session session) throws OXException {
         MailPath draftPath = mailStorageId.getDraftPath();
         if (draftPath.getAccountId() != MailAccount.DEFAULT_ID) {
             throw CompositionSpaceErrorCode.ERROR.create("Cannot operate on drafts outside of the default mail account!");
@@ -603,6 +606,7 @@ public class MailStorage implements IMailStorage {
             tryCleanUpFileCacheReference(mailStorageId);
 
             MailMessage draftMail = requireDraftMail(mailStorageId, mailAccess, false);
+            checkClientToken(clientToken, parseClientToken(draftMail));
 
             if (deleteSharedAttachmentsFolderIfPresent) {
                 String headerValue = HeaderUtility.decodeHeaderValue(draftMail.getFirstHeader(HeaderUtility.HEADER_X_OX_SHARED_ATTACHMENTS));
@@ -641,7 +645,7 @@ public class MailStorage implements IMailStorage {
     }
 
     @Override
-    public MailStorageResult<NewAttachmentsInfo> addOriginalAttachments(MailStorageId mailStorageId, Session session) throws OXException, MissingDraftException {
+    public MailStorageResult<NewAttachmentsInfo> addOriginalAttachments(MailStorageId mailStorageId, ClientToken clientToken, Session session) throws OXException, MissingDraftException {
         UUID compositionSpaceId = mailStorageId.getCompositionSpaceId();
         MailPath draftPath = mailStorageId.getDraftPath();
         if (draftPath.getAccountId() != MailAccount.DEFAULT_ID) {
@@ -656,7 +660,7 @@ public class MailStorage implements IMailStorage {
             mailAccesses.add(defaultMailAccess);
             defaultMailAccess.connect(false);
 
-            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, defaultMailAccess);
+            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, defaultMailAccess, clientToken);
             boolean changed = validateIfNeeded(mailStorageId, processor);
             MessageDescription originalDescription = processor.getCurrentDraft();
 
@@ -711,7 +715,7 @@ public class MailStorage implements IMailStorage {
     }
 
     @Override
-    public MailStorageResult<NewAttachmentsInfo> addVCardAttachment(MailStorageId mailStorageId, Session session) throws OXException, MissingDraftException {
+    public MailStorageResult<NewAttachmentsInfo> addVCardAttachment(MailStorageId mailStorageId, ClientToken clientToken, Session session) throws OXException, MissingDraftException {
         UUID compositionSpaceId = mailStorageId.getCompositionSpaceId();
         MailPath draftPath = mailStorageId.getDraftPath();
         if (draftPath.getAccountId() != MailAccount.DEFAULT_ID) {
@@ -725,7 +729,7 @@ public class MailStorage implements IMailStorage {
             mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
             mailAccess.connect(false);
 
-            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, mailAccess);
+            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, mailAccess, clientToken);
             validateIfNeeded(mailStorageId, processor);
             MessageDescription originalDescription = processor.getCurrentDraft();
 
@@ -786,7 +790,7 @@ public class MailStorage implements IMailStorage {
     }
 
     @Override
-    public MailStorageResult<NewAttachmentsInfo> addContactVCardAttachment(MailStorageId mailStorageId, String contactId, String folderId, Session session) throws OXException, MissingDraftException {
+    public MailStorageResult<NewAttachmentsInfo> addContactVCardAttachment(MailStorageId mailStorageId, String contactId, String folderId, ClientToken clientToken, Session session) throws OXException, MissingDraftException {
         UUID compositionSpaceId = mailStorageId.getCompositionSpaceId();
         MailPath draftPath = mailStorageId.getDraftPath();
         if (draftPath.getAccountId() != MailAccount.DEFAULT_ID) {
@@ -800,7 +804,7 @@ public class MailStorage implements IMailStorage {
             mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
             mailAccess.connect(false);
 
-            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, mailAccess);
+            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, mailAccess, clientToken);
             validateIfNeeded(mailStorageId, processor);
             MessageDescription originalDescription = processor.getCurrentDraft();
 
@@ -835,7 +839,7 @@ public class MailStorage implements IMailStorage {
     }
 
     @Override
-    public MailStorageResult<NewAttachmentsInfo> addAttachments(MailStorageId mailStorageId, List<Attachment> attachments, Session session) throws OXException, MissingDraftException {
+    public MailStorageResult<NewAttachmentsInfo> addAttachments(MailStorageId mailStorageId, List<Attachment> attachments, ClientToken clientToken, Session session) throws OXException, MissingDraftException {
         UUID compositionSpaceId = mailStorageId.getCompositionSpaceId();
         MailPath draftPath = mailStorageId.getDraftPath();
         if (draftPath.getAccountId() != MailAccount.DEFAULT_ID) {
@@ -848,7 +852,7 @@ public class MailStorage implements IMailStorage {
             mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
             mailAccess.connect(false);
 
-            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, mailAccess);
+            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, mailAccess, clientToken);
             validateIfNeeded(mailStorageId, processor);
             MessageDescription originalDescription = processor.getCurrentDraft();
 
@@ -873,7 +877,7 @@ public class MailStorage implements IMailStorage {
     }
 
     @Override
-    public MailStorageResult<NewAttachmentsInfo> replaceAttachment(MailStorageId mailStorageId, Attachment attachment, Session session) throws OXException, MissingDraftException {
+    public MailStorageResult<NewAttachmentsInfo> replaceAttachment(MailStorageId mailStorageId, Attachment attachment, ClientToken clientToken, Session session) throws OXException, MissingDraftException {
         UUID compositionSpaceId = mailStorageId.getCompositionSpaceId();
         MailPath draftPath = mailStorageId.getDraftPath();
         if (draftPath.getAccountId() != MailAccount.DEFAULT_ID) {
@@ -887,7 +891,7 @@ public class MailStorage implements IMailStorage {
             mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
             mailAccess.connect(false);
 
-            processor = initMessageProcessorFull(mailStorageId, session, mailAccess);
+            processor = initMessageProcessorFull(mailStorageId, session, mailAccess, clientToken);
             validateIfNeeded(mailStorageId, processor);
             MessageDescription originalDescription = processor.getCurrentDraft();
 
@@ -928,12 +932,11 @@ public class MailStorage implements IMailStorage {
             mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
             mailAccess.connect(false);
 
-            MailMessageProcessor processor = initMessageProcessorFromFileCache(mailStorageId, session, null);
+            MailMessageProcessor processor = initMessageProcessorFromFileCache(mailStorageId, session, null, ClientToken.NONE);
             if (processor != null) {
                 Attachment attachment = processor.getAttachment(attachmentId);
                 return MailStorageResult.resultFor(mailStorageId, attachment, false, mailAccess);
             }
-
 
             MailMessage draftMail = requireDraftMail(mailStorageId, mailAccess);
 
@@ -948,7 +951,7 @@ public class MailStorage implements IMailStorage {
     }
 
     @Override
-    public MailStorageResult<MessageInfo> deleteAttachments(MailStorageId mailStorageId, List<UUID> attachmentIds, Session session) throws OXException, MissingDraftException {
+    public MailStorageResult<MessageInfo> deleteAttachments(MailStorageId mailStorageId, List<UUID> attachmentIds, ClientToken clientToken, Session session) throws OXException, MissingDraftException {
         UUID compositionSpaceId = mailStorageId.getCompositionSpaceId();
         MailPath draftPath = mailStorageId.getDraftPath();
         if (draftPath.getAccountId() != MailAccount.DEFAULT_ID) {
@@ -963,7 +966,7 @@ public class MailStorage implements IMailStorage {
             mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
             mailAccess.connect(false);
 
-            processor = initMessageProcessorFull(mailStorageId, session, mailAccess);
+            processor = initMessageProcessorFull(mailStorageId, session, mailAccess, clientToken);
             validateIfNeeded(mailStorageId, processor);
             MessageDescription originalDescription = processor.getCurrentDraft(MessageField.SECURITY);
 
@@ -1523,9 +1526,7 @@ public class MailStorage implements IMailStorage {
                 LOG.debug("Hard-deleting old draft {}", draftPath);
                 MailPath[] removedPaths = enhancedDeletion.hardDeleteMessages(draftPath.getFolder(), new String[] { draftPath.getMailID() });
                 if (removedPaths == null || removedPaths.length <= 0 || !draftPath.equals(removedPaths[0])) {
-                    // Another process deleted draft mail
-                    // TODO: is it good to throw this here?
-                    throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+                    LOG.warn("Another process deleted draft mail '{}' in the meantime", draftPath);
                 }
             }
 
@@ -1578,17 +1579,19 @@ public class MailStorage implements IMailStorage {
         }
     }
 
-    private MailMessageProcessor initMessageProcessorFull(MailStorageId mailStorageId, Session session, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, MissingDraftException {
-        return initMessageProcessorFull(mailStorageId, session, mailAccess, null);
+    private MailMessageProcessor initMessageProcessorFull(MailStorageId mailStorageId, Session session, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, ClientToken clientToken) throws OXException, MissingDraftException {
+        return initMessageProcessorFull(mailStorageId, session, mailAccess, null, clientToken);
     }
 
-    private MailMessageProcessor initMessageProcessorFull(MailStorageId mailStorageId, Session session, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, String authToken) throws OXException, MissingDraftException {
-        MailMessageProcessor processor = initMessageProcessorFromFileCache(mailStorageId, session, authToken);
+    private MailMessageProcessor initMessageProcessorFull(MailStorageId mailStorageId, Session session, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, String authToken, ClientToken clientToken) throws OXException, MissingDraftException {
+        MailMessageProcessor processor = initMessageProcessorFromFileCache(mailStorageId, session, authToken, clientToken);
         if (processor == null) {
             InputStream mimeStream = null;
             try {
                 mimeStream = requireDraftMimeStream(mailStorageId, mailAccess, authToken);
                 processor = MailMessageProcessor.initForWrite(mailStorageId.getCompositionSpaceId(), mimeStream, session, services);
+                checkClientToken(clientToken, processor.getClientToken());
+
                 LOG.debug("Initialized message processor for composition space from fetched MIME stream: {}", mailStorageId);
             } finally {
                 Streams.close(mimeStream);
@@ -1607,13 +1610,20 @@ public class MailStorage implements IMailStorage {
      * @return The processor or <code>null</code> if file cache reference is missing or invalid
      * @throws OXException If initialization fails for other reasons than a missing/invalid file cache reference
      */
-    private MailMessageProcessor initMessageProcessorFromFileCache(MailStorageId mailStorageId, Session session, String authToken) throws OXException {
+    private MailMessageProcessor initMessageProcessorFromFileCache(MailStorageId mailStorageId, Session session, String authToken, ClientToken clientToken) throws OXException {
         UUID compositionSpaceId = mailStorageId.getCompositionSpaceId();
         if (mailStorageId.hasValidFileCacheReference()) {
             CacheReference cacheReference = mailStorageId.getFileCacheReference().get();
             MailMessageProcessor processor = null;
             try {
                 processor = MailMessageProcessor.initFromFileCache(compositionSpaceId, cacheReference, session, services);
+                if (clientToken.isPresent() && clientToken.isNotEquals(processor.getClientToken())) {
+                    LOG.debug("Client token mismatch for cached message. Expected: '{}' but was '{}'. Clearing cache to retry.", processor.getClientToken(), clientToken);
+                    // force re-fetch to properly detect concurrent modification
+                    cacheReference.cleanUp();
+                    return null;
+                }
+
                 LOG.debug("Initialized message processor for composition space from file cache reference: {}", mailStorageId);
                 return processor;
             } catch (OXException e) {
@@ -1893,6 +1903,44 @@ public class MailStorage implements IMailStorage {
     private Security getSecurity(MessageDescription draftMessage) {
         Security security = draftMessage.getSecurity();
         return security == null ? Security.DISABLED : security;
+    }
+
+    /**
+     * Checks the client token contained in current request against the actual one currently assigned to the
+     * composition space.
+     *
+     * @param requestToken The token sent by client to perform the current operation
+     * @param actualToken The actual token assigned to composition space
+     * @throws OXException {@link CompositionSpaceErrorCode#CONCURRENT_UPDATE} if request token is present but does not
+     *         match the actual one
+     */
+    private void checkClientToken(ClientToken requestToken, ClientToken actualToken) throws OXException {
+        if (requestToken.isPresent() && requestToken.isNotEquals(actualToken)) {
+            LOG.info("Client token mismatch. Expected: '{}' but was '{}'", actualToken, requestToken);
+            throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+        }
+    }
+
+    /**
+     * Parses the client token from given draft mails headers
+     *
+     * @param draftMail The draft mail
+     * @return The token
+     */
+    private ClientToken parseClientToken(MailMessage draftMail) {
+        ClientToken clientToken = ClientToken.NONE;
+        String clientTokenValue = null;
+        try {
+            clientTokenValue = HeaderUtility.decodeHeaderValue(draftMail.getFirstHeader(HeaderUtility.HEADER_X_OX_CLIENT_TOKEN));
+            clientToken = ClientToken.of(clientTokenValue);
+            if (clientToken == ClientToken.NONE) {
+                LOG.warn("Draft mail contains invalid client token: {}", clientTokenValue);
+            }
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Draft mail contains invalid client token: {}", clientTokenValue);
+        }
+
+        return clientToken;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------

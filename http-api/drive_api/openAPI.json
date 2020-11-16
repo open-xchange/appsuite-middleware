@@ -363,86 +363,6 @@
         } ]
       }
     },
-    "/drive?action=syncfolders" : {
-      "put" : {
-        "operationId" : "syncFolders",
-        "tags" : [ "Drive" ],
-        "summary" : "Synchronizes folders.",
-        "description" : "This request performs the synchronization of all folders, resulting in different actions that should be\nexecuted on the client afterwards. This operation typically serves as an entry point for a synchronization\ncycle.\n",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamRoot"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryApiVersion"
-        }, {
-          "in" : "query",
-          "name" : "version",
-          "description" : "The current client version (matching the pattern `^[0-9]+(\\\\.[0-9]+)*$). If not set, the initial version 0 is assumed.",
-          "required" : false,
-          "schema" : {
-            "type" : "string",
-            "default" : "0"
-          }
-        }, {
-          "in" : "query",
-          "name" : "diagnostics",
-          "description" : "If set to `true`, an additional diagnostics trace is supplied in the response.",
-          "required" : false,
-          "schema" : {
-            "type" : "boolean"
-          }
-        }, {
-          "in" : "query",
-          "name" : "quota",
-          "description" : "If set to `true`, additional quota information for the folder is supplied in the response.",
-          "required" : false,
-          "schema" : {
-            "type" : "boolean"
-          }
-        }, {
-          "in" : "query",
-          "name" : "pushToken",
-          "description" : "The client's push registration token to associate it to generated events.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array of actions the client should execute for synchronization. If the\n`diagnostics` parameter was set, the array is wrapped into an additional JSON object in the field\n`actions` and the diagnostics trace is provided at `diagnostics`. In case of errors the responsible\nfields in the response are filled.\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/DriveSyncFolderResponse"
-                }
-              }
-            }
-          }
-        },
-        "x-ox-examples" : [ {
-          "Example1" : null,
-          "description" : "Basic example",
-          "example" : "==> PUT http://192.168.32.191/ajax/drive?action=syncfolders&root=56&session=5d0c1e8eb0964a3095438b450ff6810f\n> Content:\n{\n  \"clientVersions\" : [{\n      \"path\" : \"/\",\n      \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n    }, {\n      \"path\" : \"/test1\",\n      \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n    }, {\n      \"path\" : \"/test2\",\n      \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n    }, {\n      \"path\" : \"/test2/test3\",\n      \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n    }\n  ],\n  \"originalVersions\" : [{\n      \"path\" : \"/\",\n      \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n    }, {\n      \"path\" : \"/test2/test3\",\n      \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n    }, {\n      \"path\" : \"/test2\",\n      \"checksum\" : \"35d1b51fdefbee5bf81d7ae8167719b8\"\n    }, {\n      \"path\" : \"/test1\",\n      \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n    }\n  ]\n}\n\n<== HTTP 200 OK (8.0004 ms elapsed, 102 bytes received)\n<   Content: \n    {\n      \"data\" : [{\n          \"action\" : \"sync\",\n          \"version\" : {\n            \"path\" : \"/test2\",\n            \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n          }\n        }\n      ]\n    }\n"
-        }, {
-          "Example2" : null,
-          "description" : "Extended example",
-          "example" : "==> PUT http://192.168.32.191/ajax/drive?action=syncfolders&root=56&session=5d0c1e8eb0964a3095438b450ff6810f\n  > Content:\n    {\n      \"clientVersions\" : [{\n          \"path\" : \"/\",\n          \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n        }, {\n          \"path\" : \"/test1\",\n          \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n        }, {\n          \"path\" : \"/test2\",\n          \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n        }, {\n          \"path\" : \"/test2/test3\",\n          \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n        }\n      ],\n      \"originalVersions\" : [{\n          \"path\" : \"/\",\n          \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n        }, {\n          \"path\" : \"/test2/test3\",\n          \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n        }, {\n          \"path\" : \"/test2\",\n          \"checksum\" : \"35d1b51fdefbee5bf81d7ae8167719b8\"\n        }, {\n          \"path\" : \"/test1\",\n          \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n        }\n      ]\n      \"fileExclusions\" : [{\n          \"path\" : \"/\",\n          \"name\" : \"excluded.txt\",\n          \"type\" : \"exact\"\n        }\n      ], \"directoryExclusions\" : [{\n          \"path\" : \"/temp\",\n          \"type\" : \"exact\"\n        }, {\n          \"path\" : \"/temp/*\",\n          \"type\" : \"glob\"\n        }\n      ]\n    }\n  \n<== HTTP 200 OK (8.0004 ms elapsed, 102 bytes received)\n<   Content: \n    {\n      \"data\" : [{\n          \"action\" : \"sync\",\n          \"version\" : {\n            \"path\" : \"/test2\",\n            \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n          }\n        }\n      ]\n    }\n"
-        } ],
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/DriveSyncFoldersBody"
-              }
-            }
-          },
-          "description" : "A JSON object containing the fields `clientVersions` and `originalVersions`, both representing JSON arrays.\nSince API version 2, the JSON object may also contain two arrays named `fileExclusions` and `directoryExclusions`.\n",
-          "required" : true
-        }
-      }
-    },
     "/drive?action=download" : {
       "put" : {
         "operationId" : "downloadFile",
@@ -525,6 +445,86 @@
             }
           },
           "description" : "Optionally, available since API version 3, the request body can contain a JSON object with file- and/or\ndirectory exclusion filters.\n"
+        }
+      }
+    },
+    "/drive?action=syncfolders" : {
+      "put" : {
+        "operationId" : "syncFolders",
+        "tags" : [ "Drive" ],
+        "summary" : "Synchronizes folders.",
+        "description" : "This request performs the synchronization of all folders, resulting in different actions that should be\nexecuted on the client afterwards. This operation typically serves as an entry point for a synchronization\ncycle.\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamRoot"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryApiVersion"
+        }, {
+          "in" : "query",
+          "name" : "version",
+          "description" : "The current client version (matching the pattern `^[0-9]+(\\\\.[0-9]+)*$). If not set, the initial version 0 is assumed.",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "0"
+          }
+        }, {
+          "in" : "query",
+          "name" : "diagnostics",
+          "description" : "If set to `true`, an additional diagnostics trace is supplied in the response.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "quota",
+          "description" : "If set to `true`, additional quota information for the folder is supplied in the response.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "pushToken",
+          "description" : "The client's push registration token to associate it to generated events.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array of actions the client should execute for synchronization. If the\n`diagnostics` parameter was set, the array is wrapped into an additional JSON object in the field\n`actions` and the diagnostics trace is provided at `diagnostics`. In case of errors the responsible\nfields in the response are filled.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DriveSyncFolderResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : [ {
+          "Example1" : null,
+          "description" : "Basic example",
+          "example" : "==> PUT http://192.168.32.191/ajax/drive?action=syncfolders&root=56&session=5d0c1e8eb0964a3095438b450ff6810f\n> Content:\n{\n  \"clientVersions\" : [{\n      \"path\" : \"/\",\n      \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n    }, {\n      \"path\" : \"/test1\",\n      \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n    }, {\n      \"path\" : \"/test2\",\n      \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n    }, {\n      \"path\" : \"/test2/test3\",\n      \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n    }\n  ],\n  \"originalVersions\" : [{\n      \"path\" : \"/\",\n      \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n    }, {\n      \"path\" : \"/test2/test3\",\n      \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n    }, {\n      \"path\" : \"/test2\",\n      \"checksum\" : \"35d1b51fdefbee5bf81d7ae8167719b8\"\n    }, {\n      \"path\" : \"/test1\",\n      \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n    }\n  ]\n}\n\n<== HTTP 200 OK (8.0004 ms elapsed, 102 bytes received)\n<   Content: \n    {\n      \"data\" : [{\n          \"action\" : \"sync\",\n          \"version\" : {\n            \"path\" : \"/test2\",\n            \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n          }\n        }\n      ]\n    }\n"
+        }, {
+          "Example2" : null,
+          "description" : "Extended example",
+          "example" : "==> PUT http://192.168.32.191/ajax/drive?action=syncfolders&root=56&session=5d0c1e8eb0964a3095438b450ff6810f\n  > Content:\n    {\n      \"clientVersions\" : [{\n          \"path\" : \"/\",\n          \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n        }, {\n          \"path\" : \"/test1\",\n          \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n        }, {\n          \"path\" : \"/test2\",\n          \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n        }, {\n          \"path\" : \"/test2/test3\",\n          \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n        }\n      ],\n      \"originalVersions\" : [{\n          \"path\" : \"/\",\n          \"checksum\" : \"7b744b13df4b41006495e1a15327368a\"\n        }, {\n          \"path\" : \"/test2/test3\",\n          \"checksum\" : \"c193fae995d9f9431986dcdc3621cd98\"\n        }, {\n          \"path\" : \"/test2\",\n          \"checksum\" : \"35d1b51fdefbee5bf81d7ae8167719b8\"\n        }, {\n          \"path\" : \"/test1\",\n          \"checksum\" : \"3ecc97334d7f6bf2b795988092b8137e\"\n        }\n      ]\n      \"fileExclusions\" : [{\n          \"path\" : \"/\",\n          \"name\" : \"excluded.txt\",\n          \"type\" : \"exact\"\n        }\n      ], \"directoryExclusions\" : [{\n          \"path\" : \"/temp\",\n          \"type\" : \"exact\"\n        }, {\n          \"path\" : \"/temp/*\",\n          \"type\" : \"glob\"\n        }\n      ]\n    }\n  \n<== HTTP 200 OK (8.0004 ms elapsed, 102 bytes received)\n<   Content: \n    {\n      \"data\" : [{\n          \"action\" : \"sync\",\n          \"version\" : {\n            \"path\" : \"/test2\",\n            \"checksum\" : \"56534fc2ddcb3b7310d3ef889bc5ae18\"\n          }\n        }\n      ]\n    }\n"
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DriveSyncFoldersBody"
+              }
+            }
+          },
+          "description" : "A JSON object containing the fields `clientVersions` and `originalVersions`, both representing JSON arrays.\nSince API version 2, the JSON object may also contain two arrays named `fileExclusions` and `directoryExclusions`.\n",
+          "required" : true
         }
       }
     },
@@ -1664,33 +1664,6 @@
         }
       }
     },
-    "/drive?action=directoryMetadata" : {
-      "get" : {
-        "operationId" : "getDirectoryMetadata",
-        "tags" : [ "Drive" ],
-        "summary" : "Gets directory metadata (**deprecated, available until API version 2**).",
-        "description" : "Additional metadata of synchronized directories is made available.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamRoot"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamPath"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the fields `path`, `checksum`, `directLink`, and `directLinkFragments`. In case of errors\nthe responsible fields in the response are filled.\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/DriveDirectoryMetadataResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/drive?action=updateFolder" : {
       "put" : {
         "operationId" : "updateFolder",
@@ -1739,6 +1712,33 @@
           },
           "description" : "A JSON object containing the fields `folder` and `notification`. The JSON object in field `folder` describes\nthe updated directory metadata (currently only the property `permissions` is considered) and the JSON object `notification`\nmay include a message to notify added permission entities. To notify with a default message, an empty `notification`\nobject should still be added.\n",
           "required" : true
+        }
+      }
+    },
+    "/drive?action=directoryMetadata" : {
+      "get" : {
+        "operationId" : "getDirectoryMetadata",
+        "tags" : [ "Drive" ],
+        "summary" : "Gets directory metadata (**deprecated, available until API version 2**).",
+        "description" : "Additional metadata of synchronized directories is made available.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamRoot"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamPath"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the fields `path`, `checksum`, `directLink`, and `directLinkFragments`. In case of errors\nthe responsible fields in the response are filled.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DriveDirectoryMetadataResponse"
+                }
+              }
+            }
+          }
         }
       }
     },

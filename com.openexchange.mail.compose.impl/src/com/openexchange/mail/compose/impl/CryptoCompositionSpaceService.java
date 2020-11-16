@@ -63,6 +63,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentResult;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositionSpaceId;
@@ -124,7 +125,7 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
 
         try {
             if (autoDeleteIfKeyIsMissing(session)) {
-                delegate.closeCompositionSpace(compositionSpaceUUID);
+                delegate.closeCompositionSpace(compositionSpaceUUID, ClientToken.NONE);
                 LoggerHolder.LOG.debug("Closed composition space '{}' due to missing key and enabled option \"com.openexchange.mail.compose.security.autoDeleteIfKeyIsMissing\"", getUnformattedString(compositionSpaceUUID));
             }
         } catch (Exception e) {
@@ -138,9 +139,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData requestData, List<OXException> warnings, boolean deleteAfterTransport) throws OXException {
+    public MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData requestData, List<OXException> warnings, boolean deleteAfterTransport, ClientToken clientToken) throws OXException {
         try {
-            return delegate.transportCompositionSpace(compositionSpaceId, optionalUploadedAttachments, mailSettings, requestData, warnings, deleteAfterTransport);
+            return delegate.transportCompositionSpace(compositionSpaceId, optionalUploadedAttachments, mailSettings, requestData, warnings, deleteAfterTransport, clientToken);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);
@@ -150,9 +151,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, boolean deleteAfterSave) throws OXException {
+    public MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, boolean deleteAfterSave, ClientToken clientToken) throws OXException {
         try {
-            return delegate.saveCompositionSpaceToDraftMail(compositionSpaceId, optionalUploadedAttachments, deleteAfterSave);
+            return delegate.saveCompositionSpaceToDraftMail(compositionSpaceId, optionalUploadedAttachments, deleteAfterSave, clientToken);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);
@@ -174,9 +175,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public boolean closeCompositionSpace(UUID compositionSpaceId) throws OXException {
+    public boolean closeCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException {
         try {
-            return delegate.closeCompositionSpace(compositionSpaceId);
+            return delegate.closeCompositionSpace(compositionSpaceId, clientToken);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);
@@ -215,9 +216,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public CompositionSpace updateCompositionSpace(UUID compositionSpaceId, MessageDescription messageDescription) throws OXException {
+    public CompositionSpace updateCompositionSpace(UUID compositionSpaceId, MessageDescription messageDescription, ClientToken clientToken) throws OXException {
         try {
-            return delegate.updateCompositionSpace(compositionSpaceId, messageDescription);
+            return delegate.updateCompositionSpace(compositionSpaceId, messageDescription, clientToken);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);
@@ -227,9 +228,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public AttachmentResult replaceAttachmentInCompositionSpace(UUID compositionSpaceId, UUID attachmentId, StreamedUploadFileIterator uploadedAttachments, String disposition) throws OXException {
+    public AttachmentResult replaceAttachmentInCompositionSpace(UUID compositionSpaceId, UUID attachmentId, StreamedUploadFileIterator uploadedAttachments, String disposition, ClientToken clientToken) throws OXException {
         try {
-            return delegate.replaceAttachmentInCompositionSpace(compositionSpaceId, attachmentId, uploadedAttachments, disposition);
+            return delegate.replaceAttachmentInCompositionSpace(compositionSpaceId, attachmentId, uploadedAttachments, disposition, clientToken);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);
@@ -239,9 +240,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, StreamedUploadFileIterator uploadedAttachments, String disposition) throws OXException {
+    public AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, StreamedUploadFileIterator uploadedAttachments, String disposition, ClientToken clientToken) throws OXException {
         try {
-            return delegate.addAttachmentToCompositionSpace(compositionSpaceId, uploadedAttachments, disposition);
+            return delegate.addAttachmentToCompositionSpace(compositionSpaceId, uploadedAttachments, disposition, clientToken);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);
@@ -251,9 +252,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, AttachmentDescription attachment, InputStream data) throws OXException {
+    public AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, AttachmentDescription attachment, InputStream data, ClientToken clientToken) throws OXException {
         try {
-            return delegate.addAttachmentToCompositionSpace(compositionSpaceId, attachment, data);
+            return delegate.addAttachmentToCompositionSpace(compositionSpaceId, attachment, data, clientToken);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);
@@ -263,9 +264,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public AttachmentResult addVCardToCompositionSpace(UUID compositionSpaceId) throws OXException {
+    public AttachmentResult addVCardToCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException {
         try {
-            return delegate.addVCardToCompositionSpace(compositionSpaceId);
+            return delegate.addVCardToCompositionSpace(compositionSpaceId, clientToken);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);
@@ -275,9 +276,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public AttachmentResult addContactVCardToCompositionSpace(UUID compositionSpaceId, String contactId, String folderId) throws OXException {
+    public AttachmentResult addContactVCardToCompositionSpace(UUID compositionSpaceId, String contactId, String folderId, ClientToken clientToken) throws OXException {
         try {
-            return delegate.addContactVCardToCompositionSpace(compositionSpaceId, contactId, folderId);
+            return delegate.addContactVCardToCompositionSpace(compositionSpaceId, contactId, folderId, clientToken);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);
@@ -287,9 +288,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public AttachmentResult addOriginalAttachmentsToCompositionSpace(UUID compositionSpaceId) throws OXException {
+    public AttachmentResult addOriginalAttachmentsToCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException {
         try {
-            return delegate.addOriginalAttachmentsToCompositionSpace(compositionSpaceId);
+            return delegate.addOriginalAttachmentsToCompositionSpace(compositionSpaceId, clientToken);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);
@@ -299,9 +300,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public AttachmentResult deleteAttachment(UUID compositionSpaceId, UUID attachmentId) throws OXException {
+    public AttachmentResult deleteAttachment(UUID compositionSpaceId, UUID attachmentId, ClientToken clientToken) throws OXException {
         try {
-            return delegate.deleteAttachment(compositionSpaceId, attachmentId);
+            return delegate.deleteAttachment(compositionSpaceId, attachmentId, clientToken);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);

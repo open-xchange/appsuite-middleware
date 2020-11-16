@@ -111,6 +111,7 @@ import com.openexchange.mail.compose.AttachmentComparator;
 import com.openexchange.mail.compose.AttachmentDataSource;
 import com.openexchange.mail.compose.AttachmentOrigin;
 import com.openexchange.mail.compose.AttachmentStorages;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.compose.ContentId;
@@ -303,12 +304,13 @@ public class MailMessageProcessor {
      *
      * @param compositionSpaceId The composition space identifier
      * @param optionalSharedFolderRef The optional shared attachment folder reference
+     * @param clientToken The client token
      * @param session The session providing user information
      * @param services The service look-up
      * @return Newly initialized processor ready for creating draft mail
      * @throws OXException If processor cannot be initialized
      */
-    public static MailMessageProcessor initNew(UUID compositionSpaceId, Optional<SharedFolderReference> optionalSharedFolderRef, Session session, ServiceLookup services) throws OXException {
+    public static MailMessageProcessor initNew(UUID compositionSpaceId, Optional<SharedFolderReference> optionalSharedFolderRef, ClientToken clientToken, Session session, ServiceLookup services) throws OXException {
         UserSettingMail usm;
         if (session instanceof ServerSession) {
             usm = ((ServerSession) session).getUserSettingMail();
@@ -319,7 +321,7 @@ public class MailMessageProcessor {
         MailAccount defaultMailAccount = mass.getDefaultMailAccount(session.getUserId(), session.getContextId());
         Address primaryAddress = new Address(defaultMailAccount.getPersonal(), defaultMailAccount.getPrimaryAddress());
         MailMessageProcessor processor = new MailMessageProcessor(compositionSpaceId, session, services);
-        processor.initEmptyMimeMessage(usm.getMsgFormat(), Optional.of(primaryAddress), optionalSharedFolderRef);
+        processor.initEmptyMimeMessage(usm.getMsgFormat(), Optional.of(primaryAddress), optionalSharedFolderRef, clientToken);
         return processor;
     }
 
@@ -374,6 +376,7 @@ public class MailMessageProcessor {
     private String contentForDraft;
     private String contentForWeb;
     private long originalLength;
+    private ClientToken clientToken;
     private boolean parsed;
 
     private AttachmentStorage attachmentStorage = null;
@@ -385,6 +388,7 @@ public class MailMessageProcessor {
         this.services = services;
         this.attachments = new ArrayList<>();
         warnings = new LinkedList<>();
+        clientToken = ClientToken.NONE;
     }
 
     /**
@@ -982,6 +986,16 @@ public class MailMessageProcessor {
     }
 
     /**
+     * Gets the current client token
+     *
+     * @return The token
+     */
+    public ClientToken getClientToken() {
+        validateState();
+        return clientToken;
+    }
+
+    /**
      * Gets the size of the original message this processor was initialized with.
      *
      * @return The size in bytes or <code>-1</code> if unknown
@@ -1069,7 +1083,7 @@ public class MailMessageProcessor {
         }
     }
 
-    private void initEmptyMimeMessage(int msgFormat, Optional<Address> optionalPrimaryAddress, Optional<SharedFolderReference> optionalSharedFolderRef) throws OXException {
+    private void initEmptyMimeMessage(int msgFormat, Optional<Address> optionalPrimaryAddress, Optional<SharedFolderReference> optionalSharedFolderRef, ClientToken clientToken) throws OXException {
         ContentType defaultContentType = ContentType.TEXT_HTML;
         if (msgFormat == UserSettingMail.MSG_FORMAT_TEXT_ONLY) {
             defaultContentType = ContentType.TEXT_PLAIN;
@@ -1082,6 +1096,7 @@ public class MailMessageProcessor {
         this.contentForWeb = ""; //defaultContentType.isImpliesHtml() ? getEmptyHtmlContent() : ""; Adapt to UI behavior
         this.contentForDraft = this.contentForWeb;
         this.parsed = true;
+        this.clientToken = clientToken;
 
         try {
             mimeMessage.setSubject("", "UTF-8");
@@ -1089,7 +1104,7 @@ public class MailMessageProcessor {
                 mimeMessage.setFrom(toMimeAddress(optionalPrimaryAddress.get()));
             }
             applyDraftFlag(mimeMessage);
-            applyCompositionSpaceHeadersForNew(compositionSpaceId, contentType, optionalSharedFolderRef, mimeMessage);
+            applyCompositionSpaceHeadersForNew(compositionSpaceId, contentType, optionalSharedFolderRef, clientToken, mimeMessage);
             mimeMessage.saveChanges();
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
@@ -1140,6 +1155,20 @@ public class MailMessageProcessor {
                     parsedAttachments.attachmentsByContentId, MailStorageCompositionSpaceImageDataSource.getInstance(), session);
             }
         }
+
+        // Get Client Token
+        String clientTokenValue = null;
+        try {
+            clientTokenValue = HeaderUtility.decodeHeaderValue(mailMessage.getFirstHeader(HeaderUtility.HEADER_X_OX_CLIENT_TOKEN));
+            this.clientToken = ClientToken.of(clientTokenValue);
+            if (this.clientToken.isAbsent()) {
+                LOG.warn("Draft mail contains invalid client token: {}", clientTokenValue);
+            }
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Draft mail contains invalid client token: {}", clientTokenValue);
+            this.clientToken = ClientToken.NONE;
+        }
+
         this.parsed = true;
         LOG.debug("Current in memory representation:{}{}", System.lineSeparator(), new LoggableMessageRepresentation(this));
     }
@@ -1570,6 +1599,9 @@ public class MailMessageProcessor {
                         break;
                 }
             }
+
+            // always set client token
+            draftMessage.setClientToken(clientToken);
             return draftMessage;
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
@@ -1783,13 +1815,17 @@ public class MailMessageProcessor {
         if (draftMessage.getCustomHeaders() != null) {
             mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_CUSTOM_HEADERS, HeaderUtility.encodeHeaderValue(19, HeaderUtility.customHeaders2HeaderValue(draftMessage.getCustomHeaders())));
         }
+        if (draftMessage.containsValidClientToken()) {
+            mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_CLIENT_TOKEN, HeaderUtility.encodeHeaderValue(HeaderUtility.HEADER_X_OX_CLIENT_TOKEN.length() + 2,
+                draftMessage.getClientToken().toString()));
+        }
     }
 
     private void applySharedFolderReferenceHeader(SharedFolderReference sharedFolderRef, MimeMessage mimeMessage) throws MessagingException {
         mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_SHARED_FOLDER_REFERENCE, HeaderUtility.encodeHeaderValue(30, HeaderUtility.sharedFolderReference2HeaderValue(sharedFolderRef)));
     }
 
-    private void applyCompositionSpaceHeadersForNew(UUID compositionSpaceId, ContentType contentType, Optional<SharedFolderReference> optionalSharedFolderRef, MimeMessage mimeMessage) throws MessagingException {
+    private void applyCompositionSpaceHeadersForNew(UUID compositionSpaceId, ContentType contentType, Optional<SharedFolderReference> optionalSharedFolderRef, ClientToken clientToken, MimeMessage mimeMessage) throws MessagingException {
         mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID, MimeMessageUtility.forceFold(
             HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID.length() + 2, UUIDs.getUnformattedString(compositionSpaceId)));
         mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_CONTENT_TYPE, HeaderUtility.encodeHeaderValue(19, contentType.getId()));
@@ -1798,6 +1834,7 @@ public class MailMessageProcessor {
             applySharedFolderReferenceHeader(optionalSharedFolderRef.get(), mimeMessage);
         }
         mimeMessage.setSentDate(new Date());
+        mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_CLIENT_TOKEN, HeaderUtility.encodeHeaderValue(HeaderUtility.HEADER_X_OX_CLIENT_TOKEN.length() + 2, clientToken.toString()));
     }
 
     private void applySubject(MessageDescription draftMessage, MimeMessage mimeMessage) throws MessagingException, OXException {
@@ -2157,6 +2194,7 @@ public class MailMessageProcessor {
         try {
             mimeMessage.removeHeader(HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID);
             mimeMessage.removeHeader(MessageHeaders.HDR_X_OX_NOTIFICATION);
+            mimeMessage.removeHeader(MessageHeaders.HDR_X_OX_CLIENT_TOKEN);
             if (forTransport) {
                 mimeMessage.removeHeader(HeaderUtility.HEADER_X_OX_CONTENT_TYPE);
                 mimeMessage.removeHeader(HeaderUtility.HEADER_X_OX_META);

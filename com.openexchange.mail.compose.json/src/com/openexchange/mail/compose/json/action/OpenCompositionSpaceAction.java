@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.Message.ContentType;
@@ -202,6 +203,11 @@ public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
                     parameters.withContentType(ContentType.TEXT_HTML);
                 }
             }
+        }
+
+        ClientToken clientToken = getClaimedClientToken(requestData);
+        if (clientToken.isPresent()) {
+            parameters.withClientToken(clientToken);
         }
 
         // Does not hold since a JSON array is expected for the mail paths...

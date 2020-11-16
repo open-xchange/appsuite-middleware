@@ -705,4 +705,11 @@ QueryParamMultifactorDeviceId:
   description: The ID of the multifactor device
   schema:
     type: string
+MailComposeClientToken:
+  in: query
+  name: clientToken
+  required: false
+  description: 'The client token to check against for preventing concurrent editing. Must be the one set during open or PATCH before.'
+  schema:
+    type: string
 

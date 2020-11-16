@@ -85,7 +85,7 @@ public class AddVCardMailComposeAction extends AbstractMailComposeAction {
 
         // Get needed service & add vCard as attachment
         CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
-        AttachmentResult attachmentResult = compositionSpaceService.addVCardToCompositionSpace(compositionSpaceId.getId());
+        AttachmentResult attachmentResult = compositionSpaceService.addVCardToCompositionSpace(compositionSpaceId.getId(), getClientToken(requestData));
 
         return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
     }

@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.compose.Attachment;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.MessageDescription;
 import com.openexchange.mail.compose.MessageField;
 import com.openexchange.mail.compose.SharedFolderReference;
@@ -106,13 +107,14 @@ public interface IMailStorage {
      * Generates the appropriate compose request to be used for mail transport.
      *
      * @param mailStorageId The mail storage identifier
+     * @param clientToken The client token
      * @param request The request data
      * @param session The session providing user data
      * @return The compose request and meta information
      * @throws OXException If compose request and meta information cannot be returned
      * @throws MissingDraftException If draft mail is missing
      */
-    MailStorageResult<ComposeRequestAndMeta> getForTransport(MailStorageId mailStorageId, AJAXRequestData request, Session session) throws OXException, MissingDraftException;
+    MailStorageResult<ComposeRequestAndMeta> getForTransport(MailStorageId mailStorageId, ClientToken clientToken, AJAXRequestData request, Session session) throws OXException, MissingDraftException;
 
     /**
      * Validates the draft message representing given composition space.
@@ -154,68 +156,74 @@ public interface IMailStorage {
      * @param compositionSpaceId The composition space identifier
      * @param draftMessage The draft message
      * @param optionalSharedFolderRef The optional shared attachment folder reference
+     * @param clientToken The client token
      * @param session The session providing user data
      * @return A {@link MessageInfo} instance describing the updated draft message
      * @throws OXException If creating a new mail fails
      */
-    MailStorageResult<MessageInfo> createNew(UUID compositionSpaceId, MessageDescription draftMessage, Optional<SharedFolderReference> optionalSharedFolderRef, Session session) throws OXException;
+    MailStorageResult<MessageInfo> createNew(UUID compositionSpaceId, MessageDescription draftMessage, Optional<SharedFolderReference> optionalSharedFolderRef, ClientToken clientToken, Session session) throws OXException;
 
     /**
      * Saves denoted draft mail as final draft.
      *
      * @param mailStorageId The mail storage identifier
+     * @param clientToken The client token
      * @param session The session providing user data
      * @return The new draft path
      * @throws OXException If save attempt fails
      * @throws MissingDraftException If draft mail is missing
      */
-    MailStorageResult<MailPath> saveAsFinalDraft(MailStorageId mailStorageId, Session session) throws OXException, MissingDraftException;
+    MailStorageResult<MailPath> saveAsFinalDraft(MailStorageId mailStorageId, ClientToken clientToken, Session session) throws OXException, MissingDraftException;
 
     /**
      * Updates the draft message associated with given composition space.
      *
      * @param mailStorageId The mail storage identifier
      * @param draftMessage The draft message providing the change to apply
+     * @param clientToken The client token
      * @param session The session providing user data
      * @return A {@link MessageInfo} instance describing the updated draft message
      * @throws OXException If changes cannot be applied
      * @throws MissingDraftException If draft mail is missing
      */
-    MailStorageResult<MessageInfo> update(MailStorageId mailStorageId, MessageDescription draftMessage, Session session) throws OXException, MissingDraftException;
+    MailStorageResult<MessageInfo> update(MailStorageId mailStorageId, MessageDescription draftMessage, ClientToken clientToken, Session session) throws OXException, MissingDraftException;
 
     /**
      * Deletes the draft mail referenced by given mail path.
      *
      * @param mailStorageId The mail storage identifier
      * @param deleteSharedAttachmentsFolderIfPresent Whether to delete the possibly existent shared attachments folder
+     * @param clientToken The client token
      * @param session The session providing user data
-     * @param <code>true</code> if mail has been successfully deleted; otherwise <code>false</code>
+     * @return <code>true</code> if mail has been successfully deleted; otherwise <code>false</code>
      * @throws OXException If deletion fails
      */
-    MailStorageResult<Boolean> delete(MailStorageId mailStorageId, boolean deleteSharedAttachmentsFolderIfPresent, Session session) throws OXException;
+    MailStorageResult<Boolean> delete(MailStorageId mailStorageId, boolean deleteSharedAttachmentsFolderIfPresent, ClientToken clientToken, Session session) throws OXException;
 
     /**
      * Adds the attachments from referenced original mail to draft message.
      *
      * @param mailStorageId The mail storage identifier
+     * @param clientToken The client token
      * @param session The session providing user data
      * @return A {@link NewAttachmentsInfo} instance describing the added attachments and updated draft message
      * @throws OXException If attachments from referenced original mail cannot be added
      * @throws MissingDraftException If a draft mail is missing
      */
-    MailStorageResult<NewAttachmentsInfo> addOriginalAttachments(MailStorageId mailStorageId, Session session) throws OXException, MissingDraftException;
+    MailStorageResult<NewAttachmentsInfo> addOriginalAttachments(MailStorageId mailStorageId, ClientToken clientToken, Session session) throws OXException, MissingDraftException;
 
     /**
      * Adds the vCard of session-associated user to draft message.
      *
      * @param mailStorageId The mail storage identifier
+     * @param clientToken The client token
      * @param session The session providing user data
      * @param draftPath The draft message's path
      * @return A {@link NewAttachmentsInfo} instance describing the added attachments and updated draft message
      * @throws OXException If attachments cannot be added
      * @throws MissingDraftException If a draft mail is missing
      */
-    MailStorageResult<NewAttachmentsInfo> addVCardAttachment(MailStorageId mailStorageId, Session session) throws OXException, MissingDraftException;
+    MailStorageResult<NewAttachmentsInfo> addVCardAttachment(MailStorageId mailStorageId, ClientToken clientToken, Session session) throws OXException, MissingDraftException;
 
     /**
      * Adds the vCard of specified contact to draft message.
@@ -223,38 +231,39 @@ public interface IMailStorage {
      * @param mailStorageId The mail storage identifier
      * @param contactId The identifier of the contact
      * @param folderId The identifier of the folder, in which the contact resides
+     * @param clientToken The client token
      * @param session The session providing user data
-     * @param draftPath The draft message's path
      * @return A {@link NewAttachmentsInfo} instance describing the added attachments and updated draft message
      * @throws OXException If attachments cannot be added
      * @throws MissingDraftException If a draft mail is missing
      */
-    MailStorageResult<NewAttachmentsInfo> addContactVCardAttachment(MailStorageId mailStorageId, String contactId, String folderId, Session session) throws OXException, MissingDraftException;
+    MailStorageResult<NewAttachmentsInfo> addContactVCardAttachment(MailStorageId mailStorageId, String contactId, String folderId, ClientToken clientToken, Session session) throws OXException, MissingDraftException;
 
     /**
      * Adds given attachments to a new mail then representing current draft message.
      *
      * @param mailStorageId The mail storage identifier
      * @param attachments The attachments to add
+     * @param clientToken The client token
      * @param session The session providing user data
-     * @param draftPath The draft message's path
      * @return A {@link NewAttachmentsInfo} instance describing the added attachments and updated draft message
      * @throws OXException If attachments cannot be added
      * @throws MissingDraftException If a draft mail is missing
      */
-    MailStorageResult<NewAttachmentsInfo> addAttachments(MailStorageId mailStorageId, List<Attachment> attachments, Session session) throws OXException, MissingDraftException;
+    MailStorageResult<NewAttachmentsInfo> addAttachments(MailStorageId mailStorageId, List<Attachment> attachments, ClientToken clientToken, Session session) throws OXException, MissingDraftException;
 
     /**
      * Replaces given attachment resulting in a new mail then representing current draft message.
      *
      * @param mailStorageId The mail storage identifier
      * @param attachment The attachment to replace
+     * @param clientToken The client token
      * @param session The session providing user data
      * @return A {@link NewAttachmentsInfo} instance describing the added attachments and updated draft message
      * @throws OXException If attachment cannot be replaced
      * @throws MissingDraftException If a draft mail is missing
      */
-    MailStorageResult<NewAttachmentsInfo> replaceAttachment(MailStorageId mailStorageId, Attachment attachment, Session session) throws OXException, MissingDraftException;
+    MailStorageResult<NewAttachmentsInfo> replaceAttachment(MailStorageId mailStorageId, Attachment attachment, ClientToken clientToken, Session session) throws OXException, MissingDraftException;
 
     /**
      * Looks-up attachment for given identifier.
@@ -274,12 +283,13 @@ public interface IMailStorage {
      *
      * @param mailStorageId The mail storage identifier
      * @param attachmentIds The identifiers of the attachments to delete
+     * @param clientToken The client token
      * @param session The session providing user data
      * @return A {@link MessageInfo} instance describing the updated draft message
      * @throws OXException If attachment cannot be deleted
      * @throws MissingDraftException If a draft mail is missing
      */
-    MailStorageResult<MessageInfo> deleteAttachments(MailStorageId mailStorageId, List<UUID> attachmentIds, Session session) throws OXException, MissingDraftException;
+    MailStorageResult<MessageInfo> deleteAttachments(MailStorageId mailStorageId, List<UUID> attachmentIds, ClientToken clientToken, Session session) throws OXException, MissingDraftException;
 
     /**
      * Gets the mail storage quota for drafts folder.

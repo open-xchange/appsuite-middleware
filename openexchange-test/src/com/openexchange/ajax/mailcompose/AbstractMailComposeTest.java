@@ -70,8 +70,8 @@ import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.MailComposeAttachmentPostResponse;
 import com.openexchange.testing.httpclient.models.MailComposeAttachmentResponse;
 import com.openexchange.testing.httpclient.models.MailComposeGetResponse;
-import com.openexchange.testing.httpclient.models.MailComposeMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeResponse;
+import com.openexchange.testing.httpclient.models.MailComposeResponseMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeSendResponse;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
 import com.openexchange.testing.httpclient.models.MailImportResponse;
@@ -127,8 +127,8 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         attachment2 = new File(TestInit.getTestProperty("provisioningFile"));
 
         MailComposeGetResponse allSpaces = api.getMailCompose(getSessionId(), null);
-        for (MailComposeMessageModel model : allSpaces.getData()) {
-            api.deleteMailComposeById(getSessionId(), model.getId());
+        for (MailComposeResponseMessageModel model : allSpaces.getData()) {
+            api.deleteMailComposeById(getSessionId(), model.getId(), null);
         }
     }
 
@@ -137,7 +137,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         if (null != compositionSpaceIds && compositionSpaceIds.size() > 0) {
             for (String id : compositionSpaceIds) {
                 try {
-                    api.deleteMailComposeById(getSessionId(), id);
+                    api.deleteMailComposeById(getSessionId(), id, null);
                 } catch (ApiException e) {
                     // Space was already deleted, ignore...
                 }
@@ -191,10 +191,10 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         return mailWithAttachment;
     }
 
-    protected MailComposeMessageModel createNewCompositionSpace() throws Exception {
-        MailComposeResponse response = api.postMailCompose(getSessionId(), null, null, null);
+    protected MailComposeResponseMessageModel createNewCompositionSpace() throws Exception {
+        MailComposeResponse response = api.postMailCompose(getSessionId(), null, null, null, null);
         assertTrue(response.getErrorDesc(), Strings.isEmpty(response.getError()));
-        MailComposeMessageModel data = response.getData();
+        MailComposeResponseMessageModel data = response.getData();
         compositionSpaceIds.add(data.getId());
         return data;
     }

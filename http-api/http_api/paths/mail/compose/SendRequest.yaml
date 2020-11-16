@@ -12,6 +12,7 @@
         required: true
         schema:
           type: string
+      - $ref: '#/components/parameters/MailComposeClientToken'
     responses:
       '200':
         description: 'The path to the sent mail or {"success"=true}.'
@@ -33,7 +34,7 @@
               JSON:
                 description: >-
                   Represents the request body as JSON string containing the
-                  [MailMessageModel](#/definitions/MailComposeMessageModel).
+                  [RequestMessageModel](#/definitions/MailComposeRequestMessageModel).
 
                   Note that it is not possible to change the attachments collection during this call.
                   Furthermore changing shared attachments or Guard options during this call is discouraged

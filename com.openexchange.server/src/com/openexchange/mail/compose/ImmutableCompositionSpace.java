@@ -65,6 +65,7 @@ public class ImmutableCompositionSpace implements CompositionSpace {
     private final MailPath mailPath;
     private final Message message;
     private final long lastModified;
+    private final ClientToken clientToken;
 
     /**
      * Initializes a new {@link ImmutableCompositionSpace}.
@@ -73,13 +74,15 @@ public class ImmutableCompositionSpace implements CompositionSpace {
      * @param mailPath The optional mail path associated with composition space or <code>null</code>
      * @param message The message
      * @param lastModified The last-modified time stamp; the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     * @param clientToken The client token
      */
-    public ImmutableCompositionSpace(CompositionSpaceId id, MailPath mailPath, Message message, long lastModified) {
+    public ImmutableCompositionSpace(CompositionSpaceId id, MailPath mailPath, Message message, long lastModified, ClientToken clientToken) {
         super();
         this.id = id;
         this.mailPath = mailPath;
         this.message = message;
         this.lastModified = lastModified;
+        this.clientToken = clientToken;
     }
 
     @Override
@@ -103,6 +106,11 @@ public class ImmutableCompositionSpace implements CompositionSpace {
     }
 
     @Override
+    public ClientToken getClientToken() {
+        return clientToken;
+    }
+
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("[");
@@ -115,7 +123,8 @@ public class ImmutableCompositionSpace implements CompositionSpace {
         if (message != null) {
             builder.append("message=").append(message).append(", ");
         }
-        builder.append("lastModified=").append(new Date(lastModified)).append("]");
+        builder.append("lastModified=").append(new Date(lastModified)).append(", ");
+        builder.append("clientToken=").append(clientToken.toString()).append("]");
         return builder.toString();
     }
 

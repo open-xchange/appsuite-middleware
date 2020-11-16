@@ -36,6 +36,7 @@
         required: true
         schema:
           type: string
+      - $ref: '#/components/parameters/MailComposeClientToken'
     responses:
       '200':
         description: A JSON object containing the success status.
@@ -70,6 +71,7 @@
         required: true
         schema:
           type: string
+      - $ref: '#/components/parameters/MailComposeClientToken'
     responses:
       '200':
         description: A JSON object containing the updated composition space.
@@ -85,7 +87,7 @@
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/MailComposeMessageModel'
+            $ref: '#/components/schemas/MailComposeRequestMessageModel'
       description: An object containing the attributes to update
       required: true
   patch:
@@ -106,6 +108,7 @@
         required: true
         schema:
           type: string
+      - $ref: '#/components/parameters/MailComposeClientToken'
     responses:
       '200':
         description: A JSON object containing the updated composition space.
@@ -121,6 +124,6 @@
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/MailComposeMessageModel'
+            $ref: '#/components/schemas/MailComposeRequestMessageModel'
       description: An object containing the attributes to update
       required: true

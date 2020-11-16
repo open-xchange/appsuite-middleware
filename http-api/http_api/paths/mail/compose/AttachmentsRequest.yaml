@@ -12,6 +12,7 @@
         required: true
         schema:
           type: string
+      - $ref: '#/components/parameters/MailComposeClientToken'
     responses:
       '200':
         description: A JSON object containing the newly added attachment.

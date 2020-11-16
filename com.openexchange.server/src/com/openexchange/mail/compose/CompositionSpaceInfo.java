@@ -74,4 +74,11 @@ public interface CompositionSpaceInfo {
      */
     Optional<MailPath> getMailPath();
 
+    /**
+     * Gets the last-modified time stamp, which is the number of milliseconds since January 1, 1970, 00:00:00 GMT.
+     *
+     * @return The last-modified time stamp
+     */
+    long getLastModified();
+
 }

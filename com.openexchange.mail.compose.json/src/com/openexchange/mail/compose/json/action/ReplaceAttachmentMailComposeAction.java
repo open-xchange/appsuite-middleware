@@ -55,8 +55,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.StreamedUpload;
-import com.openexchange.mail.compose.AttachmentResult;
 import com.openexchange.mail.compose.Attachment.ContentDisposition;
+import com.openexchange.mail.compose.AttachmentResult;
 import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.UploadLimits;
@@ -114,7 +114,8 @@ public class ReplaceAttachmentMailComposeAction extends AbstractMailComposeActio
         }
 
         // File upload available...
-        AttachmentResult attachmentResult = compositionSpaceService.replaceAttachmentInCompositionSpace(compositionSpaceId.getId(), attachmentUuid, upload.getUploadFiles(), disposition);
+        AttachmentResult attachmentResult = compositionSpaceService.replaceAttachmentInCompositionSpace(
+            compositionSpaceId.getId(), attachmentUuid, upload.getUploadFiles(), disposition, getClientToken(requestData));
         return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
     }
 

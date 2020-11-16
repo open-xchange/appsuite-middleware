@@ -91,7 +91,7 @@ public class UpdateCompositionSpaceAction extends AbstractMailComposeAction {
         MessageDescription md = new MessageDescription();
         parseJSONMessage(jMessage, md);
 
-        CompositionSpace compositionSpace = compositionSpaceService.updateCompositionSpace(compositionSpaceId.getId(), md);
+        CompositionSpace compositionSpace = compositionSpaceService.updateCompositionSpace(compositionSpaceId.getId(), md, getClientToken(requestData));
 
         return new AJAXRequestResult(compositionSpace, "compositionSpace").addWarnings(compositionSpaceService.getWarnings());
     }

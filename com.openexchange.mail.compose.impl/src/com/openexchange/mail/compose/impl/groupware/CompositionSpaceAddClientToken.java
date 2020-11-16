@@ -47,52 +47,61 @@
  *
  */
 
-package com.openexchange.mail.compose.json.action;
+package com.openexchange.mail.compose.impl.groupware;
 
-import java.util.UUID;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.compose.AttachmentResult;
-import com.openexchange.mail.compose.CompositionSpaceId;
-import com.openexchange.mail.compose.CompositionSpaceService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DeleteAttachmentMailComposeAction}
+ * {@link CompositionSpaceAddClientToken}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.2
+ * @since v7.10.5
  */
-public class DeleteAttachmentMailComposeAction extends AbstractMailComposeAction {
+public class CompositionSpaceAddClientToken extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link DeleteAttachmentMailComposeAction}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link CompositionSpaceAddClientToken}.
      */
-    public DeleteAttachmentMailComposeAction(ServiceLookup services) {
-        super(services);
+    public CompositionSpaceAddClientToken() {
+        super();
     }
 
     @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        // Require composition space identifier
-        String sId = requestData.requireParameter("id");
-        CompositionSpaceId compositionSpaceId = parseCompositionSpaceId(sId);
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        int rollback = 0;
+        try {
+            con.setAutoCommit(false);
+            rollback = 1;
 
-        // Require attachment identifier
-        String sAttachmentId = requestData.requireParameter("attachmentId");
-        UUID attachmentUuid = parseAttachmentId(sAttachmentId);
+            Column col = new Column("clientToken", "VARCHAR(16) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL");
+            Tools.checkAndAddColumns(con, "compositionSpace", col);
 
-        // Load composition space
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
-        AttachmentResult attachmentResult = compositionSpaceService.deleteAttachment(compositionSpaceId.getId(), attachmentUuid, getClientToken(requestData));
+            con.commit();
+            rollback = 2;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+            }
+        }
+    }
 
-        return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
+    @Override
+    public String[] getDependencies() {
+        return new String[] { CompositionSpaceAddReplyTo_2.class.getName() };
     }
 
 }

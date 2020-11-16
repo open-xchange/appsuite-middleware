@@ -65,6 +65,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestData.StreamParams;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
@@ -74,6 +75,7 @@ import com.openexchange.mail.compose.Address;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.Attachment.ContentDisposition;
 import com.openexchange.mail.compose.AttachmentOrigin;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
@@ -181,8 +183,9 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
      * @param jMessage The message's JSON representation
      * @param md The <code>MessageDescription</code> instance to parse to
      * @throws JSONException If a JSON error occurs
+     * @throws OXException
      */
-    protected static void parseJSONMessage(JSONObject jMessage, MessageDescription md) throws JSONException {
+    protected static void parseJSONMessage(JSONObject jMessage, MessageDescription md) throws JSONException, OXException {
         {
             JSONArray jFrom = jMessage.optJSONArray("from");
             if (null != jFrom) {
@@ -291,6 +294,17 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
             JSONObject jCustomHeaders = jMessage.optJSONObject("customHeaders");
             if (null != jCustomHeaders) {
                 md.setCustomHeaders(toCustomHeaders(jCustomHeaders));
+            }
+        }
+
+        {
+            String clientToken = jMessage.optString("claim", null);
+            if (null != clientToken) {
+                try {
+                    md.setClientToken(ClientToken.of(clientToken));
+                } catch (IllegalArgumentException e) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("claim", clientToken);
+                }
             }
         }
     }
@@ -571,6 +585,51 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
     protected static UUID parseAttachmentId(String id) throws OXException {
         return CompositionSpaces.parseAttachmentId(id);
     }
+
+    /**
+     * Gets the parsed {@code} claim request parameter. During {@code open} and {@code PATCH}, a {@link ClientToken}
+     * can be claimed by a client to take over editing of a composition space.
+     *
+     * @param requestData The AJAX request
+     * @return The token
+     * @throws OXException If parameter value has invalid syntax
+     */
+    protected static @NonNull ClientToken getClaimedClientToken(AJAXRequestData requestData) throws OXException {
+        return parseClientToken(requestData, "claim");
+    }
+
+    /**
+     * Gets the parsed clientToken request parameter
+     *
+     * @param requestData The AJAX request
+     * @return The token
+     * @throws OXException If parameter value has invalid syntax
+     */
+    protected static @NonNull ClientToken getClientToken(AJAXRequestData requestData) throws OXException {
+        return parseClientToken(requestData, "clientToken");
+    }
+
+    /**
+     * Parses a {@link ClientToken} from given request using given parameter name
+     *
+     * @param requestData The AJAX request
+     * @param param The parameter name
+     * @return The token
+     * @throws OXException If parameter value has invalid syntax
+     */
+    private static @NonNull ClientToken parseClientToken(AJAXRequestData requestData, String param) throws OXException {
+        String sClientToken = requestData.getParameter(param);
+        if (sClientToken == null) {
+            return ClientToken.NONE;
+        }
+
+        try {
+            return ClientToken.of(sClientToken);
+        } catch (IllegalArgumentException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(param, sClientToken);
+        }
+    }
+
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {

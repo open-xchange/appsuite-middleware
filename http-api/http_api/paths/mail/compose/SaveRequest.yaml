@@ -12,6 +12,7 @@
         required: true
         schema:
           type: string
+      - $ref: '#/components/parameters/MailComposeClientToken'
     responses:
       '200':
         description: The path to the mail.

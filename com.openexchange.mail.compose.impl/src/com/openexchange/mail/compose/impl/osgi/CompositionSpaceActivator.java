@@ -98,6 +98,7 @@ import com.openexchange.mail.compose.impl.attachment.filestore.FileStrorageAttac
 import com.openexchange.mail.compose.impl.attachment.filestore.FilestorageAttachmentStorageDatabaseAccessProvider;
 import com.openexchange.mail.compose.impl.attachment.rdb.RdbAttachmentStorage;
 import com.openexchange.mail.compose.impl.cleanup.CompositionSpaceCleanUpRegistry;
+import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddClientToken;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddContentEncryptedFlag;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddCustomHeaders;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddFileStorageIdentifier;
@@ -349,7 +350,8 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
             new CompositionSpaceAddReplyTo(),
             new CompositionSpaceRestoreAttachmentBinaryDataColumn(),
             new CompositionSpaceDynamicRowType(),
-            new CompositionSpaceAddReplyTo_2()
+            new CompositionSpaceAddReplyTo_2(),
+            new CompositionSpaceAddClientToken()
         ));
         registerService(DeleteListener.class, new CompositionSpaceDeleteListener(this));
 
