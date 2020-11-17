@@ -121,7 +121,7 @@ public final class HzMsService extends AbstractHzResource implements MsService {
         {
             final String uuid = member.getUuid();
             for (final com.hazelcast.cluster.Member cur : hz.getCluster().getMembers()) {
-                if (uuid.equals(cur.getUuid())) {
+                if (uuid.equals(cur.getUuid().toString())) {
                     hzMember = cur;
                     break;
                 }
