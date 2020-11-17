@@ -101,7 +101,7 @@ public class SearchFilter {
      * @throws OXException
      */
     public Collection<Contact> filter(Collection<Contact> contacts) throws OXException {
-        List<Contact> filteredContacts = new ArrayList<Contact>();
+        List<Contact> filteredContacts = new ArrayList<>();
         if (null != contacts && null != this.term) {
             for (Contact contact : contacts) {
                 if (matches(contact, this.term, this.locale)) {
@@ -215,7 +215,7 @@ public class SearchFilter {
             }
         }
         if (o1 instanceof Comparable) {
-            @SuppressWarnings("unchecked") Comparable<Object> comparable = (Comparable) o1;
+            @SuppressWarnings("unchecked") Comparable<Object> comparable = Comparable.class.cast(o1);
             return comparable.compareTo(o2);
         }
         throw new UnsupportedOperationException("Don't know how to compare two values of class " + o1.getClass().getName());

@@ -66,7 +66,7 @@ public class RdbContactStorageTest {
     private RdbContactStorage rdbContactStorage;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         rdbContactStorage = new RdbContactStorage();
     }
 

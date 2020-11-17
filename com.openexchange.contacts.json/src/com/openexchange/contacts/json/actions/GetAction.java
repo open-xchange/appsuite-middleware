@@ -51,6 +51,8 @@ package com.openexchange.contacts.json.actions;
 
 import java.util.EnumSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactID;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.mapping.ContactMapper;
@@ -60,24 +62,34 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
  * {@link GetAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 @OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
-public class GetAction extends ContactAction {
+public class GetAction extends IDBasedContactAction {
 
+    /**
+     * Initializes a new {@link GetAction}.
+     * 
+     * @param serviceLookup The service lookup to use
+     */
     public GetAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-        ContactField[] fields = ContactMapper.getInstance().getAllFields(EnumSet.of(ContactField.IMAGE1, ContactField.LAST_MODIFIED_UTC));
-        Contact contact = getContactService().getContact(request.getSession(), request.getFolderID(), request.getObjectID(), fields);
+    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
+        ContactID contactId = getContactID(request.getFolderID(), request.getObjectID());
+        Contact contact = access.getContact(contactId);
         return new AJAXRequestResult(contact, contact.getLastModified(), "contact");
+    }
+
+    @Override
+    protected ContactField[] getFields(ContactRequest request) throws OXException {
+        return ContactMapper.getInstance().getAllFields(EnumSet.of(ContactField.IMAGE1, ContactField.LAST_MODIFIED_UTC));
     }
 }

@@ -49,22 +49,17 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link ListAction}
@@ -72,7 +67,9 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 @OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
-public class ListAction extends ContactAction {
+public class ListAction extends IDBasedContactAction {
+
+    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS);
 
     /**
      * Initializes a new {@link ListAction}.
@@ -84,59 +81,13 @@ public class ListAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final ContactRequest request) throws OXException {
-        /*
-         * get requested object and folder IDs
-         */
-        int[][] objectIdsAndFolderIds = request.getListRequestData();
-        Map<String, List<String>> ids = new HashMap<String, List<String>>();
-        for (int[] objectIdAndFolderId : objectIdsAndFolderIds) {
-            String folderID = Integer.toString(objectIdAndFolderId[1]);
-            if (false == ids.containsKey(folderID)) {
-            	ids.put(folderID, new LinkedList<String>());
-            }
-            ids.get(folderID).add(Integer.toString(objectIdAndFolderId[0]));
-        }
-        /*
-         * get contacts
-         */
-        List<Contact> contacts = new LinkedList<Contact>();
-        Date lastModified = new Date(0);
-        ContactField[] fields = request.getFields();
-        for (final Entry<String, List<String>> entry : ids.entrySet()) {
-            SearchIterator<Contact> searchIterator = null;
-            try {
-                searchIterator = getContactService().getContacts(request.getSession(), entry.getKey(),
-                		entry.getValue().toArray(new String[entry.getValue().size()]), fields);
-                int parentFolderID = Integer.parseInt(entry.getKey());
-                while (searchIterator.hasNext()) {
-                    Contact contact = searchIterator.next();
-                    contact.setParentFolderID(parentFolderID);
-                    lastModified = getLatestModified(lastModified, contact);
-                    contacts.add(contact);
-                }
-            } finally {
-            	if (null != searchIterator) {
-            		searchIterator.close();
-            	}
-            }
-        }
-        if (1 < contacts.size()) {
-            /*
-             * sort loaded contacts in the order they were requested
-             */
-            List<Contact> sortedContacts = new ArrayList<Contact>(contacts.size());
-            for (int i = 0; i < objectIdsAndFolderIds.length; i++) {
-                int[] objectIdsAndFolderId = objectIdsAndFolderIds[i];
-                for (Contact contact : contacts) {
-                    if (contact.getObjectID() == objectIdsAndFolderId[0] && contact.getParentFolderID() == objectIdsAndFolderId[1]) {
-                        sortedContacts.add(contact);
-                        break;
-                    }
-                }
-            }
-            return new AJAXRequestResult(sortedContacts, lastModified, "contact");
-        }
-        return new AJAXRequestResult(contacts, lastModified, "contact");
+    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
+        List<Contact> contacts = access.getContacts(request.getContactIds());
+        return new AJAXRequestResult(contacts, getLatestTimestamp(contacts), "contact");
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
     }
 }

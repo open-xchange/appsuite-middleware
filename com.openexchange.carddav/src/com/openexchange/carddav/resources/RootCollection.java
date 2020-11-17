@@ -65,7 +65,7 @@ import com.openexchange.dav.resources.PlaceholderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.login.Interface;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -175,7 +175,7 @@ public class RootCollection extends DAVRootCollection {
 	                }
 	            }
 	            LOG.debug("{}: child collection '{}' not found, creating placeholder collection", getUrl(), name);
-	            return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), ContactContentType.getInstance(), FolderStorage.REAL_TREE_ID);
+	            return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), ContactsContentType.getInstance(), FolderStorage.REAL_TREE_ID);
 	        } catch (OXException e) {
 	            throw protocolException(getUrl(), e);
 	        }

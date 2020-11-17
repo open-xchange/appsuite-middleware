@@ -144,6 +144,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public final static String SUBSCRIPTION_NOT_ALLOWED = "This operation is not allowed in this folder because it has a subscription.";
 
+    public static final String MISSING_CAPABILITY_MSG = "The operation could not be completed due to missing capabilities.";
+
     private ContactExceptionMessages() {
         super();
     }

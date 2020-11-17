@@ -58,7 +58,7 @@ import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
@@ -81,7 +81,7 @@ public class FolderSubscriptionHelperImpl implements FolderSubscriptionHelper {
     private static final Map<Integer, String> SUBSCRIPTION_AWARE_MODULES = ImmutableMap.<Integer, String> builder()
         .put(I(TaskContentType.getInstance().getModule()), "tsk/")
         .put(I(CalendarContentType.getInstance().getModule()), "cal/")
-        .put(I(ContactContentType.getInstance().getModule()), "con/")
+        .put(I(ContactsContentType.getInstance().getModule()), "con/")
         .put(I(InfostoreContentType.getInstance().getModule()), "inf/")
     .build();
 

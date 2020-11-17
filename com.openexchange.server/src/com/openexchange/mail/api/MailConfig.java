@@ -51,6 +51,7 @@ package com.openexchange.mail.api;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
+import static com.openexchange.session.Sessions.isGuest;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -377,7 +378,7 @@ public abstract class MailConfig {
         UrlInfo urlInfo = MailConfig.getMailServerURL(mailAccount, userId, contextId);
         String serverURL = urlInfo.getServerURL();
         if (serverURL == null) {
-            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuest(session)))) {
+            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, isGuest(session)))) {
                 throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + userId + " in context " + contextId);
             }
             throw MailConfigException.create(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(" in context ").append(contextId).toString());
@@ -494,7 +495,7 @@ public abstract class MailConfig {
     public static final UrlInfo getMailServerURL(final Session session, final int accountId) throws OXException {
         int userId = session.getUserId();
         int contextId = session.getContextId();
-        if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuest(session)))) {
+        if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, isGuest(session)))) {
             if (!Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
                 ConfiguredServer server = MailProperties.getInstance().getMailServer(userId, contextId);
                 if (server == null) {
@@ -831,7 +832,7 @@ public abstract class MailConfig {
         if (null == authType) {
             throw MailConfigException.create("Invalid or unsupported value configured for property \"" + property + "\": " + authTypeStr);
         }
-        return new ImmutableReference<AuthType>(authType);
+        return new ImmutableReference<>(authType);
     }
 
     /**

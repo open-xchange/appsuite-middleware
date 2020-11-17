@@ -78,8 +78,8 @@ public class BasicTest extends VCardTest {
         super();
     }
 
-         @Test
-     public void testImportVCard1() throws Exception {
+    @Test
+    public void testImportVCard1() throws Exception {
         /*
          * http://de.wikipedia.org/wiki/VCard#vCard_2.1
          */
@@ -123,8 +123,8 @@ public class BasicTest extends VCardTest {
         Assert.assertEquals("erika@mustermann.de", contact.getEmail1());
     }
 
-         @Test
-     public void testImportVCard2() throws Exception {
+    @Test
+    public void testImportVCard2() throws Exception {
         /*
          * http://de.wikipedia.org/wiki/VCard#vCard_3.0
          */
@@ -170,8 +170,8 @@ public class BasicTest extends VCardTest {
         Assert.assertEquals("http://de.wikipedia.org/", contact.getURL());
     }
 
-         @Test
-     public void testImportVCard3() throws Exception {
+    @Test
+    public void testImportVCard3() throws Exception {
         /*
          * http://de.wikipedia.org/wiki/VCard#vCard_4.0
          */
@@ -217,8 +217,8 @@ public class BasicTest extends VCardTest {
         Assert.assertEquals("erika@mustermann.de", contact.getEmail1());
     }
 
-         @Test
-     public void testImportVCard4() throws Exception {
+    @Test
+    public void testImportVCard4() {
         /*
          * http://www.w3.org/2002/12/cal/vcard-examples/john-doe.vcf
          */
@@ -279,8 +279,8 @@ public class BasicTest extends VCardTest {
         Assert.assertEquals("Work,Test group", contact.getCategories());
     }
 
-         @Test
-     public void testImportVCard5() throws Exception {
+    @Test
+    public void testImportVCard5() throws Exception {
         /*
          * https://github.com/nuovo/vCard-parser/blob/master/Example.vcf
          */
@@ -336,8 +336,8 @@ public class BasicTest extends VCardTest {
         assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
     }
 
-         @Test
-     public void testImportVCard6() throws Exception {
+    @Test
+    public void testImportVCard6() {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_ANDROID.vcf
          */
@@ -505,8 +505,8 @@ public class BasicTest extends VCardTest {
         Assert.assertEquals("My Contacts", contact.getCategories());
     }
 
-         @Test
-     public void testImportVCard7() throws Exception {
+    @Test
+    public void testImportVCard7() {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_BLACK_BERRY.vcf
          */
@@ -538,8 +538,8 @@ public class BasicTest extends VCardTest {
 //        assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
     }
 
-         @Test
-     public void testImportVCard8() throws Exception {
+    @Test
+    public void testImportVCard8() {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_EVOLUTION.vcf
          */
@@ -631,8 +631,8 @@ public class BasicTest extends VCardTest {
 //        Assert.assertEquals(TimeTools.D("1980-03-22 00:00:00", TimeZones.UTC), contact.getAnniversary());
     }
 
-         @Test
-     public void testImportVCard9() throws Exception {
+    @Test
+    public void testImportVCard9() {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_GMAIL.vcf
          */
@@ -701,8 +701,8 @@ public class BasicTest extends VCardTest {
         Assert.assertEquals(expectedNote, contact.getNote());
     }
 
-         @Test
-     public void testImportVCard10() throws Exception {
+    @Test
+    public void testImportVCard10() throws Exception {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_IPHONE.vcf
          */
@@ -1360,8 +1360,8 @@ public class BasicTest extends VCardTest {
         assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
     }
 
-         @Test
-     public void testImportVCard11() throws Exception {
+    @Test
+    public void testImportVCard11() throws Exception {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_LOTUS_NOTES.vcf
          */
@@ -1592,8 +1592,8 @@ public class BasicTest extends VCardTest {
         Assert.assertEquals("Counting Money", contact.getProfession());
     }
 
-         @Test
-     public void testImportVCard12() throws Exception {
+    @Test
+    public void testImportVCard12() throws Exception {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_MAC_ADDRESS_BOOK.vcf
          */
@@ -2003,8 +2003,8 @@ public class BasicTest extends VCardTest {
         assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
     }
 
-         @Test
-     public void testImportVCard13() throws Exception {
+    @Test
+    public void testImportVCard13() throws Exception {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_MS_OUTLOOK.vcf
          */

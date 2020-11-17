@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonAllRequest;
-import com.openexchange.contacts.json.actions.ContactAction;
+import com.openexchange.contacts.json.actions.IDBasedContactAction;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.arrays.Arrays;
@@ -129,10 +129,10 @@ public class AllRequest extends CommonAllRequest {
             return new AllParser(isFailOnError(), getColumns());
         } else {
             if (getAlias().equals("all")) {
-                return new AllParser(isFailOnError(), ContactAction.COLUMNS_ALIAS_ALL);
+                return new AllParser(isFailOnError(), IDBasedContactAction.COLUMNS_ALIAS_ALL);
             }
             if (getAlias().equals("list")) {
-                return new AllParser(isFailOnError(), ContactAction.COLUMNS_ALIAS_LIST);
+                return new AllParser(isFailOnError(), IDBasedContactAction.COLUMNS_ALIAS_LIST);
             }
         }
         return null;

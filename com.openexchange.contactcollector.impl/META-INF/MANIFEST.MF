@@ -64,3 +64,4 @@ Import-Package: com.openexchange.api2,
  org.apache.commons.logging,
  org.osgi.framework,
  org.slf4j
+Automatic-Module-Name: com.openexchange.contactcollector.impl

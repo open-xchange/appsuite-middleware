@@ -71,6 +71,14 @@ import com.openexchange.session.Session;
 public class ContactUtil {
 
     /**
+     * The default contacts account prefix.
+     */
+    public static final String DEFAULT_ACCOUNT_PREFIX = "con://0/";
+    
+    /** A timestamp in the distant future as substitute for the client timestamp when circumventing concurrent modification checks */
+    public static final long DISTANT_FUTURE = Long.MAX_VALUE;
+
+    /**
      * Initializes a new {@link ContactUtil}.
      */
     private ContactUtil() {
@@ -118,7 +126,7 @@ public class ContactUtil {
         if (null == contact) {
             return Collections.emptySet();
         }
-        final Set<String> set = new HashSet<String>(20);
+        final Set<String> set = new HashSet<>(20);
         String tmp = contact.getCellularTelephone1();
         if (MsisdnCheck.checkMsisdn(tmp)) {
             set.add(tmp);

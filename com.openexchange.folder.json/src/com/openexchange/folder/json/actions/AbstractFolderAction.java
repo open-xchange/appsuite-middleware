@@ -87,7 +87,7 @@ import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.i18n.I18nService;
@@ -379,7 +379,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         static Set<ContentType> contentTypesForReadScope(String scope) {
             switch (scope) {
                 case ContactActionFactory.OAUTH_READ_SCOPE:
-                    return Collections.singleton((ContentType) ContactContentType.getInstance());
+                    return Collections.singleton((ContentType) ContactsContentType.getInstance());
 
                 case ChronosOAuthScope.OAUTH_READ_SCOPE:
                     Set<ContentType> result = new HashSet<>(2);
@@ -397,7 +397,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         static Set<ContentType> contentTypesForWriteScope(String scope) {
             switch (scope) {
                 case ContactActionFactory.OAUTH_WRITE_SCOPE:
-                    return Collections.singleton((ContentType) ContactContentType.getInstance());
+                    return Collections.singleton((ContentType) ContactsContentType.getInstance());
 
                 case ChronosOAuthScope.OAUTH_WRITE_SCOPE:
                     Set<ContentType> result = new HashSet<>(2);
@@ -414,7 +414,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         }
 
         static String readScopeForContentType(ContentType contentType) {
-            if (contentType == ContactContentType.getInstance()) {
+            if (contentType == ContactsContentType.getInstance()) {
                 return ContactActionFactory.OAUTH_READ_SCOPE;
             } else if (contentType == CalendarContentType.getInstance()) {
                 return AppointmentActionFactory.OAUTH_READ_SCOPE;
@@ -428,7 +428,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         }
 
         static String writeScopeForContentType(ContentType contentType) {
-            if (contentType == ContactContentType.getInstance()) {
+            if (contentType == ContactsContentType.getInstance()) {
                 return ContactActionFactory.OAUTH_WRITE_SCOPE;
             } else if (contentType == CalendarContentType.getInstance()) {
                 return AppointmentActionFactory.OAUTH_WRITE_SCOPE;

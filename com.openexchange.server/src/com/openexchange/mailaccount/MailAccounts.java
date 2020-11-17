@@ -106,7 +106,9 @@ public final class MailAccounts {
      *
      * @param session The session to check
      * @return <code>true</code> for a guest session; otherwise <code>false</code>
+     * @deprecated Use {@link com.openexchange.session.Sessions#isGuest(Session)} instead.
      */
+    @Deprecated
     public static boolean isGuest(Session session) {
         return null != session && Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST));
     }

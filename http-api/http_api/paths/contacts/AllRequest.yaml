@@ -28,14 +28,6 @@
         schema:
           type: string
       - in: query
-        name: admin
-        description: >-
-          (DEPRECATED) Defines whether the context admin should be included or
-          not. Defaults to `true`.
-        required: false
-        schema:
-          type: boolean
-      - in: query
         name: collation
         description: >-
           Allows you to specify a collation to sort the contacts by. Only

@@ -68,6 +68,7 @@ import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactFieldOperand;
+import com.openexchange.contact.ContactID;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.contacts.json.mapping.ColumnParser;
@@ -101,6 +102,7 @@ public class ContactRequest {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
+
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactRequest.class);
     }
 
@@ -140,7 +142,7 @@ public class ContactRequest {
         }
         try {
             return Integer.parseInt(parameter.trim());
-        } catch (NumberFormatException e) {
+        } catch (@SuppressWarnings("unused") NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
@@ -150,51 +152,48 @@ public class ContactRequest {
      * or not, i.e. the 'sort' field of the request is set to a magic value.
      *
      * @return <code>true</code>, if the results should be sorted internally,
-     * <code>false</code>, otherwise
+     *         <code>false</code>, otherwise
      * @throws OXException
      */
     public boolean isInternalSort() throws OXException {
-    	final int sort = this.getSort();
-    	return 0 == sort || Contact.SPECIAL_SORTING == sort || Contact.USE_COUNT_GLOBAL_FIRST == sort;
+        final int sort = this.getSort();
+        return 0 == sort || Contact.SPECIAL_SORTING == sort || Contact.USE_COUNT_GLOBAL_FIRST == sort;
     }
 
     /**
      * Gets the requested sort options.
      *
-     * @param considerExcludeAdmin Whether exclusion of administrator user should be rewarded
      * @return the sort options
      * @throws OXException
      */
-    public SortOptions getSortOptions(boolean considerExcludeAdmin) throws OXException {
+    public SortOptions getSortOptions() throws OXException {
         SortOptions sortOptions = new SortOptions();
-        if (false == isInternalSort()) {
-            // Left-hand and right-hand limit only applicable if no internal sorting is supposed to be performed
-            int leftHandLimit = this.getLeftHandLimit();
-            if (0 < leftHandLimit) {
-                sortOptions.setRangeStart(leftHandLimit);
-            }
-            int rightHandLimit = this.getRightHandLimit();
-            if (0 < rightHandLimit) {
-                if (rightHandLimit < leftHandLimit) {
-                    throw OXJSONExceptionCodes.INVALID_VALUE.create(Autoboxing.valueOf(rightHandLimit), "right_hand_limit");
-                }
-                if (considerExcludeAdmin && isExcludeAdmin()) {
-                    rightHandLimit++;
-                }
-                sortOptions.setLimit(rightHandLimit - leftHandLimit);
-            }
-
-       		sortOptions.setCollation(this.getCollation());
-        	int sort = this.getSort();
-        	if (0 < sort) {
-        		ContactField sortField = ContactMapper.getInstance().getMappedField(sort);
-        		if (null == sortField) {
-                    throw OXJSONExceptionCodes.INVALID_VALUE.create(I(sort), "sort");
-        		}
-        		sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(sortField, getOrder()) });
-        	}
+        if (isInternalSort()) {
+            return sortOptions;
         }
-    	return sortOptions;
+        // Left-hand and right-hand limit only applicable if no internal sorting is supposed to be performed
+        int leftHandLimit = this.getLeftHandLimit();
+        if (0 < leftHandLimit) {
+            sortOptions.setRangeStart(leftHandLimit);
+        }
+        int rightHandLimit = this.getRightHandLimit();
+        if (0 < rightHandLimit) {
+            if (rightHandLimit < leftHandLimit) {
+                throw OXJSONExceptionCodes.INVALID_VALUE.create(Autoboxing.valueOf(rightHandLimit), "right_hand_limit");
+            }
+            sortOptions.setLimit(rightHandLimit - leftHandLimit);
+        }
+
+        sortOptions.setCollation(this.getCollation());
+        int sort = this.getSort();
+        if (0 < sort) {
+            ContactField sortField = ContactMapper.getInstance().getMappedField(sort);
+            if (null == sortField) {
+                throw OXJSONExceptionCodes.INVALID_VALUE.create(I(sort), "sort");
+            }
+            sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(sortField, getOrder()) });
+        }
+        return sortOptions;
     }
 
     /**
@@ -234,20 +233,22 @@ public class ContactRequest {
      * @throws OXException If internal sorting fails
      */
     public boolean sortInternalIfNeeded(List<Contact> contacts, ContactField dateField, Date reference) throws OXException {
-        if (null != contacts && 1 < contacts.size()) {
-            int sort = this.getSort();
-            if (Contact.SPECIAL_SORTING == sort) {
+        if (null == contacts || 0 == contacts.size()) {
+            return false;
+        }
+        switch (this.getSort()) {
+            case Contact.SPECIAL_SORTING:
                 Collections.sort(contacts, new SpecialAlphanumSortContactComparator(user.getLocale()));
                 return true;
-            } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
+            case Contact.USE_COUNT_GLOBAL_FIRST:
                 Collections.sort(contacts, new UseCountComparator(user.getLocale()));
                 return true;
-            } else if (0 == sort) {
+            case 0:
                 Collections.sort(contacts, RequestTools.getAnnualDateComparator(dateField, reference));
                 return true;
-            }
+            default:
+                return false;
         }
-        return false;
     }
 
     /**
@@ -280,7 +281,7 @@ public class ContactRequest {
                     contacts = contacts.subList(fromIndex, size);
                 }
             }
-            contacts = new PropertizedList<Contact>(contacts).setProperty("more", Integer.valueOf(size));
+            contacts = new PropertizedList<>(contacts).setProperty("more", Integer.valueOf(size));
         }
 
         return contacts;
@@ -316,10 +317,10 @@ public class ContactRequest {
      * @throws OXException
      */
     public ContactField[] getFields() throws OXException {
-    	return getFields((ContactField[])null);
+        return getFields((ContactField[]) null);
     }
 
-    public ContactField[] getFields(ContactField...mandatoryFields) throws OXException {
+    public ContactField[] getFields(ContactField... mandatoryFields) throws OXException {
         /*
          * get requested column IDs
          */
@@ -327,35 +328,33 @@ public class ContactRequest {
         /*
          * determine mandatory fields
          */
-    	ContactField[] fields;
-    	if (this.isInternalSort() || Arrays.contains(columnIDs, ContactMapper.getInstance().get(ContactField.SORT_NAME).getColumnID().intValue())) {
-    		fields = new ContactField[] {
-    			ContactField.LAST_MODIFIED, ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.MARK_AS_DISTRIBUTIONLIST,
-				ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY,
-                ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.DEPARTMENT, ContactField.USE_COUNT };
-    	} else {
-    		fields = new ContactField[] { ContactField.LAST_MODIFIED };
-    	}
-    	if (null != mandatoryFields) {
-    		fields = Arrays.add(fields, mandatoryFields);
-    	}
-    	/*
-    	 * get mapped fields
-    	 */
-    	return ColumnParser.getFieldsToQuery(columnIDs, fields);
+        ContactField[] fields;
+        if (this.isInternalSort() || Arrays.contains(columnIDs, ContactMapper.getInstance().get(ContactField.SORT_NAME).getColumnID().intValue())) {
+            fields = new ContactField[] { ContactField.LAST_MODIFIED, ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.DEPARTMENT, ContactField.USE_COUNT };
+        } else {
+            fields = new ContactField[] { ContactField.LAST_MODIFIED };
+        }
+        if (null != mandatoryFields) {
+            fields = Arrays.add(fields, mandatoryFields);
+        }
+        /*
+         * get mapped fields
+         */
+        return ColumnParser.getFieldsToQuery(columnIDs, fields);
     }
 
     /**
      * Gets a search term from the json array named 'filter in the request.
+     * 
      * @return the search term
      * @throws OXException
      */
     public SearchTerm<?> getSearchFilter() throws OXException {
-    	JSONArray jsonArray = this.getJSONData().optJSONArray("filter");
-		if (null == jsonArray) {
-			throw OXJSONExceptionCodes.MISSING_FIELD.create("filter");
-		}
-	    return ContactSearchTermParser.INSTANCE.parseSearchTerm(jsonArray);
+        JSONArray jsonArray = this.getJSONData().optJSONArray("filter");
+        if (null == jsonArray) {
+            throw OXJSONExceptionCodes.MISSING_FIELD.create("filter");
+        }
+        return ContactSearchTermParser.INSTANCE.parseSearchTerm(jsonArray);
     }
 
     /**
@@ -385,7 +384,7 @@ public class ContactRequest {
         }
         try {
             return new Date(Long.parseLong(value.trim()));
-        } catch (NumberFormatException e) {
+        } catch (@SuppressWarnings("unused") NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(parameterName, value);
         }
     }
@@ -408,9 +407,8 @@ public class ContactRequest {
      * Gets the requested folder ID ('folder').
      *
      * @return The folder ID, or <code>null</code> if not present
-     * @throws OXException
      */
-    public String optFolderID() throws OXException {
+    public String optFolderID() {
         return request.getParameter("folder");
     }
 
@@ -421,11 +419,11 @@ public class ContactRequest {
      * @throws OXException
      */
     public String getObjectID() throws OXException {
-    	final String folderID = request.getParameter("id");
-    	if (null == folderID || 0 == folderID.length()) {
+        final String folderID = request.getParameter("id");
+        if (null == folderID || 0 == folderID.length()) {
             throw OXJSONExceptionCodes.MISSING_FIELD.create("id");
-    	}
-    	return folderID;
+        }
+        return folderID;
     }
 
     /**
@@ -435,13 +433,13 @@ public class ContactRequest {
      * @throws OXException
      */
     public JSONObject getJSONData() throws OXException {
-    	Object data = request.getData();
-    	if (null == data) {
+        Object data = request.getData();
+        if (null == data) {
             throw OXJSONExceptionCodes.MISSING_FIELD.create("data");
-    	} else if (false == JSONObject.class.isInstance(data)) {
-    		throw OXJSONExceptionCodes.INVALID_VALUE.create("data", data.toString());
-    	}
-    	return (JSONObject)data;
+        } else if (false == JSONObject.class.isInstance(data)) {
+            throw OXJSONExceptionCodes.INVALID_VALUE.create("data", data.toString());
+        }
+        return (JSONObject) data;
     }
 
     /**
@@ -451,15 +449,15 @@ public class ContactRequest {
      * @throws OXException
      */
     public String getFolderIDFromData() throws OXException {
-    	String folderID = this.getJSONData().optString("folder_id");
-    	if (null == folderID || 0 == folderID.length()) {
-    		throw OXJSONExceptionCodes.MISSING_FIELD.create("folder_id");
-    	}
-    	return folderID;
+        String folderID = this.getJSONData().optString("folder_id");
+        if (null == folderID || 0 == folderID.length()) {
+            throw OXJSONExceptionCodes.MISSING_FIELD.create("folder_id");
+        }
+        return folderID;
     }
 
     public int getId() throws OXException {
-    	//TODO: as String
+        //TODO: as String
         if (request.isSet("id")) {
             return request.getParameter("id", int.class).intValue();
         }
@@ -467,7 +465,7 @@ public class ContactRequest {
     }
 
     public int getFolder() throws OXException {
-    	//TODO: as String
+        //TODO: as String
         return request.getParameter("folder", int.class).intValue();
     }
 
@@ -500,25 +498,31 @@ public class ContactRequest {
         return RequestTools.getNullableIntParameter(request, "right_hand_limit");
     }
 
-    public boolean isExcludeAdmin() throws OXException {
-        return request.containsParameter("admin") && false == request.getParameter("admin", boolean.class).booleanValue();
-    }
+    //    public boolean isExcludeAdmin() throws OXException {
+    //        return request.containsParameter("admin") && false == request.getParameter("admin", boolean.class).booleanValue();
+    //    }
 
     public boolean isRequireEmail() throws OXException {
         return false == request.containsParameter("email") || request.getParameter("email", boolean.class).booleanValue();
     }
 
-    public String getQuery() throws OXException {
+    public String getQuery() {
         return request.getParameter("query");
     }
 
-    public int[][] getListRequestData() throws OXException {
-        final JSONArray data = (JSONArray) request.getData();
+    /**
+     * Gets and returns the contact identifiers of the request
+     *
+     * @return A {@link List} with the requested {@link ContactID}s
+     * @throws OXException if the 'data' field is missing
+     */
+    public List<ContactID> getContactIds() throws OXException {
+        JSONArray data = (JSONArray) request.getData();
         if (data == null) {
             throw OXJSONExceptionCodes.MISSING_FIELD.create("data");
         }
 
-        return RequestTools.buildObjectIdAndFolderId(data);
+        return RequestTools.getContactIds(data);
     }
 
     /**
@@ -531,13 +535,13 @@ public class ContactRequest {
      */
     public Map<String, List<String>> getObjectIDsPerFolder(JSONArray jsonArray) throws OXException {
         try {
-            Map<String, List<String>> objectIDsPerFolder = new HashMap<String, List<String>>();
+            Map<String, List<String>> objectIDsPerFolder = new HashMap<>();
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject objectAndFolderID = jsonArray.getJSONObject(i);
                 String folderID = objectAndFolderID.getString("folder");
                 List<String> objectIDs = objectIDsPerFolder.get(folderID);
                 if (null == objectIDs) {
-                    objectIDs = new ArrayList<String>();
+                    objectIDs = new ArrayList<>();
                     objectIDsPerFolder.put(folderID, objectIDs);
                 }
                 objectIDs.add(objectAndFolderID.getString("id"));
@@ -557,7 +561,7 @@ public class ContactRequest {
      * @throws OXException
      */
     public Map<String, List<String>> getObjectIDsPerFolder() throws OXException {
-        JSONArray jsonArray = (JSONArray)request.getData();
+        JSONArray jsonArray = (JSONArray) request.getData();
         if (null == jsonArray) {
             throw OXJSONExceptionCodes.MISSING_FIELD.create("data");
         }
@@ -587,16 +591,19 @@ public class ContactRequest {
         return request.getUploadEvent(-1L, maxSize > 0 ? maxSize : -1L);
     }
 
-    public int[] getDeleteRequestData() throws OXException {
-        final JSONObject json = (JSONObject) request.getData();
-            final int[] data = new int[2];
-            try {
-                data[0] = json.getInt("id");
-                data[1] = json.getInt("folder");
-            } catch (JSONException e) {
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
-            }
-            return data;
+    /**
+     * Returns the {@link ContactID} from the request payload
+     *
+     * @return The {@link ContactID}
+     * @throws OXException if a JSON error is occurred
+     */
+    public ContactID getContactID() throws OXException {
+        JSONObject json = JSONObject.class.cast(request.getData());
+        try {
+            return new ContactID(json.getString("folder"), json.getString("id"));
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
+        }
     }
 
     public long getTimestamp() throws OXException {
@@ -651,6 +658,7 @@ public class ContactRequest {
      */
     private static final class ContactSearchTermParser extends SearchTermParser {
 
+        @SuppressWarnings("hiding")
         public static final ContactSearchTermParser INSTANCE = new ContactSearchTermParser();
 
         private ContactSearchTermParser() {

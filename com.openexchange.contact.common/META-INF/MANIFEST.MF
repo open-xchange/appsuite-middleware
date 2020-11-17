@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Contacts Common Bundle
+Bundle-SymbolicName: com.openexchange.contact.common
+Bundle-Version: 7.10.5
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.contact.common
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.annotation,
+ com.openexchange.exception,
+ com.openexchange.session,
+ org.json
+Export-Package: com.openexchange.contact.common

@@ -57,7 +57,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
  * {@link GetUserAction}
  *
@@ -69,6 +68,7 @@ public class GetUserAction extends ContactAction {
 
     /**
      * Initializes a new {@link GetUserAction}.
+     * 
      * @param serviceLookup
      */
     public GetUserAction(ServiceLookup serviceLookup) {
@@ -77,9 +77,8 @@ public class GetUserAction extends ContactAction {
 
     @Override
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-    	int userID = Integer.parseInt(request.getObjectID());
-    	Contact contact = getContactService().getUser(request.getSession(), userID);
+        int userID = Integer.parseInt(request.getObjectID());
+        Contact contact = getContactService().getUser(request.getSession(), userID);
         return new AJAXRequestResult(contact, contact.getLastModified(), "contact");
     }
-
 }

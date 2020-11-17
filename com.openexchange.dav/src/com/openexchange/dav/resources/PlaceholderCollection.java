@@ -78,7 +78,7 @@ import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.calendar.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -164,7 +164,7 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
             }
         } else if (DAVProtocol.DAV_NS.getURI().equals(property.getNamespace()) && "resourcetype".equals(property.getName()) && null != element) {
             if (null != element.getChild("addressbook", DAVProtocol.CARD_NS)) {
-                contentType = ContactContentType.getInstance();
+                contentType = ContactsContentType.getInstance();
             } else if (null != element.getChild("calendar", DAVProtocol.CAL_NS)) {
                 contentType = CalendarContentType.getInstance();
                 if (null != element.getChild("subscribed", DAVProtocol.CALENDARSERVER_NS)) {

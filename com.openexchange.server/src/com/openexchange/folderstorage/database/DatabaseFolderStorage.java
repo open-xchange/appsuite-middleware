@@ -125,7 +125,7 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.database.contentType.UnboundContentType;
@@ -409,12 +409,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
     @Override
     public ContentType[] getSupportedContentTypes() {
-        return new ContentType[] { TaskContentType.getInstance(), CalendarContentType.getInstance(), ContactContentType.getInstance(), InfostoreContentType.getInstance(), UnboundContentType.getInstance(), SystemContentType.getInstance() };
+        return new ContentType[] { TaskContentType.getInstance(), CalendarContentType.getInstance(), ContactsContentType.getInstance(), InfostoreContentType.getInstance(), UnboundContentType.getInstance(), SystemContentType.getInstance() };
     }
 
     @Override
     public ContentType getDefaultContentType() {
-        return ContactContentType.getInstance();
+        return ContactsContentType.getInstance();
     }
 
     @Override
@@ -789,7 +789,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.TASK, con, context);
             } else if (CalendarContentType.getInstance().equals(contentType)) {
                 folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.CALENDAR, con, context);
-            } else if (ContactContentType.getInstance().equals(contentType)) {
+            } else if (ContactsContentType.getInstance().equals(contentType)) {
                 folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.CONTACT, con, context);
             } else if (InfostoreContentType.getInstance().equals(contentType)) {
                 if (TrashType.getInstance().equals(type)) {
@@ -2657,7 +2657,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         if (CalendarContentType.getInstance().toString().equals(cts)) {
             return FolderObject.CALENDAR;
         }
-        if (ContactContentType.getInstance().toString().equals(cts)) {
+        if (ContactsContentType.getInstance().toString().equals(cts)) {
             return FolderObject.CONTACT;
         }
         if (InfostoreContentType.getInstance().toString().equals(cts)) {

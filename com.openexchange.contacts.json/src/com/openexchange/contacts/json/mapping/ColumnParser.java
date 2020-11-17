@@ -52,7 +52,7 @@ package com.openexchange.contacts.json.mapping;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.contacts.json.actions.ContactAction;
+import com.openexchange.contacts.json.actions.IDBasedContactAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -70,7 +70,7 @@ public class ColumnParser {
     /**
      * Gets the mapped contact fields to use for querying the contact service based on the supplied column IDs. Besides the plain mapping
      * via {@link ContactMapper#getFields}, this includes a special treatment for the {@link Contact#IMAGE1} column. Additionally, any
-     * virtual field as defined at {@link ContactAction#VIRTUAL_FIELDS} is excluded implicitly.
+     * virtual field as defined at {@link IDBasedContactAction#VIRTUAL_FIELDS} is excluded implicitly.
      *
      * @param columnIDs The column IDs as requested by the client
      * @param mandatoryFields An optional list of mandatory contact fields to be added, independently of the requested column IDs
@@ -94,7 +94,7 @@ public class ColumnParser {
         /*
          * get mapped fields
          */
-        return ContactMapper.getInstance().getFields(columnIDs, ContactAction.VIRTUAL_FIELDS, mandatory.toArray(new ContactField[mandatory.size()]));
+        return ContactMapper.getInstance().getFields(columnIDs, IDBasedContactAction.VIRTUAL_FIELDS, mandatory.toArray(new ContactField[mandatory.size()]));
     }
 
     /**
@@ -102,7 +102,7 @@ public class ColumnParser {
      * '<code>,</code>'. Obsolete column IDs are replaced with the corresponding valid ones implicitly.
      * <p/>
      * Additionally, the <code>all</code> and <code>list</code> shortcuts are recognized and mapped to the column IDs defined at
-     * {@link ContactAction#COLUMNS_ALIAS_ALL} and {@link ContactAction#COLUMNS_ALIAS_LIST} respectively.
+     * {@link IDBasedContactAction#COLUMNS_ALIAS_ALL} and {@link IDBasedContactAction#COLUMNS_ALIAS_LIST} respectively.
      *
      * @param commaSeparated The value to parse
      * @return The parsed columnd IDs
@@ -113,10 +113,10 @@ public class ColumnParser {
             return null;
         }
         if ("all".equals(commaSeparated)) {
-            return ContactAction.COLUMNS_ALIAS_ALL;
+            return IDBasedContactAction.COLUMNS_ALIAS_ALL;
         }
         if ("list".equals(commaSeparated)) {
-            return ContactAction.COLUMNS_ALIAS_LIST;
+            return IDBasedContactAction.COLUMNS_ALIAS_LIST;
         }
         String[] splitted = Strings.splitByComma(commaSeparated);
         int[] columnIDs = new int[splitted.length];

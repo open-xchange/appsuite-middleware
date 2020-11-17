@@ -276,7 +276,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
         if (null == compositeTerm.getOperands() || 2 > compositeTerm.getOperands().length) {
             return false; // at least 2 operands
         }
-        List<Object> constantValues = new ArrayList<Object>();
+        List<Object> constantValues = new ArrayList<>();
         Object commonColumnValue = null;
         for (SearchTerm<?> term : compositeTerm.getOperands()) {
             if (false == SingleSearchTerm.class.isInstance(term)) {
@@ -416,6 +416,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
         return mapping;
     }
 
+    @SuppressWarnings("deprecation")
     private static ContactField getField(Object value) {
         ContactField field = null;
         if (ContactField.class.isInstance(value)) {

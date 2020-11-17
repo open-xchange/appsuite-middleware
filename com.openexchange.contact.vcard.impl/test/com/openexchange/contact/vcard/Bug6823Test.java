@@ -69,8 +69,8 @@ public class Bug6823Test extends VCardTest {
         super();
     }
 
-         @Test
-     public void testImportVCard() throws Exception {
+    @Test
+    public void testImportVCard() {
         /*
          * import vCard
          */

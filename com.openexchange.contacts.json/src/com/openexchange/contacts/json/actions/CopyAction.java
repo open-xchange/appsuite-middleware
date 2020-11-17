@@ -53,7 +53,7 @@ import java.io.InputStream;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.ContactService;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
@@ -75,64 +75,67 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.user.User;
 
-
 /**
  * {@link CopyAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 @OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
-public class CopyAction extends ContactAction {
+public class CopyAction extends IDBasedContactAction {
 
     /**
      * Initializes a new {@link CopyAction}.
-     * @param serviceLookup
+     * 
+     * @param serviceLookup The service lookup to use
      */
     public CopyAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(final ContactRequest request) throws OXException {
-        /*
-         * prepare original contact
-         */
-        final ContactService contactService = getContactService();
-        final Contact contact = contactService.getContact(request.getSession(), request.getFolderID(), request.getObjectID());
-        final int originalFolderID = contact.getParentFolderID();
-        final int originalObjectID = contact.getObjectID();
+    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
+        Contact contact = access.getContact(getContactID(request.getFolderID(), request.getObjectID()));
+        int originalFolderID = contact.getParentFolderID();
+        int originalObjectID = contact.getObjectID();
         contact.removeObjectID();
         contact.removeParentFolderID();
         contact.removeInternalUserId();
         contact.removeUid();
         boolean hasAttachments = 0 < contact.getNumberOfAttachments();
-        /*
-         * create copy
-         */
+
         String folderID = request.getFolderIDFromData();
         if (hasAttachments) {
             contact.removeNumberOfAttachments();
-	        contactService.createContact(request.getSession(), folderID, contact);
-	        copyAttachments(Integer.parseInt(folderID), request.getSession(), request.getSession().getContext(),
-	        		contact, originalObjectID, originalFolderID, request.getSession().getUser(), request.getSession().getUserConfiguration());
+            access.createContact(folderID, contact);
+            copyAttachments(Integer.parseInt(folderID), request.getSession(), request.getSession().getContext(), contact, originalObjectID, originalFolderID, request.getSession().getUser(), request.getSession().getUserConfiguration());
         } else {
-	        contactService.createContact(request.getSession(), folderID, contact);
+            access.createContact(folderID, contact);
         }
-        /*
-         * respond with new object ID
-         */
-        final JSONObject response = new JSONObject();
+
+        JSONObject response = new JSONObject();
         try {
-            response.put("id", contact.getObjectID());
+            response.put("id", contact.getId());
+            return new AJAXRequestResult(response, contact.getLastModified(), "json");
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
-
-        return new AJAXRequestResult(response, contact.getLastModified(), "json");
     }
 
-    public static void copyAttachments(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {
+    /**
+     * Copies the attachments of the contact
+     *
+     * @param folderId The folder identifier
+     * @param session The session
+     * @param ctx The context
+     * @param contactObj The contact object
+     * @param origObjectId The original object identifier
+     * @param origFolderId The original folder identifier
+     * @param user The user
+     * @param uc The user configuration
+     */
+    private static void copyAttachments(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {
         /*
          * Copy attachments
          */
@@ -162,14 +165,14 @@ public class CopyAction extends ContactAction {
                     try {
                         attachmentBase.rollback();
                     } catch (OXException e1) {
-                        LOG.error("Attachment transaction rollback failed", e);
+                        LOG.error("Attachment transaction rollback failed", e1);
                     }
                     throw e;
                 } catch (OXException e) {
                     try {
                         attachmentBase.rollback();
                     } catch (OXException e1) {
-                        LOG.error("Attachment transaction rollback failed", e);
+                        LOG.error("Attachment transaction rollback failed", e1);
                     }
                     throw e;
                 } finally {
