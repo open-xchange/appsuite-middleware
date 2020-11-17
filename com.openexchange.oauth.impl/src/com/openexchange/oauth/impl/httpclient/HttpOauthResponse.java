@@ -63,6 +63,7 @@ public class HttpOauthResponse implements HTTPResponse {
         delegate = oauthResponse;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <R> R getPayload(Class<R> klass) throws OXException {
         try {

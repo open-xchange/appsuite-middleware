@@ -143,11 +143,10 @@ public class Scope implements Serializable {
         for (String token : tokens) {
             if (token == null) {
                 throw new IllegalArgumentException("A scope token must not be null!");
-            } else {
-                Matcher matcher = OAUTH_SCOPE.matcher(token);
-                if (!matcher.matches()) {
-                    throw new IllegalArgumentException("Invalid token: " + token);
-                }
+            }
+            Matcher matcher = OAUTH_SCOPE.matcher(token);
+            if (!matcher.matches()) {
+                throw new IllegalArgumentException("Invalid token: " + token);
             }
         }
 
@@ -171,14 +170,12 @@ public class Scope implements Serializable {
         for (String token : tokens) {
             if (token == null) {
                 throw new IllegalArgumentException("A scope token must not be null!");
-            } else {
-                Matcher matcher = OAUTH_SCOPE.matcher(token);
-                if (matcher.matches()) {
-                    tokenSet.add(token);
-                } else {
-                    throw new IllegalArgumentException("Invalid token: " + token);
-                }
             }
+            Matcher matcher = OAUTH_SCOPE.matcher(token);
+            if (!matcher.matches()) {
+                throw new IllegalArgumentException("Invalid token: " + token);
+            }
+            tokenSet.add(token);
         }
 
         return new Scope(tokenSet);

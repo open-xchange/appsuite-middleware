@@ -65,6 +65,7 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.generic.FolderUpdaterServiceV2;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
@@ -139,6 +140,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             // Concurrent subscribe attempt
             return 0;
         }
+        LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
         try {
             final SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
             final Subscription subscription = subscribeService.loadSubscription(session.getContext(), subscriptionId, null);
@@ -155,6 +157,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             storeData(data, subscription, null);
             return data.size();
         } finally {
+            LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
             unlock(subscriptionId, session);
         }
     }
@@ -227,6 +230,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             // Concurrent subscribe attempt
             return 0;
         }
+        LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
         try {
             final Context context = session.getContext();
             final SubscriptionSource source = discoverer.getSource(context, subscriptionId);
@@ -248,6 +252,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             storeData(data, subscription, null);
             return data.size();
         } finally {
+            LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
             unlock(subscriptionId, session);
         }
     }
@@ -262,7 +267,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
                 final int subscriptionId = subscription.getId();
                 if (tryLock(subscriptionId, session)) {
                     subscription.setSession(session);
-                    session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
+                    LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
                     try {
                         // Get subscription source
                         SubscriptionSource source = subscription.getSource();
@@ -288,7 +293,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
                             // Re-fetch data elements & close remaining resources
                             SearchIterator<?> newData;
                             if (data instanceof SearchIteratorDelegator) {
-                                newData = ((SearchIteratorDelegator<?>) data).newSearchIterator();
+                                newData = ((SearchIteratorDelegator) data).newSearchIterator();
                             } else {
                                 newData = subscribeService.loadContent(subscription);
                             }
@@ -317,7 +322,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
                         }
                         LOG.warn("Subscription for {} cannot be updated. Move to next one.", subscription.getSource().getId(), oxException);
                     } finally {
-                        session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
+                        LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
                         unlock(subscriptionId, session);
                     }
                 }
@@ -436,7 +441,6 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
         @Override
         public boolean hasWarnings() {
-            // TODO Auto-generated method stub
             return false;
         }
 

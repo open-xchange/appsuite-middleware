@@ -70,6 +70,7 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.TargetFolderSession;
@@ -99,12 +100,14 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     private static final int[] MATCH_COLUMNS = I2i(Arrays.remove(i2I(Contact.CONTENT_COLUMNS), I(Contact.USERFIELD20)));
 
+    private final boolean managesSubscriptionAdminFlag;
 
     /**
      * Initializes a new {@link ContactFolderUpdaterStrategy}.
      */
     public ContactFolderUpdaterStrategy() {
         super();
+        managesSubscriptionAdminFlag = false;
     }
 
     @Override
@@ -177,11 +180,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @Override
     public void closeSession(final Object session) {
-        if (session instanceof Map<?,?>) {
-            @SuppressWarnings("unchecked") Map<Integer, Object> userInfo = (Map<Integer, Object>) session;
-            Session ses = (Session) userInfo.get(I(SESSION));
-            ses.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
-        }
+        LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
     }
 
     @Override
@@ -261,7 +260,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         if (session == null) {
             session = new TargetFolderSession(target);
         }
-        session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
+        LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
         userInfo.put(I(SESSION), session);
         return userInfo;
     }

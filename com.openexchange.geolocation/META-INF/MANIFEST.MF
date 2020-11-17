@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: com.openexchange.geolocation
 Bundle-ManifestVersion: 2
 Bundle-Name: The bundle providing a Geo location interfaces
 Bundle-SymbolicName: com.openexchange.geolocation
@@ -27,3 +28,4 @@ Export-Package: com.openexchange.geolocation,
  com.openexchange.geolocation.exceptions
 Bundle-ClassPath: lib/ipaddress-5.0.2.jar,
  .
+

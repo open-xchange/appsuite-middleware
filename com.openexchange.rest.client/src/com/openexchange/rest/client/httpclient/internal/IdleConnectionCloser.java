@@ -121,10 +121,10 @@ public class IdleConnectionCloser implements Runnable {
             manager.closeExpiredConnections();
             manager.closeIdleConnections(idleTimeoutSeconds, TimeUnit.SECONDS);
             PoolStats totalStats = manager.getTotalStats();
-            if (totalStats.getLeased() == 0 && totalStats.getPending() == 0  && totalStats.getAvailable() == 0) {
+            if (totalStats.getLeased() == 0 && totalStats.getPending() == 0 && totalStats.getAvailable() == 0) {
                 stop();
             }
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             stop();
         }
     }

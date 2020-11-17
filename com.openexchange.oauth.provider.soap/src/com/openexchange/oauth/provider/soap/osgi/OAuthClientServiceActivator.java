@@ -58,7 +58,6 @@ import com.openexchange.oauth.provider.soap.OAuthClientServicePortType;
 import com.openexchange.oauth.provider.soap.OAuthClientServicePortTypeImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
-
 /**
  * {@link OAuthClientServiceActivator} - The activator for <i>com.openexchange.oauth.provider.soap</i> bundle
  *
@@ -84,6 +83,7 @@ public class OAuthClientServiceActivator extends HousekeepingActivator {
         final BundleContext context = this.context;
         ServiceTrackerCustomizer<Remote, Remote> trackerCustomizer = new ServiceTrackerCustomizer<Remote, Remote>() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void removedService(final ServiceReference<Remote> reference, final Remote service) {
                 if (service instanceof RemoteClientManagement) {
@@ -97,6 +97,7 @@ public class OAuthClientServiceActivator extends HousekeepingActivator {
                 // Ignore
             }
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public Remote addingService(final ServiceReference<Remote> reference) {
                 final Remote service = context.getService(reference);

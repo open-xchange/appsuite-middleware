@@ -57,7 +57,6 @@ import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
@@ -197,7 +196,7 @@ public abstract class BasicCommandlineOptions {
     }
 
     public static final Hashtable<String, String> getEnvOptions() {
-        final Hashtable<String, String> opts = new Hashtable<String, String>();
+        final Hashtable<String, String> opts = new Hashtable<>();
         for (final String opt : ENV_OPTIONS) {
             try {
                 final Field f = BasicCommandlineOptions.class.getDeclaredField(opt);
@@ -257,7 +256,7 @@ public abstract class BasicCommandlineOptions {
         }
     }
 
-    protected final void printServerException(final Exception e, final AdminParser parser) {
+    protected static final void printServerException(final Exception e, final AdminParser parser) {
         StringBuilder output = new StringBuilder();
         final String msg = e.getMessage();
         if (parser != null && parser.checkNoNewLine()) {
@@ -286,7 +285,7 @@ public abstract class BasicCommandlineOptions {
     //        System.err.println("RMI module "+nbe.getMessage()+" not available on server");
     //    }
 
-    protected final void printError(final String msg, final AdminParser parser) {
+    protected static final void printError(final String msg, final AdminParser parser) {
         String output = null;
         if (parser == null) {
             output = msg;
@@ -520,7 +519,7 @@ public abstract class BasicCommandlineOptions {
         setAdminPassOption(parser);
     }
 
-    protected void sysexit(final int exitcode) {
+    protected static void sysexit(final int exitcode) {
         // see http://java.sun.com/j2se/1.5.0/docs/guide/rmi/faq.html#leases
         System.gc();
         System.runFinalization();
@@ -542,9 +541,8 @@ public abstract class BasicCommandlineOptions {
      *
      * @param parser The {@link AdminParser}
      * @return The {@link Credentials}
-     * @throws InvalidCredentialsException in case the credentials are missing
      */
-    protected final Credentials credentialsparsing(final AdminParser parser) throws InvalidCredentialsException {
+    protected final Credentials credentialsparsing(final AdminParser parser) {
         // prefer password from options
         String password = (String) parser.getOptionValue(this.adminPassOption);
         if (null == password && null != ADMIN_PASSWORD) {

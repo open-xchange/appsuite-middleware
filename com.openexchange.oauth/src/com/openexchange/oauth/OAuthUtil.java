@@ -65,6 +65,8 @@ import javax.net.ssl.SSLHandshakeException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.exceptions.OAuthException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContext;
@@ -82,6 +84,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class OAuthUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OAuthUtil.class);
 
     /**
      * Checks that specified scopes are both - available and enabled.
@@ -245,7 +249,8 @@ public final class OAuthUtil {
             try {
                 hostname = InetAddress.getLocalHost().getCanonicalHostName();
             } catch (UnknownHostException e) {
-                // ignore
+                // Log and ignore
+                LOGGER.debug("", e);
             }
         }
         // Fall back to localhost as last resort
@@ -266,6 +271,7 @@ public final class OAuthUtil {
         try {
             return URLEncoder.encode(s, "ISO-8859-1");
         } catch (UnsupportedEncodingException e) {
+            LOGGER.debug("", e);
             return s;
         }
     }
@@ -359,6 +365,7 @@ public final class OAuthUtil {
             return jo.optString(key, null);
         } catch (JSONException e) {
             // Apparent no JSON response
+            LOGGER.debug("", e);
             return null;
         }
     }

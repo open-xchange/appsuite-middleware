@@ -142,7 +142,7 @@ public class SimSubscribeService extends AbstractSubscribeService {
     }
 
     public void setContent(final Collection content) {
-        this.content = content;
+        this.content = content == null ? null : content;
     }
 
     @Override

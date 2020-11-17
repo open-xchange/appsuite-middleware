@@ -79,6 +79,12 @@ public abstract class AbstractAuthorizationCodeProvider {
 
     protected abstract void put(AuthCodeInfo authCodeInfo) throws OXException;
 
+    /**
+     * Generates the authorization code
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
     protected String generateAuthCode(int userId, int contextId) {
         return RandomStringUtils.randomAlphabetic(64);
     }

@@ -101,6 +101,7 @@ public abstract class AbstractRESTRequest implements RESTRequest {
      *
      * @return The method
      */
+    @Override
     public RESTMethod getMethod() {
         return method;
     }

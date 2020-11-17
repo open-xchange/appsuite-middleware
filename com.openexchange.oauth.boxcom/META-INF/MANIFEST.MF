@@ -34,3 +34,4 @@ Import-Package: com.openexchange.config,
  org.slf4j
 Bundle-Activator: com.openexchange.oauth.boxcom.osgi.BoxComOAuthActivator
 Export-Package: com.openexchange.oauth.boxcom
+Automatic-Module-Name: com.openexchange.oauth.boxcom

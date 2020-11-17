@@ -20,3 +20,4 @@ Import-Package: com.openexchange.context,
  org.json,
  org.osgi.framework
 Bundle-Activator: com.openexchange.rest.services.users.mailMapping.osgi.MailMappingActivator
+Automatic-Module-Name: com.openexchange.rest.services.users.mailMapping

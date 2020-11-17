@@ -73,8 +73,8 @@ public class YahooSubscribeService extends AbstractOAuthSubscribeService {
     private final ServiceLookup services;
 
     /**
-     * Initialises a new {@link YahooSubscribeService}.
-     * 
+     * Initializes a new {@link YahooSubscribeService}.
+     *
      * @param oAuthServiceMetaData The {@link OAuthServiceMetaData}
      * @param services The {@link ServiceLookup}
      */

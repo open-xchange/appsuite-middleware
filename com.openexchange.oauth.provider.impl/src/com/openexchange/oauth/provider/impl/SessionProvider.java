@@ -117,23 +117,19 @@ public class SessionProvider {
 
                 @Override
                 public void onRemoval(RemovalNotification<String, String> notification) {
-                    logout(notification.getValue());
+                    String sessionId = notification.getValue();
+                    try {
+                        Session session = LoginPerformer.getInstance().doLogout(sessionId);
+                        if (session == null) {
+                            LOG.debug("Removed session ID {} from OAuth 2.0 cache. The according session was already removed from the session container.", sessionId);
+                        } else {
+                            LOG.debug("Removed session ID {} from OAuth 2.0 cache. A logout was performed.", sessionId);
+                        }
+                    } catch (OXException e) {
+                        LOG.warn("Error while removing OAuth 2.0 session", e);
+                    }
                 }
-            })
-            .build();
-    }
-
-    private void logout(String sessionId) {
-        try {
-            Session session = LoginPerformer.getInstance().doLogout(sessionId);
-            if (session == null) {
-                LOG.debug("Removed session ID {} from OAuth 2.0 cache. The according session was already removed from the session container.", sessionId);
-            } else {
-                LOG.debug("Removed session ID {} from OAuth 2.0 cache. A logout was performed.", sessionId);
-            }
-        } catch (OXException e) {
-            LOG.warn("Error while removing OAuth 2.0 session", e);
-        }
+            }).build();
     }
 
     public Session getSession(final String accessToken, final int contextId, final int userId, final String clientName, final HttpServletRequest httpRequest) throws OXException {
@@ -242,7 +238,7 @@ public class SessionProvider {
         if (null == req) {
             cookies = Collections.emptyList();
         } else {
-            cookies = new ArrayList<Cookie>();
+            cookies = new ArrayList<>();
             for (final javax.servlet.http.Cookie c : req.getCookies()) {
                 cookies.add(new AuthCookie(c));
             }
@@ -255,11 +251,11 @@ public class SessionProvider {
         if (null == req) {
             headers = Collections.emptyMap();
         } else {
-            headers = new HashMap<String, List<String>>();
-            @SuppressWarnings("unchecked") Enumeration<String> headerNames = req.getHeaderNames();
+            headers = new HashMap<>();
+            Enumeration<String> headerNames = req.getHeaderNames();
             while (headerNames.hasMoreElements()) {
                 String name = headerNames.nextElement();
-                List<String> header = new ArrayList<String>();
+                List<String> header = new ArrayList<>();
                 if (headers.containsKey(name)) {
                     header = headers.get(name);
                 }

@@ -68,6 +68,7 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceExceptionCode;
@@ -242,18 +243,23 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
 
                 @Override
                 public Void call() throws Exception {
-                    int off = startOffset;
-                    while (off < total) {
-                        final int remain = total - off;
-                        final List<User> chunk = xingAPI.getContactsFrom(userId, remain > maxLimit ? maxLimit : remain, off, null, userFields).getUsers();
-                        // Store them
-                        final List<Contact> convertees = convert(chunk, loadingPhotoHandler, subscription, session);
-                        LOG.info("Converted {} XING contacts for user {} in context {}", I(chunk.size()), I(session.getUserId()), I(session.getContextId()));
-                        folderUpdater.save(new SearchIteratorDelegator<Contact>(convertees), subscription);
-                        // Next chunk...
-                        off += chunk.size();
+                    LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
+                    try {
+                        int off = startOffset;
+                        while (off < total) {
+                            final int remain = total - off;
+                            final List<User> chunk = xingAPI.getContactsFrom(userId, remain > maxLimit ? maxLimit : remain, off, null, userFields).getUsers();
+                            // Store them
+                            final List<Contact> convertees = convert(chunk, loadingPhotoHandler, subscription, session);
+                            LOG.info("Converted {} XING contacts for user {} in context {}", I(chunk.size()), I(session.getUserId()), I(session.getContextId()));
+                            folderUpdater.save(new SearchIteratorDelegator<Contact>(convertees), subscription);
+                            // Next chunk...
+                            off += chunk.size();
+                        }
+                        return null;
+                    } finally {
+                        LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
                     }
-                    return null;
                 }
             });
             // Return first chunk with this thread

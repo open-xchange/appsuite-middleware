@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.FolderObject;
 /**
  * {@link Bug40826Test}
  *
- * As an appsuite user, can create a guest share with WRiTE permissions in calendar/contacts module
+ * An appsuite user should not be able to create a guest share with WRITE permissions in the contacts or tasks module
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -76,11 +76,6 @@ public class Bug40826Test extends ShareTest {
      */
     public Bug40826Test() {
         super();
-    }
-
-    @Test
-    public void testShareCalendarToAuthor() throws Exception {
-        testShareToAuthor(FolderObject.CALENDAR);
     }
 
     @Test

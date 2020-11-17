@@ -51,10 +51,11 @@ package com.openexchange.ajax.folder.manager;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderBodyNotification;
@@ -78,7 +79,7 @@ public class FolderManager {
     public final static String INFOSTORE = "infostore";
 
     private final FolderApi folderApi;
-    private final Set<String> foldersToDelete = new HashSet<>();
+    private final Set<String> foldersToDelete = new LinkedHashSet<>();
     private Long lastTimestamp;
     private final String tree;
 
@@ -108,7 +109,7 @@ public class FolderManager {
     }
 
     public void cleanUp() throws ApiException {
-        deleteFolder(new ArrayList<>(foldersToDelete));
+        deleteFolder(foldersToDelete.stream().sorted(Collections.reverseOrder()).collect(Collectors.toList()));
     }
 
     /**

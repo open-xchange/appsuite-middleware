@@ -68,7 +68,7 @@ public abstract class AbstractOSGiDelegateService<S> {
 
     private final AtomicReference<S> service;
 
-    private volatile ServiceTracker tracker;
+    private volatile ServiceTracker<?, ?> tracker;
 
     /**
      * Initializes a new {@link AbstractOSGiDelegateService}.
@@ -76,7 +76,7 @@ public abstract class AbstractOSGiDelegateService<S> {
     protected AbstractOSGiDelegateService(final Class<S> clazz) {
         super();
         this.clazz = clazz;
-        service = new AtomicReference<S>();
+        service = new AtomicReference<>();
     }
 
     /**
@@ -86,14 +86,15 @@ public abstract class AbstractOSGiDelegateService<S> {
      * @return This instance for method chaining
      */
     @SuppressWarnings("unchecked")
-    public final <I extends AbstractOSGiDelegateService<S>> I start(final BundleContext bundleContext) {
-        if (null == tracker) {
-            synchronized (this) {
-                ServiceTracker tmp = tracker;
-                if (null == tracker) {
-                    tracker = tmp = new ServiceTracker(bundleContext, clazz.getName(), new Customizer<S>(service, bundleContext));
-                    tmp.open();
-                }
+    public <I extends AbstractOSGiDelegateService<S>> I start(BundleContext bundleContext) {
+        if (null != tracker) {
+            return (I) this;
+        }
+        synchronized (this) {
+            ServiceTracker<?, ?> tmp = tracker;
+            if (null == tracker) {
+                tracker = tmp = new ServiceTracker<>(bundleContext, clazz.getName(), new Customizer<>(service, bundleContext));
+                tmp.open();
             }
         }
         return (I) this;
@@ -102,8 +103,8 @@ public abstract class AbstractOSGiDelegateService<S> {
     /**
      * Stops tracking the delegate service.
      */
-    public final void stop() {
-        final ServiceTracker tmp = tracker;
+    public void stop() {
+        ServiceTracker<?, ?> tmp = tracker;
         if (null != tmp) {
             tmp.close();
         }
@@ -116,9 +117,9 @@ public abstract class AbstractOSGiDelegateService<S> {
      * @throws OXException If service reference returned <code>null</code>
      */
     protected S getService() throws OXException {
-        final S serviceInst = service.get();
+        S serviceInst = service.get();
         if (null == serviceInst) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( clazz.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
         }
         return serviceInst;
     }
@@ -132,7 +133,7 @@ public abstract class AbstractOSGiDelegateService<S> {
         return service.get();
     }
 
-    private static final class Customizer<S> implements ServiceTrackerCustomizer<S,S> {
+    private static final class Customizer<S> implements ServiceTrackerCustomizer<S, S> {
 
         private final AtomicReference<S> reference;
         private final BundleContext context;
@@ -143,26 +144,26 @@ public abstract class AbstractOSGiDelegateService<S> {
          * @param reference The service reference
          * @param context The bundle context
          */
-        public Customizer(final AtomicReference<S> reference, final BundleContext context) {
+        public Customizer(AtomicReference<S> reference, BundleContext context) {
             super();
             this.reference = reference;
             this.context = context;
         }
 
         @Override
-        public S addingService(final ServiceReference<S> reference) {
-            final S service = context.getService(reference);
+        public S addingService(ServiceReference<S> reference) {
+            S service = context.getService(reference);
             this.reference.set(service);
             return service;
         }
 
         @Override
-        public void modifiedService(final ServiceReference<S> reference, final S service) {
+        public void modifiedService(ServiceReference<S> reference, S service) {
             // Nope
         }
 
         @Override
-        public void removedService(final ServiceReference<S> reference, final S service) {
+        public void removedService(ServiceReference<S> reference, S service) {
             this.reference.set(null);
             context.ungetService(reference);
         }

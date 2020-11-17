@@ -402,6 +402,12 @@ public final class LogProperties {
          * com.openexchange.provisioning.exceptionId
          */
         PROVISIONING_EXCEPTION_ID("com.openexchange.provisioning.exceptionId"),
+        /**
+         * com.openexchange.subscription.administrative
+         * <p>
+         * A special log property that controls whether caller is allowed to delete/update/create objects in subscribed folders.
+         */
+        SUBSCRIPTION_ADMIN("com.openexchange.subscription.administrative")
         ;
 
         private final String name;

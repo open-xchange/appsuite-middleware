@@ -84,20 +84,21 @@ public class OAuthHTTPClient extends AbstractHTTPClient implements HTTPClient {
         return new OAuthHTTPRequestBuilder(this);
     }
 
+    @SuppressWarnings("unchecked")
     public <R> R process(String payload, Class<R> targetFormat) throws OXException {
         if (String.class == targetFormat) {
             return (R) payload;
         } else if (InputStream.class == targetFormat) {
             try {
                 return (R) Streams.newByteArrayInputStream(payload.getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException e) {
+            } catch (@SuppressWarnings("unused") UnsupportedEncodingException e) {
                 // WON'T HAPPEN!
             }
         } else if (Reader.class == targetFormat) {
             return (R) new StringReader(payload);
         }
 
-        for (Class inputType : Arrays.asList(String.class, Reader.class, InputStream.class)) {
+        for (Class<?> inputType : Arrays.asList(String.class, Reader.class, InputStream.class)) {
             List<HTTPResponseProcessor> procList = processors.get(inputType);
             for (HTTPResponseProcessor processor : procList) {
                 if (processor.getTypes()[1] == targetFormat) {

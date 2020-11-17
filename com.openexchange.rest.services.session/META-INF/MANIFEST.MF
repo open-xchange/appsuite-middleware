@@ -34,3 +34,4 @@ Import-Package: com.openexchange.ajax.requesthandler,
  org.osgi.framework,
  org.osgi.service.http
 Bundle-Activator: com.openexchange.rest.services.session.osgi.SessionRESTActivator
+Automatic-Module-Name: com.openexchange.rest.services.session

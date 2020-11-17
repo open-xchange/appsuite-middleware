@@ -59,6 +59,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
+import com.openexchange.log.LogProperties;
 import com.openexchange.microsoft.graph.contacts.MicrosoftGraphContactsService;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
@@ -113,7 +114,7 @@ public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeSer
 
     /**
      * Fetches all contacts in the foreground (blocking thread)
-     * 
+     *
      * @param account The {@link OAuthAccount}
      * @return A {@link List} with all fetched contacts
      * @throws OXException
@@ -125,7 +126,7 @@ public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeSer
 
     /**
      * Schedules a task to fetch all contacts and executes it in the background
-     * 
+     *
      * @param threadPool the {@link ThreadPoolService}
      * @param folderUpdater The {@link FolderUpdaterService}
      * @param account The {@link OAuthAccount}
@@ -147,11 +148,12 @@ public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeSer
         private final Subscription subscription;
 
         /**
-         * Initialises a new {@link BackgroundTask}.
-         * 
+         * Initializes a new {@link BackgroundTask}.
+         *
          * @param folderUpdater The folder updated
          * @param account The account
          * @param subscription The subscription
+         * @param backgroundTaskMarker The marker
          */
         BackgroundTask(FolderUpdaterService<Contact> folderUpdater, OAuthAccount account, Subscription subscription) {
             this.folderUpdater = folderUpdater;
@@ -161,6 +163,7 @@ public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeSer
 
         @Override
         public Void call() throws Exception {
+            LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
             try {
                 MicrosoftGraphContactsService contactsService = getServices().getService(MicrosoftGraphContactsService.class);
                 boolean hasMore = false;
@@ -175,6 +178,8 @@ public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeSer
             } catch (Exception e) {
                 LOG.error("", e);
                 throw e;
+            } finally {
+                LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
             }
         }
     }

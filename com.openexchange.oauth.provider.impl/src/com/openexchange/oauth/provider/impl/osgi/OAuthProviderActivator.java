@@ -141,7 +141,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class,
             HttpService.class, DispatcherPrefixService.class, CryptoService.class, CacheService.class, ServerConfigService.class,
- SessiondService.class, CapabilityService.class, ConfigViewFactory.class, NotificationMailFactory.class, HazelcastConfigurationService.class };
+            SessiondService.class, CapabilityService.class, ConfigViewFactory.class, NotificationMailFactory.class, HazelcastConfigurationService.class };
     }
 
     @Override
@@ -185,11 +185,13 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
         track(OAuthAuthorizationService.class, new SimpleRegistryListener<OAuthAuthorizationService>() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void added(ServiceReference<OAuthAuthorizationService> ref, OAuthAuthorizationService service) {
                 registerService(OAuthResourceService.class, new OAuthResourceServiceImpl(service, serviceLookup));
             }
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void removed(ServiceReference<OAuthAuthorizationService> ref, OAuthAuthorizationService service) {
                 unregisterService(service);
@@ -333,6 +335,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             this.hzMapName = hzMapName;
         }
 
+        @SuppressWarnings("synthetic-access")
         @Override
         public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
             HazelcastInstance hzInstance = context.getService(reference);
@@ -356,6 +359,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             // Nothing
         }
 
+        @SuppressWarnings("synthetic-access")
         @Override
         public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
             stopAuthorizationServer();

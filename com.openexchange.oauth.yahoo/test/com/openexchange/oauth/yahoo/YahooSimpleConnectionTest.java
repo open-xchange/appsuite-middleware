@@ -76,6 +76,7 @@ import com.openexchange.oauth.yahoo.internal.YahooRequestTuner;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class YahooSimpleConnectionTest {
+
     private static String singleContact = "{\"contact\":{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:50:52Z\",\"isConnection\":false,\"id\":1,\"fields\":[{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/email/2\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":2,\"type\":\"email\",\"value\":\"christine@example.com\",\"editedBy\":\"OWNER\",\"flags\":[],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/birthday/3\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":3,\"type\":\"birthday\"," + "\"value\":{\"day\":\"1\",\"month\":\"4\",\"year\":\"1980\"},\"editedBy\":\"OWNER\",\"flags\":[],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/notes/4\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":4,\"type\":\"notes\",\"value\":\"My private note on Christine\",\"editedBy\":\"OWNER\",\"flags\":[],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/company/5\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":5,\"type\":\"company\",\"value\":\"Christines L�dchen\",\"editedBy\":\"OWNER\",\"flags\":[],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com" + "/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/otherid/6\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":6,\"type\":\"otherid\",\"value\":\"christine.weissenbruenner\",\"editedBy\":\"OWNER\",\"flags\":[\"SKYPE\"],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/jobTitle/7\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":7,\"type\":\"jobTitle\",\"value\":\"Gesch�ftsf�hrerin\",\"editedBy\":\"OWNER\",\"flags\":[],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/phone/10\",\"created\":\"2009-09-14T15:50:52Z\",\"updated\":\"2009-09-14T15:50:52Z\",\"id\":10," + "\"type\":\"phone\",\"value\":\"02171 123456\",\"editedBy\":\"OWNER\",\"flags\":[\"HOME\"],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/phone/11\",\"created\":\"2009-09-14T15:50:52Z\",\"updated\":\"2009-09-14T15:50:52Z\",\"id\":11,\"type\":\"phone\",\"value\":\"0171 456987\",\"editedBy\":\"OWNER\",\"flags\":[\"MOBILE\"],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/phone/12\",\"created\":\"2009-09-14T15:50:52Z\",\"updated\":\"2009-09-14T15:50:52Z\",\"id\":12,\"type\":\"phone\",\"value\":\"0221 987654\",\"editedBy\":\"OWNER\",\"flags\":[\"WORK\"],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/" + "ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/name/1\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":1,\"type\":\"name\",\"value\":{\"givenName\":\"Christine\",\"middleName\":\"\",\"familyName\":\"Wei�enbr�nner-Doppelname\",\"prefix\":\"\",\"suffix\":\"\",\"givenNameSound\":\"\",\"familyNameSound\":\"\"},\"editedBy\":\"OWNER\",\"flags\":[],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/address/8\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":8,\"type\":\"address\",\"value\":{\"street\":\"An der Luisenburg 2a\",\"city\":\"Leverkusen\",\"stateOrProvince\":\"NRW\",\"postalCode\":\"51379\",\"country\":\"Germany\"," + "\"countryCode\":\"DE\"},\"editedBy\":\"OWNER\",\"flags\":[\"HOME\"],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/address/9\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":9,\"type\":\"address\",\"value\":{\"street\":\"Bonner Str 207\",\"city\":\"K�ln\",\"stateOrProvince\":\"NRW\",\"postalCode\":\"90768\",\"country\":\"Germany\",\"countryCode\":\"DE\"},\"editedBy\":\"OWNER\",\"flags\":[\"WORK\"],\"categories\":[]}],\"categories\":[]}}";
 
     // This works (REST-API)
@@ -89,10 +90,7 @@ public class YahooSimpleConnectionTest {
     public static void testYahooConnection() {
 
         // Keys are managed here: https://developer.apps.yahoo.com/projects (domain-specific)
-        OAuthService service = new ServiceBuilder().provider(YahooApi.class).apiKey(
-            "dj0yJmk9eDY3MW9VNXhqYTRWJmQ9WVdrOVJYWTFiRGhKTXpBbWNHbzlNelF6TURnMU5qWXkmcz1jb25zdW1lcnNlY3JldCZ4PTkx").apiSecret(
-            "b94fbe3f52d364b4ae5a28228ac7b558fcfbe58c").callback("https://www.open-xchange.com").build();
-        Scanner in = new Scanner(System.in);
+        OAuthService service = new ServiceBuilder().provider(YahooApi.class).apiKey("dj0yJmk9eDY3MW9VNXhqYTRWJmQ9WVdrOVJYWTFiRGhKTXpBbWNHbzlNelF6TURnMU5qWXkmcz1jb25zdW1lcnNlY3JldCZ4PTkx").apiSecret("b94fbe3f52d364b4ae5a28228ac7b558fcfbe58c").callback("https://www.open-xchange.com").build();
 
         System.out.println("=== Yahoo's OAuth Workflow ===");
         System.out.println();
@@ -107,48 +105,49 @@ public class YahooSimpleConnectionTest {
         System.out.println(service.getAuthorizationUrl(requestToken));
         System.out.println("And paste the verifier here");
         System.out.print(">>");
-        Verifier verifier = new Verifier(in.nextLine());
-        System.out.println();
 
-        // Trade the Request Token and Verifier for the Access Token
-        System.out.println("Trading the Request Token for an Access Token...");
-        Token accessToken = service.getAccessToken(requestToken, verifier);
-        System.out.println("Got the Access Token!");
-        System.out.println("(if your curious it looks like this: " + accessToken + " )");
-        System.out.println();
+        Verifier verifier;
+        try (Scanner in = new Scanner(System.in)) {
+            verifier = new Verifier(in.nextLine());
+            System.out.println();
 
-        // Get the GUID of the current user from yahoo. This is needed for later requests
-        System.out.println("Now we're going to get the Users GUID");
-        OAuthRequest request1 = new OAuthRequest(Verb.GET, "https://social.yahooapis.com/v1/me/guid?format=xml");
-        service.signRequest(accessToken, request1);
-        Response response1 = request1.send(YahooRequestTuner.getInstance());
-        System.out.println("Lets see it ...");
-        System.out.println();
-        System.out.println(response1.getCode());
-        System.out.println(response1.getBody());
+            // Trade the Request Token and Verifier for the Access Token
+            System.out.println("Trading the Request Token for an Access Token...");
+            Token accessToken = service.getAccessToken(requestToken, verifier);
+            System.out.println("Got the Access Token!");
+            System.out.println("(if your curious it looks like this: " + accessToken + " )");
+            System.out.println();
 
-        // Extract the Users ID from a response looking like this: <value>ANZAPAEE55TMMWPLYXQCJO7BAM<
-        Pattern pattern = Pattern.compile("<value>([^<]*)<");
-        Matcher matcher = pattern.matcher(response1.getBody());
-        String guid = "";
-        if (matcher.find()) {
-            guid = matcher.group(1);
-            System.out.println("Extracted GUID : " + guid);
-        }
+            // Get the GUID of the current user from yahoo. This is needed for later requests
+            System.out.println("Now we're going to get the Users GUID");
+            OAuthRequest request1 = new OAuthRequest(Verb.GET, "https://social.yahooapis.com/v1/me/guid?format=xml");
+            service.signRequest(accessToken, request1);
+            Response response1 = request1.send(YahooRequestTuner.getInstance());
+            System.out.println("Lets see it ...");
+            System.out.println();
+            System.out.println(response1.getCode());
+            System.out.println(response1.getBody());
 
-        // Now let's go and ask for a protected resource!
-        System.out.println("Now we're going to access a protected resource (list of contact ids) ...");
-        String resource = ALL_CONTACT_IDS_URL.replace("GUID", guid);
-        System.out.println("This is its URL : " + resource);
-        OAuthRequest request = new OAuthRequest(Verb.GET, resource);
-        service.signRequest(accessToken, request);
-        Response response = request.send(YahooRequestTuner.getInstance());
-        System.out.println("Got it! Lets see what we found...");
-        System.out.println();
-        System.out.println(response.getCode());
-        System.out.println(response.getBody());
+            // Extract the Users ID from a response looking like this: <value>ANZAPAEE55TMMWPLYXQCJO7BAM<
+            Pattern pattern = Pattern.compile("<value>([^<]*)<");
+            Matcher matcher = pattern.matcher(response1.getBody());
+            String guid = "";
+            if (matcher.find()) {
+                guid = matcher.group(1);
+                System.out.println("Extracted GUID : " + guid);
+            }
 
-        try {
+            // Now let's go and ask for a protected resource!
+            System.out.println("Now we're going to access a protected resource (list of contact ids) ...");
+            String resource = ALL_CONTACT_IDS_URL.replace("GUID", guid);
+            System.out.println("This is its URL : " + resource);
+            OAuthRequest request = new OAuthRequest(Verb.GET, resource);
+            service.signRequest(accessToken, request);
+            Response response = request.send(YahooRequestTuner.getInstance());
+            System.out.println("Got it! Lets see what we found...");
+            System.out.println();
+            System.out.println(response.getCode());
+            System.out.println(response.getBody());
             JSONObject allContactsWholeResponse = new JSONObject(response.getBody());
             if (allContactsWholeResponse.has("contacts")) {
                 JSONObject contacts = (JSONObject) allContactsWholeResponse.get("contacts");
@@ -171,7 +170,6 @@ public class YahooSimpleConnectionTest {
                 }
             }
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -206,6 +204,7 @@ public class YahooSimpleConnectionTest {
         System.out.println("contacts note : " + contact.getNote());
     }
 
+    @SuppressWarnings("deprecation")
     private static Contact parseSingleContact(String singleContact) {
         Contact oxContact = new Contact();
         // contact, fields -> danach type
@@ -292,7 +291,7 @@ public class YahooSimpleConnectionTest {
                                         date = Integer.parseInt(value.getString("day"));
                                     }
                                     if (value.has("month")) {
-                                        month = Integer.parseInt(value.getString("month")) -1;
+                                        month = Integer.parseInt(value.getString("month")) - 1;
                                     }
                                     if (value.has("year")) {
                                         year = Integer.parseInt(value.getString("year")) - 1900;
@@ -303,14 +302,14 @@ public class YahooSimpleConnectionTest {
                                 }
                             }
 
-                            else if (type.equals("otherid")){
-                                if (field.has("value") && field.has("flags")){
+                            else if (type.equals("otherid")) {
+                                if (field.has("value") && field.has("flags")) {
                                     String kind = field.getString("flags");
                                     Pattern pattern = Pattern.compile("\\[\"([^\"]*)\"\\]");
                                     Matcher matcher = pattern.matcher(kind);
-                                    if (matcher.find()){
+                                    if (matcher.find()) {
                                         String service = matcher.group(1);
-                                        oxContact.setInstantMessenger1(field.getString("value") + " ("+service+")");
+                                        oxContact.setInstantMessenger1(field.getString("value") + " (" + service + ")");
                                     }
                                 }
                             }

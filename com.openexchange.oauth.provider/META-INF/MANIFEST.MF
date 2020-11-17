@@ -24,3 +24,4 @@ Export-Package: com.openexchange.oauth.provider.authorizationserver.client,
  com.openexchange.oauth.provider.resourceserver.annotations,
  com.openexchange.oauth.provider.resourceserver.scope,
  com.openexchange.oauth.provider.tools
+Automatic-Module-Name: com.openexchange.oauth.provider

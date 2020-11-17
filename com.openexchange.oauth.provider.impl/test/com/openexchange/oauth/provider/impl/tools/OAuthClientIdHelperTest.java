@@ -74,7 +74,7 @@ public class OAuthClientIdHelperTest {
     private final static String BROKEN_CLIENT_ID = "dGhpc1Nob3V/sZEJlTWF4aW/11bTMyQ2hhcmFjdGVyc3M/d48ce8ec590c461f992158508d9ac99b04b5988d5ff14586bfe34209c22b8a67";
 
      @Test
-     public void testGenerateClientId_defaultGroup_validClientId() throws Exception {
+     public void testGenerateClientId_defaultGroup_validClientId() {
         String generateClientId = OAuthClientIdHelper.getInstance().generateClientId(GROUP_ID);
 
         String encodedGroupId = generateClientId.split(OAuthClientIdHelper.SEPERATOR)[0];
@@ -84,7 +84,7 @@ public class OAuthClientIdHelperTest {
     }
 
      @Test
-     public void testGenerateClientId_maximumCharacters_validClientId() throws Exception {
+     public void testGenerateClientId_maximumCharacters_validClientId() {
         String generateClientId = OAuthClientIdHelper.getInstance().generateClientId(GROUP_ID_MAX_SIZE);
 
         String encodedGroupId = generateClientId.split(OAuthClientIdHelper.SEPERATOR)[0];
@@ -94,14 +94,14 @@ public class OAuthClientIdHelperTest {
     }
 
      @Test
-     public void testGenerateClientId_maximumCharacters_doNotExceed256AllowedColumnCharacters() throws Exception {
+     public void testGenerateClientId_maximumCharacters_doNotExceed256AllowedColumnCharacters() {
         String generateClientId = OAuthClientIdHelper.getInstance().generateClientId(GROUP_ID_MAX_SIZE);
 
         Assert.assertTrue("Length of clientid exceeds maximum size of 256 characters", generateClientId.length() < 256);
     }
 
      @Test
-     public void testExtractGroupId_curiousGroupId_fails() throws Exception {
+     public void testExtractGroupId_curiousGroupId_fails() {
         boolean failed = false;
         try {
             OAuthClientIdHelper.getInstance().extractEncodedGroupId(BROKEN_CLIENT_ID);
@@ -121,7 +121,7 @@ public class OAuthClientIdHelperTest {
     }
 
      @Test
-     public void testDecode_ValidEncodedGroupId_correctDecoded() throws Exception {
+     public void testDecode_ValidEncodedGroupId_correctDecoded() {
         String extractedGroupId = OAuthClientIdHelper.getInstance().decode(ENCODED_GROUP_ID);
 
         Assert.assertEquals("Extracted group id not correct", GROUP_ID_MAX_SIZE, extractedGroupId);

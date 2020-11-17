@@ -95,7 +95,7 @@ public interface WildcardHttpClientConfigProvider extends HttpClientConfigProvid
      * @param config The configuration to adjust
      * @return The {@link HttpBasicConfig}
      */
-    default HttpBasicConfig configureHttpBasicConfig(@SuppressWarnings("unused") String clientId, HttpBasicConfig config) {
+    default HttpBasicConfig configureHttpBasicConfig(String clientId, HttpBasicConfig config) {
         return config;
     }
 

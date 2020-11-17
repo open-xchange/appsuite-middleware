@@ -136,21 +136,6 @@ public class SearchTest extends AbstractAJAXSession {
         assertEquals("IFO-0400", itm.getLastResponse().getException().getErrorCode());
     }
 
-    @Test
-    public void testCategories() throws Exception {
-        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
-        com.openexchange.file.storage.File file = itm.getAction(id);
-        file.setCategories("[\"curiosity\", \"cat\", \"danger\"]");
-        itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.CATEGORIES }, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
-
-        List<com.openexchange.file.storage.File> files = itm.search("curiosity", folderId);
-        assertFalse(itm.getLastResponse().hasError());
-
-        assertTitles(files, file.getTitle());
-
-    }
-
     // Node 2652
     @Test
     public void testLastModifiedUTC() throws JSONException, IOException, OXException {

@@ -126,9 +126,8 @@ public class ConfigurationRESTService {
         try {
             if (p.isDefined()) {
                 return new JSONObject().put(property, p.get());
-            } else {
-                throw new NotFoundException();
             }
+            throw new NotFoundException();
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         } catch (OXException e) {
@@ -200,8 +199,7 @@ public class ConfigurationRESTService {
     private WebApplicationException handleNotFoundException(OXException e) {
         if (UserExceptionCode.USER_NOT_FOUND.equals(e) || ContextExceptionCodes.NOT_FOUND.equals(e)) {
             return new NotFoundException();
-        } else {
-            return new InternalServerErrorException();
         }
+        return new InternalServerErrorException();
     }
 }

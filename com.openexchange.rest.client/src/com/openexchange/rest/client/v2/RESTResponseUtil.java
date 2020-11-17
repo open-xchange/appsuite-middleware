@@ -72,7 +72,7 @@ public final class RESTResponseUtil {
         String value = response.getHeader(HttpHeaders.LAST_MODIFIED);
         try {
             return Strings.isEmpty(value) ? 0 : Long.parseLong(value);
-        } catch (NumberFormatException e) {
+        } catch (@SuppressWarnings("unused") NumberFormatException e) {
             return 0;
         }
     }

@@ -17,3 +17,4 @@ Import-Package: com.google.common.io,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: com.openexchange.oauth.provider.rmi.impl

@@ -294,7 +294,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
     private String urlEncode(final String s) {
         try {
             return URLEncoder.encode(s, "ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
+        } catch (@SuppressWarnings("unused") UnsupportedEncodingException e) {
             return s;
         }
     }
@@ -335,7 +335,8 @@ public final class InitAction extends AbstractOAuthTokenAction {
             try {
                 hostName = InetAddress.getLocalHost().getCanonicalHostName();
             } catch (UnknownHostException e) {
-                // ignore
+                // log and ignore
+                LOG.debug("", e);
             }
         }
         /*
