@@ -362,10 +362,14 @@ public final class MimeForward extends AbstractMimeProcessing {
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
     static String replaceMetaEquiv(final String html, final ContentType contentType) {
-        final Matcher m = PAT_META_CT.matcher(html);
-        final MatcherReplacer mr = new MatcherReplacer(m, html);
-        final StringBuilder replaceBuffer = new StringBuilder(html.length());
-        if (m.find()) {
+        Matcher m = PAT_META_CT.matcher(html);
+        if (!m.find()) {
+            return html;
+        }
+
+        MatcherReplacer mr = new MatcherReplacer(m, html);
+        StringBuilder replaceBuffer = new StringBuilder(html.length());
+        {
             replaceBuffer.append("<meta http-equiv=\"Content-Type\" content=\"").append(contentType.getBaseType().toLowerCase(Locale.ENGLISH));
             replaceBuffer.append("; charset=").append(contentType.getCharsetParameter()).append("\" />");
             final String replacement = replaceBuffer.toString();

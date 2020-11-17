@@ -435,7 +435,7 @@ public class Reply extends AbstractOpener {
         // Add mail's inline images
         List<String> contentIds = new ArrayList<String>();
         if (TEXT_HTML == state.message.getContentType()) {
-            MimeProcessingUtility.getTextForForward(originalMail, true, false, contentIds, session);
+            contentIds.addAll(MimeMessageUtility.getContentIDs(state.message.getContent()));
 
             if (!contentIds.isEmpty()) {
                 InlineContentHandler inlineHandler = new InlineContentHandler(contentIds);
