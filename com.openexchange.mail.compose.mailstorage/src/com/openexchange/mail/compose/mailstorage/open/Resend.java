@@ -198,6 +198,7 @@ public class Resend extends AbstractOpener {
 
         // Check if original mail may contain attachments
         if (multipart) {
+            Optional<Boolean> optionalEncrypt = Optional.of(state.encrypt);
             // Add mail's non-inline parts
             {
                 NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
