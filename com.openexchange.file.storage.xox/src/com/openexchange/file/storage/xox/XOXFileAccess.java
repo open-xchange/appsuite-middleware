@@ -65,6 +65,7 @@ import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
 import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
@@ -106,8 +107,8 @@ public class XOXFileAccess implements /*@formatter:off*/
                                        FileStorageAutoRenameFoldersAccess,
                                        FileStoragePersistentIDs,
                                        FileStorageExtendedMetadata,
-                                       FileStorageRangeFileAccess /*,
-                                       FileStorageAdvancedSearchFileAccess */{
+                                       FileStorageRangeFileAccess,
+                                       FileStorageAdvancedSearchFileAccess {
                                        /*@formatter:on*/
 
     private final XOXAccountAccess accountAccess;
@@ -359,9 +360,7 @@ public class XOXFileAccess implements /*@formatter:off*/
         return new RangeAwareSearchIterator<File>(new SearchIteratorAdapter<File>(files.iterator(), files.size()), start, end);
     }
 
-    /*
     @Override
-    */
     public SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
         List<File> result = client.advancedSearch(folderIds, searchTerm, fields, sort, order, start, end);
         if(result == null  || result.isEmpty()) {
@@ -372,9 +371,7 @@ public class XOXFileAccess implements /*@formatter:off*/
         return new RangeAwareSearchIterator<File>(new SearchIteratorAdapter<File>(result.iterator(), result.size()), start, end);
     }
 
-    /*
     @Override
-    */
     public SearchIterator<File> search(String folderId, boolean includeSubfolders, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
         List<File> result = client.advancedSearch(folderId, includeSubfolders, searchTerm, fields, sort, order, start, end);
         if(result == null  || result.isEmpty()) {
