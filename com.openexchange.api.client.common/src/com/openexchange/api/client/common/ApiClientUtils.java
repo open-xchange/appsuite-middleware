@@ -244,10 +244,6 @@ public final class ApiClientUtils {
         } else {
             value = String.valueOf(object);
         }
-
-        if (Strings.isEmpty(value)) {
-            return null;
-        }
         return value;
     }
 
