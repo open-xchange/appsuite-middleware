@@ -119,23 +119,16 @@ public class SAMLLoginTools {
      *
      * @param session The session
      * @param uiWebPath The path to use
-     * @param uriFragment The requested uri fragment to add after the session parameter or <code>null</code>
+     * @param deepLinkFragment The requested uri fragment to add after the session parameter or <code>null</code>
      */
-    public static String buildFrontendRedirectLocation(Session session, String uiWebPath, String uriFragment) {
+    public static String buildFrontendRedirectLocation(Session session, String uiWebPath, String deepLinkFragment) {
         String retval = uiWebPath;
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
 
-        uriFragment = uriFragment == null ? "" : uriFragment;
-        while (uriFragment.length() > 0 && (uriFragment.charAt(0) == '#' || uriFragment.charAt(0) == '&' || uriFragment.charAt(0) == '!')) {
-            uriFragment = uriFragment.substring(1);
-        }
-
-        if (uriFragment.length() > 0) {
-            retval = retval + "&" + uriFragment;
-        }
-
+        deepLinkFragment = sanitizeDeepLinkFragment(deepLinkFragment);
+        retval = retval + deepLinkFragment;
         return retval;
     }
 
@@ -160,7 +153,9 @@ public class SAMLLoginTools {
         location.setHost(hostname).setPath(uiWebPath);
 
         StringBuilder fragment = new StringBuilder(AJAXUtility.encodeUrl(PARAMETER_SESSION)).append("=").append(AJAXUtility.encodeUrl(session.getSessionID()));
+        fragment.append(sanitizeDeepLinkFragment(httpRequest.getParameter(SAMLLoginTools.PARAM_URI_FRAGMENT)));
         location.setFragment(fragment.toString());
+
         return location.toString();
     }
 
@@ -254,6 +249,22 @@ public class SAMLLoginTools {
         }
 
         return hostname;
+    }
+
+    private static final String sanitizeDeepLinkFragment(String uriFragment) {
+        if (uriFragment == null) {
+            return "";
+        }
+
+        while (uriFragment.length() > 0 && (uriFragment.charAt(0) == '#' || uriFragment.charAt(0) == '&' || uriFragment.charAt(0) == '!')) {
+            uriFragment = uriFragment.substring(1);
+        }
+
+        if (uriFragment.length() > 0) {
+            uriFragment = "&" + uriFragment;
+        }
+
+        return uriFragment;
     }
 
 }

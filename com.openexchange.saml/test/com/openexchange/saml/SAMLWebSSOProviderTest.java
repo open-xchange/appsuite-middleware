@@ -363,7 +363,7 @@ public class SAMLWebSSOProviderTest {
     }
 
     @Test
-    public void testAutoLogin() throws Exception {
+    public void testAutoLoginWithDeepLink() throws Exception {
         /*
          * Fake SAML cookie and try auto login
          */
@@ -379,6 +379,8 @@ public class SAMLWebSSOProviderTest {
                 session.setParameter(SAMLSessionParameters.SESSION_COOKIE, samlCookieValue);
             }
         }));
+
+        String deepLinkParams = "app=io.ox/mail&folder=virtual/all-unseen";
         SimHttpServletRequest autoLoginHTTPRequest = prepareHTTPRequest("GET", new URIBuilder()
             .setScheme("https")
             .setHost("webmail.example.com")
@@ -386,6 +388,7 @@ public class SAMLWebSSOProviderTest {
             .setParameter("flow", "login")
             .setParameter("client", "test-client")
             .setParameter("redirect", "true")
+            .setParameter("uriFragment", "!!&" + deepLinkParams)
             .build());
         String cookieHash = HashCalculator.getInstance().getHash(
             autoLoginHTTPRequest,
@@ -403,6 +406,9 @@ public class SAMLWebSSOProviderTest {
         Matcher sessionMatcher = Pattern.compile("session=([a-z0-9]+)").matcher(redirectLocation);
         Assert.assertTrue(sessionMatcher.find());
         Assert.assertEquals(session.getSessionID(), sessionMatcher.group(1));
+
+        Matcher deepLinkMatcher = Pattern.compile(Pattern.quote("&" + deepLinkParams)).matcher(redirectLocation);
+        Assert.assertTrue(deepLinkMatcher.find());
     }
 
     @Test
