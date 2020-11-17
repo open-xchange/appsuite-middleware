@@ -59,6 +59,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import org.junit.Test;
 import com.openexchange.ajax.folder.manager.FolderApi;
 import com.openexchange.ajax.folder.manager.FolderManager;
@@ -95,9 +97,12 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
 
     @Override
     protected Map<String, String> getNeededConfigurations() {
-        HashMap<String, String> configuration = new HashMap<String, String>();
+        HashMap<String, String> configuration = new HashMap<String, String>(6, 0.9f);
         configuration.put("com.openexchange.capability.xctx", Boolean.TRUE.toString());
+        configuration.put("com.openexchange.capability.xox", Boolean.TRUE.toString());
         configuration.put("com.openexchange.api.client.blacklistedHosts", "");
+        configuration.put("com.openexchange.file.storage.xctx.retryAfterErrorInterval", "0");
+        configuration.put("com.openexchange.file.storage.xox.retryAfterErrorInterval", "0");
         return configuration;
     }
 
@@ -191,7 +196,13 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         String folderId = createFolder();
         ShareLinkData shareLink = getOrCreateShareLink(folderManager, smApi, folderId);
         deleteShareLink(folderManager, smApi, folderId);
-
+        
+        /*
+         * Wait so the anonymous guest user is deleted. Otherwise the guest
+         * is resolved "just in time" and a "forbidden" for an anonymous share link 
+         * is returned.
+         */
+        LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(3));
         analyze(shareLink, StateEnum.UNRESOLVABLE);
     }
 
