@@ -883,6 +883,7 @@ public final class MimeProcessingUtility {
             }
 
             String replyText = replyTextBuilder.toString();
+            replyTextBuilder = null;
             boolean isHtml = contentType.startsWithAny(CT_TEXT_HTM, "text/xhtm");
             if (isHtml) {
                 contentType.setCharsetParameter("UTF-8");
