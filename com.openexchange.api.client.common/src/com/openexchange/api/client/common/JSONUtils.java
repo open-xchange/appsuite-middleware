@@ -168,7 +168,7 @@ public final class JSONUtils {
         }
         InputStream in = null;
         try {
-            in = new ByteArrayInputStream(body.getBytes());
+            in = new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8));
             return parse(in);
         } finally {
             Streams.close(in);
