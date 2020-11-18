@@ -237,8 +237,12 @@ public class MailStorage implements IMailStorage {
             Map<MailPath, UUID> duplicateSpaces = null;
             for (MailMessage mailMessage : mailMessages) {
                 if (mailMessage != null) {
-                    UUID compositionSpaceId = UUIDs.fromUnformattedString(mailMessage.getFirstHeader(HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID));
+                    Optional<UUID> optCompositionSpaceId = parseCompositionSpaceId(mailMessage);
+                    if (!optCompositionSpaceId.isPresent()) {
+                        continue;
+                    }
 
+                    UUID compositionSpaceId = optCompositionSpaceId.get();
                     boolean isMaxSpacesExceeded = (maxSpacesPerUser > 0 && id2Message.size() >= maxSpacesPerUser);
                     MailMessage existing = isMaxSpacesExceeded ? id2Message.get(compositionSpaceId) : id2Message.putIfAbsent(compositionSpaceId, mailMessage);
 
@@ -1914,7 +1918,7 @@ public class MailStorage implements IMailStorage {
      * @throws OXException {@link CompositionSpaceErrorCode#CONCURRENT_UPDATE} if request token is present but does not
      *         match the actual one
      */
-    private void checkClientToken(ClientToken requestToken, ClientToken actualToken) throws OXException {
+    private static void checkClientToken(ClientToken requestToken, ClientToken actualToken) throws OXException {
         if (requestToken.isPresent() && requestToken.isNotEquals(actualToken)) {
             LOG.info("Client token mismatch. Expected: '{}' but was '{}'", actualToken, requestToken);
             throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
@@ -1927,7 +1931,7 @@ public class MailStorage implements IMailStorage {
      * @param draftMail The draft mail
      * @return The token
      */
-    private ClientToken parseClientToken(MailMessage draftMail) {
+    private static ClientToken parseClientToken(MailMessage draftMail) {
         ClientToken clientToken = ClientToken.NONE;
         String clientTokenValue = null;
         try {
@@ -1941,6 +1945,18 @@ public class MailStorage implements IMailStorage {
         }
 
         return clientToken;
+    }
+
+    private static Optional<UUID> parseCompositionSpaceId(MailMessage mailMessage) {
+        String headerValue = null;
+        try {
+            headerValue = mailMessage.getFirstHeader(HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID);
+            return Optional.of(UUIDs.fromUnformattedString(headerValue));
+        } catch (IllegalArgumentException e) {
+            LOG.info("Ignoring mail {} with invalid composition space ID: {}", mailMessage.getMailPath(), headerValue);
+        }
+
+        return Optional.empty();
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
