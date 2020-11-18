@@ -94,7 +94,7 @@ public class BasicPermission implements Permission, Cloneable {
      */
     public BasicPermission() {
         super();
-        setNoPermissions();
+        setNoPermissionInternal();
     }
 
     /**
@@ -246,6 +246,13 @@ public class BasicPermission implements Permission, Cloneable {
 
     @Override
     public void setNoPermissions() {
+        setNoPermissionInternal();
+    }
+
+    /**
+     * Initializes the permissions with no permission
+     */
+    private final void setNoPermissionInternal() {
         folderPermission = Permission.NO_PERMISSIONS;
         readPermission = Permission.NO_PERMISSIONS;
         deletePermission = Permission.NO_PERMISSIONS;

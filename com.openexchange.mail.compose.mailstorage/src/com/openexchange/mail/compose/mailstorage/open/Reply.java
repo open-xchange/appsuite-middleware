@@ -405,7 +405,6 @@ public class Reply extends AbstractOpener {
         }
 
         // Check whether to attach original message
-        Optional<Boolean> optionalEncrypt = Optional.of(state.encrypt);
         if (usm.getAttachOriginalMessage() > 0) {
             ThresholdFileHolder sink = ThresholdFileHolderFactory.getInstance().createFileHolder(session);
             try {
@@ -444,7 +443,7 @@ public class Reply extends AbstractOpener {
         // Add mail's inline images
         List<String> contentIds = new ArrayList<String>();
         if (TEXT_HTML == state.message.getContentType()) {
-            MimeProcessingUtility.getTextForForward(originalMail, true, false, contentIds, session);
+            contentIds.addAll(MimeMessageUtility.getContentIDs(state.message.getContent()));
 
             if (!contentIds.isEmpty()) {
                 InlineContentHandler inlineHandler = new InlineContentHandler(contentIds);

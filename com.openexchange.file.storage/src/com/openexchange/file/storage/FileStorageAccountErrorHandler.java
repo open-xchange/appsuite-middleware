@@ -170,7 +170,7 @@ public class FileStorageAccountErrorHandler {
         public Boolean apply(OXException t) {
             if (functions != null) {
                 for (Function<OXException, Boolean> function : functions) {
-                    if (function.apply(t) == Boolean.FALSE) {
+                    if (Boolean.FALSE.equals(function.apply(t))) {
                         return Boolean.FALSE;
                     }
                 }

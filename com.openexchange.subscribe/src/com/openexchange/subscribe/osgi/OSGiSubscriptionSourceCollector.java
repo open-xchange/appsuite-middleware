@@ -76,7 +76,7 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
 
     public OSGiSubscriptionSourceCollector(final BundleContext context) {
         this.context = context;
-        this.tracker = new ServiceTracker<SubscribeService, SubscribeService>(context, SubscribeService.class, this);
+        this.tracker = new ServiceTracker<>(context, SubscribeService.class, this);
         tracker.open();
     }
 
@@ -96,7 +96,7 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
                     }
                 }
                 grabbedAll = true;
-            } catch (InvalidSyntaxException x) {
+            } catch (@SuppressWarnings("unused") InvalidSyntaxException x) {
                 // IGNORE, we didn't specify a filter, so won't happen
             }
         }

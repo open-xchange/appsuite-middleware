@@ -146,7 +146,7 @@ public class Bug40627Test extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(discoverShare(guest), guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -165,6 +165,19 @@ public class Bug40627Test extends ShareTest {
             visibleUserIDs = new int[] { getClient().getValues().getUserId(), userId2 };
         }
         checkExtendedPermissions(getClient(), folderShare.getExtendedPermissions(), guest.getEntity(), visibleUserIDs);
+    }
+
+    /**
+     * Discovers the share url for the given guest and checks that one exists
+     *
+     * @param guest The guest
+     * @return The share url
+     * @throws Exception
+     */
+    private String discoverShare(ExtendedPermissionEntity guest) throws Exception {
+        String shareURL = discoverShareURL(guest);
+        assertNotNull("Share mail not found", shareURL);
+        return shareURL;
     }
 
     private void testCheckExtendedObjectPermissions(FileStorageGuestObjectPermission guestPermission) throws Exception {
@@ -203,7 +216,7 @@ public class Bug40627Test extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(discoverShare(guest), guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission, contents);
         /*

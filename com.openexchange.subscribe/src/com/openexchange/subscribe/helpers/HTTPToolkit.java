@@ -141,7 +141,7 @@ public class HTTPToolkit {
         checkContentAndLength(javaURL, timeout);
 
         HttpPost method = new HttpPost(javaURL.toURI());
-        List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
+        List<NameValuePair> postParameters = new ArrayList<>();
         for (final Map.Entry<String, String> entry : values.entrySet()) {
             postParameters.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
         }
@@ -287,7 +287,7 @@ public class HTTPToolkit {
         try {
             inputStream = Streams.newByteArrayInputStream(data);
             bimg = javax.imageio.ImageIO.read(inputStream);
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             return false;
         } finally {
             Streams.close(inputStream);

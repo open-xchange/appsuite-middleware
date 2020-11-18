@@ -221,7 +221,7 @@ public class FileSearchTermParser {
             case CREATED_BY:
                 return new CreatedByTerm(getComparablePattern(File.Field.CREATED_BY, query, comparison));
             case CURRENT_VERSION:
-                boolean currentVersion = Boolean.getBoolean(query);
+                boolean currentVersion = Boolean.valueOf(query).booleanValue();
                 return new CurrentVersionTerm(currentVersion);
             case DESCRIPTION:
                 ensureComparisonType(File.Field.DESCRIPTION, comparison, ComparisonType.EQUALS);

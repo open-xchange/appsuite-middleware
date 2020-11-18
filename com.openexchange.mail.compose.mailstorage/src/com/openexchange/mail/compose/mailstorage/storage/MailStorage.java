@@ -226,6 +226,7 @@ public class MailStorage implements IMailStorage {
 
             // No such mails
             if (mailMessages == null || mailMessages.length == 0) {
+                LOG.debug("Found no open composition spaces");
                 return MailStorageResult.resultFor(null, LookUpOutcome.EMPTY, false, mailAccess);
             }
 

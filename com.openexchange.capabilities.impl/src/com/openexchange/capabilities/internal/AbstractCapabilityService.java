@@ -87,9 +87,6 @@ import com.openexchange.capabilities.DependentCapabilityChecker;
 import com.openexchange.capabilities.FailureAwareCapabilityChecker;
 import com.openexchange.capabilities.osgi.PermissionAvailabilityServiceRegistry;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.DefaultInterests;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -125,7 +122,7 @@ import com.openexchange.userconf.UserPermissionService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractCapabilityService implements CapabilityService, Reloadable {
+public abstract class AbstractCapabilityService implements CapabilityService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCapabilityService.class);
 
@@ -1404,25 +1401,6 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
             return ImmutableSet.of();
         }
         return resellerService.getCapabilitiesByContext(contextId);
-    }
-
-    @Override
-    public Interests getInterests() {
-        return DefaultInterests.builder().propertiesOfInterest(PermissionConfigurationChecker.PROP_APPLY_ILLEGAL_PERMISSIONS).build();
-    }
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        Cache optCache = optCache();
-        if (optCache == null) {
-            return;
-        }
-
-        try {
-            optCache.clear();
-        } catch (OXException e) {
-            LOG.error("Unable to clear capability cache: {}", e.getMessage(), e);
-        }
     }
 
     // ------------------------------------------------------------------------------------------------------------------------- //

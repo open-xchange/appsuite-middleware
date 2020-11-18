@@ -97,9 +97,12 @@ public class AlgorithmUtils {
             criterias.add(signatureSigningConfigurationCriterion);
 
             SignatureSigningParameters signatureSigningParameters = resolver.resolveSingle(criterias);
+            if(null == signatureSigningParameters) {
+                throw SAMLExceptionCode.INTERNAL_ERROR.create("Unable to resolve signing parameters.");
+            }
             return signatureSigningParameters.getSignatureAlgorithm();
         } catch (ResolverException e) {
-            LOG.error("Unable while trying to resolve signing parameters.", e);
+            LOG.error("Unable to resolve signing parameters.", e);
             throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
         }
     }

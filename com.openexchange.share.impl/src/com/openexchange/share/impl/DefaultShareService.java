@@ -257,7 +257,6 @@ public class DefaultShareService implements ShareService {
         /*
          * check if guest was created by session's user
          */
-        ;
         if (guestID == session.getUserId() || guestUser.getCreatedBy() == session.getUserId() || ShareTool.isAnonymousGuest(guestUser)) {
             return true;
         }

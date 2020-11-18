@@ -50,102 +50,66 @@
 package com.openexchange.ajax.folder;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import java.rmi.server.UID;
 import java.util.ArrayList;
-import java.util.Iterator;
-import org.junit.Before;
+import java.util.Collections;
+import java.util.List;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.folder.actions.ListRequest;
-import com.openexchange.ajax.folder.actions.ListResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.ajax.folder.manager.FolderApi;
+import com.openexchange.ajax.folder.manager.FolderManager;
+import com.openexchange.ajax.framework.AbstractAPIClientSession;
 
 /**
+ * {@link Bug16899Test}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com>Steffen Templin</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
-public class Bug16899Test extends AbstractAJAXSession {
+public class Bug16899Test extends AbstractAPIClientSession {
 
-    private AJAXClient client;
+    private static final String MODULE = "mail";
+    private static final String COLUMNS = "1";
+    private FolderManager folderManager;
 
     /**
      * Initializes a new {@link Bug16899Test}.
-     *
-     * @param name name of the test.
      */
     public Bug16899Test() {
         super();
     }
 
     @Override
-    @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
+        folderManager = new FolderManager(new FolderApi(apiClient, testUser), String.valueOf(EnumAPI.OX_NEW.getTreeId()));
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        folderManager.cleanUp();
     }
 
     @Test
     public void testBug16899() throws Exception {
-        FolderObject folder = Create.createPrivateFolder("Bug 16899 Test", FolderObject.MAIL, client.getValues().getUserId());
-        folder.setFullName("default0/INBOX/Bug 16899 Test");
-        InsertRequest insertFolder = new InsertRequest(EnumAPI.OX_OLD, folder);
-        InsertResponse execute = client.execute(insertFolder);
+        String folderName = "Bug_16899_Test" + new UID().toString();
+        String root = folderManager.getDefaultFolder(MODULE);
+        String folderId = folderManager.createFolder(root, folderName, MODULE);
 
-        execute.fillObject(folder);
+        ArrayList<ArrayList<Object>> listFolders = folderManager.listFolders(root, COLUMNS, Boolean.TRUE);
+        assertNotNull(listFolders);
+        assertTrue("Testfolder not found", listFolders.stream().filter(folder -> folder.get(0).equals(folderId)).findAny().isPresent());
 
-        String inbox = client.getValues().getInboxFolder();
+        List<String> deleted = folderManager.deleteFolder(Collections.singletonList(folderId));
+        assertTrue(deleted.isEmpty());
+        folderManager.forgetFolder(folderId);
 
-        ArrayList<FolderObject> folders = performListRequest(inbox);
-        boolean firstMatch = false;
-        for (FolderObject f : folders) {
-            if (f.getFullName().equals(folder.getFullName())) {
-                firstMatch = true;
-                break;
-            }
-        }
-
-        assertTrue("Testfolder not found in inbox.", firstMatch);
-        folders = null;
-
-        DeleteRequest deleteFolder = new DeleteRequest(EnumAPI.OX_OLD, folder);
-        CommonDeleteResponse deleteResponse = client.execute(deleteFolder);
-
-        assertNull("Error during folder deletion", deleteResponse.getException());
-
-        folders = performListRequest(inbox);
-        boolean secondMatch = false;
-        for (FolderObject f : folders) {
-            // System.out.println(f.getFullName());
-            if (f.getFullName().equals(folder.getFullName())) {
-                secondMatch = true;
-                break;
-            }
-        }
-
-        assertFalse("Testfolder was not deleted.", secondMatch);
-    }
-
-    private ArrayList<FolderObject> performListRequest(String inFolder) throws Exception {
-        ArrayList<FolderObject> folderList = new ArrayList<FolderObject>();
-
-        ListRequest request = new ListRequest(EnumAPI.OUTLOOK, inFolder, FolderObject.ALL_COLUMNS, false, false);
-        ListResponse response = client.execute(request);
-        assertNull("Error during ListRequest.", response.getException());
-
-        Iterator<FolderObject> iter = response.getFolder();
-
-        while (iter.hasNext()) {
-            final FolderObject fo = iter.next();
-            folderList.add(fo);
-        }
-
-        return folderList;
+        listFolders = folderManager.listFolders(root, COLUMNS, Boolean.TRUE);
+        assertNotNull(listFolders);
+        assertFalse("Testfolder still found", listFolders.stream().filter(folder -> folder.get(0).equals(folderId)).findAny().isPresent());
     }
 
 }

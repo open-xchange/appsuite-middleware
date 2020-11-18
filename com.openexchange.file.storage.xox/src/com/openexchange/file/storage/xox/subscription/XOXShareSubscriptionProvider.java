@@ -53,7 +53,6 @@ import static com.openexchange.api.client.common.OXExceptionParser.matches;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE_WITH_PASSWORD;
 import static com.openexchange.share.subscription.ShareLinkState.FORBIDDEN;
-import static com.openexchange.share.subscription.ShareLinkState.REMOVED;
 import static com.openexchange.share.subscription.ShareLinkState.UNRESOLVABLE;
 import com.openexchange.api.client.ApiClient;
 import com.openexchange.api.client.ApiClientExceptions;
@@ -107,12 +106,6 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
         if (null == shareTargetPath) {
             return false;
         }
-        if (Strings.isNotEmpty(shareTargetPath.getItem())) {
-            /*
-             * Single files aren't supported
-             */
-            return false;
-        }
         int module = shareTargetPath.getModule();
         if (Module.INFOSTORE.getFolderConstant() != module) {
             return false;
@@ -153,6 +146,7 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
         ApiClientService apiClientService = services.getServiceSafe(ApiClientService.class);
         ApiClient apiClient = null;
         Builder builder = new Builder();
+        builder.state(UNRESOLVABLE).error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink));
         try {
             /*
              * If creation of the client throws no error, the share has been access successfully
@@ -161,20 +155,22 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
             LoginInformation loginInformation = apiClient.getLoginInformation();
             if (null != loginInformation) {
                 builder.state(ADDABLE);
-                if (Strings.isNotEmpty(loginInformation.getLoginType())) {
-                    if (false == loginInformation.getLoginType().startsWith("guest")) {
-                        builder.state(FORBIDDEN);
-                        builder.error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
-                    } else if (false == UserAliasUtility.isAlias(loginInformation.getRemoteMailAddress(), getAliases(ServerSessionAdapter.valueOf(session).getUser()))) {
-                        /*
-                         * Share is not for the current user
-                         */
-                        builder.state(FORBIDDEN);
-                        builder.error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(loginInformation.getRemoteMailAddress()));
-                    }
+                if (Strings.isEmpty(loginInformation.getRemoteMailAddress())) {
+                    /*
+                     * Only anonymous guests have no mail address
+                     */
+                    builder.state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
+                } else if (false == UserAliasUtility.isAlias(loginInformation.getRemoteMailAddress(), getAliases(ServerSessionAdapter.valueOf(session).getUser()))) {
+                    /*
+                     * Share is not for the current user
+                     */
+                    builder.state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(loginInformation.getRemoteMailAddress()));
+                } else if (Strings.isNotEmpty(loginInformation.getLoginType()) && false == loginInformation.getLoginType().startsWith("guest")) {
+                    /*
+                     * No guest
+                     */
+                    builder.state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
                 }
-            } else {
-                builder.state(UNRESOLVABLE).error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink));
             }
         } catch (OXException e) {
             /*
@@ -182,8 +178,6 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
              */
             if (isPasswordMissing(e)) {
                 builder.state(ADDABLE_WITH_PASSWORD);
-            } else if (isFolderRemoved(e)) {
-                builder.state(REMOVED);
             } else {
                 builder.state(UNRESOLVABLE).error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink, e));
             }

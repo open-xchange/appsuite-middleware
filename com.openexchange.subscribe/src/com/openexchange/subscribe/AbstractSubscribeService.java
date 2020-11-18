@@ -86,15 +86,15 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public abstract class AbstractSubscribeService implements SubscribeService {
 
-    public static final AtomicReference<SubscriptionStorage> STORAGE = new AtomicReference<SubscriptionStorage>();
+    public static final AtomicReference<SubscriptionStorage> STORAGE = new AtomicReference<>();
 
-    public static final AtomicReference<SecretEncryptionFactoryService> ENCRYPTION_FACTORY = new AtomicReference<SecretEncryptionFactoryService>();
+    public static final AtomicReference<SecretEncryptionFactoryService> ENCRYPTION_FACTORY = new AtomicReference<>();
 
-    public static final AtomicReference<CryptoService> CRYPTO_SERVICE = new AtomicReference<CryptoService>();
+    public static final AtomicReference<CryptoService> CRYPTO_SERVICE = new AtomicReference<>();
 
-    public static final AtomicReference<FolderService> FOLDERS = new AtomicReference<FolderService>();
+    public static final AtomicReference<FolderService> FOLDERS = new AtomicReference<>();
 
-    public static final AtomicReference<UserPermissionService> USER_PERMISSIONS = new AtomicReference<UserPermissionService>();
+    public static final AtomicReference<UserPermissionService> USER_PERMISSIONS = new AtomicReference<>();
 
     /**
      * Enabled by default - override as needed.
@@ -117,8 +117,8 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     private Collection<Subscription> prepareSubscriptions(final List<Subscription> allSubscriptions, final String secret, final Context context, final int userId) throws OXException {
-        final List<Subscription> subscriptions = new ArrayList<Subscription>();
-        final Map<String, Boolean> canSee = new HashMap<String, Boolean>();
+        final List<Subscription> subscriptions = new ArrayList<>();
+        final Map<String, Boolean> canSee = new HashMap<>();
 
         for (final Subscription subscription : allSubscriptions) {
             if (subscription.getSource() != null && getSubscriptionSource() != null && subscription.getSource().getId().equals(
@@ -290,7 +290,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         final List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
         final String id = subscriptionSource.getId();
         final CryptoService cryptoService = CRYPTO_SERVICE.get();
-        final Map<String, Object> update = new HashMap<String, Object>();
+        final Map<String, Object> update = new HashMap<>();
         for (final Subscription subscription : allSubscriptions) {
             if (id.equals(getSubscriptionSourceId(subscription))) {
                 final Map<String, Object> configuration = subscription.getConfiguration();
@@ -329,7 +329,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         final List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
         final String id = subscriptionSource.getId();
         final CryptoService cryptoService = CRYPTO_SERVICE.get();
-        final Map<String, Object> update = new HashMap<String, Object>();
+        final Map<String, Object> update = new HashMap<>();
         for (final Subscription subscription : allSubscriptions) {
             if (id.equals(getSubscriptionSourceId(subscription))) {
                 final Map<String, Object> configuration = subscription.getConfiguration();
@@ -368,7 +368,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         final String id = subscriptionSource.getId();
         final CryptoService cryptoService = CRYPTO_SERVICE.get();
 
-        List<Subscription> subscriptionsToDelete = new ArrayList<Subscription>(allSubscriptions.size());
+        List<Subscription> subscriptionsToDelete = new ArrayList<>(allSubscriptions.size());
 
         for (final Subscription subscription : allSubscriptions) {
             if (id.equals(getSubscriptionSourceId(subscription))) {

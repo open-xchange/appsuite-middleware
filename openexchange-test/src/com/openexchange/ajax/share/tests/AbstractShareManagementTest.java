@@ -364,7 +364,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
     }
 
     protected String receiveShareLink(ApiClient apiClient, String fromToMatch) throws Exception {
-        return receiveShareLink(apiClient, fromToMatch, "shared the folder \"" + sharedFolderName + "\" with you");
+        return receiveShareLink(apiClient, fromToMatch, sharedFolderName);
     }
 
     /**
@@ -405,7 +405,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
             }
             LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
         }
-        throw new AssertionError("No mail with " + subjectToMatch + " from " + fromToMatch + " received");
+        throw new AssertionError("No mail with \"" + subjectToMatch + "\" from " + fromToMatch + " received");
     }
 
     private MailData lookupMail(ApiClient apiClient, String folder, String fromToMatch, String subjectToMatch) throws Exception {

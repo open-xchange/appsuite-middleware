@@ -256,6 +256,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         dbStorage.insert(csc, maxSpacesPerUser);
 
         MessageDescription m = csc.getMessage();
+        applyCachedContent(m, csc.getUuid(), session);
         resolveAttachments(m, optionalEncrypt, session);
         Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
         return new ImmutableCompositionSpace(new CompositionSpaceId(SERVICE_ID, csc.getUuid()), null, message, csc.getLastModified().getTime());
@@ -272,6 +273,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         CompositionSpaceContainer cs = dbStorage.updateCompositionSpace(CompositionSpaceContainer.fromCompositionSpaceDescription(compositionSpaceDesc), true);
 
         MessageDescription m = cs.getMessage();
+        applyCachedContent(m, compositionSpaceDesc.getUuid(), session);
         List<Attachment> attachmentsToUpdate = resolveAttachments(m, Optional.empty(), session);
         Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
         ImmutableCompositionSpace ics = new ImmutableCompositionSpace(new CompositionSpaceId(SERVICE_ID, compositionSpaceDesc.getUuid()), null, message, cs.getLastModified().getTime());

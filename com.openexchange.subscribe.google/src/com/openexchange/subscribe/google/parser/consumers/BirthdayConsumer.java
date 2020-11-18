@@ -70,7 +70,8 @@ public class BirthdayConsumer implements BiConsumer<ContactEntry, Contact> {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(BirthdayConsumer.class);
+
+        static final Logger LOG = LoggerFactory.getLogger(BirthdayConsumer.class);
     }
 
     /**

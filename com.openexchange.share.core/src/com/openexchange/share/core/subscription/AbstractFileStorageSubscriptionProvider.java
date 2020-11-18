@@ -69,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.SharingFileStorageService;
@@ -127,7 +128,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         this.fileStorageService = Objects.requireNonNull(fileStorageService);
         this.userPermissionService = Objects.requireNonNull(userPermissionService);
     }
-    
+
     @Override
     public String getBackwardLink(Session session, String shareLink, String folder, String item, Map<String, String> additionals) throws OXException {
         requireAccess(session);
@@ -182,17 +183,18 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
          * Create new account and access it
          */
         FileStorageAccountAccess accountAccess = null;
+        String accountId = null;
         try {
-            String accountId = fileStorageService.getAccountManager().addAccount(storageAccount, session);
+            accountId = fileStorageService.getAccountManager().addAccount(storageAccount, session);
             accountAccess = fileStorageService.getAccountAccess(accountId, session);
             accountAccess.connect();
             setSubscribed(accountAccess, shareLink, true);
             return testAndGenerateInfos(accountAccess, shareLink);
         } catch (OXException e) {
             /**
-             * Account can't connect or be subscribed, remove it
+             * Account can't be created, connect or subscribed therefore delete it
              */
-            fileStorageService.getAccountManager().deleteAccount(getStorageAccount(session, shareLink), session);
+            deleteAccount(session, accountId);
             throw e;
         } finally {
             if (null != accountAccess) {
@@ -323,7 +325,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      * @param shareLink The share link
      * @param baseToken The base token of the share link
      * @return A {@link FileStorageAccount} or <code>null</code> if no account was found
-     * @throws OXException
+     * @throws OXException If account listing fails
      */
     protected FileStorageAccount getStorageAccount(Session session, String shareLink) throws OXException {
         URL shareUrl = getUrl(shareLink);
@@ -347,7 +349,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      * @param shareLink The share link
      * @param baseToken The base token of the share link
      * @return A {@link FileStorageAccount} or <code>null</code> if no account was found
-     * @throws OXException
+     * @throws OXException If account access cannot be returned for given account identifier
      */
     protected FileStorageAccountAccess getStorageAccountAccess(Session session, String shareLink) throws OXException {
         FileStorageAccount storageAccount = getStorageAccount(session, shareLink);
@@ -355,6 +357,25 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
             return fileStorageService.getAccountAccess(storageAccount.getId(), session);
         }
         return null;
+    }
+
+    /**
+     * Deletes the account. Any exception on deletion is logged.
+     *
+     * @param session The session of the user
+     * @param accountId The account to delete
+     */
+    private void deleteAccount(Session session, String accountId) {
+        if (Strings.isEmpty(accountId)) {
+            return;
+        }
+        try {
+            FileStorageAccountManager accountManager = fileStorageService.getAccountManager();
+            FileStorageAccount account = accountManager.getAccount(accountId, session);
+            accountManager.deleteAccount(account, session);
+        } catch (OXException e) {
+            LOGGER.warn("Unable to remove account {} for user {} in context {}", accountId, I(session.getUserId()), I(session.getContextId()), e);
+        }
     }
 
     /**

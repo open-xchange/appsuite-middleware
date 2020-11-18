@@ -52,6 +52,7 @@ package com.openexchange.ajax.mail.filter.apiclient;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static java.lang.Boolean.FALSE;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import java.io.File;
 import java.util.Collections;
@@ -71,7 +72,6 @@ import com.openexchange.testing.httpclient.models.MailImportResponse;
 import com.openexchange.testing.httpclient.models.MailsResponse;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
-import com.openexchange.testing.httpclient.models.Result;
 import com.openexchange.testing.httpclient.models.Result.ResultEnum;
 
 /**
@@ -124,17 +124,22 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
         MailFilterCreationResponse response = mailfilterapi.createRuleV2(getSessionId(), getRule(), null);
         Assert.assertNull(response.getErrorDesc(), response.getError());
         Integer ruleId = rememberSieveRule(response.getData());
+
+        // Check amount of mails
+        MailsResponse allMails = mailApi.getAllMails(getSessionId(), folderId, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);
+        Assert.assertNull(allMails.getErrorDesc(), allMails.getError());
+        Assert.assertNotNull(allMails.getData());
+        Assert.assertEquals("Unexpected amount of mails returned.", 2, allMails.getData().size());
+
         // apply the rule to the new folder
         MailFilterApplyResponse applyPredefinedRule = mailfilterapi.applyPredefinedRule(getSessionId(), ruleId, null, folderId);
         // Check result is ok
         Assert.assertNull(applyPredefinedRule.getErrorDesc(), applyPredefinedRule.getError());
         Assert.assertNotNull(applyPredefinedRule.getData());
         Assert.assertEquals("Invalid size of results", 1, applyPredefinedRule.getData().size());
-        for (Result result : applyPredefinedRule.getData()) {
-            Assert.assertEquals(ResultEnum.OK, result.getResult());
-        }
+        applyPredefinedRule.getData().stream().forEach(m -> assertEquals(ResultEnum.OK, m.getResult()));
         // Check one mail is properly marked as deleted
-        MailsResponse allMails = mailApi.getAllMails(getSessionId(), folderId, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);
+        allMails = mailApi.getAllMails(getSessionId(), folderId, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);
         Assert.assertNull(allMails.getErrorDesc(), allMails.getError());
         Assert.assertNotNull(allMails.getData());
         Assert.assertEquals("Unexpected amount of mails returned.", 1, allMails.getData().size());

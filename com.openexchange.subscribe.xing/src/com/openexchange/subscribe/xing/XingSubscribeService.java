@@ -216,7 +216,7 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
             final FolderUpdaterService<Contact> folderUpdater = null == folderUpdaterRegistry ? null : folderUpdaterRegistry.<Contact> getFolderUpdater(subscription);
             if (null == threadPool || null == folderUpdater) {
                 // Retrieve all
-                final List<User> users = new ArrayList<User>(total);
+                final List<User> users = new ArrayList<>(total);
                 users.addAll(chunk);
                 int offset = chunk.size();
                 // Request remaining chunks
@@ -228,7 +228,7 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
                 }
                 // All retrieved
                 LOG.info("Going to convert {} XING contacts for user {} in context {}", I(total), I(session.getUserId()), I(session.getContextId()));
-                final Map<String, String> photoUrlsMap = new HashMap<String, String>(total);
+                final Map<String, String> photoUrlsMap = new HashMap<>(total);
                 final PhotoHandler photoHandler = new CollectingPhotoHandler(photoUrlsMap);
                 final List<Contact> retval = convert(chunk, photoHandler, subscription, session);
                 LOG.info("Converted {} XING contacts for user {} in context {}", I(total), I(session.getUserId()), I(session.getContextId()));
@@ -252,7 +252,7 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
                             // Store them
                             final List<Contact> convertees = convert(chunk, loadingPhotoHandler, subscription, session);
                             LOG.info("Converted {} XING contacts for user {} in context {}", I(chunk.size()), I(session.getUserId()), I(session.getContextId()));
-                            folderUpdater.save(new SearchIteratorDelegator<Contact>(convertees), subscription);
+                            folderUpdater.save(new SearchIteratorDelegator<>(convertees), subscription);
                             // Next chunk...
                             off += chunk.size();
                         }
@@ -300,7 +300,7 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
      * @return The resulting contacts
      */
     protected List<Contact> convert(final List<User> xingContacts, final PhotoHandler optPhotoHandler, Subscription subscription, final ServerSession session) {
-        final List<Contact> ret = new ArrayList<Contact>(xingContacts.size());
+        final List<Contact> ret = new ArrayList<>(xingContacts.size());
         for (final User xingContact : xingContacts) {
             ret.add(convert(xingContact, optPhotoHandler, subscription, session));
         }
@@ -396,7 +396,7 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
         {
             final Map<String, Object> m = xingUser.getProfessionalExperience();
             if (null != m && !m.isEmpty()) {
-                final Map<String, Object> primaryCompany = (Map<String, Object>) m.get("primary_company");
+                final Map<String, Object> primaryCompany = Map.class.cast(m.get("primary_company"));
                 if (null != primaryCompany && !primaryCompany.isEmpty()) {
                     // Name
                     Object s = primaryCompany.get("name");

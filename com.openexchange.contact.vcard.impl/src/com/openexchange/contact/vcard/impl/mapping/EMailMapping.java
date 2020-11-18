@@ -82,12 +82,21 @@ public class EMailMapping extends AbstractMapping {
          * email1 - type "WORK"
          */
         Email businessEmail = getEmail(vCard, emails, EmailType.WORK.getValue(), null, 0, false);
+        boolean hasWork = hasWork(emails, businessEmail);
         if (has(contact, Contact.EMAIL1)) {
             if (null == businessEmail) {
-                vCard.addEmail(contact.getEmail1(), EmailType.WORK, EmailType.PREF);
+                if (hasWork) { // Only add PREF type if ambiguous
+                    vCard.addEmail(contact.getEmail1(), EmailType.WORK, EmailType.PREF);
+                } else {
+                    vCard.addEmail(contact.getEmail1(), EmailType.WORK);
+                }
             } else {
                 businessEmail.setValue(contact.getEmail1());
-                addTypesIfMissing(businessEmail, EmailType.WORK.getValue(), EmailType.PREF.getValue());
+                if (hasWork) { // Only add PREF type if ambiguous
+                    addTypesIfMissing(businessEmail, EmailType.WORK.getValue(), EmailType.PREF.getValue());
+                } else {
+                    addTypesIfMissing(businessEmail, EmailType.WORK.getValue());
+                }
             }
         } else if (null != businessEmail) {
             vCard.removeProperty(businessEmail);
@@ -135,6 +144,28 @@ public class EMailMapping extends AbstractMapping {
         } else if (null != telexEmail) {
             vCard.removeProperty(telexEmail);
         }
+    }
+
+    /**
+     * Checks, if the given List of Emails contains an email with the PREF type.
+     * Ignoring the given business Email as this will be added anyway.
+     *
+     * @param emails
+     * @param businessEmail
+     * @return
+     */
+    private boolean hasWork(List<Email> emails, Email businessEmail) {
+        for (Email email : emails) {
+            if (email.equals(businessEmail)) {
+                continue;
+            }
+            for (EmailType type : email.getTypes()) {
+                if (type.equals(EmailType.WORK)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

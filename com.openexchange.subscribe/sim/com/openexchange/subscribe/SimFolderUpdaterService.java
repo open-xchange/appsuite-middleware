@@ -67,7 +67,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 public class SimFolderUpdaterService implements FolderUpdaterService<Object> {
 
     private TargetFolderDefinition target;
-    private Collection data;
+    private Collection<?> data;
     private FolderObject folder;
     private boolean handles;
     private boolean usesMultipleStrategy = false;
@@ -92,12 +92,12 @@ public class SimFolderUpdaterService implements FolderUpdaterService<Object> {
         return target;
     }
 
-    public Collection getData() {
+    public Collection<?> getData() {
         return data;
     }
 
 
-    public void setData(final Collection data) {
+    public void setData(final Collection<?> data) {
         this.data = data;
     }
 

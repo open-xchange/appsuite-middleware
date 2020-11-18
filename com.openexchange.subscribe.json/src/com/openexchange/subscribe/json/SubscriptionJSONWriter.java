@@ -71,8 +71,6 @@ public class SubscriptionJSONWriter {
 
     public static final int CLASS_ID = 2;
 
-    private static final FormContentWriter formContentWriter = new FormContentWriter();
-
     private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
 
     private static final String ID = "id";
@@ -89,7 +87,7 @@ public class SubscriptionJSONWriter {
 
     private static final String LAST_UPDATED = "lastUpdated";
 
-    public JSONObject write(final Subscription subscription, final DynamicFormDescription form, final String urlPrefix, TimeZone tz) throws JSONException, OXException {
+    public JSONObject write(final Subscription subscription, final DynamicFormDescription form, final String urlPrefix, TimeZone tz) throws JSONException {
         final JSONObject object = new JSONObject();
         object.put(ID, subscription.getId());
         object.put(FOLDER, subscription.getFolderId());
@@ -98,13 +96,13 @@ public class SubscriptionJSONWriter {
         object.put(SOURCE, subscription.getSource().getId());
         object.put(LAST_UPDATED, subscription.getLastUpdate() + (tz != null ? tz.getOffset(subscription.getLastUpdate()) : 0L));
         object.put(CREATED, subscription.getCreated() + (tz != null ? tz.getOffset(subscription.getCreated()) : 0L));
-        
+
         writeConfiguration(object, subscription.getSource().getId(), subscription.getConfiguration(), form, urlPrefix);
         return object;
     }
 
-    private void writeConfiguration(final JSONObject object, final String id, final Map<String, Object> configuration, final DynamicFormDescription form, final String urlPrefix) throws JSONException, OXException {
-        final JSONObject config = formContentWriter.write(form, configuration, urlPrefix);
+    private void writeConfiguration(final JSONObject object, final String id, final Map<String, Object> configuration, final DynamicFormDescription form, final String urlPrefix) throws JSONException {
+        final JSONObject config = FormContentWriter.write(form, configuration, urlPrefix);
         object.put(id, config);
     }
 
@@ -117,7 +115,7 @@ public class SubscriptionJSONWriter {
         return array;
     }
 
-    private void writeSpecialCols(final JSONArray array, final Subscription subscription, final String[] strings, final String externalId, final DynamicFormDescription form) throws OXException {
+    private void writeSpecialCols(final JSONArray array, final Subscription subscription, final String[] strings, final String externalId, final DynamicFormDescription form) {
         if (strings == null) {
             return;
         }
@@ -137,22 +135,30 @@ public class SubscriptionJSONWriter {
 
     private void writeBasicCols(final JSONArray array, final Subscription subscription, final String[] basicCols, TimeZone tz) throws OXException {
         for (final String basicCol : basicCols) {
-            if (ID.equals(basicCol)) {
-                array.put(subscription.getId());
-            } else if (FOLDER.equals(basicCol)) {
-                array.put(subscription.getFolderId());
-            } else if (SOURCE.equals(basicCol)) {
-                array.put(subscription.getSource().getId());
-            } else if (DISPLAYNAME.equals(basicCol)) {
-                array.put(subscription.getDisplayName());
-            } else if (ENABLED.equals(basicCol)) {
-                array.put(subscription.isEnabled());
-            } else if (LAST_UPDATED.equals(basicCol)) {
-                array.put(subscription.getLastUpdate() + tz.getOffset(subscription.getLastUpdate()));
-            } else if (CREATED.equals(basicCol)) {
-                array.put(subscription.getCreated() + tz.getOffset(subscription.getCreated()));
-            } else {
-                throw SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.create(basicCol);
+            switch (basicCol) {
+                case ID:
+                    array.put(subscription.getId());
+                    break;
+                case FOLDER:
+                    array.put(subscription.getFolderId());
+                    break;
+                case SOURCE:
+                    array.put(subscription.getSource().getId());
+                    break;
+                case DISPLAYNAME:
+                    array.put(subscription.getDisplayName());
+                    break;
+                case ENABLED:
+                    array.put(subscription.isEnabled());
+                    break;
+                case LAST_UPDATED:
+                    array.put(subscription.getLastUpdate() + tz.getOffset(subscription.getLastUpdate()));
+                    break;
+                case CREATED:
+                    array.put(subscription.getCreated() + tz.getOffset(subscription.getCreated()));
+                    break;
+                default:
+                    throw SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.create(basicCol);
             }
         }
     }

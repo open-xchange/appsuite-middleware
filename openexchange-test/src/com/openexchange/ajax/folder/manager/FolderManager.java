@@ -50,7 +50,11 @@
 package com.openexchange.ajax.folder.manager;
 
 import static org.junit.Assert.assertNotNull;
+import static com.openexchange.java.Autoboxing.b;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static org.junit.Assert.assertNull;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -63,6 +67,7 @@ import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderResponse;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.FoldersCleanUpResponse;
+import com.openexchange.testing.httpclient.models.FoldersResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityData;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
@@ -108,6 +113,10 @@ public class FolderManager {
         foldersToDelete.add(folderId);
     }
 
+    public void forgetFolder(String folderId) {
+        foldersToDelete.remove(folderId);
+    }
+
     public void cleanUp() throws ApiException {
         deleteFolder(foldersToDelete.stream().sorted(Collections.reverseOrder()).collect(Collectors.toList()));
     }
@@ -136,9 +145,32 @@ public class FolderManager {
         return createFolder.getData();
     }
 
+    /**
+     * Gets all visible folder of the given content type
+     *
+     * @param contentType
+     * @param columns
+     * @param all
+     * @return
+     * @throws ApiException
+     */
     public FoldersVisibilityData getAllFolders(String contentType, String columns, Boolean all) throws ApiException {
         FoldersVisibilityResponse visibleFolders = folderApi.getFoldersApi().getVisibleFolders(getSession(), contentType, columns, tree, null, all);
         return checkResponse(visibleFolders.getError(), visibleFolders.getErrorDesc(), visibleFolders.getData());
+    }
+
+    /**
+     * Lists all folders under the given folder
+     *
+     * @param parent The parent folder id
+     * @param columns
+     * @param all
+     * @return
+     * @throws ApiException
+     */
+    public ArrayList<ArrayList<Object>> listFolders(String parent, String columns, Boolean all) throws ApiException {
+        FoldersResponse resp = folderApi.getFoldersApi().getSubFolders(getSession(), parent, columns, I(all == null || b(all) ? 1 : 0), tree, null, null, Boolean.FALSE);
+        return (ArrayList<ArrayList<Object>>) checkResponse(resp.getError(), resp.getErrorDesc(), resp.getData());
     }
 
     /**
@@ -231,6 +263,41 @@ public class FolderManager {
         }
         assertNotNull("Unable to find parent folder!", parent);
         return parent;
+    }
+
+    /**
+     * Retrieves the default folder
+     *
+     * @param module The module to get the default folder for
+     * @return The default folder
+     * @throws Exception if the default folder cannot be found
+     */
+    public String getDefaultFolder(String module) throws Exception {
+        FoldersVisibilityData allFolders = getAllFolders(module, "1,308,316", Boolean.TRUE);
+
+        Object privateFolders = allFolders.getPrivate();
+        int defType = getStandardFolderType(module);
+        @SuppressWarnings("unchecked") ArrayList<ArrayList<?>> privateList = (ArrayList<ArrayList<?>>) privateFolders;
+        if (privateList != null) {
+            if (privateList.size() == 1) {
+                return (String) privateList.get(0).get(0);
+            }
+            for (ArrayList<?> folder : privateList) {
+                if (((Boolean) folder.get(1)).booleanValue() && (defType <= 0 || i((Integer) folder.get(2)) == defType)) {
+                    return (String) folder.get(0);
+                }
+            }
+        }
+        throw new Exception("Unable to find default folder!");
+    }
+
+    private int getStandardFolderType(String module) {
+        switch (module) {
+            case "mail":
+                return 7;
+            default:
+                return -1;
+        }
     }
 
 }

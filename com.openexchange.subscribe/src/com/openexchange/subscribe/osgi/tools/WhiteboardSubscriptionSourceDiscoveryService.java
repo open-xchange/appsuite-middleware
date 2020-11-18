@@ -65,10 +65,10 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 public class WhiteboardSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
 
 
-    private final ServiceTracker tracker;
+    private final ServiceTracker<?, ?> tracker;
 
     public WhiteboardSubscriptionSourceDiscoveryService(final BundleContext context) {
-        this.tracker = new ServiceTracker(context, SubscriptionSourceDiscoveryService.class.getName(), null);
+        this.tracker = new ServiceTracker<>(context, SubscriptionSourceDiscoveryService.class.getName(), null);
         tracker.open();
     }
 

@@ -68,9 +68,9 @@ public class SimSubscribeService extends AbstractSubscribeService {
 
     private Subscription subscription;
 
-    private List<Subscription> subscriptionIds = new LinkedList<Subscription>();
+    private List<Subscription> subscriptionIds = new LinkedList<>();
 
-    private Collection content;
+    private Collection<?> content;
 
     public Subscription getSubscription() {
         return subscription;
@@ -100,6 +100,7 @@ public class SimSubscribeService extends AbstractSubscribeService {
         return subscriptionIds;
     }
 
+    @SuppressWarnings("unused")
     public Collection<Subscription> loadForUser(final Context context, final int userId) {
         return null;
     }
@@ -120,7 +121,7 @@ public class SimSubscribeService extends AbstractSubscribeService {
     }
 
     @Override
-    public Collection getContent(final Subscription subscription) {
+    public Collection<?> getContent(final Subscription subscription) {
         return content;
     }
 
@@ -141,7 +142,7 @@ public class SimSubscribeService extends AbstractSubscribeService {
         subscriptionIds.clear();
     }
 
-    public void setContent(final Collection content) {
+    public void setContent(final Collection<?> content) {
         this.content = content == null ? null : content;
     }
 
