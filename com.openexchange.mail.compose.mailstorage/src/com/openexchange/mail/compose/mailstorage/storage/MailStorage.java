@@ -283,14 +283,13 @@ public class MailStorage implements IMailStorage {
         }
 
         MailService mailService = services.getServiceSafe(MailService.class);
-        MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = null;
-        MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> extAccess = null;
+        List<MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>> mailAccesses = new ArrayList<>(2);
         try {
-            mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
-            mailAccess.connect(false);
+            MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> defaultMailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
+            mailAccesses.add(defaultMailAccess);
+            defaultMailAccess.connect(false);
 
-            IMailMessageStorage draftMessageStorage = mailAccess.getMessageStorage();
-            MailMessage draftMail = requireDraftMail(mailStorageId, mailAccess);
+            MailMessage draftMail = requireDraftMail(mailStorageId, defaultMailAccess);
 
             MailMessageProcessor processor = MailMessageProcessor.initForTransport(compositionSpaceId, draftMail, session, services);
             validateIfNeeded(mailStorageId, processor);
@@ -308,20 +307,7 @@ public class MailStorage implements IMailStorage {
 
                 if (referencedMessage != null) {
                     try {
-                        IMailMessageStorage messageStorage;
-                        if (referencedMessage.getAccountId() == MailAccount.DEFAULT_ID) {
-                            messageStorage = draftMessageStorage;
-                        } else {
-                            extAccess = mailService.getMailAccess(session, referencedMessage.getAccountId());
-                            extAccess.connect(false);
-                            messageStorage = extAccess.getMessageStorage();
-                        }
-
-                        Optional<MailMessage> optionalMail = getMail(referencedMessage, messageStorage);
-                        if (!optionalMail.isPresent()) {
-                            throw MailExceptionCode.MAIL_NOT_FOUND.create(referencedMessage.getMailID(), referencedMessage.getFolder());
-                        }
-                        optRefMessage = optionalMail;
+                        optRefMessage = Optional.of(getOriginalMail(session, referencedMessage, mailService, mailAccesses, defaultMailAccess));
                     } catch (OXException e) {
                         LOG.error("Cannot not apply reference headers because fetching the referenced message failed", e);
                     }
@@ -329,13 +315,10 @@ public class MailStorage implements IMailStorage {
             }
 
             ComposeRequestAndMeta composeRequestAndMeta = new ComposeRequestAndMeta(processor.compileComposeRequest(request, optRefMessage), meta);
-            return MailStorageResult.resultFor(mailStorageId, composeRequestAndMeta, true, mailAccess, processor);
+            return MailStorageResult.resultFor(mailStorageId, composeRequestAndMeta, true, defaultMailAccess, processor);
         } finally {
-            if (extAccess != null) {
-                try { extAccess.close(true); } catch (Exception e) {/*ignore*/}
-            }
-            if (mailAccess != null) {
-                try { mailAccess.close(true); } catch (Exception e) {/*ignore*/}
+            for (MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess : mailAccesses) {
+                mailAccess.close(true);
             }
         }
     }
