@@ -74,6 +74,8 @@ import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
+import com.openexchange.testing.httpclient.models.FileAccountData;
+import com.openexchange.testing.httpclient.models.FileAccountResponse;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.InfoItemUpdateResponse;
@@ -81,8 +83,11 @@ import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponse;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponseData.StateEnum;
 import com.openexchange.testing.httpclient.models.ShareLinkData;
 import com.openexchange.testing.httpclient.models.SubscribeShareBody;
+import com.openexchange.testing.httpclient.models.SubscribeShareResponseData;
+import com.openexchange.testing.httpclient.modules.FilestorageApi;
 import com.openexchange.testing.httpclient.modules.InfostoreApi;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link ShareManagementSubscriptionTest} - Test for the <code>analyze</code> action of the share management module.
@@ -97,12 +102,10 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
 
     @Override
     protected Map<String, String> getNeededConfigurations() {
-        HashMap<String, String> configuration = new HashMap<String, String>(6, 0.9f);
+        HashMap<String, String> configuration = new HashMap<String, String>(4, 0.9f);
         configuration.put("com.openexchange.capability.xctx", Boolean.TRUE.toString());
         configuration.put("com.openexchange.capability.xox", Boolean.TRUE.toString());
         configuration.put("com.openexchange.api.client.blacklistedHosts", "");
-        configuration.put("com.openexchange.file.storage.xctx.retryAfterErrorInterval", "0");
-        configuration.put("com.openexchange.file.storage.xox.retryAfterErrorInterval", "0");
         return configuration;
     }
 
@@ -111,6 +114,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
     private TestUser testUserC2;
     private ApiClient apiClientC2;
     private ShareManagementApi smApiC2;
+    private FilestorageApi filestorageApiC2;
 
     @Override
     public void setUp() throws Exception {
@@ -121,6 +125,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         apiClientC2 = generateApiClient(testUserC2);
         addTearDownOperation(() -> logoutClient(apiClientC2, true));
         smApiC2 = new ShareManagementApi(apiClientC2);
+        filestorageApiC2 = new FilestorageApi(apiClientC2);
 
         AJAXClient ajaxClientC2 = generateClient(testUserC2);
         addTearDownOperation(() -> ajaxClientC2.logout());
@@ -196,10 +201,10 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         String folderId = createFolder();
         ShareLinkData shareLink = getOrCreateShareLink(folderManager, smApi, folderId);
         deleteShareLink(folderManager, smApi, folderId);
-        
+
         /*
          * Wait so the anonymous guest user is deleted. Otherwise the guest
-         * is resolved "just in time" and a "forbidden" for an anonymous share link 
+         * is resolved "just in time" and a "forbidden" for an anonymous share link
          * is returned.
          */
         LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(3));
@@ -235,7 +240,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         /*
          * Add share and verify analyze changed
          */
-        String fqFolderId = addOXShareAccount(smApiC2, shareLink, null);
+        SubscribeShareResponseData accountData = addOXShareAccount(smApiC2, shareLink, null);
 
         /*
          * Remove guest from folder permission
@@ -258,7 +263,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         /*
          * Delete account and check again
          */
-        deleteOXShareAccount(smApiC2.getApiClient(), fqFolderId);
+        deleteOXShareAccount(smApiC2.getApiClient(), accountData.getFolder());
         analyze(shareLink, StateEnum.ADDABLE);
     }
 
@@ -291,7 +296,9 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         /*
          * Add share and verify analyze changed
          */
-        String fqFolderId = addOXShareAccount(smApiC2, shareLink, null);
+        SubscribeShareResponseData accountData = addOXShareAccount(smApiC2, shareLink, null);
+        FileAccountResponse fileAccountResponse = filestorageApiC2.getFileAccount(apiClientC2.getSession(), IDMangler.unmangle(accountData.getFolder()).get(0), accountData.getAccount());
+        FileAccountData fileAccountData = checkResponse(fileAccountResponse.getError(), fileAccountResponse.getErrorDesc(), fileAccountResponse.getData());
 
         /*
          * Change password of guest and verify response.
@@ -305,6 +312,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         assertThat(data, notNullValue());
 
         analyze(shareLink, StateEnum.CREDENTIALS_REFRESH);
+        clearAccountError(new FilestorageApi(apiClientC2), fileAccountData);
 
         /*
          * Update password in local instance and check response
@@ -333,7 +341,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         /*
          * Delete account and check again
          */
-        deleteOXShareAccount(smApiC2.getApiClient(), fqFolderId);
+        deleteOXShareAccount(smApiC2.getApiClient(), accountData.getFolder());
         analyze(shareLink, StateEnum.ADDABLE_WITH_PASSWORD);
     }
 
