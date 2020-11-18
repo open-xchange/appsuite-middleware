@@ -1221,10 +1221,21 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         List<CompositionSpaceToDraftAssociation> associations = associationStorage.getAllForUser(session);
 
         if (existingDraftPaths.isEmpty()) {
-            for (CompositionSpaceToDraftAssociation association : associations) {
-                associationStorage.delete(association.getCompositionSpaceId(), session, false);
+            // Mail storage signals no available composition-space-related draft messages...
+            if (!associations.isEmpty()) {
+                // ... but there are associations in cache. Retry...
+                storageResult = mailStorage.lookUp(session);
+                warnings.addAll(storageResult.getWarnings());
+                existingDraftPaths = storageResult.getResult().getDraftPath2CompositionSpaceId();
             }
-            return Collections.emptyList();
+
+            if (existingDraftPaths.isEmpty()) {
+                // Still empty
+                for (CompositionSpaceToDraftAssociation association : associations) {
+                    associationStorage.delete(association.getCompositionSpaceId(), session, false);
+                }
+                return Collections.emptyList();
+            }
         }
 
         boolean somethingChanged = false;

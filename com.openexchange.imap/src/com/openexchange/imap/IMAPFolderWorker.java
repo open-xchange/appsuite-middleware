@@ -473,6 +473,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         if (isEqualFolder && (mode >= desiredMode)) {
                             // Identical folder is already opened in an appropriate mode.
                             close = false;
+                            IMAPCommandsCollection.forceNoopCommand(imapFolder);
                             return imapFolder;
                         }
 
