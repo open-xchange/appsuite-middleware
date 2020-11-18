@@ -84,7 +84,7 @@ public class XOXFolderConverter {
 
     /**
      * Initializes a new {@link XOXFolderConverter}.
-     * 
+     *
      * @param entityHelper The underlying entity helper to resolve & mangle remote entities
      * @param localSession The user's <i>local</i> session associated with the file storage account
      */
@@ -125,11 +125,12 @@ public class XOXFolderConverter {
          * init storage folder and take over common properties from remote folder
          */
         XOXFolder folder = new XOXFolder();
-        folder.setCacheable(false); //for now, maybe make configurable?        
+        folder.setCacheable(false); //for now, maybe make configurable?
         folder.setId(remoteFolder.getID());
         folder.setParentId(remoteFolder.getParentID());
         folder.setName(remoteFolder.getName());
         folder.setCreationDate(remoteFolder.getCreationDate());
+        folder.setLastModifiedDate(remoteFolder.getLastModified());
         folder.setType(getFileStorageFolderType(remoteFolder.getType()));
         folder.setMeta(remoteFolder.getMeta());
         folder.setDefaultFolder(remoteFolder.isDefault());
@@ -146,10 +147,10 @@ public class XOXFolderConverter {
         /*
          * qualify remote entities for usage in local session in storage account's context & erase ambiguous numerical identifiers
          */
-        folder.setCreatedFrom(entityHelper.mangleRemoteEntity(null == remoteFolder.getCreatedFrom() && 0 < remoteFolder.getCreatedBy() ? 
+        folder.setCreatedFrom(entityHelper.mangleRemoteEntity(null == remoteFolder.getCreatedFrom() && 0 < remoteFolder.getCreatedBy() ?
             entityHelper.optEntityInfo(remoteFolder.getCreatedBy(), false) : remoteFolder.getCreatedFrom()));
-        folder.setCreatedBy(0);        
-        folder.setModifiedFrom(entityHelper.mangleRemoteEntity(null == remoteFolder.getModifiedFrom() && 0 < remoteFolder.getModifiedBy() ? 
+        folder.setCreatedBy(0);
+        folder.setModifiedFrom(entityHelper.mangleRemoteEntity(null == remoteFolder.getModifiedFrom() && 0 < remoteFolder.getModifiedBy() ?
             entityHelper.optEntityInfo(remoteFolder.getModifiedBy(), false) : remoteFolder.getModifiedFrom()));
         folder.setModifiedBy(0);
         /*
@@ -187,6 +188,8 @@ public class XOXFolderConverter {
         RemoteFolder remoteFolder = initRemoteFolder();
         remoteFolder.setID(storageFolder.getId());
         remoteFolder.setParentID(storageFolder.getParentId());
+        remoteFolder.setLastModified(storageFolder.getLastModifiedDate());
+        remoteFolder.setCreationDate(storageFolder.getCreationDate());
         EntityInfo remoteCreatedFrom = entityHelper.unmangleLocalEntity(storageFolder.getCreatedFrom());
         remoteFolder.setCreatedFrom(remoteCreatedFrom);
         remoteFolder.setCreatedBy(null != remoteCreatedFrom ? remoteCreatedFrom.getEntity() : -1);
@@ -201,7 +204,7 @@ public class XOXFolderConverter {
 
     /**
      * Initializes a new remote folder.
-     * 
+     *
      * @return The initialized remote folder
      */
     public RemoteFolder initRemoteFolder() {
@@ -251,10 +254,10 @@ public class XOXFolderConverter {
         Contact contact = extendedPermission.getContact();
         EntityInfo entityInfo;
         if (null == contact) {
-            entityInfo = new EntityInfo(extendedPermission.getIdentifier(), extendedPermission.getDisplayName(), null, null, null, null, 
+            entityInfo = new EntityInfo(extendedPermission.getIdentifier(), extendedPermission.getDisplayName(), null, null, null, null,
                 extendedPermission.getEntity(), null, type);
         } else {
-            entityInfo = new EntityInfo(extendedPermission.getIdentifier(), extendedPermission.getDisplayName(), contact.getTitle(), 
+            entityInfo = new EntityInfo(extendedPermission.getIdentifier(), extendedPermission.getDisplayName(), contact.getTitle(),
                 contact.getFirstName(), contact.getLastName(), contact.getEmail1(), extendedPermission.getEntity(), contact.getImage1Url(), type);
         }
         if (Type.ANONYMOUS.equals(type)) {
