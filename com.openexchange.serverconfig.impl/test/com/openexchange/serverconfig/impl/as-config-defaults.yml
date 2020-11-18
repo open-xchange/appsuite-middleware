@@ -24,7 +24,7 @@ default:
         # Mandatory!
         button:
             textColor: '#ffffff'
-            backgroundColor: '#3c73aa'
+            backgroundColor: '#3c61aa'
             borderColor: '#356697'
         # Notification mails can contain a footer section consisting of
         # a text and logo/image. To omit footers at all, you can omit this

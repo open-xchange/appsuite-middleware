@@ -41,7 +41,7 @@ Example content:
 	    notificationMails:
 	        button:
 	            textColor: '#ffffff'
-	            backgroundColor: '#3c73aa'
+	            backgroundColor: '#3c61aa'
 	            borderColor: '#356697'
 	        footer:
 	            text: 'Footer text'
@@ -57,7 +57,7 @@ Example content:
 	    notificationMails:
 	        button:
 	            textColor: '#ffffff'
-	            backgroundColor: '#3c73aa'
+	            backgroundColor: '#3c61aa'
 	            borderColor: '#356697'
 	
 	host3.mycloud.net:
@@ -209,7 +209,7 @@ It is possible to define the basic style of all notification mails for a host. W
 		#mandatory
         button:
             textColor: '#ffffff'
-            backgroundColor: '#3c73aa'
+            backgroundColor: '#3c61aa'
             borderColor: '#356697'
         #Optional    
         footer:
@@ -218,7 +218,7 @@ It is possible to define the basic style of all notification mails for a host. W
 
 |Name   |Type   |Description   |Example   |
 |---|---|---|---|
-| button   | String  | Where should the user be directed after logout.  | button:<br>textColor: '#ffffff'<br>backgroundColor: '#3c73aa'<br>borderColor: '#356697' |
+| button   | String  | Where should the user be directed after logout.  | button:<br>textColor: '#ffffff'<br>backgroundColor: '#3c61aa'<br>borderColor: '#356697' |
 | footer   | String  | Notification mails can contain a footer section consisting of <br> a text and logo/image. To omit footers at all, you can omit this  | footer:<br> image: 'ox_logo_claim_blue_small.png' <br>text: 'Footer text'  |
 | image  | String  | Images are referenced via their file name below <br> '/opt/open-xchange/templates'. If you don't want any image <br> to be included, omit this key.  | image: ox_logo_claim_blue_small.png  |
 | text  | Boolean  | The footer text can be customized. If no text shall <br>be displayed, omit this key. | text: 'Footer text' |
