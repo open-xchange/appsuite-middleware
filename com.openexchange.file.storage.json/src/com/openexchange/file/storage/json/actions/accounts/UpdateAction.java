@@ -113,7 +113,9 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
                 ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
             } catch (OXException e) {
                 //reset
-                account.getFileStorageService().getAccountManager().updateAccount(existingAccount, session);
+                if(existingAccount != null) {
+                    account.getFileStorageService().getAccountManager().updateAccount(existingAccount, session);
+                }
                 throw e;
             }
         }
