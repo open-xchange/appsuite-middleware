@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,31 +49,37 @@
 
 package com.openexchange.saml;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.configuration.CookieHashSource;
+import com.openexchange.saml.impl.LoginConfigurationLookup;
+
+public class TestLoginConfigurationLookup implements LoginConfigurationLookup {
+
+    private final LoginConfiguration conf;
 
 
-/**
- * {@link UnitTests}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
- */
-@RunWith(Suite.class)
-@SuiteClasses({
-    KeySpecCredentialProviderTest.class,
-    SAMLWebSSOProviderTest.class,
-    SAMLWebSSOProviderOAuthTest.class,
-    HzStateManagementTest.class,
-    MultiSAMLTest.class,
-    SignatureHelperTest.class,
-    SAMLLoginRequestHandlerTest.class
-})
-public class UnitTests {
-
-    public UnitTests() {
+    TestLoginConfigurationLookup() {
         super();
+        conf = new LoginConfiguration(
+            "/appsuite/",
+            CookieHashSource.CALCULATE,
+            "false",
+            "open-xchange-appsuite",
+            "1.0",
+            "<b>ERROR_MESSAGE</b>",
+            60000,
+            false,
+            false,
+            false,
+            true,
+            true,
+            false,
+            false);
+    }
+
+    @Override
+    public LoginConfiguration getLoginConfiguration() {
+        return conf;
     }
 
 }
