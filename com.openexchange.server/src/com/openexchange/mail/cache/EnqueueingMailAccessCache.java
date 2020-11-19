@@ -49,8 +49,10 @@
 
 package com.openexchange.mail.cache;
 
-import java.util.HashSet;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
@@ -70,9 +72,9 @@ import com.openexchange.mail.cache.queue.SingletonMailAccessQueue;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -167,7 +169,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
     // ------------------------------------------------------------------------------------------------------------------------------
 
-    private final ConcurrentMap<Key, MailAccessQueue> map;
+    private final ConcurrentMap<UserAndContext, AccountMap> map;
     private volatile int defaultIdleSeconds;
     private volatile ScheduledTimerTask timerTask;
 
@@ -185,11 +187,11 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
     private EnqueueingMailAccessCache(final int fallbackQueueCapacity) throws OXException {
         super();
         this.fallbackQueueCapacity = fallbackQueueCapacity;
-        map = new NonBlockingHashMap<Key, MailAccessQueue>();
+        map = new NonBlockingHashMap<UserAndContext, AccountMap>();
         setIdleAndShrinkerSeconds(MailProperties.getInstance().getMailAccessCacheIdleSeconds(), MailProperties.getInstance().getMailAccessCacheShrinkerSeconds(), true);
     }
 
-    private void setIdleAndShrinkerSeconds(int idleSeconds, int shrinkerSeconds, boolean withInitialDelay) throws OXException {
+    void setIdleAndShrinkerSeconds(int idleSeconds, int shrinkerSeconds, boolean withInitialDelay) throws OXException {
         TimerService service = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
 
         ScheduledTimerTask timerTask = this.timerTask;
@@ -207,13 +209,23 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
     @Override
     public int numberOfMailAccesses(Session session, int accountId) throws OXException {
-        final Key key = keyFor(accountId, session);
-        final MailAccessQueue accessQueue = map.get(key);
-        if (null == accessQueue) {
+        AccountMap accounts = map.get(UserAndContext.newInstance(session));
+        if (accounts == null) {
             return 0;
         }
-        synchronized (accessQueue) {
-            return accessQueue.size();
+
+        synchronized (accounts) {
+            if (accounts.deprecated) {
+                return 0;
+            }
+
+            MailAccessQueue accessQueue = accounts.map.get(I(accountId));
+            if (null == accessQueue) {
+                return 0;
+            }
+            synchronized (accessQueue) {
+                return accessQueue.size();
+            }
         }
     }
 
@@ -226,23 +238,34 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      */
     @Override
     public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeMailAccess(final Session session, final int accountId) {
-        final Key key = keyFor(accountId, session);
-        final MailAccessQueue accessQueue = map.get(key);
-        if (null == accessQueue) {
+        AccountMap accounts = map.get(UserAndContext.newInstance(session));
+        if (accounts == null) {
             return null;
         }
-        synchronized (accessQueue) {
-            if (accessQueue.isDeprecated()) {
+
+        synchronized (accounts) {
+            if (accounts.deprecated) {
                 return null;
             }
-            final PooledMailAccess pooledMailAccess = accessQueue.poll();
-            if (null == pooledMailAccess) {
+
+            MailAccessQueue accessQueue = accounts.map.get(I(accountId));
+            if (null == accessQueue) {
                 return null;
             }
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
-            mailAccess.setCached(false);
-            LOG.debug("Remove&Get for {}", key);
-            return mailAccess;
+
+            synchronized (accessQueue) {
+                if (accessQueue.isDeprecated()) {
+                    return null;
+                }
+                final PooledMailAccess pooledMailAccess = accessQueue.poll();
+                if (null == pooledMailAccess) {
+                    return null;
+                }
+                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
+                mailAccess.setCached(false);
+                LOG.debug("Remove&Get for account {} of user {} in context {}", I(accountId), I(session.getUserId()), I(session.getContextId()));
+                return mailAccess;
+            }
         }
     }
 
@@ -260,35 +283,51 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         if (idleSeconds <= 0) {
             idleSeconds = defaultIdleSeconds;
         }
-        final Key key = keyFor(accountId, session);
-        MailAccessQueue accessQueue = map.get(key);
-        if (null == accessQueue || accessQueue.isDeprecated()) {
-            // First check capacity boundary per mail provider and fall back to default if check fails
-            int capacity;
-            try {
-                capacity = MailProviderRegistry.getMailProviderBySession(session, accountId).getProtocol().getMaxCount(mailAccess.getMailConfig().getServer(), MailAccount.DEFAULT_ID == accountId);
-            } catch (OXException e) {
-                capacity = fallbackQueueCapacity;
-            }
-            final MailAccessQueue tmp = capacity > 0 ? (1 == capacity ? new SingletonMailAccessQueue() : new MailAccessQueueImpl(capacity)) : new MailAccessQueueImpl(-1);
-            accessQueue = map.putIfAbsent(key, tmp);
-            if (null == accessQueue) {
-                accessQueue = tmp;
+
+        UserAndContext userAndContext = UserAndContext.newInstance(session);
+        AccountMap accounts = map.get(userAndContext);
+        if (accounts == null) {
+            AccountMap newAccounts = new AccountMap();
+            accounts = map.putIfAbsent(userAndContext, newAccounts);
+            if (accounts == null) {
+                accounts = newAccounts;
             }
         }
-        synchronized (accessQueue) {
-            if (accessQueue.isDeprecated()) {
+
+        synchronized (accounts) {
+            if (accounts.deprecated) {
+                return putMailAccess(session, accountId, mailAccess);
+            }
+
+            MailAccessQueue accessQueue = accounts.map.get(I(accountId));
+            if (null == accessQueue || accessQueue.isDeprecated()) {
+                // First check capacity boundary per mail provider and fall back to default if check fails
+                int capacity;
+                try {
+                    capacity = MailProviderRegistry.getMailProviderBySession(session, accountId).getProtocol().getMaxCount(mailAccess.getMailConfig().getServer(), MailAccount.DEFAULT_ID == accountId);
+                } catch (OXException e) {
+                    capacity = fallbackQueueCapacity;
+                }
+                final MailAccessQueue tmp = capacity > 0 ? (1 == capacity ? new SingletonMailAccessQueue() : new MailAccessQueueImpl(capacity)) : new MailAccessQueueImpl(-1);
+                accessQueue = accounts.map.putIfAbsent(I(accountId), tmp);
+                if (null == accessQueue) {
+                    accessQueue = tmp;
+                }
+            }
+            synchronized (accessQueue) {
+                if (accessQueue.isDeprecated()) {
+                    return false;
+                }
+                /*
+                 * Insert subsequent MailAccess instances with halved time-to-live seconds
+                 */
+                idleSeconds = accessQueue.isEmpty() ? idleSeconds : (idleSeconds >> 1);
+                if (accessQueue.offer(PooledMailAccess.valueFor(mailAccess, idleSeconds * 1000L))) {
+                    mailAccess.setCached(true);
+                    return true;
+                }
                 return false;
             }
-            /*
-             * Insert subsequent MailAccess instances with halved time-to-live seconds
-             */
-            idleSeconds = accessQueue.isEmpty() ? idleSeconds : (idleSeconds >> 1);
-            if (accessQueue.offer(PooledMailAccess.valueFor(mailAccess, idleSeconds * 1000L))) {
-                mailAccess.setCached(true);
-                return true;
-            }
-            return false;
         }
     }
 
@@ -301,12 +340,23 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      */
     @Override
     public boolean containsMailAccess(final Session session, final int accountId) {
-        final MailAccessQueue accessQueue = map.get(keyFor(accountId, session));
-        if (null == accessQueue) {
+        AccountMap accounts = map.get(UserAndContext.newInstance(session));
+        if (accounts == null) {
             return false;
         }
-        synchronized (accessQueue) {
-            return !accessQueue.isDeprecated() && !accessQueue.isEmpty();
+
+        synchronized (accounts) {
+            if (accounts.deprecated) {
+                return false;
+            }
+
+            MailAccessQueue accessQueue = accounts.map.get(I(accountId));
+            if (null == accessQueue) {
+                return false;
+            }
+            synchronized (accessQueue) {
+                return !accessQueue.isDeprecated() && !accessQueue.isEmpty();
+            }
         }
     }
 
@@ -324,55 +374,85 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             this.timerTask = null;
             timerTask.cancel(false);
         }
-        for (final Key key : new HashSet<Key>(map.keySet())) {
-            orderlyClearQueue(key);
-        }
-    }
 
-    /**
-     * Clears specified queue orderly.
-     *
-     * @param key The key associated with the queue
-     */
-    protected void orderlyClearQueue(final Key key) {
-        final MailAccessQueue accessQueue = map.remove(key);
-        if (null == accessQueue) {
-            return;
-        }
-        synchronized (accessQueue) {
-            accessQueue.markDeprecated();
-            PooledMailAccess pooledMailAccess;
-            while (null != (pooledMailAccess = accessQueue.poll())) {
-                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
-                LOG.debug("Dropping: {}", mailAccess);
-                mailAccess.setCached(false);
-                mailAccess.close(false);
+        for (Iterator<Entry<UserAndContext, AccountMap>> it = map.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<UserAndContext, AccountMap> mapEntry = it.next();
+            AccountMap accounts = mapEntry.getValue();
+            synchronized (accounts) {
+                if (accounts.deprecated) {
+                    continue;
+                }
+
+                accounts.deprecated = true;
+                it.remove();
+
+                for (Map.Entry<Integer, MailAccessQueue> entry : accounts.map.entrySet()) {
+                    MailAccessQueue accessQueue = entry.getValue();
+                    synchronized (accessQueue) {
+                        accessQueue.markDeprecated();
+                        PooledMailAccess pooledMailAccess;
+                        while (null != (pooledMailAccess = accessQueue.poll())) {
+                            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
+                            LOG.debug("Dropping: {}", mailAccess);
+                            mailAccess.setCached(false);
+                            mailAccess.close(false);
+                        }
+                    }
+                }
+                accounts.map.clear();
             }
         }
     }
 
     @Override
     public void clearUserEntries(int userId, int contextId) throws OXException {
-        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-        MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId);
-        for (MailAccount mailAccount : accounts) {
-            orderlyClearQueue(keyFor(mailAccount.getId(), userId, contextId));
+        UserAndContext userAndContext = UserAndContext.newInstance(userId, contextId);
+        AccountMap accounts = map.get(userAndContext);
+        if (accounts == null) {
+            return;
+        }
+
+        synchronized (accounts) {
+            if (accounts.deprecated) {
+                return;
+            }
+
+            accounts.deprecated = true;
+            map.remove(userAndContext);
+
+            for (Map.Entry<Integer, MailAccessQueue> entry : accounts.map.entrySet()) {
+                MailAccessQueue accessQueue = entry.getValue();
+                synchronized (accessQueue) {
+                    accessQueue.markDeprecated();
+                    PooledMailAccess pooledMailAccess;
+                    while (null != (pooledMailAccess = accessQueue.poll())) {
+                        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
+                        LOG.debug("Dropping: {}", mailAccess);
+                        mailAccess.setCached(false);
+                        mailAccess.close(false);
+                    }
+                }
+            }
+            accounts.map.clear();
         }
     }
 
-    private static Key keyFor(int accountId, Session session) {
-        return keyFor(accountId, session.getUserId(), session.getContextId());
+    private static class AccountMap {
+
+        final Map<Integer, MailAccessQueue> map;
+        boolean deprecated;
+
+        AccountMap() {
+            super();
+            map = new HashMap<>(6);
+        }
     }
 
-    private static Key keyFor(int accountId, int userId, int contextId) {
-        return new Key(accountId, userId, contextId);
-    }
+    private static class PurgeExpiredRunnable implements Runnable {
 
-    private static final class PurgeExpiredRunnable implements Runnable {
+        private final ConcurrentMap<UserAndContext, AccountMap> map;
 
-        private final ConcurrentMap<Key, MailAccessQueue> map;
-
-        protected PurgeExpiredRunnable(final ConcurrentMap<Key, MailAccessQueue> map) {
+        PurgeExpiredRunnable(final ConcurrentMap<UserAndContext, AccountMap> map) {
             super();
             this.map = map;
         }
@@ -383,32 +463,36 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                 /*
                  * Shall timed-out queues be removed from mapping?
                  */
-                final boolean dropQueue = isDropQueue();
+                boolean dropQueue = isDropQueue();
                 /*
                  * Iterate mapping
                  */
-                for (final Iterator<Entry<Key, MailAccessQueue>> iterator = map.entrySet().iterator(); iterator.hasNext();) {
-                    final Entry<Key, MailAccessQueue> entry = iterator.next();
-                    final MailAccessQueue accessQueue = entry.getValue();
-                    synchronized (accessQueue) {
-                        PooledMailAccess pooledMailAccess;
-                        while (null != (pooledMailAccess = accessQueue.pollDelayed())) {
-                            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-                                pooledMailAccess.getMailAccess();
-                            mailAccess.setCached(false);
-                            LOG.debug("Timed-out mail access for {}", entry.getKey());
+                for (Iterator<Map.Entry<UserAndContext, AccountMap>> it = map.entrySet().iterator(); it.hasNext();) {
+                    Map.Entry<UserAndContext, AccountMap> mapEntry = it.next();
+                    UserAndContext userAndContext = mapEntry.getKey();
+                    AccountMap accounts = mapEntry.getValue();
 
-                            //System.out.println(new StringBuilder("Timed-out mail access for ").append(entry.getKey()).toString());
-
-                            mailAccess.close(false);
-                        }
-                        if (dropQueue && accessQueue.isEmpty()) {
-                            /*
-                             * Current queue is empty. Mark as deprecated
-                             */
-                            accessQueue.markDeprecated();
-                            LOG.debug("Dropped queue for {}", entry.getKey());
-                            iterator.remove();
+                    synchronized (accounts) {
+                        for (Iterator<Map.Entry<Integer, MailAccessQueue>> iterator = accounts.map.entrySet().iterator(); iterator.hasNext();) {
+                            Map.Entry<Integer, MailAccessQueue> entry = iterator.next();
+                            MailAccessQueue accessQueue = entry.getValue();
+                            synchronized (accessQueue) {
+                                PooledMailAccess pooledMailAccess;
+                                while (null != (pooledMailAccess = accessQueue.pollDelayed())) {
+                                    final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
+                                    mailAccess.setCached(false);
+                                    LOG.debug("Timed-out mail access for account {} of user {} in context {}", entry.getKey(), I(userAndContext.getUserId()), I(userAndContext.getContextId()));
+                                    mailAccess.close(false);
+                                }
+                                if (dropQueue && accessQueue.isEmpty()) {
+                                    /*
+                                     * Current queue is empty. Mark as deprecated
+                                     */
+                                    accessQueue.markDeprecated();
+                                    LOG.debug("Dropped queue for account {} of user {} in context {}", entry.getKey(), I(userAndContext.getUserId()), I(userAndContext.getContextId()));
+                                    iterator.remove();
+                                }
+                            }
                         }
                     }
                 }
@@ -421,69 +505,6 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         private boolean isDropQueue() {
             return DROP_TIMED_OUT_QUEUES;
         }
-    }
-
-    private static final class Key {
-
-        private final int user;
-        private final int context;
-        private final int accountId;
-        private final int hash;
-
-        protected Key(final int accountId, final int user, final int context) {
-            super();
-            this.user = user;
-            this.context = context;
-            this.accountId = accountId;
-            hash = hashCode0();
-        }
-
-        private int hashCode0() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + context;
-            result = prime * result + user;
-            result = prime * result + accountId;
-            return result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (context != other.context) {
-                return false;
-            }
-            if (user != other.user) {
-                return false;
-            }
-            if (accountId != other.accountId) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder builder = new StringBuilder(16);
-            builder.append("{ Key [accountId=").append(accountId).append(", user=").append(user).append(", context=").append(context).append(
-                "] }");
-            return builder.toString();
-        }
-
     }
 
 }
