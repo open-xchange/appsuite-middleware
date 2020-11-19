@@ -66,7 +66,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -142,7 +141,6 @@ public abstract class AbstractApiClient implements ApiClient {
     protected final CookieStore cookieStore;
 
     private final AtomicBoolean isClosed;
-    private final AtomicLong lastRelogin;
 
     /**
      * Initializes a new {@link AbstractApiClient}.
@@ -163,7 +161,6 @@ public abstract class AbstractApiClient implements ApiClient {
         this.cookieStore = HttpContextUtils.createCookieStore();
 
         this.isClosed = new AtomicBoolean(false);
-        this.lastRelogin = new AtomicLong(System.currentTimeMillis());
     }
 
     @Override
@@ -282,6 +279,17 @@ public abstract class AbstractApiClient implements ApiClient {
         }
 
         LOGGER.debug("Client is closed. Logging out user {} in context {} on host {}", I(userId), I(contextId), loginLink.getHost());
+        doLogout(true);
+    }
+
+    /**
+     * Performs a logout call.
+     * <p>
+     * Clears the cookie store
+     * 
+     * @param logOnError If an error should be logged
+     */
+    protected void doLogout(boolean logOnError) {
         HttpRequestBase request = null;
         HttpResponse response = null;
         try {
@@ -292,12 +300,14 @@ public abstract class AbstractApiClient implements ApiClient {
             request = buildRequest(new LogoutCall());
             response = getHttpClient().execute(request, httpContext);
             int status = response.getStatusLine().getStatusCode();
-            if (HttpStatus.SC_OK != status) {
+            if (HttpStatus.SC_OK != status && logOnError) {
                 OXException oxException = getNestedOXException(response);
-                LOGGER.info("Unable to logout user {} in context {} from host {} with error code", I(userId), I(contextId), loginLink.getHost(), I(status), oxException);
+                LOGGER.info("Unable to logout user {} in context {} from host {} with error code {}", I(userId), I(contextId), loginLink.getHost(), I(status), oxException);
             }
         } catch (Exception e) {
-            LOGGER.error("Unable to logout client", e);
+            if (logOnError) {
+                LOGGER.error("Unable to logout client", e);
+            }
         } finally {
             HttpClients.close(request, response);
             cookieStore.clear();
@@ -560,25 +570,32 @@ public abstract class AbstractApiClient implements ApiClient {
      * @throws OXException In case a valid session can't be obtained, or the login fails because of another reason then {@link SessionExceptionCodes#SESSION_EXPIRED}
      */
     private synchronized void reLogin(OXException oxException) throws OXException {
-        if (System.currentTimeMillis() - lastRelogin.get() < TimeUnit.MINUTES.toMillis(1)) {
-            LOGGER.trace("Already tried relogin in the last minute. Using local data to determine state");
-            LoginInformation loginInformation = getLoginInformation();
+        /*
+         * Check if client has been closed meanwhile
+         */
+        if (isClosed.get()) {
+            throw ApiClientExceptions.SESSION_EXPIRED.create();
+        }
+        LoginInformation loginInformation = getLoginInformation();
+        if (null == loginInformation || Strings.isEmpty(loginInformation.getRemoteSessionId())) {
+            throw ApiClientExceptions.SESSION_EXPIRED.create();
+        }
+        /*
+         * Check if new session has been set meanwhile
+         */
+        if (null != oxException.getDisplayArgs() && oxException.getDisplayArgs().length > 0) {
             String expiredSessionId = (String) oxException.getDisplayArgs()[0];
-            /*
-             * Check if new session has been set meanwhile
-             */
-            if (null == loginInformation || Strings.isEmpty(loginInformation.getRemoteSessionId()) || //@formatter:off
-                Strings.isEmpty(expiredSessionId) || expiredSessionId.equals(loginInformation.getRemoteSessionId())) { //@formatter:on
-                throw ApiClientExceptions.SESSION_EXPIRED.create();
+            if (Strings.isNotEmpty(expiredSessionId) && false == expiredSessionId.equals(loginInformation.getRemoteSessionId())) {
+                return;
             }
-            return;
+        } else {
+            LOGGER.debug("Unable to extract expired session ID. Performing re-login to ensure reliable session");
         }
 
-        lastRelogin.set(System.currentTimeMillis());
         LOGGER.debug("The session on the remote system {} expired for user {} in context {}. Trying to re-login", loginLink.getHost(), I(userId), I(contextId));
         for (int counter = 0; counter <= DEFAULT_RETRIES; counter++) {
             try {
-                cookieStore.clear();
+                doLogout(false);
                 doLogin();
                 return;
             } catch (OXException e) {
