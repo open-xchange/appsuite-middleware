@@ -1,4 +1,4 @@
-/share/management?action=remount:
+/share/management?action=resubscribe:
   put:
     operationId: resubscribeShare
     tags:

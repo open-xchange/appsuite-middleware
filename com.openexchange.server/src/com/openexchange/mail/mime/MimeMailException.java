@@ -447,6 +447,11 @@ public class MimeMailException extends OXException {
                     return MimeMailExceptionCode.READ_TIMEOUT.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
                 }
 
+                Exception nextException = e.getNextException();
+                if (nextException instanceof com.sun.mail.iap.ConnectionException) {
+                    return handleConnectionException((com.sun.mail.iap.ConnectionException) nextException, mailConfig, e);
+                }
+
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.STORE_CLOSED_EXT.create(e, mailConfig.getServer(), mailConfig.getLogin(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), EMPTY_ARGS);
                 }
@@ -1099,6 +1104,11 @@ public class MimeMailException extends OXException {
     private static boolean isByeException(com.sun.mail.iap.ConnectionException e) {
         if (null == e) {
             return false;
+        }
+
+        Response response = e.getResponse();
+        if (response != null && response.isBYE()) {
+            return true;
         }
 
         return isEitherOf(e, com.sun.mail.iap.ByeIOException.class);

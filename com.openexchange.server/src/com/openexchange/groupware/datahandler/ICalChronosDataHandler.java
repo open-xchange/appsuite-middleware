@@ -100,7 +100,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 public final class ICalChronosDataHandler extends ICalDataHandler {
 
     private static final String CALENDAR_PATH = "com.openexchange.groupware.calendar.folder";
-    private static final String FOLDER_PATH   = "com.openexchange.groupware.task.folder";
+    private static final String FOLDER_PATH = "com.openexchange.groupware.task.folder";
 
     private static final Class<?>[] TYPES = { InputStream.class };
 
@@ -170,7 +170,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
             stream = inputStreamCopy.getInputStream();
             ImportedCalendar calendar = iCalService.importICal(stream, initializeParameters(iCalService));
             events = calendar.getEvents();
-            if (events.isEmpty()) {
+            if (null == events || events.isEmpty()) {
                 return;
             }
         } finally {
@@ -185,7 +185,17 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
             access.set(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.UPDATE_OR_REASSIGN);
             access.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
             access.set(CalendarParameters.PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS, Boolean.TRUE);
+
             List<ImportResult> importEvents = access.importEvents(calendarFolder, events);
+            if (null == importEvents || importEvents.isEmpty()) {
+                if (null != access.getWarnings()) {
+                    access.getWarnings().forEach(w -> result.addWarning(w));
+                } else {
+                    result.addWarning(ConversionWarning.Code.UNEXPECTED_ERROR.create("No appointments to import"));
+                }
+                return;
+            }
+
             for (ImportResult importEvent : importEvents) {
                 if (null == importEvent.getError()) {
                     for (CreateResult created : importEvent.getCreations()) {

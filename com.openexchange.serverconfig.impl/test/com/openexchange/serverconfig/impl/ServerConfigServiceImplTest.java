@@ -264,7 +264,7 @@ public class ServerConfigServiceImplTest {
         ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("nonconfiguredhost.com", -1, -1);
         NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
         assertEquals("Wrong button text color", "#ffffff", nmc.getButtonTextColor());
-        assertEquals("Wrong button background color", "#3c73aa", nmc.getButtonBackgroundColor());
+        assertEquals("Wrong button background color", "#3c61aa", nmc.getButtonBackgroundColor());
         assertEquals("Wrong button border color", "#356697", nmc.getButtonBorderColor());
         assertEquals("Wrong footer image name", "ox_logo_claim_blue_small.png", nmc.getFooterImage());
         assertEquals("Wrong footer text", "", nmc.getFooterText());
@@ -286,7 +286,7 @@ public class ServerConfigServiceImplTest {
         ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("host2.mycloud.net", -1, -1);
         NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
         assertEquals("Wrong button text color", "#ffffff", nmc.getButtonTextColor());
-        assertEquals("Wrong button background color", "#3c73aa", nmc.getButtonBackgroundColor());
+        assertEquals("Wrong button background color", "#3c61aa", nmc.getButtonBackgroundColor());
         assertEquals("Wrong button border color", "#356697", nmc.getButtonBorderColor());
         assertEquals("Wrong footer image name", null, nmc.getFooterImage());
         assertEquals("Wrong footer text", null, nmc.getFooterText());
@@ -297,7 +297,7 @@ public class ServerConfigServiceImplTest {
         ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("host1.mycloud.net", -1, -1);
         NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
         assertEquals("Wrong button text color", "#ffffff", nmc.getButtonTextColor());
-        assertEquals("Wrong button background color", "#3c73aa", nmc.getButtonBackgroundColor());
+        assertEquals("Wrong button background color", "#3c61aa", nmc.getButtonBackgroundColor());
         assertEquals("Wrong button border color", "#356697", nmc.getButtonBorderColor());
         assertEquals("Wrong footer image name", null, nmc.getFooterImage());
         assertEquals("Wrong footer text", "Footer text", nmc.getFooterText());

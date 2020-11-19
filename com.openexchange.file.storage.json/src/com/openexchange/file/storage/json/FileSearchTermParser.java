@@ -294,7 +294,11 @@ public class FileSearchTermParser {
     private static ComparisonType resolveComparison(SingleSearchTerm.SingleOperation operation) throws OXException {
         final ComparisonType comparison;
 
-        switch (SingleSearchTerm.SingleOperation.getSingleOperation(operation.getOperation())) {
+        SingleSearchTerm.SingleOperation singleOperation = SingleSearchTerm.SingleOperation.getSingleOperation(operation.getOperation());
+        if(null == singleOperation) {
+            throw SearchExceptionMessages.UNKNOWN_OPERATION.create();
+        }
+        switch (singleOperation) {
             case EQUALS:
                 comparison = ComparisonType.EQUALS;
                 break;

@@ -197,11 +197,6 @@ public class ApiClientBlacklist {
             }
         }
 
-        if (port < 0) {
-            // port not set; always allow
-            return true;
-        }
-
         if (port > 65535) {
             // invalid port
             return false;

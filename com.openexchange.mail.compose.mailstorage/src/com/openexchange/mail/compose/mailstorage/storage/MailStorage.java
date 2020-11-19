@@ -283,23 +283,41 @@ public class MailStorage implements IMailStorage {
         }
 
         MailService mailService = services.getServiceSafe(MailService.class);
-        MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = null;
+        List<MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>> mailAccesses = new ArrayList<>(2);
         try {
-            mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
-            mailAccess.connect(false);
+            MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> defaultMailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
+            mailAccesses.add(defaultMailAccess);
+            defaultMailAccess.connect(false);
 
-            IMailMessageStorage draftMessageStorage = mailAccess.getMessageStorage();
-            MailMessage draftMail = requireDraftMail(mailStorageId, mailAccess);
+            MailMessage draftMail = requireDraftMail(mailStorageId, defaultMailAccess);
 
             MailMessageProcessor processor = MailMessageProcessor.initForTransport(compositionSpaceId, draftMail, session, services);
             validateIfNeeded(mailStorageId, processor);
-            Meta meta = processor.getCurrentDraft(MessageField.META).getMeta();
 
-            Optional<MailMessage> optRefMessage = Optional.ofNullable(getReferencedMessage(meta, draftMessageStorage));
+            Meta meta = processor.getCurrentDraft(MessageField.META).getMeta();
+            Optional<MailMessage> optRefMessage = Optional.empty();
+            if (meta != null) {
+                MailPath referencedMessage = null;
+                MetaType metaType = meta.getType();
+                if (metaType == MetaType.REPLY || metaType == MetaType.REPLY_ALL) {
+                    referencedMessage = meta.getReplyFor();
+                } else if (metaType == MetaType.FORWARD_INLINE) {
+                    referencedMessage = meta.getForwardsFor().get(0);
+                }
+
+                if (referencedMessage != null) {
+                    try {
+                        optRefMessage = Optional.of(getOriginalMail(session, referencedMessage, mailService, mailAccesses, defaultMailAccess));
+                    } catch (OXException e) {
+                        LOG.error("Cannot not apply reference headers because fetching the referenced message failed", e);
+                    }
+                }
+            }
+
             ComposeRequestAndMeta composeRequestAndMeta = new ComposeRequestAndMeta(processor.compileComposeRequest(request, optRefMessage), meta);
-            return MailStorageResult.resultFor(mailStorageId, composeRequestAndMeta, true, mailAccess, processor);
+            return MailStorageResult.resultFor(mailStorageId, composeRequestAndMeta, true, defaultMailAccess, processor);
         } finally {
-            if (mailAccess != null) {
+            for (MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess : mailAccesses) {
                 mailAccess.close(true);
             }
         }
@@ -1087,34 +1105,6 @@ public class MailStorage implements IMailStorage {
 
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
         return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.compose.maxSpacesPerUser", defaultValue, view);
-    }
-
-    private MailMessage getReferencedMessage(Meta meta, IMailMessageStorage draftMessageStorage) {
-        if (meta == null) {
-            return null;
-        }
-
-        MetaType metaType = meta.getType();
-        MailPath referencedMessage = null;
-        if (metaType == MetaType.REPLY || metaType == MetaType.REPLY_ALL) {
-            referencedMessage = meta.getReplyFor();
-        } else if (metaType == MetaType.FORWARD_INLINE) {
-            referencedMessage = meta.getForwardsFor().get(0);
-        }
-
-        if (referencedMessage != null) {
-            try {
-                Optional<MailMessage> optionalMail = getMail(referencedMessage, draftMessageStorage);
-                if (!optionalMail.isPresent()) {
-                    throw MailExceptionCode.MAIL_NOT_FOUND.create(referencedMessage.getMailID(), referencedMessage.getFolder());
-                }
-                return optionalMail.get();
-            } catch (OXException e) {
-                LOG.error("Cannot not apply reference headers because fetching the referenced message failed", e);
-            }
-        }
-
-        return null;
     }
 
     private static void closeProcessorSafe(MailMessageProcessor processor) {

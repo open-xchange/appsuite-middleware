@@ -68,6 +68,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import org.json.JSONObject;
 import org.junit.Assert;
 import com.openexchange.ajax.chronos.AbstractEnhancedApiClientSession;
 import com.openexchange.ajax.folder.manager.FolderApi;
@@ -79,6 +80,8 @@ import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.ExtendedSubscribeShareBody;
+import com.openexchange.testing.httpclient.models.FileAccountCreationResponse;
+import com.openexchange.testing.httpclient.models.FileAccountData;
 import com.openexchange.testing.httpclient.models.FileAccountUpdateResponse;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
@@ -286,7 +289,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
      * @return The folder ID
      * @throws ApiException
      */
-    protected String addOXShareAccount(ShareManagementApi smApi, String shareLink, String password) throws ApiException {
+    protected SubscribeShareResponseData addOXShareAccount(ShareManagementApi smApi, String shareLink, String password) throws ApiException {
         ExtendedSubscribeShareBody body = getExtendedBody(shareLink, password, "Share from " + testUser.getLogin());
         SubscribeShareResponse mountResponse = smApi.subscribeShare(smApi.getApiClient().getSession(), body);
 
@@ -299,7 +302,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         assertThat(data.getModule(), is(Module.INFOSTORE.getName()));
 
         analyze(smApi, shareLink, StateEnum.SUBSCRIBED);
-        return data.getFolder();
+        return data;
     }
 
     /**
@@ -451,4 +454,15 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         }
         return null;
     }
+
+    protected void clearAccountError(FilestorageApi filestorageApi, FileAccountData data) throws Exception {
+        FileAccountData fileAccountData = new FileAccountData();
+        fileAccountData.setId(data.getId());
+        fileAccountData.setFilestorageService(data.getFilestorageService());
+        fileAccountData.setDisplayName(data.getDisplayName());
+        fileAccountData.setConfiguration(new JSONObject());
+        FileAccountCreationResponse resp = filestorageApi.updateFileAccount(filestorageApi.getApiClient().getSession(), fileAccountData);
+        assertThat("Password still wrong", resp.getError(), notNullValue());
+    }
+
 }

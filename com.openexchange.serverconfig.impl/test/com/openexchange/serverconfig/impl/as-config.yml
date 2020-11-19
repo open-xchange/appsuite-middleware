@@ -21,7 +21,7 @@ host1.mycloud.net:
     notificationMails:
         button:
             textColor: '#ffffff'
-            backgroundColor: '#3c73aa'
+            backgroundColor: '#3c61aa'
             borderColor: '#356697'
         footer:
             text: 'Footer text'
@@ -37,7 +37,7 @@ host2.mycloud.net:
     notificationMails:
         button:
             textColor: '#ffffff'
-            backgroundColor: '#3c73aa'
+            backgroundColor: '#3c61aa'
             borderColor: '#356697'
 
 host3.mycloud.net:
