@@ -51,6 +51,7 @@ package com.openexchange.caching;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Queue;
 
 /**
  * {@link ElementAttributes}
@@ -234,7 +235,7 @@ public interface ElementAttributes extends Serializable {
      *
      * @return The element event handlers value, null if there are none
      */
-    public ArrayList<ElementEventHandler> getElementEventHandlers();
+    public Queue<ElementEventHandler> getElementEventHandlers();
 
     /**
      * Sets the event handlers of the element attributes object

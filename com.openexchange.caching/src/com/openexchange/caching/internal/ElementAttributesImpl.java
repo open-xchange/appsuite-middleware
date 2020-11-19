@@ -53,6 +53,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.ElementEventHandler;
 
@@ -232,8 +234,8 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
 
     @SuppressWarnings("unchecked")
     @Override
-    public ArrayList<ElementEventHandler> getElementEventHandlers() {
-        return (ArrayList<ElementEventHandler>) eventHandlers.clone();
+    public Queue<ElementEventHandler> getElementEventHandlers() {
+        return (LinkedList<ElementEventHandler>) eventHandlers.clone();
     }
 
     @Override

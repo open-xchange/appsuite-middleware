@@ -72,7 +72,7 @@ jcs.region.OXFolderQueryCache.elementattributes.IsLateral=false
 # Pre-defined cache region for User data
 jcs.region.User=LTCP
 jcs.region.User.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.User.cacheattributes.MaxObjects=40000
+jcs.region.User.cacheattributes.MaxObjects=4000000
 jcs.region.User.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.User.cacheattributes.UseMemoryShrinker=true
 jcs.region.User.cacheattributes.MaxMemoryIdleTimeSeconds=360
@@ -89,7 +89,7 @@ jcs.region.User.elementattributes.IsLateral=false
 # Pre-defined cache for user configuration
 jcs.region.UserConfiguration=LTCP
 jcs.region.UserConfiguration.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.UserConfiguration.cacheattributes.MaxObjects=20000
+jcs.region.UserConfiguration.cacheattributes.MaxObjects=4000000
 jcs.region.UserConfiguration.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.UserConfiguration.cacheattributes.UseMemoryShrinker=true
 jcs.region.UserConfiguration.cacheattributes.MaxMemoryIdleTimeSeconds=360
@@ -106,7 +106,7 @@ jcs.region.UserConfiguration.elementattributes.IsLateral=false
 # Pre-defined cache for user configuration
 jcs.region.UserPermissionBits=LTCP
 jcs.region.UserPermissionBits.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.UserPermissionBits.cacheattributes.MaxObjects=20000
+jcs.region.UserPermissionBits.cacheattributes.MaxObjects=4000000
 jcs.region.UserPermissionBits.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.UserPermissionBits.cacheattributes.UseMemoryShrinker=true
 jcs.region.UserPermissionBits.cacheattributes.MaxMemoryIdleTimeSeconds=360
@@ -123,7 +123,7 @@ jcs.region.UserPermissionBits.elementattributes.IsLateral=false
 # Pre-defined cache for user mail configuration
 jcs.region.UserSettingMail=LTCP
 jcs.region.UserSettingMail.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.UserSettingMail.cacheattributes.MaxObjects=20000
+jcs.region.UserSettingMail.cacheattributes.MaxObjects=4000000
 jcs.region.UserSettingMail.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.UserSettingMail.cacheattributes.UseMemoryShrinker=true
 jcs.region.UserSettingMail.cacheattributes.MaxMemoryIdleTimeSeconds=360
@@ -140,7 +140,7 @@ jcs.region.UserSettingMail.elementattributes.IsLateral=false
 # Pre-defined region for context data
 jcs.region.Context=LTCP
 jcs.region.Context.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.Context.cacheattributes.MaxObjects=10000
+jcs.region.Context.cacheattributes.MaxObjects=1000000
 jcs.region.Context.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.Context.cacheattributes.UseMemoryShrinker=true
 jcs.region.Context.cacheattributes.MaxMemoryIdleTimeSeconds=360
