@@ -339,7 +339,7 @@ public class FileStorageAccountErrorHandler {
                 //Check if the error occurred in the last n seconds
                 final Instant now = new Date().toInstant();
                 final Instant errorOccuredOn = lastErrorTimeStamp.toInstant();
-                if (errorOccuredOn.isAfter(now.minusSeconds(t))) {
+                if (t <= 0 || errorOccuredOn.isAfter(now.minusSeconds(t))) {
                     ConversionResult result = json2error.processData(new SimpleData<JSONObject>(error), new DataArguments(), null);
                     if (result.getData() != null && OXException.class.isInstance(result.getData())) {
                         //The error occurred in the last n seconds

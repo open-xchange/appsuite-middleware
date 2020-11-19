@@ -100,31 +100,7 @@ public class Functions {
     }
 
     /**
-     * {@link ExceptionThrowingBiFunction} Represents an exception aware function that accepts one argument and produces a result.
-     *
-     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
-     * @since v7.10.5
-     * @param <T> The type of the input to the function
-     * @param <U> the type of the second argument to the function
-     * @param <R> The type of the result of the function
-     * @param <E> The type of exception
-     */
-    @FunctionalInterface
-    public interface ExceptionThrowingBiFunction<T, U, R, E extends Exception> {
-
-        /**
-         * Applies this function to the given argument.
-         *
-         * @param t The function argument
-         * @param u The second function argument
-         * @return The function result
-         * @throws E In case the result can't be formulated
-         */
-        R apply(T t, U u) throws E;
-    }
-
-    /**
-     * {@link OXBiFunction} Represents an exception aware function that accepts one argument and produces a result.
+     * {@link OXBiFunction} Represents an exception aware function that accepts two arguments and produces a result.
      *
      * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
      * @since v7.10.5

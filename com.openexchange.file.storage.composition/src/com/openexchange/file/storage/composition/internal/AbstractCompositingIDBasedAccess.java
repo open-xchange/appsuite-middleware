@@ -325,17 +325,16 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
      * @return The connected account accesses.
      */
     protected List<FileStorageFileAccess> getAllFileStorageAccesses() throws OXException {
-        return getAllFileStorageAccesses(null, false);
+        return getAllFileStorageAccesses(null);
     }
 
     /**
      * Gets a list of all file storage account accesses.
      *
      * @param filter A predicate which defines the {@link FileStorageService}s which should only be returned, or <code>null</code> to return all services.
-     * @param ignoreConnectionErrors <code>true</code> in order to not return {@link FileStorageFileAccess}es which failed to connect, <code>false</code> to throw an Exception
      * @return The account accesses.
      */
-    protected List<FileStorageFileAccess> getAllFileStorageAccesses(Predicate<FileStorageService> filter, boolean ignoreConnectionErrors) throws OXException {
+    protected List<FileStorageFileAccess> getAllFileStorageAccesses(Predicate<FileStorageService> filter) throws OXException {
         List<FileStorageService> allFileStorageServices = getFileStorageServiceRegistry().getAllServices();
         List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>(allFileStorageServices.size());
         for (FileStorageService fsService : getFileStorageServiceRegistry().getAllServices()) {
@@ -354,14 +353,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
             }
             for (FileStorageAccount fileStorageAccount : accounts) {
                 FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
-                try {
-                    retval.add(connect(accountAccess).getFileAccess());
-                }
-                catch(Exception e) {
-                   if(!ignoreConnectionErrors) {
-                      throw e;
-                   }
-                }
+                retval.add(connect(accountAccess).getFileAccess());
             }
         }
         return retval;
@@ -369,16 +361,16 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
 
     /**
      * Constructs the unique folder identifier for the supplied storage-relative folder identifier in a specific file storage account.
-     * 
+     *
      * @param relativeId The relative folder identifier to get the unique composite identifier for
-     * @param serviceId The file storage service identifier the referenced folder originates in 
+     * @param serviceId The file storage service identifier the referenced folder originates in
      * @param accountId The identifier of the account the referenced folder originates in
      * @return The unique folder identifier
      */
     protected String getUniqueFolderId(String relativeId, String serviceId, String accountId) {
         if (null == relativeId || FileID.INFOSTORE_SERVICE_ID.equals(serviceId) && FileID.INFOSTORE_ACCOUNT_ID.equals(accountId)) {
             return relativeId;
-        }   
+        }
         /*
          * check if special handling of shared root folders for federated shares applies
          */
@@ -386,7 +378,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
             FileStorageService fileStorageService = null;
             try {
                 FileStorageAccountAccess accountAccess = optAccountAccess(serviceId, accountId);
-                fileStorageService = null == accountAccess ? getFileStorageServiceRegistry().getFileStorageService(serviceId) : accountAccess.getService();        
+                fileStorageService = null == accountAccess ? getFileStorageServiceRegistry().getFileStorageService(serviceId) : accountAccess.getService();
             } catch (OXException e) {
                 getLogger(AbstractCompositingIDBasedAccess.class).warn(
                     "Unexpected error determining file storage service for {} / {}, falling back to static ID mangling", serviceId, accountId, e);
@@ -441,7 +433,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
     /**
      * Gets a value indicating whether <i>federated</i> shares from other servers/contexts are mounted at a separate location in the
      * folder tree, or if they're integrated into the common system folders "Shared Files" / "Public Files".
-     * 
+     *
      * @return <code>true</code> if federated shares appear as separate account, <code>false</code> if they're integrated into the default folders
      */
     protected boolean isSeparateFederatedShares() {

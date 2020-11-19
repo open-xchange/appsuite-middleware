@@ -58,7 +58,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.conversion.ConversionService;
@@ -66,6 +65,7 @@ import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.datahandler.DataHandlers;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
+import com.openexchange.file.storage.ErrorStateFileAccess;
 import com.openexchange.file.storage.ErrorStateFolderAccess;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountErrorHandler;
@@ -73,10 +73,10 @@ import com.openexchange.file.storage.FileStorageAccountErrorHandler.Result;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.folderstorage.FederatedSharingFolders;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -140,9 +140,7 @@ public class XOXAccountAccess implements CapabilityAware {
             this,
             session,
             retryAfterError,
-            new FileStorageAccountErrorHandler.CompositingFilter()
-                .add(new FileStorageAccountErrorHandler.IgnoreExceptionPrefixes("SES"))
-                .add(new FileStorageAccountErrorHandler.IgnoreExceptionCodes(ApiClientExceptions.SESSION_EXPIRED)));
+            new FileStorageAccountErrorHandler.IgnoreExceptionPrefixes("SES"));
     }
     //@formatter:on
 
@@ -229,26 +227,30 @@ public class XOXAccountAccess implements CapabilityAware {
     }
 
     @Override
-    public XOXFileAccess getFileAccess() throws OXException {
+    public FileStorageFileAccess getFileAccess() throws OXException {
         assertConnected();
-        this.errorHandler.assertNoRecentException();
+        OXException recentException = this.errorHandler.getRecentException();
+        if (recentException != null) {
+            //In case of an error state: we return an implementation which at least return empty objects on read access
+            return new ErrorStateFileAccess(recentException, this);
+        }
         return new XOXFileAccess(this, shareClient);
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
         assertConnected();
-
         OXException recentException = this.errorHandler.getRecentException();
         if (recentException != null) {
             //In case of an error state: we return an implementation which will only allow to get the last known folders
             //@formatter:off
             return new ErrorStateFolderAccess(
                 recentException,
-                (String folderId) -> FederatedSharingFolders.getLastKnownFolder(account, folderId, session));
+                (String folderId) -> new AccountMetadataHelper(account, session).getLastKnownFolder(folderId),
+                (String folderId) -> new AccountMetadataHelper(account, session).getLastKnownFolders(folderId));
             //@formatter:on
         }
-        return new XOXFolderAccess(this, shareClient);
+        return new XOXFolderAccess(this, new XOXFileAccess(this, shareClient), shareClient, session);
     }
 
     @Override
@@ -314,9 +316,6 @@ public class XOXAccountAccess implements CapabilityAware {
             errorHandler.assertNoRecentException();
             shareClient.ping();
             return true;
-        } catch (OXException e) {
-            errorHandler.handleException(e);
-            throw e;
         } finally {
             close();
         }
@@ -334,6 +333,11 @@ public class XOXAccountAccess implements CapabilityAware {
             //The advanced search is only available on the remote side if the version is > 7.10.5
             try {
                 connect();
+                boolean hasKnownError = errorHandler.hasRecentException();
+                if (hasKnownError) {
+                    //We cannot perform the search by term in case of an error state
+                    return Boolean.FALSE;
+                }
                 return B(shareClient.supportsFederatedSharing());
             } catch (OXException e) {
                 LOG.error("Error while checking if federated sharing functionality is available on the remote host: ", e);

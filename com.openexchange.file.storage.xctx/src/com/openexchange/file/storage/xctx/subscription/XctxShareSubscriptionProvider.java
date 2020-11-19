@@ -90,7 +90,7 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
 
     /**
      * Initializes a new {@link XctxShareSubscriptionProvider}.
-     * 
+     *
      * @param services The services
      * @param fileStorageService The filestorage to operate with
      */
@@ -142,7 +142,7 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
          */
         FileStorageAccountAccess accountAccess = getStorageAccountAccess(session, shareLink);
         if (null != accountAccess) {
-            Builder builder = checkAccessible(accountAccess, shareLink);
+            Builder builder = checkAccessible(accountAccess, shareLink, session);
             return builder.infos(generateInfos(accountAccess, shareLink)).build();
         }
 

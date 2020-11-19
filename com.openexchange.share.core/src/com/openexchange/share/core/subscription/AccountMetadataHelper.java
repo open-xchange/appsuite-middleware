@@ -49,13 +49,27 @@
 
 package com.openexchange.share.core.subscription;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Callable;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFileStoragePermission;
+import com.openexchange.file.storage.ErrorStateFolderAccess.FileStorageFolderStub;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountMetaDataUtil;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.session.Session;
 
 /**
@@ -65,13 +79,13 @@ import com.openexchange.session.Session;
  * @since v7.10.5
  */
 public class AccountMetadataHelper {
-    
+
     private final FileStorageAccount account;
     private final Session session;
-    
+
     /**
      * Initializes a new {@link AccountMetadataHelper}.
-     * 
+     *
      * @param account The underlying file storage account
      * @param session The account owner's session
      */
@@ -83,17 +97,17 @@ public class AccountMetadataHelper {
 
     /**
      * Gets the account's metadata.
-     * 
+     *
      * @return The metadata of the account, or a new {@link JSONObject} if not yet set
      */
     public JSONObject getAccountMetadata() {
         JSONObject metadata = account.getMetadata();
         return null == metadata ? new JSONObject() : metadata;
     }
-    
+
     /**
      * Gets certain metadata stored in the account's metadata JSON object, refreshing the cached data implicitly as needed.
-     * 
+     *
      * @param <T> The type of the cached value. Since stored in the JSON-based configuration, it should be one of
      *            Boolean, Double, Integer, JSONArray, JSONObject, Long,String, or the JSONObject.NULL object
      * @param key The key under which the value is cached
@@ -130,7 +144,7 @@ public class AccountMetadataHelper {
 
     /**
      * Updates the account's metadata configuration in the storage.
-     * 
+     *
      * @param accountMetadata The metadata to store
      */
     public void saveAccountMetadata(JSONObject accountMetadata) throws OXException {
@@ -143,6 +157,113 @@ public class AccountMetadataHelper {
         accountUpdate.setConfiguration(account.getConfiguration());
         accountUpdate.setMetaData(accountMetadata);
         fileStorageService.getAccountManager().updateAccount(accountUpdate, session);
+    }
+
+    /**
+     * Internal method to store the last known sub folders for a {@link FileStorageAccount} and the given parent
+     *
+     * @param folderd The list of sub folders to store
+     * @param parentId The parentID to store the folders for
+     * @throws OXException
+     */
+    public void storeSubFolders(FileStorageFolder[] folders, String parentId) throws OXException {
+
+        if (folders != null && folders.length > 0) {
+
+            try {
+                List<JSONObject> lastKnownFolders = new ArrayList<JSONObject>();
+                for (FileStorageFolder folder : folders) {
+                    JSONObject jsonFolder = new JSONObject();
+                    jsonFolder.put(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_ID, folder.getId());
+                    jsonFolder.put(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_NAME, folder.getName());
+                    jsonFolder.put(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_PARENT_ID, String.valueOf(parentId));
+                    lastKnownFolders.add(jsonFolder);
+                }
+
+                //preserve folders with a different parent
+                JSONArray currentKnownFolders = FileStorageAccountMetaDataUtil.getLastKnownFolders(account);
+                if (currentKnownFolders != null) {
+                    for (int i = 0; i < currentKnownFolders.length(); i++) {
+                        JSONObject knownFolder = currentKnownFolders.getJSONObject(i);
+                        if (false == Objects.equals(knownFolder.optString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_PARENT_ID, null), String.valueOf(parentId))) {
+                            lastKnownFolders.add(knownFolder);
+                        }
+                    }
+                }
+
+                //Save if needed
+                if (FileStorageAccountMetaDataUtil.setLastKnownFolders(account, lastKnownFolders)) {
+                    account.getFileStorageService().getAccountManager().updateAccount(account, session);
+                }
+            } catch (JSONException e) {
+                throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Gets a sub folder from the list of known subfolders
+     *
+     * @param folderId The ID of the folder to get
+     * @return The {@link FileStorageFolder} if it is present in the list of last known sub folders, null if unknown.
+     * @throws OXException
+     */
+    public FileStorageFolderStub getLastKnownFolder(String folderId) throws OXException {
+        Optional<FileStorageFolderStub> folder = Arrays.asList(getLastKnownFolders()).stream().filter(f -> folderId.equals(f.getId())).findFirst();
+        return folder.orElse(null);
+    }
+
+    /**
+     * Gets the last known folders for a given parent and account
+     *
+     * @param parentId The parent ID to get the folders for
+     * @return A list of last known folders with the given parent ID for the given account
+     * @throws OXException
+     */
+    public FileStorageFolderStub[] getLastKnownFolders(String parentId) throws OXException {
+        List<FileStorageFolderStub> allKnownFolders = Arrays.asList(getLastKnownFolders());
+        return allKnownFolders.stream().filter(folder -> Objects.equals(folder.getParentId(), parentId)).toArray(FileStorageFolderStub[]::new);
+    }
+
+    /**
+     * Gets the last known folders for the given account
+     *
+     * @return A list of last known folders for the account
+     * @throws OXException
+     */
+    public FileStorageFolderStub[] getLastKnownFolders() throws OXException {
+        try {
+            JSONArray lastKnownFolders = FileStorageAccountMetaDataUtil.getLastKnownFolders(account);
+            if (lastKnownFolders != null) {
+                ArrayList<FileStorageFolderStub> ret = new ArrayList<FileStorageFolderStub>(lastKnownFolders.length());
+                for (int i = 0; i < lastKnownFolders.length(); i++) {
+                    JSONObject jsonFolder = lastKnownFolders.getJSONObject(i);
+
+                    FileStorageFolderStub folder = new FileStorageFolderStub();
+                    folder.setId(jsonFolder.getString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_ID));
+                    folder.setName(jsonFolder.getString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_NAME));
+                    folder.setParentId(jsonFolder.optString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_PARENT_ID, "10"));
+
+                    folder.setExists(true);
+                    folder.setSubscribed(true);
+
+                    folder.setProperties(new HashMap<String, Object>());
+
+                    //default permissions
+                    List<FileStoragePermission> permissions = new ArrayList<FileStoragePermission>(1);
+                    final DefaultFileStoragePermission defaultPermission = DefaultFileStoragePermission.newInstance();
+                    defaultPermission.setEntity(session.getUserId());
+                    permissions.add(defaultPermission);
+                    folder.setPermissions(permissions);
+
+                    ret.add(folder);
+                }
+                return ret.toArray(new FileStorageFolderStub[ret.size()]);
+            }
+            return new FileStorageFolderStub[0];
+        } catch (JSONException e) {
+            throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

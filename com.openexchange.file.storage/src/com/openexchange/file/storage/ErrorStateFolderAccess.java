@@ -53,6 +53,7 @@ import java.util.Objects;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.java.Functions.OXFunction;
+import com.openexchange.session.Session;
 
 /**
  * {@link ErrorStateFolderAccess} - A {@link FileStorageFolderAccess} implementation which can be used in case of an account error.
@@ -68,6 +69,7 @@ public class ErrorStateFolderAccess implements FileStorageFolderAccess {
 
     private final OXException error;
     private final OXFunction<String, FileStorageFolderStub, OXException> getFolderFunction;
+    private final OXFunction<String, FileStorageFolder[],OXException> getSubFolderFunction;
 
     /**
      * {@link FileStorageFolderStub} represents a folder which is defective and will not be cached
@@ -104,12 +106,19 @@ public class ErrorStateFolderAccess implements FileStorageFolderAccess {
      * Initializes a new {@link ErrorStateFolderAccess}.
      *
      * @param error The current problem preventing to query the remote folders
+     * @param account The {@link FileStorageAccount}
+     * @param session The {@link Session}
      * @param getFolderFunction A function which will be used to retrieve the last known folder, when loaded
      */
-    public ErrorStateFolderAccess(OXException error, OXFunction<String, FileStorageFolderStub, OXException> getFolderFunction) {
+    //@formatter:off
+    public ErrorStateFolderAccess(OXException error,
+        OXFunction<String, FileStorageFolderStub, OXException> getFolderFunction,
+        OXFunction<String, FileStorageFolder[], OXException> getSubFolderFunction) {
         this.error = Objects.requireNonNull(error, "error must not be null");
         this.getFolderFunction = Objects.requireNonNull(getFolderFunction, "getFolderFunction must not be null");
+        this.getSubFolderFunction = Objects.requireNonNull(getSubFolderFunction, "getSubFolderFunction must not be null");
     }
+    //@formatter:on
 
     @Override
     public boolean exists(String folderId) throws OXException {
@@ -145,7 +154,8 @@ public class ErrorStateFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
-        throw error;
+        FileStorageFolder[] storedSubFolders = getSubFolderFunction.apply(parentIdentifier);
+        return storedSubFolders;
     }
 
     @Override

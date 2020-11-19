@@ -52,8 +52,11 @@ package com.openexchange.file.storage.xctx;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
+import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.SetterAwareFileStorageFolder;
@@ -61,6 +64,7 @@ import com.openexchange.file.storage.infostore.folder.AbstractInfostoreFolderAcc
 import com.openexchange.file.storage.infostore.folder.FolderConverter;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.share.core.subscription.AccountMetadataHelper;
 import com.openexchange.tools.arrays.Collections;
 import com.openexchange.tools.session.ServerSession;
 
@@ -71,7 +75,9 @@ import com.openexchange.tools.session.ServerSession;
  * @since 7.10.5
  */
 public class XctxFolderAccess extends AbstractInfostoreFolderAccess {
-    
+
+    private static final Logger LOG = LoggerFactory.getLogger(XctxFolderAccess.class);
+
     /** Identifiers of those system folders that are shared with the default infostore, hence served by the cross-context file storage provider */
     static final Set<String> UNHANDLED_FOLDER_IDS = Collections.unmodifiableSet(INFOSTORE_FOLDER_ID, PUBLIC_INFOSTORE_FOLDER_ID);
 
@@ -120,8 +126,33 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess {
 
     @Override
     public DefaultFileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
-        DefaultFileStorageFolder[] subfolders = super.getSubfolders(parentIdentifier, true);
-        return accountAccess.getSubscribedHelper().addSubscribed(subfolders, false == all);
+        final FileStorageAccount account = accountAccess.getAccount();
+        DefaultFileStorageFolder[] ret = null;
+        try {
+            DefaultFileStorageFolder[] subfolders = super.getSubfolders(parentIdentifier, true);
+            ret = accountAccess.getSubscribedHelper().addSubscribed(subfolders, false == all);
+            if (parentIdentifier.equals("10") || parentIdentifier.equals("15")) {
+                //Set the last known folders
+                new AccountMetadataHelper(accountAccess.getAccount(), session).storeSubFolders(ret, parentIdentifier);
+            }
+        } catch (Exception e) {
+            if (parentIdentifier.equals("10") || parentIdentifier.equals("15")) {
+                try {
+                    //Error: We do return the last known sub folders in case of an error.
+                    //Those folders get decorated with an error when loaded later and thus can be displayed by the client
+                    LOG.debug("Unable to load federate sharing folders for account " + account.getId() + ": " + e.getMessage());
+                    ret = new AccountMetadataHelper(account, session).getLastKnownFolders(parentIdentifier);
+                    if (ret.length == 0) {
+                        LOG.debug("There are no last known federated sharing folders for account " + account.getId());
+                    }
+                } catch (Exception e2) {
+                    LOG.error("Unable to load last known federate sharing folders for account " + account.getId(), e2);
+                }
+            } else {
+                throw e;
+            }
+        }
+        return ret;
     }
 
     @Override
@@ -164,8 +195,8 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess {
 
     @Override
     public String toString() {
-        return "XctxFolderAccess [accountId=" + accountAccess.getAccountId() + 
-            ", localUser=" + localSession.getUserId() + '@' + localSession.getContextId() + 
+        return "XctxFolderAccess [accountId=" + accountAccess.getAccountId() +
+            ", localUser=" + localSession.getUserId() + '@' + localSession.getContextId() +
             ", guestUser=" + super.session.getUserId() + '@' + super.session.getContextId() + ']';
     }
 

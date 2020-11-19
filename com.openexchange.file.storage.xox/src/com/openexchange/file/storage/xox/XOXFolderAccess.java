@@ -54,7 +54,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -67,6 +70,8 @@ import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.QuotaType;
+import com.openexchange.session.Session;
+import com.openexchange.share.core.subscription.AccountMetadataHelper;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
@@ -78,19 +83,27 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
  */
 public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess, PermissionAware {
 
+    private static final Logger LOG = LoggerFactory.getLogger(XOXFolderAccess.class);
+
     /** The identifier of the root folder on the remote account */
     private static final String ROOT_FOLDER_ID = "9"; // SYSTEM_INFOSTORE_FOLDER_ID
 
     private final XOXAccountAccess accountAccess;
     private final ShareClient client;
+    private final XOXFileAccess fileAccess;
+    private final Session session;
 
     /**
      * Initializes a new {@link XOXFolderAccess}.
      *
      * @param accountAccess The {@link XOXAccountAccess}
+     * @param fileAccess The {@link XOXFileAccess}
      * @param client The {@link ShareClient} for accessing the remote OX
+     * @param session the {@link Session}
      */
-    public XOXFolderAccess(XOXAccountAccess accountAccess, ShareClient client) {
+    public XOXFolderAccess(XOXAccountAccess accountAccess, XOXFileAccess fileAccess, ShareClient client, Session session) {
+        this.fileAccess = fileAccess;
+        this.session = session;
         this.accountAccess = Objects.requireNonNull(accountAccess, "accountAccess must not be null");
         this.client = Objects.requireNonNull(client, "client must not be null");
     }
@@ -169,8 +182,33 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
-        XOXFolder[] subfolders = client.getSubFolders(parentIdentifier);
-        return accountAccess.getSubscribedHelper().addSubscribed(subfolders, false == all);
+        final FileStorageAccount account = accountAccess.getAccount();
+        FileStorageFolder[] ret = null;
+        try {
+            XOXFolder[] subfolders = client.getSubFolders(parentIdentifier);
+            ret = accountAccess.getSubscribedHelper().addSubscribed(subfolders, false == all);
+            if (parentIdentifier.equals("10") || parentIdentifier.equals("15")) {
+                //Set the last known root folders
+                new AccountMetadataHelper(account, session).storeSubFolders(ret, parentIdentifier);
+            }
+        } catch (Exception e) {
+            if (parentIdentifier.equals("10") || parentIdentifier.equals("15")) {
+                try {
+                    //Error: We do return last known sub folders in case of an error.
+                    //Those folders get decorated with an error when loaded later and thus can be displayed by the client
+                    LOG.debug("Unable to load federate sharing folders for account " + account.getId() + ": " + e.getMessage());
+                    ret = new AccountMetadataHelper(account, session).getLastKnownFolders(parentIdentifier);
+                    if (ret.length == 0) {
+                        LOG.debug("There are no last known federated sharing folders for account " + account.getId());
+                    }
+                } catch (Exception e2) {
+                    LOG.error("Unable to load last known federate sharing folders for account " + account.getId(), e2);
+                }
+            } else {
+                throw e;
+            }
+        }
+        return ret;
     }
 
     @Override
@@ -185,7 +223,7 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
-        return accountAccess.getFileAccess().createFolder(toCreate, true);
+        return fileAccess.createFolder(toCreate, true);
     }
 
     @Override
@@ -217,12 +255,12 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
-        return accountAccess.getFileAccess().moveFolder(folderId, newParentId, newName, true);
+        return fileAccess.moveFolder(folderId, newParentId, newName, true);
     }
 
     @Override
     public String renameFolder(String folderId, String newName) throws OXException {
-        return accountAccess.getFileAccess().moveFolder(folderId, null, newName, true);
+        return fileAccess.moveFolder(folderId, null, newName, true);
     }
 
     @Override
@@ -242,7 +280,7 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public void clearFolder(String folderId, boolean hardDelete) throws OXException {
-        accountAccess.getFileAccess().removeDocument(folderId, FileStorageFileAccess.DISTANT_FUTURE, hardDelete);
+        fileAccess.removeDocument(folderId, FileStorageFileAccess.DISTANT_FUTURE, hardDelete);
     }
 
     @Override

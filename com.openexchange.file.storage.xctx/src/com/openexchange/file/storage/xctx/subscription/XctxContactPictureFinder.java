@@ -62,7 +62,7 @@ import com.openexchange.contact.picture.finder.PictureResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.xctx.XctxFileStorageService;
-import com.openexchange.java.Functions.ExceptionThrowingBiFunction;
+import com.openexchange.java.Functions.OXBiFunction;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -86,7 +86,7 @@ public class XctxContactPictureFinder implements ContactPictureFinder {
 
     /**
      * Initializes a new {@link XctxContactPictureFinder}.
-     * 
+     *
      * @param services The service lookup
      * @param fileStorageService The actual file storage to lookup the account in
      */
@@ -187,7 +187,7 @@ public class XctxContactPictureFinder implements ContactPictureFinder {
      * @return The result if a guest session can be found, or an empty optional
      * @throws OXException In case of error
      */
-    private <T> Optional<T> getResult(Session guestSession, PictureSearchData data, ExceptionThrowingBiFunction<ContactPictureService, PictureSearchData, T, OXException> f) throws OXException {
+    private <T> Optional<T> getResult(Session guestSession, PictureSearchData data, OXBiFunction<ContactPictureService, PictureSearchData, T, OXException> f) throws OXException {
         if (null == guestSession) {
             return Optional.empty();
         }

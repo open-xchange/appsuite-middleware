@@ -119,7 +119,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
 
     /**
      * Initializes a new {@link AbstractFileStorageSubscriptionProvider}.
-     * 
+     *
      * @param fileStorageService The storage to operate on
      * @param userPermissionService The {@link UserPermissionService}
      */
@@ -302,7 +302,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
 
     /**
      * Logs the given {@link OXException}
-     * 
+     *
      * @param e The exception to log
      */
     protected void logExcpetionError(OXException e) {
@@ -311,7 +311,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
 
     /**
      * Logs the given {@link OXException}
-     * 
+     *
      * @param e The exception to log
      */
     protected void logExcpetionDebug(OXException e) {
@@ -380,7 +380,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
 
     /**
      * Compares two URLs if they have the same host
-     * 
+     *
      * @param actual The actual URL
      * @param url The expected URL as saved in the account access
      * @return <code>true</code> if both URL share the same host/domain part
@@ -423,14 +423,20 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      * Uses {@link #isPasswordMissing(OXException)} to check a {@link OXException} that might occur while
      * accessing the share. If is <code>true</code> the {@link ShareLinkState#CREDENTIALS_REFRESH}
      * is used as a return value instead of {@link ShareLinkState#INACCESSIBLE}
-     * 
+     *
      * @param accountAccess The access to the account
      * @param shareLink The share link
+     * @param session The session
      * @return A builder holding the state fitting the accessibility of the share
      */
-    protected Builder checkAccessible(FileStorageAccountAccess accountAccess, String shareLink) {
+    protected Builder checkAccessible(FileStorageAccountAccess accountAccess, String shareLink, Session session) {
         Builder builder = new Builder();
         try {
+            /**
+             * Clear recent errors of the account
+             */
+            fileStorageService.resetRecentError(accountAccess.getAccountId(), session);
+
             /*
              * Connect and access to check accessibility
              */
@@ -661,8 +667,8 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         HostData hostData = ShareLinks.extractHostData(shareUrl);
         String guestToken = ShareLinks.extractBaseToken(shareUrl);
         ShareTargetPath targetPath = new ShareTargetPath(
-            Module.INFOSTORE.getFolderConstant(), 
-            null != folder ? new FolderID(folder).getFolderId() : null, 
+            Module.INFOSTORE.getFolderConstant(),
+            null != folder ? new FolderID(folder).getFolderId() : null,
             null != item ? new FileID(item).getFileId() : null,
             additionals
         );

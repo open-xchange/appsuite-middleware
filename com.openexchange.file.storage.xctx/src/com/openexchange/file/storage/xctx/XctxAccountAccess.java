@@ -64,6 +64,7 @@ import com.openexchange.conversion.datahandler.DataHandlers;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
+import com.openexchange.file.storage.ErrorStateFileAccess;
 import com.openexchange.file.storage.ErrorStateFolderAccess;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
@@ -76,13 +77,13 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.folderstorage.FederatedSharingFolders;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.core.subscription.AccountMetadataHelper;
 import com.openexchange.share.core.subscription.SubscribedHelper;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareToken;
@@ -292,7 +293,11 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
         if (false == isConnected()) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        this.errorHandler.assertNoRecentException();
+        OXException recentException = this.errorHandler.getRecentException();
+        if (recentException != null) {
+            //In case of an error state: we return an implementation which at least return empty objects on read access
+            return new ErrorStateFileAccess(recentException, this);
+        }
         return new XctxFileAccess(this, session, guestSession);
     }
 
@@ -307,7 +312,8 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
             //@formatter:off
             return new ErrorStateFolderAccess(
                 recentException,
-                (String folderId) -> FederatedSharingFolders.getLastKnownFolder(account, folderId, session));
+                (String folderId) -> new AccountMetadataHelper(account, session).getLastKnownFolder(folderId),
+                (String folderId) -> new AccountMetadataHelper(account, session).getLastKnownFolders(folderId));
             //@formatter:on
         }
         return new XctxFolderAccess(this, session, guestSession);
