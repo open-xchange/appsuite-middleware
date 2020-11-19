@@ -50,25 +50,22 @@
 package com.openexchange.saml;
 
 import java.io.ByteArrayOutputStream;
+import static com.openexchange.saml.utils.SAMLTestUtils.parseURIQuery;
+import static com.openexchange.saml.utils.SAMLTestUtils.prepareHTTPRequest;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
@@ -446,33 +443,6 @@ public class SAMLWebSSOProviderOAuthTest {
         authnRequest.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
         authnRequest.setIssueInstant(new DateTime());
         return authnRequest;
-    }
-
-    private static SimHttpServletRequest prepareHTTPRequest(String method, URI location) {
-        SimHttpServletRequest request = new SimHttpServletRequest();
-        request.setRequestURI(location.getRawPath());
-        request.setRequestURL(location.getScheme() + "://" + location.getHost() + location.getPath());
-        request.setMethod(method);
-        request.setScheme(location.getScheme());
-        request.setSecure("https".equals(location.getScheme()));
-        request.setServerName(location.getHost());
-        request.setQueryString(location.getRawQuery());
-        request.setCookies(Collections.<Cookie> emptyList());
-        request.setRemoteAddr("127.0.0.1");
-        Map<String, String> params = parseURIQuery(location);
-        for (String name : params.keySet()) {
-            request.setParameter(name, params.get(name));
-        }
-        return request;
-    }
-
-    private static Map<String, String> parseURIQuery(URI uri) {
-        Map<String, String> map = new HashMap<String, String>();
-        List<NameValuePair> pairs = URLEncodedUtils.parse(uri, Charset.forName("UTF-8"));
-        for (NameValuePair pair : pairs) {
-            map.put(pair.getName(), pair.getValue());
-        }
-        return map;
     }
 
     private Response buildResponse(AuthnRequest request) throws Exception {
