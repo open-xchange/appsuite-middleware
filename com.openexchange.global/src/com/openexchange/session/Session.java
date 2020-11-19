@@ -191,12 +191,65 @@ public interface Session {
     static final String PARAM_PUBLICATION = "__session.publication".intern();
 
     /**
+     * The parameter to indicate a guest session.
+     *
+     * @type <code>java.lang.Boolean</code>
+     */
+    public static final String PARAM_GUEST = "__session.guest".intern();
+
+    /**
+     * The parameter for the cookie refresh time stamp.
+     *
+     * @type <code>java.lang.Long</code>
+     */
+    public static final String PARAM_COOKIE_REFRESH_TIMESTAMP = "__session.cookierefresh".intern();
+
+    /**
+     * The parameter for optional OAuth access token associated with a session intended for mail access & transport.
+     *
+     * @type <code>java.lang.String</code>
+     */
+    public static final String PARAM_OAUTH_ACCESS_TOKEN = "__session.oauth.access".intern();
+
+    /**
+     * The parameter for optional OAuth refresh token associated with a session intended for refreshing the access token
+     *
+     * @type <code>java.lang.String</code>
+     */
+    public static final String PARAM_OAUTH_REFRESH_TOKEN = "__session.oauth.refresh".intern();
+    
+    /**
+     * The parameter that holds when the Oauth token expires.
+     *
+     * @type <code>java.lang.String</code>
+     */
+    public static final String PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE = "__session.oauth.access.expiry".intern();
+
+
+    /**
+     * The parameter for optional host name associated with a session.
+     *
+     * @type <code>java.lang.String</code>
+     */
+    public static final String PARAM_HOST_NAME = "__session.hostname".intern();
+
+    /**
+     * The parameter for optional OAuth flag associated with a session.
+     * <p>
+     * If present, the session is marked as being created through
+     * <a href="https://documentation.open-xchange.com/7.8.4/middleware/components/oauth_provider/developer_guide.html">Open-Xchange Middleware OAuth authentication flow</a>.
+     *
+     * @type <code>java.lang.Boolean</code>
+     */
+    public static final String PARAM_IS_OAUTH = "__session.oauth".intern();
+
+    /**
      * @return the context identifier.
      */
     public int getContextId();
 
     /**
-     * Gets the local IP address
+     * IP address of the session client. Normally every request from the client using this session is verified to come from this IP address.
      *
      * @return The local IP address
      */

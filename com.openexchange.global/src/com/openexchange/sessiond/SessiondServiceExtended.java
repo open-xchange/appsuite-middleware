@@ -50,6 +50,7 @@
 package com.openexchange.sessiond;
 
 import java.util.Collection;
+import java.util.List;
 import com.openexchange.session.Session;
 
 /**
@@ -76,6 +77,14 @@ public interface SessiondServiceExtended extends SessiondService {
     boolean isActive(String sessionId);
 
     /**
+     * Gets a list of <i>active</i> sessions, i.e. those sessions that are <code>locally</code> available and located in one of the
+     * short-term containers.
+     *
+     * @return The identifiers of all active sessions in a list
+     */
+    List<String> getActiveSessionIDs();
+
+    /**
      * Get the session object related to the given session identifier.
      *
      * @param sessionId The Session identifier
@@ -94,5 +103,13 @@ public interface SessiondServiceExtended extends SessiondService {
      * @return The <b>local-only</b> sessions associated with specified user in given context
      */
     Collection<Session> getSessions(int userId, int contextId, boolean considerSessionStorage);
+
+    /**
+     * Checks if specified session is applicable for session storage.
+     *
+     * @param session The session to check
+     * @return <code>true</code> if applicable for session storage; otherwise <code>false</code>
+     */
+    boolean isApplicableForSessionStorage(Session session);
 
 }

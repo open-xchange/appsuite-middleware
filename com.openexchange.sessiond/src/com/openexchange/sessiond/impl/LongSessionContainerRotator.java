@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import com.openexchange.exception.ExceptionUtils;
 
 /**
  * This timer rotates the containers in the SessionHandler.
@@ -68,6 +69,7 @@ public class LongSessionContainerRotator implements Runnable {
         try {
             SessionHandler.cleanUpLongTerm();
         } catch (final Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.error("", t);
         }
     }

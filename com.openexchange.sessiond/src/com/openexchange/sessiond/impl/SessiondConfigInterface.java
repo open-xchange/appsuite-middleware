@@ -49,12 +49,12 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.util.List;
-
 /**
- * SessionConfig
+ * 
+ * {@link SessiondConfigInterface}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
 public interface SessiondConfigInterface {
 
@@ -62,7 +62,7 @@ public interface SessiondConfigInterface {
 
     long getLongTermSessionContainerTimeout();
 
-    long getNumberOfSessionContainers();
+    int getNumberOfSessionContainers();
 
     int getMaxSessions();
 
@@ -76,7 +76,7 @@ public interface SessiondConfigInterface {
 
     long getRandomTokenTimeout();
 
-    long getNumberOfLongTermSessionContainers();
+    int getNumberOfLongTermSessionContainers();
 
     /**
      * @return <code>true</code> if autologin is enabled.
@@ -96,12 +96,5 @@ public interface SessiondConfigInterface {
      * @return The obfuscation key
      */
     String getObfuscationKey();
-
-    /**
-     * Gets the names of such parameters that are supposed to be taken over from session to stored session representation.
-     *
-     * @return The parameter names
-     */
-    List<String> getRemoteParameterNames();
 
 }
