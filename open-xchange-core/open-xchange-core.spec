@@ -859,6 +859,32 @@ EOF
       fi
       ox_scr_done ${SCR}
     fi
+
+    SCR=SCR-758
+    if ox_scr_todo ${SCR}
+    then
+      props="com.openexchange.capabilities.allowIllegalPermissionProvisioning com.openexchange.capabilities.applyIllegalPermissions"
+      for prop in ${props}
+      do
+        matches="$(grep -Hs "^\s*$prop" /opt/open-xchange/etc/*.properties)"
+        if [ $? -eq 0 ]
+        then
+          set -e
+          IFS=$'\n'
+          for match in ${matches}
+          do
+            unset IFS
+            file=${match%%:*}
+            if [ -f "${file}" ]
+            then
+              ox_remove_property ${prop} "${file}"
+            fi
+          done
+        fi
+      done
+      ox_scr_done ${SCR}
+    fi
+
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
