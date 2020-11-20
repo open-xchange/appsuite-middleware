@@ -35,3 +35,15 @@ properties:
       file: filestorage.properties
       packageName: open-xchange-subscribe
       tags: ["Federated Sharing", "XCTX"]
+    - key: com.openexchange.file.storage.xctx.autoRemoveUnknownShares
+      description: |
+        Enables or disables the automatic removal of accounts in the <i>cross-context</i> file storage provider that refer to a no longer 
+        existing guest user in the remote context. 
+      defaultValue: true
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: filestorage.properties
+      packageName: open-xchange-subscribe
+      tags: ["Federated Sharing", "XCTX"]

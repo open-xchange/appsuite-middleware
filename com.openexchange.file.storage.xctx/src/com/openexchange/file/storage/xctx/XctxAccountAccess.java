@@ -51,13 +51,18 @@ package com.openexchange.file.storage.xctx;
 
 import static com.openexchange.file.storage.infostore.folder.AbstractInfostoreFolderAccess.PUBLIC_INFOSTORE_FOLDER_ID;
 import static com.openexchange.file.storage.infostore.folder.AbstractInfostoreFolderAccess.USER_INFOSTORE_FOLDER_ID;
+import static com.openexchange.java.Autoboxing.b;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.datahandler.DataHandlers;
@@ -104,6 +109,8 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
     /** The identifiers of the parent folders where adjusting the subscribed flag is supported, which mark the entry points for shared and public files */
     private static final Set<String> SUBSCRIBE_PARENT_IDS = Collections.unmodifiableSet(USER_INFOSTORE_FOLDER_ID, PUBLIC_INFOSTORE_FOLDER_ID);
 
+    private static final Logger LOG = LoggerFactory.getLogger(XctxFileStorageService.class);
+
     private final FileStorageAccount account;
     private final ServerSession session;
     private final ServiceLookup services;
@@ -135,7 +142,21 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
             this,
             session,
             retryAfterError,
-            new FileStorageAccountErrorHandler.IgnoreExceptionPrefixes("SES"));
+            new FileStorageAccountErrorHandler.CompositingFilter()
+                .add(new FileStorageAccountErrorHandler.IgnoreExceptionPrefixes("SES"))
+                .add((e) -> {
+                    if (ShareExceptionCodes.UNKNOWN_SHARE.equals(e) && isAutoRemoveUnknownShares(session)) {
+                        LOG.info("Guest account for cross-context share subscription no longer exists, removing file storage account {}.", account.getId(), e);
+                        try {
+                            account.getFileStorageService().getAccountManager().deleteAccount(account, session);
+                            return Boolean.FALSE; // handled by removing the account, abort upstream processing
+                        } catch (OXException x) {
+                            LOG.error("Unexpected error removing file storage account {}.", account.getId(), x);
+                        }
+                    }
+                    return Boolean.TRUE; // not handled, continue with upstream processing (persist error in account)
+                })
+            );
         //@formatter:on
     }
 
@@ -327,6 +348,23 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
     @Override
     public FileStorageService getService() {
         return account.getFileStorageService();
+    }
+
+    /**
+     * Gets a value indicating whether the automatic removal of accounts in the <i>cross-context</i> file storage provider that refer to a no
+     * longer existing guest user in the remote context is enabled or not.
+     *
+     * @param session The session to check the configuration for
+     * @return <code>true</code> if unknown shares should be removed automatically, <code>false</code>, otherwise
+     */
+    private boolean isAutoRemoveUnknownShares(Session session) {
+        Property property = XctxFileStorageProperties.AUTO_REMOVE_UNKNOWN_SHARES;
+        try {
+            return services.getServiceSafe(LeanConfigurationService.class).getBooleanProperty(session.getUserId(), session.getContextId(), property);
+        } catch (OXException e) {
+            LOG.error("Error getting {}, falling back to defaults.", property, e);
+            return b(property.getDefaultValue(Boolean.class));
+        }
     }
 
     private static String getBaseToken(FileStorageAccount account) throws OXException {
