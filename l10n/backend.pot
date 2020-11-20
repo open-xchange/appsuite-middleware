@@ -11030,6 +11030,13 @@ msgid ""
 "You don't have sufficient permissions to send notifications for this share."
 msgstr ""
 
+#. After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed.
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:63
+msgid ""
+"After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" "
+"will be removed."
+msgstr ""
+
 #. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
 #: com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
 msgid ""
