@@ -92,11 +92,16 @@ public enum ShareSubscriptionExceptions implements DisplayableOXExceptionCode {
      * You don't have enough permissions to perform the operation.
      */
     MISSING_PERMISSIONS("You don't have enough permissions to perform the operation.", Category.CATEGORY_ERROR, 6),
-    
+
     /**
      * The folder %1$s belongs to a folder tree that is unsubscribed.
      */
     UNSUBSCRIEBED_FOLDER("The folder %1$s belongs to a folder tree that is unsubscribed.", Category.CATEGORY_WARNING, 7),
+
+    /**
+     * After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed.
+     */
+    ACCOUNT_WILL_BE_REMOVED("After unsubscribing from \"%1$s\", the account \"%2$s\" will be removed.", CATEGORY_WARNING, 8, ShareSubscriptionExceptionMessages.ACCOUNT_WILL_BE_REMOVED_MSG),
 
     ;
 
@@ -118,7 +123,7 @@ public enum ShareSubscriptionExceptions implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link ApiClientExceptions}.
-     * 
+     *
      * @param message The message
      * @param category The category
      * @param detailNumber The exception number
@@ -129,7 +134,7 @@ public enum ShareSubscriptionExceptions implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link ApiClientExceptions}.
-     * 
+     *
      * @param message The message
      * @param category The category
      * @param detailNumber The exception number
@@ -174,7 +179,7 @@ public enum ShareSubscriptionExceptions implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
