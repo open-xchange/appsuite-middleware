@@ -333,6 +333,10 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         if (null == shareUrl || Strings.isEmpty(baseToken)) {
             return null;
         }
+        ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
+        if (null != targetPath && Module.INFOSTORE.getFolderConstant() != targetPath.getModule()) {
+            return null;
+        }
         for (FileStorageAccount account : fileStorageService.getAccountManager().getAccounts(session)) {
             String url = String.valueOf(account.getConfiguration().get(URL));
             if (Strings.isNotEmpty(url) && baseToken.equals(ShareTool.getBaseToken(url)) && compareHost(shareUrl, url)) {
