@@ -68,17 +68,17 @@ public enum OAuthIntrospectionProperty implements Property{
     /**
      * Enable basic authentication for introspection
      */
-    BASIC_AUTH_ENABLED("basicAuthEnabled", Boolean.TRUE),
+    BASIC_AUTH_ENABLED("introspection.basicAuthEnabled", Boolean.TRUE),
 
     /**
      * ID of the OAuth client.
      */
-    CLIENT_ID("clientID", OAuthIntrospectionProperty.EMPTY),
+    CLIENT_ID("introspection.clientID", OAuthIntrospectionProperty.EMPTY),
 
     /**
      * Secret of the OAuth client.
      */
-    CLIENT_SECRET("clientSecret", OAuthIntrospectionProperty.EMPTY),
+    CLIENT_SECRET("introspection.clientSecret", OAuthIntrospectionProperty.EMPTY),
 
     /**
      * Name of the claim that will be used to resolve a context.

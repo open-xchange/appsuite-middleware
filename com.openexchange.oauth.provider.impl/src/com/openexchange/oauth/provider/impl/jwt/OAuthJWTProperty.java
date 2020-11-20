@@ -63,22 +63,22 @@ public enum OAuthJWTProperty implements Property {
     /**
      * Specifies a JWKS endpoint used to fetch signature keys for validation.
      */
-    JWKS_ENDPOINT("jwks.endpoint", OAuthJWTProperty.EMPTY),
+    JWKS_ENDPOINT("jwt.jwksEndpoint", OAuthJWTProperty.EMPTY),
 
     /**
      * Path to locally populated keystore if JWKs are not fetched from remote.
      */
-    KEYSTORE_PATH("keystore.path", OAuthJWTProperty.EMPTY),
+    KEYSTORE_PATH("jwt.keystore.path", OAuthJWTProperty.EMPTY),
 
     /**
      * Password for the locally populated keystore.
      */
-    KEYSTORE_PASSWORD("keystore.password", OAuthJWTProperty.EMPTY),
+    KEYSTORE_PASSWORD("jwt.keystore.password", OAuthJWTProperty.EMPTY),
 
     /**
      * The keystore type.
      */
-    KEYSTORE_TYPE("keystore.type", "JKS"),
+    KEYSTORE_TYPE("jwt.keystore.type", "JKS"),
 
     /**
      * A comma separated list of issuer names (JWT claim "iss") that tokens are accepted from.
