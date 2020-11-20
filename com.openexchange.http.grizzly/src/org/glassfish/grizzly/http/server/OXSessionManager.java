@@ -209,7 +209,7 @@ public class OXSessionManager implements SessionManager {
         }
 
         int unjoinedThresholdSeconds = grizzlyConfig.getSessionUnjoinedThreshold();
-        return (unjoinedThresholdSeconds > 0) && ((currentTime - session.getCreationTime()) > (unjoinedThresholdSeconds * 1000));
+        return (unjoinedThresholdSeconds > 0) && ((currentTime - session.getCreationTime()) > (unjoinedThresholdSeconds * 1000l));
     }
 
     /**

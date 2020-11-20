@@ -1,6 +1,7 @@
 
 package com.openexchange.saml;
 
+import static com.openexchange.saml.utils.SAMLTestUtils.buildAddSessionParameter;
 import static org.hamcrest.Matchers.containsString;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,7 +10,6 @@ import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -92,15 +92,11 @@ import org.opensaml.xmlsec.signature.support.Signer;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.login.HashCalculator;
-import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
-import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
@@ -108,7 +104,6 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.http.InitService;
 import com.openexchange.saml.impl.AlgorithmUtils;
-import com.openexchange.saml.impl.LoginConfigurationLookup;
 import com.openexchange.saml.impl.WebSSOProviderImpl;
 import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
 import com.openexchange.saml.oauth.service.SimOAuthAccessTokenService;
@@ -121,11 +116,9 @@ import com.openexchange.saml.tools.SignatureHelper;
 import com.openexchange.saml.utils.SecurityHelperUtils;
 import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.session.reservation.SimSessionReservationService;
-import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SimSessiondService;
 import com.openexchange.user.SimUserService;
@@ -363,7 +356,7 @@ public class SAMLWebSSOProviderTest {
     }
 
     @Test
-    public void testAutoLogin() throws Exception {
+    public void testAutoLoginWithDeepLink() throws Exception {
         /*
          * Fake SAML cookie and try auto login
          */
@@ -379,6 +372,8 @@ public class SAMLWebSSOProviderTest {
                 session.setParameter(SAMLSessionParameters.SESSION_COOKIE, samlCookieValue);
             }
         }));
+
+        String deepLinkParams = "app=io.ox/mail&folder=virtual/all-unseen";
         SimHttpServletRequest autoLoginHTTPRequest = prepareHTTPRequest("GET", new URIBuilder()
             .setScheme("https")
             .setHost("webmail.example.com")
@@ -386,6 +381,7 @@ public class SAMLWebSSOProviderTest {
             .setParameter("flow", "login")
             .setParameter("client", "test-client")
             .setParameter("redirect", "true")
+            .setParameter("uriFragment", "!!&" + deepLinkParams)
             .build());
         String cookieHash = HashCalculator.getInstance().getHash(
             autoLoginHTTPRequest,
@@ -403,6 +399,9 @@ public class SAMLWebSSOProviderTest {
         Matcher sessionMatcher = Pattern.compile("session=([a-z0-9]+)").matcher(redirectLocation);
         Assert.assertTrue(sessionMatcher.find());
         Assert.assertEquals(session.getSessionID(), sessionMatcher.group(1));
+
+        Matcher deepLinkMatcher = Pattern.compile(Pattern.quote("&" + deepLinkParams)).matcher(redirectLocation);
+        Assert.assertTrue(deepLinkMatcher.find());
     }
 
     @Test
@@ -1003,86 +1002,6 @@ public class SAMLWebSSOProviderTest {
         return response;
     }
 
-    private AddSessionParameter buildAddSessionParameter(final SessionEnhancement enhancement) {
-        return new AddSessionParameter() {
-
-            @Override
-            public boolean isTransient() {
-                return false;
-            }
-
-            @Override
-            public boolean isStaySignedIn() {
-                return false;
-            }
-
-            @Override
-            public String getUserLoginInfo() {
-                return "test.user";
-            }
-
-            @Override
-            public int getUserId() {
-                return 1;
-            }
-
-            @Override
-            public String getPassword() {
-                return null;
-            }
-
-            @Override
-            public String getHash() {
-                return UUIDs.getUnformattedString(UUID.randomUUID());
-            }
-
-            @Override
-            public String getFullLogin() {
-                return "test.user@example.com";
-            }
-
-            @Override
-            public List<SessionEnhancement> getEnhancements() {
-                return Arrays.asList(enhancement);
-            }
-
-            @Override
-            public Context getContext() {
-                return new SimContext(1);
-            }
-
-            @Override
-            public String getClientToken() {
-                return null;
-            }
-
-            @Override
-            public String getClientIP() {
-                return "127.0.0.1";
-            }
-
-            @Override
-            public String getClient() {
-                return "Test Client";
-            }
-
-            @Override
-            public String getAuthId() {
-                return UUIDs.getUnformattedString(UUID.randomUUID());
-            }
-
-            @Override
-            public String getUserAgent() {
-                return "User-Agent";
-            }
-
-            @Override
-            public Origin getOrigin() {
-                return Origin.HTTP_JSON;
-            }
-        };
-    }
-
     private AuthnRequest parseAuthnRequest(HttpServletRequest httpRequest) throws Exception {
         HTTPRedirectDeflateDecoder decoder = new HTTPRedirectDeflateDecoder();
         decoder.setParserPool(parserPool);
@@ -1401,37 +1320,6 @@ public class SAMLWebSSOProviderTest {
         @Override
         public void setWriteListener(WriteListener writeListener) {
             // Nope...
-        }
-
-    }
-
-    private static final class TestLoginConfigurationLookup implements LoginConfigurationLookup {
-
-        private final LoginConfiguration conf;
-
-
-        private TestLoginConfigurationLookup() {
-            super();
-            conf = new LoginConfiguration(
-                "/appsuite/",
-                CookieHashSource.CALCULATE,
-                "false",
-                "open-xchange-appsuite",
-                "1.0",
-                "<b>ERROR_MESSAGE</b>",
-                60000,
-                false,
-                false,
-                false,
-                true,
-                true,
-                false,
-                false);
-        }
-
-        @Override
-        public LoginConfiguration getLoginConfiguration() {
-            return conf;
         }
 
     }

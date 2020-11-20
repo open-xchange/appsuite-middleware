@@ -196,8 +196,9 @@ public class MailMessageProcessor {
      * @param services The service look-up
      * @return Newly initialized processor ready for transporting draft mail
      * @throws OXException If processor cannot be initialized
+     * @throws MissingDraftException If {@link MailMessage} throws {@link MailExceptionCode#MAIL_NOT_FOUND} when lazily loading parts of it.
      */
-    public static MailMessageProcessor initForTransport(UUID compositionSpaceId, MailMessage mailMessage, Session session, ServiceLookup services) throws OXException {
+    public static MailMessageProcessor initForTransport(UUID compositionSpaceId, MailMessage mailMessage, Session session, ServiceLookup services) throws OXException, MissingDraftException {
         MailMessageProcessor processor = new MailMessageProcessor(compositionSpaceId, session, services);
         MailMessage clone = processor.initBufferedMimeMessage(mailMessage);
         processor.parse(clone, false); // Since already buffered before
@@ -215,8 +216,9 @@ public class MailMessageProcessor {
      * @param services The service look-up
      * @return Newly initialized processor ready for modifying draft mail
      * @throws OXException If processor cannot be initialized
+     * @throws MissingDraftException If {@link MailMessage} throws {@link MailExceptionCode#MAIL_NOT_FOUND} when lazily loading parts of it.
      */
-    public static MailMessageProcessor initForWrite(UUID compositionSpaceId, MailMessage mailMessage, Session session, ServiceLookup services) throws OXException {
+    public static MailMessageProcessor initForWrite(UUID compositionSpaceId, MailMessage mailMessage, Session session, ServiceLookup services) throws OXException, MissingDraftException {
         MailMessageProcessor processor = new MailMessageProcessor(compositionSpaceId, session, services);
         MailMessage clone = processor.initBufferedMimeMessage(mailMessage);
         processor.parse(clone, false); // Since already buffered before
@@ -275,8 +277,9 @@ public class MailMessageProcessor {
      * @param services The service look-up
      * @return Newly initialized processor ready for reading draft mail
      * @throws OXException If processor cannot be initialized
+     * @throws MissingDraftException If {@link MailMessage} throws {@link MailExceptionCode#MAIL_NOT_FOUND} when lazily loading parts of it.
      */
-    public static MailMessageProcessor initReadEnvelope(UUID compositionSpaceId, MailMessage mailMessage, Session session, ServiceLookup services) throws OXException {
+    public static MailMessageProcessor initReadEnvelope(UUID compositionSpaceId, MailMessage mailMessage, Session session, ServiceLookup services) throws OXException, MissingDraftException {
         MailMessageProcessor processor = new MailMessageProcessor(compositionSpaceId, session, services);
 
         boolean buffered = false;
@@ -330,22 +333,31 @@ public class MailMessageProcessor {
      * @param services The service look-up
      * @return The attachment
      * @throws OXException If no such attachment exists
+     * @throws MissingDraftException If {@link MailMessage} throws {@link MailExceptionCode#MAIL_NOT_FOUND} when lazily loading parts of it.
      */
-    public static Attachment attachmentLookUp(UUID attachmentId, UUID compositionSpaceId, MailMessage mailMessage, Session session, ServiceLookup services) throws OXException {
-        AttachmentLookUpHandler handler = new AttachmentLookUpHandler(attachmentId);
-        new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(mailMessage, handler);
-        Optional<MailPart> optionalAttachment = handler.getAttachment();
+    public static Attachment attachmentLookUp(UUID attachmentId, UUID compositionSpaceId, MailMessage mailMessage, Session session, ServiceLookup services) throws OXException, MissingDraftException {
+        try {
+            AttachmentLookUpHandler handler = new AttachmentLookUpHandler(attachmentId);
+            new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(mailMessage, handler);
+            Optional<MailPart> optionalAttachment = handler.getAttachment();
 
-        if (!optionalAttachment.isPresent()) {
-            throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_IN_COMPOSITION_SPACE.create(getUnformattedString(attachmentId), getUnformattedString(compositionSpaceId));
-        }
+            if (!optionalAttachment.isPresent()) {
+                throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_IN_COMPOSITION_SPACE.create(getUnformattedString(attachmentId), getUnformattedString(compositionSpaceId));
+            }
 
-        MailMessageProcessor processor = new MailMessageProcessor(compositionSpaceId, session, services);
-        MailPart mailPart = optionalAttachment.get();
-        if (mailPart.containsContentDisposition() && mailPart.getContentDisposition().isInline()) {
-            return processor.createExistingInlineAttachmentFor(mailPart, ContentId.valueOf(mailPart.getContentId()), compositionSpaceId, true);
+            MailMessageProcessor processor = new MailMessageProcessor(compositionSpaceId, session, services);
+            MailPart mailPart = optionalAttachment.get();
+            if (mailPart.containsContentDisposition() && mailPart.getContentDisposition().isInline()) {
+                return processor.createExistingInlineAttachmentFor(mailPart, ContentId.valueOf(mailPart.getContentId()), compositionSpaceId, true);
+            }
+            return processor.createExistingAttachmentFor(mailPart, compositionSpaceId, true);
+        } catch (OXException e) {
+            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+                throw new MissingDraftException(new DefaultMailStorageId(mailMessage.getMailPath(), compositionSpaceId, Optional.empty()));
+            }
+
+            throw e;
         }
-        return processor.createExistingAttachmentFor(mailPart, compositionSpaceId, true);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -1013,7 +1025,7 @@ public class MailMessageProcessor {
         }
     }
 
-    private MailMessage initBufferedMimeMessage(MailMessage mailMessage) throws OXException {
+    private MailMessage initBufferedMimeMessage(MailMessage mailMessage) throws OXException, MissingDraftException {
         ThresholdFileHolder sink = ThresholdFileHolderFactory.getInstance().createFileHolder(session);
         boolean closeSink = true;
         try {
@@ -1031,6 +1043,12 @@ public class MailMessageProcessor {
             throw MimeMailException.handleMessagingException(e);
         } catch (IOException e) {
             throw CompositionSpaceErrorCode.IO_ERROR.create(e, e.getMessage());
+        } catch (OXException e) {
+            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+                throw new MissingDraftException(new DefaultMailStorageId(mailMessage.getMailPath(), compositionSpaceId, Optional.empty()));
+            }
+
+            throw e;
         } finally {
             if (closeSink) {
                 sink.close();
