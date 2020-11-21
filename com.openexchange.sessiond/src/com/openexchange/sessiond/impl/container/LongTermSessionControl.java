@@ -47,68 +47,40 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.container;
+
+import com.openexchange.sessiond.impl.SessionImpl;
 
 /**
- * Stores the additional values necessary for a session created using the token login mechanism.
+ * {@link LongTermSessionControl} - The instance managed in long-term container.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.5
  */
-public final class TokenSessionControl {
-
-    private final SessionImpl session;
-    private final String clientToken;
-    private final String serverToken;
-    private final long creationStamp;
+public class LongTermSessionControl extends AbstractSessionControl {
 
     /**
-     * Initializes a new {@link TokenSessionControl}.
+     * Initializes a new {@link LongTermSessionControl}.
      *
-     * @param session The associated session
-     * @param clientToken The client token
-     * @param serverToken The server token
+     * @param sessionControl The session control
      */
-    public TokenSessionControl(SessionImpl session, String clientToken, String serverToken, long creationStamp) {
-        super();
-        this.session = session;
-        this.clientToken = clientToken;
-        this.serverToken = serverToken;
-        this.creationStamp = creationStamp;
+    public LongTermSessionControl(SessionControl sessionControl) {
+        super(sessionControl.getSession(), sessionControl.getCreationTime());
     }
 
     /**
-     * Gets the creation time in milliseconds
+     * Initializes a new {@link LongTermSessionControl}.
      *
-     * @return The creation time in milliseconds
+     * @param session The session
+     * @param creationTime The creation time to apply
      */
-    public long getCreationStamp() {
-        return creationStamp;
+    public LongTermSessionControl(SessionImpl session, long creationTime) {
+        super(session, creationTime);
     }
 
-    /**
-     * Gets the associated session
-     *
-     * @return The session
-     */
-    public SessionImpl getSession() {
-        return session;
+    @Override
+    public ContainerType geContainerType() {
+        return ContainerType.LONG_TERM;
     }
 
-    /**
-     * Gets the client token
-     *
-     * @return The client token
-     */
-    public String getClientToken() {
-        return clientToken;
-    }
-
-    /**
-     * Gets the server token
-     *
-     * @return The server token
-     */
-    public String getServerToken() {
-        return serverToken;
-    }
 }

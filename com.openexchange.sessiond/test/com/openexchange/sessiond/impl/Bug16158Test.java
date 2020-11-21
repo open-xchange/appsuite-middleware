@@ -54,6 +54,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.sessiond.impl.container.SessionControl;
+import com.openexchange.sessiond.impl.util.RotateShortResult;
 import com.openexchange.threadpool.SimThreadPoolService;
 
 /**

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,62 +47,87 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.container;
 
-import java.util.Collections;
-import java.util.List;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionImpl;
 
 /**
- * {@link RotateShortResult} - The result of invoking {@link SessionData#rotateShort()} providing a listing of sessions for
- * <ul>
- * <li>Sessions moved to long-term container</li>
- * <li>Timed out sessions</li>
- * </ul>
+ * {@link SessionControl} - Holds a {@link Session} instance and remembers life-cycle time stamps such as last-accessed, creation-time, etc.
  *
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.3
  */
-public class RotateShortResult {
+public interface SessionControl {
 
-    private final List<SessionControl> movedToLongTerm;
-    private final List<SessionControl> removed;
-
-    /**
-     * Initializes a new {@link RotateShortResult}.
-     *
-     * @param movedToLongTerm A listing of sessions moved to long-term container or <code>null</code>
-     * @param removed A listing of timed out sessions or <code>null</code>
-     */
-    public RotateShortResult(List<SessionControl> movedToLongTerm, List<SessionControl> removed) {
-        super();
-        this.movedToLongTerm = movedToLongTerm == null ? Collections.emptyList() : movedToLongTerm;
-        this.removed = removed == null ? Collections.emptyList() : removed;
+    /** The container type; either short-term or long-term */
+    public static enum ContainerType {
+        /** Instance is managed in short-term container */
+        SHORT_TERM,
+        /** Instance is managed in long-term container */
+        LONG_TERM;
     }
 
-    /**
-     * Gets the sessions, which were moved to long-term container.
-     *
-     * @return The sessions, which were moved to long-term container
-     */
-    public List<SessionControl> getMovedToLongTerm() {
-        return movedToLongTerm;
-    }
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Gets the sessions, which were removed
+     * Gets the type of the container, in which this instance is managed.
      *
-     * @return The sessions, which were removed
+     * @return The container type
      */
-    public List<SessionControl> getRemoved() {
-        return removed;
-    }
+    ContainerType geContainerType();
 
     /**
-     * Checks if both collections are empty.
+     * Gets the session identifier
      *
-     * @return <code>true</code> if both are empty; otherwise <code>false</code>
+     * @return The session identifier
+     * @see com.openexchange.sessiond.impl.SessionImpl#getSessionID()
      */
-    public boolean isEmpty() {
-        return movedToLongTerm.isEmpty() && removed.isEmpty();
-    }
+    String getSessionID();
+
+    /**
+     * Gets the stored session
+     *
+     * @return The stored session
+     */
+    SessionImpl getSession();
+
+    /**
+     * Gets the creation-time time stamp
+     *
+     * @return The creation-time time stamp
+     */
+    long getCreationTime();
+
+    /**
+     * Checks if the session associated with this control holds specified context identifier
+     *
+     * @param contextId The context identifier to check against
+     * @return <code>true</code> if session holds specified context identifier; otherwise <code>false</code>
+     */
+    boolean equalsContext(int contextId);
+
+    /**
+     * Checks if the session associated with this control holds specified user and context identifier
+     *
+     * @param userId The user identifier to check against
+     * @param contextId The context identifier to check against
+     * @return <code>true</code> if session holds specified user and context identifier; otherwise <code>false</code>
+     */
+    boolean equalsUserAndContext(int userId, int contextId);
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    int getContextId();
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    int getUserId();
+
 }

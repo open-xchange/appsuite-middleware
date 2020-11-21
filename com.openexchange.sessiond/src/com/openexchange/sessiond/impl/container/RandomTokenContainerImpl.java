@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.container;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -58,6 +58,7 @@ import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionSpecificContainerRetrievalService.CleanUp;
 import com.openexchange.session.SessionSpecificContainerRetrievalService.Lifecycle;
+import com.openexchange.sessiond.impl.UUIDSessionIdGenerator;
 
 
 /**
@@ -97,7 +98,6 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
             // Try again.
         }
     }
-
 
     private void associate(final Session session, final String token) {
         final String sessionID = session.getSessionID();

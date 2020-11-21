@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.util;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -55,16 +55,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.container.SessionControl;
 
 /**
  * {@link SessionMap} - The thread-safe map for session identifier mappings and more.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SessionMap {
+public final class SessionMap<S extends SessionControl> {
 
-    private final ConcurrentMap<String, SessionControl> sessionIdMap;
-    private final ConcurrentMap<String, SessionControl> alternativeIdMap;
+    private final ConcurrentMap<String, S> sessionIdMap;
+    private final ConcurrentMap<String, S> alternativeIdMap;
 
     /**
      * Initializes a new {@link SessionMap}.
@@ -80,8 +81,8 @@ public final class SessionMap {
      */
     public SessionMap(final int initialCapacity) {
         super();
-        sessionIdMap = new ConcurrentHashMap<String, SessionControl>(initialCapacity, 0.75f, 1);
-        alternativeIdMap = new ConcurrentHashMap<String, SessionControl>(initialCapacity, 0.75f, 1);
+        sessionIdMap = new ConcurrentHashMap<String, S>(initialCapacity, 0.75f, 1);
+        alternativeIdMap = new ConcurrentHashMap<String, S>(initialCapacity, 0.75f, 1);
     }
 
     // -------------------------------------------------------------------------------
@@ -125,7 +126,7 @@ public final class SessionMap {
      * @param sessionId The session identifier
      * @return The associated session or <code>null</code> if absent
      */
-    public SessionControl getBySessionId(final String sessionId) {
+    public S getBySessionId(final String sessionId) {
         return sessionIdMap.get(sessionId);
     }
 
@@ -135,7 +136,7 @@ public final class SessionMap {
      * @param altId The alternative identifier
      * @return The associated session or <code>null</code> if absent
      */
-    public SessionControl getByAlternativeId(final String altId) {
+    public S getByAlternativeId(final String altId) {
         return alternativeIdMap.get(altId);
     }
 
@@ -148,8 +149,8 @@ public final class SessionMap {
      * @param session The session to put
      * @return The session already associated with given session identifier that has been replaced or <code>null</code> if nothing replaced
      */
-    public SessionControl putBySessionId(final String sessionId, final SessionControl session) {
-        SessionControl prev = sessionIdMap.put(sessionId, session);
+    public S putBySessionId(final String sessionId, final S session) {
+        S prev = sessionIdMap.put(sessionId, session);
         if (null != prev) {
             String prevAltId = (String) prev.getSession().getParameter(Session.PARAM_ALTERNATIVE_ID);
             if (null != prevAltId) {
@@ -174,8 +175,8 @@ public final class SessionMap {
      * @param session The session to put
      * @return The session already associated with given session identifier or <code>null</code> on successful put
      */
-    public SessionControl putIfAbsentBySessionId(final String sessionId, final SessionControl session) {
-        SessionControl prev = sessionIdMap.putIfAbsent(sessionId, session);
+    public S putIfAbsentBySessionId(final String sessionId, final S session) {
+        S prev = sessionIdMap.putIfAbsent(sessionId, session);
         if (null != prev) {
             return prev;
         }
@@ -196,8 +197,8 @@ public final class SessionMap {
      * @param sessionId The session identifier
      * @return The possibly removed session or <code>null</code>
      */
-    public SessionControl removeBySessionId(final String sessionId) {
-        SessionControl session = sessionIdMap.remove(sessionId);
+    public S removeBySessionId(final String sessionId) {
+        S session = sessionIdMap.remove(sessionId);
         if (null != session) {
             final String altId = (String) session.getSession().getParameter(Session.PARAM_ALTERNATIVE_ID);
             if (null != altId) {
@@ -214,7 +215,7 @@ public final class SessionMap {
      *
      * @return The unmodifable {@link Collection} view of the sessions contained in this map
      */
-    public Collection<SessionControl> values() {
+    public Collection<S> values() {
         return Collections.unmodifiableCollection(sessionIdMap.values());
     }
 

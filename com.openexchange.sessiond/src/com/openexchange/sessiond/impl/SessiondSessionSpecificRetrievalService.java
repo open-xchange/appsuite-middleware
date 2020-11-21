@@ -57,6 +57,7 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionScopedContainer;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.sessiond.event.SessiondEventListener;
+import com.openexchange.sessiond.impl.container.RandomTokenContainerImpl;
 
 /**
  * {@link SessiondSessionSpecificRetrievalService}

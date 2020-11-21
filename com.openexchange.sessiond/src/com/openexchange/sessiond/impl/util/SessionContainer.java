@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,25 +61,27 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.impl.SessionImpl;
+import com.openexchange.sessiond.impl.container.ShortTermSessionControl;
 
 /**
- * {@link SessionContainer} - A thread-safe container for {@link Session} objects wrapped by a {@link SessionControl} object.
+ * {@link SessionContainer} - A thread-safe container for {@link Session} objects wrapped by a {@link ShortTermSessionControl} object.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class SessionContainer {
+public final class SessionContainer {
 
     private static final Object PRESENT = new Object();
 
-    private final SessionMap sessionMap;
+    private final SessionMap<ShortTermSessionControl> sessionMap;
     private final ConcurrentMap<Integer, ConcurrentMap<Integer, Map<String, Object>>> userSessions;
 
     /**
      * Initializes a new {@link SessionContainer}.
      */
-    protected SessionContainer() {
+    public SessionContainer() {
         super();
-        sessionMap = new SessionMap();
+        sessionMap = new SessionMap<ShortTermSessionControl>();
         userSessions = new ConcurrentHashMap<>(32, 0.9F, 1);
     }
 
@@ -88,7 +90,7 @@ final class SessionContainer {
      *
      * @return The current number of sessions held by this container
      */
-    protected int size() {
+    public int size() {
         return sessionMap.size();
     }
 
@@ -98,7 +100,7 @@ final class SessionContainer {
      * @param sessionId The session identifier
      * @return <code>true</code> if this container contains an entry for specified session identifier; otherwise <code>false</code>
      */
-    protected boolean containsSessionId(final String sessionId) {
+    public boolean containsSessionId(final String sessionId) {
         return sessionMap.containsBySessionId(sessionId);
     }
 
@@ -108,7 +110,7 @@ final class SessionContainer {
      * @param altId The alternative identifier
      * @return <code>true</code> if this container contains an entry for specified alternative identifier; otherwise <code>false</code>
      */
-    protected boolean containsAlternativeId(final String altId) {
+    public boolean containsAlternativeId(final String altId) {
         return sessionMap.containsByAlternativeId(altId);
     }
 
@@ -119,7 +121,7 @@ final class SessionContainer {
      * @param contextId The context identifier
      * @return <code>true</code> if this container contains an entry for specified user; otherwise <code>false</code>
      */
-    protected boolean containsUser(final int userId, final int contextId) {
+    public boolean containsUser(final int userId, final int contextId) {
         final ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(Integer.valueOf(contextId));
         if (null == map) {
             return false;
@@ -136,7 +138,7 @@ final class SessionContainer {
      * @param contextId The context identifier
      * @return The number of sessions bound to specified user in specified context
      */
-    protected int numOfUserSessions(final int userId, final int contextId) {
+    public int numOfUserSessions(final int userId, final int contextId) {
         final ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(Integer.valueOf(contextId));
         if (null == map) {
             return 0;
@@ -151,7 +153,7 @@ final class SessionContainer {
      * @param sessionId The session identifier
      * @return The session bound to specified session identifier, or <code>null</code> if there's no session for specified session identifier.
      */
-    protected SessionControl getSessionById(final String sessionId) {
+    public ShortTermSessionControl getSessionById(final String sessionId) {
         return sessionMap.getBySessionId(sessionId);
     }
 
@@ -161,7 +163,7 @@ final class SessionContainer {
      * @param altId The alternative identifier
      * @return The session bound to specified alternative identifier, or <code>null</code> if there's no session for specified alternative identifier.
      */
-    protected SessionControl getSessionByAlternativeId(final String altId) {
+    public ShortTermSessionControl getSessionByAlternativeId(final String altId) {
         return sessionMap.getByAlternativeId(altId);
     }
 
@@ -172,7 +174,7 @@ final class SessionContainer {
      * @param contextId The context identifier
      * @return The sessions bound to specified user identifier and context identifier
      */
-    protected List<SessionControl> getSessionsByUser(final int userId, final int contextId) {
+    public List<ShortTermSessionControl> getSessionsByUser(final int userId, final int contextId) {
         ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(Integer.valueOf(contextId));
         if (null == map) {
             return Collections.emptyList();
@@ -183,10 +185,10 @@ final class SessionContainer {
             return Collections.emptyList();
         }
 
-        List<SessionControl> sessions = new ArrayList<SessionControl>(sessionIds.size());
+        List<ShortTermSessionControl> sessions = new ArrayList<ShortTermSessionControl>(sessionIds.size());
         Set<String> idsToRemove = null;
         for (final String sessionId : sessionIds.keySet()) {
-            SessionControl control = sessionMap.getBySessionId(sessionId);
+            ShortTermSessionControl control = sessionMap.getBySessionId(sessionId);
             if (null == control) {
                 // Apparently such a session does no more exist
                 if (null == idsToRemove) {
@@ -212,7 +214,7 @@ final class SessionContainer {
      * @param contextId The context identifier
      * @return An arbitrary session or <code>null</code>
      */
-    public SessionControl getAnySessionByUser(final int userId, final int contextId) {
+    public ShortTermSessionControl getAnySessionByUser(final int userId, final int contextId) {
         final ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(Integer.valueOf(contextId));
         if (null == map) {
             return null;
@@ -229,18 +231,18 @@ final class SessionContainer {
 
 
     /**
-     * Wraps specified session by a newly created {@link SessionControl} object and puts it into this container
+     * Wraps specified session by a newly created {@link ShortTermSessionControl} object and puts it into this container
      *
      * @param session The session to put
      * @param addIfAbsent <code>true</code> to perform an add-if-absent operation; otherwise <code>false</code>
-     * @return The wrapping {@link SessionControl session control}.
+     * @return The wrapping {@link ShortTermSessionControl session control}.
      */
-    protected SessionControl put(final SessionImpl session, final boolean addIfAbsent) throws OXException {
+    public ShortTermSessionControl put(final SessionImpl session, final boolean addIfAbsent) throws OXException {
         final String sessionId = session.getSessionID();
         // Add session
-        SessionControl sessionControl;
+        ShortTermSessionControl sessionControl;
         {
-            final SessionControl newSessionControl = new SessionControl(session);
+            final ShortTermSessionControl newSessionControl = new ShortTermSessionControl(session);
             sessionControl = sessionMap.putIfAbsentBySessionId(sessionId, newSessionControl);
             if (null == sessionControl) {
                 // Insert succeeded
@@ -282,18 +284,18 @@ final class SessionContainer {
     }
 
     /**
-     * Puts specified {@link SessionControl} object into this container
+     * Puts specified {@link ShortTermSessionControl} object into this container
      *
      * @param sessionControl The session control to put
      * @throws OXException If put operation fails because of conflict with an existing session
      */
-    protected void putSessionControl(final SessionControl sessionControl) throws OXException {
+    public void putSessionControl(final ShortTermSessionControl sessionControl) throws OXException {
         if (null == sessionControl) {
             return;
         }
         final Session session = sessionControl.getSession();
         final String sessionId = session.getSessionID();
-        final SessionControl oldSessionControl = sessionMap.putIfAbsentBySessionId(sessionId, sessionControl);
+        final ShortTermSessionControl oldSessionControl = sessionMap.putIfAbsentBySessionId(sessionId, sessionControl);
         if (null != oldSessionControl) {
             final String login1 = oldSessionControl.getSession().getLogin();
             final String login2 = sessionControl.getSession().getLogin();
@@ -326,14 +328,14 @@ final class SessionContainer {
      * Removes the session bound to specified session identifier.
      *
      * @param sessionId The session Id
-     * @return The {@link SessionControl session control} previously associated with specified session identifier, or <code>null</code>.
+     * @return The {@link ShortTermSessionControl session control} previously associated with specified session identifier, or <code>null</code>.
      */
-    protected SessionControl removeSessionById(final String sessionId) {
+    public ShortTermSessionControl removeSessionById(final String sessionId) {
         if (null == sessionId) {
             return null;
         }
 
-        SessionControl sessionControl = sessionMap.removeBySessionId(sessionId);
+        ShortTermSessionControl sessionControl = sessionMap.removeBySessionId(sessionId);
         if (sessionControl == null) {
             return null;
         }
@@ -356,9 +358,9 @@ final class SessionContainer {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return The {@link SessionControl session controls} previously associated with specified user identifier and context identifier.
+     * @return The {@link ShortTermSessionControl session controls} previously associated with specified user identifier and context identifier.
      */
-    protected List<SessionControl> removeSessionsByUser(final int userId, final int contextId) {
+    public List<ShortTermSessionControl> removeSessionsByUser(final int userId, final int contextId) {
         Integer iContextId = Integer.valueOf(contextId);
         ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(iContextId);
         if (null == map) {
@@ -371,9 +373,9 @@ final class SessionContainer {
             return Collections.emptyList();
         }
 
-        List<SessionControl> l = new ArrayList<SessionControl>(sessionIds.size());
+        List<ShortTermSessionControl> l = new ArrayList<ShortTermSessionControl>(sessionIds.size());
         for (String sessionId : sessionIds.keySet()) {
-            SessionControl sc = sessionMap.removeBySessionId(sessionId);
+            ShortTermSessionControl sc = sessionMap.removeBySessionId(sessionId);
             if (sc != null) {
                 l.add(sc);
             }
@@ -385,20 +387,20 @@ final class SessionContainer {
      * Removes the sessions bound to specified context identifier.
      *
      * @param contextId The context identifier
-     * @return The {@link SessionControl session controls} previously associated with specified user identifier and context identifier.
+     * @return The {@link ShortTermSessionControl session controls} previously associated with specified user identifier and context identifier.
      */
-    protected List<SessionControl> removeSessionsByContext(final int contextId) {
+    public List<ShortTermSessionControl> removeSessionsByContext(final int contextId) {
         Integer iContextId = Integer.valueOf(contextId);
         ConcurrentMap<Integer, Map<String, Object>> map = userSessions.remove(iContextId);
         if (null == map || map.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<SessionControl> l = new ArrayList<SessionControl>(128);
-        SessionMap sessionMap = this.sessionMap;
+        List<ShortTermSessionControl> l = new ArrayList<ShortTermSessionControl>(128);
+        SessionMap<ShortTermSessionControl> sessionMap = this.sessionMap;
         for (Map<String, Object> sessionIds : map.values()) {
             for (String sessionId : sessionIds.keySet()) {
-                SessionControl sc = sessionMap.removeBySessionId(sessionId);
+                ShortTermSessionControl sc = sessionMap.removeBySessionId(sessionId);
                 if (sc != null) {
                     l.add(sc);
                 }
@@ -411,10 +413,10 @@ final class SessionContainer {
      * Removes the sessions bound to the given contextIds.
      *
      * @param contextIds The context identifiers to remove
-     * @return The {@link SessionControl session controls} previously associated with specified user identifier and context identifier.
+     * @return The {@link ShortTermSessionControl session controls} previously associated with specified user identifier and context identifier.
      */
-    protected List<SessionControl> removeSessionsByContexts(final Set<Integer> contextIds) {
-        List<SessionControl> removedSessionsByContexts = new ArrayList<SessionControl>();
+    public List<ShortTermSessionControl> removeSessionsByContexts(final Set<Integer> contextIds) {
+        List<ShortTermSessionControl> removedSessionsByContexts = new ArrayList<ShortTermSessionControl>();
         for (int contextId : contextIds) {
             removedSessionsByContexts.addAll(this.removeSessionsByContext(contextId));
         }
@@ -427,7 +429,7 @@ final class SessionContainer {
      * @param contextId The context identifier
      * @return <code>true</code> if there is such a session; otherwise <code>false</code>
      */
-    protected boolean hasForContext(final int contextId) {
+    public boolean hasForContext(final int contextId) {
         ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(Integer.valueOf(contextId));
         if (null == map || map.isEmpty()) {
             return false;
@@ -442,13 +444,13 @@ final class SessionContainer {
     }
 
     /**
-     * Returns a collection view of the {@link SessionControl} objects contained in this container. The collection is
+     * Returns a collection view of the {@link ShortTermSessionControl} objects contained in this container. The collection is
      * <b><small>not</small></b> backed by the container, so changes to the map are not reflected in the container, but changes made to any
-     * {@link SessionControl} object is reflected in this container.
+     * {@link ShortTermSessionControl} object is reflected in this container.
      *
-     * @return A collection view of the {@link SessionControl} objects contained in this container.
+     * @return A collection view of the {@link ShortTermSessionControl} objects contained in this container.
      */
-    protected Collection<SessionControl> getSessionControls() {
+    public Collection<ShortTermSessionControl> getSessionControls() {
         return sessionMap.values();
     }
 
@@ -458,7 +460,7 @@ final class SessionContainer {
      *
      * @return A collection view of the session identifiers contained in this container.
      */
-    protected Collection<String> getSessionIDs() {
+    public Collection<String> getSessionIDs() {
         return sessionMap.keys();
     }
 

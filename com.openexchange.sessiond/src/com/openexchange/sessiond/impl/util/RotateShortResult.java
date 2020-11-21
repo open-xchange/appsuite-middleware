@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,60 +47,64 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.util;
 
-import java.util.UUID;
-import com.openexchange.java.util.UUIDs;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.sessiond.impl.container.SessionControl;
 
 /**
- * {@link UUIDSessionIdGenerator} - The session ID generator based on {@link UUID#randomUUID()}.
+ * {@link RotateShortResult} - The result of invoking {@code rotateShort()} from <code>com.openexchange.sessiond.impl.SessionData</code>
+ * providing a listing of sessions for:
+ * <ul>
+ * <li>Sessions moved to long-term container</li>
+ * <li>Timed out sessions</li>
+ * </ul>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public final class UUIDSessionIdGenerator extends SessionIdGenerator {
+public class RotateShortResult {
 
-    private static final UUIDSessionIdGenerator INSTANCE = new UUIDSessionIdGenerator();
+    private final List<SessionControl> movedToLongTerm;
+    private final List<SessionControl> removed;
 
     /**
-     * Gets the instance
+     * Initializes a new {@link RotateShortResult}.
      *
-     * @return The instance
+     * @param movedToLongTerm A listing of sessions moved to long-term container or <code>null</code>
+     * @param removed A listing of timed out sessions or <code>null</code>
      */
-    public static UUIDSessionIdGenerator getInstance() {
-        return INSTANCE;
-    }
-
-    // -------------------------------------------------------------------------------------------------------
-
-    /**
-     * Initializes a new {@link UUIDSessionIdGenerator}
-     */
-    private UUIDSessionIdGenerator() {
+    public RotateShortResult(List<SessionControl> movedToLongTerm, List<SessionControl> removed) {
         super();
-    }
-
-    @Override
-    public String createSessionId(final String loginName) {
-        return randomUUID();
-    }
-
-    @Override
-    public String createSecretId(final String loginName) {
-        return randomUUID();
-    }
-
-    @Override
-    public String createRandomId() {
-        return randomUUID();
+        this.movedToLongTerm = movedToLongTerm == null ? Collections.emptyList() : movedToLongTerm;
+        this.removed = removed == null ? Collections.emptyList() : removed;
     }
 
     /**
-     * Generates a UUID using {@link UUID#randomUUID()} and removes all dashes; e.g.:<br>
-     * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i> would be <i>a5aa65cb6c7e40899ce2b107d21b9d15</i>
+     * Gets the sessions, which were moved to long-term container.
      *
-     * @return A UUID string
+     * @return The sessions, which were moved to long-term container
      */
-    public static String randomUUID() {
-        return UUIDs.getUnformattedString(UUID.randomUUID());
+    public List<SessionControl> getMovedToLongTerm() {
+        return movedToLongTerm;
+    }
+
+    /**
+     * Gets the sessions, which were removed
+     *
+     * @return The sessions, which were removed
+     */
+    public List<SessionControl> getRemoved() {
+        return removed;
+    }
+
+    /**
+     * Checks if both collections are empty.
+     *
+     * @return <code>true</code> if both are empty; otherwise <code>false</code>
+     */
+    public boolean isEmpty() {
+        return movedToLongTerm.isEmpty() && removed.isEmpty();
     }
 }

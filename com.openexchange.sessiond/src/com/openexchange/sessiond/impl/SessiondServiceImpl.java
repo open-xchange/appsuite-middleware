@@ -63,6 +63,8 @@ import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
+import com.openexchange.sessiond.impl.container.SessionControl;
+import com.openexchange.sessiond.impl.container.ShortTermSessionControl;
 
 /**
  * {@link SessiondServiceImpl} - Implementation of {@link SessiondService}
@@ -174,13 +176,13 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public Collection<Session> getActiveSessions(int userId, int contextId) {
-        List<SessionControl> sessionControls = SessionHandler.getUserActiveSessions(userId, contextId);
+        List<ShortTermSessionControl> sessionControls = SessionHandler.getUserActiveSessions(userId, contextId);
         if (null == sessionControls) {
             return Collections.emptyList();
         }
 
         List<Session> list = new ArrayList<Session>(sessionControls.size());
-        for (SessionControl sc : sessionControls) {
+        for (ShortTermSessionControl sc : sessionControls) {
             list.add(sc.getSession());
         }
         return list;

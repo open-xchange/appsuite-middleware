@@ -134,10 +134,10 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
 
     @Override
     public T get(Object key) {
-        key = ID(key);
-        if (!delegate.containsKey(key) && initial != null) {
+        SessionKey sessionKey = ID(key);
+        if (!delegate.containsKey(sessionKey) && initial != null) {
             T created = initial.create();
-            T other = delegate.putIfAbsent((SessionKey) key, created);
+            T other = delegate.putIfAbsent(sessionKey, created);
             if (other != null) {
                 cleanUp(created);
                 return other;
@@ -145,7 +145,7 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
 
             return created;
         }
-        return delegate.get(key);
+        return delegate.get(sessionKey);
     }
 
     @Override

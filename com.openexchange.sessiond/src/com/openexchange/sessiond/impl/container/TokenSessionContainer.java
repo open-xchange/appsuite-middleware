@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.container;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -63,6 +63,10 @@ import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.map.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.HazelcastInstanceNotActiveExceptionHandler;
+import com.openexchange.sessiond.impl.SessionHandler;
+import com.openexchange.sessiond.impl.SessionImpl;
+import com.openexchange.sessiond.impl.TokenSessionTimerRemover;
 import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessiond.portable.PortableTokenSessionControl;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
@@ -276,7 +280,7 @@ public final class TokenSessionContainer {
         timerService = null;
     }
 
-    TokenSessionControl addSession(SessionImpl session, String clientToken, String serverToken) {
+    public TokenSessionControl addSession(SessionImpl session, String clientToken, String serverToken) {
         TokenSessionControl control;
 
         Lock lock = getLock();
@@ -292,7 +296,7 @@ public final class TokenSessionContainer {
         return control;
     }
 
-    TokenSessionControl getSession(String clientToken, String serverToken) throws OXException {
+    public TokenSessionControl getSession(String clientToken, String serverToken) throws OXException {
         TokenSessionControl control;
 
         Lock lock = getLock();
@@ -317,7 +321,7 @@ public final class TokenSessionContainer {
         return control;
     }
 
-    TokenSessionControl removeSession(TokenSessionControl control) {
+    public TokenSessionControl removeSession(TokenSessionControl control) {
         TokenSessionControl removed;
 
         Lock lock = getLock();

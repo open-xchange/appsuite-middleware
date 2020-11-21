@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -195,7 +195,7 @@ public class RotatableCopyOnWriteArrayList<E> extends CopyOnWriteArrayList<E> {
                 throw new IndexOutOfBoundsException();
             }
 
-            E oldValue = (E) elements[lastIndex];
+            @SuppressWarnings("unchecked") E oldValue = (E) elements[lastIndex];
             Object[] newElements = new Object[len];
             System.arraycopy(elements, 0, newElements, 1, lastIndex);
             newElements[0] = newElement;
