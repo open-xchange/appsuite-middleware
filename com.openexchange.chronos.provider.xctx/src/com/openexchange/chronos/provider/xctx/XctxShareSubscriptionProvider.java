@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.xctx;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.osgi.Tools.requireService;
 import static com.openexchange.share.core.tools.ShareLinks.extractHostName;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE;
@@ -63,13 +64,14 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
-import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
@@ -152,7 +154,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         CalendarAccount existingAccount = lookupExistingAccount(session, shareLink);
         if (null != existingAccount) {
             ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
-            FolderCalendarAccess calendarAccess;
+            XctxCalendarAccess calendarAccess;
             try {
                 calendarAccess = provider.connect(session, existingAccount, null);
             } catch (OXException e) {
@@ -161,10 +163,13 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
                 }
                 throw e;
             }
-
-            CalendarFolder folder = calendarAccess.getFolder(getRelativeFolderId(targetPath.getFolder()));
-            ShareLinkState state = Boolean.FALSE.equals(folder.isSubscribed()) ? ShareLinkState.UNSUBSCRIBED : ShareLinkState.SUBSCRIBED;
-            return new ShareLinkAnalyzeResult.Builder().state(state).infos(getSubscriptionInfo(existingAccount, targetPath)).build();
+            try {
+                CalendarFolder folder = calendarAccess.getFolder(getRelativeFolderId(targetPath.getFolder()));
+                ShareLinkState state = Boolean.FALSE.equals(folder.isSubscribed()) ? ShareLinkState.UNSUBSCRIBED : ShareLinkState.SUBSCRIBED;
+                return new ShareLinkAnalyzeResult.Builder().state(state).infos(getSubscriptionInfo(existingAccount, targetPath)).build();
+            } finally {
+                calendarAccess.close();
+            }
         }
         /*
          * check if and how the share link is resolvable, otherwise
@@ -199,13 +204,17 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
          */
         CalendarAccount existingAccount = lookupExistingAccount(session, shareLink);
         if (null != existingAccount) {
-            FolderCalendarAccess calendarAccess = provider.connect(session, existingAccount, null);
             ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
+            String folderId = getRelativeFolderId(targetPath.getFolder());
             DefaultCalendarFolder folderUpdate = new DefaultCalendarFolder();
-            folderUpdate.setId(targetPath.getFolder());
+            folderUpdate.setId(folderId);
             folderUpdate.setSubscribed(Boolean.TRUE);
-            calendarAccess.updateFolder(targetPath.getFolder(), folderUpdate, CalendarUtils.DISTANT_FUTURE);
-            calendarAccess.close();
+            FolderCalendarAccess calendarAccess = provider.connect(session, existingAccount, null);
+            try {
+                calendarAccess.updateFolder(folderId, folderUpdate, existingAccount.getLastModified().getTime());
+            } finally {
+                calendarAccess.close();
+            }
             return getSubscriptionInfo(existingAccount, targetPath);
         }
         /*
@@ -213,7 +222,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
          */
         JSONObject userConfig = new JSONObject();
         userConfig.putSafe("url", shareLink);
-        userConfig.putSafe("password", password); //TODO: crypt
+        userConfig.putSafe("password", password);
         userConfig.putSafe("name", Strings.isEmpty(shareName) ? extractHostName(shareLink) : shareName);
         CalendarAccountService accountService = services.getServiceSafe(CalendarAccountService.class);
         CalendarAccount account = accountService.createAccount(session, provider.getId(), userConfig, null);
@@ -248,8 +257,13 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         return getSubscriptionInfo(updatedAccount, ShareTool.getShareTarget(shareLink));
     }
 
+
     @Override
     public boolean unsubscribe(Session session, String shareLink) throws OXException {
+        return unsubscribe(session, shareLink, false);
+    }
+
+    public boolean unsubscribe(Session session, String shareLink, boolean ignoreWarnings) throws OXException {
         /*
          * update targeted folder in existing account
          */
@@ -257,15 +271,30 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         if (null == existingAccount) {
             return false;
         }
-        FolderCalendarAccess calendarAccess = provider.connect(session, existingAccount, null);
         ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
+        String folderId = getRelativeFolderId(targetPath.getFolder());
         DefaultCalendarFolder folderUpdate = new DefaultCalendarFolder();
-        folderUpdate.setId(targetPath.getFolder());
+        folderUpdate.setId(folderId);
         folderUpdate.setSubscribed(Boolean.FALSE);
-        calendarAccess.updateFolder(targetPath.getFolder(), folderUpdate, CalendarUtils.DISTANT_FUTURE);
-        return true;
+        DefaultCalendarParameters parameters = new DefaultCalendarParameters();
+        parameters.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, B(ignoreWarnings));
+        XctxCalendarAccess calendarAccess = provider.connect(session, existingAccount, parameters);
+        String result;
+        try {
+            result = calendarAccess.updateFolder(folderId, folderUpdate, existingAccount.getLastModified().getTime());
+        } finally {
+            calendarAccess.close();
+        }
+        if (null != result) {
+            return true;
+        }
+        if (null == result && null != calendarAccess.getWarnings() && 1 == calendarAccess.getWarnings().size() &&
+            ShareSubscriptionExceptions.ACCOUNT_WILL_BE_REMOVED.equals(calendarAccess.getWarnings().get(0))) {
+            throw calendarAccess.getWarnings().get(0); //TODO: or supply the warnings to the caller?
+        }
+        return false;
     }
-    
+
     protected static Set<String> getAliases(User user) {
         Set<String> possibleAliases = new HashSet<String>();
         if (Strings.isNotEmpty(user.getMail())) {

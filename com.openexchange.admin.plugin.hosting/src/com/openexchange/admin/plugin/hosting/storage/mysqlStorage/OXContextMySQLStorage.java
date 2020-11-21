@@ -123,6 +123,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.Reloadables;
 import com.openexchange.database.Assignment;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.Databases;
 import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
@@ -3167,6 +3168,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 prep = null;
             }
 
+        } catch (DataTruncation e) {
+            OXException oxe = DBPoolingExceptionCodes.COUNTS_INCONSISTENT.create(e, new Object[0]);
+            throw new StorageException(oxe.getMessage(), oxe);
         } finally {
             closeSQLStuff(prep);
         }

@@ -53,6 +53,7 @@ import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -309,7 +310,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         }
     }
 
-    private void updateCountTables(Connection con, int poolId, String schemaName, boolean increment) throws SQLException {
+    private void updateCountTables(Connection con, int poolId, String schemaName, boolean increment) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=count" + (increment ? '+' : '-') + "1 WHERE db_pool_id=?");
@@ -319,18 +320,28 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             stmt = null;
 
             updateSchemaCountTable(con, poolId, schemaName, increment);
+        } catch (DataTruncation e) {
+            if (!increment) {
+                throw DBPoolingExceptionCodes.COUNTS_INCONSISTENT.create(e, new Object[0]);
+            }
+            throw e;
         } finally {
             closeSQLStuff(stmt);
         }
     }
 
-    private void updateSchemaCountTable(Connection con, int poolId, String schemaName, boolean increment) throws SQLException {
+    private void updateSchemaCountTable(Connection con, int poolId, String schemaName, boolean increment) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE contexts_per_dbschema SET count=count" + (increment ? '+' : '-') + "1 WHERE db_pool_id=? AND schemaname=?");
             stmt.setInt(1, poolId);
             stmt.setString(2, schemaName);
             stmt.executeUpdate();
+        } catch (DataTruncation e) {
+            if (!increment) {
+                throw DBPoolingExceptionCodes.COUNTS_INCONSISTENT.create(e, new Object[0]);
+            }
+            throw e;
         } finally {
             closeSQLStuff(stmt);
         }

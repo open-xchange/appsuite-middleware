@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,26 @@
  *
  */
 
-package com.openexchange.file.storage.xctx;
+package com.openexchange.share.subscription;
 
-import static com.openexchange.java.Autoboxing.I;
-import com.openexchange.config.lean.DefaultProperty;
-import com.openexchange.config.lean.Property;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link XctxFileStorageProperties}
+ * {@link OXExceptionMessages}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
-public class XctxFileStorageProperties {
+public class ShareSubscriptionExceptionMessages implements LocalizableStrings {
+
+    // After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed.
+    public static final String ACCOUNT_WILL_BE_REMOVED_MSG = "After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed.";
 
     /**
-     * The time interval, in seconds, after which the access to an error afflicted account should be retried.
+     * Initializes a new {@link OXExceptionMessages}.
      */
-    public static Property RETRY_AFTER_ERROR_INTERVAL = DefaultProperty.valueOf("com.openexchange.file.storage.xctx.retryAfterErrorInterval", I(3600 /* seconds = 1h */));
-
-    /**
-     * Defines the maximum number of allowed accounts within the xctx file storage provider. A value of 0 disables the limit.
-     */
-    public static final Property MAX_ACCOUNTS = DefaultProperty.valueOf("com.openexchange.file.storage.xctx.maxAccounts", I(20));
-
-    /**
-     * Indicates whether the automatic removal of accounts in the <i>cross-context</i> file storage provider that refer to a no
-     * longer existing guest user in the remote context is enabled or not.
-     */
-    public static final Property AUTO_REMOVE_UNKNOWN_SHARES = DefaultProperty.valueOf("com.openexchange.file.storage.xctx.autoRemoveUnknownShares", Boolean.TRUE);
+    private ShareSubscriptionExceptionMessages() {
+        super();
+    }
 
 }

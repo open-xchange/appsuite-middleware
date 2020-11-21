@@ -176,6 +176,10 @@ public class DownloadAction extends AbstractOnboardingAction {
             PlistScenario scenario = PlistScenario.newInstance(providerEntry.getKey(), Collections.singletonList(provider));
             dict = provider.getPlist(dict, scenario, requestData.getHostData().getHost(), session.getUserId(), session.getContextId());
         }
+        if (dict == null) {
+            return new AJAXRequestResult();
+        }
+        
         PListSigner signer = services.getOptionalService(PListSigner.class);
         if (null != signer) {
             boolean error = true;

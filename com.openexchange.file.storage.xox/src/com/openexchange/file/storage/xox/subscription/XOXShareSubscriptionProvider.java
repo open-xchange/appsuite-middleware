@@ -91,7 +91,7 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
 
     /**
      * Initializes a new {@link XOXShareSubscriptionProvider}.
-     * 
+     *
      * @param services The services
      * @param fileStorageService The storage
      */
@@ -136,7 +136,7 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
          */
         FileStorageAccountAccess accountAccess = getStorageAccountAccess(session, shareLink);
         if (null != accountAccess) {
-            Builder builder = checkAccessible(accountAccess, shareLink);
+            Builder builder = checkAccessible(accountAccess, shareLink, session);
             return builder.infos(generateInfos(accountAccess, shareLink)).build();
         }
 

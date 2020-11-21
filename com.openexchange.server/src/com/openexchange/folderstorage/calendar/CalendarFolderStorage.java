@@ -66,6 +66,7 @@ import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -73,6 +74,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.SubfolderListingFolderStorage;
@@ -121,7 +123,7 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
     @Override
     public boolean startTransaction(StorageParameters parameters, boolean modify) throws OXException {
         /*
-         * initialize ID based file access if necessary
+         * initialize ID based calendar access if necessary
          */
         if (null == parameters.getParameter(FOLDER_TYPE, PARAMETER_ACCESS)) {
             /*
@@ -135,6 +137,12 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
              */
             IDBasedCalendarAccess calendarAccess = accessFactory.createAccess(parameters.getSession());
             if (parameters.putParameterIfAbsent(FOLDER_TYPE, PARAMETER_ACCESS, calendarAccess)) {
+                /*
+                 * transfer storage- to calendar parameters
+                 */
+                if (StorageParametersUtility.getBoolParameter("ignoreWarnings", parameters)) {
+                    calendarAccess.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.TRUE);
+                }
                 /*
                  * enqueue in managed transaction if possible, otherwise signal that we started the transaction ourselves
                  */
@@ -162,9 +170,7 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
                 // Ignore
                 org.slf4j.LoggerFactory.getLogger(CalendarFolderStorage.class).warn("Unexpected error during rollback: {}", e.getMessage(), e);
             } finally {
-                if (null != storageParameters.putParameter(FOLDER_TYPE, PARAMETER_ACCESS, null)) {
-                    calendarAccess.set(PARAMETER_CONNECTION(), null);
-                }
+                finish(storageParameters);
             }
         }
     }
@@ -175,6 +181,28 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
         if (null != calendarAccess) {
             try {
                 calendarAccess.commit();
+            } finally {
+                finish(storageParameters);
+            }
+        }
+    }
+
+    /**
+     * Performs possible clean-up operations after a commit/roll-back.
+     *
+     * @param storageParameters The storage parameters
+     */
+    private void finish(StorageParameters storageParameters) {
+        IDBasedCalendarAccess calendarAccess = storageParameters.getParameter(FOLDER_TYPE, PARAMETER_ACCESS);
+        if (null != calendarAccess) {
+            try {
+                calendarAccess.finish();
+                for (OXException warning : calendarAccess.getWarnings()) {
+                    storageParameters.addWarning(warning);
+                }
+            } catch (Exception e) {
+                // Ignore
+                org.slf4j.LoggerFactory.getLogger(CalendarFolderStorage.class).warn("Unexpected error during finish: {}", e.getMessage(), e);
             } finally {
                 if (null != storageParameters.putParameter(FOLDER_TYPE, PARAMETER_ACCESS, null)) {
                     calendarAccess.set(PARAMETER_CONNECTION(), null);
@@ -244,10 +272,10 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
 
     @Override
     public void updateFolder(Folder folder, StorageParameters storageParameters) throws OXException {
-        IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
         /*
          * update folder
          */
+        IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
         long timestamp = null != storageParameters.getTimeStamp() ? storageParameters.getTimeStamp().getTime() : DISTANT_FUTURE;
         CalendarFolder folderToUpdate = getCalendarFolder(folder);
         JSONObject userConfig = optCalendarConfig(folder);
@@ -280,15 +308,11 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
             throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(contentType, treeId);
         }
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        try {
-            CalendarFolder folder = calendarAccess.getDefaultFolder();
-            if (null == folder) {
-                throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(contentType, treeId);
-            }
-            return folder.getId();
-        } finally {
-            calendarAccess.finish();
+        CalendarFolder folder = calendarAccess.getDefaultFolder();
+        if (null == folder) {
+            throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(contentType, treeId);
         }
+        return folder.getId();
     }
 
     @Override
@@ -323,13 +347,8 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
         if (StorageType.BACKUP.equals(storageType)) {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
-        IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        try {
-            List<AccountAwareCalendarFolder> calendarFolders = calendarAccess.getFolders(folderIds);
-            return getStorageFolders(treeId, getDefaultContentType(), calendarFolders);
-        } finally {
-            calendarAccess.finish();
-        }
+        List<AccountAwareCalendarFolder> calendarFolders = getCalendarAccess(storageParameters).getFolders(folderIds);
+        return getStorageFolders(treeId, getDefaultContentType(), calendarFolders);
     }
 
     @Override
@@ -342,13 +361,8 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
         if (StorageType.BACKUP.equals(storageType)) {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
-        IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        try {
-            AccountAwareCalendarFolder calendarFolder = calendarAccess.getFolder(folderId);
-            return getStorageFolder(treeId, getDefaultContentType(), calendarFolder, calendarFolder.getAccount());
-        } finally {
-            calendarAccess.finish();
-        }
+        AccountAwareCalendarFolder calendarFolder = getCalendarAccess(storageParameters).getFolder(folderId);
+        return getStorageFolder(treeId, getDefaultContentType(), calendarFolder, calendarFolder.getAccount());
     }
 
     @Override
@@ -403,12 +417,7 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
     }
 
     private List<AccountAwareCalendarFolder> getVisibleFolders(GroupwareFolderType type, StorageParameters storageParameters) throws OXException {
-        IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        try {
-            return calendarAccess.getVisibleFolders(type);
-        } finally {
-            calendarAccess.finish();
-        }
+        return getCalendarAccess(storageParameters).getVisibleFolders(type);
     }
 
     /**

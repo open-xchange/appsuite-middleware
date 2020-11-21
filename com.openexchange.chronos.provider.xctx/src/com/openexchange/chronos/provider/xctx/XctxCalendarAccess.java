@@ -57,7 +57,9 @@ import static com.openexchange.chronos.provider.xctx.Constants.PUBLIC_FOLDER_ID;
 import static com.openexchange.chronos.provider.xctx.Constants.SHARED_FOLDER_ID;
 import static com.openexchange.chronos.provider.xctx.Constants.TREE_ID;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -117,6 +119,7 @@ import com.openexchange.java.util.TimeZones;
 import com.openexchange.quota.Quota;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.subscription.ShareSubscriptionExceptions;
 
 /**
  * {@link XctxCalendarAccess}
@@ -134,6 +137,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
 
     private final CalendarSession guestSession;
     private final CalendarAccount account;
+    private final List<OXException> warnings;
 
     /**
      * Initializes a new {@link XctxCalendarAccess}.
@@ -149,6 +153,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         this.services = services;
         this.localSession = localSession;
         this.account = account;
+        this.warnings = new ArrayList<OXException>();
         this.entityHelper = new EntityHelper(services, account);
     }
 
@@ -190,11 +195,33 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
          */
         JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
         boolean updated = false;
-        if (null != folder.isSubscribed()) {
-            updated = updated || new AccountConfigHelper(internalConfig).setSubscribed(folderId, folder.isSubscribed());
+        if (null != folder.isSubscribed() && new AccountConfigHelper(internalConfig).setSubscribed(folderId, folder.isSubscribed())) {
+            updated = true;
+            if (false == b(folder.isSubscribed())) {
+                /*
+                 * transition to 'unsubscribed', check if everything else is already unsubscribed
+                 */
+                List<CalendarFolder> subscribedFolders = getVisibleFolders(false);
+                if (null != subscribedFolders && 1 == subscribedFolders.size() && folderId.equals(subscribedFolders.get(0).getId())) {
+                    if (b(guestSession.get(PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.class, Boolean.FALSE))) {
+                        /*
+                         * delete whole calendar account & return
+                         */
+                        services.getServiceSafe(CalendarAccountService.class).deleteAccount(localSession, account.getAccountId(), clientTimestamp, null);
+                        return folderId;
+                    }
+                    /*
+                     * cancel update operation & track appropriate warning if not ignored
+                     */
+                    String folderName = subscribedFolders.get(0).getName();
+                    String accountName = account.getUserConfiguration().optString("name", "Account " + account.getAccountId());
+                    warnings.add(ShareSubscriptionExceptions.ACCOUNT_WILL_BE_REMOVED.create(folderName, accountName));
+                    return null;
+                }
+            }
         }
-        if (null != folder.getExtendedProperties()) {
-            updated = updated || new AccountConfigHelper(internalConfig).setColor(folderId, folder.getExtendedProperties().get(COLOR_LITERAL));
+        if (null != folder.getExtendedProperties() && new AccountConfigHelper(internalConfig).setColor(folderId, folder.getExtendedProperties().get(COLOR_LITERAL))) {
+            updated = true;
         }
         if (updated) {
             JSONObject userConfig = null != account.getUserConfiguration() ? account.getUserConfiguration() : new JSONObject();
@@ -343,7 +370,32 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
 
     @Override
     public List<OXException> getWarnings() {
-        return guestSession.getWarnings();
+        List<OXException> guestSessionWarnings = guestSession.getWarnings();
+        List<OXException> thisWarnings = this.warnings;
+        if (null == guestSessionWarnings || guestSessionWarnings.isEmpty()) {
+            return thisWarnings;
+        }
+        if (null == thisWarnings || thisWarnings.isEmpty()) {
+            return guestSessionWarnings;
+        }
+        List<OXException> warnings = new ArrayList<OXException>();
+        warnings.addAll(guestSessionWarnings);
+        warnings.addAll(thisWarnings);
+        return warnings;
+    }
+
+    private List<CalendarFolder> getVisibleFolders(boolean all) throws OXException {
+        List<CalendarFolder> folders = getVisibleFolders();
+        if (null == folders || folders.isEmpty() || all) {
+            return folders;
+        }
+        List<CalendarFolder> subscribedFolders = new ArrayList<CalendarFolder>(folders.size());
+        for (CalendarFolder folder : folders) {
+            if (null == folder.isSubscribed() || b(folder.isSubscribed())) {
+                subscribedFolders.add(folder);
+            }
+        }
+        return subscribedFolders;
     }
 
     /**
@@ -410,7 +462,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         }
         return allFolders;
     }
-    
+
     /**
      * Gets a list of groupware calendar folders representing the folders in the supplied userized folders.
      *
@@ -455,7 +507,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
          * insert user's own permission as system permission to ensure folder is considered as visible for the local session user throughout the stack
          */
         Permission ownPermission = folder.getOwnPermission();
-        permissions.add(new DefaultCalendarPermission(String.valueOf(localSession.getUserId()), localSession.getUserId(), null, 
+        permissions.add(new DefaultCalendarPermission(String.valueOf(localSession.getUserId()), localSession.getUserId(), null,
             ownPermission.getFolderPermission(), ownPermission.getReadPermission(), ownPermission.getWritePermission(), ownPermission.getDeletePermission(),
             ownPermission.isAdmin(), false, Permissions.createPermissionBits(ownPermission)));
         calendarFolder.setPermissions(permissions);
@@ -483,7 +535,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
      * <p/>
      * Previously remembered folders of this type are purged implicitly, so that the passed collection of folders will effectively replace
      * the last known state for this folder type afterwards.
-     * 
+     *
      * @param calendarFolders The calendar folders to remember
      * @param type The folder type to remember the calendars for
      * @return The passed calendar folders after they were remembered
