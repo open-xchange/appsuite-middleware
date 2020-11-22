@@ -103,6 +103,7 @@ public class UserRefCounter {
                     // Marked as deprecated. Retry.
                 } else {
                     counter.increment();
+                    return;
                 }
             }
         }
@@ -126,7 +127,6 @@ public class UserRefCounter {
             if (null == counter) {
                 return;
             }
-
             synchronized (counter) {
                 if (counter.isDeprecated()) {
                     // Marked as deprecated. Retry.
@@ -136,6 +136,7 @@ public class UserRefCounter {
                         counter.markDeprecated();
                         user2Counter.remove(iUserId);
                     }
+                    return;
                 }
             }
         }
