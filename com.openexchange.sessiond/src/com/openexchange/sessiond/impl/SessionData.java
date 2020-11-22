@@ -307,7 +307,7 @@ final class SessionData {
     }
 
     /**
-     * Removes all sessions belonging to given contexts out of long- and short-term container.
+     * Removes all sessions belonging to given contexts from long-term and short-term container.
      *
      * @param contextIds - Set with the context identifiers to remove sessions for
      * @return List of {@link SessionControl} objects for each handled session
