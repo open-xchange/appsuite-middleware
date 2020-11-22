@@ -1981,23 +1981,30 @@ public final class SessionHandler {
         }
 
         Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
-        Map<String, Session> eventMap = new HashMap<String, Session>();
-        Set<UserAndContext> users = new HashSet<UserAndContext>(controls.size());
+        Map<String, Session> eventMap = new HashMap<String, Session>(controls.size());
+        Set<UserAndContext> users = null;
         for (SessionControl sessionControl : controls) {
             Session session = sessionControl.getSession();
             eventMap.put(session.getSessionID(), session);
-            users.add(UserAndContext.newInstance(session));
+            if (ContainerType.SHORT_TERM == sessionControl.geContainerType()) {
+                if (users == null) {
+                    users = new HashSet<UserAndContext>(controls.size());
+                }
+                users.add(UserAndContext.newInstance(session));
+            }
         }
         dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);
         dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
         eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REMOVE_DATA, dic));
         LOG.debug("Posted event for removing temporary session data.");
 
-        SessionData sessionData = SESSION_DATA_REF.get();
-        if (null != sessionData) {
-            for (UserAndContext userKey : users) {
-                if (false == sessionData.isUserActive(userKey.getUserId(), userKey.getContextId(), false)) {
-                    postLastSessionGone(userKey.getUserId(), userKey.getContextId(), eventAdmin);
+        if (users != null) {
+            SessionData sessionData = SESSION_DATA_REF.get();
+            if (null != sessionData) {
+                for (UserAndContext userKey : users) {
+                    if (false == sessionData.isUserActive(userKey.getUserId(), userKey.getContextId(), false)) {
+                        postLastSessionGone(userKey.getUserId(), userKey.getContextId(), eventAdmin);
+                    }
                 }
             }
         }

@@ -55,7 +55,7 @@ import com.openexchange.sessiond.impl.container.SessionControl;
 
 /**
  * {@link RotateShortResult} - The result of invoking {@code rotateShort()} from <code>com.openexchange.sessiond.impl.SessionData</code>
- * providing a listing of sessions for:
+ * providing a listing of <b>non-transient</b> sessions for:
  * <ul>
  * <li>Sessions moved to long-term container</li>
  * <li>Timed out sessions</li>
@@ -82,18 +82,18 @@ public class RotateShortResult {
     }
 
     /**
-     * Gets the sessions, which were moved to long-term container.
+     * Gets the <b>non-transient</b> sessions, which were moved to long-term container.
      *
-     * @return The sessions, which were moved to long-term container
+     * @return The <b>non-transient</b>sessions, which were moved to long-term container
      */
     public List<SessionControl> getMovedToLongTerm() {
         return movedToLongTerm;
     }
 
     /**
-     * Gets the sessions, which were removed
+     * Gets the <b>non-transient</b> sessions, which were removed
      *
-     * @return The sessions, which were removed
+     * @return The <b>non-transient</b> sessions, which were removed
      */
     public List<SessionControl> getRemoved() {
         return removed;
