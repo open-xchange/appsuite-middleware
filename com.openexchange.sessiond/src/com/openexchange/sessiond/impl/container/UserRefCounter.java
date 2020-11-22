@@ -51,7 +51,6 @@ package com.openexchange.sessiond.impl.container;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -62,7 +61,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class UserRefCounter {
 
-    private final ConcurrentMap<Integer, ConcurrentMap<Integer, AtomicInteger>> context2CountersMap;
+    private final ConcurrentMap<Integer, ConcurrentMap<Integer, Counter>> context2CountersMap;
 
     /**
      * Initializes a new {@link UserRefCounter}.
@@ -80,9 +79,9 @@ public class UserRefCounter {
      */
     public void incrementCounter(int userId, int contextId) {
         Integer iContextId = Integer.valueOf(contextId);
-        ConcurrentMap<Integer, AtomicInteger> user2Counter = context2CountersMap.get(iContextId);
+        ConcurrentMap<Integer, Counter> user2Counter = context2CountersMap.get(iContextId);
         if (null == user2Counter) {
-            ConcurrentMap<Integer, AtomicInteger> newUser2Counter = new ConcurrentHashMap<>(16, 0.9F, 1);
+            ConcurrentMap<Integer, Counter> newUser2Counter = new ConcurrentHashMap<>(16, 0.9F, 1);
             user2Counter = context2CountersMap.putIfAbsent(iContextId, newUser2Counter);
             if (null == user2Counter) {
                 user2Counter = newUser2Counter;
@@ -91,20 +90,21 @@ public class UserRefCounter {
 
         Integer iUserId = Integer.valueOf(userId);
         while (true) {
-            AtomicInteger counter = user2Counter.get(iUserId);
+            Counter counter = user2Counter.get(iUserId);
             if (null == counter) {
-                AtomicInteger nuCounter = new AtomicInteger(1);
+                Counter nuCounter = new Counter();
                 counter = user2Counter.putIfAbsent(iUserId, nuCounter);
                 if (null == counter) {
-                    // This thread was able to put the new counter with initial count of 1
-                    return;
+                    counter = nuCounter;
                 }
             }
-            if (counter.getAndIncrement() > 0) {
-                return;
+            synchronized (counter) {
+                if (counter.isDeprecated()) {
+                    // Marked as deprecated. Retry.
+                } else {
+                    counter.increment();
+                }
             }
-            // Became invalid in the meantime: Revert the increment & retry
-            counter.decrementAndGet();
         }
     }
 
@@ -115,20 +115,29 @@ public class UserRefCounter {
      * @param contextId The context identifier
      */
     public void decrementCounter(int userId, int contextId) {
-        ConcurrentMap<Integer, AtomicInteger> user2Counter = context2CountersMap.get(Integer.valueOf(contextId));
+        ConcurrentMap<Integer, Counter> user2Counter = context2CountersMap.get(Integer.valueOf(contextId));
         if (null == user2Counter) {
             return;
         }
 
         Integer iUserId = Integer.valueOf(userId);
-        AtomicInteger counter = user2Counter.get(iUserId);
-        if (null == counter) {
-            return;
-        }
+        while (true) {
+            Counter counter = user2Counter.get(iUserId);
+            if (null == counter) {
+                return;
+            }
 
-        if (counter.decrementAndGet() <= 0) {
-            // Remove counter
-            user2Counter.remove(iUserId);
+            synchronized (counter) {
+                if (counter.isDeprecated()) {
+                    // Marked as deprecated. Retry.
+                } else {
+                    if (counter.decrementAndGet() <= 0) {
+                        // Remove counter since decremented to 0 (zero)
+                        counter.markDeprecated();
+                        user2Counter.remove(iUserId);
+                    }
+                }
+            }
         }
     }
 
@@ -139,14 +148,18 @@ public class UserRefCounter {
      * @return <code>true</code> if a long-term session is existent for given context; otherwise <code>false</code>
      */
     public boolean contains(int contextId) {
-        ConcurrentMap<Integer, AtomicInteger> counters = context2CountersMap.get(Integer.valueOf(contextId));
+        ConcurrentMap<Integer, Counter> counters = context2CountersMap.get(Integer.valueOf(contextId));
         if (null == counters) {
             return false;
         }
 
-        for (AtomicInteger counter : counters.values()) {
-            if (counter.get() > 0) {
-                return true;
+        for (Counter counter : counters.values()) {
+            if (counter != null) {
+                synchronized (counter) {
+                    if (!counter.isDeprecated() && counter.get() > 0) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -160,13 +173,19 @@ public class UserRefCounter {
      * @return <code>true</code> if a long-term session is existent for given user; otherwise <code>false</code>
      */
     public boolean contains(int userId, int contextId) {
-        ConcurrentMap<Integer, AtomicInteger> counters = context2CountersMap.get(Integer.valueOf(contextId));
+        ConcurrentMap<Integer, Counter> counters = context2CountersMap.get(Integer.valueOf(contextId));
         if (null == counters) {
             return false;
         }
 
-        AtomicInteger counter = counters.get(Integer.valueOf(userId));
-        return null != counter && counter.get() > 0;
+        Counter counter = counters.get(Integer.valueOf(userId));
+        if (counter == null) {
+            return false;
+        }
+
+        synchronized (counter) {
+            return !counter.isDeprecated() && counter.get() > 0;
+        }
     }
 
     /**
@@ -175,5 +194,42 @@ public class UserRefCounter {
     public void clear() {
         context2CountersMap.clear();
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class Counter {
+
+        private int count;
+        private boolean deprecated;
+
+        /**
+         * Initializes a new {@link Counter} having current count set to <code>0</code> (zero).
+         */
+        Counter() {
+            super();
+            count = 0;
+            deprecated = false;
+        }
+
+        int get() {
+            return count;
+        }
+
+        void increment() {
+            count++;
+        }
+
+        int decrementAndGet() {
+            return --count;
+        }
+
+        void markDeprecated() {
+            deprecated = true;
+        }
+
+        boolean isDeprecated() {
+            return deprecated;
+        }
+    } // End of class Counter
 
 }

@@ -215,8 +215,7 @@ final class SessionData {
         // This is the only location which alters 'longTermList' during runtime
         List<LongTermSessionControl> removedSessions = new ArrayList<LongTermSessionControl>(longTermList.rotate(new SessionMap<LongTermSessionControl>(256)).values());
         for (LongTermSessionControl sessionControl : removedSessions) {
-            SessionImpl session = sessionControl.getSession();
-            longTermUserGuardian.decrementCounter(session.getUserId(), session.getContextId());
+            longTermUserGuardian.decrementCounter(sessionControl.getUserId(), sessionControl.getContextId());
         }
         return removedSessions;
     }
@@ -269,9 +268,9 @@ final class SessionData {
         for (SessionMap<LongTermSessionControl> longTerm : longTermList) {
             for (LongTermSessionControl control : longTerm.values()) {
                 if (control.equalsUserAndContext(userId, contextId)) {
-                    Session session = control.getSession();
-                    longTerm.removeBySessionId(session.getSessionID());
-                    longTermUserGuardian.decrementCounter(userId, contextId);
+                    if (longTerm.removeBySessionId(control.getSessionID()) != null) {
+                        longTermUserGuardian.decrementCounter(userId, contextId);
+                    }
                     retval.add(control);
                 }
             }
@@ -296,9 +295,9 @@ final class SessionData {
         for (SessionMap<LongTermSessionControl> longTerm : longTermList) {
             for (LongTermSessionControl control : longTerm.values()) {
                 if (control.equalsContext(contextId)) {
-                    Session session = control.getSession();
-                    longTerm.removeBySessionId(session.getSessionID());
-                    longTermUserGuardian.decrementCounter(session.getUserId(), contextId);
+                    if (longTerm.removeBySessionId(control.getSessionID()) != null) {
+                        longTermUserGuardian.decrementCounter(control.getUserId(), contextId);
+                    }
                     list.add(control);
                 }
             }
@@ -332,8 +331,9 @@ final class SessionData {
                 Session session = control.getSession();
                 int contextId = session.getContextId();
                 if (contextIdsToCheck.contains(contextId)) {
-                    longTerm.removeBySessionId(session.getSessionID());
-                    longTermUserGuardian.decrementCounter(session.getUserId(), contextId);
+                    if (longTerm.removeBySessionId(session.getSessionID()) != null) {
+                        longTermUserGuardian.decrementCounter(session.getUserId(), contextId);
+                    }
                     list.add(control);
                 }
             }
@@ -843,8 +843,7 @@ final class SessionData {
                 control = longTermMap.removeBySessionId(sessionId);
                 if (null != control) {
                     firstContainer.putSessionControl(new ShortTermSessionControl(control));
-                    SessionImpl session = control.getSession();
-                    longTermUserGuardian.decrementCounter(session.getUserId(), session.getContextId());
+                    longTermUserGuardian.decrementCounter(control.getUserId(), control.getContextId());
                     LOG.trace("Moved from long term container to first one.");
                     movedSession = true;
                 }
