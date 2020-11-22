@@ -1206,7 +1206,7 @@ public final class SessionHandler {
             return null;
         }
         if (postEvent) {
-            postSessionRemoval(sessionControl.getSession());
+            postSessionRemoval(sessionControl);
         }
         return sessionControl;
     }
@@ -1802,7 +1802,8 @@ public final class SessionHandler {
         LOG.debug("Posted event for restored session");
     }
 
-    private static void postSessionRemoval(final SessionImpl session) {
+    private static void postSessionRemoval(final SessionControl sessionControl) {
+        Session session = sessionControl.getSession();
         Future<Void> dropSessionFromHz = null;
         if (useSessionStorage(session)) {
             // Asynchronous remove from session storage
@@ -1834,12 +1835,14 @@ public final class SessionHandler {
             eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REMOVE_SESSION, dic));
             LOG.debug("Posted event for removed session");
 
-            SessionData sessionData = SESSION_DATA_REF.get();
-            if (null != sessionData) {
-                int contextId = session.getContextId();
-                int userId = session.getUserId();
-                if (false == sessionData.isUserActive(userId, contextId, false)) {
-                    postLastSessionGone(userId, contextId, eventAdmin);
+            if (sessionControl.geContainerType() == ContainerType.SHORT_TERM) {
+                SessionData sessionData = SESSION_DATA_REF.get();
+                if (null != sessionData) {
+                    int contextId = session.getContextId();
+                    int userId = session.getUserId();
+                    if (false == sessionData.isUserActive(userId, contextId, false)) {
+                        postLastSessionGone(userId, contextId, eventAdmin);
+                    }
                 }
             }
         }
