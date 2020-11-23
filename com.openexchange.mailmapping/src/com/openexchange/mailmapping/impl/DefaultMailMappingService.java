@@ -49,6 +49,7 @@
 
 package com.openexchange.mailmapping.impl;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,6 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -93,14 +95,15 @@ public class DefaultMailMappingService implements MultipleMailResolver {
      * Initializes a new {@link DefaultMailMappingService}.
      *
      * @param mailMappingActivator
+     * @throws IOException if an I/O error is occurred
      */
-    public DefaultMailMappingService(ServiceLookup services) {
+    public DefaultMailMappingService(ServiceLookup services) throws IOException {
         super();
         this.services = services;
         ConfigurationService service = services.getService(ConfigurationService.class);
         lookUpByDomain = service.getBoolProperty("com.openexchange.mailmapping.lookUpByDomain", false);
-        Set<Object> set = service.getFile("external-domains.properties").keySet();
-        this.externalDomains = new HashSet<String>(set.size(), 0.9f);
+        Set<Object> set = ConfigurationServices.loadPropertiesFrom(service.getFileByName("external-domains.properties")).keySet();
+        this.externalDomains = new HashSet<>(set.size(), 0.9f);
         for (Object domain : set) {
             externalDomains.add(domain.toString());
         }
