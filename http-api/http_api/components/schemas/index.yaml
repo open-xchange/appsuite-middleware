@@ -399,6 +399,8 @@ InfoItemsRestoreResponseData:
   $ref: ./infostore/InfoItemsRestoreResponseData.yaml
 InfoFolderPathData:
   $ref: ./infostore/FolderPathData.yaml
+BackwardLinkResponse:
+  $ref: ./infostore/BackwardLinkResponse.yaml
 # Module: attachments
 AttachmentsResponse:
   $ref: ./attachments/AttachmentsResponse.yaml
@@ -739,8 +741,6 @@ SubscribeShareBody:
   $ref: ./sharemanagement/SubscribeShareBody.yaml
 ExtendedSubscribeShareBody:
   $ref: ./sharemanagement/ExtendedSubscribeShareBody.yaml
-BackwardLinkResponse:
-  $ref: ./sharemanagement/BackwardLinkResponse.yaml
 # Module: passwordchange
 PasswordChangeBody:
   $ref: ./passwordchange/PasswordChangeBody.yaml

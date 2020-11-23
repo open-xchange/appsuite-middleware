@@ -1,6 +1,7 @@
 requests: 
   - AllRequest.yaml
   - AdvancedSearchRequest.yaml
+  - BackwardLinkRequest.yaml
   - ChecknameRequest.yaml
   - CopyRequest.yaml
   - DeleteRequest.yaml

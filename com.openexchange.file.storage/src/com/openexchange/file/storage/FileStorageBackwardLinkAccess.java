@@ -47,56 +47,28 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.file.storage;
 
-import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AnalyzeAction;
-import com.openexchange.share.json.actions.DeleteLinkAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.ResubscribeShareAction;
-import com.openexchange.share.json.actions.SendLinkAction;
-import com.openexchange.share.json.actions.SubscribeShareAction;
-import com.openexchange.share.json.actions.UnsubscribeShareAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
 
 /**
- * {@link ShareActionFactory}
+ * {@link FileStorageBackwardLinkAccess}.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.5
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+public interface FileStorageBackwardLinkAccess extends FileStorageFileAccess {
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * 
-     * @param services The services
+     * Generates a <i>backward</i> link into the guest account of a subscribed share, pointing to a specific target, which can be used
+     * to open the regular, browser-based guest mode on the remote host.
+     *
+     * @param folderId The targeted folder in the guest account
+     * @param id The targeted item in the guest account, or <code>null</code> when pointing to a folder
+     * @param additionals Additional data to include in the resulting backward link's share target, or <code>null</code> if not set
+     * @return The generated backward link
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("deleteLink", new DeleteLinkAction(services));
-        actions.put("sendLink", new SendLinkAction(services));
-
-        // Federated Sharing
-        actions.put("analyze", new AnalyzeAction(services));
-        actions.put("subscribe", new SubscribeShareAction(services));
-        actions.put("unsubscribe", new UnsubscribeShareAction(services));
-        actions.put("resubscribe", new ResubscribeShareAction(services));
-    }
-
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
+    String getBackwardLink(String folderId, String id, Map<String, String> additionals) throws OXException;
 
 }

@@ -1,8 +1,8 @@
-/share/management?action=backwardLink:
+/infostore?action=backwardLink:
   get:
-    operationId: backwardLink
+    operationId: getBackwardLink
     tags:
-      - Share/Management
+      - Infostore
       - FederatedSharing
     summary: >
       Generates a <i>backward</i> link into the guest account of a subscribed share, pointing to a 
@@ -10,26 +10,15 @@
       host. Only available if supported by the responsible provider.
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamInfostoreFolder'
       - in: query
-        name: link
-        description: The original share URL, as previously used to subscribe to the share. 
-        required: true
-        schema:
-          type: string
-      - in: query
-        name: folder
-        description: The identifier of the folder the backward link should be generated for. 
-        required: true
-        schema:
-          type: string
-      - in: query
-        name: item
-        description: The identifier of the item the backward link should be generated for. 
+        name: id
+        description: Object ID of the requested infoitem.
         required: false
         schema:
           type: string
       - in: query
-        name: merge
+        name: redirect
         description: >
           "true" if the redirect link should be returned in the Location header of a HTTP 302 Moved Temporarily 
           response, "false" (default) to return the link in a plain API response.
