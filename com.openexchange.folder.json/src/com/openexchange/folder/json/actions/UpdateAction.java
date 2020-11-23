@@ -62,7 +62,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
 import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.parser.ParsedFolder;
 import com.openexchange.folder.json.services.ServiceRegistry;

@@ -209,7 +209,7 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
         folder.setSubscribed(Boolean.TRUE);
         folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse response = api.createFolder(parentFolderId, getApiClient().getSession(), body, TREE, null, null, null);
+        FolderUpdateResponse response = api.createFolder(parentFolderId, body, TREE, null, null, null);
         String folderId = response.getData();
         createdFolders.add(folderId);
         return folderId;
@@ -231,7 +231,7 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
         }
         folder.setPermissions(perm);
         body.setFolder(folder);
-        FolderUpdateResponse response = api.createFolder(parentFolderId, getApiClient().getSession(), body, TREE, null, null, null);
+        FolderUpdateResponse response = api.createFolder(parentFolderId, body, TREE, null, null, null);
         String folderId = response.getData();
         createdFolders.add(folderId);
         return folderId;

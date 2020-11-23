@@ -86,9 +86,9 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.oauth.provider.authorizationserver.spi.AuthorizationException;
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse;
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse.TokenStatus;
+import com.openexchange.oauth.provider.impl.OAuthProviderProperties;
 import com.openexchange.oauth.provider.impl.osgi.Services;
 import com.openexchange.user.UserService;
 
@@ -102,12 +102,12 @@ import com.openexchange.user.UserService;
 @PrepareForTest({ Services.class, LeanConfigurationService.class, OAuthJwtAuthorizationService.class })
 public class OAuthJwtAuthorizationServiceTest {
 
-    private String subject = "anton@context1.ox.test";
-    private String issuer = "https://example.com";
-    private String scopeClaimname = "scope";
-    private String scope = "oxpim";
-    private String authorizedPartyClaimname = "azp";
-    private String authorizedParty = "contactviewer";
+    private final String subject = "anton@context1.ox.test";
+    private final String issuer = "https://example.com";
+    private final String scopeClaimname = "scope";
+    private final String scope = "oxpim";
+    private final String authorizedPartyClaimname = "azp";
+    private final String authorizedParty = "contactviewer";
 
     private OAuthJwtAuthorizationService spy;
 
@@ -134,16 +134,14 @@ public class OAuthJwtAuthorizationServiceTest {
         PowerMockito.when(Services.requireService(ContextService.class)).thenReturn(contextService);
         PowerMockito.when(Services.requireService(UserService.class)).thenReturn(userService);
 
-        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.JWKS_ENDPOINT)).thenReturn(OAuthJWTProperty.JWKS_ENDPOINT.getDefaultValue().toString());
-        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.KEYSTORE_PATH)).thenReturn(OAuthJWTProperty.KEYSTORE_PATH.getDefaultValue().toString());
-        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.KEYSTORE_PASSWORD)).thenReturn(OAuthJWTProperty.KEYSTORE_PASSWORD.getDefaultValue().toString());
-        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.ALLOWED_ISSUER)).thenReturn(issuer);
+        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.JWKS_URI)).thenReturn(OAuthJWTProperty.JWKS_URI.getDefaultValue().toString());
+        Mockito.when(leanConfigurationService.getProperty(OAuthProviderProperties.ALLOWED_ISSUER)).thenReturn(issuer);
 
-        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.CONTEXT_LOOKUP_CLAIM)).thenReturn(OAuthJWTProperty.CONTEXT_LOOKUP_CLAIM.getDefaultValue().toString());
-        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.CONTEXT_LOOKUP_NAME_PART)).thenReturn(NamePart.DOMAIN.getConfigName());
+        Mockito.when(leanConfigurationService.getProperty(OAuthProviderProperties.CONTEXT_LOOKUP_CLAIM)).thenReturn(OAuthProviderProperties.CONTEXT_LOOKUP_CLAIM.getDefaultValue().toString());
+        Mockito.when(leanConfigurationService.getProperty(OAuthProviderProperties.CONTEXT_LOOKUP_NAME_PART)).thenReturn(NamePart.DOMAIN.getConfigName());
 
-        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.USER_LOOKUP_CLAIM)).thenReturn(OAuthJWTProperty.USER_LOOKUP_CLAIM.getDefaultValue().toString());
-        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.USER_LOOKUP_NAME_PART)).thenReturn(NamePart.LOCAL_PART.getConfigName());
+        Mockito.when(leanConfigurationService.getProperty(OAuthProviderProperties.USER_LOOKUP_CLAIM)).thenReturn(OAuthProviderProperties.USER_LOOKUP_CLAIM.getDefaultValue().toString());
+        Mockito.when(leanConfigurationService.getProperty(OAuthProviderProperties.USER_LOOKUP_NAME_PART)).thenReturn(NamePart.LOCAL_PART.getConfigName());
 
         Mockito.when(contextService.getContext(ArgumentMatchers.anyInt())).thenReturn(new ContextImpl(1));
         Mockito.when(I(userService.getUserId(ArgumentMatchers.anyString(), (Context) ArgumentMatchers.any()))).thenReturn(I(3));
@@ -185,7 +183,7 @@ public class OAuthJwtAuthorizationServiceTest {
         assertEquals(value.getTokenStatus(), TokenStatus.VALID);
     }
 
-    @Test(expected = AuthorizationException.class)
+    @Test
     public void testJWTValidationForExpiredToken() throws Exception {
         // Create RSA-signer with the private key
         JWSSigner signer = new RSASSASigner(keyPair.getPrivate());
@@ -208,10 +206,11 @@ public class OAuthJwtAuthorizationServiceTest {
 
         String jwt = signedJWT.serialize();
 
-        spy.validateAccessToken(jwt);
+        ValidationResponse value = spy.validateAccessToken(jwt);
+        assertEquals(value.getTokenStatus(), TokenStatus.INVALID);
     }
 
-    @Test(expected = AuthorizationException.class)
+    @Test
     public void testJWTValidationForUnexpectedTokenIssuer() throws Exception {
         // Create RSA-signer with the private key
         JWSSigner signer = new RSASSASigner(keyPair.getPrivate());
@@ -234,12 +233,13 @@ public class OAuthJwtAuthorizationServiceTest {
 
         String jwt = signedJWT.serialize();
 
-        spy.validateAccessToken(jwt);
+        ValidationResponse value = spy.validateAccessToken(jwt);
+        assertEquals(value.getTokenStatus(), TokenStatus.INVALID);
     }
 
-    @Test(expected = AuthorizationException.class)
+    @Test
     public void testJWTValidationForMissingScopes() throws Exception {
-        Mockito.when(leanConfigurationService.getProperty(OAuthJWTProperty.ALLOWED_ISSUER)).thenReturn("https://example.com");
+        Mockito.when(leanConfigurationService.getProperty(OAuthProviderProperties.ALLOWED_ISSUER)).thenReturn("https://example.com");
 
         // Create RSA-signer with the private key
         JWSSigner signer = new RSASSASigner(keyPair.getPrivate());
@@ -262,7 +262,8 @@ public class OAuthJwtAuthorizationServiceTest {
 
         String jwt = signedJWT.serialize();
 
-        spy.validateAccessToken(jwt);
+        ValidationResponse value = spy.validateAccessToken(jwt);
+        assertEquals(value.getTokenStatus(), TokenStatus.INVALID);
     }
 
     private KeyPair generateKeyPair() throws NoSuchAlgorithmException {

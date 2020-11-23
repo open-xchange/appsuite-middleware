@@ -86,6 +86,8 @@ FolderCheckLimitsResponseData:
   $ref: ./folders/FolderCheckLimitsResponseData.yaml
 FolderCheckLimitsResponseErrorData:
   $ref: ./folders/FolderCheckLimitsResponseErrorData.yaml
+FolderSearchBody:
+  $ref: ./folders/FolderSearchBody.yaml
 # Module: tasks
 TasksResponse:
   $ref: ./tasks/TasksResponse.yaml

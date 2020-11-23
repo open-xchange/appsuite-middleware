@@ -58,6 +58,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.NamePart;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -74,24 +75,26 @@ import com.openexchange.oauth.provider.impl.osgi.Services;
 import com.openexchange.user.UserService;
 
 /**
- * {@link AbstractAuthorizationService}
+ * {@link AbstractClaimSetAuthorizationService}
  *
  * @author <a href="mailto:sebastian.lutz@open-xchange.com">Sebastian Lutz</a>
  * @since 7.10.5
  */
-public abstract class AbstractAuthorizationService implements OAuthAuthorizationService {
+public abstract class AbstractClaimSetAuthorizationService implements OAuthAuthorizationService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractAuthorizationService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractClaimSetAuthorizationService.class);
 
     private final OAuthJWTScopeService scopeService;
+    protected final LeanConfigurationService leanConfService;
 
     /**
-     * Initializes a new {@link AbstractAuthorizationService}.
+     * Initializes a new {@link AbstractClaimSetAuthorizationService}.
      *
      * @param scopeService
      */
-    protected AbstractAuthorizationService(OAuthJWTScopeService scopeService) {
+    protected AbstractClaimSetAuthorizationService(LeanConfigurationService leanConfService, OAuthJWTScopeService scopeService) {
         this.scopeService = scopeService;
+        this.leanConfService = leanConfService;
     }
 
 
@@ -204,27 +207,38 @@ public abstract class AbstractAuthorizationService implements OAuthAuthorization
      *
      * @return the context lookup claimname
      */
-    protected abstract String getContextLookupClaimname();
+    protected String getContextLookupClaimname() {
+        return leanConfService.getProperty(OAuthProviderProperties.CONTEXT_LOOKUP_CLAIM);
+    }
 
     /**
      * Get context lookup {@link NamePart}.
      *
      * @return the context lookup {@link NamePart}
      */
-    protected abstract String getContextLookupNamePart();
+    protected String getContextLookupNamePart() {
+        return leanConfService.getProperty(OAuthProviderProperties.CONTEXT_LOOKUP_NAME_PART);
+    }
 
     /**
      * Get user lookup claimname.
      *
      * @return the user lookup claim name
      */
-    protected abstract String getUserLookupClaimname();
+    protected String getUserLookupClaimname() {
+        return leanConfService.getProperty(OAuthProviderProperties.USER_LOOKUP_CLAIM);
+    }
 
     /**
      * Get user lookup {@link NamePart}.
      *
      * @return the user lookup {@link NamePart}
      */
-    protected abstract String getUserNameLookupPart();
+    protected String getUserNameLookupPart() {
+        return leanConfService.getProperty(OAuthProviderProperties.USER_LOOKUP_NAME_PART);
+    }
+
+
+
 
 }

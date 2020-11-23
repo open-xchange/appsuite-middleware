@@ -158,7 +158,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
 
     /**
      * Prepares a guest permission
-     * 
+     *
      * @return the guest
      */
     protected static FolderPermission prepareGuest(TestUser testUser) {
@@ -171,7 +171,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
 
     /**
      * Prepares a guest permission
-     * 
+     *
      * @return the guest
      */
     protected static FolderPermission prepareUser(TestUser testUser, ApiClient apiClient) {
@@ -239,7 +239,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         data.setItem(item);
         data.setFolder(folder);
         data.setModule(INFOSTORE);
-        ShareLinkResponse shareLink = smApi.getShareLink(folderManager.getSession(), data);
+        ShareLinkResponse shareLink = smApi.getShareLink(data);
         checkResponse(shareLink.getError(), shareLink.getErrorDesc(), shareLink.getData());
         folderManager.setLastTimestamp(shareLink.getTimestamp());
         return shareLink.getData();
@@ -247,7 +247,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
 
     /**
      * Deletes a share link
-     * 
+     *
      * @param smApi The API to use
      * @param folderId The folder ID to remove the link from
      * @throws ApiException
@@ -256,7 +256,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         ShareTargetData shareTargetData = new ShareTargetData();
         shareTargetData.setFolder(folderId);
         shareTargetData.setModule(INFOSTORE);
-        CommonResponse deleteShareLink = smApi.deleteShareLink(folderManager.getSession(), now(), shareTargetData);
+        CommonResponse deleteShareLink = smApi.deleteShareLink(now(), shareTargetData);
         assertNull(deleteShareLink.getError(), deleteShareLink.getErrorDesc());
         folderManager.setLastTimestamp(deleteShareLink.getTimestamp());
     }
@@ -275,7 +275,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         body.setIncludeSubfolders(Boolean.TRUE);
         body.setExpiryDate(null);
 
-        CommonResponse updateShareLink = smApi.updateShareLink(folderManager.getSession(), now(), body);
+        CommonResponse updateShareLink = smApi.updateShareLink(now(), body);
         assertNull(updateShareLink.getError(), updateShareLink.getErrorDesc());
         folderManager.setLastTimestamp(updateShareLink.getTimestamp());
     }
@@ -318,7 +318,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         FilestorageApi filestorageApi = new FilestorageApi(client);
         List<String> unmangle = IDMangler.unmangle(fqFolderId);
         Assert.assertTrue(fqFolderId + "isn't the correct full qualified folder ID with embeded account ID", unmangle.size() > 1);
-        FileAccountUpdateResponse response = filestorageApi.deleteFileAccount(client.getSession(), unmangle.get(0), unmangle.get(1));
+        FileAccountUpdateResponse response = filestorageApi.deleteFileAccount(unmangle.get(0), unmangle.get(1));
         checkResponse(response.getError(), response.getErrorDesc());
     }
 
@@ -413,14 +413,14 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
 
     private MailData lookupMail(ApiClient apiClient, String folder, String fromToMatch, String subjectToMatch) throws Exception {
         MailApi mailApi = new MailApi(apiClient);
-        MailsResponse mailsResponse = mailApi.getAllMails(apiClient.getSession(), folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
+        MailsResponse mailsResponse = mailApi.getAllMails(folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
         checkResponse(mailsResponse.getError(), mailsResponse.getErrorDesc(), mailsResponse.getData());
         for (List<String> mail : mailsResponse.getData()) {
             String subject = mail.get(2);
             if (Strings.isEmpty(subject) || false == subject.contains(subjectToMatch)) {
                 continue;
             }
-            MailResponse mailResponse = mailApi.getMail(apiClient.getSession(), mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
+            MailResponse mailResponse = mailApi.getMail(mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
             MailData mailData = checkResponse(mailResponse.getError(), mailsResponse.getErrorDesc(), mailResponse.getData());
             if (null == extractMatchingAddress(mailData.getFrom(), fromToMatch)) {
                 continue;
@@ -439,7 +439,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         elm.setId(data.getId());
         elm.setFolder(data.getFolderId());
         addTearDownOperation(() -> {
-            mailApi.deleteMails(mailApi.getApiClient().getSession(), Collections.singletonList(elm), null, Boolean.TRUE, Boolean.FALSE);
+            mailApi.deleteMails(Collections.singletonList(elm), null, Boolean.TRUE, Boolean.FALSE);
         });
     }
 
@@ -461,7 +461,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         fileAccountData.setFilestorageService(data.getFilestorageService());
         fileAccountData.setDisplayName(data.getDisplayName());
         fileAccountData.setConfiguration(new JSONObject());
-        FileAccountCreationResponse resp = filestorageApi.updateFileAccount(filestorageApi.getApiClient().getSession(), fileAccountData);
+        FileAccountCreationResponse resp = filestorageApi.updateFileAccount(fileAccountData);
         assertThat("Password still wrong", resp.getError(), notNullValue());
     }
 

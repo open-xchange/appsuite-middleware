@@ -55,7 +55,7 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CommonObject.Marker;

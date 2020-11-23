@@ -79,6 +79,10 @@ public interface ValidationResponse {
          */
         EXPIRED,
         /**
+         * The received token is rejected, i.e. token validation failed.
+         */
+        INVALID,
+        /**
          * The token is valid.
          */
         VALID

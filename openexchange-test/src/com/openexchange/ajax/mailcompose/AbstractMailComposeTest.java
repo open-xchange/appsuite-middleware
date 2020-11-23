@@ -127,8 +127,8 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         attachment2 = new File(TestInit.getTestProperty("provisioningFile"));
 
         MailComposeGetResponse allSpaces = api.getMailCompose(null);
-        for (MailComposeMessageModel model : allSpaces.getData()) {
-            api.deleteMailComposeById(model.getId());
+        for (MailComposeResponseMessageModel model : allSpaces.getData()) {
+            api.deleteMailComposeById(model.getId(), null);
         }
     }
 

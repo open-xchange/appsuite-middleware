@@ -61,22 +61,6 @@ import com.openexchange.exception.OXExceptionFactory;
  * @since v7.10.5
  */
 public enum OAuthJWTExceptionCode implements OXExceptionCode {
-
-    /**
-     * The JWT is rejected because the issuer is invalid: '%1$s'
-     */
-    IVALID_ISSUER("JWT validation failed because of invalid issuer: '%1$s'", Category.CATEGORY_ERROR, 1),
-
-    /**
-     * Unable to load client name from JWT: '%1$s'"
-     */
-    UNALBLE_TO_LOAD_CLIENT("Unable to load client name from JWT: '%1$s'", Category.CATEGORY_ERROR, 2),
-
-    /**
-     * Unable to load valid scope from JWT claims: '%1$s'"
-     */
-    UNABLE_TO_LOAD_VALID_SCOPE("Unable to load valid scope from claim: '%1$s'", Category.CATEGORY_ERROR, 3),
-
     /**
      * Service configuration failed because of internal errors: '%1$s'
      */
@@ -94,7 +78,7 @@ public enum OAuthJWTExceptionCode implements OXExceptionCode {
 
     /**
      * Initializes a new {@link OAuthJWTExceptionCode}.
-     * 
+     *
      * @param message
      * @param category
      * @param detailNumber
@@ -105,7 +89,7 @@ public enum OAuthJWTExceptionCode implements OXExceptionCode {
 
     /**
      * Initializes a new {@link OAuthJWTExceptionCode}.
-     * 
+     *
      * @param message
      * @param displayMessage
      * @param category

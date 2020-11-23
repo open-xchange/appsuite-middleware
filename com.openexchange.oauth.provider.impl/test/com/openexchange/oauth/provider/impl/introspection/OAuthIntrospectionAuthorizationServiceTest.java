@@ -50,6 +50,7 @@
 package com.openexchange.oauth.provider.impl.introspection;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import javax.mail.internet.ParseException;
 import org.junit.Assert;
@@ -79,6 +80,7 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.oauth.provider.authorizationserver.spi.AuthorizationException;
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse;
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse.TokenStatus;
+import com.openexchange.oauth.provider.impl.OAuthProviderProperties;
 import com.openexchange.oauth.provider.impl.jwt.OAuthJWTScopeService;
 import com.openexchange.oauth.provider.impl.osgi.Services;
 import com.openexchange.user.UserService;
@@ -93,51 +95,51 @@ import com.openexchange.user.UserService;
 @PrepareForTest({ Services.class, OAuthIntrospectionAuthorizationService.class })
 public class OAuthIntrospectionAuthorizationServiceTest {
 
-    private String accessToken = "c1MGYwNDJiYmYxNDFkZjVkOGI0MSAgLQ";
+    private final String accessToken = "c1MGYwNDJiYmYxNDFkZjVkOGI0MSAgLQ";
 
-    private Date expirationTime = DateUtils.fromSecondsSinceEpoch(System.currentTimeMillis() / 1000l + 10000);
-    private Date issueTime = DateUtils.fromSecondsSinceEpoch(System.currentTimeMillis() / 1000l);
-    private JWTID jwtid = new JWTID("7115162b-047b-450c-9687-97271fbb8a45");
-    private Issuer issuer = new Issuer("http://127.0.0.1:8085/auth/realms/demo");
-    private Subject subject = new Subject("anton@context1.ox.test");
-    private Scope scope = new Scope("oxpim");
-        
+    private final Date expirationTime = DateUtils.fromSecondsSinceEpoch(System.currentTimeMillis() / 1000l + 10000);
+    private final Date issueTime = DateUtils.fromSecondsSinceEpoch(System.currentTimeMillis() / 1000l);
+    private final JWTID jwtid = new JWTID("7115162b-047b-450c-9687-97271fbb8a45");
+    private final Issuer issuer = new Issuer("http://127.0.0.1:8085/auth/realms/demo");
+    private final Subject subject = new Subject("anton@context1.ox.test");
+    private final Scope scope = new Scope("oxpim");
+
     private OAuthIntrospectionAuthorizationService service;
 
     private OAuthJWTScopeService scopeService;
-        
+
 
     @Mock
     private ContextService contextService;
-        
+
     @Mock
     private UserService userService;
-    
+
     @Mock
     private LeanConfigurationService leanConfigurationService;
-    
+
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(Services.class);
 
-        PowerMockito.when(Services.requireService(LeanConfigurationService.class)).thenReturn(leanConfigurationService);  
+        PowerMockito.when(Services.requireService(LeanConfigurationService.class)).thenReturn(leanConfigurationService);
         PowerMockito.when(Services.requireService(ContextService.class)).thenReturn(contextService);
         PowerMockito.when(Services.requireService(UserService.class)).thenReturn(userService);
 
-        Mockito.when(leanConfigurationService.getProperty(OAuthIntrospectionProperty.CONTEXT_LOOKUP_CLAIM)).thenReturn(OAuthIntrospectionProperty.CONTEXT_LOOKUP_CLAIM.getDefaultValue().toString());
-        Mockito.when(leanConfigurationService.getProperty(OAuthIntrospectionProperty.CONTEXT_LOOKUP_NAME_PART)).thenReturn(NamePart.DOMAIN.getConfigName());
+        Mockito.when(leanConfigurationService.getProperty(OAuthProviderProperties.CONTEXT_LOOKUP_CLAIM)).thenReturn(OAuthProviderProperties.CONTEXT_LOOKUP_CLAIM.getDefaultValue().toString());
+        Mockito.when(leanConfigurationService.getProperty(OAuthProviderProperties.CONTEXT_LOOKUP_NAME_PART)).thenReturn(NamePart.DOMAIN.getConfigName());
 
-        Mockito.when(leanConfigurationService.getProperty(OAuthIntrospectionProperty.USER_LOOKUP_CLAIM)).thenReturn(OAuthIntrospectionProperty.USER_LOOKUP_CLAIM.getDefaultValue().toString());
-        Mockito.when(leanConfigurationService.getProperty(OAuthIntrospectionProperty.USER_LOOKUP_NAME_PART)).thenReturn(NamePart.LOCAL_PART.getConfigName());
+        Mockito.when(leanConfigurationService.getProperty(OAuthProviderProperties.USER_LOOKUP_CLAIM)).thenReturn(OAuthProviderProperties.USER_LOOKUP_CLAIM.getDefaultValue().toString());
+        Mockito.when(leanConfigurationService.getProperty(OAuthProviderProperties.USER_LOOKUP_NAME_PART)).thenReturn(NamePart.LOCAL_PART.getConfigName());
 
         Mockito.when(contextService.getContext(ArgumentMatchers.anyInt())).thenReturn(new ContextImpl(1));
         Mockito.when(I(userService.getUserId(ArgumentMatchers.anyString(), (Context) ArgumentMatchers.any()))).thenReturn(I(3));
-        
+
         this.scopeService = new OAuthJWTScopeService(leanConfigurationService);
         this.service = new OAuthIntrospectionAuthorizationService(leanConfigurationService, scopeService);
     }
-    
-    
+
+
     /**
      * Tests the process of an introspection using a given access token.
      * Finally, it is checked whether the entries of the {@link TokenIntrospectionSuccessResponse} are translated correctly and set in the {@link ValidationResponse}.
@@ -159,7 +161,7 @@ public class OAuthIntrospectionAuthorizationServiceTest {
             .parameter("azp", "contactviewer")
             .build();
      // @formatter:on
-        
+
         PowerMockito.stub(PowerMockito.method(OAuthIntrospectionAuthorizationService.class, "introspect", String.class)).toReturn(introspectionSuccessResponse);
 
         ValidationResponse value = service.validateAccessToken(accessToken);
@@ -172,10 +174,10 @@ public class OAuthIntrospectionAuthorizationServiceTest {
 
     /**
      * This test checks if the handling of an inactive token is executed correctly.
-     * 
+     *
      * @throws Exception
      */
-    @Test(expected = AuthorizationException.class)
+    @Test
     public void testIntrospectionOnInactiveToken() throws Exception {
      // @formatter:off
         TokenIntrospectionSuccessResponse introspectionSuccessResponse = new TokenIntrospectionSuccessResponse
@@ -192,7 +194,8 @@ public class OAuthIntrospectionAuthorizationServiceTest {
 
         PowerMockito.stub(PowerMockito.method(OAuthIntrospectionAuthorizationService.class, "makeRequest", String.class)).toReturn(introspectionSuccessResponse);
 
-        service.validateAccessToken(accessToken);
+        ValidationResponse value = service.validateAccessToken(accessToken);
+        assertEquals(value.getTokenStatus(), TokenStatus.EXPIRED);
     }
 
     /**

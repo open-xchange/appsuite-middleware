@@ -157,9 +157,8 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         final ServiceLookup serviceLookup = this;
         Services.setServiceLookup(serviceLookup);
 
-        ConfigurationService configService = getService(ConfigurationService.class);
-        boolean providerEnabled = configService.getBoolProperty(OAuthProviderProperties.ENABLED, false);
-        if (!providerEnabled) {
+        LeanConfigurationService leanConfigService = getServiceSafe(LeanConfigurationService.class);
+        if (!leanConfigService.getBooleanProperty(OAuthProviderProperties.ENABLED)) {
             LOG.info("OAuth provider is disabled by configuration.");
             return;
         }
@@ -172,11 +171,11 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         trackService(MailService.class);
         track(OAuthScopeProvider.class, new OAuthScopeProviderTracker(context));
 
-        OAuthProviderMode mode = OAuthProviderMode.getProviderMode(configService.getProperty(OAuthProviderProperties.MODE));
+        OAuthProviderMode mode = OAuthProviderMode.getProviderMode(leanConfigService.getProperty(OAuthProviderProperties.MODE));
         switch (mode) {
             default:
             case AUTH_SEVER:
-                if ("hz".equalsIgnoreCase(configService.getProperty(OAuthProviderProperties.AUTHCODE_TYPE, "hz").trim())) {
+                if ("hz".equalsIgnoreCase(leanConfigService.getProperty(OAuthProviderProperties.AUTHCODE_TYPE).trim())) {
                     final HazelcastConfigurationService hzConfigService = getService(HazelcastConfigurationService.class);
                     if (!hzConfigService.isEnabled()) {
                         String msg = "OAuth provider is configured to use Hazelcast, but Hazelcast is disabled as per configuration! Aborting start of OAuth provider!";
@@ -192,10 +191,10 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
                 }
                 break;
             case EXPECT_JWT:
-                startJWTService();
+                startJWTService(leanConfigService);
                 break;
             case TOKEN_INTROSPECTION:
-                startTokenIntrospectionService();
+                startTokenIntrospectionService(leanConfigService);
                 break;
         }
 
@@ -278,8 +277,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         }
     }
 
-    private void startJWTService() throws OXException {
-    	LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
+    private void startJWTService(LeanConfigurationService leanConfigService) throws OXException {
     	OAuthJWTScopeService scopeService = new OAuthJWTScopeService(leanConfigService);
     	registerService(Reloadable.class, scopeService);
 
@@ -288,13 +286,13 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         registerService(ForcedReloadable.class, jwtAuthorizationService);
     }
 
-    private void startTokenIntrospectionService() {
-        LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
+    private void startTokenIntrospectionService(LeanConfigurationService leanConfigService) {
         OAuthJWTScopeService scopeService = new OAuthJWTScopeService(leanConfigService);
         registerService(Reloadable.class, scopeService);
 
         OAuthIntrospectionAuthorizationService tokenIntrospectionAuthorizationService = new OAuthIntrospectionAuthorizationService(leanConfigService, scopeService);
         registerService(OAuthAuthorizationService.class, tokenIntrospectionAuthorizationService, null);
+        registerService(Reloadable.class, tokenIntrospectionAuthorizationService);
     }
 
     private void stopAuthorizationServer() {

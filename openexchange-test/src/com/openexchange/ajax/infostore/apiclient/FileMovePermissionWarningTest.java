@@ -74,6 +74,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.folder.manager.FolderApi;
 import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.exception.Category;
@@ -86,13 +87,12 @@ import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.InfoItemMovedResponse;
 import com.openexchange.testing.httpclient.models.InfoItemPermission;
 import com.openexchange.testing.httpclient.models.InfoItemsMovedResponse;
-import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.tools.io.IOTools;
 
 /**
- * 
+ *
  * {@link FileMovePermissionWarningTest}
- * 
+ *
  * Tests the warning behavior of {@link com.openexchange.file.storage.json.actions.files.MoveAction}.
  * The action can handle single files, files as pairs and folders.
  * The folder move is only tested with the MoveFolderPermissionMode INHERIT to test moving a folder via the files move action.
@@ -148,8 +148,8 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
         rememberClient(apiClient3);
         userId3 = apiClient3.getUserId();
 
-        folderManager = new FolderManager(new FoldersApi(getApiClient()), "1");
-        folderManager2 = new FolderManager(new FoldersApi(getApiClient2()), "1");
+        folderManager = new FolderManager(new FolderApi(getApiClient(), testUser), "1");
+        folderManager2 = new FolderManager(new FolderApi(getApiClient2(), testUser2), "1");
         foldersToDelete = new ArrayList<String>();
 
         file = File.createTempFile("FileMovePermissionWarningTest", ".txt");
@@ -164,7 +164,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether the warning MOVE_TO_ANOTHER_SHARED_WARNING
      * is returned, when a file (as pair), a single file or a folder (with permission mode inherit) is moved
      * from a private folder shared with user 2 to a private folder shared with user 3.
@@ -180,7 +180,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether the warning MOVE_TO_NOT_SHARED_WARNING
      * is returned, when a file (as pair), a single file or a folder (with permission mode inherit) is moved
      * from a private folder shared with user 2 to a private unshared folder.
@@ -196,7 +196,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether the warning MOVE_TO_SHARED_WARNING
      * is returned, when a file (as pair), a single file or a folder (with permission mode inherit) is moved
      * from a private unshared folder to a public folder.
@@ -212,7 +212,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether the warning MOVE_TO_SHARED_WARNING
      * is returned, when a file (as pair), a single file or a folder (with permission mode inherit) is moved
      * from a private unshared folder to a shared folder.
@@ -228,7 +228,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether the warning MOVE_TO_SHARED_WARNING
      * is returned, when a file (as pair), a single file or a folder (with permission mode inherit) is moved
      * from a private unshared folder to a private folder shared with user 2.
@@ -244,7 +244,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether the warning MOVE_TO_NOT_SHARED_WARNING
      * is returned, when a file (as pair), a single file or a folder (with permission mode inherit) is moved from a public folder to a private unshared folder.
      *
@@ -259,7 +259,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether the warning MOVE_TO_ANOTHER_SHARED_WARNING
      * is returned, when a file (as pair), a single file or a folder (with permission mode inherit) is moved from a public folder to a shared folder.
      *
@@ -274,7 +274,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether the warning MOVE_TO_NOT_SHARED_WARNING
      * is returned, when a file (as pair), a single file or a folder (with permission mode inherit) is moved from a shared folder to a private unshared folder.
      *
@@ -289,7 +289,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether the warning MOVE_TO_ANOTHER_SHARED_WARNING
      * is returned, when a file (as pair), a single file or a folder (with permission mode inherit) is moved from a shared folder to a public folder.
      *
@@ -304,7 +304,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether the warnings
      * {@link com.openexchange.file.storage.FileStorageExceptionCodes#MOVE_SHARED_FILE_WARNING}
      * and {@link com.openexchange.file.storage.FileStorageExceptionCodes#MOVE_TO_SHARED_WARNING}
@@ -343,7 +343,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether the warning
      * {@link com.openexchange.file.storage.FileStorageExceptionCodes#MOVE_SHARED_FILE_WARNING}
      * is returned, when files shared with user 2 is moved from a private unshared to another private unshared folder.
@@ -375,7 +375,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether the warning
      * {@link com.openexchange.file.storage.FileStorageExceptionCodes#MOVE_SHARED_FILE_WARNING}
      * is returned, when a file shared with user 2 is moved from a private unshared to another private unshared folder.
@@ -410,7 +410,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether no warning is returned,
      * when a file (as pair), a single file or a folder (with permission mode inherit) is moved
      * from a private folder shared with user 2 to a private folder shared with user 2.
@@ -425,7 +425,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     /**
-     * 
+     *
      * Tests whether no warning is returned,
      * when a file (as pair), a single file or a folder (with permission mode inherit) is moved
      * from a private unshared folder to a private unshared folder.
@@ -629,14 +629,14 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
         List<InfoItemPermission> permissions = Collections.singletonList(permission);
         updatePermissions(fileId, permissions);
     }
-    
+
     public enum FolderType {
 
         PRIVATE("/Drive/My files/"),
         SHARED("/Drive/Shared files/"),
         PUBLIC("/Drive/Public files/");
 
-        private String rootPath;
+        private final String rootPath;
 
         FolderType(String rootPath) {
             this.rootPath = rootPath;

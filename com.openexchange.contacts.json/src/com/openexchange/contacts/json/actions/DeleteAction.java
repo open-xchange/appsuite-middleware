@@ -56,7 +56,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.contact.ContactID;
 import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactActionFactory;
@@ -78,7 +78,7 @@ public class DeleteAction extends IDBasedContactAction {
 
     /**
      * Initializes a new {@link DeleteAction}.
-     * 
+     *
      * @param serviceLookup The service lookup to use
      */
     public DeleteAction(final ServiceLookup serviceLookup) {

@@ -49,20 +49,20 @@
 
 package com.openexchange.oauth.provider.impl.jwt;
 
-import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.KeyStoreException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.PasswordLookup;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.jwk.source.RemoteJWKSet;
@@ -77,11 +77,13 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.ConfigAwareKeyStore;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.authorizationserver.spi.AuthorizationException;
+import com.openexchange.oauth.provider.authorizationserver.spi.DefaultValidationResponse;
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse;
-import com.openexchange.oauth.provider.impl.AbstractAuthorizationService;
+import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse.TokenStatus;
+import com.openexchange.oauth.provider.impl.AbstractClaimSetAuthorizationService;
+import com.openexchange.oauth.provider.impl.OAuthProviderProperties;
 
 /**
  * {@link OAuthJwtAuthorizationService} - Service provider Interface that validates and parses incoming access tokens that are JWT.
@@ -89,13 +91,11 @@ import com.openexchange.oauth.provider.impl.AbstractAuthorizationService;
  * @author <a href="mailto:sebastian.lutz@open-xchange.com">Sebastian Lutz</a>
  * @since v7.10.5
  */
-public class OAuthJwtAuthorizationService extends AbstractAuthorizationService implements ForcedReloadable {
+public class OAuthJwtAuthorizationService extends AbstractClaimSetAuthorizationService implements ForcedReloadable {
 
     private static final Logger LOG = LoggerFactory.getLogger(OAuthJwtAuthorizationService.class);
 
-    private final LeanConfigurationService leanConfService;
-    private final ConfigurableJWTProcessor<SecurityContext> jwtProcessor;
-    private ConfigAwareKeyStore configAwareKeystore;
+    private ConfigurableJWTProcessor<SecurityContext> jwtProcessor;
 
     /**
      * Initializes a new {@link OAuthJwtAuthorizationService}.
@@ -105,85 +105,93 @@ public class OAuthJwtAuthorizationService extends AbstractAuthorizationService i
      * @throws OXException
      */
     public OAuthJwtAuthorizationService(LeanConfigurationService leanConfService, OAuthJWTScopeService scopeService) throws OXException {
-        super(scopeService);
-        this.leanConfService = leanConfService;
+        super(leanConfService, scopeService);
         this.jwtProcessor = createJWTProcessor();
     }
 
     @Override
     public ValidationResponse validateAccessToken(String accessToken) throws AuthorizationException {
+        DefaultValidationResponse validationResponse = new DefaultValidationResponse();
         try {
             JWTClaimsSet claimsSet = jwtProcessor.process(accessToken, null);
-            return createValidationReponse(claimsSet);
-        } catch (ParseException | BadJOSEException | JOSEException | OXException e) {
-            LOG.debug(e.getMessage());
-            throw new AuthorizationException(e);
+            validationResponse = createValidationReponse(claimsSet);
+        } catch (ParseException e) {
+            LOG.debug("Unable to parse the received token.", e);
+            validationResponse.setTokenStatus(TokenStatus.MALFORMED);
+        } catch (BadJOSEException e) {
+            LOG.debug("The received token is rejected, i.e. the token has expired or the issuer is unknown.", e);
+            validationResponse.setTokenStatus(TokenStatus.INVALID);
+        } catch (JOSEException e) {
+            LOG.debug("Internal processing exception is encountered.", e);
+            validationResponse.setTokenStatus(TokenStatus.UNKNOWN);
+        } catch (Exception e) {
+            LOG.debug("The validation of the received token failed with an unexpected error.", e);
+            throw new AuthorizationException("The validation of the received token failed with an unexpected error", e);
         }
+        LOG.debug("Processed JWT with token status: {}", validationResponse.getTokenStatus());
+        return validationResponse;
     }
 
     /**
-     * Depending on configuration this method gets a {@link JWKSource} from remote or a locally populated keystore.
+     * Depending on configuration this method gets a {@link JWKSource} from remote or a local JSON file.
      *
      * @return the loaded JWKSource.
      * @throws OXException
      */
     JWKSource<SecurityContext> getKeySource() throws OXException {
-        if (Strings.isNotEmpty(leanConfService.getProperty(OAuthJWTProperty.JWKS_ENDPOINT))) {
-            return getRemoteJWKS();
+        String jwksUri = leanConfService.getProperty(OAuthJWTProperty.JWKS_URI);
+        if (Strings.isNotEmpty(jwksUri)) {
+            String[] schemes = { "http", "https", "file" };
+            UrlValidator validator = new UrlValidator(schemes);
+
+            if (validator.isValid(jwksUri)) {
+                try {
+                    URI uri = new URI(jwksUri);
+                    if ("file".equals(uri.getScheme())) {
+                        return getJWKSFromJson(uri);
+                    }
+                    return getRemoteJWKS(uri);
+                } catch (URISyntaxException e) {
+                    LOG.error("Unable to load JWKs, because of malformed JWKs URI", e);
+                }
+            }
+            throw OAuthJWTExceptionCode.SERVICE_CONFIGURATION_FAILED.create("The OAuthJwtAuthorizationService could not be initialized because the specified JWKs URI (" + OAuthJWTProperty.JWKS_URI.getFQPropertyName() + ") is invalid");
         }
-        return getLocalKeystore();
+        throw OAuthJWTExceptionCode.SERVICE_CONFIGURATION_FAILED.create("The OAuthJwtAuthorizationService could not be initialized because no source for loading a JWKs (" + OAuthJWTProperty.JWKS_URI.getFQPropertyName() + ") has been specified");
     }
 
     /**
      * Fetches signature keys from configured JWKS endpoint used for validation
      *
+     * @param jwksUri The configured uri of the jwks endpoint
      * @return the retrieved {@link RemoteJWKSet}
      * @throws OXException
      */
-    private RemoteJWKSet<SecurityContext> getRemoteJWKS() throws OXException {
+    private RemoteJWKSet<SecurityContext> getRemoteJWKS(URI jwksUri) throws OXException {
         try {
-            String endpoint = leanConfService.getProperty(OAuthJWTProperty.JWKS_ENDPOINT);
-            return new RemoteJWKSet<>(new URL(endpoint));
+            return new RemoteJWKSet<>(jwksUri.toURL());
         } catch (MalformedURLException e) {
             throw OAuthJWTExceptionCode.SERVICE_CONFIGURATION_FAILED.create(e, "Unable to parse JWKSet URL");
         }
     }
 
     /**
-     * Loads signature keys from locally populated KeyStore used for validation.
+     * Loads a JWK set from a local file
      *
-     * @return the loaded {@link JWKSource}
+     * @param jwksUri The configured uri to the local file
+     * @return the loaded {@link JWKSet}
      * @throws OXException
      */
-    private JWKSource<SecurityContext> getLocalKeystore() throws OXException {
+    private JWKSource<SecurityContext> getJWKSFromJson(URI jwksUri) throws OXException {
         try {
-            if (configAwareKeystore == null) {
-                configAwareKeystore = new ConfigAwareKeyStore(OAuthJWTProperty.KEYSTORE_PATH.getFQPropertyName(), OAuthJWTProperty.KEYSTORE_PASSWORD.getFQPropertyName(), OAuthJWTProperty.KEYSTORE_TYPE.getFQPropertyName());
+            File file = new File(jwksUri);
+            if (file.exists() == false) {
+                throw OAuthJWTExceptionCode.SERVICE_CONFIGURATION_FAILED.create("Unable to load JWK set from a local file. The file '{}' doesn't exist.", file.getAbsolutePath());
             }
-
-            String keystorePath = leanConfService.getProperty(OAuthJWTProperty.KEYSTORE_PATH);
-            String keyStorePassword = leanConfService.getProperty(OAuthJWTProperty.KEYSTORE_PASSWORD);
-            
-            if(Strings.isEmpty(keystorePath)) {
-                throw OAuthJWTExceptionCode.SERVICE_CONFIGURATION_FAILED.create("Missing required property: " + OAuthJWTProperty.KEYSTORE_PATH.getFQPropertyName());
-            }
-            
-            Properties properties = new Properties();
-            properties.put(OAuthJWTProperty.KEYSTORE_PATH.getFQPropertyName(), keystorePath);
-            properties.put(OAuthJWTProperty.KEYSTORE_PASSWORD.getFQPropertyName(), keyStorePassword);
-
-            configAwareKeystore.reloadStore(properties);
-
-            JWKSet jwkSet = JWKSet.load(configAwareKeystore.getKeyStore(), new PasswordLookup() {
-
-                @Override
-                public char[] lookupPassword(String name) {
-                    return keyStorePassword.toCharArray();
-                }
-            });
-            return new ImmutableJWKSet<>(jwkSet);
-        } catch (KeyStoreException | FileNotFoundException e) {
-            throw OAuthJWTExceptionCode.SERVICE_CONFIGURATION_FAILED.create(e, "Unable to load local keystore");
+            JWKSet localKeys = JWKSet.load(file);
+            return new ImmutableJWKSet<>(localKeys);
+        } catch (IOException | ParseException e) {
+            throw OAuthJWTExceptionCode.SERVICE_CONFIGURATION_FAILED.create(e, "Unable to load JWK set from a local file");
         }
     }
 
@@ -208,7 +216,7 @@ public class OAuthJwtAuthorizationService extends AbstractAuthorizationService i
      * @return {@link OAuthJWTClaimVerifier}
      */
     private OAuthJWTClaimVerifier<SecurityContext> createClaimVerifier() {
-        List<String> allowedIssuers = Arrays.asList(Strings.splitByComma(leanConfService.getProperty(OAuthJWTProperty.ALLOWED_ISSUER)));
+        List<String> allowedIssuers = Arrays.asList(Strings.splitByComma(leanConfService.getProperty(OAuthProviderProperties.ALLOWED_ISSUER)));
         OAuthJWTClaimVerifier<SecurityContext> claimVerifier = new OAuthJWTClaimVerifier<SecurityContext>(allowedIssuers);
         return claimVerifier;
     }
@@ -228,32 +236,11 @@ public class OAuthJwtAuthorizationService extends AbstractAuthorizationService i
 
     @Override
     public synchronized void reloadConfiguration(ConfigurationService configService) {
-        JWSKeySelector<SecurityContext> reloadedKeySelector;
         try {
-            reloadedKeySelector = createJWSKeySelector();
-            jwtProcessor.setJWSKeySelector(reloadedKeySelector);
+            this.jwtProcessor = createJWTProcessor();
         } catch (OXException e) {
-            LOG.error("Reload of OAuth JWT properties failed: ", e.getMessage());
+            LOG.error("Reload of OAuth JWT properties failed: {}", e.getMessage(), e);
         }
     }
 
-    @Override
-    protected String getContextLookupClaimname() {
-        return leanConfService.getProperty(OAuthJWTProperty.CONTEXT_LOOKUP_CLAIM);
-    }
-
-    @Override
-    protected String getContextLookupNamePart() {
-        return leanConfService.getProperty(OAuthJWTProperty.CONTEXT_LOOKUP_NAME_PART);
-    }
-
-    @Override
-    protected String getUserLookupClaimname() {
-        return leanConfService.getProperty(OAuthJWTProperty.USER_LOOKUP_CLAIM);
-    }
-
-    @Override
-    protected String getUserNameLookupPart() {
-        return leanConfService.getProperty(OAuthJWTProperty.USER_LOOKUP_NAME_PART);
-    }
 }

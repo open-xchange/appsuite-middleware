@@ -203,7 +203,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
     protected String uploadInfoItemToFolder(String id, File file, String parentFolderId, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, String filename) throws ApiException, FileNotFoundException, IOException {
         String name = filename == null ? file.getName() : filename;
         byte[] bytesData = bytes == null ? IOTools.getBytes(new FileInputStream(file)) : bytes;
-        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), parentFolderId, name, bytesData, timestamp, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytesData.length) : filesize, Boolean.FALSE, Boolean.FALSE, offset, null);
+        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(parentFolderId, name, bytesData, timestamp, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytesData.length) : filesize, Boolean.FALSE, Boolean.FALSE, offset, null);
         Assert.assertNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
         Assert.assertNotNull(uploadInfoItem.getData());
         timestamp = uploadInfoItem.getTimestamp();
@@ -223,7 +223,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
     protected void uploadInfoItemWithError(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, String filename) {
         try {
             String name = filename == null ? file.getName() : filename;
-            infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, name, bytes, timestamp, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, Boolean.FALSE, Boolean.FALSE, offset, null);
+            infostoreApi.uploadInfoItem(folderId, name, bytes, timestamp, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, Boolean.FALSE, Boolean.FALSE, offset, null);
             // Should not succeed
             Assert.fail("Request expected to fail but succeeded");
         } catch (ApiException e) {
@@ -337,7 +337,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
         InfoItemListElement itemToMove = new InfoItemListElement();
         itemToMove.setFolder(sourceFolderId);
         itemToMove.setId(fileId);
-        InfoItemsMovedResponse response = infostoreApi.moveInfoItems(getApiClient().getSession(), destinationFolderId, Collections.singletonList(itemToMove), null, B(ignoreWarnings));
+        InfoItemsMovedResponse response = infostoreApi.moveInfoItems(destinationFolderId, Collections.singletonList(itemToMove), null, B(ignoreWarnings));
         if (response.getError() == null) {
             timestamp = response.getTimestamp();
         }
@@ -352,7 +352,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
             itemToMove.setId(fileId);
             itemsToMove.add(itemToMove);
         }
-        InfoItemsMovedResponse response = infostoreApi.moveInfoItems(getApiClient().getSession(), destinationFolderId, itemsToMove, null, B(ignoreWarnings));
+        InfoItemsMovedResponse response = infostoreApi.moveInfoItems(destinationFolderId, itemsToMove, null, B(ignoreWarnings));
         if (response.getError() == null) {
             timestamp = response.getTimestamp();
         }
@@ -363,7 +363,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
         InfoItemListElement itemToMove = new InfoItemListElement();
         itemToMove.setFolder(sourceFolderId);
         itemToMove.setId(fileId);
-        InfoItemMovedResponse response = infostoreApi.moveFile(getApiClient().getSession(), timestamp, destinationFolderId, fileId, null, B(ignoreWarnings));
+        InfoItemMovedResponse response = infostoreApi.moveFile(timestamp, destinationFolderId, fileId, null, B(ignoreWarnings));
         if (response.getError() == null) {
             timestamp = response.getTimestamp();
         }
@@ -431,7 +431,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
     }
 
     protected boolean fileExistsInFolder(String fileId, String folderId) throws ApiException {
-        InfoItemResponse infoItem = infostoreApi.getInfoItem(getSessionId(), fileId, folderId);
+        InfoItemResponse infoItem = infostoreApi.getInfoItem(fileId, folderId);
         return infoItem.getError() == null;
     }
 

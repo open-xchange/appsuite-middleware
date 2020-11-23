@@ -49,7 +49,7 @@
 
 package com.openexchange.drive.json.action;
 
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 
 /**
  * {@link AbstractDriveWriteAction}

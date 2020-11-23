@@ -176,7 +176,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
             //Cleanup: Delete the created FileAccount
             FileAccountData accountToClean = getAccountData();
             if (accountToClean != null && accountToClean.getId() != null) {
-                FileAccountUpdateResponse response = filestorageApi.deleteFileAccount(getSessionId(), accountToClean.getFilestorageService(), accountToClean.getId());
+                FileAccountUpdateResponse response = filestorageApi.deleteFileAccount(accountToClean.getFilestorageService(), accountToClean.getId());
                 Integer responseData = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
                 Assert.assertThat(responseData, is(I(1)));
             }
@@ -200,7 +200,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         testFileAccount.setFilestorageService(serviceId);
         testFileAccount.setDisplayName(displayName);
         testFileAccount.setConfiguration(configuration);
-        FileAccountCreationResponse response = filestorageApi.createFileAccount(getSessionId(), testFileAccount);
+        FileAccountCreationResponse response = filestorageApi.createFileAccount(testFileAccount);
         String newAccountId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
         testFileAccount.setId(newAccountId);
         return testFileAccount;
@@ -247,7 +247,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
      * @throws ApiException
      */
     protected FolderData getFolder(FoldersApi foldersApi, String id) throws ApiException {
-        FolderResponse response = foldersApi.getFolder(foldersApi.getApiClient().getSession(), id, null, null, null);
+        FolderResponse response = foldersApi.getFolder(id, null, null, null);
         return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
     }
 
@@ -260,7 +260,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
      * @throws ApiException
      */
     protected InfoItemData getInfoItem(String id, String folder) throws ApiException {
-        InfoItemResponse response = infostoreApi.getInfoItem(getSessionId(), id, folder);
+        InfoItemResponse response = infostoreApi.getInfoItem(id, folder);
         InfoItemData itemData = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
         //assertThat(id, is(itemData.getId()));
         assertThat(folder, is(itemData.getFolderId()));
@@ -271,7 +271,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
      * Downloads a document
      */
     protected File getDocument(String folder, String id) throws ApiException {
-        return infostoreApi.getInfoItemDocument(getSessionId(), folder, id, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        return infostoreApi.getInfoItemDocument(folder, id, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     /**
@@ -282,7 +282,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
      * @throws ApiException
      */
     protected List<String> getAllInfoItems(String folder) throws ApiException {
-        InfoItemsResponse allResponse = infostoreApi.getAllInfoItems(getSessionId(), folder, "1", null, null, null, null, null, null);
+        InfoItemsResponse allResponse = infostoreApi.getAllInfoItems(folder, "1", null, null, null, null, null, null);
         List<List<String>> ret = (List<List<String>>) checkResponse(allResponse.getError(), allResponse.getErrorDesc(), allResponse.getData());
         List<String> itemIds = new ArrayList<>();
         for (List<String> itemData : ret) {
@@ -323,7 +323,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
      * @throws ApiException
      */
     protected String uploadInfoItem(String folderId, String id, String fileName, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, Long timestamp) throws ApiException {
-        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, fileName, bytes, timestamp, id, fileName, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, Boolean.FALSE, Boolean.FALSE, offset, null);
+        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(folderId, fileName, bytes, timestamp, id, fileName, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, Boolean.FALSE, Boolean.FALSE, offset, null);
         Assert.assertNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
         Assert.assertNotNull(uploadInfoItem.getData());
         timestamp = uploadInfoItem.getTimestamp();
@@ -338,7 +338,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
      * @throws ApiException
      */
     protected void deleteInfoItems(boolean hardDelete, InfoItemListElement... toDelete) throws ApiException {
-        InfoItemsResponse deleteInfoItems = infostoreApi.deleteInfoItems(getApiClient().getSession(), L(System.currentTimeMillis()), Arrays.asList(toDelete), B(hardDelete), null);
+        InfoItemsResponse deleteInfoItems = infostoreApi.deleteInfoItems(L(System.currentTimeMillis()), Arrays.asList(toDelete), B(hardDelete), null);
         Assert.assertNull(deleteInfoItems.getError());
         Assert.assertNotNull(deleteInfoItems.getData());
         Object data = deleteInfoItems.getData();
@@ -390,7 +390,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         folder.setId(title);
         folder.setPermissions(permissions);
         body.setFolder(folder);
-        FolderUpdateResponse response = foldersApi.createFolder(parentFolder, foldersApi.getApiClient().getSession(), body, null, null, null, null);
+        FolderUpdateResponse response = foldersApi.createFolder(parentFolder, body, null, null, null, null);
 
         String folderId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
         return getFolder(foldersApi, folderId);
@@ -419,7 +419,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
     protected List<String> deleteFolder(FoldersApi foldersApi, String folderId, boolean hardDelete) throws ApiException {
         final boolean failOnError = true;
         final boolean extendedResponse = false;
-        FoldersCleanUpResponse response = foldersApi.deleteFolders(foldersApi.getApiClient().getSession(), Collections.singletonList(folderId), null, null, null, B(hardDelete), B(failOnError), B(extendedResponse), null, null);
+        FoldersCleanUpResponse response = foldersApi.deleteFolders(Collections.singletonList(folderId), null, null, null, B(hardDelete), B(failOnError), B(extendedResponse), null, null);
         return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
     }
 
@@ -434,7 +434,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
     protected String getPrivateInfostoreFolderID(ApiClient client) throws ApiException {
         if (null == privateInfostoreFolder) {
             ConfigApi configApi = new ConfigApi(client);
-            ConfigResponse configNodeResponse = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath(), client.getSession());
+            ConfigResponse configNodeResponse = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath());
             Object data = checkResponse(configNodeResponse.getError(), configNodeResponse.getErrorDesc(), configNodeResponse.getData());
             if (data != null && !data.toString().equalsIgnoreCase("null")) {
                 privateInfostoreFolder = String.valueOf(data);
@@ -467,7 +467,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
     @Test
     public void testGetAllFileAccounts() throws Exception {
         final boolean connectionCheck = true;
-        FileAccountsResponse response = filestorageApi.getAllFileAccounts(getSessionId(), null, B(connectionCheck));
+        FileAccountsResponse response = filestorageApi.getAllFileAccounts(null, B(connectionCheck));
         List<FileAccountData> allAccounts = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
         assertThat(allAccounts, is(not(empty())));
         FileAccountData account = getAccountData();
@@ -495,11 +495,11 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         incorrectFileAccount.setDisplayName(incorrectDisplayName);
         //Wrong configuration
         incorrectFileAccount.setConfiguration(getWrongFileStorageConfiguration());
-        FileAccountCreationResponse response = filestorageApi.createFileAccount(getSessionId(), incorrectFileAccount);
+        FileAccountCreationResponse response = filestorageApi.createFileAccount(incorrectFileAccount);
         assertThat(response.getError(), not(emptyOrNullString()));
 
         final boolean connectionCheck = true;
-        FileAccountsResponse allResponse = filestorageApi.getAllFileAccounts(getSessionId(), null, B(connectionCheck));
+        FileAccountsResponse allResponse = filestorageApi.getAllFileAccounts(null, B(connectionCheck));
         List<FileAccountData> allAccounts = checkResponse(allResponse.getError(), allResponse.getErrorDesc(), allResponse.getData());
         List<FileAccountData> shouldBeEmpty = allAccounts.stream().filter(a -> a.getDisplayName().equals(incorrectDisplayName)).collect(Collectors.toList());
         assertThat(shouldBeEmpty, is(empty()));
@@ -543,12 +543,12 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         deleteInfoItems(true, newItem);
 
         //Gone?
-        InfoItemResponse getResponse2 = infostoreApi.getInfoItem(getSessionId(), newItem.getId(), newItem.getFolder());
+        InfoItemResponse getResponse2 = infostoreApi.getInfoItem(newItem.getId(), newItem.getFolder());
         assertThat(getResponse2.getData(), is(nullValue()));
 
         //There was a bug which causes a duplicated, null byte, file. Check that this file is not being created anymore
         String mustNotExist = fileName + " (1)";
-        InfoItemsResponse allResponse = infostoreApi.getAllInfoItems(getSessionId(), getPrivateInfostoreFolderID(getApiClient()), "700" /* title */, null, null, null, null, null, null);
+        InfoItemsResponse allResponse = infostoreApi.getAllInfoItems(getPrivateInfostoreFolderID(getApiClient()), "700" /* title */, null, null, null, null, null, null);
         List<List<String>> ret = (List<List<String>>) checkResponse(allResponse.getError(), allResponse.getErrorDesc(), allResponse.getData());
         for (List<String> itemData : ret) {
             for (String data : itemData) {
@@ -576,13 +576,13 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         //Copy the file
         InfoItemData fileToCopy = getInfoItem(newItem.getId(), newItem.getFolder());
         fileToCopy.setFolderId(folder.getId());
-        InfoItemUpdateResponse response = infostoreApi.copyInfoItem(getSessionId(), fileToCopy.getId(), fileToCopy, null);
+        InfoItemUpdateResponse response = infostoreApi.copyInfoItem(fileToCopy.getId(), fileToCopy, null);
         String copiedId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
 
         //Get The file and check if the content is okay
         InfoItemData copiedInfoItem = getInfoItem(copiedId, folder.getId());
         //Check if the file is present get the content
-        File copiedContent = infostoreApi.getInfoItemDocument(getSessionId(), folder.getId(), copiedInfoItem.getId(), null, null, null, null, null, null, null, null, null, null, null, null, null);
+        File copiedContent = infostoreApi.getInfoItemDocument(folder.getId(), copiedInfoItem.getId(), null, null, null, null, null, null, null, null, null, null, null, null, null);
         try {
             assertThat(copiedContent, is(not(nullValue())));
             byte[] data = IOUtils.readFileToByteArray(copiedContent);
@@ -616,11 +616,11 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         FolderData folder = getFolder(destinationFolderId);
         assertThat(folder.getId(), is(destinationFolderId));
 
-        //InfoItemsMovedResponse response = infostoreApi.moveFile(getSessionId(), L(0), destinationFolderId, newFileId, null);
+        //InfoItemsMovedResponse response = infostoreApi.moveFile(L(0), destinationFolderId, newFileId, null);
         InfoItemListElement itemToMove = new InfoItemListElement();
         itemToMove.setFolder(getRootFolderId());
         itemToMove.setId(newFileId);
-        InfoItemsMovedResponse response = infostoreApi.moveInfoItems(getSessionId(), destinationFolderId, Collections.singletonList(itemToMove), null, null);
+        InfoItemsMovedResponse response = infostoreApi.moveInfoItems(destinationFolderId, Collections.singletonList(itemToMove), null, null);
         List<InfoItemListElement> notMoved = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
         assertThat(notMoved, is(empty()));
 
@@ -631,12 +631,12 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         }
 
         //Get the moved file and check it's content
-        InfoItemsResponse allResponse = infostoreApi.getAllInfoItems(getSessionId(), destinationFolderId, "1", null, null, null, null, null, null);
+        InfoItemsResponse allResponse = infostoreApi.getAllInfoItems(destinationFolderId, "1", null, null, null, null, null, null);
         List<List<String>> ret = (List<List<String>>) checkResponse(allResponse.getError(), allResponse.getErrorDesc(), allResponse.getData());
         assertThat(ret, is(not(empty())));
         assertThat(I(ret.size()), is(I(1)));
         String movedId = ret.get(0).get(0);
-        File movedContent = infostoreApi.getInfoItemDocument(getSessionId(), destinationFolderId, movedId, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        File movedContent = infostoreApi.getInfoItemDocument(destinationFolderId, movedId, null, null, null, null, null, null, null, null, null, null, null, null, null);
         try {
             assertThat(movedContent, is(not(nullValue())));
             byte[] data = IOUtils.readFileToByteArray(movedContent);
@@ -667,7 +667,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         assertThat(notDeletedIds, not(contains("")));
 
         //Folder gone?
-        FolderResponse response = foldersApi.getFolder(getSessionId(), folder.getId(), null, null, null);
+        FolderResponse response = foldersApi.getFolder(folder.getId(), null, null, null);
         assertThat(response.getError(), not(emptyOrNullString()));
         assertThat(response.getErrorDesc(), not(emptyOrNullString()));
         assertThat(response.getCode(), anyOf(is("FILE_STORAGE-0007"), is("FLD-0008"))); /* FOLDER_NOT_FOUND */
@@ -693,11 +693,11 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         FolderData folderData = new FolderData();
         folderData.setFolderId(folder.getId());
         folderBody.setFolder(folderData);
-        FolderUpdateResponse updateResponse = foldersApi.updateFolder(getSessionId(), newFolder2.getId(), folderBody, null, null, null, null, null, null, null, null);
+        FolderUpdateResponse updateResponse = foldersApi.updateFolder(newFolder2.getId(), folderBody, null, null, null, null, null, null, null, null);
         String movedFolderId = checkResponse(updateResponse.getError(), updateResponse.getErrorDesc(), updateResponse.getData());
 
         //Folder present?
-        FolderResponse checkResponse = foldersApi.getFolder(getSessionId(), movedFolderId, null, null, null);
+        FolderResponse checkResponse = foldersApi.getFolder(movedFolderId, null, null, null);
         FolderData checkedFolderData = checkResponse(checkResponse.getError(), checkResponse.getErrorDesc(), checkResponse.getData());
         assertThat(checkedFolderData.getId(), is(movedFolderId));
         //Check that the folder has the new parent folder set

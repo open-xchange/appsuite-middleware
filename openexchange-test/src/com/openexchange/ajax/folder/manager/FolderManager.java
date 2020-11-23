@@ -89,7 +89,6 @@ public class FolderManager {
     private final List<String> foldersToDelete = new ArrayList<>();
     private Long lastTimestamp;
     private final String tree;
-    private final String session;
 
     /**
      * Initializes a new {@link FolderManager}.
@@ -101,7 +100,6 @@ public class FolderManager {
         super();
         this.tree = tree;
         this.foldersApi = api.getFoldersApi();
-        this.session = api.getSession();
         this.lastTimestamp = Long.valueOf(0l);
     }
 
@@ -232,7 +230,7 @@ public class FolderManager {
         folderBody.setNotification(notification);
         folderBody.setFolder(folder);
 
-        FolderUpdateResponse response = foldersApi.updateFolder(session, folderId, folderBody, Boolean.FALSE, lastTimestamp, tree, null, Boolean.TRUE, null, Boolean.FALSE, null);
+        FolderUpdateResponse response = foldersApi.updateFolder(folderId, folderBody, Boolean.FALSE, lastTimestamp, tree, null, Boolean.TRUE, null, Boolean.FALSE, null);
         String updatedFolderId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
         rememberFolder(updatedFolderId);
         lastTimestamp = response.getTimestamp();
@@ -248,7 +246,7 @@ public class FolderManager {
      * @throws ApiException In case deletion fails
      */
     public List<String> deleteFolder(List<String> foldersToDelete) throws ApiException {
-        FoldersCleanUpResponse deleteFolders = foldersApi.deleteFolders(session, foldersToDelete, tree, lastTimestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null);
+        FoldersCleanUpResponse deleteFolders = foldersApi.deleteFolders(foldersToDelete, tree, lastTimestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null);
         lastTimestamp = deleteFolders.getTimestamp();
         return checkResponse(deleteFolders.getError(), deleteFolders.getErrorDesc(), deleteFolders.getData());
     }
@@ -279,7 +277,7 @@ public class FolderManager {
      * @throws ApiException
      */
     public String getFolderName(String folderId) throws ApiException {
-        FolderResponse folder = foldersApi.getFolder(session, folderId, tree, null, null);
+        FolderResponse folder = foldersApi.getFolder(folderId, tree, null, null);
         return folder.getData().getTitle();
     }
 

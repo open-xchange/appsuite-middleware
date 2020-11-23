@@ -58,7 +58,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.compat.AppointmentParser;

@@ -54,7 +54,7 @@ import java.util.Set;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;

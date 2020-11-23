@@ -62,7 +62,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.osgi.framework.BundleException;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -94,10 +94,11 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
      * Initializes a new {@link RdbOAuthClientStorage}.
      *
      * @throws BundleException If configuration property is missing
+     * @throws OXException
      */
-    public RdbOAuthClientStorage(ServiceLookup services) throws BundleException {
+    public RdbOAuthClientStorage(ServiceLookup services) throws BundleException, OXException {
         super(services);
-        ConfigurationService service = services.getService(ConfigurationService.class);
+        LeanConfigurationService service = services.getServiceSafe(LeanConfigurationService.class);
         String key = service.getProperty(OAuthProviderProperties.ENCRYPTION_KEY);
         if (Strings.isEmpty(key)) {
             throw new BundleException("Missing \"" + OAuthProviderProperties.ENCRYPTION_KEY + "\" property", BundleException.ACTIVATOR_ERROR);

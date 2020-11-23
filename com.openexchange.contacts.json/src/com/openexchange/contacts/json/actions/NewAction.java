@@ -53,7 +53,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
@@ -80,7 +80,7 @@ public class NewAction extends IDBasedContactAction {
 
     /**
      * Initializes a new {@link NewAction}.
-     * 
+     *
      * @param serviceLookup
      */
     public NewAction(ServiceLookup serviceLookup) {

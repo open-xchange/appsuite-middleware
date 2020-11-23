@@ -187,7 +187,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
     public void testJPImport() throws ApiException {
         File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "jpcontact.csv");
         importApi.importCSV(folderId, file, Boolean.FALSE, null);
-        ContactsResponse allContacts = contactsApi.getAllContacts(folderId, COLUMNS, null, null, null, null);
+        ContactsResponse allContacts = contactsApi.getAllContacts(folderId, COLUMNS, null, null, null);
         Object data = checkResponse(allContacts.getError(), allContacts.getErrorDesc(), allContacts.getData());
         Assert.assertTrue("Wrong response type. Expected ArrayList but received: " + data.getClass().getSimpleName(), data instanceof ArrayList<?>);
         ArrayList<?> contacts = (ArrayList<?>) data;

@@ -57,7 +57,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;

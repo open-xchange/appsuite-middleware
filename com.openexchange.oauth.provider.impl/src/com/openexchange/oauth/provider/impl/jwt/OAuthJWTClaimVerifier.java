@@ -85,6 +85,7 @@ public class OAuthJWTClaimVerifier<T extends SecurityContext> extends DefaultJWT
 
     @Override
     public void verify(JWTClaimsSet claimsSet, T context) throws BadJWTException {
+        //Check if the token is expired
         super.verify(claimsSet, context);
         verify(claimsSet);
     }
@@ -93,19 +94,18 @@ public class OAuthJWTClaimVerifier<T extends SecurityContext> extends DefaultJWT
     public void verify(JWTClaimsSet claimsSet) throws BadJWTException {
         try {
             //Verify that the JWT issuer matches the configured issuer and therefore is allowed.
-
             if (issuer.isEmpty() == false && (issuer.size() > 1 || Strings.isNotEmpty(issuer.get(0))) && !issuer.contains(claimsSet.getIssuer())) {
-                throw new BadJWTException("JWT validation failed because of invalid issuer: " + claimsSet.getIssuer());
+                throw new BadJWTException("JWT validation failed because of an invalid issuer: " + claimsSet.getIssuer());
             }
 
             //Verify that the clientname claim is not empty.
             if (Strings.isEmpty(claimsSet.getStringClaim(AUTHORIZED_PARTY_CLAIM_NAME))) {
-                throw new BadJWTException("Clientname claim is empty");
+                throw new BadJWTException("The clientname claim of the received token is empty");
             }
 
             //Verify that the scope claim is not empty.
             if (Strings.isEmpty(claimsSet.getStringClaim(OAuthJWTClaimVerifier.SCOPE_CLAIM_NAME))) {
-                throw new BadJWTException("Scope is null or empty");
+                throw new BadJWTException("The scope claim of the received token is empty");
             }
 
         } catch (ParseException e) {

@@ -297,7 +297,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
          * Add share and verify analyze changed
          */
         SubscribeShareResponseData accountData = addOXShareAccount(smApiC2, shareLink, null);
-        FileAccountResponse fileAccountResponse = filestorageApiC2.getFileAccount(apiClientC2.getSession(), IDMangler.unmangle(accountData.getFolder()).get(0), accountData.getAccount());
+        FileAccountResponse fileAccountResponse = filestorageApiC2.getFileAccount(IDMangler.unmangle(accountData.getFolder()).get(0), accountData.getAccount());
         FileAccountData fileAccountData = checkResponse(fileAccountResponse.getError(), fileAccountResponse.getErrorDesc(), fileAccountResponse.getData());
 
         /*
@@ -354,7 +354,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
     }
 
     /**
-     * 
+     *
      * Creates a file with the given file name, owner and shared user.
      *
      * @param folderId The ID of the folder to put the file in
@@ -363,7 +363,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
      * @throws ApiException
      */
     private String createFile(String folderId, String fileName) throws ApiException {
-        InfoItemUpdateResponse uploadResponse = new InfostoreApi(apiClient).uploadInfoItem(folderManager.getSession(), folderId, fileName, new byte[] { 34, 45, 35, 23 }, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        InfoItemUpdateResponse uploadResponse = new InfostoreApi(apiClient).uploadInfoItem(folderId, fileName, new byte[] { 34, 45, 35, 23 }, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         assertNotNull(uploadResponse);
         assertNull(uploadResponse.getErrorDesc(), uploadResponse.getError());
         return uploadResponse.getData();

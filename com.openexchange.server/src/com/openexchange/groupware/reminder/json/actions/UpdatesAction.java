@@ -63,7 +63,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;

@@ -134,7 +134,7 @@ public class PermissionTest extends AbstractAppPasswordTest {
         try {
             ContactsApi contactApi = new ContactsApi(client);
             int folder = getClient().getValues().getPrivateContactFolder();
-            ContactsResponse resp = contactApi.getAllContacts(Integer.toString(folder), "1,20,101,607", "607", "asc", Boolean.FALSE, null);
+            ContactsResponse resp = contactApi.getAllContacts(Integer.toString(folder), "1,20,101,607", "607", "asc", null);
             return resp.getError() == null;
         } catch (OXException | IOException | JSONException e) {
             throw new ApiException(e.getMessage());

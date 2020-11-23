@@ -67,7 +67,7 @@ import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
 import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -351,7 +351,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
 
     /**
      * Parses the folder/file pairs from the specified {@link JSONArray}
-     * 
+     *
      * @param jPairs The pairs to parse
      * @return A {@link List} with all the parsed pairs
      * @throws JSONException if a JSON error is occurred
@@ -383,7 +383,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
     /**
      * Performs a scan (if a scan is requested by the specified {@link InfostoreRequest}, i.e. via the <code>scan</code>
      * URL parameter) of the specified InputStreamClosure.
-     * 
+     *
      * @param request The {@link InfostoreRequest}
      * @param isClosure The stream
      * @param metadata The metadata of the stream
@@ -402,7 +402,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
     /**
      * Performs a scan (if a scan is requested by the specified {@link InfostoreRequest}, i.e. via the <code>scan</code>
      * URL parameter) of the specified InputStreamClosure.
-     * 
+     *
      * @param request The {@link InfostoreRequest}
      * @param isClosure The stream
      * @param metadata The attachment metadata of the stream
@@ -433,7 +433,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * {@link InfostoreRequest}, i.e. via the <code>scan</code> URL parameter). If the <code>recursive</code> flag
      * is enabled and one (or more) of the {@link IdVersionPair}s denote a folder, then the scan is performed recursively
      * for all sub-folders.
-     * 
+     *
      * @param request The {@link InfostoreRequest}
      * @param versionPairs The version pairs that denote files and/or folders
      * @param fileAccess The {@link IDBasedFileAccess}
@@ -460,7 +460,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * Checks whether to perform an Anti-Virus scan by examining:<br/>
      * a) the 'scan' URL parameter of the request (if absent defaults to <code>false</code>)<br/>
      * b) the capability 'antivirus' is enabled for the specified user<br/>
-     * 
+     *
      * @param request The {@link InfostoreRequest}
      * @return <code>true</code> if scanning is enabled, <code>false</code> otherwise
      * @throws OXException if the 'antivirus' capability is disabled
@@ -481,7 +481,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
 
     /**
      * Scans the folder with the specified identifier (recursively)
-     * 
+     *
      * @param request The {@link InfostoreRequest}
      * @param folderId The folder identifier
      * @param fileAccess The {@link IDBasedFileAccess}
@@ -505,7 +505,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
 
     /**
      * Checks whether the {@link InputStream} in the specified closure should be scanned
-     * 
+     *
      * @param request The {@link InfostoreRequest}
      * @param isClosure The InputStreamClosure
      * @param metadata The metadata of the input stream
@@ -518,7 +518,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
 
     /**
      * Checks whether the {@link InputStream} in the specified closure should be scanned
-     * 
+     *
      * @param closure The InputStreamClosure
      * @param uniqueId the unique identifier of the stream
      * @param filesize The file size of the stream
@@ -532,7 +532,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
 
     /**
      * Retrieves the Anti-Virus service if available
-     * 
+     *
      * @return The anti-virus service
      * @throws OXException if the service is absent
      */
@@ -546,7 +546,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
 
     /**
      * Retrieves the Anti-Virus service if available
-     * 
+     *
      * @return The anti-virus service
      * @throws OXException if the service is absent
      */
@@ -562,7 +562,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * Gets the identifier that uniquely identifies the specified {@link File}, being
      * either the MD5 checksum, or the file identifier (in that order). If none is present
      * then the fall-back identifier is returned
-     * 
+     *
      * @param file The {@link File}
      * @param contextId The context identifier
      * @return The unique identifier, never <code>null</code>

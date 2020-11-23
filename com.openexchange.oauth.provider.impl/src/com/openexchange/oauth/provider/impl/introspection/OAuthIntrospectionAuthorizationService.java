@@ -49,9 +49,11 @@
 
 package com.openexchange.oauth.provider.impl.introspection;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,12 +74,17 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.Token;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.authorizationserver.spi.AuthorizationException;
+import com.openexchange.oauth.provider.authorizationserver.spi.DefaultValidationResponse;
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse;
-import com.openexchange.oauth.provider.impl.AbstractAuthorizationService;
+import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse.TokenStatus;
+import com.openexchange.oauth.provider.impl.AbstractClaimSetAuthorizationService;
 import com.openexchange.oauth.provider.impl.jwt.OAuthJWTClaimVerifier;
 import com.openexchange.oauth.provider.impl.jwt.OAuthJWTScopeService;
 
@@ -87,11 +94,10 @@ import com.openexchange.oauth.provider.impl.jwt.OAuthJWTScopeService;
  * @author <a href="mailto:sebastian.lutz@open-xchange.com">Sebastian Lutz</a>
  * @since 7.10.5
  */
-public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizationService {
+public class OAuthIntrospectionAuthorizationService extends AbstractClaimSetAuthorizationService implements Reloadable {
 
     private static final Logger LOG = LoggerFactory.getLogger(OAuthIntrospectionAuthorizationService.class);
 
-    private LeanConfigurationService leanConfService;
     private final LoadingCache<String, TokenIntrospectionResponse> cache;
 
     /**
@@ -101,14 +107,13 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
      * @param scopeService the {@link OAuthJWTScopeService}
      */
     public OAuthIntrospectionAuthorizationService(LeanConfigurationService leanConfService, OAuthJWTScopeService scopeService) {
-        super(scopeService);
-        this.leanConfService = leanConfService;
+        super(leanConfService, scopeService);
         this.cache = Caffeine.newBuilder().expireAfter(new Expiry<String, TokenIntrospectionResponse>() {
 
             @Override
             public long expireAfterCreate(String key, TokenIntrospectionResponse resp, long currentTime) {
                 long TTL;
-                if (resp.indicatesSuccess()) {
+                if (resp.indicatesSuccess() && ((TokenIntrospectionSuccessResponse)resp).isActive()) {
                     long expiration = ((TokenIntrospectionSuccessResponse) resp).getExpirationTime().getTime();
                     long current = System.currentTimeMillis();
 
@@ -137,22 +142,46 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
 
     @Override
     public ValidationResponse validateAccessToken(String accessToken) throws AuthorizationException {
-
-        TokenIntrospectionResponse introspectionResponse = cache.get(accessToken);
-        if (introspectionResponse.indicatesSuccess()) {
+        TokenIntrospectionResponse introspectionResponse = null;
+        try {
+            introspectionResponse = cache.get(accessToken);
+        } catch (CompletionException e) {
+            if (e.getCause() instanceof AuthorizationException) {
+                throw (AuthorizationException) e.getCause();
+            }
+            throw new AuthorizationException(e.getCause());
+        }
+        if (null != introspectionResponse && introspectionResponse.indicatesSuccess()) {
+            DefaultValidationResponse validationResponse = new DefaultValidationResponse();
             TokenIntrospectionSuccessResponse introspectionSuccessResponse = (TokenIntrospectionSuccessResponse) introspectionResponse;
             if (!introspectionSuccessResponse.isActive()) {
-                throw new AuthorizationException("Provided access token isn't active");
+                validationResponse.setTokenStatus(TokenStatus.EXPIRED);
+                return validationResponse;
             }
             try {
                 JWTClaimsSet claimsSet = parseResponseToClaimSet(introspectionSuccessResponse);
-                return createValidationReponse(claimsSet);
-            } catch (OXException | java.text.ParseException | BadJWTException e) {
-                LOG.error("Provided access token can't be processed", e);
-                throw new AuthorizationException(e);
+                validationResponse = createValidationReponse(claimsSet);
+            } catch (BadJWTException e) {
+                LOG.debug("Bad JSON Web Token (JWT)", e);
+                validationResponse.setTokenStatus(TokenStatus.INVALID);
+            } catch (java.text.ParseException e) {
+                LOG.debug("Parsing of JSON Web Token (JWT) failed", e);
+                validationResponse.setTokenStatus(TokenStatus.MALFORMED);
+            } catch (Exception e) {
+                LOG.debug("Token introspection failed with unexpected error", e);
+                throw new AuthorizationException("Token introspection failed with unexpected error", e);
             }
+
+            LOG.debug("Processed response from introspection request with token status: {}", validationResponse.getTokenStatus());
+            return validationResponse;
         }
-        throw new AuthorizationException("The passed access token is invalid");
+        if(null != introspectionResponse) {
+            HTTPResponse httpResponse = introspectionResponse.toHTTPResponse();
+            LOG.debug("Token introspection failed with response error: {} {}: {}", I(httpResponse.getStatusCode()), httpResponse.getStatusMessage(), httpResponse.getContent());
+        } else {
+            LOG.debug("Token introspection response was null");
+        }
+        throw new AuthorizationException("Token introspection failed with response error");
     }
 
     /**
@@ -165,7 +194,7 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
      */
     private JWTClaimsSet parseResponseToClaimSet(TokenIntrospectionSuccessResponse introspectionSuccessResponse) throws java.text.ParseException, BadJWTException {
         JWTClaimsSet claimsSet = JWTClaimsSet.parse(introspectionSuccessResponse.toJSONObject());
-        OAuthJWTClaimVerifier.DEFAULT_VERIFIER.verify(claimsSet);
+        OAuthJWTClaimVerifier.DEFAULT_VERIFIER.verify(claimsSet, null);
         return claimsSet;
     }
 
@@ -179,8 +208,8 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
     public TokenIntrospectionResponse introspect(String accessToken) throws AuthorizationException {
         try {
             return makeRequest(accessToken);
-        } catch (OXException e) {
-            throw new AuthorizationException("Introspection failed", e);
+        } catch (Exception e) {
+            throw new AuthorizationException("Token introspection request failed", e);
         }
     }
 
@@ -189,15 +218,15 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
      *
      * @param accessToken the access token to inspect
      * @return the {@link TokenIntrospectionResponse}
-     * @throws OXException
+     * @throws AuthorizationException
      */
-    private TokenIntrospectionResponse makeRequest(String accessToken) throws OXException {
+    private TokenIntrospectionResponse makeRequest(String accessToken) throws AuthorizationException {
         HTTPRequest httpRequest = buildRequest(accessToken);
         try {
             HTTPResponse httpResponse = httpRequest.send();
             return parseResponse(httpResponse);
         } catch (IOException e) {
-            throw OAuthIntrospectionExceptionCode.VALIDATON_FAILED.create(e, "Unable to send introspection request");
+            throw new AuthorizationException("Unable to send introspection request", e);
         }
     }
 
@@ -206,13 +235,13 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
      *
      * @param response the {@link HTTPResponse} from introspection request.
      * @return Either {@link TokenIntrospectionSuccessResponse} or {@link TokenIntrospectionErrorResponse}.
-     * @throws OXException in case of a parsing error
+     * @throws AuthorizationException in case of a parsing error
      */
-    private TokenIntrospectionResponse parseResponse(HTTPResponse response) throws OXException {
+    private TokenIntrospectionResponse parseResponse(HTTPResponse response) throws AuthorizationException {
         try {
             return TokenIntrospectionResponse.parse(response);
         } catch (ParseException e) {
-            throw OAuthIntrospectionExceptionCode.VALIDATON_FAILED.create(e, "Unable to parse introspection request");
+            throw new AuthorizationException("Unable to parse introspection response", e);
         }
     }
 
@@ -221,18 +250,18 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
      *
      * @param accessToken the received access token
      * @return configured {@link HTTPRequest}
-     * @throws OXException
+     * @throws AuthorizationException
      */
-    private HTTPRequest buildRequest(String accessToken) throws OXException {
+    private HTTPRequest buildRequest(String accessToken) throws AuthorizationException {
         Token token = new BearerAccessToken(accessToken);
+
+        URI introspectionEndpoint = getIntrospectionEndpoint();
 
         ClientSecretBasic clientSecretBasic = null;
         boolean basicAuthEnabled = leanConfService.getBooleanProperty(OAuthIntrospectionProperty.BASIC_AUTH_ENABLED);
         if (basicAuthEnabled) {
             clientSecretBasic = createClientSecretBasic();
         }
-
-        URI introspectionEndpoint = getIntrospectionEndpoint();
 
         TokenIntrospectionRequest request;
         if (basicAuthEnabled) {
@@ -248,52 +277,64 @@ public class OAuthIntrospectionAuthorizationService extends AbstractAuthorizatio
      * Get the introspection endpoint.
      *
      * @return the introspection endpoint URI
-     * @throws OXException
+     * @throws AuthorizationException
      */
-    private URI getIntrospectionEndpoint() throws OXException {
+    private URI getIntrospectionEndpoint() throws AuthorizationException {
         String introspectionEndpoint = leanConfService.getProperty(OAuthIntrospectionProperty.ENDPOINT);
         if (Strings.isNotEmpty(introspectionEndpoint)) {
             try {
                 return new URI(leanConfService.getProperty(OAuthIntrospectionProperty.ENDPOINT));
             } catch (URISyntaxException e) {
-                throw OAuthIntrospectionExceptionCode.VALIDATON_FAILED.create(e, "Unable to parse introspection endpoint");
+                throw new AuthorizationException("Unable to parse introspection endpoint", e);
             }
         }
-        throw OAuthIntrospectionExceptionCode.VALIDATON_FAILED.create("Unable to parse introspection endpoint: Endpoint is null or empty");
+        LOG.debug("The mandatory property " + OAuthIntrospectionProperty.ENDPOINT.getFQPropertyName() + " is empty");
+        throw new AuthorizationException("Token introspection failed because of internal errors: Endpoint is null  or empty");
     }
 
     /**
      * Create client secret basic.
      *
      * @return the client secret basic authentication
-     * @throws OXException
+     * @throws AuthorizationException
      */
-    private ClientSecretBasic createClientSecretBasic() throws OXException {
+    private ClientSecretBasic createClientSecretBasic() throws AuthorizationException {
         String clientID = leanConfService.getProperty(OAuthIntrospectionProperty.CLIENT_ID);
         String secret = leanConfService.getProperty(OAuthIntrospectionProperty.CLIENT_SECRET);
         if (Strings.isEmpty(clientID) || Strings.isEmpty(secret)) {
-            throw OAuthIntrospectionExceptionCode.UNABLE_TO_LOAD_CLIENT_CREDENTIALS.create();
+            throw new AuthorizationException("Token introspection failed because of internal errors: Unable to load credentials for introsprection basic auth");
         }
         return new ClientSecretBasic(new ClientID(clientID), new Secret(secret));
     }
 
     @Override
-    protected String getContextLookupClaimname() {
-        return leanConfService.getProperty(OAuthIntrospectionProperty.CONTEXT_LOOKUP_CLAIM);
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties(
+            OAuthIntrospectionProperty.ENDPOINT.getFQPropertyName(),
+            OAuthIntrospectionProperty.BASIC_AUTH_ENABLED.getFQPropertyName(),
+            OAuthIntrospectionProperty.CLIENT_ID.getFQPropertyName(),
+            OAuthIntrospectionProperty.CLIENT_SECRET.getFQPropertyName()
+       );
     }
 
     @Override
-    protected String getContextLookupNamePart() {
-        return leanConfService.getProperty(OAuthIntrospectionProperty.CONTEXT_LOOKUP_NAME_PART);
-    }
+    public void reloadConfiguration(ConfigurationService configService) {
+        LOG.info("Reloading configuration for OAuthIntrospectionAuthorizationService");
+        this.cache.invalidateAll();
 
-    @Override
-    protected String getUserLookupClaimname() {
-        return leanConfService.getProperty(OAuthIntrospectionProperty.USER_LOOKUP_CLAIM);
-    }
+        //Make sure everything is configured
+        if(Strings.isEmpty(leanConfService.getProperty(OAuthIntrospectionProperty.ENDPOINT))) {
+            LOG.error("Error reloading introspection configuration: Introspection endpoint is not configured properly.");
+        }
 
-    @Override
-    protected String getUserNameLookupPart() {
-        return leanConfService.getProperty(OAuthIntrospectionProperty.USER_LOOKUP_NAME_PART);
+        boolean basicAuthEnabled = leanConfService.getBooleanProperty(OAuthIntrospectionProperty.BASIC_AUTH_ENABLED);
+        if(basicAuthEnabled) {
+            if(Strings.isEmpty(leanConfService.getProperty(OAuthIntrospectionProperty.CLIENT_ID))) {
+                LOG.error("Error reloading introspection configuration: Basic auth is enabled but client id is empty.");
+            }
+            if(Strings.isEmpty(leanConfService.getProperty(OAuthIntrospectionProperty.CLIENT_SECRET))) {
+                LOG.error("Error reloading introspection configuration: Basic auth is enabled but client secret is empty.");
+            }
+        }
     }
 }

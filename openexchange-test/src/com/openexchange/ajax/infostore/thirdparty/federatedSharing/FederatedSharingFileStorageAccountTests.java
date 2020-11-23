@@ -261,7 +261,7 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
     private MailData lookupMail(ApiClient apiClient, String folder, String subjectToMatch) throws Exception {
         for (int i = 0; i < 10; i++) {
             MailApi mailApi = new MailApi(apiClient);
-            MailsResponse mailsResponse = mailApi.getAllMails(apiClient.getSession(), folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
+            MailsResponse mailsResponse = mailApi.getAllMails(folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
             checkResponse(mailsResponse.getError(), mailsResponse.getErrorDesc(), mailsResponse.getData());
             for (List<String> mail : mailsResponse.getData()) {
                 String subject = mail.get(2);
@@ -270,14 +270,14 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
                 }
 
                 //Get The mail
-                MailResponse mailResponse = mailApi.getMail(apiClient.getSession(), mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
+                MailResponse mailResponse = mailApi.getMail(mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
                 MailData mailData = checkResponse(mailResponse.getError(), mailsResponse.getErrorDesc(), mailResponse.getData());
 
                 //Delete the mail
                 MailListElement mailToDelete = new MailListElement();
                 mailToDelete.setFolder(mailData.getFolderId());
                 mailToDelete.setId(mailData.getId());
-                MailsCleanUpResponse deleteResponse = mailApi.deleteMails(apiClient.getSession(), Collections.singletonList(mailToDelete), L(Long.MAX_VALUE), B(true), B(false));
+                MailsCleanUpResponse deleteResponse = mailApi.deleteMails(Collections.singletonList(mailToDelete), L(Long.MAX_VALUE), B(true), B(false));
                 List<String> deletedMailIds = checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
                 assertThat(deletedMailIds, is(empty()));
 
@@ -324,7 +324,7 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
         body.notification(notification);
 
         //update with new guest permission
-        FolderUpdateResponse updateResponse = api.updateFolder(api.getApiClient().getSession(), folderToShare.getId(), body, B(false), null, null, null, null, null, null, null);
+        FolderUpdateResponse updateResponse = api.updateFolder(folderToShare.getId(), body, B(false), null, null, null, null, null, null, null);
         checkResponse(updateResponse.getError(), updateResponse.getErrorDesc(), updateResponse.getData());
     }
 

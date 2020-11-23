@@ -72,7 +72,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXRequestResultPostProcessor;
 import com.openexchange.ajax.requesthandler.AJAXState;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.annotation.NonNull;

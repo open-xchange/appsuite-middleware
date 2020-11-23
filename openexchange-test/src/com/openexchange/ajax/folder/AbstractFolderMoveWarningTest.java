@@ -71,7 +71,7 @@ import com.openexchange.testing.httpclient.models.FolderResponse;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 
 /**
- * 
+ *
  * {@link AbstractFolderMoveWarningTest}
  *
  * @author <a href="mailto:anna.ottersbach@open-xchange.com">Anna Ottersbach</a>
@@ -114,7 +114,7 @@ public abstract class AbstractFolderMoveWarningTest extends AbstractFolderMovePe
 
     protected void checkFolderMove(String folderToMove, String sourceFolder, String destinationFolder, OXException expectedWarning) throws ApiException, JSONException {
         FolderUpdateResponse response = moveFolder(folderToMove, destinationFolder, null);
-        
+
         checkResponseForWarning(response, expectedWarning);
 
         checkParentFolder(folderToMove, sourceFolder);
@@ -126,7 +126,7 @@ public abstract class AbstractFolderMoveWarningTest extends AbstractFolderMovePe
     }
 
     protected void checkParentFolder(String folderToCheck, String expectedParentFolder) throws ApiException {
-        FolderResponse folderReponse = api.getFolder(getSessionId(), folderToCheck, TREE, null, null);
+        FolderResponse folderReponse = api.getFolder(folderToCheck, TREE, null, null);
         assertNotNull(folderReponse);
         FolderData data = folderReponse.getData();
         assertNotNull(data);
@@ -170,7 +170,7 @@ public abstract class AbstractFolderMoveWarningTest extends AbstractFolderMovePe
     }
 
     protected String getFolderName(String folderId) throws ApiException {
-        FolderResponse folder = api.getFolder(getSessionId(), folderId, TREE, null, null);
+        FolderResponse folder = api.getFolder(folderId, TREE, null, null);
         return folder.getData().getTitle();
     }
 
@@ -181,7 +181,7 @@ public abstract class AbstractFolderMoveWarningTest extends AbstractFolderMovePe
         folderData.setPermissions(null);
         folderBody.setFolder(folderData);
 
-        FolderUpdateResponse response = api.updateFolder(getSessionId(), folderToMove, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE, ignoreWarnings);
+        FolderUpdateResponse response = api.updateFolder(folderToMove, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE, ignoreWarnings);
         return response;
     }
 

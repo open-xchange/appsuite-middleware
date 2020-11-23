@@ -49,11 +49,8 @@
 
 package com.openexchange.oauth.provider.impl;
 
-import static com.openexchange.osgi.Tools.requireService;
-
 import javax.servlet.http.HttpServletRequest;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.authorizationserver.spi.AuthorizationException;
 import com.openexchange.oauth.provider.authorizationserver.spi.OAuthAuthorizationService;
@@ -76,7 +73,7 @@ import com.openexchange.session.Session;
  * @since v7.8.0
  */
 public class OAuthResourceServiceImpl implements OAuthResourceService {
-	
+
     private final ServiceListing<OAuthAuthorizationService>  authServices;
 
     private final ServiceLookup serviceLookup;
@@ -89,7 +86,7 @@ public class OAuthResourceServiceImpl implements OAuthResourceService {
         this.serviceLookup = serviceLookup;
         sessionProvider = new SessionProvider(serviceLookup);
     }
-	
+
     @Override
     public OAuthAccess checkAccessToken(String accessToken, HttpServletRequest httpRequest) throws OXException {
         ValidationResponse response;
@@ -106,6 +103,8 @@ public class OAuthResourceServiceImpl implements OAuthResourceService {
                 throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
             case EXPIRED:
                 throw new OAuthInvalidTokenException(Reason.TOKEN_EXPIRED);
+            case INVALID:
+                throw new OAuthInvalidTokenException(Reason.TOKEN_INVALID);
             case VALID:
                 Session session = sessionProvider.getSession(accessToken, response.getContextId(), response.getUserId(), response.getClientName(), httpRequest);
                 return new OAuthAccessImpl(session, Scope.newInstance(response.getScope()));
@@ -115,8 +114,7 @@ public class OAuthResourceServiceImpl implements OAuthResourceService {
     }
     @Override
     public boolean isProviderEnabled(int contextId, int userId) throws OXException {
-        ConfigView configView = requireService(ConfigViewFactory.class, serviceLookup).getView(userId, contextId);
-        return configView.opt(OAuthProviderProperties.ENABLED, Boolean.class, Boolean.TRUE).booleanValue();
+        return serviceLookup.getServiceSafe(LeanConfigurationService.class).getBooleanProperty(userId, contextId, OAuthProviderProperties.ENABLED);
     }
 
     private static final class OAuthAccessImpl implements OAuthAccess {

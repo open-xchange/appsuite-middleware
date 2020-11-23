@@ -55,6 +55,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.FolderField;
@@ -65,7 +66,6 @@ import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

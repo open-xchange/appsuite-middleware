@@ -56,7 +56,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;

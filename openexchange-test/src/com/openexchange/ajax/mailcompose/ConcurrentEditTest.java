@@ -75,19 +75,19 @@ public class ConcurrentEditTest extends AbstractMailComposeTest {
     public void testFailWithWrongToken_Patch() throws Exception {
         String clientToken1 = RandomStringUtils.randomAlphanumeric(16);
         String clientToken2 = RandomStringUtils.randomAlphanumeric(16);
-        MailComposeResponse openResponse = api.postMailCompose(getSessionId(), "new", false, clientToken1, Collections.emptyList());
+        MailComposeResponse openResponse = api.postMailCompose("new", Boolean.FALSE, clientToken1, Collections.emptyList());
         check(openResponse);
 
         MailComposeRequestMessageModel patch1 = new MailComposeRequestMessageModel();
         patch1.setContentType(PLAIN);
         patch1.setContent("patch1");
-        MailComposeResponse patchResponse1 = api.patchMailComposeById(getSessionId(), openResponse.getData().getId(), patch1, clientToken1);
+        MailComposeResponse patchResponse1 = api.patchMailComposeById(openResponse.getData().getId(), patch1, clientToken1);
         check(patchResponse1);
 
         // patch again with different token
         MailComposeRequestMessageModel patch2 = new MailComposeRequestMessageModel();
         patch1.setContent("patch2");
-        MailComposeResponse patchResponse2 = api.patchMailComposeById(getSessionId(), openResponse.getData().getId(), patch2, clientToken2);
+        MailComposeResponse patchResponse2 = api.patchMailComposeById(openResponse.getData().getId(), patch2, clientToken2);
         assertEquals("MSGCS-0010", patchResponse2.getCode());
     }
 
@@ -95,16 +95,16 @@ public class ConcurrentEditTest extends AbstractMailComposeTest {
     public void testFailWithWrongToken_PostAttachment() throws Exception {
         String clientToken1 = RandomStringUtils.randomAlphanumeric(16);
         String clientToken2 = RandomStringUtils.randomAlphanumeric(16);
-        MailComposeResponse openResponse = api.postMailCompose(getSessionId(), "new", false, clientToken1, Collections.emptyList());
+        MailComposeResponse openResponse = api.postMailCompose("new", Boolean.FALSE, clientToken1, Collections.emptyList());
         check(openResponse);
 
-        MailComposeAttachmentResponse attachmentResponseForCorrectToken = api.postAttachments(getSessionId(), openResponse.getData().getId(), attachment, clientToken1);
+        MailComposeAttachmentResponse attachmentResponseForCorrectToken = api.postAttachments(openResponse.getData().getId(), attachment, clientToken1);
         check(attachmentResponseForCorrectToken);
 
-        MailComposeAttachmentResponse attachmentResponseForNoToken = api.postAttachments(getSessionId(), openResponse.getData().getId(), attachment, null);
+        MailComposeAttachmentResponse attachmentResponseForNoToken = api.postAttachments(openResponse.getData().getId(), attachment, null);
         check(attachmentResponseForNoToken);
 
-        MailComposeAttachmentResponse attachmentResponseForWrongToken = api.postAttachments(getSessionId(), openResponse.getData().getId(), attachment, clientToken2);
+        MailComposeAttachmentResponse attachmentResponseForWrongToken = api.postAttachments(openResponse.getData().getId(), attachment, clientToken2);
         assertEquals("MSGCS-0010", attachmentResponseForWrongToken.getCode());
     }
 
@@ -121,39 +121,39 @@ public class ConcurrentEditTest extends AbstractMailComposeTest {
     public void testTokenHandover() throws Exception {
         String clientToken1 = RandomStringUtils.randomAlphanumeric(16);
         String clientToken2 = RandomStringUtils.randomAlphanumeric(16);
-        MailComposeResponse openResponse = api.postMailCompose(getSessionId(), "new", false, null, Collections.emptyList());
+        MailComposeResponse openResponse = api.postMailCompose("new", Boolean.FALSE, null, Collections.emptyList());
         check(openResponse);
         MailComposeRequestMessageModel patch1 = new MailComposeRequestMessageModel();
         patch1.setClaim(clientToken1);
         patch1.setContentType(PLAIN);
         patch1.setContent("patch1");
-        MailComposeResponse patchResponse1 = api.patchMailComposeById(getSessionId(), openResponse.getData().getId(), patch1, null);
+        MailComposeResponse patchResponse1 = api.patchMailComposeById(openResponse.getData().getId(), patch1, null);
         check(patchResponse1);
 
         // patch again with token check
         MailComposeRequestMessageModel patch2 = new MailComposeRequestMessageModel();
         patch2.setContent("patch2");
-        MailComposeResponse patchResponse2 = api.patchMailComposeById(getSessionId(), openResponse.getData().getId(), patch2, clientToken1);
+        MailComposeResponse patchResponse2 = api.patchMailComposeById(openResponse.getData().getId(), patch2, clientToken1);
         check(patchResponse2);
 
         // get and patch as client 2 to take over editing
-        MailComposeResponse getResponse = api.getMailComposeById(getSessionId(), openResponse.getData().getId());
+        MailComposeResponse getResponse = api.getMailComposeById(openResponse.getData().getId());
         check(getResponse);
 
         MailComposeRequestMessageModel tokenPatch = new MailComposeRequestMessageModel();
         tokenPatch.setClaim(clientToken2);
-        MailComposeResponse tokenPatchResponse = api.patchMailComposeById(getSessionId(), openResponse.getData().getId(), tokenPatch, null);
+        MailComposeResponse tokenPatchResponse = api.patchMailComposeById(openResponse.getData().getId(), tokenPatch, null);
         check(tokenPatchResponse);
 
         MailComposeRequestMessageModel patch3 = new MailComposeRequestMessageModel();
         patch3.setContent("patch3");
-        MailComposeResponse patchResponse3 = api.patchMailComposeById(getSessionId(), openResponse.getData().getId(), patch3, clientToken2);
+        MailComposeResponse patchResponse3 = api.patchMailComposeById(openResponse.getData().getId(), patch3, clientToken2);
         check(patchResponse3);
 
         // client 1 must fail now
         MailComposeRequestMessageModel patch4 = new MailComposeRequestMessageModel();
         patch4.setContent("patch4");
-        MailComposeResponse patchResponse4 = api.patchMailComposeById(getSessionId(), openResponse.getData().getId(), patch4, clientToken1);
+        MailComposeResponse patchResponse4 = api.patchMailComposeById(openResponse.getData().getId(), patch4, clientToken1);
         assertEquals("MSGCS-0010", patchResponse4.getCode());
     }
 
@@ -166,21 +166,21 @@ public class ConcurrentEditTest extends AbstractMailComposeTest {
     @Test
     public void testNoTokenOverridesAlways() throws Exception {
         String clientToken1 = RandomStringUtils.randomAlphanumeric(16);
-        MailComposeResponse openResponse = api.postMailCompose(getSessionId(), "new", false, clientToken1, Collections.emptyList());
+        MailComposeResponse openResponse = api.postMailCompose("new", Boolean.FALSE, clientToken1, Collections.emptyList());
         check(openResponse);
         MailComposeRequestMessageModel patch1 = new MailComposeRequestMessageModel();
         patch1.setContentType(PLAIN);
         patch1.setContent("patch1");
-        MailComposeResponse patchResponse1 = api.patchMailComposeById(getSessionId(), openResponse.getData().getId(), patch1, clientToken1);
+        MailComposeResponse patchResponse1 = api.patchMailComposeById(openResponse.getData().getId(), patch1, clientToken1);
         check(patchResponse1);
 
         // patch again without token => override in any case
         MailComposeRequestMessageModel patch2 = new MailComposeRequestMessageModel();
         patch2.setContent("patch2");
-        MailComposeResponse patchResponse2 = api.patchMailComposeById(getSessionId(), openResponse.getData().getId(), patch2, null);
+        MailComposeResponse patchResponse2 = api.patchMailComposeById(openResponse.getData().getId(), patch2, null);
         check(patchResponse2);
 
-        MailComposeResponse getResponse = api.getMailComposeById(getSessionId(), openResponse.getData().getId());
+        MailComposeResponse getResponse = api.getMailComposeById(openResponse.getData().getId());
         check(getResponse);
         assertEquals("Patch without token was not applied", patch2.getContent(), getResponse.getData().getContent());
     }
@@ -188,7 +188,7 @@ public class ConcurrentEditTest extends AbstractMailComposeTest {
     @Test
     public void testInvalidTokenSyntax_Open() throws Exception {
         String invalidToken = "123!efg$";
-        MailComposeResponse openResponse = api.postMailCompose(getSessionId(), "new", false, invalidToken, Collections.emptyList());
+        MailComposeResponse openResponse = api.postMailCompose("new", Boolean.FALSE, invalidToken, Collections.emptyList());
         assertEquals("SVL-0010", openResponse.getCode());
         assertEquals("claim", openResponse.getErrorParams().get(0));
     }
@@ -196,12 +196,12 @@ public class ConcurrentEditTest extends AbstractMailComposeTest {
     @Test
     public void testInvalidTokenSyntax_Set() throws Exception {
         String invalidToken = "123!efg$";
-        MailComposeResponse openResponse = api.postMailCompose(getSessionId(), "new", false, null, Collections.emptyList());
+        MailComposeResponse openResponse = api.postMailCompose("new", Boolean.FALSE, null, Collections.emptyList());
         check(openResponse);
 
         MailComposeRequestMessageModel tokenPatch = new MailComposeRequestMessageModel();
         tokenPatch.setClaim(invalidToken);
-        MailComposeResponse tokenPatchResponse = api.patchMailComposeById(getSessionId(), openResponse.getData().getId(), tokenPatch, null);
+        MailComposeResponse tokenPatchResponse = api.patchMailComposeById(openResponse.getData().getId(), tokenPatch, null);
         assertEquals("SVL-0010", tokenPatchResponse.getCode());
         assertEquals("claim", tokenPatchResponse.getErrorParams().get(0));
     }
@@ -209,14 +209,14 @@ public class ConcurrentEditTest extends AbstractMailComposeTest {
     @Test
     public void testInvalidTokenSyntax_Request() throws Exception {
         String invalidToken = "123!efg$";
-        MailComposeResponse openResponse = api.postMailCompose(getSessionId(), "new", false, null, Collections.emptyList());
+        MailComposeResponse openResponse = api.postMailCompose("new", Boolean.FALSE, null, Collections.emptyList());
         check(openResponse);
 
         MailComposeRequestMessageModel patch1 = new MailComposeRequestMessageModel();
         patch1.setContentType(PLAIN);
         patch1.setContent("patch1");
 
-        MailComposeResponse patchResponse1 = api.patchMailComposeById(getSessionId(), openResponse.getData().getId(), patch1, invalidToken);
+        MailComposeResponse patchResponse1 = api.patchMailComposeById(openResponse.getData().getId(), patch1, invalidToken);
         assertEquals("SVL-0010", patchResponse1.getCode());
         assertEquals("clientToken", patchResponse1.getErrorParams().get(0));
     }

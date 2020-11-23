@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.provider.impl.jwt;
 
-import com.openexchange.authentication.NamePart;
 import com.openexchange.config.lean.Property;
 
 /**
@@ -61,56 +60,22 @@ import com.openexchange.config.lean.Property;
 public enum OAuthJWTProperty implements Property {
 
     /**
-     * Specifies a JWKS endpoint used to fetch signature keys for validation.
+     * Specifies a JWKS URI used to fetch signature keys for validation.
+     * This URI can either be local file path or an URL.
+     *
+     * Example:
+     *  file:/Users/sebastianlutz/git/core/com.openexchange.oauth.provider.impl/conf/jwk.json,
+     *  http://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/certs
+     *
      */
-    JWKS_ENDPOINT("jwt.jwksEndpoint", OAuthJWTProperty.EMPTY),
+    JWKS_URI("jwksUri", OAuthJWTProperty.EMPTY),
 
     /**
-     * Path to locally populated keystore if JWKs are not fetched from remote.
+     * Path for loading a JWK set from a local JSON file
      */
-    KEYSTORE_PATH("jwt.keystore.path", OAuthJWTProperty.EMPTY),
+    JWKS_JSON_PATH("jwksJson.path", OAuthJWTProperty.EMPTY);
 
-    /**
-     * Password for the locally populated keystore.
-     */
-    KEYSTORE_PASSWORD("jwt.keystore.password", OAuthJWTProperty.EMPTY),
-
-    /**
-     * The keystore type.
-     */
-    KEYSTORE_TYPE("jwt.keystore.type", "JKS"),
-
-    /**
-     * A comma separated list of issuer names (JWT claim "iss") that tokens are accepted from.
-     * If this property is empty, tokens are accepted from all issuers.
-     */
-    ALLOWED_ISSUER("allowedIssuer", OAuthJWTProperty.EMPTY),
-
-    /**
-     * Name of the JWT claim that will be used to resolve a context.
-     */
-    CONTEXT_LOOKUP_CLAIM("contextLookupClaim", "sub"),
-
-    /**
-     * Gets the {@link NamePart} used for determining the context
-     * of a user for which a JWT has been obtained. The part
-     * is taken from the value of the according {@link OAuthJWTProperty#CONTEXT_LOOKUP_CLAIM}.
-     */
-    CONTEXT_LOOKUP_NAME_PART("contextLookupNamePart", NamePart.DOMAIN.getConfigName()),
-
-    /**
-     * Name of the JWT claim that will be used to resolve a user.
-     */
-    USER_LOOKUP_CLAIM("userLookupClaim", "sub"),
-
-    /**
-     * Gets the {@link NamePart} used for determining the user for
-     * which a JWT has been obtained. The part is taken from
-     * the value of the according {@link OAuthJWTProperty#USER_LOOKUP_CLAIM}.
-     */
-    USER_LOOKUP_NAME_PART("userLookupNamePart", NamePart.LOCAL_PART.getConfigName());
-
-    public static final String PREFIX = "com.openexchange.oauth.provider.";
+    public static final String PREFIX = "com.openexchange.oauth.provider.jwt.";
     private static final String EMPTY = "";
     private final String fqn;
     private final Object defaultValue;

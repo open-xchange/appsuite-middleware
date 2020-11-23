@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.apiclient;
 
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static java.lang.Boolean.FALSE;
 import static org.junit.Assert.assertEquals;
@@ -128,7 +127,7 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
         Integer ruleId = rememberSieveRule(response.getData());
 
         // Check amount of mails
-        MailsResponse allMails = mailApi.getAllMails(getSessionId(), folderId, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);
+        MailsResponse allMails = mailApi.getAllMails(folderId, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);
         Assert.assertNull(allMails.getErrorDesc(), allMails.getError());
         Assert.assertNotNull(allMails.getData());
         Assert.assertEquals("Unexpected amount of mails returned.", 2, allMails.getData().size());

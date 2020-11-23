@@ -63,52 +63,20 @@ properties:
     file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth Provider", "Authorization Server"]
-
-  - key: com.openexchange.oauth.provider.jwt.jwksEndpoint
+  - key: com.openexchange.oauth.provider.jwt.jwksUri
     description: |
-      Specifies (and thus enables) a JWKS endpoint used to fetch signature keys for validation
+      Specifies an URI used to fetch signature keys for token validation.
       Examples:
-      <pre>
-      com.openexchange.oauth.provider.jwksEndpoint = https://YOUR_DOMAIN/.well-known/jwks.json
-      </pre>
+      <ul>
+        <li>com.openexchange.oauth.provider.jwksEndpoint = http://YOUR_DOMAIN/.well-known/jwks.json</li>
+        <li>com.openexchange.oauth.provider.jwksEndpoint = https://YOUR_DOMAIN/.well-known/jwks.json</li>
+        <li>com.openexchange.oauth.provider.jwksEndpoint = file://PATH_TO/jwks.json</li>
+      </ul>
     defaultValue:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: com.openexchange.oauth.provider.keystore.path
-    file: oauth-provider.properties
-    packageName: open-xchange-oauth-provider
-    tags: ["OAuth Provider", "JWT"]
-  - key: com.openexchange.oauth.provider.jwt.keystore.path
-    description: |
-      Specifies (and thus enables) a path to locally populated keystore if JWKs are not fetched from remote.
-    defaultValue: 
-    version: 7.10.5
-    reloadable: true
-    configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.jwks.endpoint", "com.openexchange.oauth.provider.keystore.password", "com.openexchange.oauth.provider.keystore.type"]
-    file: oauth-provider.properties
-    packageName: open-xchange-oauth-provider
-    tags: ["OAuth Provider", "JWT"]
-  - key: com.openexchange.oauth.provider.jwt.keystore.password
-    description: |
-      Password for the locally populated keystore.
-    defaultValue: 
-    version: 7.10.5
-    reloadable: true
-    configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.keystore.path", "com.openexchange.oauth.provider.keystore.type"]
-    file: oauth-provider.properties
-    packageName: open-xchange-oauth-provider
-    tags: ["OAuth Provider", "JWT"]
-  - key: com.openexchange.oauth.provider.jwt.keystore.type
-    description: |
-      Specifies the type of the used keystore.
-    defaultValue: JKS
-    version: 7.10.5
-    reloadable: true
-    configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.keystore.path", "com.openexchange.oauth.provider.keystore.password"]
+    related: 
     file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth Provider", "JWT"]
@@ -137,10 +105,9 @@ properties:
     reloadable: true
     configcascadeAware: true
     related: 
-    file: oauth-provider.propertie
+    file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth Provider", "JWT"]
-
   - key: com.openexchange.oauth.provider.contextLookupClaim
     description: |
       Name of the claim that will be used to resolve a context.
@@ -203,7 +170,6 @@ properties:
     file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth Provider", "Introspection", "JWT"]
-
   - key: com.openexchange.oauth.provider.introspection.endpoint
     description: |
       A OAuth2-compliant Token Introspection Endpoint which clients can use to query the server to determine the active state of a Token.
@@ -211,7 +177,7 @@ properties:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.basicAuthEnabled", "com.openexchange.oauth.provider.clientID", "com.openexchange.oauth.provider.clientSecret"]
+    related: ["com.openexchange.oauth.provider.introspection.basicAuthEnabled", "com.openexchange.oauth.provider.introspection.clientID", "com.openexchange.oauth.provider.introspection.clientSecret"]
     file: oauth-provider-introspection.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth Provider", "Introspection"]
@@ -222,7 +188,7 @@ properties:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.endpoint", "com.openexchange.oauth.provider.clientID", "com.openexchange.oauth.provider.clientSecret"]
+    related: ["com.openexchange.oauth.provider.introspection.endpoint", "com.openexchange.oauth.provider.introspection.clientID", "com.openexchange.oauth.provider.introspection.clientSecret"]
     file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth Provider", "Introspection"]
@@ -233,7 +199,7 @@ properties:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.endpoint", "com.openexchange.oauth.provider.basicAuthEnabled", "com.openexchange.oauth.provider.clientSecret"]
+    related: ["com.openexchange.oauth.provider.introspection.endpoint", "com.openexchange.oauth.provider.introspection.basicAuthEnabled", "com.openexchange.oauth.provider.introspection.clientSecret"]
     file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth Provider", "Introspection"]
@@ -244,7 +210,7 @@ properties:
     version: 7.10.5
     reloadable: true
     configcascadeAware: true
-    related: ["com.openexchange.oauth.provider.endpoint", "com.openexchange.oauth.provider.basicAuthEnabled", "com.openexchange.oauth.provider.clientID"]
+    related: ["com.openexchange.oauth.provider.introspection.endpoint", "com.openexchange.oauth.provider.introspection.basicAuthEnabled", "com.openexchange.oauth.provider.introspection.clientID"]
     file: oauth-provider.properties
     packageName: open-xchange-oauth-provider
     tags: ["OAuth Provider", "Introspection"]

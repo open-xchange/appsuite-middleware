@@ -54,7 +54,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
@@ -78,7 +78,7 @@ public class UpdateAction extends TaskAction {
 
     /**
      * Initializes a new {@link UpdateAction}.
-     * 
+     *
      * @param services
      */
     public UpdateAction(final ServiceLookup services) {

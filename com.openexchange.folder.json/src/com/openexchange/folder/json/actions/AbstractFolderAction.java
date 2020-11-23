@@ -90,6 +90,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.contact.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;

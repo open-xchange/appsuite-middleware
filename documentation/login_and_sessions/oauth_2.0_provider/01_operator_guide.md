@@ -1020,15 +1020,14 @@ The following sections will describe the configuration of the available modes in
 
 ## JSON Web Token (JWT)
 
-If you want to use an external Identity and Access management System that issues JWTs, this must be configured accordingly in `/opt/open-xchange/etc/oauth-provider.properties`.
+If you want to use an external Identity and Access management System that issues JWTs this must be configured accordingly in `/opt/open-xchange/etc/oauth-provider.properties`.
 To do this, you first have to activate the OAuth provider and set `com.openexchange.oauth.provider.mode` to `expect_jwt`.
 
     # Set to 'true' to basically enable the OAuth 2.0 provider. This setting can then be overridden
-    # via config cascade to disallow granting access for certain users. If the provider is enabled,
-    # an encryption key (see below) must be set!
+    # via config cascade to disallow granting access for certain users.
     #
     # Default: false
-    com.openexchange.oauth.provider.enabled=true
+    com.openexchange.oauth.provider.enabled = true
 
     # Besides the functionality to act as an OAuth 2.0 provider, there are three different modes to choose from:
     #
@@ -1045,27 +1044,59 @@ To do this, you first have to activate the OAuth provider and set `com.openexcha
     #  * Defines whether the enabled OAuth 2.0 provider is able to grant access based on opaque bearer tokens through token introspection.
     #
     # Default: auth_server
-    com.openexchange.oauth.provider.mode=expect_jwt
+    com.openexchange.oauth.provider.mode = expect_jwt
 
 In order to validate the incoming JWTs, it is necessary to specify where the required signature keys should be fetched from.
-There are two possible configurations:
+There are two possible configurations, which are configured via `com.openexchange.oauth.provider.jwt.jwksUri`.
+It is possible to retrieve the required [JSON Web Key Set (JWKS)](https://auth0.com/docs/tokens/json-web-tokens/json-web-key-sets) from a JWKS endpoint, 
+provided by the Identity and Access Management System, or a local JSON file containing these keys. Which mechanism is used to load the JWKS is determined by the given URI scheme.
+Supported are `http/https` and `file`.
 
 The first option is to retrieve them from a JWKS endpoint.
 
-	#Specifies (and thus enables) a JWKS endpoint used to fetch signature keys for validation
-	com.openexchange.oauth.provider.jwks.endpoint=http://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/certs
+	#Specifies a JWKS endpoint used to fetch signature keys for validation
+	com.openexchange.oauth.provider.jwt.jwksUri = http://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/certs
 
+The second is to load them from a local JSON file.
 
-The second is to load them from a locally populated keystore.
+	#Specifies a path to a JSON used for validation
+	com.openexchange.oauth.provider.jwt.jwksUri = file:/Users/foo/core/com.openexchange.oauth.provider.impl/conf/jwk.json
+	
+The local JSON file may look like the following example:
 
-	#Specifies (and thus enables) a keystore used for validation
-	com.openexchange.oauth.provider.keystore.path=keystore.jks
+	{
+	   "keys":[
+	      {
+	         "kid":"bY_yOOTU67iZLZaV79y2TLIxhEF4J9ZTVbTT98kUOSU",
+	         "kty":"RSA",
+	         "alg":"RS256",
+	         "use":"sig",
+	         "n":"s0I2jbv48n8KkFl3IiMHxwhK7QRrenlDwUpr9dPRAYIahDo4zXrGyRnxaJ3hQ6Q32E9L7L8_JjrOm
+	         jtIuvxOeG7wKQV-mVk0zkF5NDfwDuRTIj2XPIVAhLbsI3EK8RMjGjzCt7vTa5VMZKXXhV_KwUgIEBWlPma
+	         8z925Sjb85ilZnzhAikeLLKXIXNJyGkILL19o6Apy38N7Ma6WAwJfIX5YjbTNIfRywQAyParivsl0TVo-9
+	         cTsrq0ApAe-4rJElWXC0nGu5P7uI6b7KYD_c4wP9Om2AXO5Fq8O8P2vbZ3Rv4DjBsI2P7BEVm_N3-yHB2p
+	         LzaaMqldNRClgfid53Q",
+	         "e":"AQAB",
+	         "x5c":[
+	            "MIIClzCCAX8CBgF1Y9QwMDANBgkqhkiG9w0BAQsFADAPMQ0wCwYDVQQDDARkZW1vMB4XDTIwMTAyNj
+	            A3MzIzMVoXDTMwMTAyNjA3MzQxMVowDzENMAsGA1UEAwwEZGVtbzCCASIwDQYJKoZIhvcNAQEBBQADg
+	            gEPADCCAQoCggEBALNCNo27+PJ/CpBZdyIjB8cISu0Ea3p5Q8FKa/XT0QGCGoQ6OM16xskZ8Wid4UOk
+	            N9hPS+y/PyY6zpo7SLr8Tnhu8CkFfplZNM5BeTQ38A7kUyI9lzyFQIS27CNxCvETIxo8wre702uVTGS
+	            l14VfysFICBAVpT5mvM/duUo2/OYpWZ84QIpHiyylyFzSchpCCy9faOgKct/DezGulgMCXyF+WI20zS
+	            H0csEAMj2q4r7JdE1aPvXE7K6tAKQHvuKyRJVlwtJxruT+7iOm+ymA/3OMD/TptgFzuRavDvD9r22d0
+	            b+A4wbCNj+wRFZvzd/shwdqS82mjKpXTUQpYH4ned0CAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAcRV+
+	            /+wDhar7NeaRgvy42UoD9D36y5AYYlZCiwgU2eGciKMVEsVrmaTvMNeboulWahb9bQfVRea7KjOZDeR
+	            Zz/X7kLNG8BytnIWOEHAKmQM9wlIa5Fr9f+Za72vKnFAllTNiKxI6LsUkD5s7Lh3JuwEfnR0hx+op9Q
+	            EqntCjuMU4RWlKKj7ZG3ggjJTaQhwyb+D7faZxsLbnCTRcUdbgKRsTiS3wTlHfCM3UqcElNMME2MoGr
+	            d1IQs9KDIj0vcsjTUpUss6OqqfAjSsut4A1q47bY7QOb2kq9Tmlhy/4idu49+NB0F4kshvaC1mLmYJH
+	            ZjruXG//CqeQnq/BFk0PmQ=="
+	         ],
+	         "x5t":"1fMYDHQJ9DCIJh8OTszMRVx0Rfg",
+	         "x5t#S256":"d_ms-okav_ldmeWLQJwemeKIveOyvR9R3P_fNHLTp58"
+	      }
+	   ]
+	}
 
-	#Determines password for the keystore used for validation
-	com.openexchange.oauth.provider.keystore.password=secret
-
-	#Determines the type of the specified keystore. Default is "JKS"
-	com.openexchange.oauth.provider.keystore.type
 
 Furthermore the allowed token issuers can be specified. If you do not configure this property, tokens are accepted from all issuers.
 
@@ -1074,15 +1105,19 @@ Furthermore the allowed token issuers can be specified. If you do not configure 
 
 The user resolution can also be configured. For this purpose, the values required for the resolution of user and context are first read from the JWT. The names of the claims that contain the information can be specified with the following configuration properties:
 
-	#Specifies the name of claim that shall be used for context resolution. Default is "sub"
+	#Specifies the name of claim that shall be used for context resolution. 
+	#Default is "sub"
 	com.openexchange.oauth.provider.contextLookupClaim
 
-	#Specifies the name of claim that shall be used for user resolution. Default is "sub"
+	#Specifies the name of claim that shall be used for user resolution. 
+	#Default is "sub"
 	com.openexchange.oauth.provider.userLookupClaim
 
 How the queried values are subsequently processed is configured via the following configuration properties.
 
-	#Specifies what portion of the value used for context resolution is supposed to be used for context look-up. Default value is "domain"
+	#Specifies what portion of the value used for context resolution is supposed to be used for context look-up. 
+	#Default value is "domain"
+	#
 	#Possible values:
 	# full
 	#  *The full string as returned by the authorization server
@@ -1094,7 +1129,9 @@ How the queried values are subsequently processed is configured via the followin
 	#  *The domain part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.
 	com.openexchange.oauth.provider.contextLookupNamePart
 
-	#Specifies what portion of the value used for user resolution is supposed to be used for user look-up. Default value is "local-part"
+	#Specifies what portion of the value used for user resolution is supposed to be used for user look-up. 
+	#Default value is "local-part"
+	#
 	#Possible values:
 	# full
 	#  *The full string as returned by the authorization server
@@ -1115,13 +1152,13 @@ To specify an external scope replace `[EXTERNAL_SCOPE]` with the corresponding�
 
 
 
-Example:
+Example configuration:
 
-	com.openexchange.oauth.provider.enabled=true
-	com.openexchange.oauth.provider.mode=expect_jwt
-	com.openexchange.oauth.provider.jwks.endpoint=http://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/certs
-	com.openexchange.oauth.provider.contextLookupClaim=email
-	com.openexchange.oauth.provider.userLookupClaim=email
+	com.openexchange.oauth.provider.enabled = true
+	com.openexchange.oauth.provider.mode = expect_jwt
+	com.openexchange.oauth.provider.jwt.jwksUri = https://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/certs
+	com.openexchange.oauth.provider.contextLookupClaim = email
+	com.openexchange.oauth.provider.userLookupClaim = email
 	com.openexchange.oauth.provider.scope.mail = read_mail, write_mail
 
 
@@ -1135,7 +1172,7 @@ As a first step the OAuth provider must be activated and `com.openexchange.oauth
     # an encryption key (see below) must be set!
     #
     # Default: false
-    com.openexchange.oauth.provider.enabled=true
+    com.openexchange.oauth.provider.enabled = true
 
 
     # Besides the functionality to act as an OAuth 2.0 provider, there are three different modes to choose from:
@@ -1153,32 +1190,32 @@ As a first step the OAuth provider must be activated and `com.openexchange.oauth
     #  * Defines whether the enabled OAuth 2.0 provider is able to grant access based on opaque bearer tokens through token introspection.
     #
     # Default: auth_server
-    com.openexchange.oauth.provider.mode=token_introspection
+    com.openexchange.oauth.provider.mode = token_introspection
 
 Afterwards the introspection endpoint must be defined from which information about the received token is retrieved. This property is mandatory if you want to use token introspection.
 
 	#Specifies the endpoint for the introspection service
-	com.openexchange.oauth.provider.introspection.endpoint=http://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/token/introspect
+	com.openexchange.oauth.provider.introspection.endpoint = http://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/token/introspect
 
 If HTTP Basic.Auth is supposed to be used for the token information request, this must be configured via the following configuration properties:
 
 	#Enables using HTTP Basic-Auth for the introspection endpoint. Default is false
-	com.openexchange.oauth.provider.introspection.basicAuthEnabled=true
+	com.openexchange.oauth.provider.introspection.basicAuthEnabled = true
 
 	#Specifies the client identifier used as user name for HTTP Basic-Auth
-	com.openexchange.oauth.provider.introspection.clientID=OAuthShowcase
+	com.openexchange.oauth.provider.introspection.clientID = OAuthShowcase
 
 	#Specifies the client secret used as password for HTTP Basic-Auth
-	com.openexchange.oauth.provider.introspection.clientSecret=bef75a68-f3d8-499c-8c0a-65155de13dbb
+	com.openexchange.oauth.provider.introspection.clientSecret = bef75a68-f3d8-499c-8c0a-65155de13dbb
 
 The token introspection endpoint should respond with a JSON object that contains information about the user, among other things. The resolution of this user is configurable. 
 To do this, the values required to resolve user and context are first read from the JSON object. The names of the properties that contain the information can be specified using the following configuration properties:
 
 	#Specifies the name of the property that shall be used for context resolution. Default is "sub"
-	com.openexchange.oauth.provider.introspection.contextLookupClaim=email
+	com.openexchange.oauth.provider.contextLookupClaim = email
 
 	#Specifies the name of the property that shall be used for user resolution. Default is "sub"
-	com.openexchange.oauth.provider.introspection.userLookupClaim=email
+	com.openexchange.oauth.provider.userLookupClaim = email
 
 How the queried values are subsequently processed is configured via the following configuration properties.
 
@@ -1192,7 +1229,7 @@ How the queried values are subsequently processed is configured via the followin
 	#
 	# domain
 	#  *The domain part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.
-	com.openexchange.oauth.provider.introspection.contextLookupNamePart
+	com.openexchange.oauth.provider.contextLookupNamePart
 
 	#Specifies what portion of the value used for user resolution is supposed to be used for user look-up. Default value is {{"local-part"}}
 	#Possible values:
@@ -1204,16 +1241,24 @@ How the queried values are subsequently processed is configured via the followin
 	#
 	# domain
 	#  *The domain part of an email address (local-part@domain), if the provided name matches such. In case the name does not match an email address, the full string is taken.
-	com.openexchange.oauth.provider.introspection.userLookupNamePart
+	com.openexchange.oauth.provider.userLookupNamePart
 
-Example:
+The last property enables a generic, configurable scope-mapping of external authorization server scopes to internal middleware scopes. 
+To specify an external scope replace `[EXTERNAL_SCOPE]` with the corresponding external scope name.
 
-	com.openexchange.oauth.provider.enabled=true
-	com.openexchange.oauth.provider.mode=token_introspection
-	com.openexchange.oauth.provider.contextLookupClaim=email
-	com.openexchange.oauth.provider.userLookupClaim=email
-	com.openexchange.oauth.provider.endpoint=http://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/token/introspect
-	com.openexchange.oauth.provider.clientID=OAuthShowcase
-	com.openexchange.oauth.provider.clientSecret=bef75a68-f3d8-499c-8c0a-65155de13dbb
+	#Specifies external scopes and their mapping to internal middleware scopes.
+	#E.g. com.openexchange.oauth.provider.scope.mail = read_mail, write_mail.
+	com.openexchange.oauth.provider.scope.[EXTERNAL_SCOPE]
+
+
+Example configuration:
+
+	com.openexchange.oauth.provider.enabled = true
+	com.openexchange.oauth.provider.mode = token_introspection
+	com.openexchange.oauth.provider.contextLookupClaim = email
+	com.openexchange.oauth.provider.userLookupClaim = email
+	com.openexchange.oauth.provider.introspection.endpoint = http://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/token/introspect
+	com.openexchange.oauth.provider.introspection.clientID = OAuthShowcase
+	com.openexchange.oauth.provider.introspection.clientSecret = bef75a68-f3d8-499c-8c0a-65155de13dbb
 
 

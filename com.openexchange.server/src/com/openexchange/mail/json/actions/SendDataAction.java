@@ -53,7 +53,7 @@ import javax.mail.MessagingException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.json.MailActionFactory;
