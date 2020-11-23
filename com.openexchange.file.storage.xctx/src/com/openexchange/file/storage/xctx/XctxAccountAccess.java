@@ -111,13 +111,15 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
 
     private static final Logger LOG = LoggerFactory.getLogger(XctxFileStorageService.class);
 
-    private final FileStorageAccount account;
-    private final ServerSession session;
     private final ServiceLookup services;
     private final FileStorageAccountErrorHandler errorHandler;
 
     private ServerSession guestSession;
     private boolean isConnected;
+
+    protected final FileStorageAccount account;
+    protected final ServerSession session;
+
 
     /**
      * Initializes a new {@link XctxAccountAccess}.
@@ -328,15 +330,24 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
         OXException recentException = this.errorHandler.getRecentException();
+
+        //In case of an error state: we return an implementation which will only allow to get the last known folders
         if (recentException != null) {
-            //In case of an error state: we return an implementation which will only allow to get the last known folders
-            //@formatter:off
-            return new ErrorStateFolderAccess(
-                recentException,
-                (String folderId) -> new AccountMetadataHelper(account, session).getLastKnownFolder(folderId),
-                (String folderId) -> new AccountMetadataHelper(account, session).getLastKnownFolders(folderId));
-            //@formatter:on
+
+            return new ErrorStateFolderAccess(recentException) {
+
+                @Override
+                public FileStorageFolderStub[] getLastKnownSubFolders(String folderId) throws OXException {
+                    return new AccountMetadataHelper(account, session).getLastKnownFolders(folderId);
+                }
+
+                @Override
+                public FileStorageFolderStub getLastKnownFolder(String folderId) throws OXException {
+                    return new AccountMetadataHelper(account, session).getLastKnownFolder(folderId);
+                }
+            };
         }
+
         return new XctxFolderAccess(this, session, guestSession);
     }
 

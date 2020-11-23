@@ -102,14 +102,15 @@ public class XOXAccountAccess implements CapabilityAware {
 
     private static final Logger LOG = LoggerFactory.getLogger(XOXAccountAccess.class);
 
-    private final FileStorageAccount account;
     private final FileStorageService service;
-    private final Session session;
     private final FileStorageAccountErrorHandler errorHandler;
     private final ServiceLookup services;
 
     private boolean isConnected;
     private ShareClient shareClient;
+
+    protected final FileStorageAccount account;
+    protected final Session session;
 
     /**
      * Initializes a new {@link XOXAccountAccess}.
@@ -241,15 +242,23 @@ public class XOXAccountAccess implements CapabilityAware {
     public FileStorageFolderAccess getFolderAccess() throws OXException {
         assertConnected();
         OXException recentException = this.errorHandler.getRecentException();
+
+        //In case of an error state: we return an implementation which will only allow to get the last known folders
         if (recentException != null) {
-            //In case of an error state: we return an implementation which will only allow to get the last known folders
-            //@formatter:off
-            return new ErrorStateFolderAccess(
-                recentException,
-                (String folderId) -> new AccountMetadataHelper(account, session).getLastKnownFolder(folderId),
-                (String folderId) -> new AccountMetadataHelper(account, session).getLastKnownFolders(folderId));
-            //@formatter:on
+            return new ErrorStateFolderAccess(recentException) {
+
+                @Override
+                public FileStorageFolderStub[] getLastKnownSubFolders(String folderId) throws OXException {
+                    return new AccountMetadataHelper(account, session).getLastKnownFolders(folderId);
+                }
+
+                @Override
+                public FileStorageFolderStub getLastKnownFolder(String folderId) throws OXException {
+                    return new AccountMetadataHelper(account, session).getLastKnownFolder(folderId);
+                }
+            };
         }
+
         return new XOXFolderAccess(this, new XOXFileAccess(this, shareClient), shareClient, session);
     }
 
