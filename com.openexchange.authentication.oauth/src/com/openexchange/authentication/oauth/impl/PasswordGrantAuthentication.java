@@ -217,12 +217,7 @@ public class PasswordGrantAuthentication extends OAuthRequestIssuer implements A
                 contextLookup = loginInfo.getUsername();
                 break;
             case RESPONSE_PARAMETER:
-                String contextLookupParameter = config.getContextLookupParameter();
-                contextLookup = tokenResponse.getCustomParameters().get(contextLookupParameter).toString();
-                if (Strings.isEmpty(contextLookup)) {
-                    LOG.debug("Missing or empty context lookup parameter '{}' in access token response", contextLookupParameter);
-                    throw LoginExceptionCodes.MISSING_PROPERTY.create(contextLookupParameter);
-                }
+                contextLookup = extractContextLookup(tokenResponse);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid context lookup source: " + config.getContextLookupSource().name());
@@ -238,6 +233,19 @@ public class PasswordGrantAuthentication extends OAuthRequestIssuer implements A
 
         LOG.debug("Resolved context {} for login mapping '{}' ('{}')", I(contextId), contextInfo, contextLookup);
         return new ContextWrapper(contextInfo, contextService.getContext(contextId));
+    }
+
+    private String extractContextLookup(AccessTokenResponse tokenResponse) throws OXException {
+        String contextLookupParameter = config.getContextLookupParameter();
+        Object object = tokenResponse.getCustomParameters().get(contextLookupParameter);
+        if (null != object) {
+            String contextLookup = object.toString();
+            if (Strings.isNotEmpty(contextLookup)) {
+                return contextLookup;
+            }
+        }
+        LOG.debug("Missing or empty context lookup parameter '{}' in access token response", contextLookupParameter);
+        throw LoginExceptionCodes.MISSING_PROPERTY.create(contextLookupParameter);
     }
 
     private String resolveUser(Context context, LoginInfo loginInfo, AccessTokenResponse tokenResponse) throws OXException, IllegalArgumentException {
