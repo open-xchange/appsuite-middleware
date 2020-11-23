@@ -90,7 +90,6 @@ import com.openexchange.share.core.subscription.SubscribedHelper;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.tools.arrays.Collections;
-
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.b;
 
@@ -410,5 +409,4 @@ public class XOXAccountAccess implements CapabilityAware {
         }
         return shareUrl;
     }
-
 }

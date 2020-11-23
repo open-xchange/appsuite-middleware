@@ -51,6 +51,10 @@ package com.openexchange.file.storage.xctx;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,12 +64,14 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.SearchableFolderNameFolderAccess;
+import com.openexchange.file.storage.FileStorageResult;
 import com.openexchange.file.storage.SetterAwareFileStorageFolder;
 import com.openexchange.file.storage.infostore.folder.AbstractInfostoreFolderAccess;
 import com.openexchange.file.storage.infostore.folder.FolderConverter;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.share.core.subscription.AccountMetadataHelper;
+import com.openexchange.share.subscription.ShareSubscriptionExceptions;
 import com.openexchange.tools.arrays.Collections;
 import com.openexchange.tools.session.ServerSession;
 
@@ -98,6 +104,25 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess implements S
         this.localSession = localSession;
         this.accountAccess = accountAccess;
         this.folderConverter = new XctxFolderConverter(accountAccess, localSession, guestSession);
+    }
+
+    /**
+     * Returns a list of visible/subscribed root-subfolders
+     *
+     * @return A list of subscribed root subfolders
+     * @throws OXException
+     */
+    private List<FileStorageFolder> getVisibleFolders() throws OXException {
+        List<FileStorageFolder> ret = new ArrayList<>();
+        FileStorageFolder[] f1 = getSubfolders("10", false);
+        if (f1 != null) {
+            java.util.Collections.addAll(ret, f1);
+        }
+        FileStorageFolder[] f2 = getSubfolders("15", false);
+        if (f2 != null) {
+            java.util.Collections.addAll(ret, f2);
+        }
+        return ret;
     }
 
     @Override
@@ -170,12 +195,47 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess implements S
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
+        FileStorageResult<String> result = updateFolder(true, identifier, toUpdate, cascadePermissions);
+        return result.getResponse();
+    }
+
+    @Override
+    public FileStorageResult<String> updateFolder(String identifier, boolean ignoreWarnings, FileStorageFolder toUpdate) throws OXException {
+        return updateFolder(ignoreWarnings, identifier, toUpdate, false);
+    }
+
+    @Override
+    public FileStorageResult<String> updateFolder(boolean ignoreWarnings, String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
         String result = super.updateFolder(identifier, toUpdate, cascadePermissions);
         if (SetterAwareFileStorageFolder.class.isInstance(toUpdate) && ((SetterAwareFileStorageFolder) toUpdate).containsSubscribed()) {
+
+            if(false == toUpdate.isSubscribed()) {
+                //Transition to  'unsubscribed', check if everything else is already unsubscribed
+                List<FileStorageFolder> subscribedFolders = getVisibleFolders();
+                Optional<FileStorageFolder> folderToUnsubscibe =  subscribedFolders.stream().filter(f -> f.getId().equals(identifier)).findFirst();
+                if(folderToUnsubscibe.isPresent()) {
+                    subscribedFolders.removeIf(f -> f == folderToUnsubscibe.get());
+                    if(subscribedFolders.isEmpty()) {
+                        //The last folder is going to be unsubscribed
+                        if(ignoreWarnings) {
+                            //Delete
+                            accountAccess.getService().getAccountManager().deleteAccount(accountAccess.getAccount(), localSession);
+                        }
+                        else {
+                            //Throw a warning
+                            String folderName = folderToUnsubscibe.get().getName();
+                            String accountName = accountAccess.getAccount().getDisplayName();
+                            return FileStorageResult.newFileStorageResult(null, Arrays.asList(ShareSubscriptionExceptions.ACCOUNT_WILL_BE_REMOVED.create(folderName, accountName)));
+                        }
+                        return FileStorageResult.newFileStorageResult(null, null);
+                    }
+                }
+            }
+
             DefaultFileStorageFolder folder = super.getFolder(result);
             accountAccess.getSubscribedHelper().setSubscribed(localSession, folder, B(toUpdate.isSubscribed()));
         }
-        return result;
+        return FileStorageResult.newFileStorageResult(result, null);
     }
 
     @Override

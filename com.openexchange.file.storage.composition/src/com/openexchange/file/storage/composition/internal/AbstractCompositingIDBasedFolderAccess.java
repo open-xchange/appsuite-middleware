@@ -216,27 +216,44 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
-        return updateFolder(identifier, toUpdate, false);
+        return updateFolder(identifier, toUpdate, false, true);
     }
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
+        return updateFolder(identifier, toUpdate, false, true);
+    }
+
+    @Override
+    public String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions, boolean ignoreWarnings) throws OXException {
         FolderID folderID = new FolderID(identifier);
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         if (containsForeignPermissions(session.getUserId(), toUpdate) && false == PermissionAware.class.isInstance(folderAccess)) {
             throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, folderID), folderID, Integer.valueOf(session.getContextId()));
         }
         FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
-        String newID;
+        FileStorageResult<String> result = null;
         if (cascadePermissions) {
             if (false == PermissionAware.class.isInstance(folderAccess)) {
                 throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, folderID), folderID, Integer.valueOf(session.getContextId()));
             }
-            newID = ((PermissionAware) folderAccess).updateFolder(folderID.getFolderId(), withRelativeID(toUpdate), cascadePermissions);
+            result = ((PermissionAware) folderAccess).updateFolder(ignoreWarnings, folderID.getFolderId(), withRelativeID(toUpdate), cascadePermissions);
         } else {
-            newID = folderAccess.updateFolder(folderID.getFolderId(), withRelativeID(toUpdate));
+            result = folderAccess.updateFolder(folderID.getFolderId(), ignoreWarnings, withRelativeID(toUpdate));
         }
-        FolderID newFolderID = new FolderID(folderID.getService(), folderID.getAccountId(), newID);
+
+        Collection<OXException> warnings = result.getWarnings();
+        if(0 < warnings.size()) {
+            addWarnings(warnings);
+            if(ignoreWarnings == false) {
+                return null;
+            }
+        }
+        if(result.getResponse() == null) {
+            return null;
+        }
+
+        FolderID newFolderID = new FolderID(folderID.getService(), folderID.getAccountId(), result.getResponse());
         fire(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
         return newFolderID.toUniqueID();
     }

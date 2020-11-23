@@ -689,7 +689,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
                     rename = null != folderToUpdate.getName() && false == getFolder(originalFolder, folder.getID(), folderAccess).getName().equals(folderToUpdate.getName());
                 }
                 permissions = null != folderToUpdate.getPermissions() && !folderToUpdate.getPermissions().isEmpty() && false == folderToUpdate.getPermissions().equals(getFolder(originalFolder, folder.getID(), folderAccess).getPermissions());
-                subscribed = SetterAwareFolder.class.isInstance(folder) && ((SetterAwareFolder) folder).containsSubscribed() && 
+                subscribed = SetterAwareFolder.class.isInstance(folder) && ((SetterAwareFolder) folder).containsSubscribed() &&
                     folder.isSubscribed() != getFolder(originalFolder, folder.getID(), folderAccess).isSubscribed();
             }
             /*
@@ -708,7 +708,8 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
              * update permissions / subscribed separately if needed
              */
             if (permissions || subscribed) {
-                String newID = folderAccess.updateFolder(folderToUpdate.getId(), folderToUpdate);
+                boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
+                String newID = folderAccess.updateFolder(folderToUpdate.getId(), folderToUpdate, false, ignoreWarnings);
                 folderToUpdate.setId(newID);
                 if (StorageParametersUtility.isHandDownPermissions(storageParameters)) {
                     handDown(folderToUpdate.getId(), folderToUpdate.getPermissions(), folderAccess);
