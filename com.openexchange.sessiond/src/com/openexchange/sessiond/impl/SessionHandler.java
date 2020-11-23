@@ -86,13 +86,21 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionAttributes;
 import com.openexchange.session.SessionDescription;
 import com.openexchange.session.SessionSerializationInterceptor;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.impl.container.LongTermSessionControl;
+import com.openexchange.sessiond.impl.container.SessionControl;
+import com.openexchange.sessiond.impl.container.ShortTermSessionControl;
+import com.openexchange.sessiond.impl.container.TokenSessionContainer;
+import com.openexchange.sessiond.impl.container.TokenSessionControl;
+import com.openexchange.sessiond.impl.container.SessionControl.ContainerType;
 import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigInterface;
 import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry;
+import com.openexchange.sessiond.impl.util.RotateShortResult;
 import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessiond.serialization.PortableContextSessionsCleaner;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplier;
@@ -639,11 +647,11 @@ public final class SessionHandler {
      * @param contextId The context identifier
      * @return The wrapper objects for active sessions
      */
-    public static List<SessionControl> getUserActiveSessions(int userId, int contextId) {
+    public static List<ShortTermSessionControl> getUserActiveSessions(int userId, int contextId) {
         SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
-            return new LinkedList<SessionControl>();
+            return new LinkedList<ShortTermSessionControl>();
         }
 
         return sessionData.getUserActiveSessions(userId, contextId);
@@ -749,7 +757,7 @@ public final class SessionHandler {
                     };
                     SessionImpl unwrappedSession = getObfuscator().unwrap(getFrom(c, null));
                     if (null != unwrappedSession) {
-                        retval = new SessionControl(unwrappedSession);
+                        retval = new ShortTermSessionControl(unwrappedSession);
                     }
                 } catch (RuntimeException e) {
                     LOG.error("", e);
@@ -1198,7 +1206,7 @@ public final class SessionHandler {
             return null;
         }
         if (postEvent) {
-            postSessionRemoval(sessionControl.getSession());
+            postSessionRemoval(sessionControl);
         }
         return sessionControl;
     }
@@ -1454,7 +1462,7 @@ public final class SessionHandler {
             }
 
             if (peek) {
-                return new SessionControl(unwrappedSession);
+                return new ShortTermSessionControl(unwrappedSession);
             }
 
             SessionControl sc = sessionData.addSession(unwrappedSession, noLimit, true);
@@ -1530,7 +1538,7 @@ public final class SessionHandler {
                     };
                     SessionImpl unwrappedSession = getObfuscator().unwrap(getFrom(c, null));
                     if (null != unwrappedSession) {
-                        return new SessionControl(unwrappedSession);
+                        return new ShortTermSessionControl(unwrappedSession);
                     }
                 } catch (RuntimeException e) {
                     LOG.error("", e);
@@ -1562,7 +1570,7 @@ public final class SessionHandler {
                 };
                 SessionImpl unwrappedSession = getObfuscator().unwrap(getFrom(c, null));
                 if (null != unwrappedSession) {
-                    return new SessionControl(unwrappedSession);
+                    return new ShortTermSessionControl(unwrappedSession);
                 }
             } catch (RuntimeException e) {
                 LOG.error("", e);
@@ -1576,14 +1584,14 @@ public final class SessionHandler {
      *
      * @return All available instances of {@link SessionControl}
      */
-    public static List<SessionControl> getSessions() {
+    public static List<ShortTermSessionControl> getSessions() {
         LOG.debug("getSessions");
         SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return Collections.emptyList();
         }
-        List<SessionControl> retval = sessionData.getShortTermSessions();
+        List<ShortTermSessionControl> retval = sessionData.getShortTermSessions();
         if (retval == null) {
             final SessionStorageService storageService = Services.optService(SessionStorageService.class);
             if (storageService != null) {
@@ -1596,12 +1604,12 @@ public final class SessionHandler {
                 };
                 List<Session> list = getFrom(c, Collections.<Session> emptyList());
                 if (null != list && !list.isEmpty()) {
-                    List<SessionControl> result = new ArrayList<SessionControl>();
+                    List<ShortTermSessionControl> result = new ArrayList<ShortTermSessionControl>();
                     Obfuscator obfuscator = getObfuscator();
                     for (Session s : list) {
                         SessionImpl unwrappedSession = obfuscator.unwrap(s);
                         if (null != unwrappedSession) {
-                            result.add(new SessionControl(unwrappedSession));
+                            result.add(new ShortTermSessionControl(unwrappedSession));
                         }
                     }
                     return result;
@@ -1645,7 +1653,7 @@ public final class SessionHandler {
             LOG.warn("\tSessionData instance is null.");
             return;
         }
-        List<SessionControl> controls = sessionData.rotateLongTerm();
+        List<LongTermSessionControl> controls = sessionData.rotateLongTerm();
         if (!controls.isEmpty()) {
             for (SessionControl control : controls) {
                 LOG.info("Session timed out. ID: {}", control.getSession().getSessionID());
@@ -1698,7 +1706,7 @@ public final class SessionHandler {
             return 0;
         }
         int[] shortTermSessionsPerContainer = sessionData.getShortTermSessionsPerContainer();
-        return shortTermSessionsPerContainer.length < 2 ? 0 : shortTermSessionsPerContainer[0]+shortTermSessionsPerContainer[1];
+        return shortTermSessionsPerContainer.length < 2 ? 0 : shortTermSessionsPerContainer[0] + shortTermSessionsPerContainer[1];
     }
 
     /**
@@ -1727,8 +1735,6 @@ public final class SessionHandler {
         return sessionData.getNumLongTerm();
     }
 
-
-
     public static int[] getNumberOfLongTermSessions() {
         SessionData sessionData = SESSION_DATA_REF.get();
         return null == sessionData ? new int[0] : sessionData.getLongTermSessionsPerContainer();
@@ -1756,38 +1762,48 @@ public final class SessionHandler {
      */
     public static void postSessionStored(Session session, final EventAdmin optEventAdmin) {
         EventAdmin eventAdmin = optEventAdmin == null ? Services.optService(EventAdmin.class) : optEventAdmin;
-        if (eventAdmin != null) {
-            Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
-            dic.put(SessiondEventConstants.PROP_SESSION, session);
-            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_STORED_SESSION, dic));
-            LOG.debug("Posted event for added session");
+        if (eventAdmin == null) {
+            // Missing EventAdmin service. Nothing to do.
+            return;
         }
+
+        Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+        dic.put(SessiondEventConstants.PROP_SESSION, session);
+        dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
+        eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_STORED_SESSION, dic));
+        LOG.debug("Posted event for added session");
     }
 
     private static void postSessionCreation(Session session) {
         EventAdmin eventAdmin = Services.optService(EventAdmin.class);
-        if (eventAdmin != null) {
-            Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
-            dic.put(SessiondEventConstants.PROP_SESSION, session);
-            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic));
-            LOG.debug("Posted event for added session");
+        if (eventAdmin == null) {
+            // Missing EventAdmin service. Nothing to do.
+            return;
         }
+
+        Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+        dic.put(SessiondEventConstants.PROP_SESSION, session);
+        dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
+        eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic));
+        LOG.debug("Posted event for added session");
     }
 
     private static void postSessionRestauration(Session session) {
         EventAdmin eventAdmin = Services.optService(EventAdmin.class);
-        if (eventAdmin != null) {
-            Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
-            dic.put(SessiondEventConstants.PROP_SESSION, session);
-            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_RESTORED_SESSION, dic));
-            LOG.debug("Posted event for restored session");
+        if (eventAdmin == null) {
+            // Missing EventAdmin service. Nothing to do.
+            return;
         }
+
+        Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+        dic.put(SessiondEventConstants.PROP_SESSION, session);
+        dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
+        eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_RESTORED_SESSION, dic));
+        LOG.debug("Posted event for restored session");
     }
 
-    private static void postSessionRemoval(final SessionImpl session) {
+    private static void postSessionRemoval(final SessionControl sessionControl) {
+        Session session = sessionControl.getSession();
         Future<Void> dropSessionFromHz = null;
         if (useSessionStorage(session)) {
             // Asynchronous remove from session storage
@@ -1819,12 +1835,14 @@ public final class SessionHandler {
             eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REMOVE_SESSION, dic));
             LOG.debug("Posted event for removed session");
 
-            SessionData sessionData = SESSION_DATA_REF.get();
-            if (null != sessionData) {
-                int contextId = session.getContextId();
-                int userId = session.getUserId();
-                if (false == sessionData.isUserActive(userId, contextId, false)) {
-                    postLastSessionGone(userId, contextId, eventAdmin);
+            if (sessionControl.geContainerType() == ContainerType.SHORT_TERM) {
+                SessionData sessionData = SESSION_DATA_REF.get();
+                if (null != sessionData) {
+                    int contextId = session.getContextId();
+                    int userId = session.getUserId();
+                    if (false == sessionData.isUserActive(userId, contextId, false)) {
+                        postLastSessionGone(userId, contextId, eventAdmin);
+                    }
                 }
             }
         }
@@ -1848,49 +1866,64 @@ public final class SessionHandler {
     }
 
     private static void postLastSessionGone(int userId, int contextId, EventAdmin eventAdmin) {
-        if (eventAdmin != null) {
-            Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
-            dic.put(SessiondEventConstants.PROP_USER_ID, I(userId));
-            dic.put(SessiondEventConstants.PROP_CONTEXT_ID, I(contextId));
-            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_LAST_SESSION, dic));
-            LOG.debug("Posted event for last removed session for user {} in context {}", I(userId), I(contextId));
+        if (eventAdmin == null) {
+            // Missing EventAdmin service. Nothing to do.
+            return;
+        }
 
-            SessionData sessionData = SESSION_DATA_REF.get();
-            if (null != sessionData) {
-                if (false == sessionData.hasForContext(contextId)) {
-                    postContextLastSessionGone(contextId, eventAdmin);
-                }
+        Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+        dic.put(SessiondEventConstants.PROP_USER_ID, I(userId));
+        dic.put(SessiondEventConstants.PROP_CONTEXT_ID, I(contextId));
+        eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_LAST_SESSION, dic));
+        LOG.debug("Posted event for last removed session for user {} in context {}", I(userId), I(contextId));
+
+        SessionData sessionData = SESSION_DATA_REF.get();
+        if (null != sessionData) {
+            if (false == sessionData.hasForContext(contextId)) {
+                postContextLastSessionGone(contextId, eventAdmin);
             }
         }
     }
 
     private static void postContextLastSessionGone(int contextId, EventAdmin eventAdmin) {
-        if (eventAdmin != null) {
-            Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
-            dic.put(SessiondEventConstants.PROP_CONTEXT_ID, I(contextId));
-            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_LAST_SESSION_CONTEXT, dic));
-            LOG.debug("Posted event for last removed session for context {}", I(contextId));
+        if (eventAdmin == null) {
+            // Missing EventAdmin service. Nothing to do.
+            return;
         }
+
+        Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+        dic.put(SessiondEventConstants.PROP_CONTEXT_ID, I(contextId));
+        eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_LAST_SESSION_CONTEXT, dic));
+        LOG.debug("Posted event for last removed session for context {}", I(contextId));
     }
 
-    protected static void postContainerRemoval(List<SessionControl> sessionControls, boolean removeFromSessionStorage) {
+    protected static void postContainerRemoval(List<? extends SessionControl> sessionControls, boolean removeFromSessionStorage) {
+        if (sessionControls == null || sessionControls.isEmpty()) {
+            return;
+        }
+
         if (removeFromSessionStorage) {
-            // Asynchronous remove from session storage
-            final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
+            // Asynchronously remove from session storage
+            SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
             if (sessionStorageService != null) {
                 ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
 
                     @Override
                     public Void call() {
                         try {
-                            List<String> sessionsToRemove = new ArrayList<String>();
-                            for (final SessionControl sessionControl : sessionControls) {
+                            List<String> sessionsToRemove = null;
+                            for (SessionControl sessionControl : sessionControls) {
                                 SessionImpl session = sessionControl.getSession();
                                 if (useSessionStorage(session)) {
+                                    if (sessionsToRemove == null) {
+                                        sessionsToRemove = new ArrayList<String>();
+                                    }
                                     sessionsToRemove.add(session.getSessionID());
                                 }
                             }
-                            sessionStorageService.removeSessions(sessionsToRemove);
+                            if (sessionsToRemove != null) {
+                                sessionStorageService.removeSessions(sessionsToRemove);
+                            }
                         } catch (RuntimeException e) {
                             LOG.error("", e);
                         } catch (OXException e) {
@@ -1904,25 +1937,35 @@ public final class SessionHandler {
 
         // Asynchronous post of event
         EventAdmin eventAdmin = Services.optService(EventAdmin.class);
-        if (eventAdmin != null) {
-            Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
-            Map<String, Session> eventMap = new HashMap<String, Session>(sessionControls.size());
-            Set<UserKey> users = new HashSet<UserKey>(sessionControls.size());
-            for (SessionControl sessionControl : sessionControls) {
-                Session session = sessionControl.getSession();
-                eventMap.put(session.getSessionID(), session);
-                users.add(new UserKey(session.getUserId(), session.getContextId()));
-            }
-            dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);
-            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REMOVE_CONTAINER, dic));
-            LOG.debug("Posted event for removed session container");
+        if (eventAdmin == null) {
+            // Missing EventAdmin service. Nothing to do.
+            return;
+        }
 
+        Map<String, Session> eventMap = new HashMap<String, Session>(sessionControls.size());
+        Set<UserAndContext> users = null;
+        for (SessionControl sessionControl : sessionControls) {
+            Session session = sessionControl.getSession();
+            eventMap.put(session.getSessionID(), session);
+            if (ContainerType.SHORT_TERM == sessionControl.geContainerType()) {
+                if (users == null) {
+                    users = new HashSet<UserAndContext>(sessionControls.size());
+                }
+                users.add(UserAndContext.newInstance(session));
+            }
+        }
+        Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+        dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);
+        dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
+        eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REMOVE_CONTAINER, dic));
+        LOG.debug("Posted event for removed session container");
+
+        if (users != null) {
             SessionData sessionData = SESSION_DATA_REF.get();
             if (null != sessionData) {
-                for (UserKey userKey : users) {
-                    if (false == sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
-                        postLastSessionGone(userKey.userId, userKey.contextId, eventAdmin);
+                for (UserAndContext userKey : users) {
+                    if (false == sessionData.isUserActive(userKey.getUserId(), userKey.getContextId(), false)) {
+                        postLastSessionGone(userKey.getUserId(), userKey.getContextId(), eventAdmin);
                     }
                 }
             }
@@ -1932,25 +1975,35 @@ public final class SessionHandler {
     private static void postSessionDataRemoval(List<SessionControl> controls) {
         // Post event
         EventAdmin eventAdmin = Services.optService(EventAdmin.class);
-        if (eventAdmin != null) {
-            Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
-            Map<String, Session> eventMap = new HashMap<String, Session>();
-            Set<UserKey> users = new HashSet<UserKey>(controls.size());
-            for (SessionControl sessionControl : controls) {
-                Session session = sessionControl.getSession();
-                eventMap.put(session.getSessionID(), session);
-                users.add(new UserKey(session.getUserId(), session.getContextId()));
-            }
-            dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);
-            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REMOVE_DATA, dic));
-            LOG.debug("Posted event for removing temporary session data.");
+        if (eventAdmin == null) {
+            // Missing EventAdmin service. Nothing to do.
+            return;
+        }
 
+        Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+        Map<String, Session> eventMap = new HashMap<String, Session>(controls.size());
+        Set<UserAndContext> users = null;
+        for (SessionControl sessionControl : controls) {
+            Session session = sessionControl.getSession();
+            eventMap.put(session.getSessionID(), session);
+            if (ContainerType.SHORT_TERM == sessionControl.geContainerType()) {
+                if (users == null) {
+                    users = new HashSet<UserAndContext>(controls.size());
+                }
+                users.add(UserAndContext.newInstance(session));
+            }
+        }
+        dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);
+        dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
+        eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REMOVE_DATA, dic));
+        LOG.debug("Posted event for removing temporary session data.");
+
+        if (users != null) {
             SessionData sessionData = SESSION_DATA_REF.get();
             if (null != sessionData) {
-                for (UserKey userKey : users) {
-                    if (false == sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
-                        postLastSessionGone(userKey.userId, userKey.contextId, eventAdmin);
+                for (UserAndContext userKey : users) {
+                    if (false == sessionData.isUserActive(userKey.getUserId(), userKey.getContextId(), false)) {
+                        postLastSessionGone(userKey.getUserId(), userKey.getContextId(), eventAdmin);
                     }
                 }
             }
@@ -1959,13 +2012,16 @@ public final class SessionHandler {
 
     static void postSessionReactivation(Session session) {
         EventAdmin eventAdmin = Services.optService(EventAdmin.class);
-        if (eventAdmin != null) {
-            Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
-            dic.put(SessiondEventConstants.PROP_SESSION, session);
-            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REACTIVATE_SESSION, dic));
-            LOG.debug("Posted event for reactivated session");
+        if (eventAdmin == null) {
+            // Missing EventAdmin service. Nothing to do.
+            return;
         }
+
+        Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+        dic.put(SessiondEventConstants.PROP_SESSION, session);
+        dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
+        eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REACTIVATE_SESSION, dic));
+        LOG.debug("Posted event for reactivated session");
     }
 
     /**
@@ -1976,13 +2032,16 @@ public final class SessionHandler {
      */
     static void postSessionTouched(Session session) {
         EventAdmin eventAdmin = Services.optService(EventAdmin.class);
-        if (eventAdmin != null) {
-            Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
-            dic.put(SessiondEventConstants.PROP_SESSION, session);
-            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_TOUCH_SESSION, dic));
-            LOG.debug("Posted event for touched session");
+        if (eventAdmin == null) {
+            // Missing EventAdmin service. Nothing to do.
+            return;
         }
+
+        Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+        dic.put(SessiondEventConstants.PROP_SESSION, session);
+        dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
+        eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_TOUCH_SESSION, dic));
+        LOG.debug("Posted event for touched session");
     }
 
     public static void addThreadPoolService(ThreadPoolService service) {
@@ -2036,11 +2095,11 @@ public final class SessionHandler {
         interceptors.remove(interceptor);
     }
 
-    private static SessionControl sessionToSessionControl(Session session) {
+    private static ShortTermSessionControl sessionToSessionControl(Session session) {
         if (session == null) {
             return null;
         }
-        return new SessionControl(session instanceof SessionImpl ? (SessionImpl) session : new SessionImpl(session));
+        return new ShortTermSessionControl(session instanceof SessionImpl ? (SessionImpl) session : new SessionImpl(session));
     }
 
     private static Session[] merge(Session[] array1, final Session[] array2) {
@@ -2206,49 +2265,6 @@ public final class SessionHandler {
         }
         String uc = Strings.toUpperCase(clientId);
         return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
-    }
-
-    private static final class UserKey {
-
-        protected final int contextId;
-
-        protected final int userId;
-
-        private final int hash;
-
-        protected UserKey(int userId, final int contextId) {
-            super();
-            this.userId = userId;
-            this.contextId = contextId;
-            int prime = 31;
-            int result = 1;
-            result = prime * result + contextId;
-            result = prime * result + userId;
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof UserKey)) {
-                return false;
-            }
-            UserKey other = (UserKey) obj;
-            if (contextId != other.contextId) {
-                return false;
-            }
-            if (userId != other.userId) {
-                return false;
-            }
-            return true;
-        }
     }
 
 }

@@ -47,67 +47,39 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.container;
+
+import com.openexchange.sessiond.impl.SessionImpl;
 
 /**
- * Simple key class for user ID and context ID.
+ * {@link ShortTermSessionControl} - The instance managed in short-term container.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.5
  */
-final class UserKey {
+public class ShortTermSessionControl extends AbstractSessionControl {
 
-    private final int userId;
-    private final int cid;
-    private final int hash;
-
-    public UserKey(final int userId, final int cid) {
-        super();
-        this.userId = userId;
-        this.cid = cid;
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + cid;
-        result = prime * result + userId;
-        hash = result;
+    /**
+     * Initializes a new {@link ShortTermSessionControl}.
+     *
+     * @param session The session
+     */
+    public ShortTermSessionControl(SessionImpl session) {
+        super(session, System.currentTimeMillis());
     }
 
     /**
-     * Gets the user identifier
+     * Initializes a new {@link ShortTermSessionControl}.
      *
-     * @return The user identifier
+     * @param sessionControl The session control
      */
-    public int getUserId() {
-        return userId;
-    }
-
-    /**
-     * Gets the context identifier
-     *
-     * @return The context identifier
-     */
-    public int getCid() {
-        return cid;
+    public ShortTermSessionControl(SessionControl sessionControl) {
+        super(sessionControl.getSession(), sessionControl.getCreationTime());
     }
 
     @Override
-    public int hashCode() {
-        return hash;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof UserKey)) {
-            return false;
-        }
-        final UserKey other = (UserKey) obj;
-        if (cid != other.cid) {
-            return false;
-        }
-        if (userId != other.userId) {
-            return false;
-        }
-        return true;
+    public ContainerType geContainerType() {
+        return ContainerType.SHORT_TERM;
     }
 
 }

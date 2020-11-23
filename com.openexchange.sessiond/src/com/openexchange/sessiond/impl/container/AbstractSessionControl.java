@@ -47,60 +47,73 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.container;
 
-import java.util.UUID;
-import com.openexchange.java.util.UUIDs;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionImpl;
 
 /**
- * {@link UUIDSessionIdGenerator} - The session ID generator based on {@link UUID#randomUUID()}.
+ * {@link AbstractSessionControl} - Holds a {@link Session} instance and remembers life-cycle time stamps such as last-accessed, creation-time, etc.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UUIDSessionIdGenerator extends SessionIdGenerator {
-
-    private static final UUIDSessionIdGenerator INSTANCE = new UUIDSessionIdGenerator();
+public abstract class AbstractSessionControl implements SessionControl {
 
     /**
-     * Gets the instance
+     * Time stamp when this session control was created.
+     */
+    protected final long creationTime;
+
+    /**
+     * The associated session.
+     */
+    protected final SessionImpl session;
+
+    /**
+     * Initializes a new {@link AbstractSessionControl}
      *
-     * @return The instance
+     * @param session The stored session
+     * @param creationTime The creation time to apply
      */
-    public static UUIDSessionIdGenerator getInstance() {
-        return INSTANCE;
-    }
-
-    // -------------------------------------------------------------------------------------------------------
-
-    /**
-     * Initializes a new {@link UUIDSessionIdGenerator}
-     */
-    private UUIDSessionIdGenerator() {
+    protected AbstractSessionControl(SessionImpl session, long creationTime) {
         super();
+        this.session = session;
+        this.creationTime = creationTime;
     }
 
     @Override
-    public String createSessionId(final String loginName) {
-        return randomUUID();
+    public String getSessionID() {
+        return session.getSessionID();
     }
 
     @Override
-    public String createSecretId(final String loginName) {
-        return randomUUID();
+    public SessionImpl getSession() {
+        return session;
     }
 
     @Override
-    public String createRandomId() {
-        return randomUUID();
+    public long getCreationTime() {
+        return creationTime;
     }
 
-    /**
-     * Generates a UUID using {@link UUID#randomUUID()} and removes all dashes; e.g.:<br>
-     * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i> would be <i>a5aa65cb6c7e40899ce2b107d21b9d15</i>
-     *
-     * @return A UUID string
-     */
-    public static String randomUUID() {
-        return UUIDs.getUnformattedString(UUID.randomUUID());
+    @Override
+    public boolean equalsContext(int contextId) {
+        return session.getContextId() == contextId;
     }
+
+    @Override
+    public boolean equalsUserAndContext(int userId, int contextId) {
+        return session.getContextId() == contextId && session.getUserId() == userId;
+    }
+
+    @Override
+    public int getContextId() {
+        return session.getContextId();
+    }
+
+    @Override
+    public int getUserId() {
+        return session.getUserId();
+    }
+
 }

@@ -47,105 +47,70 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.container;
 
-import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionImpl;
 
 /**
- * {@link SessionControl} - Holds a {@link Session} instance and remembers life-cycle timestamps such as last-accessed, creation-time, etc.
+ * Stores the additional values necessary for a session created using the token login mechanism.
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class SessionControl {
+public final class TokenSessionControl {
 
-    /**
-     * Time stamp when this session control was created.
-     */
-    private final long creationTime;
-
-    /**
-     * The associated session.
-     */
     private final SessionImpl session;
+    private final String clientToken;
+    private final String serverToken;
+    private final long creationStamp;
 
     /**
-     * Initializes a new {@link SessionControl}
+     * Initializes a new {@link TokenSessionControl}.
      *
-     * @param session The stored session
-     * @param idleTime The session's allowed idle time or <code>-1</code> to use default setting
+     * @param session The associated session
+     * @param clientToken The client token
+     * @param serverToken The server token
      */
-    public SessionControl(SessionImpl session) {
+    public TokenSessionControl(SessionImpl session, String clientToken, String serverToken, long creationStamp) {
         super();
         this.session = session;
-        creationTime = System.currentTimeMillis();
+        this.clientToken = clientToken;
+        this.serverToken = serverToken;
+        this.creationStamp = creationStamp;
     }
 
     /**
-     * Gets the session identifier
+     * Gets the creation time in milliseconds
      *
-     * @return The session identifier
-     * @see com.openexchange.sessiond.impl.SessionImpl#getSessionID()
+     * @return The creation time in milliseconds
      */
-    public String getSessionID() {
-        return session.getSessionID();
+    public long getCreationStamp() {
+        return creationStamp;
     }
 
     /**
-     * Gets the stored session
+     * Gets the associated session
      *
-     * @return The stored session
+     * @return The session
      */
     public SessionImpl getSession() {
         return session;
     }
 
     /**
-     * Gets the creation-time time stamp
+     * Gets the client token
      *
-     * @return The creation-time time stamp
+     * @return The client token
      */
-    public long getCreationTime() {
-        return creationTime;
+    public String getClientToken() {
+        return clientToken;
     }
 
     /**
-     * Checks if the session associated with this control holds specified context identifier
+     * Gets the server token
      *
-     * @param contextId The context identifier to check against
-     * @return <code>true</code> if session holds specified context identifier; otherwise <code>false</code>
+     * @return The server token
      */
-    public boolean equalsContext(int contextId) {
-        return session.getContextId() == contextId;
+    public String getServerToken() {
+        return serverToken;
     }
-
-    /**
-     * Checks if the session associated with this control holds specified user and context identifier
-     *
-     * @param userId The user identifier to check against
-     * @param contextId The context identifier to check against
-     * @return <code>true</code> if session holds specified user and context identifier; otherwise <code>false</code>
-     */
-    public boolean equalsUserAndContext(int userId, int contextId) {
-        return session.getContextId() == contextId && session.getUserId() == userId;
-    }
-
-    /**
-     * Gets the context identifier
-     *
-     * @return The context identifier
-     */
-    public int getContextId() {
-        return session.getContextId();
-    }
-
-    /**
-     * Gets the user identifier
-     *
-     * @return The user identifier
-     */
-    public int getUserId() {
-        return session.getUserId();
-    }
-
 }
