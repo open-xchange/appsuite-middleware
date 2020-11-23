@@ -49,38 +49,28 @@
 
 package com.openexchange.mail.compose.mailstorage.association;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
-import org.slf4j.Logger;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalNotification;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
 import com.openexchange.mail.compose.mailstorage.MailStorageCompositionSpaceConfig;
 import com.openexchange.session.Session;
 import com.openexchange.session.UserAndContext;
 
 
 /**
- * {@link AssociationStorageManager}
+ * {@link AssociationStorageManager} - The association storage manager implementation backed by Google Cache.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.5
  */
 public class AssociationStorageManager implements IAssociationStorageManager {
 
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(IAssociationStorageManager.class);
-    }
-
     private final LoadingCache<UserAndContext, AssociationStorage> user2Storages;
-    private final AtomicReference<CompositionSpaceServiceFactory> compositionSpaceServiceFactoryReference;
 
     /**
      * Initializes a new {@link AssociationStorageManager}.
@@ -89,58 +79,34 @@ public class AssociationStorageManager implements IAssociationStorageManager {
      */
     public AssociationStorageManager() throws OXException {
         super();
-        AtomicReference<CompositionSpaceServiceFactory> compositionSpaceServiceFactoryReference = new AtomicReference<CompositionSpaceServiceFactory>(null);
-        this.compositionSpaceServiceFactoryReference = compositionSpaceServiceFactoryReference;
-
         long maxIdleSeconds = MailStorageCompositionSpaceConfig.getInstance().getInMemoryCacheMaxIdleSeconds();
         user2Storages = CacheBuilder.newBuilder()
             .expireAfterAccess(Duration.ofSeconds(maxIdleSeconds))
             .removalListener((RemovalNotification<UserAndContext, AssociationStorage> notification) -> {
                 if (notification.wasEvicted()) {
-                    CompositionSpaceServiceFactory compositionSpaceServiceFactory = compositionSpaceServiceFactoryReference.get();
-                    if (compositionSpaceServiceFactory == null) {
-                        UserAndContext uac = notification.getKey();
-                        LoggerHolder.LOG.error("Could not save drafts of user {} in context {} because of absent CompositionSpaceServiceFactory on eviction of user-associated composition spaces", I(uac.getUserId()), I(uac.getContextId()));
-                        return;
-                    }
-
                     AssociationStorage activeUserStorage = notification.getValue();
-                    handleEvictedStorage(activeUserStorage, compositionSpaceServiceFactory);
+                    handleEvictedStorage(activeUserStorage);
                 }
             })
             .build(new CacheLoader<UserAndContext, AssociationStorage>() {
 
                 @Override
                 public AssociationStorage load(UserAndContext key) throws Exception {
-                    return new AssociationStorage(maxIdleSeconds, compositionSpaceServiceFactoryReference);
+                    return new AssociationStorage(maxIdleSeconds);
                 }
             });
     }
 
-    void handleEvictedStorage(AssociationStorage activeUserStorage, CompositionSpaceServiceFactory compositionSpaceServiceFactory) {
-        activeUserStorage.signalEviction(compositionSpaceServiceFactory);
-    }
-
-    /**
-     * Sets the composition space service factory to use,
-     *
-     * @param compositionSpaceServiceFactory The composition space service factory to use
-     */
-    public void setCompositionSpaceServiceFactory(CompositionSpaceServiceFactory compositionSpaceServiceFactory) {
-        compositionSpaceServiceFactoryReference.set(compositionSpaceServiceFactory);
+    void handleEvictedStorage(AssociationStorage activeUserStorage) {
+        activeUserStorage.signalEviction();
     }
 
     /**
      * Signals shut-down to this association storage manager.
      */
     public void shutDown() {
-        CompositionSpaceServiceFactory compositionSpaceServiceFactory = compositionSpaceServiceFactoryReference.get();
-        if (compositionSpaceServiceFactory == null) {
-            return;
-        }
-
         for (AssociationStorage activeUserStorage : user2Storages.asMap().values()) {
-            handleEvictedStorage(activeUserStorage, compositionSpaceServiceFactory);
+            handleEvictedStorage(activeUserStorage);
         }
         user2Storages.invalidateAll();
     }

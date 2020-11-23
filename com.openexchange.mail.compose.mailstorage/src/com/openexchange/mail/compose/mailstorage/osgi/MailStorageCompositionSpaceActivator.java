@@ -144,8 +144,6 @@ public class MailStorageCompositionSpaceActivator extends HousekeepingActivator 
         this.associationStorageManager = associationStorageManager;
 
         MailStorageCompositionSpaceServiceFactory compositionSpaceServiceFactory = new MailStorageCompositionSpaceServiceFactory(mailStorage, associationStorageManager, this);
-        associationStorageManager.setCompositionSpaceServiceFactory(compositionSpaceServiceFactory);
-
         {
             MailStorageCompositionSpaceImageDataSource mailStorageCompositionSpaceImageDataSource = MailStorageCompositionSpaceImageDataSource.getInstance();
             mailStorageCompositionSpaceImageDataSource.setServiceFactory(compositionSpaceServiceFactory);
