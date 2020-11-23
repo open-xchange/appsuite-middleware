@@ -63,6 +63,7 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.config.WildcardNamePropertyFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.security.manager.SecurityManagerPropertyProvider;
+import com.openexchange.security.manager.exceptions.SecurityManagerExceptionCodes;
 import com.openexchange.security.manager.impl.FolderPermission;
 import com.openexchange.security.manager.impl.FolderPermission.Allow;
 
@@ -288,7 +289,7 @@ public class ConfigurationReader {
         }
 
         List<FolderPermission> permissions = new ArrayList<>();
-        for(String prop : props) {
+        for (String prop : props) {
             if (missing.containsKey(prop) == false) {
                 continue;
             }
@@ -341,7 +342,8 @@ public class ConfigurationReader {
             }
             return folderPermissions;
         }
-        return null;
+
+        throw SecurityManagerExceptionCodes.PROBLEM_POLICY_FILE.create("Unable to load configurations");
     }
 
     /**
