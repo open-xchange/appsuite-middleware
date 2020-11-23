@@ -123,6 +123,12 @@ public class ApiShareClient extends AbstractApiClient {
         String loginType = shareLoginInfos.getLoginType();
         if ("anonymous_password".equals(loginType)) {
             /*
+             * Precondition check
+             */
+            if (null == credentials.getPassword()) {
+                throw ApiClientExceptions.MISSING_CREDENTIALS.create();
+            }
+            /*
              * Perform anonymous login
              */
             shareLoginInfos = execute(new RedeemTokenCall(shareLoginInfos.getToken()));
