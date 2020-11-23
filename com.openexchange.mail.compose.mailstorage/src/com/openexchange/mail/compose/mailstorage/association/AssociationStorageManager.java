@@ -52,6 +52,7 @@ package com.openexchange.mail.compose.mailstorage.association;
 import static com.openexchange.java.Autoboxing.I;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.google.common.cache.CacheBuilder;
@@ -146,7 +147,14 @@ public class AssociationStorageManager implements IAssociationStorageManager {
 
     @Override
     public IAssociationStorage getStorageFor(Session session) throws OXException {
-        return user2Storages.getUnchecked(UserAndContext.newInstance(session));
+        try {
+            return user2Storages.get(UserAndContext.newInstance(session));
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            throw OXException.general(new StringBuilder("Failed fetching association storage for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString(), cause == null ? e : cause);
+        } catch (RuntimeException e) {
+            throw OXException.general(new StringBuilder("Failed fetching association storage for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString(), e);
+        }
     }
 
     @Override
