@@ -331,7 +331,7 @@ public class APNAccess {
             return false;
         }
         if (null == teamId) {
-            if (null != teamId) {
+            if (null != other.teamId) {
                 return false;
             }
         } else if (!teamId.equals(other.teamId)) {
