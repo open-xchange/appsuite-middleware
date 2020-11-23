@@ -6,7 +6,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-admin
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 55
+%define         ox_release 56
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -75,6 +75,8 @@ fi
 %doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Mon Nov 23 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-11-23 (5916)
 * Thu Sep 17 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-09-22 (5867)
 * Wed Jul 01 2020 Marcus Klein <marcus.klein@open-xchange.com>

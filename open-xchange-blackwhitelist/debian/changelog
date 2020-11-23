@@ -1,3 +1,9 @@
+open-xchange-blackwhitelist (7.6.3-56) stable; urgency=medium
+
+  * Build for patch 2020-11-23 (5916)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 23 Nov 2020 11:51:58 +0000
+
 open-xchange-blackwhitelist (7.6.3-55) stable; urgency=medium
 
   * Build for patch 2020-09-22 (5867)
