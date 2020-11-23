@@ -152,14 +152,16 @@ public class Strings {
                 }
             }
         }
-
+        if (c == null) {
+            return s;
+        }
         while (i-- > 0) {
             if (c[i] <= 127) {
                 c[i] = lowercases[c[i]];
             }
         }
 
-        return c == null ? s : new String(c);
+        return new String(c);
     }
 
 

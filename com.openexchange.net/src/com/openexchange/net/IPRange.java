@@ -61,6 +61,8 @@ import org.apache.commons.lang.math.LongRange;
 import org.apache.commons.lang.math.NumberRange;
 import org.apache.commons.lang.math.Range;
 import org.apache.commons.validator.routines.InetAddressValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.googlecode.ipv6.IPv6Address;
@@ -76,6 +78,8 @@ import edazdarevic.commons.net.CIDRUtils;
  * @since v7.8.3
  */
 public class IPRange {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IPRange.class);
 
     /**
      * Parses specified string to an IP range.
@@ -122,8 +126,7 @@ public class IPRange {
             final NumberRange ipv6Range = new NumberRange(IPv6Address.fromString(startAddress.toString().replaceAll("/", "")).toBigInteger(), IPv6Address.fromString(endAddress.toString().replaceAll("/", "")).toBigInteger());
             return new IPRange(null, ipv6Range);
         } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
-            //LOG.
+            LOGGER.debug("", e);
         }
         return null;
     }
@@ -156,7 +159,7 @@ public class IPRange {
     }
 
     private static byte[] longToIP(long value) {
-        final List<Byte> retval = new ArrayList<Byte>();
+        final List<Byte> retval = new ArrayList<>();
         while (value != 0) {
             retval.add(Byte.valueOf((byte) (value & 0xff)));
             value >>= 8;

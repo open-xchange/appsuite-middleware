@@ -288,7 +288,7 @@ public class HostListTest {
             String hostList = "www.google.*";
             HostList.valueOf(hostList);
             fail("Host list did not fail to parse: " + hostList);
-        } catch (IllegalArgumentException e) {
+        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
             // Expected
         } catch (Exception e) {
             e.printStackTrace();
@@ -302,7 +302,7 @@ public class HostListTest {
             String hostList = "*.open-xchange.*";
             HostList.valueOf(hostList);
             fail("Host list did not fail to parse: " + hostList);
-        } catch (IllegalArgumentException e) {
+        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
             // Expected
         } catch (Exception e) {
             e.printStackTrace();
