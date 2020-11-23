@@ -209,7 +209,6 @@ public class ICAPRequest {
          * @see <a href="https://tools.ietf.org/html/rfc3507#section-4.3.2">RFC-3507, Section 4.3.2</a>
          */
         ICAPMethod method = ICAPMethod.OPTIONS;
-        OperationMode clientMode;
         String service;
         String server;
         int port = -1;
