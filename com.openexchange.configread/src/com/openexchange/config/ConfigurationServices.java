@@ -59,7 +59,6 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
-import org.slf4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 import com.openexchange.java.Charsets;
@@ -72,8 +71,6 @@ import com.openexchange.java.Streams;
  * @since v7.8.3
  */
 public class ConfigurationServices {
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationServices.class);
 
     /**
      * Initializes a new {@link ConfigurationServices}.
@@ -101,7 +98,7 @@ public class ConfigurationServices {
             Properties properties = new Properties();
             properties.load(fis);
             return properties;
-        } catch (FileNotFoundException e) {
+        } catch (@SuppressWarnings("unused") FileNotFoundException e) {
             return null;
         } finally {
             Streams.close(fis);
@@ -137,7 +134,7 @@ public class ConfigurationServices {
      * @throws IOException If reading from stream yields an I/O error
      * @throws IllegalArgumentException If stream data is no valid YAML
      */
-    public static Object loadYamlFrom(InputStream in) throws IOException {
+    public static Object loadYamlFrom(InputStream in) {
         if (null == in) {
             return null;
         }
