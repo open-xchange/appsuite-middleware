@@ -167,8 +167,8 @@ public class ApiShareClient extends AbstractApiClient {
      */
     private void checkResponse(ShareLoginInformation shareLoginInfos) throws OXException {
         boolean message = "message".equals(shareLoginInfos.getLoginType());
-        boolean message_comtinue = "message_continue".equals(shareLoginInfos.getLoginType());
-        if (false == (message || message_comtinue)) {
+        boolean message_continue = "message_continue".equals(shareLoginInfos.getLoginType());
+        if (false == (message || message_continue)) {
             /*
              * No errors, continue.
              */

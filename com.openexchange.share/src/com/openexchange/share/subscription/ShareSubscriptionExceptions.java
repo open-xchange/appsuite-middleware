@@ -79,27 +79,32 @@ public enum ShareSubscriptionExceptions implements DisplayableOXExceptionCode {
     MISSING_CREDENTIALS("The credentials are missing", Category.CATEGORY_ERROR, 3, OXExceptionStrings.BAD_REQUEST),
 
     /**
-     * <code>Unable to find a subscription for \"%1$s\"</code>
+     * <li><code>Unable to find a subscription for \"%1$s\"</code></li>
+     * <li>{@value ShareSubscriptionExceptionMessages#MISSING_SUBSCRIPTION_MSG}</li>
      */
-    MISSING_SUBSCRIPTION("Unable to find a subscription for \"%1$s\"", Category.CATEGORY_ERROR, 4),
+    MISSING_SUBSCRIPTION("Unable to find a subscription for \"%1$s\"", Category.CATEGORY_ERROR, 4, ShareSubscriptionExceptionMessages.MISSING_SUBSCRIPTION_MSG),
 
     /**
-     * Unable to interpret the link \"%1$s\".
+     * <li>Unable to interpret the link \"%1$s\".</li>
+     * <li>{@value ShareSubscriptionExceptionMessages#NOT_USABLE_MSG}</li>
      */
-    NOT_USABLE("Unable to interpret the link \"%1$s\".", Category.CATEGORY_USER_INPUT, 5),
+    NOT_USABLE("Unable to interpret the link \"%1$s\".", Category.CATEGORY_USER_INPUT, 5, ShareSubscriptionExceptionMessages.NOT_USABLE_MSG),
 
     /**
-     * You don't have enough permissions to perform the operation.
+     * <li>You don't have enough permissions to perform the operation.</li>
+     * <li>{@value ShareSubscriptionExceptionMessages#MISSING_PERMISSIONS_MSG}</li>
      */
-    MISSING_PERMISSIONS("You don't have enough permissions to perform the operation.", Category.CATEGORY_ERROR, 6),
+    MISSING_PERMISSIONS("You don't have enough permissions to perform the operation.", Category.CATEGORY_ERROR, 6, ShareSubscriptionExceptionMessages.MISSING_PERMISSIONS_MSG),
 
     /**
-     * The folder %1$s belongs to a folder tree that is unsubscribed.
+     * <li>The folder %1$s belongs to a folder tree that is unsubscribed.</li>
+     * <li>{@value ShareSubscriptionExceptionMessages#UNSUBSCRIEBED_FOLDER_MSG}</li>
      */
-    UNSUBSCRIEBED_FOLDER("The folder %1$s belongs to a folder tree that is unsubscribed.", Category.CATEGORY_WARNING, 7),
+    UNSUBSCRIEBED_FOLDER("The folder %1$s belongs to a folder tree that is unsubscribed.", Category.CATEGORY_WARNING, 7, ShareSubscriptionExceptionMessages.UNSUBSCRIEBED_FOLDER_MSG),
 
     /**
-     * After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed.
+     * <li>After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed.</li>
+     * <li>{@value ShareSubscriptionExceptionMessages#ACCOUNT_WILL_BE_REMOVED_MSG}</li>
      */
     ACCOUNT_WILL_BE_REMOVED("After unsubscribing from \"%1$s\", the account \"%2$s\" will be removed.", CATEGORY_WARNING, 8, ShareSubscriptionExceptionMessages.ACCOUNT_WILL_BE_REMOVED_MSG),
 

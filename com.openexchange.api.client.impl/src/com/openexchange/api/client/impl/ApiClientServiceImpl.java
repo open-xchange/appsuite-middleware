@@ -56,6 +56,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -115,16 +116,17 @@ public class ApiClientServiceImpl implements ApiClientService {
     }
 
     @Override
-    public ApiClient getApiClient(int contextId, int userId, String loginLink, Credentials credentials) throws OXException {
+    public ApiClient getApiClient(int contextId, int userId, String loginLink, Credentials creds) throws OXException {
         URL url = generateURL(loginLink);
         checkBlackList(url, contextId, userId);
 
+        Credentials credentials = null == creds ? new Credentials("") : creds;
         String cacheKey = generateCacheKey(contextId, userId, url);
         try {
             ApiClient client = cachedClients.get(cacheKey, () -> loginClient(chooseClient(contextId, userId, url, credentials)));
-            if (client.isClosed()) {
+            if (client.isClosed() || false == Objects.equals(client.getCredentials(), credentials)) {
                 /*
-                 * Remove from cache and create a new instance
+                 * Client is closed or credentials are outdated. Remove from cache and create a new instance.
                  */
                 close(client);
                 return getApiClient(contextId, userId, loginLink, credentials);

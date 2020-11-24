@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,38 +47,27 @@
  *
  */
 
-package com.openexchange.share.subscription;
+package com.openexchange.api.client;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ShareSubscriptionExceptionMessages}
+ * {@link ApiClientExceptionMessages}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class ShareSubscriptionExceptionMessages implements LocalizableStrings {
+public class ApiClientExceptionMessages implements LocalizableStrings {
 
-    /** Unable to find a subscription for \"%1$s\" */
-    public static final String MISSING_SUBSCRIPTION_MSG = "Unable to find a subscription for \"%1$s\"";
+    /** Unable to access the link %1$s */
+    public static final String NO_ACCESS_MSG = "Unable to access the link %1$s";
 
-    /** The given link \"%1$s\" can't be resolved to a share. */
-    public static final String NOT_USABLE_MSG = "The given link \"%1$s\" can't be resolved to a share.";
+    /** To access the link credentials are required. */
+    public static final String MISSING_CREDENTIALS_MSG = "To access the link credentials are required.";
 
-    /** You don't have enough permissions to perform the operation. */
-    public static final String MISSING_PERMISSIONS_MSG = "You don't have enough permissions to perform the operation.";
+    /** The access to the share was revoked. Please contact the owner of the share */
+    public static final String ACCESS_REVOKED_MSG = "The access to the share was revoked. Please contact the owner of the share";
 
-    /** The folder %1$s belongs to a folder tree that is unsubscribed. */
-    public static final String UNSUBSCRIEBED_FOLDER_MSG = "The folder %1$s belongs to a folder tree that is unsubscribed.";
-
-    /** After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed. */
-    public static final String ACCOUNT_WILL_BE_REMOVED_MSG = "After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed.";
-
-    /**
-     * Initializes a new {@link OXExceptionMessages}.
-     */
-    private ShareSubscriptionExceptionMessages() {
-        super();
-    }
-
+    /** Initializes a new {@link ApiClientExceptionMessages}. */
+    private ApiClientExceptionMessages() {}
 }
