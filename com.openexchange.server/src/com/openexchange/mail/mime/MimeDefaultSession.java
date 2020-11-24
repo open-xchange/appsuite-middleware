@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import java.util.Map;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
@@ -138,6 +139,13 @@ public final class MimeDefaultSession {
                         p.put(MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
                     } else {
                         p.put(MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET, defaultMimeCharset);
+                    }
+                    final Properties systemProperties = System.getProperties();
+                    for (Map.Entry<Object, Object> systemProperty : systemProperties.entrySet()) {
+                        String propName = systemProperty.getKey().toString();
+                        if (propName.startsWith("mail.")) {
+                            p.put(propName, systemProperty.getValue());
+                        }
                     }
                     final Properties javaMailProperties = mailProperties.getJavaMailProperties();
                     if (javaMailProperties != null) {

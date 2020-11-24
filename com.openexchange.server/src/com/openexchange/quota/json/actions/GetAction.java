@@ -90,6 +90,7 @@ public class GetAction implements AJAXActionService {
     public AJAXRequestResult perform(AJAXRequestData req, ServerSession session) throws OXException {
         String module = req.getParameter("module");
         String accountID = req.getParameter("account");
+        String folder = req.getParameter("folder");
 
         QuotaService quotaService = services.getOptionalService(QuotaService.class);
         if (quotaService == null) {
@@ -97,14 +98,14 @@ public class GetAction implements AJAXActionService {
         }
 
         try {
-            JSONValue result = performRequest(quotaService, session, module, accountID);
+            JSONValue result = performRequest(quotaService, session, module, accountID, folder);
             return new AJAXRequestResult(result, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
     }
 
-    private JSONValue performRequest(QuotaService quotaService, ServerSession session, String module, String accountID) throws JSONException, OXException {
+    private JSONValue performRequest(QuotaService quotaService, ServerSession session, String module, String accountID, String folder) throws JSONException, OXException {
         if (module == null) {
             JSONObject allQuotas = new JSONObject();
             for (QuotaProvider provider : quotaService.getAllProviders()) {
@@ -132,7 +133,7 @@ public class GetAction implements AJAXActionService {
         }
 
         // Account available...
-        AccountQuota quota = provider.getFor(session, accountID);
+        AccountQuota quota = provider.getFor(session, accountID, folder);
         if (quota == null) {
             throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("No account '" + accountID + "' exists for module '" + module + "'.");
         }

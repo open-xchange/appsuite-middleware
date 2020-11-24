@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,46 +47,35 @@
  *
  */
 
-package com.openexchange.filemanagement.distributed.servlet.osgi;
+package com.openexchange.tools.filename;
 
-import org.osgi.service.http.HttpService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.filemanagement.DistributedFileUtils;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.filemanagement.distributed.servlet.DistributedFileServlet;
-import com.openexchange.osgi.HousekeepingActivator;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import org.junit.Test;
 
 /**
- * Activator for "com.openexchange.filemanagement.distributed.servlet" bundle.
+ * {@link MWB_692}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.5
  */
-public class Activator extends HousekeepingActivator {
+public class MWB_692 {
 
-    private String alias;
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, ManagedFileManagement.class, ConfigurationService.class, DistributedFileUtils.class };
-    }
-
-    @Override
-    protected synchronized void startBundle() throws Exception {
-        HttpService service = getService(HttpService.class);
-        String alias = com.openexchange.filemanagement.DistributedFileManagement.PATH;
-        service.registerServlet(alias, new DistributedFileServlet(this), null, null);
-        this.alias = alias;
-    }
-
-    @Override
-    protected synchronized void stopBundle() throws Exception {
-        HttpService service = getService(HttpService.class);
-        if (null != service) {
-            String alias = this.alias;
-            if (null != alias) {
-                this.alias = null;
-                service.unregister(alias);
-            }
+    @Test
+    public void testUTF16withSanitizing() {
+        String filename = "ab\ud83c\udc00cd";
+        CharsetEncoder utf16Encoder = Charset.forName("UTF-16").newEncoder();
+        String sanitized = FileNameTools.sanitizeFilename(filename);
+        try {
+            utf16Encoder.encode(CharBuffer.wrap(sanitized));
+            assertEquals("Unexpected result: " + sanitized, "ab_cd", sanitized);
+        } catch (CharacterCodingException e) {
+            fail(e.getMessage());
         }
-        super.stopBundle();
     }
 
 }

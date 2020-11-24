@@ -47,46 +47,64 @@
  *
  */
 
-package com.openexchange.filemanagement.distributed.servlet.osgi;
+package com.openexchange.filemanagement.internal;
 
-import org.osgi.service.http.HttpService;
-import com.openexchange.config.ConfigurationService;
+import org.slf4j.Logger;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.DistributedFileUtils;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.filemanagement.distributed.servlet.DistributedFileServlet;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.mail.utils.MailPasswordUtil;
+
 
 /**
- * Activator for "com.openexchange.filemanagement.distributed.servlet" bundle.
+ * {@link DistributedFileUtilsImpl}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public class Activator extends HousekeepingActivator {
+public class DistributedFileUtilsImpl implements DistributedFileUtils {
 
-    private String alias;
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, ManagedFileManagement.class, ConfigurationService.class, DistributedFileUtils.class };
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DistributedFileUtilsImpl.class);
     }
 
-    @Override
-    protected synchronized void startBundle() throws Exception {
-        HttpService service = getService(HttpService.class);
-        String alias = com.openexchange.filemanagement.DistributedFileManagement.PATH;
-        service.registerServlet(alias, new DistributedFileServlet(this), null, null);
-        this.alias = alias;
+    /**
+     * Initializes a new {@link DistributedFileUtilsImpl}.
+     */
+    public DistributedFileUtilsImpl() {
+        super();
     }
 
+    private static final java.security.Key DFM_KEY = MailPasswordUtil.generateSecretKey("open-xchange");
+
     @Override
-    protected synchronized void stopBundle() throws Exception {
-        HttpService service = getService(HttpService.class);
-        if (null != service) {
-            String alias = this.alias;
-            if (null != alias) {
-                this.alias = null;
-                service.unregister(alias);
-            }
+    public String encodeId(String rawId) throws OXException {
+        if (rawId == null) {
+            return null;
         }
-        super.stopBundle();
+
+        try {
+            String encrypted = MailPasswordUtil.encrypt(rawId, DFM_KEY);
+            return com.openexchange.ajax.AJAXUtility.encodeUrl(encrypted);
+        } catch (java.security.GeneralSecurityException x) {
+            LoggerHolder.LOG.debug("Failed to encode identifier", x);
+            return rawId;
+        }
+    }
+
+    @Override
+    public String decodeId(String encodedId) throws OXException {
+        if (encodedId == null) {
+            return null;
+        }
+
+        try {
+            String urlDecoded = com.openexchange.ajax.AJAXUtility.decodeUrl(encodedId, "UTF-8");
+            return MailPasswordUtil.decrypt(urlDecoded, DFM_KEY);
+        } catch (java.security.GeneralSecurityException x) {
+            LoggerHolder.LOG.debug("Failed to decode identifier", x);
+            return encodedId;
+        }
     }
 
 }

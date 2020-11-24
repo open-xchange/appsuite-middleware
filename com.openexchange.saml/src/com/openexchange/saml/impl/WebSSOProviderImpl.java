@@ -335,7 +335,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
              */
             if (config.isAllowUnsolicitedResponses()) {
                 String relayState = httpRequest.getParameter("RelayState");
-                if (relayState == null) {
+                if (Strings.isEmpty(relayState)) {
                     // use DefaultAuthnRequestInfo if no RelayState is set
                     String domainName = getDomainName(httpRequest);
                     requestInfo = new DefaultAuthnRequestInfo();

@@ -59,6 +59,7 @@ import com.openexchange.i18n.I18nServiceRegistryTest;
 import com.openexchange.sessiond.SessionFilterTest;
 import com.openexchange.tools.filename.Bug53791Test;
 import com.openexchange.tools.filename.Bug55271Test;
+import com.openexchange.tools.filename.MWB_692;
 
 /**
  * {@link UnitTests}
@@ -76,7 +77,8 @@ import com.openexchange.tools.filename.Bug55271Test;
     Bug55271Test.class,
     com.openexchange.tools.filename.Bug56499Test.class,
     com.openexchange.tools.filename.Bug58052Test.class,
-    I18nServiceRegistryTest.class
+    I18nServiceRegistryTest.class,
+    MWB_692.class
 })
 public class UnitTests {
 }

@@ -76,6 +76,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
@@ -159,7 +160,7 @@ public class IMAPAuthentication implements AuthenticationService {
                 connectiontimeout = (String) props.get(PropertyNames.IMAP_CONNECTIONTIMEOUT.name);
             }
 
-            final Properties imapprops = new Properties();
+            final Properties imapprops = MimeDefaultSession.getDefaultMailProperties();
             imapprops.put("mail.imap.connectiontimeout", connectiontimeout);
             imapprops.put("mail.imap.timeout", imaptimeout);
 
