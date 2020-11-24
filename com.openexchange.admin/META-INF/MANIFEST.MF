@@ -9,6 +9,7 @@ Bundle-Vendor: OX Software GmbH
 Import-Package: com.damienmiller,
  com.google.common.annotations,
  com.google.common.base,
+ com.google.common.cache;version="30.0.0",
  com.google.common.collect,
  com.mysql.jdbc,
  com.openexchange.admin.rmi,
@@ -122,3 +123,4 @@ Export-Package: com.openexchange.admin.daemons,
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .
 Require-Bundle: com.openexchange.admin.rmi
+Automatic-Module-Name: com.openexchange.admin

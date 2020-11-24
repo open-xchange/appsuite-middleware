@@ -113,7 +113,7 @@ public class StorageException extends AbstractAdminRmiException {
      * @return The wrapping instance of <code>StorageException</code>
      */
     public static StorageException wrapForRMI(String message, Throwable t) {
-        Stack<Throwable> causeHierarchy = new Stack<Throwable>();
+        Stack<Throwable> causeHierarchy = new Stack<>();
         Throwable cause = t.getCause();
         while (cause != null) {
             causeHierarchy.push(cause);

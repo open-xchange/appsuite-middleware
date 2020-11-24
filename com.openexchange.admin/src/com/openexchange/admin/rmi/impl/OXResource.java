@@ -53,8 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import com.google.common.collect.ImmutableList;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
 import com.openexchange.admin.plugins.PluginException;
@@ -86,9 +84,6 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXResource.class);
 
     // ---------------------------------------------------------------------------------------------------------- //
-
-    /** A listing of scopes: <code>context</code> -&gt; <code>server</code> */
-    private static final List<String> SCOPES_FROM_CONTEXT = ImmutableList.of("context", "server");
 
     private final BasicAuthenticator basicauth;
     private final OXResourceStorageInterface oxRes;
@@ -265,7 +260,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             final int retval = oxRes.create(ctx, res);
             res.setId(I(retval));
 
-            final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
+            final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<>();
 
             // Trigger plugin extensions
             {
@@ -336,7 +331,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             if (!tool.existsResource(ctx, res.getId().intValue())) {
                 throw new NoSuchResourceException("Resource with this id does not exist");
             }
-            final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
+            final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<>();
 
             // Trigger plugin extensions
             {
@@ -458,7 +453,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
                     resource.setId(I(tool.getResourceIDByResourcename(ctx, resource.getName())));
                 }
             }
-            final ArrayList<Resource> retval = new ArrayList<Resource>();
+            final ArrayList<Resource> retval = new ArrayList<>();
             for (final Resource resource : resources) {
                 // not nice, but works ;)
                 final Resource tmp = oxRes.getData(ctx, resource);
