@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.test.matrix;
 
+import static com.openexchange.java.Autoboxing.B;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.junit.Test;
@@ -123,7 +124,7 @@ public class TestMailAuthenticityStatusMatrixF2 extends AbstractTestMailAuthenti
     public void testSPFFailDKIMNeutralDMARCMissingWithDomainMatch() throws AddressException {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=neutral header.d=example.net");
-        assertResults(2, MailAuthenticityStatus.SUSPICIOUS, false, "example.net", DKIMResult.NEUTRAL, SPFResult.FAIL);
+        assertResults(2, MailAuthenticityStatus.SUSPICIOUS, B(false), "example.net", DKIMResult.NEUTRAL, SPFResult.FAIL);
     }
 
     /**
@@ -133,6 +134,6 @@ public class TestMailAuthenticityStatusMatrixF2 extends AbstractTestMailAuthenti
     public void testSPFFailDKIMNeutralDMARCMissingWithDomainMismatch() throws AddressException {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
         perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=neutral header.d=example.net");
-        assertResults(2, MailAuthenticityStatus.SUSPICIOUS, true, "example.net", DKIMResult.NEUTRAL, SPFResult.FAIL);
+        assertResults(2, MailAuthenticityStatus.SUSPICIOUS, B(true), "example.net", DKIMResult.NEUTRAL, SPFResult.FAIL);
     }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.test.matrix_v2;
 
+import static com.openexchange.java.Autoboxing.B;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.junit.Test;
@@ -123,7 +124,7 @@ public class TestMailAuthenticityStatusMatrixD2 extends AbstractTestMailAuthenti
     public void testSPFNeutralDKIMMissingDMARCFailNonePolicyWithDomainMatch() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=neutral smtp.mailfrom=example.net; dmarc=fail (p=none sp=NONE dis=NONE) header.from=example.net");
-        assertResults(2, MailAuthenticityStatus.NEUTRAL, false, "example.net", DMARCResult.FAIL, SPFResult.NEUTRAL);
+        assertResults(2, MailAuthenticityStatus.NEUTRAL, B(false), "example.net", DMARCResult.FAIL, SPFResult.NEUTRAL);
     }
 
     /**
@@ -133,7 +134,7 @@ public class TestMailAuthenticityStatusMatrixD2 extends AbstractTestMailAuthenti
     public void testSPFNeutralDKIMMissingDMARCFailNonePolicyWithDomainMismatch() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
         perform("ox.io; spf=neutral smtp.mailfrom=example.net; dmarc=fail (p=none sp=NONE dis=NONE) header.from=example.net");
-        assertResults(2, MailAuthenticityStatus.NEUTRAL, true, "example.net", DMARCResult.FAIL, SPFResult.NEUTRAL);
+        assertResults(2, MailAuthenticityStatus.NEUTRAL, B(true), "example.net", DMARCResult.FAIL, SPFResult.NEUTRAL);
     }
 
     /**
@@ -143,7 +144,7 @@ public class TestMailAuthenticityStatusMatrixD2 extends AbstractTestMailAuthenti
     public void testSPFNeutralDKIMNeutralDMARCFailNonePolicyWithDomainMatch() throws AddressException {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=neutral header.d=example.net; dmarc=fail (p=none sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.NEUTRAL, false, "example.net", DMARCResult.FAIL, DKIMResult.NEUTRAL, SPFResult.NEUTRAL);
+        assertResults(3, MailAuthenticityStatus.NEUTRAL, B(false), "example.net", DMARCResult.FAIL, DKIMResult.NEUTRAL, SPFResult.NEUTRAL);
     }
 
     /**
@@ -153,7 +154,7 @@ public class TestMailAuthenticityStatusMatrixD2 extends AbstractTestMailAuthenti
     public void testSPFNeutralDKIMNeutralDMARCFailNonePolicyWithDomainMismatch() throws AddressException {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
         perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=neutral header.d=example.net; dmarc=fail (p=none sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.NEUTRAL, true, "example.net", DMARCResult.FAIL, DKIMResult.NEUTRAL, SPFResult.NEUTRAL);
+        assertResults(3, MailAuthenticityStatus.NEUTRAL, B(true), "example.net", DMARCResult.FAIL, DKIMResult.NEUTRAL, SPFResult.NEUTRAL);
     }
 
     /**
@@ -183,7 +184,7 @@ public class TestMailAuthenticityStatusMatrixD2 extends AbstractTestMailAuthenti
     public void testSPFNeutralDKIMMissingDMARCMissingWithDomainMatch() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=neutral smtp.mailfrom=example.net");
-        assertResults(1, MailAuthenticityStatus.NEUTRAL, false, "example.net", SPFResult.NEUTRAL);
+        assertResults(1, MailAuthenticityStatus.NEUTRAL, B(false), "example.net", SPFResult.NEUTRAL);
     }
     
     /**
@@ -193,7 +194,7 @@ public class TestMailAuthenticityStatusMatrixD2 extends AbstractTestMailAuthenti
     public void testSPFNeutralDKIMNeutralDMARCMissingWithDomainMatch() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=neutral header.d=example.net");
-        assertResults(2, MailAuthenticityStatus.NEUTRAL, false, "example.net", DKIMResult.NEUTRAL, SPFResult.NEUTRAL);
+        assertResults(2, MailAuthenticityStatus.NEUTRAL, B(false), "example.net", DKIMResult.NEUTRAL, SPFResult.NEUTRAL);
     }
 
     /**
@@ -203,7 +204,7 @@ public class TestMailAuthenticityStatusMatrixD2 extends AbstractTestMailAuthenti
     public void testSPFNeutralDKIMMissingDMARCMissingWithDomainMismatch() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
         perform("ox.io; spf=neutral smtp.mailfrom=example.net");
-        assertResults(1, MailAuthenticityStatus.NEUTRAL, true, "example.net", SPFResult.NEUTRAL);
+        assertResults(1, MailAuthenticityStatus.NEUTRAL, B(true), "example.net", SPFResult.NEUTRAL);
     }
     
     /**
@@ -213,7 +214,7 @@ public class TestMailAuthenticityStatusMatrixD2 extends AbstractTestMailAuthenti
     public void testSPFNeutralDKIMNeutralDMARCMissingWithDomainMismatch() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
         perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=neutral header.d=example.net");
-        assertResults(2, MailAuthenticityStatus.NEUTRAL, true, "example.net", DKIMResult.NEUTRAL, SPFResult.NEUTRAL);
+        assertResults(2, MailAuthenticityStatus.NEUTRAL, B(true), "example.net", DKIMResult.NEUTRAL, SPFResult.NEUTRAL);
     }
 
     /**
