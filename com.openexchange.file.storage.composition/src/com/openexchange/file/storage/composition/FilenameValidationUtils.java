@@ -260,9 +260,8 @@ public final class FilenameValidationUtils {
      *
      * @param name The folder name to check
      * @return <code>true</code> if the name is considered invalid, <code>false</code>, otherwise
-     * @throws OXException
      */
-    public static boolean isInvalidFolderName(String name) throws OXException {
+    public static boolean isInvalidFolderName(String name) {
         // same check as for filenames for now
         return isInvalidFileName(name);
     }

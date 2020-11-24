@@ -103,9 +103,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
      * @param account The underlying account
      * @param session The session The account access
      * @param accountAccess The account access
+     * @throws OXException if the {@link MicrosoftGraphDriveService} is absent
      */
-    public OneDriveFileAccess(OneDriveOAuthAccess oneDriveAccess, FileStorageAccount account, Session session, OneDriveAccountAccess accountAccess, OneDriveFolderAccess folderAccess) {
-        super(oneDriveAccess, account, session);
+    public OneDriveFileAccess(OneDriveOAuthAccess oneDriveAccess, FileStorageAccount account, Session session, OneDriveAccountAccess accountAccess, OneDriveFolderAccess folderAccess) throws OXException {
+        super(oneDriveAccess, session);
         this.accountAccess = accountAccess;
         this.folderAccess = folderAccess;
         this.userId = session.getUserId();
@@ -315,7 +316,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
             @Override
             protected TimedResult<File> doPerform() throws OXException {
-                List<String> itemIds = ids.stream().map(predicate -> predicate.getId()).collect(Collectors.<String> toList());
+                List<String> itemIds = ids.stream().map(IDTuple::getId).collect(Collectors.<String> toList());
                 return new FileTimedResult(new LinkedList<>(driveService.getFiles(userId, getAccessToken(), itemIds)));
             }
         });

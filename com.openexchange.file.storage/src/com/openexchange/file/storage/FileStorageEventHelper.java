@@ -138,6 +138,8 @@ public class FileStorageEventHelper {
 
     static final class FastThrowable extends Throwable {
 
+        private static final long serialVersionUID = 1501160688156375693L;
+
         FastThrowable() {
             super("tracked event creation");
         }
@@ -176,7 +178,7 @@ public class FileStorageEventHelper {
     }
 
     private static Dictionary<String, Object> buildProperties(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName, final EventProperty... properties) {
-        final Dictionary<String, Object> ht = new Hashtable<String, Object>(8);
+        final Dictionary<String, Object> ht = new Hashtable<>(8);
         if (null != session) {
             ht.put(FileStorageEventConstants.SESSION, session);
         }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,53 +47,55 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.files;
+package com.openexchange.file.storage.json;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import java.util.Arrays;
-import java.util.List;
-import org.junit.Test;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.groupware.results.Results;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.file.storage.json.actions.files.AllTest;
+import com.openexchange.file.storage.json.actions.files.DeleteTest;
+import com.openexchange.file.storage.json.actions.files.DetachTest;
+import com.openexchange.file.storage.json.actions.files.FileActionTest;
+import com.openexchange.file.storage.json.actions.files.GetTest;
+import com.openexchange.file.storage.json.actions.files.InfostoreRequestTest;
+import com.openexchange.file.storage.json.actions.files.ListTest;
+import com.openexchange.file.storage.json.actions.files.LockActionTest;
+import com.openexchange.file.storage.json.actions.files.NewTest;
+import com.openexchange.file.storage.json.actions.files.RevertTest;
+import com.openexchange.file.storage.json.actions.files.SearchTest;
+import com.openexchange.file.storage.json.actions.files.UnlockActionTest;
+import com.openexchange.file.storage.json.actions.files.UpdateTest;
+import com.openexchange.file.storage.json.actions.files.UpdatesTest;
+import com.openexchange.file.storage.json.actions.files.VersionsTest;
 
 /**
- * {@link AllTest}
+ * {@link FileStorageTestSuite}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.5
  */
-
-public class AllTest extends FileActionTest {
-
-    @Test
-    public void testMissingParameters() {
-        try {
-            action.handle(request());
-            fail("Expected Exception due to missing parameters");
-        } catch (OXException x) {
-            assertTrue(true);
-        }
-    }
-
-    @Test
-    public void testAction() throws OXException {
-        request().param("folder", "12").param("columns", "1,700,702") // id, title and filename
-            .param("sort", "700").param("order", "desc");
-
-        final List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME, File.Field.FOLDER_ID);
-        fileAccess().expectCall("getDocuments", "12", columns, File.Field.TITLE, SortDirection.DESC).andReturn(Results.emptyTimedResult());
-
-        perform();
-
-        fileAccess().assertAllWereCalled();
-    }
-
-    @Override
-    public AbstractFileAction createAction() {
-        return new AllAction();
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    // @formatter:off
+    FileWriterTest.class, 
+    FileSearchTermParserTest.class,
+    FileParserTest.class, 
+    AllTest.class,
+    DeleteTest.class,
+    DetachTest.class,
+    FileActionTest.class,
+    GetTest.class,
+    InfostoreRequestTest.class,
+    ListTest.class,
+    LockActionTest.class,
+    NewTest.class,
+    RevertTest.class,
+    SearchTest.class,
+    UnlockActionTest.class,
+    UpdatesTest.class,
+    UpdateTest.class,
+    VersionsTest.class
+    // @formatter:on
+})
+public class FileStorageTestSuite {
 
 }

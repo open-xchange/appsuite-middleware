@@ -100,7 +100,7 @@ public class FileEventTest {
     private ServiceLookup serviceLookup;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         fileAccess = new InMemoryAccess();
 
         MockitoAnnotations.initMocks(this);
@@ -270,7 +270,7 @@ public class FileEventTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         fileAccess = null;
     }
 

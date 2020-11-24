@@ -63,17 +63,15 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
-import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFolder;
 import com.openexchange.microsoft.graph.onedrive.exception.MicrosoftGraphDriveServiceExceptionCodes;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
- * {@link OneDriveFolderAccess} - Just a light-weighted proxy that bridges the Infostore and the real
+ * {@link OneDriveFolderAccess} - Just a light-weighted proxy that bridges the Infostore and
  * the real service that handles the actual requests, {@link MicrosoftGraphDriveService}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -81,21 +79,16 @@ import com.openexchange.session.Session;
  */
 public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess, UserCreatedFileStorageFolderAccess {
 
-    private final int userId;
     private final String accountDisplayName;
-    private final MicrosoftGraphDriveService driveService;
 
     /**
      * Initializes a new {@link OneDriveFolderAccess}.
+     * 
+     * @throws OXException if the {@link MicrosoftGraphDriveService} is absent
      */
-    public OneDriveFolderAccess(final OneDriveOAuthAccess oneDriveAccess, final FileStorageAccount account, final Session session, final OneDriveAccountAccess accountAccess) throws OXException {
-        super(oneDriveAccess, account, session);
-        userId = session.getUserId();
+    public OneDriveFolderAccess(OneDriveOAuthAccess oneDriveAccess, FileStorageAccount account, Session session) throws OXException {
+        super(oneDriveAccess, session);
         accountDisplayName = account.getDisplayName();
-        driveService = Services.getOptionalService(MicrosoftGraphDriveService.class);
-        if (driveService == null) {
-            throw ServiceExceptionCode.absentService(MicrosoftGraphDriveService.class);
-        }
     }
 
     @Override
@@ -115,7 +108,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
             @Override
             protected FileStorageFolder doPerform() throws OXException {
-                return driveService.getFolder(userId, getAccessToken(), toOneDriveFolderId(folderId));
+                return driveService.getFolder(session.getUserId(), getAccessToken(), toOneDriveFolderId(folderId));
             }
         });
     }
@@ -146,14 +139,14 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
             @Override
             protected FileStorageFolder[] doPerform() throws OXException {
-                return driveService.getSubFolders(userId, getAccessToken(), toOneDriveFolderId(parentIdentifier)).toArray(new FileStorageFolder[0]);
+                return driveService.getSubFolders(session.getUserId(), getAccessToken(), toOneDriveFolderId(parentIdentifier)).toArray(new FileStorageFolder[0]);
             }
         });
     }
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        OneDriveFolder root = driveService.getRootFolder(userId, getAccessToken());
+        OneDriveFolder root = driveService.getRootFolder(session.getUserId(), getAccessToken());
         root.setName(accountDisplayName);
         return root;
     }
@@ -172,7 +165,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                 try {
                     // No need to use a {@link NameBuilder} in this case. The Microsoft Graph API already provides
                     // the autorename functionality.
-                    return driveService.createFolder(userId, getAccessToken(), toCreate.getName(), toOneDriveFolderId(toCreate.getParentId()), autoRename).getId();
+                    return driveService.createFolder(session.getUserId(), getAccessToken(), toCreate.getName(), toOneDriveFolderId(toCreate.getParentId()), autoRename).getId();
                 } catch (OXException e) {
                     if (MicrosoftGraphDriveServiceExceptionCodes.FOLDER_ALREADY_EXISTS.equals(e)) {
                         throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, toCreate.getName(), toCreate.getParentId());
@@ -215,7 +208,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                 }
                 String folderName = newName;
                 if (Strings.isEmpty(folderName)) {
-                    folderName = driveService.getFolder(userId, getAccessToken(), oneDriveFolderId).getName();
+                    folderName = driveService.getFolder(session.getUserId(), getAccessToken(), oneDriveFolderId).getName();
                 }
                 NameBuilder name = new NameBuilder(folderName);
                 while (true) {
@@ -294,7 +287,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
             @Override
             protected FileStorageFolder[] doPerform() throws OXException {
-                List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
+                List<FileStorageFolder> list = new LinkedList<>();
 
                 String fid = folderId;
                 FileStorageFolder f = getFolder(fid);

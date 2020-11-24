@@ -142,3 +142,4 @@ Import-Package: com.fasterxml.jackson.annotation,
  org.slf4j
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.file.storage.onedrive.osgi.OneDriveActivator
+Automatic-Module-Name: com.openexchange.file.storage.onedrive

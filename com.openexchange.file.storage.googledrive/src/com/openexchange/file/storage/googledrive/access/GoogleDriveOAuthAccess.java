@@ -81,7 +81,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
     /**
      * Initialises a new {@link GoogleDriveOAuthAccess}.
      */
-    public GoogleDriveOAuthAccess(FileStorageAccount fsAccount, Session session) throws OXException {
+    public GoogleDriveOAuthAccess(FileStorageAccount fsAccount, Session session) {
         super(session);
         this.fsAccount = fsAccount;
     }
@@ -107,7 +107,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
             GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, getSession());
 
             // Establish Drive instance
-            setOAuthClient(new OAuthClient<Drive>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName(getSession())).build(), getOAuthAccount().getToken()));
+            setOAuthClient(new OAuthClient<>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName(getSession())).build(), getOAuthAccount().getToken()));
         }
     }
 
@@ -133,7 +133,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
     public int getAccountId() throws OXException {
         try {
             return getAccountId(fsAccount.getConfiguration());
-        } catch (IllegalArgumentException e) {
+        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
             throw FileStorageExceptionCodes.MISSING_CONFIG.create(GoogleDriveConstants.ID, fsAccount.getId());
         }
     }

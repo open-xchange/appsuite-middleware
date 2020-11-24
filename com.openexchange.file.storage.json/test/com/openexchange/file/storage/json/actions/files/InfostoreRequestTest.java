@@ -72,11 +72,11 @@ import com.openexchange.groupware.ldap.SimUser;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SuppressWarnings("unused")
 public class InfostoreRequestTest extends FileTest {
 
     @Test
     public void testShouldGetTheFolderId() throws OXException {
-
         request().param("folder", "12");
         assertEquals(request.getFolderId(), "12");
 
@@ -179,13 +179,13 @@ public class InfostoreRequestTest extends FileTest {
     }
 
     @Test
-    public void testGetTimezone() throws OXException {
+    public void testGetTimezone() {
         request().param("timezone", "Europe/Berlin");
         assertEquals(TimeZone.getTimeZone("Europe/Berlin"), request.getTimezone());
     }
 
     @Test
-    public void testGetTimezoneDefaultsToUserTimeZone() throws OXException {
+    public void testGetTimezoneDefaultsToUserTimeZone() {
         final SimUser simUser = new SimUser();
         simUser.setTimeZone("Europe/Berlin");
         request().getSimSession().setUser(simUser);
@@ -214,7 +214,7 @@ public class InfostoreRequestTest extends FileTest {
     @Test
     public void testGetIgnore() {
         final Set<String> ignore = request().param("ignore", "deleted,nice,blue").getIgnore();
-        assertEquals(new HashSet<String>(Arrays.asList("deleted", "nice", "blue")), ignore);
+        assertEquals(new HashSet<>(Arrays.asList("deleted", "nice", "blue")), ignore);
     }
 
     @Test
@@ -232,7 +232,7 @@ public class InfostoreRequestTest extends FileTest {
     @Test
     public void testGetIDs() throws JSONException, OXException {
         final List<String> ids = request().body(new JSONArray("[{id: 'id1', folder: 'folder'}, {id: 'id2', folder: 'folder'}]")).getIds();
-        assertEquals(Arrays.asList("id1", "id2"), ids);
+        assertEquals(Arrays.asList("folder/id1", "folder/id2"), ids);
 
     }
 
@@ -249,10 +249,10 @@ public class InfostoreRequestTest extends FileTest {
     @Test
     public void testGetDiff() {
         long diff = request().param("diff", "1337").getDiff();
-        assertEquals(1337l, diff);
+        assertEquals(1337L, diff);
 
         diff = request().getDiff();
-        assertEquals(-1l, diff);
+        assertEquals(-1L, diff);
     }
 
     @Test

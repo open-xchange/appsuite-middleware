@@ -224,11 +224,11 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         setETag(FileStorageUtility.getETagFor(fileMetadata), 0, result);
     }
 
-    private void setLastModified(File fileMetadata, AJAXRequestResult result) throws OXException {
+    private void setLastModified(File fileMetadata, AJAXRequestResult result) {
         setLastModified(fileMetadata.getLastModified(), result);
     }
 
-    private void setLastModified(Date lastModified, AJAXRequestResult result) throws OXException {
+    private void setLastModified(Date lastModified, AJAXRequestResult result) {
         if (null != lastModified) {
             result.setHeader(LAST_MODIFIED, Tools.formatHeaderDate(lastModified));
         }

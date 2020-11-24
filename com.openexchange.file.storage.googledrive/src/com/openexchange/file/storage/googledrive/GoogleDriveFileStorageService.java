@@ -81,6 +81,7 @@ public final class GoogleDriveFileStorageService extends AbstractOAuthFileStorag
         super(services, KnownApi.GOOGLE, GoogleDriveConstants.DISPLAY_NAME, GoogleDriveConstants.ID, compositeFileStorageAccountManagerProvider);
     }
 
+    @SuppressWarnings("null")
     @Override
     public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
         FileStorageAccount account = getAccountAccess(session, accountId);

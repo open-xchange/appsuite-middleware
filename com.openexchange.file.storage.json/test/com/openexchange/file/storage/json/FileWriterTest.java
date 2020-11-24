@@ -70,6 +70,9 @@ import static com.openexchange.file.storage.File.Field.TITLE;
 import static com.openexchange.file.storage.File.Field.URL;
 import static com.openexchange.file.storage.File.Field.VERSION;
 import static com.openexchange.file.storage.File.Field.VERSION_COMMENT;
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.json.JSONAssertion.assertValidates;
 import static com.openexchange.time.TimeTools.D;
 import static org.junit.Assert.assertEquals;
@@ -93,10 +96,10 @@ public class FileWriterTest extends FileTest {
 
     FileMetadataWriter writer = new FileMetadataWriter(null);
 
-         @Test
-     public void testWriteFileAsArray() throws JSONException {
+    @Test
+    public void testWriteFileAsArray() throws JSONException {
         DefaultFile f = createFile();
-
+        //@formatter:off
         JSONArray array = writer.writeArray(new JsonFieldHandler(new TestFriendlyInfostoreRequest()), f, Arrays.asList(
             CATEGORIES,
             COLOR_LABEL,
@@ -119,7 +122,7 @@ public class FileWriterTest extends FileTest {
             URL,
             VERSION,
             VERSION_COMMENT));
-
+        //@formatter:on
         assertNotNull(array);
 
         assertValidates(new JSONAssertion().isArray().withValues("cat1", "cat2", "cat3").inStrictOrder(), array.getJSONArray(0));
@@ -170,18 +173,14 @@ public class FileWriterTest extends FileTest {
         return f;
     }
 
-         @Test
-     public void testTimezone() throws JSONException {
+    @Test
+    public void testTimezone() throws JSONException {
         DefaultFile f = new DefaultFile();
         f.setCreated(D("Today at 10:00"));
         f.setLastModified(D("Today at 12:00"));
         f.setLockedUntil(D("Today at 20:00"));
 
-        JSONArray array = writer.writeArray(new JsonFieldHandler(new TestFriendlyInfostoreRequest("GMT-2")), f, Arrays.asList(
-            CREATED,
-            LAST_MODIFIED,
-            LAST_MODIFIED_UTC,
-            LOCKED_UNTIL));
+        JSONArray array = writer.writeArray(new JsonFieldHandler(new TestFriendlyInfostoreRequest("GMT-2")), f, Arrays.asList(CREATED, LAST_MODIFIED, LAST_MODIFIED_UTC, LOCKED_UNTIL));
 
         assertNotNull(array);
 
@@ -191,33 +190,32 @@ public class FileWriterTest extends FileTest {
         //assertEquals(D("Today at 18:00").getTime(), array.getLong(3));
     }
 
-         @Test
-     public void testWriteAsObject() {
+    @Test
+    public void testWriteAsObject() {
         DefaultFile file = createFile();
-
         JSONObject object = writer.write(new TestFriendlyInfostoreRequest(), file);
 
-
-        /*assertValidates(new JSONAssertion().isObject()
+        //@formatter:off
+        assertValidates(new JSONAssertion().isObject()
             .hasKey("categories").withValueArray().withValues("cat1", "cat2", "cat3").inStrictOrder()
-            .hasKey("color_label").withValue(12)
-            .hasKey("creation_date").withValue(D("Today at 08:00").getTime())
-            .hasKey("created_by").withValue(3)
+            .hasKey("color_label").withValue(I(12))
+            .hasKey("creation_date").withValue(L(D("Today at 08:00").getTime()))
+            .hasKey("created_by").withValue(I(3))
             .hasKey("description").withValue("description")
             .hasKey("file_md5sum").withValue("md5sum")
             .hasKey("file_mimetype").withValue("mime/type")
-            .hasKey("file_size").withValue(1337)
+            .hasKey("file_size").withValue(I(1337))
             .hasKey("folder_id").withValue("folder 3")
             .hasKey("id").withValue("Id 23")
-            .hasKey("current_version").withValue(true)
-            .hasKey("last_modified").withValue(D("Today at 10:00").getTime())
-            .hasKey("locked_until").withValue(D("Today at 18:00").getTime())
-            .hasKey("modified_by").withValue(22)
-            .hasKey("number_of_versions").withValue(2)
+            .hasKey("current_version").withValue(B(true))
+            .hasKey("last_modified").withValue(L(D("Today at 10:00").getTime()))
+            .hasKey("locked_until").withValue(L(D("Today at 18:00").getTime()))
+            .hasKey("modified_by").withValue(I(22))
+            .hasKey("number_of_versions").withValue(I(2))
             .hasKey("title").withValue("Nice Title")
             .hasKey("url").withValue("url")
-            .hasKey("version").withValue(2)
-            .hasKey("version_comment").withValue("version comment"), object); */
-
+            .hasKey("version").withValue("2")
+            .hasKey("version_comment").withValue("version comment"), object);
+        //@formatter:on
     }
 }

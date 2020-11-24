@@ -113,3 +113,4 @@ Import-Package: com.dropbox.core,
  org.slf4j
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.file.storage.dropbox.osgi.DropboxActivator
+Automatic-Module-Name: com.openexchange.file.storage.dropbox

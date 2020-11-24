@@ -12,3 +12,4 @@ Import-Package: com.openexchange.annotation,
  com.openexchange.log,
  org.json
 Export-Package: com.openexchange.file.storage.generic
+Automatic-Module-Name: com.openexchange.file.storage.generic
